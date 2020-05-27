@@ -1,15 +1,17 @@
 import Element from "./element";
-import { ELEMENTS } from "../constants";
-import iframer, { setAttributes } from "../../iframe-libs/iframer";
-import globals from "../../constants";
-// import bus from "framebus";
+import { ELEMENTS, FRAME_CONTROLLER } from "../constants";
+import iframer, {
+  setAttributes,
+  getIframeSrc,
+} from "../../iframe-libs/iframer";
+import bus from "framebus";
 
 class Elements {
   elements: Record<string, Element> = {};
   count: number = 0;
   metaData: any;
-  // bus class to teardown on destroy
-  // destructor to remove events on destroy
+  // bus class to store all listeners and teardown on destroy
+  // destructor to remove events(non bus events - with the event emitter) on destroy
   constructor(
     {
       fonts = {} /* todo: font object */,
@@ -23,9 +25,9 @@ class Elements {
       return;
     }
     this.metaData = metaData;
-    const iframe = iframer({ name: "controller" });
+    const iframe = iframer({ name: FRAME_CONTROLLER });
     setAttributes(iframe, {
-      src: globals.IFRAME_SECURE_SITE + "/#" + metaData.uuid,
+      src: getIframeSrc(this.metaData.uuid),
     });
     document.body.append(iframe);
     // on ready for client need to send the clint JSON
@@ -36,10 +38,13 @@ class Elements {
       throw new Error("Provide valid element type");
       return;
     }
-    options.name = `${elementType}:${++this.count}`;
+    options.name = `${elementType}:${options.name || ++this.count}`;
+    if (this.elements[options.name]) {
+      return this.elements[options.name];
+    }
     const element = new Element(elementType, options, this.metaData);
-    if (element.name) this.elements[element.name] = element;
     // element.on destroy remove element
+
     return element;
   }
 

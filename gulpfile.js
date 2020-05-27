@@ -11,7 +11,6 @@ var gulp = require("gulp");
 var ts = require("gulp-typescript");
 const babel = require("gulp-babel");
 var args = require("yargs").argv;
-var gutil = require("gulp-util");
 var concat = require("gulp-concat");
 var rename = require("gulp-rename");
 var replace = require("gulp-replace");
@@ -34,7 +33,7 @@ gulp.task("default", function () {
 
   var tsResult = gulp
     .src(["src/*.ts", "package.json"])
-    .pipe(tsProj())
+    .pipe(tsProj()).js
     .pipe(babel())
     .pipe(concat(pkg.name + "-" + pkg.version + ".min.js"))
     .pipe(uglify())

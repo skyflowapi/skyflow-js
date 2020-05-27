@@ -1,3 +1,5 @@
+export const FRAME_CONTROLLER = "controller";
+
 export const ELEMENT_EVENTS_TO_CLIENT = {
   CHANGE: "Change",
   READY: "Ready",
@@ -15,10 +17,30 @@ export const ELEMENTS = {
     },
     sensitive: false,
   },
-  lastName: { sensitive: false },
-  dob: { sensitive: true },
-  phoneNumber: { sensitive: false },
-  ssn: { sensitive: true },
+  lastName: {
+    attributes: {
+      type: "text",
+    },
+    sensitive: false,
+  },
+  dob: {
+    attributes: {
+      type: "text",
+    },
+    sensitive: true,
+  },
+  phoneNumber: {
+    attributes: {
+      type: "text",
+    },
+    sensitive: false,
+  },
+  ssn: {
+    attributes: {
+      type: "text",
+    },
+    sensitive: true,
+  },
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {

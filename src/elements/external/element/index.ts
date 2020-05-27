@@ -1,19 +1,27 @@
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENTS } from "../../constants";
-import iframer from "../../../iframe-libs/iframer";
+import iframer, {
+  setAttributes,
+  getIframeSrc,
+} from "../../../iframe-libs/iframer";
+import EventEmitter from "../../../event-emitter";
 
 class Element {
   elementType: string;
   name: string;
   metaData: any;
   iframe: HTMLIFrameElement;
-  // state -> empty/valid/invalid/
-  //     isEmpty: true,
-  //     isValid: false,
+  state = {
+    isEmpty: true,
+    isValid: false,
+    isFocused: false,
+    container: <HTMLFrameElement | null>null,
+  };
+
   //     isPotentiallyValid: true,
-  //     isFocused: false,
-  //     container: container
   // destructor
   // label focus
+
+  eventEmitter: EventEmitter = new EventEmitter();
 
   constructor(elementType: string, options: any, metaData: any) {
     if (!(elementType in Object.keys(ELEMENTS))) {
@@ -28,7 +36,21 @@ class Element {
   }
 
   mount(domElement) {
+    if (this.state.container)
+      throw new Error("Element mount can be called only 1 time");
+
+    if (typeof domElement === "string")
+      this.state.container = document.querySelector(domElement);
+    else this.state.container = domElement;
+
+    setAttributes(this.iframe, { src: getIframeSrc(this.metaData.uuid) });
+    // update iframe with src and mount in container
+    this.state.container?.appendChild(this.iframe);
     // add event listener on change/focus/blur on label and emit change event on iframe
+  }
+
+  updateElement(options) {
+    // update to read-only etc
   }
 
   // listening to element events on iframe
@@ -43,6 +65,8 @@ class Element {
   destroy() {}
 
   focus() {}
+
+  unmount() {}
 }
 
 export default Element;

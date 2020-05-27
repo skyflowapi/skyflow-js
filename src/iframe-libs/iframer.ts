@@ -1,3 +1,5 @@
+import globals from "../constants";
+
 export default (options = {}) => {
   const iframe = document.createElement("iframe");
   var config: any = { ...iframeDefaultAttributes, ...options };
@@ -21,6 +23,10 @@ export const iframeDefaultAttributes = {
   frameBorder: 0,
   allowtransparency: true,
   scrolling: "no",
+};
+
+export const getIframeSrc = (uuid) => {
+  globals.IFRAME_SECURE_SITE + "/#" + uuid;
 };
 
 export const setAttributes = (element, attributes) => {

@@ -5,6 +5,7 @@
     "target": "es6",
     "lib": ["es2015", "es2017", "dom"],
     "esModuleInterop": true,
+    "module": "commonjs",
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
