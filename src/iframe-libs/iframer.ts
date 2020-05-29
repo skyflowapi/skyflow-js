@@ -1,9 +1,11 @@
 import globals from "../constants";
+import { IFRAME_DEFAULT_STYLES } from "../elements/constants";
 
 export default (options = {}) => {
   const iframe = document.createElement("iframe");
   var config: any = { ...iframeDefaultAttributes, ...options };
 
+  config.style = config.style || IFRAME_DEFAULT_STYLES;
   if (config.style && typeof config.style !== "string") {
     Object.assign(iframe.style, config.style);
     delete config.style;
@@ -23,10 +25,11 @@ export const iframeDefaultAttributes = {
   frameBorder: 0,
   allowtransparency: true,
   scrolling: "no",
+  style: "width: 100%; height: 100%",
 };
 
 export const getIframeSrc = (uuid) => {
-  globals.IFRAME_SECURE_SITE + "/#" + uuid;
+  return globals.IFRAME_SECURE_SITE; //+ "/#" + uuid;
 };
 
 export const setAttributes = (element, attributes) => {
@@ -39,6 +42,15 @@ export const setAttributes = (element, attributes) => {
       } else {
         element.setAttribute(key, value);
       }
+    }
+  }
+};
+
+export const setStyles = (element: HTMLElement, styles) => {
+  //todo: allow limited styles
+  for (let key in styles) {
+    if (styles.hasOwnProperty(key)) {
+      element.style[key] = styles[key];
     }
   }
 };

@@ -1,5 +1,3 @@
-// import
-
 import { FRAME_CONTROLLER } from "./elements/constants";
 import { FrameController, FrameElement } from "./elements/internal";
 
@@ -11,9 +9,15 @@ if (typeof window.console === "undefined") {
 }
 
 (function (root: any) {
-  if (root.name.split(":")[0] === FRAME_CONTROLLER) {
-    FrameController.init(location.hash);
-  } else {
-    root.Skyflow = FrameElement;
+  try {
+    if (root.name.split(":")[0] === FRAME_CONTROLLER) {
+      root.Skyflow = FrameController;
+      FrameController.init(location.hash);
+    } else {
+      root.Skyflow = FrameElement;
+      FrameElement.start();
+    }
+  } catch (e) {
+    throw new Error("Expecting a valid Iframe");
   }
-})(this);
+})(window);

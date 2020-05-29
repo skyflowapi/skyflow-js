@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <form action="#" id="form">
+      <label>First Name</label>
+      <div id="first_name"></div>
+      <label>Last Name</label>
+      <div id="last_name"></div>
+      <label>Date of Birth</label>
+      <div id="dob"></div>
+      <label>Phone Number</label>
+      <div id="phone_number"></div>
+      <button type="submit">Submit</button>
+    </form>
+    <script>
+      skyflow = new Skyflow("", "", "");
+      elements = skyflow.elements({});
+      firstName = elements.create("firstName");
+      firstName.mount("#first_name");
+      lastName = elements.create("lastName");
+      lastName.mount("#last_name");
+      dob = elements.create("dob");
+      dob.mount("#dob");
+      phoneNumber = elements.create("phoneNumber");
+      phoneNumber.mount("#phone_number");
+
+      document.getElementById("form").onsubmit = elements.onSubmit;
+    </script>
+  </body>
+</html>

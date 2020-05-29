@@ -5,6 +5,11 @@
       {
         "targets": "> 0.2%"
       }
-    ]
+    ],
+    "@babel/typescript"
+  ],
+  "plugins": [
+    "@babel/proposal-class-properties",
+    "@babel/proposal-object-rest-spread"
   ]
 }

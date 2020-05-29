@@ -1,6 +1,23 @@
-- `gulp` dumps a plain and a minified file from all files in the folder `src` into the folder `release`.
-- `gulp watch` watches for any changes in folder `src` and rebuilds for each change(without minifier).
-- `gulp clean` removes all files in the folder `release`.
-- `gulp bump-patch` increases the version by `0.0.1` for the last git commit and pushes the new tag to the remote repository.
-- `gulp bump-minor` increases the version by `0.1.0` for the last git commit and pushes the new tag to the remote repository.
-- `gulp bump-major` increases the version by `1.0.0` for the last git commit and pushes the new tag to the remote repository.
+## Building the repo
+
+```shell
+npm run build
+```
+
+## Building only types
+
+```shell
+npm run build:types
+```
+
+## Type-Checking the repo
+
+```shell
+npm run type-check
+```
+
+And to run in --watch mode:
+
+```shell
+npm run type-check:watch
+```

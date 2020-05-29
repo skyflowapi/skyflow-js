@@ -25,13 +25,13 @@ export const ELEMENTS = {
   },
   dob: {
     attributes: {
-      type: "text",
+      type: "date",
     },
     sensitive: true,
   },
   phoneNumber: {
     attributes: {
-      type: "text",
+      type: "number",
     },
     sensitive: false,
   },
@@ -43,10 +43,40 @@ export const ELEMENTS = {
   },
 };
 
+export const INPUT_DEFAULT_STYLES = {
+  height: "100%",
+  width: "100%",
+  margin: 0,
+  padding: 0,
+  border: 0,
+  position: "relative",
+};
+
+export const IFRAME_DEFAULT_STYLES = {
+  height: "100%",
+  width: "100%",
+  margin: 0,
+  padding: 0,
+  border: 0,
+  position: "absolute",
+  top: 0,
+  left: 0,
+};
+
+export const CONTROLLER_STYLES = {
+  position: "absolute",
+  top: 0,
+  width: 0,
+  height: 0,
+  visibility: "hidden",
+  left: "-99999999px",
+};
+
 export const ELEMENT_EVENTS_TO_IFRAME = {
   FRAME_READY: "FRAME_READY",
   READY_FOR_CLIENT: "READY_FOR_CLIENT",
   TOKENIZATION_REQUEST: "TOKENIZATION_REQUEST",
+  INPUT_EVENT: "INPUT_EVENT",
 };
 //   'ADD_CLASS',
 //   'AUTOFILL_EXPIRATION_DATE',

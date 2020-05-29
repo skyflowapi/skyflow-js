@@ -1,10 +1,20 @@
 import Element from "./element";
-import { ELEMENTS, FRAME_CONTROLLER } from "../constants";
+import {
+  ELEMENTS,
+  FRAME_CONTROLLER,
+  ELEMENT_EVENTS_TO_IFRAME,
+  INPUT_DEFAULT_STYLES,
+  CONTROLLER_STYLES,
+  IFRAME_DEFAULT_STYLES,
+} from "../constants";
 import iframer, {
   setAttributes,
   getIframeSrc,
+  setStyles,
 } from "../../iframe-libs/iframer";
 import bus from "framebus";
+import uuid from "../../libs/uuid";
+import { FramebusReplyHandler } from "framebus/dist/lib/types";
 
 class Elements {
   elements: Record<string, Element> = {};
@@ -29,12 +39,13 @@ class Elements {
     setAttributes(iframe, {
       src: getIframeSrc(this.metaData.uuid),
     });
+    setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
     // on ready for client need to send the clint JSON
   }
 
-  create(elementType: string, options: any = {}) {
-    if (!(elementType in Object.keys(ELEMENTS))) {
+  create = (elementType: string, options: any = {}) => {
+    if (!ELEMENTS.hasOwnProperty(elementType)) {
       throw new Error("Provide valid element type");
       return;
     }
@@ -46,9 +57,9 @@ class Elements {
     // element.on destroy remove element
 
     return element;
-  }
+  };
 
-  getElement(elementType: string) {
+  getElement = (elementType: string) => {
     let elementsByType: Element[] = [];
     for (let element in this.elements) {
       if (element.split(":")[0] === elementType)
@@ -56,7 +67,27 @@ class Elements {
     }
 
     return elementsByType;
-  }
+  };
+
+  onSubmit = (event: Event) => {
+    event.preventDefault();
+    // event.submitter
+
+    this.tokenize();
+  };
+
+  tokenize = () => {
+    return new Promise((resolve, reject) => {
+      bus
+        // .target(getIframeSrc(this.metaData.uuid))
+        .emit(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST, {}, function (
+          data
+        ) {
+          console.log("Here is the tokenized Data: ", data);
+          resolve(data);
+        });
+    });
+  };
 }
 
 export default Elements;

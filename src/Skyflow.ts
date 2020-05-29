@@ -18,7 +18,7 @@ class Skyflow {
     });
   }
 
-  elements(...options: any) {
+  elements(options: any) {
     return new Elements(options, { uuid: this.uuid });
   }
 }

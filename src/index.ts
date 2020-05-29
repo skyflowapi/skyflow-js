@@ -9,4 +9,4 @@ if (typeof window.console === "undefined") {
 
 (function (root: any) {
   root.Skyflow = root.Skyflow || Skyflow;
-})(this);
+})(window);
