@@ -8,16 +8,17 @@ import iframer, {
   getIframeSrc,
 } from "../../../iframe-libs/iframer";
 import EventEmitter from "../../../event-emitter";
-import bus from "framebus";
+import Bus from "../../../libs/Bus";
 
 class Element {
   elementType: string;
-  name: string;
-  metaData: any;
-  options: any;
-  iframe: HTMLIFrameElement;
-  state = {
+  private name: string;
+  private metaData: any;
+  private options: any;
+  private iframe: HTMLIFrameElement;
+  private state = {
     isEmpty: true,
+    isComplete: false,
     isValid: false,
     isFocused: false,
     container: <HTMLFrameElement | null>null,
@@ -27,7 +28,8 @@ class Element {
   // destructor
   // label focus
 
-  eventEmitter: EventEmitter = new EventEmitter();
+  private eventEmitter: EventEmitter = new EventEmitter();
+  private bus = new Bus();
 
   constructor(elementType: string, options: any, metaData: any) {
     if (!ELEMENTS.hasOwnProperty(elementType)) {
@@ -39,49 +41,154 @@ class Element {
     this.name = options.name;
     this.elementType = elementType;
 
-    this.iframe = iframer({ ...options, name: this.name }); // todo: need to deep clone the object where  ever needed
+    this.iframe = iframer({ name: this.name }); // todo: need to deep clone the object where  ever needed
+
+    this.registerIFrameBusListener();
+
+    this.eventEmitter.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (data) => {
+      this.state.isEmpty = data.isEmpty;
+      this.state.isComplete = data.isComplete;
+      this.state.isValid = data.isValid;
+      this.state.isFocused = data.isFocused;
+    });
   }
 
   mount = (domElement) => {
-    if (this.state.container)
-      throw new Error("Element mount can be called only 1 time");
-
-    if (typeof domElement === "string")
-      this.state.container = document.querySelector(domElement);
-    else this.state.container = domElement;
+    try {
+      if (typeof domElement === "string")
+        this.state.container = document.querySelector(domElement);
+      else this.state.container = domElement;
+    } catch (e) {
+      throw new Error(
+        "Provide a valid dom element selector or provided element not found"
+      ); //todo: need to validate in constructor
+    }
 
     setAttributes(this.iframe, { src: getIframeSrc(this.metaData.uuid) });
-    // update iframe with src and mount in container
     this.state.container?.appendChild(this.iframe);
-    // add event listener on change/focus/blur on label and emit change event on iframe
+    // todo: add event listener on change/focus/blur on label and emit change event on iframe
 
     const sub = (data, callback) => {
       if (data.name === this.name) {
         callback(this.options);
-        bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+        this.bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
       }
     };
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+    this.bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
   };
 
   updateElement = (options) => {
-    // update to read-only etc
+    // todo: update on read-only etc
   };
 
-  // listening to element events on iframe
-  // on destroy remove events
-  on = (eventName: string, handler) => {};
+  getState = () => {
+    return {
+      isEmpty: this.state.isEmpty,
+      isComplete: this.state.isComplete,
+      isValid: this.state.isValid,
+      isFocused: this.state.isFocused,
+    };
+  };
+
+  // listening to element events and error messages on iframe
+  // on destroy remove events todo: off methods
+  on(eventName: string, handler) {
+    if (Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
+      this.eventEmitter.on(eventName, (data) => {
+        handler(data);
+      });
+    } else {
+      throw new Error("Provide valid event listener");
+    }
+  }
 
   // methods to invoke element events
-  blur = () => {};
+  blur = () => {
+    this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+      name: this.name,
+      event: ELEMENT_EVENTS_TO_CLIENT.BLUR,
+    });
+  };
 
-  clear = () => {};
+  focus = () => {
+    this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+      name: this.name,
+      event: ELEMENT_EVENTS_TO_CLIENT.FOCUS,
+    });
+  };
 
-  destroy = () => {};
+  destroy = () => {
+    this.bus.emit(
+      ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
+      {
+        name: this.name,
+      },
+      () => {
+        this.unmount();
+        this.bus.teardown();
+        this.eventEmitter.resetEvents();
+        this.eventEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME);
+        delete this.iframe;
+      }
+    );
+  };
 
-  focus = () => {};
+  onDestroy = (callback) => {
+    this.eventEmitter.on(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME, () => {
+      callback(this.elementType);
+    });
+  };
 
-  unmount = () => {};
+  unmount = () => {
+    this.iframe.remove();
+  };
+
+  // todo
+  // clear = () => {
+  //   bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+  //     name: this.name,
+  //     event: ELEMENT_EVENTS_TO_CLIENT.,
+  //   });
+  // };
+
+  // todo: need to find the use-case
+
+  private registerIFrameBusListener() {
+    this.bus.on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, (data: any) => {
+      if (data.name === this.name) {
+        switch (data.event) {
+          case ELEMENT_EVENTS_TO_CLIENT.FOCUS:
+            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+            break;
+          case ELEMENT_EVENTS_TO_CLIENT.BLUR:
+            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.BLUR);
+            break;
+          case ELEMENT_EVENTS_TO_CLIENT.CHANGE:
+            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CHANGE, {
+              ...data.value,
+              elementType: this.elementType,
+            });
+            break;
+          case ELEMENT_EVENTS_TO_CLIENT.READY:
+            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
+            break;
+          // todo: need to implement the below events
+          case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
+            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
+            break;
+          case ELEMENT_EVENTS_TO_CLIENT.CLICK:
+            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CLICK);
+            break;
+          case ELEMENT_EVENTS_TO_CLIENT.ERROR:
+            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ERROR);
+            break;
+
+          default:
+            throw new Error("Provide a valid event type");
+        }
+      }
+    });
+  }
 }
 
 export default Element;

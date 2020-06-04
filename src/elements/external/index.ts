@@ -14,7 +14,8 @@ import iframer, {
 } from "../../iframe-libs/iframer";
 import bus from "framebus";
 import uuid from "../../libs/uuid";
-import { FramebusReplyHandler } from "framebus/dist/lib/types";
+import deepClone from "../../libs/deepClone";
+import { getStylesFromClass } from "../../libs/styles";
 
 class Elements {
   elements: Record<string, Element> = {};
@@ -44,21 +45,61 @@ class Elements {
     // on ready for client need to send the clint JSON
   }
 
+  // create("ssn", {
+  //   classes: {
+  //     base: "", // default
+  //     complete: "",
+  //     empty: "",
+  //     focus: "",
+  //     invalid: "",
+  //     webkitAutoFill: ""
+  //   },
+  //   style: {
+  //     base: {}, // default
+  //     complete: {},
+  //     empty: {},
+  //     invalid: {}
+  //   },
+  //   value: "",
+  //   disabled: false,
+  //   name: vault field name
+  // })
   create = (elementType: string, options: any = {}) => {
     if (!ELEMENTS.hasOwnProperty(elementType)) {
       throw new Error("Provide valid element type");
       return;
     }
-    options.name = `${elementType}:${options.name || ++this.count}`;
-    if (this.elements[options.name]) {
-      return this.elements[options.name];
+
+    options = deepClone(options);
+    const classes = options.classes || {};
+    const styles = options.styles || {};
+    for (const classType in classes) {
+      styles[classType] = {
+        ...getStylesFromClass(classes[classType]),
+        ...styles[classType],
+      };
     }
+
+    options.classes = classes;
+    options.styles = styles;
+
+    options.name = `${elementType}:${options.name || elementType}`;
+
+    if (this.elements[options.name]) {
+      return this.elements[options.name]; // todo: update if already exits?
+    }
+
     const element = new Element(elementType, options, this.metaData);
-    // element.on destroy remove element
+    this.elements[options.name] = element;
+
+    element.onDestroy((elementName) => {
+      this.removeElement(elementName);
+    });
 
     return element;
   };
 
+  // todo: need to send single element
   getElement = (elementType: string) => {
     let elementsByType: Element[] = [];
     for (let element in this.elements) {
@@ -67,6 +108,12 @@ class Elements {
     }
 
     return elementsByType;
+  };
+
+  removeElement = (elementName: string) => {
+    for (let element in this.elements) {
+      if (element === elementName) delete this.elements[element];
+    }
   };
 
   onSubmit = (event: Event) => {
@@ -81,10 +128,15 @@ class Elements {
       bus
         // .target(getIframeSrc(this.metaData.uuid))
         .emit(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST, {}, function (
-          data
+          data: any
         ) {
-          console.log("Here is the tokenized Data: ", data);
-          resolve(data);
+          if (data.error) {
+            console.log("Error while processing the form data");
+            reject(data);
+          } else {
+            console.log("Here is the tokenized Data: ", data);
+            resolve(data);
+          }
         });
     });
   };

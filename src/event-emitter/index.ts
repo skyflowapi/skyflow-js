@@ -47,6 +47,10 @@ class EventEmitter {
     return eventCallbacks.length > 0;
   }
 
+  resetEvents() {
+    this._events = {};
+  }
+
   static createChild(ChildObject): void {
     ChildObject.prototype = Object.create(EventEmitter.prototype, {
       constructor: ChildObject,

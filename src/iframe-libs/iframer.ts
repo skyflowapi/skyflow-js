@@ -1,15 +1,11 @@
-import globals from "../constants";
+import { properties } from "../properties";
 import { IFRAME_DEFAULT_STYLES } from "../elements/constants";
 
 export default (options = {}) => {
   const iframe = document.createElement("iframe");
   var config: any = { ...iframeDefaultAttributes, ...options };
 
-  config.style = config.style || IFRAME_DEFAULT_STYLES;
-  if (config.style && typeof config.style !== "string") {
-    Object.assign(iframe.style, config.style);
-    delete config.style;
-  }
+  Object.assign(iframe.style, IFRAME_DEFAULT_STYLES);
 
   setAttributes(iframe, config);
 
@@ -29,7 +25,7 @@ export const iframeDefaultAttributes = {
 };
 
 export const getIframeSrc = (uuid) => {
-  return globals.IFRAME_SECURE_SITE; //+ "/#" + uuid;
+  return properties.IFRAME_SECURE_SITE; //+ "/#" + uuid;
 };
 
 export const setAttributes = (element, attributes) => {

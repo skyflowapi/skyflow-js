@@ -1,11 +1,11 @@
 import Elements from "./elements/external";
 import Client from "./client";
-import pk from "../package.json";
 import uuid from "./libs/uuid";
+import { properties } from "./properties";
 
 class Skyflow {
   client: Client;
-  static version: string = pk.version;
+  static version = properties.VERSION;
   uuid: string = uuid();
   constructor(
     username: string,
@@ -18,6 +18,15 @@ class Skyflow {
     });
   }
 
+  // elements({
+  //   fonts: { // todo
+  //     cssSrc: 'https://fonts.googleapis.com/css?family=Open+Sans',
+  //     // or
+  //     family: 'Avenir',
+  //     src: 'url(https://my-domain.com/assets/avenir.woff)',
+  //   },
+  //   locale: "en" // todo
+  // })
   elements(options: any) {
     return new Elements(options, { uuid: this.uuid });
   }

@@ -14,6 +14,7 @@ module.exports = () => {
       overlay: true,
       open: true,
       stats: "errors-only",
+      //todo: add routes for iframe and index ex: / for index.html and iframe for iframe.html
     },
     plugins: [
       new BundleAnalyser(),

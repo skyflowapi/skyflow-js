@@ -2,6 +2,22 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <style>
+      .base {
+        color: #3f51b5;
+      }
+      .complete {
+        color: #4caf50;
+      }
+      .empty {
+      }
+      .focus {
+        color: #000;
+      }
+      .invalid {
+        color: #f44336;
+      }
+    </style>
   </head>
   <body>
     <form action="#" id="form">
@@ -16,15 +32,33 @@
       <button type="submit">Submit</button>
     </form>
     <script>
+      const options = {
+        classes: {
+          base: ".base", // default
+          complete: ".complete",
+          empty: ".empty",
+          focus: ".focus",
+          invalid: ".invalid",
+        },
+        styles: {
+          base: {}, // default
+          complete: {},
+          empty: {},
+          focus: {},
+          invalid: {},
+        },
+        // value: "",
+        // disabled: false,
+      };
       skyflow = new Skyflow("", "", "");
       elements = skyflow.elements({});
-      firstName = elements.create("firstName");
-      firstName.mount("#first_name");
-      lastName = elements.create("lastName");
+      firstName = elements.create("firstName", options);
+      firstName.mount("#first_name", options);
+      lastName = elements.create("lastName", options);
       lastName.mount("#last_name");
-      dob = elements.create("dob");
+      dob = elements.create("dob", options);
       dob.mount("#dob");
-      phoneNumber = elements.create("phoneNumber");
+      phoneNumber = elements.create("phoneNumber", options);
       phoneNumber.mount("#phone_number");
 
       document.getElementById("form").onsubmit = elements.onSubmit;

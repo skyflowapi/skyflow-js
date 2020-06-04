@@ -23,6 +23,7 @@ module.exports = {
     ],
   },
 
+  // todo: add minifier for css in html file
   plugins: [
     new ForkTsCheckerWebpackPlugin(),
     new HtmlWebPackPlugin({

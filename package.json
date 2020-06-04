@@ -6,20 +6,20 @@
   "author": "Skyflow",
   "description": "Skyflow JavaScript SDK",
   "keywords": [
+    "client",
     "sdk",
-    "api",
     "javascript"
   ],
   "scripts": {
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
     "build:types": "tsc --emitDeclarationOnly",
-    "start": "webpack-dev-server --config=webpack.dev.js --open --hot ",
+    "dev": "webpack-dev-server --config=webpack.dev.js --open --hot ",
     "build": "webpack --config=webpack.prod.js"
   },
   "dependencies": {
-    "@types/node": "^14.0.5",
-    "framebus": "^4.0.0"
+    "framebus": "^4.0.0",
+    "inject-stylesheet": "^2.0.0"
   },
   "engines": {
     "node": ">=12.0",
@@ -28,6 +28,7 @@
   "devDependencies": {
     "@babel/core": "^7.9.6",
     "@babel/preset-env": "^7.9.6",
+    "@types/node": "^14.0.5",
     "typescript": "^3.9.3",
     "@babel/plugin-proposal-class-properties": "^7.10.1",
     "@babel/plugin-proposal-object-rest-spread": "^7.10.1",

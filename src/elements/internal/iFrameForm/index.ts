@@ -3,10 +3,9 @@ import bus from "framebus";
 import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
+  ELEMENTS,
 } from "../../constants";
-import { FrameElement } from "..";
 import EventEmitter from "../../../event-emitter";
-import { FramebusOnHandler } from "framebus/dist/lib/types";
 
 export class IFrameForm {
   // single form to all form elements
@@ -31,12 +30,25 @@ export class IFrameForm {
     bus.on(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST, (data, callback) => {
       callback(this.tokenize());
     });
+
+    bus.on(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME, (data, callback) => {
+      for (const iFrameFormElement in this.iFrameFormElements) {
+        if (iFrameFormElement === data.name) {
+          this.iFrameFormElements[iFrameFormElement].destroy();
+          delete this.iFrameFormElements[iFrameFormElement];
+        }
+      }
+      callback({});
+    });
   }
 
   tokenize = () => {
     const responseObject: any = {};
     for (const iFrameFormElement in this.iFrameFormElements) {
       const state = this.iFrameFormElements[iFrameFormElement].state;
+      if (!state.isValid || !state.isComplete) {
+        return { error: "Provide complete and valid inputs" };
+      }
       responseObject[state.name] = state.value;
     }
 
@@ -86,10 +98,12 @@ export class IFrameFormElement extends EventEmitter {
     value: "",
     isFocused: false,
     isValid: false,
-    isPotentiallyValid: true,
+    isEmpty: true,
+    isComplete: false,
+    // isPotentiallyValid: false, todo: check whether this is useful or not
     name: "",
   };
-  fieldType: string;
+  readonly fieldType: string;
   fieldName: string;
   iFrameName: string;
   constructor(frameGlobalName: string, options) {
@@ -122,18 +136,54 @@ export class IFrameFormElement extends EventEmitter {
 
   changeFocus = (focus: boolean) => {
     this.state.isFocused = focus;
+
+    this.sendChangeStatus();
   };
 
+  // todo: send error message of the field
   setValue = (value: string) => {
     // todo: validate by the type of class
     this.state.value = value;
+    if (this.fieldType === "dob") {
+      this.state.value = new Date()
+        .toISOString()
+        .slice(0, 10)
+        .split("-")
+        .reverse()
+        .join("/");
+    }
+    if (value && this.state.isEmpty) {
+      this.state.isEmpty = false;
+    } else if (!value && !this.state.isEmpty) {
+      this.state.isEmpty = true;
+    }
+
+    if (ELEMENTS[this.fieldType].validator(this.state.value)) {
+      this.state.isValid = true;
+      this.state.isComplete = true;
+    } else {
+      this.state.isValid = false;
+      this.state.isComplete = false;
+    }
+
+    this.sendChangeStatus();
   };
 
   getValue = () => {
-    // todo: return part of the value if the field is readonly
+    // todo: return part of the value if the field is readonly and make state as private
     return this.state.value;
   };
 
+  getStatus = () => {
+    return {
+      isFocused: this.state.isFocused,
+      isValid: this.state.isValid,
+      isEmpty: this.state.isEmpty,
+      isComplete: this.state.isComplete,
+    };
+  };
+
+  // on client force focus
   collectBusEvents = () => {
     bus.on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, (data, callback) => {
       if (data.name === this.iFrameName) {
@@ -146,10 +196,35 @@ export class IFrameFormElement extends EventEmitter {
         }
         // todo: listen to remaining events
       } else {
-        // clear focus if any other
+        // empty
       }
     });
   };
 
-  // get set data, setup event handlers
+  // todo: add setMethods to state object and emit this event in that methods
+  sendChangeStatus = () => {
+    // todo: need to emit it on any state change
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+      name: this.iFrameName,
+      event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+      value: this.getStatus(),
+    });
+
+    this._emit(ELEMENT_EVENTS_TO_CLIENT.CHANGE, this.getStatus());
+  };
+
+  resetData() {
+    this.state = {
+      value: "",
+      isFocused: false,
+      isValid: false,
+      isEmpty: true,
+      isComplete: false,
+      name: "",
+    };
+  }
+  destroy() {
+    this.resetData();
+    this.resetEvents();
+  }
 }
