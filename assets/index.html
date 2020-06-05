@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      .base {
+        color: #3f51b5;
+      }
+      .complete {
+        color: #4caf50;
+      }
+      .empty {
+      }
+      .focus {
+        color: #000;
+      }
+      .invalid {
+        color: #f44336;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="#" id="form">
+      <label>First Name</label>
+      <div id="first_name"></div>
+      <label>Last Name</label>
+      <div id="last_name"></div>
+      <label>Date of Birth</label>
+      <div id="dob"></div>
+      <label>Phone Number</label>
+      <div id="phone_number"></div>
+      <button type="submit">Submit</button>
+    </form>
+    <script>
+      const options = {
+        classes: {
+          base: ".base", // default
+          complete: ".complete",
+          empty: ".empty",
+          focus: ".focus",
+          invalid: ".invalid",
+        },
+        styles: {
+          base: {}, // default
+          complete: {},
+          empty: {},
+          focus: {},
+          invalid: {},
+        },
+        // value: "",
+        // disabled: false,
+      };
+      skyflow = new Skyflow("", "", "");
+      elements = skyflow.elements({});
+      firstName = elements.create("firstName", options);
+      firstName.mount("#first_name", options);
+      lastName = elements.create("lastName", options);
+      lastName.mount("#last_name");
+      dob = elements.create("dob", options);
+      dob.mount("#dob");
+      phoneNumber = elements.create("mobileNumber", options);
+      phoneNumber.mount("#phone_number");
+
+      document.getElementById("form").onsubmit = elements.onSubmit;
+    </script>
+  </body>
+</html>
