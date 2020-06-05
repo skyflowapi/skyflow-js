@@ -4,12 +4,12 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: {
-    main: path.resolve(__dirname, "src/index.ts"),
+    skyflow: path.resolve(__dirname, "src/index.ts"),
     iframe: path.resolve(__dirname, "src/index-internal.ts"),
   },
 
   output: {
-    filename: "[name].bundle.js",
+    filename: "[name].js",
     path: path.resolve(__dirname, "dist"),
   },
 
@@ -28,7 +28,7 @@ module.exports = {
     new ForkTsCheckerWebpackPlugin(),
     new HtmlWebPackPlugin({
       template: "assets/index.html",
-      chunks: ["main"],
+      chunks: ["skyflow"],
       inject: "head",
     }),
     new HtmlWebPackPlugin({
