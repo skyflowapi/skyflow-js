@@ -127,7 +127,7 @@ export class IFrameFormElement extends EventEmitter {
   onFocusChange = (focus: boolean) => {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: this.iFrameName,
-      type: focus
+      event: focus
         ? ELEMENT_EVENTS_TO_CLIENT.FOCUS
         : ELEMENT_EVENTS_TO_CLIENT.BLUR,
     });
@@ -141,11 +141,12 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   // todo: send error message of the field
-  setValue = (value: string) => {
+  setValue = (value: string | undefined) => {
     // todo: validate by the type of class
+    if (!value) value = "";
     this.state.value = value;
     if (this.fieldType === "dob") {
-      this.state.value = new Date()
+      this.state.value = new Date(value)
         .toISOString()
         .slice(0, 10)
         .split("-")
@@ -171,6 +172,9 @@ export class IFrameFormElement extends EventEmitter {
 
   getValue = () => {
     // todo: return part of the value if the field is readonly and make state as private
+    if (this.fieldType === "dob") {
+      return this.state.value.split("/").reverse().join("-");
+    }
     return this.state.value;
   };
 
@@ -197,6 +201,11 @@ export class IFrameFormElement extends EventEmitter {
         // todo: listen to remaining events
       } else {
         // empty
+      }
+    });
+    bus.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+      if (data.name === this.iFrameName) {
+        this.setValue(<string | undefined>data.value);
       }
     });
   };

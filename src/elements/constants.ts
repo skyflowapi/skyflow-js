@@ -16,6 +16,7 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
   TOKENIZATION_REQUEST: "TOKENIZATION_REQUEST",
   INPUT_EVENT: "INPUT_EVENT",
   DESTROY_FRAME: "DESTROY FRAME",
+  SET_VALUE: "SET_VALUE",
 };
 //   'ADD_CLASS',
 //   'AUTOFILL_EXPIRATION_DATE',
@@ -59,6 +60,17 @@ export const ELEMENTS: Record<
       return /^([A-Z][a-z]+([ ]?[a-z]?['-]?[A-Z][a-z]+)*)$/.test(value);
     },
   },
+  email: {
+    attributes: {
+      type: "email",
+    },
+    sensitive: true,
+    validator: function (value: string) {
+      return /^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)$/s.test(
+        value
+      );
+    },
+  },
   dob: {
     attributes: {
       type: "date",
@@ -71,7 +83,7 @@ export const ELEMENTS: Record<
       );
     },
   },
-  phoneNumber: {
+  mobileNumber: {
     attributes: {
       type: "number",
     },
@@ -91,6 +103,60 @@ export const ELEMENTS: Record<
       return /^(([0-9]{9})|([0-9]{3}-[0-9]{2}-[0-9]{4})|([0-9]{2}-[0-9]{7}))$/.test(
         value
       );
+    },
+  },
+  address: {
+    attributes: {
+      type: "text",
+    },
+    sensitive: false,
+    validator: function (value: string) {
+      return /^[#.0-9a-zA-Z\s,-]+$/.test(value);
+    },
+  },
+  street: {
+    attributes: {
+      type: "text",
+    },
+    sensitive: false,
+    validator: function (value: string) {
+      return true;
+    },
+  },
+  zipCode: {
+    attributes: {
+      type: "number",
+    },
+    sensitive: false,
+    validator: function (value: string) {
+      return /^[0-9]{4,}$/.test(value);
+    },
+  },
+  city: {
+    attributes: {
+      type: "text",
+    },
+    sensitive: false,
+    validator: function (value: string) {
+      return /^[A-Za-z]+(\s[A-Za-z]+)?$/.test(value);
+    },
+  },
+  state: {
+    attributes: {
+      type: "text",
+    },
+    sensitive: false,
+    validator: function (value: string) {
+      return /^[A-Za-z]+(\s[A-Za-z]+)?$/.test(value);
+    },
+  },
+  income: {
+    attributes: {
+      type: "number",
+    },
+    sensitive: false,
+    validator: function (value: string) {
+      return /^[0-9]+$/.test(value);
     },
   },
 };

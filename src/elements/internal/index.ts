@@ -126,6 +126,10 @@ export class FrameElement {
       this.updateInputStyleClass(this.iFrameFormElement?.getStatus());
   };
 
+  setValue = (value) => {
+    if (this.domFormInput) this.domFormInput.value = value;
+  };
+
   // todo: update the options and
   update = () => {};
 

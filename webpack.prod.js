@@ -10,7 +10,6 @@ const CompressionPlugin = require("compression-webpack-plugin");
 module.exports = () => {
   return merge(common, {
     mode: "production",
-    devtool: "source-map",
     optimization: {
       splitChunks: {
         chunks: "all",

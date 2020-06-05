@@ -24,8 +24,6 @@ class Element {
     container: <HTMLFrameElement | null>null,
   };
 
-  // isPotentiallyValid: true,
-  // destructor
   // label focus
 
   private eventEmitter: EventEmitter = new EventEmitter();
@@ -41,19 +39,25 @@ class Element {
     this.name = options.name;
     this.elementType = elementType;
 
+    // todo: styles for hidden and disabled/readonly
     this.iframe = iframer({ name: this.name }); // todo: need to deep clone the object where  ever needed
 
     this.registerIFrameBusListener();
 
-    this.eventEmitter.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (data) => {
-      this.state.isEmpty = data.isEmpty;
-      this.state.isComplete = data.isComplete;
-      this.state.isValid = data.isValid;
-      this.state.isFocused = data.isFocused;
-    });
+    this.eventEmitter.on(
+      ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+      (data) => {
+        this.state.isEmpty = data.isEmpty;
+        this.state.isComplete = data.isComplete;
+        this.state.isValid = data.isValid;
+        this.state.isFocused = data.isFocused;
+      },
+      true
+    );
   }
 
   mount = (domElement) => {
+    this.unmount();
     try {
       if (typeof domElement === "string")
         this.state.container = document.querySelector(domElement);
@@ -79,6 +83,13 @@ class Element {
 
   updateElement = (options) => {
     // todo: update on read-only etc
+  };
+
+  setValue = (value) => {
+    this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+      name: this.name,
+      value,
+    });
   };
 
   getState = () => {
@@ -134,13 +145,21 @@ class Element {
   };
 
   onDestroy = (callback) => {
-    this.eventEmitter.on(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME, () => {
-      callback(this.elementType);
-    });
+    this.eventEmitter.on(
+      ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
+      () => {
+        callback(this.elementType);
+      },
+      true
+    );
   };
 
   unmount = () => {
     this.iframe.remove();
+  };
+
+  resetEvents = () => {
+    this.eventEmitter.resetEvents();
   };
 
   // todo

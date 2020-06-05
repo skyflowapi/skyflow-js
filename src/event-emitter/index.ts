@@ -1,15 +1,15 @@
 class EventEmitter {
-  _events: Record<string, Function[]>;
+  _events: Record<string, { priority: boolean; callback: Function }[]>;
 
   constructor() {
     this._events = {};
   }
 
-  on(event: string, callback: Function): void {
+  on(event: string, callback: Function, priority: boolean = false): void {
     if (this._events[event]) {
-      this._events[event].push(callback);
+      this._events[event].push({ priority, callback });
     } else {
-      this._events[event] = [callback];
+      this._events[event] = [{ priority, callback }];
     }
   }
 
@@ -20,7 +20,9 @@ class EventEmitter {
       return;
     }
 
-    const indexOfCallback = eventCallbacks.indexOf(callback);
+    const indexOfCallback = eventCallbacks.findIndex(
+      (event) => event.callback === callback
+    );
 
     eventCallbacks.splice(indexOfCallback, 1);
   }
@@ -32,8 +34,8 @@ class EventEmitter {
       return;
     }
 
-    eventCallbacks.forEach(function (callback) {
-      callback(...args);
+    eventCallbacks.forEach(function (event) {
+      event.callback(...args);
     });
   }
 
@@ -48,7 +50,19 @@ class EventEmitter {
   }
 
   resetEvents() {
-    this._events = {};
+    const _newEvents: any = {};
+    for (const eventName in this._events) {
+      const events = this._events[eventName];
+      if (events && events.length > 0) {
+        const newEvents: any[] = [];
+        events.forEach((event) => {
+          if (event.priority) newEvents.push(event);
+        });
+        _newEvents[eventName] = newEvents;
+      }
+    }
+
+    this._events = _newEvents;
   }
 
   static createChild(ChildObject): void {

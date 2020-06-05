@@ -42,7 +42,7 @@ class Elements {
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
-    // on ready for client need to send the clint JSON
+    // on ready for client need to send the clint json object not its instance
   }
 
   // create("ssn", {
@@ -62,7 +62,9 @@ class Elements {
   //   },
   //   value: "",
   //   disabled: false,
-  //   name: vault field name
+  //   name: vault field name,
+  //   hidden: true/false, <--> disabled
+  //   readeOnly: true/false
   // })
   create = (elementType: string, options: any = {}) => {
     if (!ELEMENTS.hasOwnProperty(elementType)) {
@@ -100,14 +102,29 @@ class Elements {
   };
 
   // todo: need to send single element
-  getElement = (elementType: string) => {
-    let elementsByType: Element[] = [];
-    for (let element in this.elements) {
-      if (element.split(":")[0] === elementType)
-        elementsByType.push(this.elements[element]);
+  getElement = (elementType: string, elementName: string = elementType) => {
+    for (const element in this.elements) {
+      const elementData = element.split(":");
+      if (elementData[0] === elementType && elementData[1] === elementName)
+        return this.elements[element];
     }
 
-    return elementsByType;
+    return null;
+  };
+
+  // todo: get all elements metadata like name, type and its instance
+  getElements = () => {
+    const elements: any[] = [];
+    for (const element in this.elements) {
+      const elementData = element.split(":");
+      elements.push({
+        name: elementData[1],
+        type: elementData[0],
+        instance: this.elements[element],
+      });
+    }
+
+    return elements;
   };
 
   removeElement = (elementName: string) => {
