@@ -6,29 +6,68 @@
       .base {
         color: #3f51b5;
       }
+      .base:hover {
+        /* this wont work */
+        color: aqua;
+      }
       .complete {
         color: #4caf50;
       }
       .empty {
       }
       .focus {
-        color: #000;
+        /* color: #000; */
+        /* will take all the default values for this class */
       }
       .invalid {
         color: #f44336;
       }
+
+      #form {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        height: 100vh;
+      }
+
+      #form * {
+        width: 100px !important;
+        height: 20px !important;
+      }
     </style>
+    <script>
+      const startDate = new Date();
+    </script>
   </head>
   <body>
     <form action="#" id="form">
       <label>First Name</label>
       <div id="first_name"></div>
-      <label>Last Name</label>
-      <div id="last_name"></div>
+      <label>ssn</label>
+      <div id="ssn"></div>
       <label>Date of Birth</label>
       <div id="dob"></div>
       <label>Phone Number</label>
       <div id="phone_number"></div>
+
+      <label>Text</label>
+      <div id="text"></div>
+      <label>Text Area</label>
+      <div id="textarea"></div>
+      <label>Checkbox</label>
+      <div id="checkbox1"></div>
+      <label>Checkbox</label>
+      <div id="checkbox2"></div>
+      <label>Radio</label>
+      <div id="radio1"></div>
+      <label>Radio</label>
+      <div id="radio2"></div>
+      <label>Password</label>
+      <div id="password"></div>
+      <label>Number</label>
+      <div id="number"></div>
+      <label>Dropdown</label>
+      <div id="dropdown"></div>
       <button type="submit">Submit</button>
     </form>
     <script>
@@ -52,16 +91,105 @@
       };
       skyflow = new Skyflow("", "", "");
       elements = skyflow.elements({});
-      firstName = elements.create("firstName", options);
-      firstName.mount("#first_name", options);
-      lastName = elements.create("lastName", options);
-      lastName.mount("#last_name");
-      dob = elements.create("dob", options);
+      firstName = elements.create("firstName", {
+        ...options,
+        name: "first-name",
+      });
+      firstName.mount("#first_name");
+      ssn = elements.create("ssn", {
+        ...options,
+        name: "ssn",
+        validation: ["required", "default"],
+      });
+      ssn.mount("#ssn");
+      dob = elements.create("dob", { ...options, name: "dob" });
       dob.mount("#dob");
-      phoneNumber = elements.create("mobileNumber", options);
+      phoneNumber = elements.create("mobileNumber", {
+        ...options,
+        name: "mobile-number",
+      });
       phoneNumber.mount("#phone_number");
 
+      text = elements.create("text", { ...options, name: "text" });
+      text.mount("#text");
+
+      textarea = elements.create("textarea", { ...options, name: "textarea" });
+      textarea.mount("#textarea");
+
+      checkbox1 = elements.create("checkbox", {
+        ...options,
+        name: "checkbox",
+        value: "checkbox1",
+      });
+      checkbox1.mount("#checkbox1");
+      checkbox2 = elements.create("checkbox", {
+        ...options,
+        name: "checkbox",
+        value: "checkbox2",
+      });
+      checkbox2.mount("#checkbox2");
+
+      radio1 = elements.create("radio", {
+        ...options,
+        name: "radio",
+        value: "radio1",
+      });
+      radio1.mount("#radio1");
+      radio2 = elements.create("radio", {
+        ...options,
+        name: "radio",
+        value: "radio2",
+      });
+      radio2.mount("#radio2");
+
+      password = elements.create("password", {
+        ...options,
+        name: "password",
+        sensitive: true,
+        validation: ["required"],
+      });
+      password.mount("#password");
+
+      number = elements.create("number", {
+        ...options,
+        name: "number",
+        min: 10,
+        max: 100,
+      });
+      number.mount("#number");
+
+      dropdown = elements.create("dropdown", {
+        ...options,
+        name: "dropdown",
+        options: [{ text: "text1", value: "value1" }],
+      });
+      dropdown.mount("#dropdown");
+
+      // const test = document.getElementById("form");
+
+      // function pushElement(name) {
+      //   firstName = elements.create("firstName", {
+      //     ...options,
+      //     name: name + "",
+      //     value: name + "",
+      //   });
+      //   const elementDiv = document.createElement("div");
+      //   test.append(elementDiv);
+      //   firstName.mount(elementDiv);
+      // }
+
+      // for (let i = 0; i < 30; i++) {
+      //   pushElement(i);
+      // }
+
       document.getElementById("form").onsubmit = elements.onSubmit;
+
+      window.onload = () => {
+        console.log(
+          "loaded: ",
+          new Date(new Date().getTime() - startDate.getTime())
+        );
+      };
     </script>
   </body>
 </html>

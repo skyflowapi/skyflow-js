@@ -28,7 +28,10 @@ class Skyflow {
   //   locale: "en" // todo
   // })
   elements(options: any) {
-    return new Elements(options, { uuid: this.uuid });
+    return new Elements(options, {
+      uuid: this.uuid,
+      clientDomain: location.origin,
+    });
   }
 }
 

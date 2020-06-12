@@ -1,6 +1,7 @@
-import { ALLOWED_STYLES } from "../elements/constants";
+import { ALLOWED_STYLES, STYLE_TYPE } from "../elements/constants";
 
 export function getStylesFromClass(cssClass) {
+  if (!cssClass) return {};
   var element = document.createElement("input");
   var styles = {};
   var computedStyles;
@@ -29,4 +30,57 @@ export function getStylesFromClass(cssClass) {
   document.body.removeChild(element);
 
   return styles;
+}
+
+export function splitStyles(styles) {
+  const pseudoStyles = {};
+  const nonPseudoStyles = {};
+  for (const style in styles) {
+    if (style && style[0] === ":") {
+      pseudoStyles[style] = styles[style];
+    } else {
+      nonPseudoStyles[style] = styles[style];
+    }
+  }
+
+  return [nonPseudoStyles, pseudoStyles];
+}
+
+export function buildStylesFromClassesAndStyles(classes, styles) {
+  // if focus add to base styles with psudo element tag
+  Object.values(STYLE_TYPE).forEach((classType) => {
+    if (classes[classType] || styles[classType])
+      switch (classType) {
+        case STYLE_TYPE.BASE:
+          styles[classType] = {
+            ...getStylesFromClass(classes[classType]),
+            ...styles[classType],
+          };
+          break;
+        case STYLE_TYPE.FOCUS:
+          styles[STYLE_TYPE.BASE] = {
+            ...styles[STYLE_TYPE.BASE],
+            ":focus": {
+              ...getStylesFromClass(classes[classType]),
+              ...(styles[STYLE_TYPE.BASE] && styles[STYLE_TYPE.BASE][":focus"]),
+            },
+          };
+          break;
+        case STYLE_TYPE.WEBPACKAUTOFILL:
+          styles[STYLE_TYPE.BASE] = {
+            ...styles[STYLE_TYPE.BASE],
+            ":-webkit-autofill": {
+              ...getStylesFromClass(classes[classType]),
+              ...(styles[STYLE_TYPE.BASE] &&
+                styles[STYLE_TYPE.BASE][":-webkit-autofill"]),
+            },
+          };
+          break;
+        default:
+          styles[classType] = {
+            ...getStylesFromClass(classes[classType]),
+            ...styles[classType],
+          };
+      }
+  });
 }

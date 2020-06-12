@@ -17,7 +17,7 @@ module.exports = () => {
       //todo: add routes for iframe and index ex: / for index.html and iframe for iframe.html
     },
     plugins: [
-      new BundleAnalyser(),
+      new BundleAnalyser({ analyzerPort: 8881 }),
       new webpack.DefinePlugin({
         "process.env": JSON.stringify(process.env),
       }),

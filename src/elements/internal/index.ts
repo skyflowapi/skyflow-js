@@ -5,12 +5,17 @@ import {
   ELEMENTS,
   ALLOWED_STYLES,
   STYLE_TYPE,
+  ALLOWED_PSEUDO_STYLES,
+  FRAME_CONTROLLER,
 } from "../constants";
 import bus from "framebus";
 import injectStylesheet from "inject-stylesheet";
 import Client from "../../client";
 import { IFrameForm, IFrameFormElement } from "./iFrameForm";
 import { setAttributes, setStyles } from "../../iframe-libs/iframer";
+import { splitStyles } from "../../libs/styles";
+import Element from "../external/element";
+import { validateElementOptions } from "../../libs/element-options";
 
 export class FrameController {
   static controller?: FrameController;
@@ -18,16 +23,23 @@ export class FrameController {
   iFrameForm: IFrameForm;
   constructor() {
     this.iFrameForm = new IFrameForm();
+    bus.emit(
+      ELEMENT_EVENTS_TO_IFRAME.FRAME_READY,
+      { name: FRAME_CONTROLLER },
+      (clientMetaData) => {
+        this.iFrameForm.setClientMetadata(clientMetaData);
+      }
+    );
   }
   static init(uuid: string) {
     // todo: on 2nd init need to reset all the forms and its elements(more like reset)
     this.controller = new FrameController();
-    bus.emit(ELEMENT_EVENTS_TO_IFRAME.READY_FOR_CLIENT, {}, (clientJSON) => {
-      // todo: create client object from clientJSON
-      // this.controller = new FrameController()
-      // this.controller?.client = new Client()
-      // send client object to IFrameForm
-    });
+    // bus.emit(ELEMENT_EVENTS_TO_IFRAME.READY_FOR_CLIENT, {}, (clientJSON) => {
+    // todo: create client object from clientJSON
+    // this.controller = new FrameController()
+    // this.controller?.client = new Client()
+    // send client object to IFrameForm
+    // });
   }
 }
 
@@ -35,14 +47,9 @@ export class FrameElement {
   // all html events like focus blur events will be handled here
   static frameElement?: FrameElement; // factory class
   static options?: any;
-  private iFrameFormElement?: IFrameFormElement;
+  private iFrameFormElement: IFrameFormElement;
   domForm?: HTMLFormElement;
-  domFormInput?: HTMLInputElement; // todo: multiple inputs , need to write FrameElement(s) or similar
-
-  // called by IFrameForm
-  static init = (iFrameFormElement: IFrameFormElement) => {
-    FrameElement.frameElement = new FrameElement(iFrameFormElement);
-  };
+  domFormInput?: HTMLInputElement | HTMLSelectElement; // todo: multiple inputs , need to write FrameElement(s) or similar
 
   // called on iframe loaded im html file
   static start = () => {
@@ -59,6 +66,11 @@ export class FrameElement {
     );
   };
 
+  // called by IFrameForm
+  static init = (iFrameFormElement: IFrameFormElement) => {
+    FrameElement.frameElement = new FrameElement(iFrameFormElement);
+  };
+
   constructor(iFrameFormElement: IFrameFormElement) {
     this.iFrameFormElement = iFrameFormElement;
 
@@ -69,7 +81,7 @@ export class FrameElement {
 
   // mount element onto dom
   mount = () => {
-    this.injectInputStyles();
+    // this.injectInputStyles();
     this.iFrameFormElement?.resetEvents();
     const form = document.createElement("form");
     this.domForm = form;
@@ -78,19 +90,16 @@ export class FrameElement {
       event.preventDefault();
     };
 
-    const inputElement = document.createElement("input");
+    const inputElement = document.createElement(
+      this.iFrameFormElement?.fieldType === ELEMENTS.dropdown.name
+        ? "select"
+        : "input"
+    );
+
     this.domFormInput = inputElement;
 
-    const attr = {
-      ...ELEMENTS[this.iFrameFormElement?.fieldType || ""].attributes,
-      name: this.iFrameFormElement?.fieldName,
-      id: this.iFrameFormElement?.iFrameName,
-    };
-    // set input attributes
-    // todo: default value
-    inputElement.value = this.iFrameFormElement?.getValue() || "";
-
-    setAttributes(inputElement, attr);
+    // this.setupInputField();
+    this.updateOptions(FrameElement.options);
 
     // events and todo: onclick ...???
     inputElement.onfocus = (event) => {
@@ -112,7 +121,19 @@ export class FrameElement {
       this.focusChange(false);
     });
     this.iFrameFormElement?.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
+      if (
+        state.value &&
+        this.iFrameFormElement?.fieldType === ELEMENTS.radio.name
+      ) {
+        (<HTMLInputElement>this.domFormInput).checked =
+          FrameElement.options.value === state.value;
+      }
       this.updateInputStyleClass(state);
+    });
+    this.iFrameFormElement?.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+      if (data.options) {
+        this.updateOptions(data.options);
+      }
     });
 
     setStyles(form, INPUT_DEFAULT_STYLES);
@@ -126,12 +147,90 @@ export class FrameElement {
       this.updateInputStyleClass(this.iFrameFormElement?.getStatus());
   };
 
-  setValue = (value) => {
-    if (this.domFormInput) this.domFormInput.value = value;
-  };
+  setupInputField(newValue: boolean = false) {
+    const attr = {
+      ...ELEMENTS[this.iFrameFormElement?.fieldType || ""].attributes,
+      name: this.iFrameFormElement?.fieldName,
+      id: this.iFrameFormElement?.iFrameName,
+      disabled: FrameElement.options.disabled,
+      placeholder: FrameElement.options.placeholder,
+      readonly: FrameElement.options.readonly,
+      min: FrameElement.options.min,
+      max: FrameElement.options.max,
+      maxLength: FrameElement.options.maxLength,
+      ...(FrameElement.options.validation?.includes("required") && {
+        required: "",
+      }),
+    };
 
-  // todo: update the options and
-  update = () => {};
+    this.iFrameFormElement.setValidation(FrameElement.options.validation);
+    // todo: what about 'select' multiple fields selection?
+    if (
+      this.domFormInput &&
+      this.iFrameFormElement?.fieldType === ELEMENTS.dropdown.name
+    ) {
+      // <select id="pet-select" value="" name="name">
+      //   <option value="goldfish">Goldfish</option>
+      // </select>
+      this.domFormInput.innerHTML = "";
+      FrameElement.options.options.forEach((option) => {
+        const optionElement = document.createElement("option");
+        optionElement.value = option.value;
+        optionElement.innerText = option.text;
+        this.domFormInput?.append(optionElement);
+      });
+    }
+
+    setAttributes(this.domFormInput, attr);
+
+    let newInputValue = this.iFrameFormElement.getValue();
+
+    // todo: validity on default value, HTML don't support validity on radio
+    if (this.iFrameFormElement?.getValue() === undefined) {
+      if (
+        this.iFrameFormElement?.fieldType === ELEMENTS.checkbox.name ||
+        this.iFrameFormElement?.fieldType === ELEMENTS.radio.name
+      ) {
+        // this.iFrameFormElement?.setValue("");
+        newInputValue = "";
+      } else if (FrameElement.options.value) {
+        // this.iFrameFormElement?.setValue(FrameElement.options.value);
+        newInputValue = FrameElement.options.value;
+      }
+    }
+
+    if (
+      newValue &&
+      this.iFrameFormElement?.fieldType !== ELEMENTS.checkbox.name &&
+      this.iFrameFormElement?.fieldType !== ELEMENTS.radio.name
+    ) {
+      newInputValue = FrameElement.options.value;
+    }
+
+    if (this.domFormInput) {
+      if (
+        this.iFrameFormElement?.fieldType === ELEMENTS.checkbox.name ||
+        this.iFrameFormElement?.fieldType === ELEMENTS.radio.name
+      ) {
+        this.domFormInput.value = FrameElement.options.value;
+        (<HTMLInputElement>this.domFormInput).checked =
+          FrameElement.options.value === newInputValue;
+      } else {
+        this.domFormInput.value = newInputValue || "";
+      }
+    }
+
+    this.iFrameFormElement.setValue(
+      newInputValue,
+      this.domFormInput?.checkValidity()
+    );
+  }
+
+  setValue = (value) => {
+    if (this.domFormInput) {
+      this.domFormInput.value = value;
+    }
+  };
 
   // events from HTML
   onFocusChange = (event: FocusEvent, focus: boolean) => {
@@ -139,8 +238,10 @@ export class FrameElement {
     // todo: change css of input on focus, blur
     this.iFrameFormElement?.onFocusChange(focus);
   };
+
   onInputChange = (event: Event) => {
-    this.iFrameFormElement?.setValue((event.target as HTMLInputElement).value);
+    const target = event.target as HTMLInputElement;
+    this.iFrameFormElement?.setValue(target.value, target.checkValidity());
   };
 
   focusChange = (focus: boolean) => {
@@ -150,14 +251,22 @@ export class FrameElement {
   };
 
   destroy = () => {};
+
   injectInputStyles() {
     const styles = FrameElement.options.styles;
 
     // todo: inject default styles in html files
     const stylesByClassName = {};
     Object.values(STYLE_TYPE).forEach((classType) => {
-      if (styles[classType] && Object.keys(styles).length !== 0)
-        stylesByClassName[".SkyflowElement--" + classType] = styles[classType];
+      if (styles[classType] && Object.keys(styles).length !== 0) {
+        const [nonPseudoStyles, pseudoStyles] = splitStyles(styles[classType]);
+        stylesByClassName[".SkyflowElement--" + classType] = nonPseudoStyles;
+        for (const pseudoStyle in pseudoStyles) {
+          if (ALLOWED_PSEUDO_STYLES.includes(pseudoStyle))
+            stylesByClassName[".SkyflowElement--" + classType + pseudoStyle] =
+              pseudoStyles[pseudoStyle];
+        }
+      }
     });
 
     injectStylesheet.injectWithAllowlist(stylesByClassName, ALLOWED_STYLES);
@@ -170,10 +279,6 @@ export class FrameElement {
     isComplete: boolean;
   }) {
     const classes: string[] = [];
-
-    if (state.isFocused) {
-      classes.push(STYLE_TYPE.FOCUS);
-    }
 
     if (state.isEmpty) {
       classes.push(STYLE_TYPE.EMPTY);
@@ -201,5 +306,27 @@ export class FrameElement {
 
       this.domFormInput.className = classes.join(" ");
     }
+  }
+
+  updateOptions(options) {
+    const newOptions = { ...FrameElement.options, ...options };
+
+    validateElementOptions(
+      this.iFrameFormElement.fieldType,
+      FrameElement.options,
+      newOptions
+    );
+
+    FrameElement.options = newOptions;
+
+    if (options.styles) {
+      // update styles
+      this.injectInputStyles();
+    }
+
+    this.setupInputField(
+      options.hasOwnProperty("value") &&
+        options.value !== this.iFrameFormElement.getValue()
+    );
   }
 }

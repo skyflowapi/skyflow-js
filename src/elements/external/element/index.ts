@@ -2,6 +2,7 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENTS,
   ELEMENT_EVENTS_TO_IFRAME,
+  STYLE_TYPE,
 } from "../../constants";
 import iframer, {
   setAttributes,
@@ -9,6 +10,12 @@ import iframer, {
 } from "../../../iframe-libs/iframer";
 import EventEmitter from "../../../event-emitter";
 import Bus from "../../../libs/Bus";
+import deepClone from "../../../libs/deepClone";
+import {
+  getStylesFromClass,
+  buildStylesFromClassesAndStyles,
+} from "../../../libs/styles";
+import { validateElementOptions } from "../../../libs/element-options";
 
 class Element {
   elementType: string;
@@ -22,6 +29,7 @@ class Element {
     isValid: false,
     isFocused: false,
     container: <HTMLFrameElement | null>null,
+    value: undefined,
   };
 
   // label focus
@@ -51,6 +59,7 @@ class Element {
         this.state.isComplete = data.isComplete;
         this.state.isValid = data.isValid;
         this.state.isFocused = data.isFocused;
+        if (!this.options.sensitive) this.state.value = data.value;
       },
       true
     );
@@ -83,14 +92,33 @@ class Element {
 
   updateElement = (options) => {
     // todo: update on read-only etc
-  };
+    options = deepClone(options);
 
-  setValue = (value) => {
+    options = { ...this.options, ...options };
+
+    validateElementOptions(this.elementType, this.options, options);
+
+    if (
+      this.options.styles === options.styles ||
+      this.options.classes === options.classes
+    ) {
+      delete options.styles; // updating styles don't required if there is no change
+    } else {
+      buildStylesFromClassesAndStyles(options.classes, options.styles);
+    }
+
     this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
       name: this.name,
-      value,
+      options: options,
     });
   };
+
+  // setValue = (value) => {
+  //   this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+  //     name: this.name,
+  //     value,
+  //   });
+  // };
 
   getState = () => {
     return {
@@ -98,7 +126,16 @@ class Element {
       isComplete: this.state.isComplete,
       isValid: this.state.isValid,
       isFocused: this.state.isFocused,
+      ...(!this.options.sensitive && { value: this.state.value }),
     };
+  };
+
+  getOptions = () => {
+    const options = deepClone(this.options);
+    delete options.options;
+    delete options.value;
+
+    return options;
   };
 
   // listening to element events and error messages on iframe

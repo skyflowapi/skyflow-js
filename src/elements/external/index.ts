@@ -6,6 +6,7 @@ import {
   INPUT_DEFAULT_STYLES,
   CONTROLLER_STYLES,
   IFRAME_DEFAULT_STYLES,
+  STYLE_TYPE,
 } from "../constants";
 import iframer, {
   setAttributes,
@@ -15,7 +16,11 @@ import iframer, {
 import bus from "framebus";
 import uuid from "../../libs/uuid";
 import deepClone from "../../libs/deepClone";
-import { getStylesFromClass } from "../../libs/styles";
+import {
+  getStylesFromClass,
+  buildStylesFromClassesAndStyles,
+} from "../../libs/styles";
+import { validateElementOptions } from "../../libs/element-options";
 
 class Elements {
   elements: Record<string, Element> = {};
@@ -41,7 +46,17 @@ class Elements {
       src: getIframeSrc(this.metaData.uuid),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
+
+    const sub = (data, callback) => {
+      if (data.name === FRAME_CONTROLLER) {
+        callback({ ...metaData });
+        bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+      }
+    };
+    bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+
     document.body.append(iframe);
+
     // on ready for client need to send the clint json object not its instance
   }
 
@@ -61,34 +76,47 @@ class Elements {
   //     invalid: {}
   //   },
   //   value: "",
-  //   disabled: false,
   //   name: vault field name,
-  //   hidden: true/false, <--> disabled
-  //   readeOnly: true/false
+  //   options:[{value: string, text: string}] //for dropdown
+  //
+  //   sensitive: true/false can't be updated
+  //   validation: [required, default, //regex]
+  //   serializers/formatters --> ?
+  //
+  //   disabled: false,
+  //   hidden: true/false, --> ?
+  //   readeOnly: true/false,
+  //   placeholder: string,
+  //   min, max, maxLength
   // })
   create = (elementType: string, options: any = {}) => {
-    if (!ELEMENTS.hasOwnProperty(elementType)) {
-      throw new Error("Provide valid element type");
-      return;
-    }
-
     options = deepClone(options);
+    options.sensitive = options.sensitive || ELEMENTS[elementType].sensitive;
+    validateElementOptions(elementType, options);
+
     const classes = options.classes || {};
     const styles = options.styles || {};
-    for (const classType in classes) {
-      styles[classType] = {
-        ...getStylesFromClass(classes[classType]),
-        ...styles[classType],
-      };
-    }
+
+    buildStylesFromClassesAndStyles(classes, styles);
 
     options.classes = classes;
     options.styles = styles;
 
-    options.name = `${elementType}:${options.name || elementType}`;
+    // todo: if name contains : need to fix the same in below
+    // todo: what if elementType is different but name is same
+    options.name = `${elementType}:${options.name}`;
+
+    if (
+      elementType === ELEMENTS.radio.name ||
+      elementType === ELEMENTS.checkbox.name
+    ) {
+      options.name = `${options.name}:${options.value}`;
+    }
 
     if (this.elements[options.name]) {
-      return this.elements[options.name]; // todo: update if already exits?
+      // todo: update if already exits?
+      throw new Error("This element already existed: " + options.name);
+      return this.elements[options.name];
     }
 
     const element = new Element(elementType, options, this.metaData);
@@ -102,17 +130,27 @@ class Elements {
   };
 
   // todo: need to send single element
-  getElement = (elementType: string, elementName: string = elementType) => {
+  getElement = (
+    elementType: string,
+    elementName: string = elementType,
+    valueForRadioOrCheckbox?: string
+  ) => {
     for (const element in this.elements) {
       const elementData = element.split(":");
-      if (elementData[0] === elementType && elementData[1] === elementName)
+      if (
+        elementData[0] === elementType &&
+        elementData[1] === elementName &&
+        (elementData[2] !== undefined
+          ? elementData[2] === valueForRadioOrCheckbox
+          : true)
+      )
         return this.elements[element];
     }
 
     return null;
   };
 
-  // todo: get all elements metadata like name, type and its instance
+  // todo: get all elements metadata like name, type and its instance ?
   getElements = () => {
     const elements: any[] = [];
     for (const element in this.elements) {
