@@ -11,9 +11,9 @@ module.exports = () => {
   return merge(common, {
     mode: "production",
     optimization: {
-      splitChunks: {
-        chunks: "all",
-      },
+      // splitChunks: {
+      //   chunks: "all",
+      // },
       runtimeChunk: false,
       minimizer: [new UglifyJsPlugin()],
     },
