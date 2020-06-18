@@ -26,20 +26,21 @@ export class FrameController {
     bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.FRAME_READY,
       { name: FRAME_CONTROLLER },
-      (clientMetaData) => {
+      (clientMetaData: any) => {
+        const clientJSON = clientMetaData.clientJSON;
         this.iFrameForm.setClientMetadata(clientMetaData);
+        this.iFrameForm.setClient(Client.fromJSON(clientJSON));
+        delete clientMetaData.clientJSON;
       }
     );
+
+    // bus.emit(ELEMENT_EVENTS_TO_IFRAME.READY_FOR_CLIENT, {}, (clientJSON) => {
+    //   this.iFrameForm.setClient(Client.fromJSON(clientJSON));
+    // });
   }
   static init(uuid: string) {
-    // todo: on 2nd init need to reset all the forms and its elements(more like reset)
+    // todo: on 2nd init need to reset all the forms and its elements(more like reset)?
     this.controller = new FrameController();
-    // bus.emit(ELEMENT_EVENTS_TO_IFRAME.READY_FOR_CLIENT, {}, (clientJSON) => {
-    // todo: create client object from clientJSON
-    // this.controller = new FrameController()
-    // this.controller?.client = new Client()
-    // send client object to IFrameForm
-    // });
   }
 }
 
@@ -49,7 +50,7 @@ export class FrameElement {
   static options?: any;
   private iFrameFormElement: IFrameFormElement;
   domForm?: HTMLFormElement;
-  domFormInput?: HTMLInputElement | HTMLSelectElement; // todo: multiple inputs , need to write FrameElement(s) or similar
+  domFormInput?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement; // todo: multiple inputs , need to write FrameElement(s) or similar
 
   // called on iframe loaded im html file
   static start = () => {
@@ -93,13 +94,12 @@ export class FrameElement {
     const inputElement = document.createElement(
       this.iFrameFormElement?.fieldType === ELEMENTS.dropdown.name
         ? "select"
+        : this.iFrameFormElement?.fieldType === ELEMENTS.textarea.name
+        ? "textarea"
         : "input"
     );
 
     this.domFormInput = inputElement;
-
-    // this.setupInputField();
-    this.updateOptions(FrameElement.options);
 
     // events and todo: onclick ...???
     inputElement.onfocus = (event) => {
@@ -127,6 +127,16 @@ export class FrameElement {
       ) {
         (<HTMLInputElement>this.domFormInput).checked =
           FrameElement.options.value === state.value;
+      } else if (
+        this.iFrameFormElement.fieldType !== ELEMENTS.radio.name &&
+        this.iFrameFormElement.fieldType !== ELEMENTS.checkbox.name
+      ) {
+        if (
+          FrameElement.options.mask ||
+          FrameElement.options.replacePattern
+        ) {
+          this.setValue(state.value);
+        }
       }
       this.updateInputStyleClass(state);
     });
@@ -135,6 +145,9 @@ export class FrameElement {
         this.updateOptions(data.options);
       }
     });
+
+    // this.setupInputField();
+    this.updateOptions(FrameElement.options);
 
     setStyles(form, INPUT_DEFAULT_STYLES);
     setStyles(inputElement, INPUT_DEFAULT_STYLES);
@@ -148,6 +161,7 @@ export class FrameElement {
   };
 
   setupInputField(newValue: boolean = false) {
+    // todo: attr for textarea
     const attr = {
       ...ELEMENTS[this.iFrameFormElement?.fieldType || ""].attributes,
       name: this.iFrameFormElement?.fieldName,
@@ -158,12 +172,12 @@ export class FrameElement {
       min: FrameElement.options.min,
       max: FrameElement.options.max,
       maxLength: FrameElement.options.maxLength,
+      minLength: FrameElement.options.minLength,
       ...(FrameElement.options.validation?.includes("required") && {
         required: "",
       }),
     };
 
-    this.iFrameFormElement.setValidation(FrameElement.options.validation);
     // todo: what about 'select' multiple fields selection?
     if (
       this.domFormInput &&
@@ -230,6 +244,13 @@ export class FrameElement {
     if (this.domFormInput) {
       this.domFormInput.value = value;
     }
+    // todo: replace the cursor to its prev place on masking
+    // var target = e.target,
+    //   position = target.selectionStart; // Capture initial position
+
+    // target.value = target.value.replace(/\s/g, ""); // This triggers the cursor to move.
+
+    // target.selectionEnd = position; // Set the cursor back to the initial position.
   };
 
   // events from HTML
@@ -323,6 +344,14 @@ export class FrameElement {
       // update styles
       this.injectInputStyles();
     }
+
+    this.iFrameFormElement.setValidation(FrameElement.options.validation);
+    // todo: set replacePattern
+    this.iFrameFormElement.setReplacePattern(
+      FrameElement.options.replacePattern
+    );
+    this.iFrameFormElement.setMask(FrameElement.options.mask);
+    // todo: set mask
 
     this.setupInputField(
       options.hasOwnProperty("value") &&

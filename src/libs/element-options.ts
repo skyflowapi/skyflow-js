@@ -25,6 +25,33 @@ export function validateElementOptions(
 
   newOptions = { ...oldOptions, ...newOptions };
 
+  if (!newOptions.mask === undefined && !Array.isArray(newOptions.mask)) {
+    throw new Error("mask option has to be array or undefined");
+  }
+
+  // todo: replacer should be a char in mask[1]
+  if (Array.isArray(newOptions.mask)) {
+    const array = newOptions.mask;
+    if (
+      typeof array[0] !== "string" ||
+      // (array[1] ? typeof array[1] !== "string" : false) ||
+      (array[1] ? typeof array[1] !== "object" : false)
+    ) {
+      throw new Error("mask array values has to be string");
+    }
+  }
+
+  if (Array.isArray(newOptions.replacePattern)) {
+    const array = newOptions.replacePattern;
+    if (
+      typeof array[0] !== "string" ||
+      // (array[1] ? typeof array[1] !== "string" : false) ||
+      (array[1] ? typeof array[1] !== "string" : false)
+    ) {
+      throw new Error("replacePatterns array values has to be string");
+    }
+  }
+
   if (
     (elementType === ELEMENTS.radio.name ||
       elementType === ELEMENTS.checkbox.name) &&

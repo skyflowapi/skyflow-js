@@ -32,7 +32,7 @@ class Elements {
     {
       fonts = {} /* todo: font object */,
       locale = "en" /* need to be auto from browser */,
-    },
+    } = {},
     metaData
   ) {
     // todo: scan for any iframe
@@ -56,42 +56,44 @@ class Elements {
     bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
 
     document.body.append(iframe);
-
-    // on ready for client need to send the clint json object not its instance
   }
 
   // create("ssn", {
-  //   classes: {
-  //     base: "", // default
-  //     complete: "",
-  //     empty: "",
-  //     focus: "",
-  //     invalid: "",
-  //     webkitAutoFill: ""
-  //   },
-  //   style: {
-  //     base: {}, // default
-  //     complete: {},
-  //     empty: {},
-  //     invalid: {}
-  //   },
-  //   value: "",
-  //   name: vault field name,
-  //   options:[{value: string, text: string}] //for dropdown
-  //
-  //   sensitive: true/false can't be updated
-  //   validation: [required, default, //regex]
-  //   serializers/formatters --> ?
-  //
-  //   disabled: false,
-  //   hidden: true/false, --> ?
-  //   readeOnly: true/false,
-  //   placeholder: string,
-  //   min, max, maxLength
+  // classes: {
+  //   base: "", // default
+  //   complete: "",
+  //   empty: "",
+  //   focus: "",
+  //   invalid: "",
+  //   webkitAutoFill: ""
+  // },
+  // style: {
+  //   base: {}, // default
+  //   complete: {},
+  //   empty: {},
+  //   invalid: {}
+  // },
+  // value: "",
+  // name: vault field name,
+  // options:[{value: string, text: string}] //for dropdown
+
+  // sensitive: true/false can't be updated
+  // validation: [required, default, //regex]
+  // serializers/formatters --> ?
+
+  // disabled: false,
+  // hidden: true/false, --> ?
+  // readeOnly: true/false,
+  // placeholder: string,
+  // min, max, maxLength, minLength
+  // replacePattern = "" or pattern
+  // mask: ["","",""]
   // })
   create = (elementType: string, options: any = {}) => {
     options = deepClone(options);
     options.sensitive = options.sensitive || ELEMENTS[elementType].sensitive;
+    options.replacePattern = options.replacePattern || ELEMENTS[elementType].replacePattern;
+    options.mask = options.mask || ELEMENTS[elementType].mask;
     validateElementOptions(elementType, options);
 
     const classes = options.classes || {};
@@ -165,17 +167,10 @@ class Elements {
     return elements;
   };
 
-  removeElement = (elementName: string) => {
+  private removeElement = (elementName: string) => {
     for (let element in this.elements) {
       if (element === elementName) delete this.elements[element];
     }
-  };
-
-  onSubmit = (event: Event) => {
-    event.preventDefault();
-    // event.submitter
-
-    this.tokenize();
   };
 
   tokenize = () => {
@@ -186,10 +181,8 @@ class Elements {
           data: any
         ) {
           if (data.error) {
-            console.log("Error while processing the form data");
             reject(data);
           } else {
-            console.log("Here is the tokenized Data: ", data);
             resolve(data);
           }
         });

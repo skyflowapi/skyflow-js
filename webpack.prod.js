@@ -15,6 +15,7 @@ module.exports = () => {
         chunks: "all",
       },
       runtimeChunk: false,
+      minimizer: [new UglifyJsPlugin()],
     },
     module: {
       rules: [],
@@ -24,7 +25,7 @@ module.exports = () => {
         verbose: true,
         dry: false,
       }),
-      new UglifyJsPlugin(),
+      // new UglifyJsPlugin(),
       new ManifestPlugin(),
       new webpack.DefinePlugin({
         "process.env": JSON.stringify(process.env),

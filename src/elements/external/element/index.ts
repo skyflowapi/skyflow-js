@@ -90,7 +90,7 @@ class Element {
     this.bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
   };
 
-  updateElement = (options) => {
+  update = (options) => {
     // todo: update on read-only etc
     options = deepClone(options);
 

@@ -1,5 +1,6 @@
 import { FRAME_CONTROLLER } from "./elements/constants";
 import { FrameController, FrameElement } from "./elements/internal";
+import "core-js/stable";
 
 if (typeof window.console === "undefined") {
   (<any>window).console = <any>{

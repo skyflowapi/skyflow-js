@@ -15,10 +15,6 @@
       }
       .empty {
       }
-      .focus {
-        /* color: #000; */
-        /* will take all the default values for this class */
-      }
       .invalid {
         color: #f44336;
       }
@@ -31,7 +27,7 @@
       }
 
       #form * {
-        width: 100px !important;
+        width: 150px !important;
         height: 20px !important;
       }
     </style>
@@ -43,6 +39,8 @@
     <form action="#" id="form">
       <label>First Name</label>
       <div id="first_name"></div>
+      <label>Email</label>
+      <div id="email"></div>
       <label>ssn</label>
       <div id="ssn"></div>
       <label>Date of Birth</label>
@@ -76,7 +74,6 @@
           base: ".base", // default
           complete: ".complete",
           empty: ".empty",
-          focus: ".focus",
           invalid: ".invalid",
         },
         styles: {
@@ -89,17 +86,26 @@
         // value: "",
         // disabled: false,
       };
-      skyflow = new Skyflow("", "", "");
+      skyflow = new Skyflow("bfa831cab06e11ea81abc6d2cc16794f");
       elements = skyflow.elements({});
       firstName = elements.create("firstName", {
         ...options,
         name: "first-name",
+        replacePattern: ["/[^a-zA-Z\\s]+/g", ""],
       });
       firstName.mount("#first_name");
+      email = elements.create("email", {
+        ...options,
+        name: "email",
+        validation: ["default"],
+      });
+      email.mount("#email");
       ssn = elements.create("ssn", {
         ...options,
         name: "ssn",
-        validation: ["required", "default"],
+        // validation: ["required", "default"],
+        placeholder: "XXX-XX-XXXX",
+        mask: ["XXX-XX-XXX", { X: "[0-9]" }],
       });
       ssn.mount("#ssn");
       dob = elements.create("dob", { ...options, name: "dob" });
@@ -146,15 +152,15 @@
         ...options,
         name: "password",
         sensitive: true,
-        validation: ["required"],
+        // validation: ["required"],
       });
       password.mount("#password");
 
-      number = elements.create("number", {
+      number = elements.create("text", {
         ...options,
         name: "number",
-        min: 10,
-        max: 100,
+        placeholder: "+91 (XXX) XXX-XX-XX--",
+        mask: ["+91 (XXX) XXX-XX-XX--", { X: "[0-9]" }],
       });
       number.mount("#number");
 
@@ -182,14 +188,17 @@
       //   pushElement(i);
       // }
 
-      document.getElementById("form").onsubmit = elements.onSubmit;
-
-      window.onload = () => {
-        console.log(
-          "loaded: ",
-          new Date(new Date().getTime() - startDate.getTime())
-        );
+      document.getElementById("form").onsubmit = (event) => {
+        event.preventDefault();
+        elements.tokenize();
       };
+
+      // window.onload = () => {
+      //   console.log(
+      //     "loaded: ",
+      //     new Date(new Date().getTime() - startDate.getTime())
+      //   );
+      // };
     </script>
   </body>
 </html>

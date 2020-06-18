@@ -8,14 +8,12 @@ class Skyflow {
   static version = properties.VERSION;
   uuid: string = uuid();
   constructor(
-    username: string,
-    password: string,
-    appId: string,
-    appSecret: string = ""
+    // username: string,
+    // password: string,
+    appId: string
+    // appSecret: string = ""
   ) {
-    this.client = new Client(username, password, appId, appSecret, {
-      uuid: this.uuid,
-    });
+    this.client = new Client(appId);
   }
 
   // elements({
@@ -31,6 +29,7 @@ class Skyflow {
     return new Elements(options, {
       uuid: this.uuid,
       clientDomain: location.origin,
+      clientJSON: this.client.toJSON(),
     });
   }
 }

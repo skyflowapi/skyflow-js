@@ -7,15 +7,17 @@ import {
   FRAME_CONTROLLER,
 } from "../../constants";
 import EventEmitter from "../../../event-emitter";
+import { mask, unMask } from "../../../libs/strings";
+import { regExFromString } from "../../../libs/regex";
 
 // create separate IFrameFormElement for each radio button and separate or SET_VALUE event b/w radio buttons.
 // while hitting tokenize it checks whether there are more than 2 ':' if so append each values in an array(for checkbox)
 export class IFrameForm {
   // single form to all form elements
-  iFrameFormElements: Record<string, IFrameFormElement> = {};
-  client?: Client;
-  clientMetaData?: string;
-  callbacks: Function[] = [];
+  private iFrameFormElements: Record<string, IFrameFormElement> = {};
+  private client?: Client;
+  private clientMetaData?: string;
+  private callbacks: Function[] = [];
   constructor() {
     bus
       .target(location.origin)
@@ -46,7 +48,14 @@ export class IFrameForm {
       });
 
     bus.on(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST, (data, callback) => {
-      callback(this.tokenize());
+      // todo: Do we need to reset the data!?
+      this.tokenize()
+        .then((data) => {
+          callback(data);
+        })
+        .catch((error) => {
+          callback(error);
+        });
     });
 
     bus.on(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME, (data, callback) => {
@@ -60,6 +69,10 @@ export class IFrameForm {
     });
   }
 
+  setClient(client) {
+    this.client = client;
+  }
+
   setClientMetadata(clientMetaData: any) {
     this.clientMetaData = clientMetaData;
     this.callbacks.forEach((func) => {
@@ -69,11 +82,12 @@ export class IFrameForm {
   }
 
   tokenize = () => {
+    if (!this.client) throw new Error("client connection not established");
     const responseObject: any = {};
     for (const iFrameFormElement in this.iFrameFormElements) {
       const state = this.iFrameFormElements[iFrameFormElement].state;
       if (!state.isValid || !state.isComplete) {
-        return { error: "Provide complete and valid inputs" };
+        return Promise.reject({ error: "Provide complete and valid inputs" });
       }
 
       if (
@@ -86,11 +100,38 @@ export class IFrameForm {
           responseObject[state.name] = [state.value];
         }
       } else {
-        responseObject[state.name] = state.value;
+        responseObject[state.name] = this.iFrameFormElements[
+          iFrameFormElement
+        ].getUnformattedValue();
       }
     }
 
-    return responseObject;
+    return this.client.deliverPayload(responseObject);
+
+    //     {Credit_score: "0608",…}
+    // Credit_score: "0608"
+    // Skyflow_vault_response: {responses: [{ID: "010100003d1d19f34f2b36ec84f5afd1",…}]}
+    // responses: [{ID: "010100003d1d19f34f2b36ec84f5afd1",…}]
+    // 0: {ID: "010100003d1d19f34f2b36ec84f5afd1",…}
+    // ID: "010100003d1d19f34f2b36ec84f5afd1"
+    // fields: [{ID: "0102000db5ae61e001c0bb83533f29b7", name: "social_security_number"},…]
+    // 0: {ID: "0102000db5ae61e001c0bb83533f29b7", name: "social_security_number"}
+    // 1: {ID: "0102000c4120875fabb0ba6759af9f06", name: "phone_number"}
+    // ID: "0102000c4120875fabb0ba6759af9f06"
+    // name: "phone_number"
+    // 2: {ID: "0102000b5489f81194b50e45133acb74", name: "permanent_address"}
+    // 3: {ID: "01020009c734031e035ae650ee47383c", name: "middle_name"}
+    // 4: {ID: "01020008c4aaef70c4b6cfcc3998e819", name: "level_of_study"}
+    // 5: {ID: "01020007060481d95b48d85fd107f56a", name: "last_name"}
+    // 6: {ID: "0102000602a7fe6080884a315fab94ba", name: "first_name"}
+    // 7: {ID: "01020005e6ec681ea502411df63b567c", name: "email_address"}
+    // ID: "01020005e6ec681ea502411df63b567c"
+    // name: "email_address"
+    // 8: {ID: "010200046ea92a4bdf48554de2148fec", name: "date_of_birth"}
+    // 9: {ID: "010200033a3ee8e25ba98fc3906df564", name: "address_zip_code"}
+    // 10: {ID: "010200023de8f3804d797648a574e60e", name: "address_street"}
+    // 11: {ID: "0102000196ea24eb58e0d39f399b77ba", name: "address_state"}
+    // 12: {ID: "01020000a6b9cd0ac847b03736302292", name: "address_city"}
   };
 
   static initializeFrame = (
@@ -151,7 +192,9 @@ export class IFrameFormElement extends EventEmitter {
   iFrameName: string;
   // iFrameSignificantName: string;
   metaData;
-  regex?: RegExp;
+  private regex?: RegExp;
+  private replacePattern?: [RegExp, string];
+  private mask?: any;
   constructor(frameSignificantName: string, frameGlobalName: string, metaData) {
     // todo: create each class for each fieldType and assign to a local variable variable
     super();
@@ -191,12 +234,50 @@ export class IFrameFormElement extends EventEmitter {
     this.state.isFocused = focus;
 
     this.sendChangeStatus();
+
+    if (this.mask) {
+      this.setValue(this.state.value, true);
+    }
   };
+
+  setReplacePattern(pattern: string[]) {
+    if (!pattern) return;
+    this.replacePattern = [regExFromString(pattern[0]), pattern[1] || ""];
+  }
+
+  setMask(mask: string[]) {
+    // todo apply mask only for req types
+    if (!mask) {
+      return;
+    }
+    const newMask: any[] = [];
+    newMask[0] = mask[0];
+    newMask[1] = null; //todo: replacer options
+    newMask[2] = mask[1];
+    if (newMask[2]) {
+      Object.keys(newMask[2]).forEach((key) => {
+        newMask[2][key] = new RegExp(newMask[2][key]);
+      });
+    } else {
+      newMask[2]["9"] = /[0-9]/;
+      newMask[2]["a"] = /[a-zA-Z]/;
+      newMask[2]["*"] = /[a-zA-Z0-9]/;
+    }
+
+    this.mask = newMask;
+  }
 
   setValidation(validations: string[] | undefined) {
     if (validations) {
       if (validations.includes("default"))
         this.regex = ELEMENTS[this.fieldType].regex;
+      else {
+        validations.forEach((value) => {
+          if (value !== "default" && value !== "required") {
+            this.regex = regExFromString(value);
+          }
+        });
+      }
     }
   }
 
@@ -209,11 +290,21 @@ export class IFrameFormElement extends EventEmitter {
   }
 
   // todo: send error message of the field
-  setValue = (value: string | undefined, valid: boolean = true) => {
+  setValue = (value: string = "", valid: boolean = true) => {
     // todo: validate by the type of class
-    if (!value) value = "";
+    // if (!value) value = "";
+
+    // todo: mask only for req fields
+    if (this.mask) {
+      value = mask(value, this.state.value, this.mask, this.state.isFocused);
+
+      valid = valid && this.mask[0].length === value.length;
+    } else if (this.replacePattern) {
+      value = value.replace(this.replacePattern[0], this.replacePattern[1]);
+    }
 
     if (this.fieldType === ELEMENTS.checkbox.name) {
+      // toggle for checkbox
       if (this.state.value === value) {
         this.state.value = "";
       } else {
@@ -232,9 +323,9 @@ export class IFrameFormElement extends EventEmitter {
         .join("/");
     }
 
-    if (this.state.value && this.state.isEmpty) {
+    if (this.getUnformattedValue() && this.state.isEmpty) {
       this.state.isEmpty = false;
-    } else if (!this.state.value && !this.state.isEmpty) {
+    } else if (!this.getUnformattedValue() && !this.state.isEmpty) {
       this.state.isEmpty = true;
     }
 
@@ -258,6 +349,12 @@ export class IFrameFormElement extends EventEmitter {
       return this.state.value.split("/").reverse().join("-");
     }
     return this.state.value;
+  };
+
+  getUnformattedValue = () => {
+    // todo for redact
+    if (!this.mask) return this.state.value;
+    return unMask(this.state.value, this.mask);
   };
 
   getStatus = () => {

@@ -19,31 +19,35 @@
   },
   "dependencies": {
     "framebus": "^4.0.0",
-    "inject-stylesheet": "^2.0.0"
+    "inject-stylesheet": "^2.0.0",
+    "core-js": "^3.6.5"
   },
   "engines": {
     "node": ">=12.0",
     "npm": ">=6.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.6",
-    "@babel/preset-env": "^7.9.6",
     "@types/node": "^14.0.5",
-    "typescript": "^3.9.3",
+    "@babel/core": "^7.9.6",
     "@babel/plugin-proposal-class-properties": "^7.10.1",
+    "@babel/plugin-proposal-decorators": "^7.10.1",
     "@babel/plugin-proposal-object-rest-spread": "^7.10.1",
+    "@babel/plugin-transform-runtime": "^7.10.1",
+    "@babel/preset-env": "^7.9.6",
     "@babel/preset-typescript": "^7.10.1",
+    "@babel/runtime": "^7.10.2",
     "babel-loader": "^8.1.0",
-    "fork-ts-checker-webpack-plugin": "^4.1.6",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11",
-    "webpack-bundle-analyzer": "^3.8.0",
-    "webpack-dev-server": "^3.11.0",
-    "webpack-merge": "^4.2.2",
-    "html-webpack-plugin": "^4.3.0",
     "clean-webpack-plugin": "^3.0.0",
-    "uglifyjs-webpack-plugin": "^2.2.0",
     "compression-webpack-plugin": "^4.0.0",
-    "webpack-manifest-plugin": "^2.2.0"
+    "fork-ts-checker-webpack-plugin": "^4.1.6",
+    "html-webpack-plugin": "^4.3.0",
+    "typescript": "^3.9.3",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.43.0",
+    "webpack-bundle-analyzer": "^3.8.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.0",
+    "webpack-manifest-plugin": "^2.2.0",
+    "webpack-merge": "^4.2.2"
   }
 }
