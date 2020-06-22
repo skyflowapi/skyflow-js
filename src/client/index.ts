@@ -43,7 +43,6 @@ class Client {
     return new Promise((resolve, reject) => {
       const httpRequest = new XMLHttpRequest();
       if (!httpRequest) {
-        throw new Error("Error while initializing the connection");
         reject("Error while initializing the connection");
       }
 
@@ -58,13 +57,13 @@ class Client {
 
       httpRequest.onload = () => {
         if (httpRequest.status < 200 || httpRequest.status >= 400)
-          throw new Error("Error on response: " + httpRequest.response);
+          reject(httpRequest.response);
 
         resolve(httpRequest.response);
       };
 
-      httpRequest.onerror = () => {
-        throw new Error("Unable to trigger any http request");
+      httpRequest.onerror = (error) => {
+        reject(new Error("An error occurred during transaction"));
       };
     });
   }

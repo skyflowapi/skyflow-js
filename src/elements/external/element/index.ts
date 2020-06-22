@@ -47,8 +47,7 @@ class Element {
     this.name = options.name;
     this.elementType = elementType;
 
-    // todo: styles for hidden and disabled/readonly
-    this.iframe = iframer({ name: this.name }); // todo: need to deep clone the object where  ever needed
+    this.iframe = iframer({ name: this.name });
 
     this.registerIFrameBusListener();
 
@@ -72,9 +71,7 @@ class Element {
         this.state.container = document.querySelector(domElement);
       else this.state.container = domElement;
     } catch (e) {
-      throw new Error(
-        "Provide a valid dom element selector or provided element not found"
-      ); //todo: need to validate in constructor
+      throw new Error("Provided element selector is not valid or not found");
     }
 
     setAttributes(this.iframe, { src: getIframeSrc(this.metaData.uuid) });
@@ -91,7 +88,6 @@ class Element {
   };
 
   update = (options) => {
-    // todo: update on read-only etc
     options = deepClone(options);
 
     options = { ...this.options, ...options };
@@ -113,13 +109,6 @@ class Element {
     });
   };
 
-  // setValue = (value) => {
-  //   this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
-  //     name: this.name,
-  //     value,
-  //   });
-  // };
-
   getState = () => {
     return {
       isEmpty: this.state.isEmpty,
@@ -139,7 +128,7 @@ class Element {
   };
 
   // listening to element events and error messages on iframe
-  // on destroy remove events todo: off methods
+  // todo: off methods
   on(eventName: string, handler) {
     if (Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       this.eventEmitter.on(eventName, (data) => {
@@ -199,16 +188,6 @@ class Element {
     this.eventEmitter.resetEvents();
   };
 
-  // todo
-  // clear = () => {
-  //   bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
-  //     name: this.name,
-  //     event: ELEMENT_EVENTS_TO_CLIENT.,
-  //   });
-  // };
-
-  // todo: need to find the use-case
-
   private registerIFrameBusListener() {
     this.bus.on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, (data: any) => {
       if (data.name === this.name) {
@@ -229,15 +208,15 @@ class Element {
             this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
             break;
           // todo: need to implement the below events
-          case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
-            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
-            break;
-          case ELEMENT_EVENTS_TO_CLIENT.CLICK:
-            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CLICK);
-            break;
-          case ELEMENT_EVENTS_TO_CLIENT.ERROR:
-            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ERROR);
-            break;
+          // case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
+          //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
+          //   break;
+          // case ELEMENT_EVENTS_TO_CLIENT.CLICK:
+          //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CLICK);
+          //   break;
+          // case ELEMENT_EVENTS_TO_CLIENT.ERROR:
+          //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ERROR);
+          //   break;
 
           default:
             throw new Error("Provide a valid event type");

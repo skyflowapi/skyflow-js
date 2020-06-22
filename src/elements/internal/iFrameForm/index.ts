@@ -107,31 +107,6 @@ export class IFrameForm {
     }
 
     return this.client.deliverPayload(responseObject);
-
-    //     {Credit_score: "0608",…}
-    // Credit_score: "0608"
-    // Skyflow_vault_response: {responses: [{ID: "010100003d1d19f34f2b36ec84f5afd1",…}]}
-    // responses: [{ID: "010100003d1d19f34f2b36ec84f5afd1",…}]
-    // 0: {ID: "010100003d1d19f34f2b36ec84f5afd1",…}
-    // ID: "010100003d1d19f34f2b36ec84f5afd1"
-    // fields: [{ID: "0102000db5ae61e001c0bb83533f29b7", name: "social_security_number"},…]
-    // 0: {ID: "0102000db5ae61e001c0bb83533f29b7", name: "social_security_number"}
-    // 1: {ID: "0102000c4120875fabb0ba6759af9f06", name: "phone_number"}
-    // ID: "0102000c4120875fabb0ba6759af9f06"
-    // name: "phone_number"
-    // 2: {ID: "0102000b5489f81194b50e45133acb74", name: "permanent_address"}
-    // 3: {ID: "01020009c734031e035ae650ee47383c", name: "middle_name"}
-    // 4: {ID: "01020008c4aaef70c4b6cfcc3998e819", name: "level_of_study"}
-    // 5: {ID: "01020007060481d95b48d85fd107f56a", name: "last_name"}
-    // 6: {ID: "0102000602a7fe6080884a315fab94ba", name: "first_name"}
-    // 7: {ID: "01020005e6ec681ea502411df63b567c", name: "email_address"}
-    // ID: "01020005e6ec681ea502411df63b567c"
-    // name: "email_address"
-    // 8: {ID: "010200046ea92a4bdf48554de2148fec", name: "date_of_birth"}
-    // 9: {ID: "010200033a3ee8e25ba98fc3906df564", name: "address_zip_code"}
-    // 10: {ID: "010200023de8f3804d797648a574e60e", name: "address_street"}
-    // 11: {ID: "0102000196ea24eb58e0d39f399b77ba", name: "address_state"}
-    // 12: {ID: "01020000a6b9cd0ac847b03736302292", name: "address_city"}
   };
 
   static initializeFrame = (
@@ -154,7 +129,6 @@ export class IFrameForm {
         }
       } catch (e) {
         /* ignored */
-        console.log("error");
       }
     }
 
@@ -180,10 +154,9 @@ export class IFrameFormElement extends EventEmitter {
   state = {
     value: <undefined | string>undefined,
     isFocused: false,
-    isValid: false, // todo: is fix needed?
+    isValid: false,
     isEmpty: true,
     isComplete: false,
-    // isPotentiallyValid: false, todo: check whether this is useful or not
     name: "",
   };
   readonly fieldType: string;
@@ -196,7 +169,6 @@ export class IFrameFormElement extends EventEmitter {
   private replacePattern?: [RegExp, string];
   private mask?: any;
   constructor(frameSignificantName: string, frameGlobalName: string, metaData) {
-    // todo: create each class for each fieldType and assign to a local variable variable
     super();
     const frameValues = frameSignificantName.split(":");
     const fieldType = frameValues[0];
@@ -214,8 +186,6 @@ export class IFrameFormElement extends EventEmitter {
     this.state.name = fieldName;
 
     this.metaData = metaData;
-
-    // todo: need to create single radio button and checkbox form element
 
     this.collectBusEvents();
   }
@@ -246,7 +216,6 @@ export class IFrameFormElement extends EventEmitter {
   }
 
   setMask(mask: string[]) {
-    // todo apply mask only for req types
     if (!mask) {
       return;
     }
@@ -285,16 +254,12 @@ export class IFrameFormElement extends EventEmitter {
     if (this.sensitive === false && sensitive === true) {
       this.sensitive = sensitive;
     } else if (this.sensitive === true && sensitive === false) {
-      throw Error("Sensitivity is backward compatible");
+      throw Error("Sensitivity is not backward compatible");
     }
   }
 
   // todo: send error message of the field
   setValue = (value: string = "", valid: boolean = true) => {
-    // todo: validate by the type of class
-    // if (!value) value = "";
-
-    // todo: mask only for req fields
     if (this.mask) {
       value = mask(value, this.state.value, this.mask, this.state.isFocused);
 
@@ -352,7 +317,6 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   getUnformattedValue = () => {
-    // todo for redact
     if (!this.mask) return this.state.value;
     return unMask(this.state.value, this.mask);
   };
@@ -389,7 +353,6 @@ export class IFrameFormElement extends EventEmitter {
               this.changeFocus(false);
               this._emit(ELEMENT_EVENTS_TO_CLIENT.BLUR);
             }
-            // todo: listen to remaining events
           } else {
             // empty
           }
@@ -433,16 +396,13 @@ export class IFrameFormElement extends EventEmitter {
     }
   };
 
-  // todo: add setMethods to state object and emit this event in that methods
   sendChangeStatus = (inputEvent: boolean = false) => {
-    // todo: need to emit it on any state change
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: this.iFrameName,
       event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
       value: this.getStatus(),
     });
 
-    // todo: check the security issues
     this._emit(ELEMENT_EVENTS_TO_CLIENT.CHANGE, {
       ...this.getStatus(),
       value: this.state.value,

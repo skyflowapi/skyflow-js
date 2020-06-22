@@ -25,6 +25,14 @@ export function validateElementOptions(
 
   newOptions = { ...oldOptions, ...newOptions };
 
+  if (newOptions.mask || newOptions.replacePattern) {
+    const type = ELEMENTS[elementType].attributes.type;
+    if (type !== "text" || type !== "textarea" || type !== "email") {
+      delete newOptions.mask;
+      delete newOptions.replacePattern;
+    }
+  }
+
   if (!newOptions.mask === undefined && !Array.isArray(newOptions.mask)) {
     throw new Error("mask option has to be array or undefined");
   }

@@ -191,15 +191,6 @@ export const ELEMENTS = {
   },
 };
 
-export const INPUT_DEFAULT_STYLES = {
-  height: "100%",
-  width: "100%",
-  margin: 0,
-  padding: 0,
-  border: 0,
-  position: "relative",
-};
-
 export const IFRAME_DEFAULT_STYLES = {
   height: "100%",
   width: "100%",
@@ -209,6 +200,7 @@ export const IFRAME_DEFAULT_STYLES = {
   position: "absolute",
   top: 0,
   left: 0,
+  "user-select": "none",
 };
 
 export const CONTROLLER_STYLES = {
@@ -218,6 +210,7 @@ export const CONTROLLER_STYLES = {
   height: 0,
   visibility: "hidden",
   left: "-99999999px",
+  "user-select": "none",
 };
 
 export const ALLOWED_ATTRIBUTES = {
@@ -237,6 +230,7 @@ export const ALLOWED_STYLES = [
   "-webkit-tap-highlight-color",
   "-webkit-transition",
   "appearance",
+  "background-color",
   "color",
   "direction",
   "font",
@@ -258,7 +252,9 @@ export const ALLOWED_STYLES = [
   "opacity",
   "outline",
   "padding",
+  "text-decoration",
   "text-shadow",
+  "text-transform",
   "transition",
 ];
 
@@ -267,6 +263,7 @@ export const ALLOWED_PSEUDO_STYLES = [
   ":focus",
   "::placeholder",
   "::selection",
+  ":disabled",
   ":-webkit-autofill",
 ];
 

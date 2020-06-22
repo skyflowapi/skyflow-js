@@ -3,10 +3,7 @@ import {
   ELEMENTS,
   FRAME_CONTROLLER,
   ELEMENT_EVENTS_TO_IFRAME,
-  INPUT_DEFAULT_STYLES,
   CONTROLLER_STYLES,
-  IFRAME_DEFAULT_STYLES,
-  STYLE_TYPE,
 } from "../constants";
 import iframer, {
   setAttributes,
@@ -35,7 +32,6 @@ class Elements {
     } = {},
     metaData
   ) {
-    // todo: scan for any iframe
     if (!metaData.uuid) {
       throw new Error("SSN not provided");
       return;
@@ -91,8 +87,14 @@ class Elements {
   // })
   create = (elementType: string, options: any = {}) => {
     options = deepClone(options);
+    if (this.elements[options.name]) {
+      // todo: update if already exits?
+      throw new Error("This element already existed: " + options.name);
+      return this.elements[options.name];
+    }
     options.sensitive = options.sensitive || ELEMENTS[elementType].sensitive;
-    options.replacePattern = options.replacePattern || ELEMENTS[elementType].replacePattern;
+    options.replacePattern =
+      options.replacePattern || ELEMENTS[elementType].replacePattern;
     options.mask = options.mask || ELEMENTS[elementType].mask;
     validateElementOptions(elementType, options);
 
@@ -115,12 +117,6 @@ class Elements {
       options.name = `${options.name}:${options.value}`;
     }
 
-    if (this.elements[options.name]) {
-      // todo: update if already exits?
-      throw new Error("This element already existed: " + options.name);
-      return this.elements[options.name];
-    }
-
     const element = new Element(elementType, options, this.metaData);
     this.elements[options.name] = element;
 
@@ -130,6 +126,24 @@ class Elements {
 
     return element;
   };
+
+  // { // display flex by default(not changeable)
+  //   justifyContent: "", //default flex-start
+  //   alignItems: "", //default stretch
+  //   rows: [
+  //     { // row 1, display flex by default(not changeable)
+  //       justifyContent: "", //default flex-start
+  //       alignItems: "",  //default stretch
+  //       spacing: "",// default 0px
+  //       elements: [{element1}, {element2}]
+  //     },
+  //     { /* row2 */ }
+  //   ]
+  // }
+  // the spacing can be adjusted using the flex styling and the element padding(from element styles)
+  createBulk = (multipleElements: any) => {
+
+  }
 
   // todo: need to send single element
   getElement = (

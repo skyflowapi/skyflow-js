@@ -78,9 +78,23 @@ export function buildStylesFromClassesAndStyles(classes, styles) {
           break;
         default:
           styles[classType] = {
+            ...styles[STYLE_TYPE.BASE],
             ...getStylesFromClass(classes[classType]),
             ...styles[classType],
           };
       }
+  });
+
+  Object.keys(styles).forEach((styleType) => {
+    const autofillStyles = styles[styleType][":-webkit-autofill"];
+    if (typeof autofillStyles === "object") {
+      Object.keys(autofillStyles).forEach((styleKey) => {
+        if (
+          autofillStyles[styleKey] &&
+          !autofillStyles[styleKey].includes("!important")
+        )
+          autofillStyles[styleKey] = autofillStyles[styleKey] + " !important";
+      });
+    }
   });
 }

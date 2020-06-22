@@ -1,7 +1,6 @@
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENT_EVENTS_TO_CLIENT,
-  INPUT_DEFAULT_STYLES,
   ELEMENTS,
   ALLOWED_STYLES,
   STYLE_TYPE,
@@ -33,13 +32,9 @@ export class FrameController {
         delete clientMetaData.clientJSON;
       }
     );
-
-    // bus.emit(ELEMENT_EVENTS_TO_IFRAME.READY_FOR_CLIENT, {}, (clientJSON) => {
-    //   this.iFrameForm.setClient(Client.fromJSON(clientJSON));
-    // });
   }
   static init(uuid: string) {
-    // todo: on 2nd init need to reset all the forms and its elements(more like reset)?
+    if (this.controller) return this.controller;
     this.controller = new FrameController();
   }
 }
@@ -49,8 +44,9 @@ export class FrameElement {
   static frameElement?: FrameElement; // factory class
   static options?: any;
   private iFrameFormElement: IFrameFormElement;
+  // private inputCursorLocation: number | null = 0;
   domForm?: HTMLFormElement;
-  domFormInput?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement; // todo: multiple inputs , need to write FrameElement(s) or similar
+  domFormInput?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
   // called on iframe loaded im html file
   static start = () => {
@@ -60,7 +56,6 @@ export class FrameElement {
       (options) => {
         FrameElement.options = options;
         if (FrameElement.frameElement) {
-          // todo: call update
           FrameElement.frameElement.mount();
         }
       }
@@ -101,7 +96,7 @@ export class FrameElement {
 
     this.domFormInput = inputElement;
 
-    // events and todo: onclick ...???
+    // events and todo: onclick, onescape ...???
     inputElement.onfocus = (event) => {
       this.onFocusChange(event, true);
     };
@@ -131,10 +126,7 @@ export class FrameElement {
         this.iFrameFormElement.fieldType !== ELEMENTS.radio.name &&
         this.iFrameFormElement.fieldType !== ELEMENTS.checkbox.name
       ) {
-        if (
-          FrameElement.options.mask ||
-          FrameElement.options.replacePattern
-        ) {
+        if (FrameElement.options.mask || FrameElement.options.replacePattern) {
           this.setValue(state.value);
         }
       }
@@ -148,10 +140,6 @@ export class FrameElement {
 
     // this.setupInputField();
     this.updateOptions(FrameElement.options);
-
-    setStyles(form, INPUT_DEFAULT_STYLES);
-    setStyles(inputElement, INPUT_DEFAULT_STYLES);
-    setStyles(document.body, INPUT_DEFAULT_STYLES);
 
     form.append(inputElement);
     document.body.append(form);
@@ -173,19 +161,16 @@ export class FrameElement {
       max: FrameElement.options.max,
       maxLength: FrameElement.options.maxLength,
       minLength: FrameElement.options.minLength,
+      autocomplete: FrameElement.options.autocomplete,
       ...(FrameElement.options.validation?.includes("required") && {
         required: "",
       }),
     };
 
-    // todo: what about 'select' multiple fields selection?
     if (
       this.domFormInput &&
       this.iFrameFormElement?.fieldType === ELEMENTS.dropdown.name
     ) {
-      // <select id="pet-select" value="" name="name">
-      //   <option value="goldfish">Goldfish</option>
-      // </select>
       this.domFormInput.innerHTML = "";
       FrameElement.options.options.forEach((option) => {
         const optionElement = document.createElement("option");
@@ -199,7 +184,7 @@ export class FrameElement {
 
     let newInputValue = this.iFrameFormElement.getValue();
 
-    // todo: validity on default value, HTML don't support validity on radio
+    // HTML don't support validity on radio
     if (this.iFrameFormElement?.getValue() === undefined) {
       if (
         this.iFrameFormElement?.fieldType === ELEMENTS.checkbox.name ||
@@ -243,6 +228,15 @@ export class FrameElement {
   setValue = (value) => {
     if (this.domFormInput) {
       this.domFormInput.value = value;
+      // if (this.inputCursorLocation) {
+      //   console.log(this.inputCursorLocation);
+      //   (<HTMLInputElement>(
+      //     this.domFormInput
+      //   )).selectionEnd = this.inputCursorLocation;
+      //   (<HTMLInputElement>(
+      //     this.domFormInput
+      //   )).selectionStart = this.inputCursorLocation;
+      // }
     }
     // todo: replace the cursor to its prev place on masking
     // var target = e.target,
@@ -256,17 +250,19 @@ export class FrameElement {
   // events from HTML
   onFocusChange = (event: FocusEvent, focus: boolean) => {
     // emit event to iFrameFormElement
-    // todo: change css of input on focus, blur
     this.iFrameFormElement?.onFocusChange(focus);
   };
 
   onInputChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
+    // console.log(target.value, target.selectionStart, target.selectionEnd);
+    // this.inputCursorLocation = (<HTMLInputElement>(
+    //   this.domFormInput
+    // )).selectionStart;
     this.iFrameFormElement?.setValue(target.value, target.checkValidity());
   };
 
   focusChange = (focus: boolean) => {
-    // todo: change css of input on focus, blur
     if (focus) this.domFormInput?.focus();
     else this.domFormInput?.blur();
   };
@@ -276,7 +272,6 @@ export class FrameElement {
   injectInputStyles() {
     const styles = FrameElement.options.styles;
 
-    // todo: inject default styles in html files
     const stylesByClassName = {};
     Object.values(STYLE_TYPE).forEach((classType) => {
       if (styles[classType] && Object.keys(styles).length !== 0) {
@@ -346,12 +341,10 @@ export class FrameElement {
     }
 
     this.iFrameFormElement.setValidation(FrameElement.options.validation);
-    // todo: set replacePattern
     this.iFrameFormElement.setReplacePattern(
       FrameElement.options.replacePattern
     );
     this.iFrameFormElement.setMask(FrameElement.options.mask);
-    // todo: set mask
 
     this.setupInputField(
       options.hasOwnProperty("value") &&
