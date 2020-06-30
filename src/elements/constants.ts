@@ -213,6 +213,15 @@ export const CONTROLLER_STYLES = {
   "user-select": "none",
 };
 
+export const INPUT_STYLES = {
+  width: "100%",
+  height: "100%",
+  border: "0",
+  padding: "0",
+  margin: "0",
+  outline: "none",
+};
+
 export const ALLOWED_ATTRIBUTES = {
   "aria-invalid": "boolean",
   "aria-required": "boolean",
@@ -231,6 +240,8 @@ export const ALLOWED_STYLES = [
   "-webkit-transition",
   "appearance",
   "background-color",
+  "border",
+  "border-radius",
   "color",
   "direction",
   "font",
@@ -246,6 +257,7 @@ export const ALLOWED_STYLES = [
   "font-variant-ligatures",
   "font-variant-numeric",
   "font-weight",
+  "height",
   "letter-spacing",
   "line-height",
   "margin",
@@ -256,6 +268,7 @@ export const ALLOWED_STYLES = [
   "text-shadow",
   "text-transform",
   "transition",
+  "width",
 ];
 
 export const ALLOWED_PSEUDO_STYLES = [
@@ -265,6 +278,18 @@ export const ALLOWED_PSEUDO_STYLES = [
   "::selection",
   ":disabled",
   ":-webkit-autofill",
+];
+
+export const ALLOWED_MULTIPLE_FIELDS_STYLES = [
+  "height",
+  "width",
+  "padding",
+  "margin",
+  "position",
+  "display",
+  "flex-direction",
+  "align-items",
+  "justify-content",
 ];
 
 // should be in the order of applying the styles

@@ -137,3 +137,7 @@ export const replaceAt = function (
 ) {
   return (str = str.substring(0, index) + replacer + str.substring(index + 1));
 };
+
+export const escapeStrings = (str = "") => {
+  return JSON.stringify(str).slice(1, -1);
+};

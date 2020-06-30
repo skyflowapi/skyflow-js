@@ -16,7 +16,7 @@ export class IFrameForm {
   // single form to all form elements
   private iFrameFormElements: Record<string, IFrameFormElement> = {};
   private client?: Client;
-  private clientMetaData?: string;
+  private clientMetaData?: any;
   private callbacks: Function[] = [];
   constructor() {
     bus
@@ -30,20 +30,10 @@ export class IFrameForm {
         }
         const frameGlobalName: string = <string>data.name;
         if (this.clientMetaData)
-          IFrameForm.initializeFrame(
-            window.parent,
-            frameGlobalName,
-            this.iFrameFormElements,
-            this.clientMetaData
-          );
+          this.initializeFrame(window.parent, frameGlobalName);
         else
           this.callbacks.push(() => {
-            IFrameForm.initializeFrame(
-              window.parent,
-              frameGlobalName,
-              this.iFrameFormElements,
-              this.clientMetaData
-            );
+            this.initializeFrame(window.parent, frameGlobalName);
           });
       });
 
@@ -81,6 +71,15 @@ export class IFrameForm {
     this.callbacks = [];
   }
 
+  private getOrCreateIFrameFormElement = (frameName) => {
+    this.iFrameFormElements[frameName] =
+      this.iFrameFormElements[frameName] ||
+      new IFrameFormElement(frameName, {
+        ...this.clientMetaData,
+      });
+    return this.iFrameFormElements[frameName];
+  };
+
   tokenize = () => {
     if (!this.client) throw new Error("client connection not established");
     const responseObject: any = {};
@@ -109,12 +108,7 @@ export class IFrameForm {
     return this.client.deliverPayload(responseObject);
   };
 
-  static initializeFrame = (
-    root: Window,
-    frameGlobalName: string,
-    iFrameFormElements: Record<string, IFrameFormElement>,
-    metaData
-  ) => {
+  private initializeFrame = (root: Window, frameGlobalName: string) => {
     let frameInstance: any = undefined;
     for (let i = 0; i < root.frames.length; i++) {
       const frame: any = root.frames[i];
@@ -135,16 +129,7 @@ export class IFrameForm {
     if (!frameInstance) {
       throw new Error("frame not found: " + frameGlobalName);
     } else {
-      // const frameValues = frameGlobalName.split(":");
-      // frameValues.splice(2);
-      // const key = frameValues.join(":");
-      iFrameFormElements[frameGlobalName] =
-        iFrameFormElements[frameGlobalName] ||
-        new IFrameFormElement(frameGlobalName, frameGlobalName, {
-          ...metaData,
-        });
-
-      frameInstance.Skyflow.init(iFrameFormElements[frameGlobalName]);
+      frameInstance.Skyflow.init(this.getOrCreateIFrameFormElement);
     }
   };
 }
@@ -163,21 +148,20 @@ export class IFrameFormElement extends EventEmitter {
   private sensitive: boolean;
   fieldName: string;
   iFrameName: string;
-  // iFrameSignificantName: string;
   metaData;
   private regex?: RegExp;
   private replacePattern?: [RegExp, string];
   private mask?: any;
-  constructor(frameSignificantName: string, frameGlobalName: string, metaData) {
+  constructor(name: string, metaData) {
     super();
-    const frameValues = frameSignificantName.split(":");
+    const frameValues = name.split(":");
     const fieldType = frameValues[0];
     const fieldName = isNaN(parseInt(frameValues[1])) // set frame name as frame type of the string besides : is number
       ? frameValues[1]
       : frameValues[0];
 
     // this.iFrameSignificantName = frameSignificantName;
-    this.iFrameName = frameGlobalName;
+    this.iFrameName = name;
     this.fieldType = fieldType;
     this.fieldName = fieldName;
 

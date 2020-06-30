@@ -6,6 +6,7 @@ import {
   STYLE_TYPE,
   ALLOWED_PSEUDO_STYLES,
   FRAME_CONTROLLER,
+  INPUT_STYLES,
 } from "../constants";
 import bus from "framebus";
 import injectStylesheet from "inject-stylesheet";
@@ -15,6 +16,7 @@ import { setAttributes, setStyles } from "../../iframe-libs/iframer";
 import { splitStyles } from "../../libs/styles";
 import Element from "../external/element";
 import { validateElementOptions } from "../../libs/element-options";
+import { escapeStrings } from "../../libs/strings";
 
 export class FrameController {
   static controller?: FrameController;
@@ -41,60 +43,40 @@ export class FrameController {
 
 export class FrameElement {
   // all html events like focus blur events will be handled here
-  static frameElement?: FrameElement; // factory class
-  static options?: any;
+  options: any;
+  private htmlDivElement: HTMLDivElement;
   private iFrameFormElement: IFrameFormElement;
-  // private inputCursorLocation: number | null = 0;
-  domForm?: HTMLFormElement;
-  domFormInput?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+  private domLabel?: HTMLLabelElement;
+  private domInput?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
-  // called on iframe loaded im html file
-  static start = () => {
-    bus.emit(
-      ELEMENT_EVENTS_TO_IFRAME.FRAME_READY,
-      { name: window.name },
-      (options) => {
-        FrameElement.options = options;
-        if (FrameElement.frameElement) {
-          FrameElement.frameElement.mount();
-        }
-      }
-    );
-  };
-
-  // called by IFrameForm
-  static init = (iFrameFormElement: IFrameFormElement) => {
-    FrameElement.frameElement = new FrameElement(iFrameFormElement);
-  };
-
-  constructor(iFrameFormElement: IFrameFormElement) {
+  constructor(
+    iFrameFormElement: IFrameFormElement,
+    options: any,
+    htmlDivElement: HTMLDivElement
+  ) {
     this.iFrameFormElement = iFrameFormElement;
+    this.options = options;
+    this.htmlDivElement = htmlDivElement;
 
-    if (FrameElement.options) {
-      this.mount();
-    }
+    this.mount();
   }
 
   // mount element onto dom
   mount = () => {
-    // this.injectInputStyles();
-    this.iFrameFormElement?.resetEvents();
-    const form = document.createElement("form");
-    this.domForm = form;
-    form.action = "#";
-    form.onsubmit = (event) => {
-      event.preventDefault();
-    };
+    this.iFrameFormElement.resetEvents();
+    this.domLabel = document.createElement("label");
+    this.domLabel.htmlFor = this.iFrameFormElement.iFrameName;
+    this.domLabel.innerText = escapeStrings(this.options.label);
 
     const inputElement = document.createElement(
-      this.iFrameFormElement?.fieldType === ELEMENTS.dropdown.name
+      this.iFrameFormElement.fieldType === ELEMENTS.dropdown.name
         ? "select"
         : this.iFrameFormElement?.fieldType === ELEMENTS.textarea.name
         ? "textarea"
         : "input"
     );
 
-    this.domFormInput = inputElement;
+    this.domInput = inputElement;
 
     // events and todo: onclick, onescape ...???
     inputElement.onfocus = (event) => {
@@ -109,178 +91,168 @@ export class FrameElement {
 
     // events from client or on pressing tab, label etc
     // this.iFrameFormElement?.on()
-    this.iFrameFormElement?.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, () => {
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, () => {
       this.focusChange(true);
     });
-    this.iFrameFormElement?.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, () => {
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, () => {
       this.focusChange(false);
     });
-    this.iFrameFormElement?.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
       if (
         state.value &&
-        this.iFrameFormElement?.fieldType === ELEMENTS.radio.name
+        this.iFrameFormElement.fieldType === ELEMENTS.radio.name
       ) {
-        (<HTMLInputElement>this.domFormInput).checked =
-          FrameElement.options.value === state.value;
+        (<HTMLInputElement>this.domInput).checked =
+          this.options.value === state.value;
       } else if (
         this.iFrameFormElement.fieldType !== ELEMENTS.radio.name &&
         this.iFrameFormElement.fieldType !== ELEMENTS.checkbox.name
       ) {
-        if (FrameElement.options.mask || FrameElement.options.replacePattern) {
+        if (this.options.mask || this.options.replacePattern) {
           this.setValue(state.value);
         }
       }
-      this.updateInputStyleClass(state);
+      this.updateStyleClasses(state);
     });
-    this.iFrameFormElement?.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
       if (data.options) {
         this.updateOptions(data.options);
       }
     });
 
     // this.setupInputField();
-    this.updateOptions(FrameElement.options);
+    this.updateOptions(this.options);
 
-    form.append(inputElement);
-    document.body.append(form);
+    this.htmlDivElement.append(this.domLabel, inputElement);
 
-    this.iFrameFormElement &&
-      this.updateInputStyleClass(this.iFrameFormElement?.getStatus());
+    this.updateStyleClasses(this.iFrameFormElement.getStatus());
   };
 
   setupInputField(newValue: boolean = false) {
     // todo: attr for textarea
     const attr = {
-      ...ELEMENTS[this.iFrameFormElement?.fieldType || ""].attributes,
-      name: this.iFrameFormElement?.fieldName,
-      id: this.iFrameFormElement?.iFrameName,
-      disabled: FrameElement.options.disabled,
-      placeholder: FrameElement.options.placeholder,
-      readonly: FrameElement.options.readonly,
-      min: FrameElement.options.min,
-      max: FrameElement.options.max,
-      maxLength: FrameElement.options.maxLength,
-      minLength: FrameElement.options.minLength,
-      autocomplete: FrameElement.options.autocomplete,
-      ...(FrameElement.options.validation?.includes("required") && {
+      ...ELEMENTS[this.iFrameFormElement.fieldType || ""].attributes,
+      name: this.iFrameFormElement.fieldName,
+      id: this.iFrameFormElement.iFrameName,
+      disabled: this.options.disabled,
+      placeholder: this.options.placeholder,
+      readonly: this.options.readonly,
+      min: this.options.min,
+      max: this.options.max,
+      maxLength: this.options.maxLength,
+      minLength: this.options.minLength,
+      autocomplete: this.options.autocomplete,
+      ...(this.options.validation?.includes("required") && {
         required: "",
       }),
     };
 
     if (
-      this.domFormInput &&
-      this.iFrameFormElement?.fieldType === ELEMENTS.dropdown.name
+      this.domInput &&
+      this.iFrameFormElement.fieldType === ELEMENTS.dropdown.name
     ) {
-      this.domFormInput.innerHTML = "";
-      FrameElement.options.options.forEach((option) => {
+      this.domInput.innerHTML = "";
+      this.options.options.forEach((option) => {
         const optionElement = document.createElement("option");
         optionElement.value = option.value;
         optionElement.innerText = option.text;
-        this.domFormInput?.append(optionElement);
+        this.domInput?.append(optionElement);
       });
     }
 
-    setAttributes(this.domFormInput, attr);
+    setAttributes(this.domInput, attr);
 
     let newInputValue = this.iFrameFormElement.getValue();
 
     // HTML don't support validity on radio
-    if (this.iFrameFormElement?.getValue() === undefined) {
+    if (this.iFrameFormElement.getValue() === undefined) {
       if (
-        this.iFrameFormElement?.fieldType === ELEMENTS.checkbox.name ||
-        this.iFrameFormElement?.fieldType === ELEMENTS.radio.name
+        this.iFrameFormElement.fieldType === ELEMENTS.checkbox.name ||
+        this.iFrameFormElement.fieldType === ELEMENTS.radio.name
       ) {
-        // this.iFrameFormElement?.setValue("");
+        // this.iFrameFormElement.setValue("");
         newInputValue = "";
-      } else if (FrameElement.options.value) {
-        // this.iFrameFormElement?.setValue(FrameElement.options.value);
-        newInputValue = FrameElement.options.value;
+      } else if (this.options.value) {
+        // this.iFrameFormElement.setValue(this.options.value);
+        newInputValue = this.options.value;
       }
     }
 
     if (
       newValue &&
-      this.iFrameFormElement?.fieldType !== ELEMENTS.checkbox.name &&
-      this.iFrameFormElement?.fieldType !== ELEMENTS.radio.name
+      this.iFrameFormElement.fieldType !== ELEMENTS.checkbox.name &&
+      this.iFrameFormElement.fieldType !== ELEMENTS.radio.name
     ) {
-      newInputValue = FrameElement.options.value;
+      newInputValue = this.options.value;
     }
 
-    if (this.domFormInput) {
+    if (this.domInput) {
       if (
-        this.iFrameFormElement?.fieldType === ELEMENTS.checkbox.name ||
-        this.iFrameFormElement?.fieldType === ELEMENTS.radio.name
+        this.iFrameFormElement.fieldType === ELEMENTS.checkbox.name ||
+        this.iFrameFormElement.fieldType === ELEMENTS.radio.name
       ) {
-        this.domFormInput.value = FrameElement.options.value;
-        (<HTMLInputElement>this.domFormInput).checked =
-          FrameElement.options.value === newInputValue;
+        this.domInput.value = this.options.value;
+        (<HTMLInputElement>this.domInput).checked =
+          this.options.value === newInputValue;
       } else {
-        this.domFormInput.value = newInputValue || "";
+        this.domInput.value = newInputValue || "";
       }
     }
 
     this.iFrameFormElement.setValue(
       newInputValue,
-      this.domFormInput?.checkValidity()
+      this.domInput?.checkValidity()
     );
   }
 
   setValue = (value) => {
-    if (this.domFormInput) {
-      this.domFormInput.value = value;
-      // if (this.inputCursorLocation) {
-      //   console.log(this.inputCursorLocation);
-      //   (<HTMLInputElement>(
-      //     this.domFormInput
-      //   )).selectionEnd = this.inputCursorLocation;
-      //   (<HTMLInputElement>(
-      //     this.domFormInput
-      //   )).selectionStart = this.inputCursorLocation;
-      // }
+    if (this.domInput) {
+      this.domInput.value = value;
     }
-    // todo: replace the cursor to its prev place on masking
-    // var target = e.target,
-    //   position = target.selectionStart; // Capture initial position
-
-    // target.value = target.value.replace(/\s/g, ""); // This triggers the cursor to move.
-
-    // target.selectionEnd = position; // Set the cursor back to the initial position.
   };
 
   // events from HTML
   onFocusChange = (event: FocusEvent, focus: boolean) => {
     // emit event to iFrameFormElement
-    this.iFrameFormElement?.onFocusChange(focus);
+    this.iFrameFormElement.onFocusChange(focus);
   };
 
   onInputChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
-    // console.log(target.value, target.selectionStart, target.selectionEnd);
-    // this.inputCursorLocation = (<HTMLInputElement>(
-    //   this.domFormInput
-    // )).selectionStart;
-    this.iFrameFormElement?.setValue(target.value, target.checkValidity());
+    this.iFrameFormElement.setValue(target.value, target.checkValidity());
   };
 
   focusChange = (focus: boolean) => {
-    if (focus) this.domFormInput?.focus();
-    else this.domFormInput?.blur();
+    if (focus) this.domInput?.focus();
+    else this.domInput?.blur();
   };
 
   destroy = () => {};
 
-  injectInputStyles() {
-    const styles = FrameElement.options.styles;
-
+  injectInputStyles(styles, preText: string = "") {
     const stylesByClassName = {};
     Object.values(STYLE_TYPE).forEach((classType) => {
       if (styles[classType] && Object.keys(styles).length !== 0) {
         const [nonPseudoStyles, pseudoStyles] = splitStyles(styles[classType]);
-        stylesByClassName[".SkyflowElement--" + classType] = nonPseudoStyles;
+        stylesByClassName[
+          ".SkyflowElement-" +
+            preText +
+            "-" +
+            this.options.name +
+            "-" +
+            classType
+        ] = nonPseudoStyles;
         for (const pseudoStyle in pseudoStyles) {
           if (ALLOWED_PSEUDO_STYLES.includes(pseudoStyle))
-            stylesByClassName[".SkyflowElement--" + classType + pseudoStyle] =
-              pseudoStyles[pseudoStyle];
+            stylesByClassName[
+              ".SkyflowElement-" +
+                preText +
+                "-" +
+                this.options.name +
+                "-" +
+                classType +
+                pseudoStyle
+            ] = pseudoStyles[pseudoStyle];
         }
       }
     });
@@ -288,7 +260,7 @@ export class FrameElement {
     injectStylesheet.injectWithAllowlist(stylesByClassName, ALLOWED_STYLES);
   }
 
-  updateInputStyleClass(state: {
+  updateStyleClasses(state: {
     isFocused: boolean;
     isValid: boolean;
     isEmpty: boolean;
@@ -307,44 +279,52 @@ export class FrameElement {
       }
     }
 
-    this.setClass(...classes);
+    this.setClass(classes, this.domInput);
+    this.setClass(classes, this.domLabel, "label");
   }
 
-  setClass(...types: string[]) {
-    if (this.domFormInput) {
-      // types = types.sort();
-      // types = types.map((type) => "SkyflowElement--" + type.toLowerCase());
+  setClass(types: string[], dom?: HTMLElement, preText: string = "") {
+    if (dom) {
       let classes = ["base"];
       Object.values(STYLE_TYPE).forEach((type) => {
         if (types.includes(type)) classes.push(type);
       });
-      classes = classes.map((type) => "SkyflowElement--" + type);
+      classes = classes.map(
+        (type) =>
+          "SkyflowElement-" + preText + "-" + this.options.name + "-" + type
+      );
 
-      this.domFormInput.className = classes.join(" ");
+      dom.className = classes.join(" ");
     }
   }
 
   updateOptions(options) {
-    const newOptions = { ...FrameElement.options, ...options };
+    const newOptions = { ...this.options, ...options };
 
     validateElementOptions(
       this.iFrameFormElement.fieldType,
-      FrameElement.options,
+      this.options,
       newOptions
     );
 
-    FrameElement.options = newOptions;
+    this.options = newOptions;
 
     if (options.styles) {
       // update styles
-      this.injectInputStyles();
+      options.styles.base = {
+        ...INPUT_STYLES,
+        ...options.styles.base,
+      };
+      this.injectInputStyles(options.styles);
+    }
+    if (options?.labelStyles?.styles) {
+      // update label styles
+      this.injectInputStyles(options?.labelStyles?.styles, "label");
     }
 
-    this.iFrameFormElement.setValidation(FrameElement.options.validation);
-    this.iFrameFormElement.setReplacePattern(
-      FrameElement.options.replacePattern
-    );
-    this.iFrameFormElement.setMask(FrameElement.options.mask);
+    this.iFrameFormElement.setValidation(this.options.validation);
+    this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
+    this.iFrameFormElement.setMask(this.options.mask);
 
     this.setupInputField(
       options.hasOwnProperty("value") &&

@@ -84,52 +84,45 @@ class Elements {
   // min, max, maxLength, minLength
   // replacePattern = "" or pattern
   // mask: ["","",""]
+  // label: "label"
+  // labelStyles: {
+  //  classes: {
+  //   base: "", // default
+  //   complete: "",
+  //   empty: "",
+  //   focus: "",
+  //   invalid: "",
+  //   webkitAutoFill: ""
+  //  },
+  //  style: {
+  //   base: {}, // default
+  //   complete: {},
+  //   empty: {},
+  //   invalid: {}
+  //  },
+  // }
   // })
   create = (elementType: string, options: any = {}) => {
-    options = deepClone(options);
-    if (this.elements[options.name]) {
-      // todo: update if already exits?
-      throw new Error("This element already existed: " + options.name);
-      return this.elements[options.name];
-    }
-    options.sensitive = options.sensitive || ELEMENTS[elementType].sensitive;
-    options.replacePattern =
-      options.replacePattern || ELEMENTS[elementType].replacePattern;
-    options.mask = options.mask || ELEMENTS[elementType].mask;
-    validateElementOptions(elementType, options);
-
-    const classes = options.classes || {};
-    const styles = options.styles || {};
-
-    buildStylesFromClassesAndStyles(classes, styles);
-
-    options.classes = classes;
-    options.styles = styles;
-
-    // todo: if name contains : need to fix the same in below
-    // todo: what if elementType is different but name is same
-    options.name = `${elementType}:${options.name}`;
-
-    if (
-      elementType === ELEMENTS.radio.name ||
-      elementType === ELEMENTS.checkbox.name
-    ) {
-      options.name = `${options.name}:${options.value}`;
-    }
-
-    const element = new Element(elementType, options, this.metaData);
-    this.elements[options.name] = element;
-
-    element.onDestroy((elementName) => {
-      this.removeElement(elementName);
-    });
-
-    return element;
+    const elementGroup = {
+      rows: [
+        {
+          elements: [
+            {
+              elementType,
+              ...options,
+            },
+          ],
+        },
+      ],
+    };
+    return this._createMultipleElement(elementGroup, true);
   };
 
   // { // display flex by default(not changeable)
+  //   name: "", //required for identification - getElements
   //   justifyContent: "", //default flex-start
   //   alignItems: "", //default stretch
+  //   spacing: "", // in px
   //   rows: [
   //     { // row 1, display flex by default(not changeable)
   //       justifyContent: "", //default flex-start
@@ -141,9 +134,84 @@ class Elements {
   //   ]
   // }
   // the spacing can be adjusted using the flex styling and the element padding(from element styles)
-  createBulk = (multipleElements: any) => {
+  createMultipleElement = (multipleElements: any) => {
+    if (!multipleElements.name) {
+      throw new Error("Cannot find name in the options");
+    }
+    return this._createMultipleElement(multipleElements);
+  };
 
-  }
+  private _createMultipleElement = (
+    multipleElements: any,
+    isSingleElementAPI: boolean = false
+  ) => {
+    let elements: any[] = [];
+    multipleElements = deepClone(multipleElements);
+    multipleElements.rows.forEach((row) => {
+      row.elements.forEach((element) => {
+        const options = element;
+        const elementType = options.elementType;
+
+        options.sensitive =
+          options.sensitive || ELEMENTS[elementType].sensitive;
+        options.replacePattern =
+          options.replacePattern || ELEMENTS[elementType].replacePattern;
+        options.mask = options.mask || ELEMENTS[elementType].mask;
+
+        options.elementName = options.name;
+        options.elementName = `${options.elementType}:${options.name}`;
+
+        if (
+          options.elementType === ELEMENTS.radio.name ||
+          options.elementType === ELEMENTS.checkbox.name
+        ) {
+          options.elementName = `${options.elementName}:${options.value}`;
+        }
+
+        // if (this.elements[options.elementName]) {
+        //   // todo: update if already exits?
+        //   throw new Error("This element already existed: " + options.name);
+        //   return this.elements[options.name];
+        // }
+
+        elements.push(options);
+      });
+    });
+    // todo: group name
+    multipleElements.elementName = isSingleElementAPI
+      ? elements[0].elementName
+      : `group:${multipleElements.name}`;
+    if (this.elements[multipleElements.elementName]) {
+      // todo: update if already exits?
+      throw new Error(
+        "This element already existed: " + multipleElements.elementName
+      );
+    }
+    const element = new Element(
+      multipleElements,
+      this.metaData,
+      isSingleElementAPI
+    );
+
+    this.elements[multipleElements.elementName] = element;
+
+    if (!isSingleElementAPI) {
+      elements.forEach((element) => {
+        const name = element.elementName;
+        if (!this.elements[name]) {
+          this.elements[name] = this.create(element.elementType, element);
+        }
+      });
+    }
+    // todo: on iframe side
+    element.onDestroy((elementNames: string[]) => {
+      elementNames.forEach((elementName) => {
+        this.removeElement(elementName);
+      });
+    });
+
+    return element;
+  };
 
   // todo: need to send single element
   getElement = (

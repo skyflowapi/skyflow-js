@@ -15,21 +15,28 @@ import {
   getStylesFromClass,
   buildStylesFromClassesAndStyles,
 } from "../../../libs/styles";
-import { validateElementOptions } from "../../../libs/element-options";
+import {
+  validateElementOptions,
+  getElements,
+  validateAndSetupGroupOptions,
+} from "../../../libs/element-options";
 
 class Element {
   elementType: string;
   private name: string;
   private metaData: any;
-  private options: any;
+  private group: any;
+  private isSingleElementAPI: boolean = false;
   private iframe: HTMLIFrameElement;
+  private states: any[];
+  private elements: any[];
   private state = {
     isEmpty: true,
     isComplete: false,
     isValid: false,
     isFocused: false,
     container: <HTMLFrameElement | null>null,
-    value: undefined,
+    value: <string | Object | undefined>undefined,
   };
 
   // label focus
@@ -37,31 +44,40 @@ class Element {
   private eventEmitter: EventEmitter = new EventEmitter();
   private bus = new Bus();
 
-  constructor(elementType: string, options: any, metaData: any) {
-    if (!ELEMENTS.hasOwnProperty(elementType)) {
-      throw new Error("Provide valid element type");
-      return;
-    }
+  constructor(
+    elementGroup: any,
+    metaData: any,
+    isSingleElementAPI: boolean = false
+  ) {
+    // this.group = elementGroup;
+    this.group = validateAndSetupGroupOptions(elementGroup);
     this.metaData = metaData;
-    this.options = { ...options };
-    this.name = options.name;
-    this.elementType = elementType;
+    this.elements = getElements(elementGroup.rows);
+    this.isSingleElementAPI = isSingleElementAPI;
+    if (this.isSingleElementAPI && this.elements.length > 1) {
+      throw new Error("Unknown Error");
+    }
+    this.name = elementGroup.elementName;
+    this.elementType = this.isSingleElementAPI
+      ? this.elements[0].elementType
+      : "group";
+
+    this.states = [];
+    this.elements.forEach((element) => {
+      this.states.push({
+        isEmpty: true,
+        isComplete: false,
+        isValid: false,
+        isFocused: false,
+        value: undefined,
+        elementType: element.elementType,
+        name: element.elementName,
+      });
+    });
 
     this.iframe = iframer({ name: this.name });
 
     this.registerIFrameBusListener();
-
-    this.eventEmitter.on(
-      ELEMENT_EVENTS_TO_CLIENT.CHANGE,
-      (data) => {
-        this.state.isEmpty = data.isEmpty;
-        this.state.isComplete = data.isComplete;
-        this.state.isValid = data.isValid;
-        this.state.isFocused = data.isFocused;
-        if (!this.options.sensitive) this.state.value = data.value;
-      },
-      true
-    );
   }
 
   mount = (domElement) => {
@@ -80,32 +96,60 @@ class Element {
 
     const sub = (data, callback) => {
       if (data.name === this.name) {
-        callback(this.options);
+        callback(this.group);
         this.bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
       }
     };
     this.bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
   };
 
-  update = (options) => {
-    options = deepClone(options);
+  update = (group) => {
+    group = deepClone(group);
 
-    options = { ...this.options, ...options };
+    this.group = validateAndSetupGroupOptions(this.group, group);
 
-    validateElementOptions(this.elementType, this.options, options);
-
-    if (
-      this.options.styles === options.styles ||
-      this.options.classes === options.classes
-    ) {
-      delete options.styles; // updating styles don't required if there is no change
-    } else {
-      buildStylesFromClassesAndStyles(options.classes, options.styles);
-    }
-
+    // todo: need to send update to each and every element and up the
     this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
       name: this.name,
-      options: options,
+      options: group,
+    });
+  };
+
+  setUpGroupOptions = () => {};
+
+  private updateState = () => {
+    this.states.forEach((elementState, index) => {
+      if (index === 0) {
+        this.state.isEmpty = elementState.isEmpty;
+        this.state.isComplete = elementState.isComplete;
+        this.state.isValid = elementState.isValid;
+        this.state.isFocused = elementState.isFocused;
+        // if (this.isSingleElementAPI) {
+        //   this.state.value = {};
+        //   if (!this.elements[index].sensitive)
+        //     this.state.value[this.elements[index].elementName] =
+        //       elementState.value || "";
+        // } else {
+        this.state.value = {};
+        const key = this.elements[index].elementName;
+        const value = this.elements[index].sensitive
+          ? undefined
+          : elementState.value;
+        if (this.isSingleElementAPI) this.state.value = value;
+        else this.state.value[key] = value;
+        // }
+        // if (data.hasOwnProperty("value")) this.state.value = data.value;
+      } else {
+        this.state.isEmpty = this.state.isEmpty || elementState.isEmpty;
+        this.state.isComplete =
+          this.state.isComplete && elementState.isComplete;
+        this.state.isValid = this.state.isValid && elementState.isValid;
+        this.state.isFocused = this.state.isFocused || elementState.isFocused;
+        if (!this.state.value) this.state.value = {};
+        if (!this.elements[index].sensitive)
+          this.state.value[this.elements[index].elementName] =
+            elementState.value || "";
+      }
     });
   };
 
@@ -115,12 +159,13 @@ class Element {
       isComplete: this.state.isComplete,
       isValid: this.state.isValid,
       isFocused: this.state.isFocused,
-      ...(!this.options.sensitive && { value: this.state.value }),
+      value: this.state.value,
     };
   };
 
   getOptions = () => {
-    const options = deepClone(this.options);
+    // todo: remove all names
+    const options = deepClone(this.group);
     delete options.options;
     delete options.value;
 
@@ -141,24 +186,37 @@ class Element {
 
   // methods to invoke element events
   blur = () => {
+    let name = this.name;
+    // if (this.isSingleElementAPI) {
+    //   name = this.elements[0].elementName;
+    // }
     this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
-      name: this.name,
+      name: name,
       event: ELEMENT_EVENTS_TO_CLIENT.BLUR,
     });
   };
 
   focus = () => {
+    let name = this.name;
+    // if (this.isSingleElementAPI) {
+    //   name = this.elements[0].name;
+    // }
     this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
-      name: this.name,
+      name: name,
       event: ELEMENT_EVENTS_TO_CLIENT.FOCUS,
     });
   };
 
   destroy = () => {
+    // todo: destroy all the internal elements
+    let name = this.name;
+    // if (this.isSingleElementAPI) {
+    //   name = this.elements[0].name;
+    // }
     this.bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
       {
-        name: this.name,
+        name: name,
       },
       () => {
         this.unmount();
@@ -174,7 +232,9 @@ class Element {
     this.eventEmitter.on(
       ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
       () => {
-        callback(this.elementType);
+        const names = this.elements.map((element) => element.elementName);
+        if (!this.isSingleElementAPI) names.push(this.name);
+        callback(names);
       },
       true
     );
@@ -190,37 +250,62 @@ class Element {
 
   private registerIFrameBusListener() {
     this.bus.on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, (data: any) => {
-      if (data.name === this.name) {
-        switch (data.event) {
-          case ELEMENT_EVENTS_TO_CLIENT.FOCUS:
-            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.FOCUS);
-            break;
-          case ELEMENT_EVENTS_TO_CLIENT.BLUR:
-            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.BLUR);
-            break;
-          case ELEMENT_EVENTS_TO_CLIENT.CHANGE:
-            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CHANGE, {
-              ...data.value,
-              elementType: this.elementType,
-            });
-            break;
-          case ELEMENT_EVENTS_TO_CLIENT.READY:
-            this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
-            break;
-          // todo: need to implement the below events
-          // case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
-          //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
-          //   break;
-          // case ELEMENT_EVENTS_TO_CLIENT.CLICK:
-          //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CLICK);
-          //   break;
-          // case ELEMENT_EVENTS_TO_CLIENT.ERROR:
-          //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ERROR);
-          //   break;
+      if (
+        this.isSingleElementAPI &&
+        data.event === ELEMENT_EVENTS_TO_CLIENT.READY &&
+        data.name === this.name
+      ) {
+        this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
+      } else {
+        this.elements.forEach((element, index) => {
+          if (data.name === element.elementName) {
+            let emitEvent = "",
+              emitData: any = undefined;
+            switch (data.event) {
+              case ELEMENT_EVENTS_TO_CLIENT.FOCUS:
+                emitEvent = ELEMENT_EVENTS_TO_CLIENT.FOCUS;
+                break;
+              case ELEMENT_EVENTS_TO_CLIENT.BLUR:
+                emitEvent = ELEMENT_EVENTS_TO_CLIENT.BLUR;
+                break;
+              case ELEMENT_EVENTS_TO_CLIENT.CHANGE:
+                this.states[index].isEmpty = data.value.isEmpty;
+                this.states[index].isComplete = data.value.isComplete;
+                this.states[index].isValid = data.value.isValid;
+                this.states[index].isFocused = data.value.isFocused;
+                if (data.value.hasOwnProperty("value"))
+                  this.states[index].value = data.value.value;
+                else this.states[index].value = undefined;
 
-          default:
-            throw new Error("Provide a valid event type");
-        }
+                this.updateState();
+
+                emitEvent = ELEMENT_EVENTS_TO_CLIENT.CHANGE;
+                emitData = {
+                  ...this.getState(),
+                  elementType: this.elementType,
+                };
+                break;
+              case ELEMENT_EVENTS_TO_CLIENT.READY:
+                emitEvent = ELEMENT_EVENTS_TO_CLIENT.READY;
+                break;
+              // todo: need to implement the below events
+              // case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
+              //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
+              //   break;
+              // case ELEMENT_EVENTS_TO_CLIENT.CLICK:
+              //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CLICK);
+              //   break;
+              // case ELEMENT_EVENTS_TO_CLIENT.ERROR:
+              //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ERROR);
+              //   break;
+
+              default:
+                throw new Error("Provide a valid event type");
+            }
+
+            this.eventEmitter._emit(emitEvent, emitData);
+          }
+        });
       }
     });
   }

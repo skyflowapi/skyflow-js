@@ -1,6 +1,8 @@
 import { ALLOWED_STYLES, STYLE_TYPE } from "../elements/constants";
+import { getValueAndItsUnit } from "./element-options";
 
 export function getStylesFromClass(cssClass) {
+  return undefined;
   if (!cssClass) return {};
   var element = document.createElement("input");
   var styles = {};
@@ -98,3 +100,26 @@ export function buildStylesFromClassesAndStyles(classes, styles) {
     }
   });
 }
+
+export const getFlexGridStyles = (obj: any) => {
+  const spacingValueAndUnit = getValueAndItsUnit(obj.spacing);
+  const styles = {
+    "align-items": obj["align-items"] || "stretch",
+    "justify-content": obj["justify-content"] || "flex-start",
+    height:
+      "auto" ||
+      `calc(100% + ${
+        Number.parseInt(spacingValueAndUnit[0]) * 2 + spacingValueAndUnit[1]
+      })`,
+    width: `calc(100% + ${
+      Number.parseInt(spacingValueAndUnit[0]) * 2 + spacingValueAndUnit[1]
+    }))`,
+    margin: `-${spacingValueAndUnit[0] + spacingValueAndUnit[1]}`,
+    padding: "0px",
+  };
+  if (obj.padding) {
+    styles.padding = getValueAndItsUnit(obj.padding).join("");
+  }
+
+  return styles;
+};
