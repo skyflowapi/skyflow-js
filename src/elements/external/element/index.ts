@@ -47,12 +47,14 @@ class Element {
   constructor(
     elementGroup: any,
     metaData: any,
-    isSingleElementAPI: boolean = false
+    isSingleElementAPI: boolean = false,
+    destroyCallback: Function,
+    updateCallback: Function
   ) {
     // this.group = elementGroup;
     this.group = validateAndSetupGroupOptions(elementGroup);
     this.metaData = metaData;
-    this.elements = getElements(elementGroup.rows);
+    this.elements = getElements(elementGroup);
     this.isSingleElementAPI = isSingleElementAPI;
     if (this.isSingleElementAPI && this.elements.length > 1) {
       throw new Error("Unknown Error");
@@ -78,6 +80,9 @@ class Element {
     this.iframe = iframer({ name: this.name });
 
     this.registerIFrameBusListener();
+
+    this.onDestroy(destroyCallback);
+    this.onUpdate(updateCallback);
   }
 
   mount = (domElement) => {
@@ -106,16 +111,55 @@ class Element {
   update = (group) => {
     group = deepClone(group);
 
+    if (this.isSingleElementAPI) {
+      group = {
+        rows: [
+          {
+            elements: [
+              {
+                ...group,
+              },
+            ],
+          },
+        ],
+      };
+    }
     this.group = validateAndSetupGroupOptions(this.group, group);
+    this.elements = getElements(this.group);
 
-    // todo: need to send update to each and every element and up the
-    this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
-      name: this.name,
-      options: group,
-    });
+    if (this.isSingleElementAPI) {
+      this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+        name: this.name,
+        options: this.elements[0],
+      });
+    } else {
+      // todo: check whether we need to update
+      this.elements.forEach((elementOptions) => {
+        this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+          name: elementOptions.elementName,
+          options: elementOptions,
+        });
+      });
+
+      this.bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+        name: this.name,
+        options: this.group,
+      });
+    }
   };
 
-  setUpGroupOptions = () => {};
+  private onUpdate = (callback) => {
+    // todo: us bus if else there will be an infinite loop
+    if (!this.isSingleElementAPI) {
+      this.eventEmitter.on(
+        ELEMENT_EVENTS_TO_IFRAME.SET_VALUE,
+        () => {
+          callback(this.elements);
+        },
+        true
+      );
+    }
+  };
 
   private updateState = () => {
     this.states.forEach((elementState, index) => {
@@ -124,12 +168,6 @@ class Element {
         this.state.isComplete = elementState.isComplete;
         this.state.isValid = elementState.isValid;
         this.state.isFocused = elementState.isFocused;
-        // if (this.isSingleElementAPI) {
-        //   this.state.value = {};
-        //   if (!this.elements[index].sensitive)
-        //     this.state.value[this.elements[index].elementName] =
-        //       elementState.value || "";
-        // } else {
         this.state.value = {};
         const key = this.elements[index].elementName;
         const value = this.elements[index].sensitive
@@ -137,8 +175,6 @@ class Element {
           : elementState.value;
         if (this.isSingleElementAPI) this.state.value = value;
         else this.state.value[key] = value;
-        // }
-        // if (data.hasOwnProperty("value")) this.state.value = data.value;
       } else {
         this.state.isEmpty = this.state.isEmpty || elementState.isEmpty;
         this.state.isComplete =
@@ -213,6 +249,8 @@ class Element {
     // if (this.isSingleElementAPI) {
     //   name = this.elements[0].name;
     // }
+
+    //todo: fix this
     this.bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
       {
@@ -228,7 +266,7 @@ class Element {
     );
   };
 
-  onDestroy = (callback) => {
+  private onDestroy = (callback) => {
     this.eventEmitter.on(
       ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
       () => {

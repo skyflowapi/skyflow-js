@@ -66,7 +66,6 @@ export class FrameElement {
     this.iFrameFormElement.resetEvents();
     this.domLabel = document.createElement("label");
     this.domLabel.htmlFor = this.iFrameFormElement.iFrameName;
-    this.domLabel.innerText = escapeStrings(this.options.label);
 
     const inputElement = document.createElement(
       this.iFrameFormElement.fieldType === ELEMENTS.dropdown.name
@@ -123,7 +122,7 @@ export class FrameElement {
     // this.setupInputField();
     this.updateOptions(this.options);
 
-    this.htmlDivElement.append(this.domLabel, inputElement);
+    this.updateParentDiv(this.htmlDivElement);
 
     this.updateStyleClasses(this.iFrameFormElement.getStatus());
   };
@@ -134,17 +133,12 @@ export class FrameElement {
       ...ELEMENTS[this.iFrameFormElement.fieldType || ""].attributes,
       name: this.iFrameFormElement.fieldName,
       id: this.iFrameFormElement.iFrameName,
-      disabled: this.options.disabled,
       placeholder: this.options.placeholder,
-      readonly: this.options.readonly,
       min: this.options.min,
       max: this.options.max,
       maxLength: this.options.maxLength,
       minLength: this.options.minLength,
       autocomplete: this.options.autocomplete,
-      ...(this.options.validation?.includes("required") && {
-        required: "",
-      }),
     };
 
     if (
@@ -161,7 +155,13 @@ export class FrameElement {
     }
 
     setAttributes(this.domInput, attr);
-
+    if (this.domInput) {
+      this.domInput.disabled = this.options.disabled ? true : false;
+      this.domInput.required = this.options.validation?.includes("required");
+      (<HTMLInputElement>this.domInput).readOnly = this.options.readonly
+        ? true
+        : false;
+    }
     let newInputValue = this.iFrameFormElement.getValue();
 
     // HTML don't support validity on radio
@@ -204,6 +204,11 @@ export class FrameElement {
       this.domInput?.checkValidity()
     );
   }
+
+  updateParentDiv = (newDiv: HTMLDivElement) => {
+    this.htmlDivElement = newDiv;
+    this.htmlDivElement.append(this.domLabel || "", this.domInput || "");
+  };
 
   setValue = (value) => {
     if (this.domInput) {
@@ -309,8 +314,9 @@ export class FrameElement {
 
     this.options = newOptions;
 
+    // todo: clear old styles
     if (options.styles) {
-      // update styles
+      // update element styles
       options.styles.base = {
         ...INPUT_STYLES,
         ...options.styles.base,
@@ -321,6 +327,9 @@ export class FrameElement {
       // update label styles
       this.injectInputStyles(options?.labelStyles?.styles, "label");
     }
+
+    if (this.domLabel)
+      this.domLabel.innerText = escapeStrings(this.options.label);
 
     this.iFrameFormElement.setValidation(this.options.validation);
     this.iFrameFormElement.setReplacePattern(this.options.replacePattern);

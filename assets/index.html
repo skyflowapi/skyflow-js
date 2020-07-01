@@ -73,6 +73,8 @@
       <label>Dropdown</label>
       <div id="dropdown"></div>
       <button type="submit">Submit</button>
+      <button id="fistNameUpdate">Update FirstName</button>
+      <button id="multipleUpdate">Update Multiple</button>
     </form>
     <script>
       const options = {
@@ -134,7 +136,7 @@
         // display flex by default(not changeable)
         justifyContent: "", //default flex-start
         alignItems: "", //default stretch
-        spacing: "5px",
+        spacing: "10px",
         rows: [
           {
             // row 1, display flex by default(not changeable)
@@ -149,7 +151,7 @@
                 labelStyles: {
                   ...Label,
                 },
-                name: "first-name",
+                name: "first-name2",
               },
             ],
           },
@@ -274,8 +276,36 @@
       //   pushElement(i);
       // }
 
-      document.getElementById("form").onsubmit = (event) => {
+      document.getElementById("fistNameUpdate").onclick = (event) => {
         event.preventDefault();
+        firstName.update({ replacePattern: ["/[^a-z ]+/gi", ""] });
+      };
+
+      document.getElementById("multipleUpdate").onclick = (event) => {
+        event.preventDefault();
+        multiple.update({
+          spacing: "5px",
+          rows: [
+            {
+              elements: [
+                {
+                  label: "label-1(new)",
+                },
+              ],
+            },
+            {
+              elements: [
+                {},
+                {
+                  label: "label-3(new)",
+                },
+              ],
+            },
+          ],
+        });
+      };
+
+      document.getElementById("form").onsubmit = (event) => {
         elements.tokenize();
       };
 

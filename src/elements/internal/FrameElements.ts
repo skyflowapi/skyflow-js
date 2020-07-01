@@ -5,7 +5,10 @@ import {
   ALLOWED_MULTIPLE_FIELDS_STYLES,
 } from "../constants";
 import injectStylesheet from "inject-stylesheet";
-import { getValueAndItsUnit } from "../../libs/element-options";
+import {
+  getValueAndItsUnit,
+  validateAndSetupGroupOptions,
+} from "../../libs/element-options";
 import { getFlexGridStyles } from "../../libs/styles";
 
 export default class FrameElements {
@@ -14,9 +17,12 @@ export default class FrameElements {
   private static frameElements?: any;
   private getOrCreateIFrameFormElement: Function;
   domForm?: HTMLFormElement;
-  private elements: FrameElement[] = [];
+  private elements: Record<string, FrameElement> = {};
   private name?: string;
-  constructor(getOrCreateIFrameFormElement) {
+  private metaData: any;
+  constructor(getOrCreateIFrameFormElement, metaData: any) {
+    this.name = window.name;
+    this.metaData = metaData;
     this.getOrCreateIFrameFormElement = getOrCreateIFrameFormElement;
     if (FrameElements.group) {
       this.setup(); // start the process
@@ -38,23 +44,48 @@ export default class FrameElements {
   };
 
   // called by IFrameForm
-  static init = (getOrCreateIFrameFormElement: Function) => {
+  static init = (getOrCreateIFrameFormElement: Function, metaData) => {
     FrameElements.frameElements = new FrameElements(
-      getOrCreateIFrameFormElement
+      getOrCreateIFrameFormElement,
+      metaData
     );
   };
 
   setup = () => {
     // this.name = FrameElements.group.name;
-    const group = FrameElements.group;
-    const rows = group.rows;
-    const elements: any[] = [];
-
     this.domForm = document.createElement("form");
     this.domForm.action = "#";
     this.domForm.onsubmit = (event) => {
       event.preventDefault();
     };
+
+    this.updateOptions(FrameElements.group);
+
+    // on bus event call update again
+    bus
+      .target(this.metaData.clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+        if (
+          location.origin === this.metaData.clientDomain &&
+          data.name === this.name
+        ) {
+          if (data.options !== undefined) {
+            // for updating options
+            this.updateOptions(data.options);
+          }
+        }
+      });
+  };
+
+  updateOptions = (newGroup) => {
+    FrameElements.group = validateAndSetupGroupOptions(
+      FrameElements.group,
+      newGroup,
+      false
+    );
+    const group = FrameElements.group;
+    const rows = group.rows;
+    const elements = this.elements;
 
     group.spacing = getValueAndItsUnit(group.spacing).join("");
 
@@ -107,23 +138,33 @@ export default class FrameElements {
           },
           ALLOWED_MULTIPLE_FIELDS_STYLES
         );
-        // create a iframeelement
-        const iFrameFormElement = this.getOrCreateIFrameFormElement(
-          element.elementName
-        );
-        // create element by passing iframeformelement and options and mount by default returns
-        elementsInRow.push(
-          new FrameElement(iFrameFormElement, element, elementDiv)
-        );
+
+        if (elements[element.elementName]) {
+          elements[element.elementName].updateParentDiv(elementDiv);
+        } else {
+          // create a iframeelement
+          // create element by passing iframeformelement and options and mount by default returns
+          const iFrameFormElement = this.getOrCreateIFrameFormElement(
+            element.elementName
+          );
+          elements[element.elementName] = new FrameElement(
+            iFrameFormElement,
+            element,
+            elementDiv
+          );
+        }
 
         rowDiv.append(elementDiv);
       });
-      elements.push(elementsInRow);
       rootDiv.append(rowDiv);
     });
 
-    this.elements = elements;
-    this.domForm.append(rootDiv);
-    document.body.append(this.domForm);
+    if (this.domForm) {
+      // for cleaning
+      this.domForm.innerHTML = "";
+      document.body.innerHTML = "";
+      this.domForm.append(rootDiv);
+      document.body.append(this.domForm);
+    }
   };
 }

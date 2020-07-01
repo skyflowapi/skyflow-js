@@ -181,42 +181,42 @@ class Elements {
     multipleElements.elementName = isSingleElementAPI
       ? elements[0].elementName
       : `group:${multipleElements.name}`;
-    if (this.elements[multipleElements.elementName]) {
-      // todo: update if already exits?
-      throw new Error(
-        "This element already existed: " + multipleElements.elementName
-      );
-    }
-    const element = new Element(
-      multipleElements,
-      this.metaData,
-      isSingleElementAPI
-    );
 
-    this.elements[multipleElements.elementName] = element;
+    let element = this.elements[multipleElements.elementName];
+    if (element) {
+      if (isSingleElementAPI) {
+        element.update(elements[0]);
+      } else {
+        element.update(multipleElements);
+      }
+    } else {
+      element = new Element(
+        multipleElements,
+        this.metaData,
+        isSingleElementAPI,
+        this.destroyCallback,
+        this.updateCallback
+      );
+      this.elements[multipleElements.elementName] = element;
+    }
 
     if (!isSingleElementAPI) {
       elements.forEach((element) => {
         const name = element.elementName;
         if (!this.elements[name]) {
           this.elements[name] = this.create(element.elementType, element);
+        } else {
+          this.elements[name].update(element);
         }
       });
     }
-    // todo: on iframe side
-    element.onDestroy((elementNames: string[]) => {
-      elementNames.forEach((elementName) => {
-        this.removeElement(elementName);
-      });
-    });
 
     return element;
   };
 
-  // todo: need to send single element
   getElement = (
     elementType: string,
-    elementName: string = elementType,
+    elementName: any = elementType,
     valueForRadioOrCheckbox?: string
   ) => {
     for (const element in this.elements) {
@@ -232,6 +232,26 @@ class Elements {
     }
 
     return null;
+  };
+
+  hasElement = (
+    elementType: string,
+    elementName: any = elementType,
+    valueForRadioOrCheckbox?: string
+  ) => {
+    for (const element in this.elements) {
+      const elementData = element.split(":");
+      if (
+        elementData[0] === elementType &&
+        elementData[1] === elementName &&
+        (elementData[2] !== undefined
+          ? elementData[2] === valueForRadioOrCheckbox
+          : true)
+      )
+        return true;
+    }
+
+    return false;
   };
 
   // todo: get all elements metadata like name, type and its instance ?
@@ -268,6 +288,20 @@ class Elements {
             resolve(data);
           }
         });
+    });
+  };
+
+  private destroyCallback = (elementNames: string[]) => {
+    elementNames.forEach((elementName) => {
+      this.removeElement(elementName);
+    });
+  };
+
+  private updateCallback = (elements: any[]) => {
+    elements.forEach((element) => {
+      if (this.elements[element.elementName]) {
+        this.elements[element.elementName].update(element);
+      }
     });
   };
 }

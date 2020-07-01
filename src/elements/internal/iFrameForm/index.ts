@@ -129,7 +129,10 @@ export class IFrameForm {
     if (!frameInstance) {
       throw new Error("frame not found: " + frameGlobalName);
     } else {
-      frameInstance.Skyflow.init(this.getOrCreateIFrameFormElement);
+      frameInstance.Skyflow.init(
+        this.getOrCreateIFrameFormElement,
+        this.clientMetaData
+      );
     }
   };
 }
