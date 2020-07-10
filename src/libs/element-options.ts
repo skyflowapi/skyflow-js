@@ -3,7 +3,8 @@ import { buildStylesFromClassesAndStyles } from "./styles";
 
 export function validateAndSetupGroupOptions(
   oldGroup: any,
-  newGroup: any = {}
+  newGroup: any = {},
+  setup = true
 ) {
   const isNewEmpty = Object.keys(newGroup).length === 0;
   newGroup = { ...oldGroup, ...newGroup };
@@ -15,49 +16,35 @@ export function validateAndSetupGroupOptions(
       const oldElement = oldRow.elements[elementIndex];
       const newElement = element;
       if (
-        oldElement.elementType !== newElement.elementType ||
+        newElement.elementType &&
+        oldElement.elementType !== newElement.elementType &&
+        oldElement.elementName &&
         oldElement.elementName !== newElement.elementName
       ) {
         throw new Error("Element can't be changed");
       }
-      validateElementOptions(newElement.elementType, oldElement, newElement);
+      validateElementOptions(oldElement.elementType, oldElement, newElement);
       newRow.elements[elementIndex] = {
         ...oldElement,
-        newElement,
+        ...newElement,
         elementName: oldElement.elementName,
       };
 
-      if (
-        !isNewEmpty &&
-        (oldElement.styles === newElement.styles ||
-          oldElement.classes === newElement.classes)
-      ) {
-        delete newElement.styles; // updating styles don't required if there is no change
-      } else {
-        const classes = newElement.classes || {};
-        const styles = newElement.styles || {};
-        styles.base = { ...INPUT_STYLES, ...styles.base };
-        buildStylesFromClassesAndStyles(classes, styles);
+      const classes = newElement.classes || {};
+      const styles = newElement.styles || {};
+      styles.base = { ...INPUT_STYLES, ...styles.base };
+      setup && buildStylesFromClassesAndStyles(classes, styles);
 
-        newElement.classes = classes;
-        newElement.styles = styles;
-      }
+      newElement.classes = classes;
+      newElement.styles = styles;
 
-      if (
-        !isNewEmpty &&
-        (oldElement.labelStyles.styles === newElement.labelStyles.styles ||
-          oldElement.labelStyles.classes === newElement.labelStyles.classes)
-      ) {
-        delete newElement.styles; // updating styles don't required if there is no change
-      } else {
-        const classes = newElement?.labelStyles?.classes || {};
-        const styles = newElement?.labelStyles?.styles || {};
+      const labelClasses = newElement?.labelStyles?.classes || {};
+      const labelStyles = newElement?.labelStyles?.styles || {};
 
-        buildStylesFromClassesAndStyles(classes, styles);
+      setup && buildStylesFromClassesAndStyles(labelClasses, labelStyles);
 
-        newElement.labelStyles = { classes };
-        newElement.labelStyles.styles = styles;
-      }
+      newElement.labelStyles = { labelClasses };
+      newElement.labelStyles.styles = labelStyles;
     });
   });
   return newGroup;
@@ -68,7 +55,7 @@ export function validateElementOptions(
   oldOptions: any,
   newOptions: any = {}
 ) {
-  if (!ELEMENTS.hasOwnProperty(elementType) || elementType === "group") {
+  if (elementType !== "group" && !ELEMENTS.hasOwnProperty(elementType)) {
     throw new Error("Provide valid element type");
   }
 
@@ -160,7 +147,8 @@ export function validateElementOptions(
   }
 }
 
-export const getElements = (rows: any[]) => {
+export const getElements = (group: any) => {
+  const rows = group.rows;
   const elements: string[] = [];
   rows.forEach((row) => {
     row.elements.forEach((element) => {

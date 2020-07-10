@@ -8,15 +8,15 @@ import {
   FRAME_CONTROLLER,
   INPUT_STYLES,
 } from "../constants";
+import $ from "jquery";
 import bus from "framebus";
 import injectStylesheet from "inject-stylesheet";
 import Client from "../../client";
 import { IFrameForm, IFrameFormElement } from "./iFrameForm";
 import { setAttributes, setStyles } from "../../iframe-libs/iframer";
 import { splitStyles } from "../../libs/styles";
-import Element from "../external/element";
 import { validateElementOptions } from "../../libs/element-options";
-import { escapeStrings } from "../../libs/strings";
+import "jquery-mask-plugin/dist/jquery.mask.min";
 
 export class FrameController {
   static controller?: FrameController;
@@ -66,7 +66,6 @@ export class FrameElement {
     this.iFrameFormElement.resetEvents();
     this.domLabel = document.createElement("label");
     this.domLabel.htmlFor = this.iFrameFormElement.iFrameName;
-    this.domLabel.innerText = escapeStrings(this.options.label);
 
     const inputElement = document.createElement(
       this.iFrameFormElement.fieldType === ELEMENTS.dropdown.name
@@ -85,12 +84,7 @@ export class FrameElement {
     inputElement.onblur = (event) => {
       this.onFocusChange(event, false);
     };
-    inputElement.oninput = (event) => {
-      this.onInputChange(event);
-    };
 
-    // events from client or on pressing tab, label etc
-    // this.iFrameFormElement?.on()
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, () => {
       this.focusChange(true);
     });
@@ -98,19 +92,8 @@ export class FrameElement {
       this.focusChange(false);
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
-      if (
-        state.value &&
-        this.iFrameFormElement.fieldType === ELEMENTS.radio.name
-      ) {
-        (<HTMLInputElement>this.domInput).checked =
-          this.options.value === state.value;
-      } else if (
-        this.iFrameFormElement.fieldType !== ELEMENTS.radio.name &&
-        this.iFrameFormElement.fieldType !== ELEMENTS.checkbox.name
-      ) {
-        if (this.options.mask || this.options.replacePattern) {
-          this.setValue(state.value);
-        }
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.radio.name) {
+        (<HTMLInputElement>this.domInput).checked = this.options.value === state.value;
       }
       this.updateStyleClasses(state);
     });
@@ -123,7 +106,7 @@ export class FrameElement {
     // this.setupInputField();
     this.updateOptions(this.options);
 
-    this.htmlDivElement.append(this.domLabel, inputElement);
+    this.updateParentDiv(this.htmlDivElement);
 
     this.updateStyleClasses(this.iFrameFormElement.getStatus());
   };
@@ -134,35 +117,34 @@ export class FrameElement {
       ...ELEMENTS[this.iFrameFormElement.fieldType || ""].attributes,
       name: this.iFrameFormElement.fieldName,
       id: this.iFrameFormElement.iFrameName,
-      disabled: this.options.disabled,
       placeholder: this.options.placeholder,
-      readonly: this.options.readonly,
       min: this.options.min,
       max: this.options.max,
       maxLength: this.options.maxLength,
       minLength: this.options.minLength,
       autocomplete: this.options.autocomplete,
-      ...(this.options.validation?.includes("required") && {
-        required: "",
-      }),
+      disabled: this.options.disabled ? true : undefined,
+      readOnly: this.options.readOnly ? true : undefined,
+      required: this.options.validation?.includes("required") || undefined,
     };
 
-    if (
-      this.domInput &&
-      this.iFrameFormElement.fieldType === ELEMENTS.dropdown.name
-    ) {
+    if (this.domInput && this.iFrameFormElement.fieldType === ELEMENTS.dropdown.name) {
       this.domInput.innerHTML = "";
       this.options.options.forEach((option) => {
         const optionElement = document.createElement("option");
         optionElement.value = option.value;
-        optionElement.innerText = option.text;
+        optionElement.textContent = option.text;
         this.domInput?.append(optionElement);
       });
     }
 
     setAttributes(this.domInput, attr);
-
-    let newInputValue = this.iFrameFormElement.getValue();
+    // if (this.domInput) {
+    //   this.domInput.disabled = this.options.disabled ? true : false;
+    //   this.domInput.required = this.options.validation?.includes("required");
+    //   (<HTMLInputElement>this.domInput).readOnly = this.options.readonly ? true : false;
+    // }
+    let newInputValue = this.domInput?.value || this.iFrameFormElement.getValue();
 
     // HTML don't support validity on radio
     if (this.iFrameFormElement.getValue() === undefined) {
@@ -192,18 +174,19 @@ export class FrameElement {
         this.iFrameFormElement.fieldType === ELEMENTS.radio.name
       ) {
         this.domInput.value = this.options.value;
-        (<HTMLInputElement>this.domInput).checked =
-          this.options.value === newInputValue;
+        (<HTMLInputElement>this.domInput).checked = this.options.value === newInputValue;
       } else {
         this.domInput.value = newInputValue || "";
       }
     }
 
-    this.iFrameFormElement.setValue(
-      newInputValue,
-      this.domInput?.checkValidity()
-    );
+    this.iFrameFormElement.setValue(newInputValue, this.domInput?.checkValidity());
   }
+
+  updateParentDiv = (newDiv: HTMLDivElement) => {
+    this.htmlDivElement = newDiv;
+    this.htmlDivElement.append(this.domLabel || "", this.domInput || "");
+  };
 
   setValue = (value) => {
     if (this.domInput) {
@@ -235,12 +218,7 @@ export class FrameElement {
       if (styles[classType] && Object.keys(styles).length !== 0) {
         const [nonPseudoStyles, pseudoStyles] = splitStyles(styles[classType]);
         stylesByClassName[
-          ".SkyflowElement-" +
-            preText +
-            "-" +
-            this.options.name +
-            "-" +
-            classType
+          ".SkyflowElement-" + preText + "-" + this.options.name + "-" + classType
         ] = nonPseudoStyles;
         for (const pseudoStyle in pseudoStyles) {
           if (ALLOWED_PSEUDO_STYLES.includes(pseudoStyle))
@@ -290,8 +268,7 @@ export class FrameElement {
         if (types.includes(type)) classes.push(type);
       });
       classes = classes.map(
-        (type) =>
-          "SkyflowElement-" + preText + "-" + this.options.name + "-" + type
+        (type) => "SkyflowElement-" + preText + "-" + this.options.name + "-" + type
       );
 
       dom.className = classes.join(" ");
@@ -301,16 +278,13 @@ export class FrameElement {
   updateOptions(options) {
     const newOptions = { ...this.options, ...options };
 
-    validateElementOptions(
-      this.iFrameFormElement.fieldType,
-      this.options,
-      newOptions
-    );
+    validateElementOptions(this.iFrameFormElement.fieldType, this.options, newOptions);
 
     this.options = newOptions;
 
+    // todo: clear old styles
     if (options.styles) {
-      // update styles
+      // update element styles
       options.styles.base = {
         ...INPUT_STYLES,
         ...options.styles.base,
@@ -322,13 +296,51 @@ export class FrameElement {
       this.injectInputStyles(options?.labelStyles?.styles, "label");
     }
 
-    this.iFrameFormElement.setValidation(this.options.validation);
-    this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
-    this.iFrameFormElement.setMask(this.options.mask);
+    if (this.domLabel) this.domLabel.textContent = this.options.label;
 
-    this.setupInputField(
-      options.hasOwnProperty("value") &&
-        options.value !== this.iFrameFormElement.getValue()
-    );
+    $(document).ready(() => {
+      const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
+
+      this.iFrameFormElement.setValidation(this.options.validation);
+      this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
+      this.iFrameFormElement.setMask(this.options.mask);
+
+      const mask = this.iFrameFormElement.mask;
+      $(id).off("input");
+      (<any>$).jMaskGlobals.translation = {};
+      (<any>$).jMaskGlobals.clearIfNotMatch = true;
+
+      $(id).unmask();
+
+      if (mask) {
+        const translation = {};
+        Object.keys(mask[2]).forEach((key) => {
+          translation[key] = { pattern: mask[2][key] };
+        });
+
+        $(id).mask(mask[0], {
+          translation,
+        });
+      }
+
+      if (this.domInput) {
+        const replacePattern = this.iFrameFormElement.replacePattern;
+        if (replacePattern) {
+          $(id).on("input", (event) => {
+            event.target.value = event.target.value.replace(
+              replacePattern[0],
+              replacePattern[1]
+            );
+          });
+        }
+
+        $(id).on("input", this.onInputChange);
+      }
+
+      this.setupInputField(
+        options.hasOwnProperty("value") &&
+          options.value !== this.iFrameFormElement.getValue()
+      );
+    });
   }
 }

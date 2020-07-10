@@ -4,6 +4,7 @@ import {
   FRAME_CONTROLLER,
   ELEMENT_EVENTS_TO_IFRAME,
   CONTROLLER_STYLES,
+  FRAME_ELEMENT,
 } from "../constants";
 import iframer, {
   setAttributes,
@@ -13,16 +14,11 @@ import iframer, {
 import bus from "framebus";
 import uuid from "../../libs/uuid";
 import deepClone from "../../libs/deepClone";
-import {
-  getStylesFromClass,
-  buildStylesFromClassesAndStyles,
-} from "../../libs/styles";
-import { validateElementOptions } from "../../libs/element-options";
 
 class Elements {
-  elements: Record<string, Element> = {};
-  count: number = 0;
-  metaData: any;
+  #elements: Record<string, Element> = {};
+  #count: number = 0;
+  #metaData: any;
   // bus class to store all listeners and teardown on destroy
   // destructor to remove events(non bus events - with the event emitter) on destroy
   constructor(
@@ -36,10 +32,10 @@ class Elements {
       throw new Error("SSN not provided");
       return;
     }
-    this.metaData = metaData;
+    this.#metaData = metaData;
     const iframe = iframer({ name: FRAME_CONTROLLER });
     setAttributes(iframe, {
-      src: getIframeSrc(this.metaData.uuid),
+      src: getIframeSrc(this.#metaData.uuid),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
 
@@ -115,7 +111,7 @@ class Elements {
         },
       ],
     };
-    return this._createMultipleElement(elementGroup, true);
+    return this.#createMultipleElement(elementGroup, true);
   };
 
   // { // display flex by default(not changeable)
@@ -138,10 +134,10 @@ class Elements {
     if (!multipleElements.name) {
       throw new Error("Cannot find name in the options");
     }
-    return this._createMultipleElement(multipleElements);
+    return this.#createMultipleElement(multipleElements);
   };
 
-  private _createMultipleElement = (
+  #createMultipleElement = (
     multipleElements: any,
     isSingleElementAPI: boolean = false
   ) => {
@@ -152,8 +148,7 @@ class Elements {
         const options = element;
         const elementType = options.elementType;
 
-        options.sensitive =
-          options.sensitive || ELEMENTS[elementType].sensitive;
+        options.sensitive = options.sensitive || ELEMENTS[elementType].sensitive;
         options.replacePattern =
           options.replacePattern || ELEMENTS[elementType].replacePattern;
         options.mask = options.mask || ELEMENTS[elementType].mask;
@@ -168,90 +163,110 @@ class Elements {
           options.elementName = `${options.elementName}:${options.value}`;
         }
 
-        // if (this.elements[options.elementName]) {
-        //   // todo: update if already exits?
-        //   throw new Error("This element already existed: " + options.name);
-        //   return this.elements[options.name];
-        // }
+        options.elementName = `${FRAME_ELEMENT}:${options.elementName}`;
 
         elements.push(options);
       });
     });
-    // todo: group name
+
     multipleElements.elementName = isSingleElementAPI
       ? elements[0].elementName
-      : `group:${multipleElements.name}`;
-    if (this.elements[multipleElements.elementName]) {
-      // todo: update if already exits?
-      throw new Error(
-        "This element already existed: " + multipleElements.elementName
-      );
-    }
-    const element = new Element(
-      multipleElements,
-      this.metaData,
-      isSingleElementAPI
-    );
+      : `${FRAME_ELEMENT}:group:${multipleElements.name}`;
 
-    this.elements[multipleElements.elementName] = element;
+    if (
+      isSingleElementAPI &&
+      !this.#elements[elements[0].elementName] &&
+      this.#hasElementName(elements[0].name)
+    ) {
+      throw new Error("The element name has to unique: " + elements[0].name);
+    }
+
+    let element = this.#elements[multipleElements.elementName];
+    if (element) {
+      if (isSingleElementAPI) {
+        element.update(elements[0]);
+      } else {
+        element.update(multipleElements);
+      }
+    } else {
+      element = new Element(
+        multipleElements,
+        this.#metaData,
+        isSingleElementAPI,
+        this.#destroyCallback,
+        this.#updateCallback
+      );
+      this.#elements[multipleElements.elementName] = element;
+    }
 
     if (!isSingleElementAPI) {
       elements.forEach((element) => {
         const name = element.elementName;
-        if (!this.elements[name]) {
-          this.elements[name] = this.create(element.elementType, element);
+        if (!this.#elements[name]) {
+          this.#elements[name] = this.create(element.elementType, element);
+        } else {
+          this.#elements[name].update(element);
         }
       });
     }
-    // todo: on iframe side
-    element.onDestroy((elementNames: string[]) => {
-      elementNames.forEach((elementName) => {
-        this.removeElement(elementName);
-      });
-    });
 
     return element;
   };
 
-  // todo: need to send single element
   getElement = (
     elementType: string,
-    elementName: string = elementType,
+    elementName: any = elementType,
     valueForRadioOrCheckbox?: string
   ) => {
-    for (const element in this.elements) {
+    for (const element in this.#elements) {
       const elementData = element.split(":");
       if (
-        elementData[0] === elementType &&
-        elementData[1] === elementName &&
-        (elementData[2] !== undefined
-          ? elementData[2] === valueForRadioOrCheckbox
-          : true)
+        elementData[1] === elementType &&
+        elementData[2] === elementName &&
+        (elementData[3] !== undefined ? elementData[2] === valueForRadioOrCheckbox : true)
       )
-        return this.elements[element];
+        return this.#elements[element];
     }
 
     return null;
   };
 
+  hasElement = (
+    elementType: string,
+    elementName: any = elementType,
+    valueForRadioOrCheckbox?: string
+  ) => {
+    for (const element in this.#elements) {
+      const elementData = element.split(":");
+      if (
+        elementData[0] === elementType &&
+        elementData[1] === elementName &&
+        (elementData[2] !== undefined ? elementData[2] === valueForRadioOrCheckbox : true)
+      )
+        return true;
+    }
+
+    return false;
+  };
+
   // todo: get all elements metadata like name, type and its instance ?
   getElements = () => {
     const elements: any[] = [];
-    for (const element in this.elements) {
+    for (const element in this.#elements) {
       const elementData = element.split(":");
       elements.push({
         name: elementData[1],
         type: elementData[0],
-        instance: this.elements[element],
+        instance: this.#elements[element],
       });
     }
 
     return elements;
   };
 
-  private removeElement = (elementName: string) => {
-    for (let element in this.elements) {
-      if (element === elementName) delete this.elements[element];
+  #removeElement = (elementName: string) => {
+    for (let element in this.#elements) {
+      if (element === elementName) delete this.#elements[element];
     }
   };
 
@@ -259,9 +274,7 @@ class Elements {
     return new Promise((resolve, reject) => {
       bus
         // .target(getIframeSrc(this.metaData.uuid))
-        .emit(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST, {}, function (
-          data: any
-        ) {
+        .emit(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST, {}, function (data: any) {
           if (data.error) {
             reject(data);
           } else {
@@ -269,6 +282,30 @@ class Elements {
           }
         });
     });
+  };
+
+  #destroyCallback = (elementNames: string[]) => {
+    elementNames.forEach((elementName) => {
+      this.#removeElement(elementName);
+    });
+  };
+
+  #updateCallback = (elements: any[]) => {
+    elements.forEach((element) => {
+      if (this.#elements[element.elementName]) {
+        this.#elements[element.elementName].update(element);
+      }
+    });
+  };
+
+  #hasElementName = (name: string) => {
+    Object.keys(this.#elements).forEach((elementName) => {
+      if (elementName.split(":")[2] === name) {
+        return true;
+      }
+    });
+
+    return false;
   };
 }
 

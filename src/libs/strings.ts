@@ -13,10 +13,7 @@ export const mask = function (value = "", prevValue = "", maskObject, focus) {
   if (newValue.length === 0) {
     newValue = pattern;
     patternRegexMapperKeys.forEach((char) => {
-      newValue.replace(
-        new RegExp(char, "g"),
-        replacer !== null ? replacer : ""
-      );
+      newValue.replace(new RegExp(char, "g"), replacer !== null ? replacer : "");
     });
   }
 
@@ -47,8 +44,7 @@ export const mask = function (value = "", prevValue = "", maskObject, focus) {
         }
       }
       if (removerIndex !== backspaceIndex) {
-        newValue =
-          newValue.slice(0, removerIndex) + newValue.slice(backspaceIndex);
+        newValue = newValue.slice(0, removerIndex) + newValue.slice(backspaceIndex);
       }
     }
   }
@@ -72,10 +68,7 @@ export const mask = function (value = "", prevValue = "", maskObject, focus) {
         }
       }
     } else {
-      if (
-        pattern[i] === newValue[i] &&
-        !patternRegexMapperKeys.includes(pattern[i])
-      ) {
+      if (pattern[i] === newValue[i] && !patternRegexMapperKeys.includes(pattern[i])) {
         continue;
       }
 
@@ -125,19 +118,9 @@ export const splice = function (
   removeCount: number,
   adder: string
 ) {
-  return (
-    string.slice(0, index) + adder + string.slice(index + Math.abs(removeCount))
-  );
+  return string.slice(0, index) + adder + string.slice(index + Math.abs(removeCount));
 };
 
-export const replaceAt = function (
-  str: string,
-  index: number,
-  replacer: string = ""
-) {
+export const replaceAt = function (str: string, index: number, replacer: string = "") {
   return (str = str.substring(0, index) + replacer + str.substring(index + 1));
-};
-
-export const escapeStrings = (str = "") => {
-  return JSON.stringify(str).slice(1, -1);
 };

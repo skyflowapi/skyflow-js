@@ -9,6 +9,7 @@ import {
 import EventEmitter from "../../../event-emitter";
 import { mask, unMask } from "../../../libs/strings";
 import { regExFromString } from "../../../libs/regex";
+import { properties } from "../../../properties";
 
 // create separate IFrameFormElement for each radio button and separate or SET_VALUE event b/w radio buttons.
 // while hitting tokenize it checks whether there are more than 2 ':' if so append each values in an array(for checkbox)
@@ -29,8 +30,7 @@ export class IFrameForm {
           return;
         }
         const frameGlobalName: string = <string>data.name;
-        if (this.clientMetaData)
-          this.initializeFrame(window.parent, frameGlobalName);
+        if (this.clientMetaData) this.initializeFrame(window.parent, frameGlobalName);
         else
           this.callbacks.push(() => {
             this.initializeFrame(window.parent, frameGlobalName);
@@ -90,13 +90,12 @@ export class IFrameForm {
       }
 
       if (
-        this.iFrameFormElements[iFrameFormElement].fieldType ===
-        ELEMENTS.checkbox.name
+        this.iFrameFormElements[iFrameFormElement].fieldType === ELEMENTS.checkbox.name
       ) {
-        if (Array.isArray(responseObject[state.name])) {
-          responseObject[state.name].push(state.value);
-        } else if (state.value !== "" && state.value !== undefined) {
-          responseObject[state.name] = [state.value];
+        if (responseObject[state.name]) {
+          responseObject[state.name] = `${responseObject[state.name]},${state.value}`;
+        } else {
+          responseObject[state.name] = state.value;
         }
       } else {
         responseObject[state.name] = this.iFrameFormElements[
@@ -105,7 +104,16 @@ export class IFrameForm {
       }
     }
 
-    return this.client.deliverPayload(responseObject);
+    return this.client.request({
+      body: {
+        ...responseObject,
+        orgID: this.client.config.orgId,
+        vaultID: this.client.config.vaultId,
+      },
+      requestMethod: "POST",
+      url: this.client.config.workflowURL + "/getcreditscore",
+      headers: { skyflow_app_id: this.client.config.appId },
+    });
   };
 
   private initializeFrame = (root: Window, frameGlobalName: string) => {
@@ -114,10 +122,7 @@ export class IFrameForm {
       const frame: any = root.frames[i];
 
       try {
-        if (
-          frame.location.href === location.href &&
-          frame.name === frameGlobalName
-        ) {
+        if (frame.location.href === location.href && frame.name === frameGlobalName) {
           frameInstance = frame;
           break;
         }
@@ -129,7 +134,12 @@ export class IFrameForm {
     if (!frameInstance) {
       throw new Error("frame not found: " + frameGlobalName);
     } else {
-      frameInstance.Skyflow.init(this.getOrCreateIFrameFormElement);
+      if (frameInstance?.Skyflow?.init) {
+        frameInstance.Skyflow.init(
+          this.getOrCreateIFrameFormElement,
+          this.clientMetaData
+        );
+      }
     }
   };
 }
@@ -150,15 +160,13 @@ export class IFrameFormElement extends EventEmitter {
   iFrameName: string;
   metaData;
   private regex?: RegExp;
-  private replacePattern?: [RegExp, string];
-  private mask?: any;
+  replacePattern?: [RegExp, string];
+  mask?: any;
   constructor(name: string, metaData) {
     super();
     const frameValues = name.split(":");
-    const fieldType = frameValues[0];
-    const fieldName = isNaN(parseInt(frameValues[1])) // set frame name as frame type of the string besides : is number
-      ? frameValues[1]
-      : frameValues[0];
+    const fieldType = frameValues[1];
+    const fieldName = frameValues[2]; // set frame name as frame type of the string besides : is number
 
     // this.iFrameSignificantName = frameSignificantName;
     this.iFrameName = name;
@@ -177,9 +185,7 @@ export class IFrameFormElement extends EventEmitter {
   onFocusChange = (focus: boolean) => {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: this.iFrameName,
-      event: focus
-        ? ELEMENT_EVENTS_TO_CLIENT.FOCUS
-        : ELEMENT_EVENTS_TO_CLIENT.BLUR,
+      event: focus ? ELEMENT_EVENTS_TO_CLIENT.FOCUS : ELEMENT_EVENTS_TO_CLIENT.BLUR,
     });
     this.changeFocus(focus);
   };
@@ -216,14 +222,12 @@ export class IFrameFormElement extends EventEmitter {
       newMask[2]["a"] = /[a-zA-Z]/;
       newMask[2]["*"] = /[a-zA-Z0-9]/;
     }
-
     this.mask = newMask;
   }
 
   setValidation(validations: string[] | undefined) {
     if (validations) {
-      if (validations.includes("default"))
-        this.regex = ELEMENTS[this.fieldType].regex;
+      if (validations.includes("default")) this.regex = ELEMENTS[this.fieldType].regex;
       else {
         validations.forEach((value) => {
           if (value !== "default" && value !== "required") {
@@ -244,14 +248,6 @@ export class IFrameFormElement extends EventEmitter {
 
   // todo: send error message of the field
   setValue = (value: string = "", valid: boolean = true) => {
-    if (this.mask) {
-      value = mask(value, this.state.value, this.mask, this.state.isFocused);
-
-      valid = valid && this.mask[0].length === value.length;
-    } else if (this.replacePattern) {
-      value = value.replace(this.replacePattern[0], this.replacePattern[1]);
-    }
-
     if (this.fieldType === ELEMENTS.checkbox.name) {
       // toggle for checkbox
       if (this.state.value === value) {
@@ -363,20 +359,18 @@ export class IFrameFormElement extends EventEmitter {
 
     // for radio buttons
     if (this.fieldType === ELEMENTS.radio.name) {
-      bus
-        .target(location.origin)
-        .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
-          if (
-            data.value !== null &&
-            data.value !== undefined &&
-            data.value !== "" &&
-            data.fieldName === this.fieldName &&
-            data.fieldType === this.fieldType &&
-            data.value !== this.state.value
-          ) {
-            this.setValue(<string | undefined>data.value);
-          }
-        });
+      bus.target(location.origin).on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+        if (
+          data.value !== null &&
+          data.value !== undefined &&
+          data.value !== "" &&
+          data.fieldName === this.fieldName &&
+          data.fieldType === this.fieldType &&
+          data.value !== this.state.value
+        ) {
+          this.setValue(<string | undefined>data.value);
+        }
+      });
     }
   };
 
