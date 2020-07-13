@@ -15,7 +15,7 @@ __Prerequisites__
 
 ```shell
 
-npm run build
+npm run build 
 
 ```
 
