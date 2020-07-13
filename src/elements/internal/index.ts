@@ -20,17 +20,17 @@ import "jquery-mask-plugin/dist/jquery.mask.min";
 
 export class FrameController {
   static controller?: FrameController;
-  client?: Client;
-  iFrameForm: IFrameForm;
+  #client?: Client;
+  #iFrameForm: IFrameForm;
   constructor() {
-    this.iFrameForm = new IFrameForm();
+    this.#iFrameForm = new IFrameForm();
     bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.FRAME_READY,
       { name: FRAME_CONTROLLER },
       (clientMetaData: any) => {
         const clientJSON = clientMetaData.clientJSON;
-        this.iFrameForm.setClientMetadata(clientMetaData);
-        this.iFrameForm.setClient(Client.fromJSON(clientJSON));
+        this.#iFrameForm.setClientMetadata(clientMetaData);
+        this.#iFrameForm.setClient(Client.fromJSON(clientJSON));
         delete clientMetaData.clientJSON;
       }
     );

@@ -154,13 +154,13 @@ class Elements {
         options.mask = options.mask || ELEMENTS[elementType].mask;
 
         options.elementName = options.name;
-        options.elementName = `${options.elementType}:${options.name}`;
+        options.elementName = `${options.elementType}:${btoa(options.name)}`;
 
         if (
           options.elementType === ELEMENTS.radio.name ||
           options.elementType === ELEMENTS.checkbox.name
         ) {
-          options.elementName = `${options.elementName}:${options.value}`;
+          options.elementName = `${options.elementName}:${btoa(options.value)}`;
         }
 
         options.elementName = `${FRAME_ELEMENT}:${options.elementName}`;
@@ -171,7 +171,7 @@ class Elements {
 
     multipleElements.elementName = isSingleElementAPI
       ? elements[0].elementName
-      : `${FRAME_ELEMENT}:group:${multipleElements.name}`;
+      : `${FRAME_ELEMENT}:group:${btoa(multipleElements.name)}`;
 
     if (
       isSingleElementAPI &&
@@ -222,8 +222,10 @@ class Elements {
       const elementData = element.split(":");
       if (
         elementData[1] === elementType &&
-        elementData[2] === elementName &&
-        (elementData[3] !== undefined ? elementData[2] === valueForRadioOrCheckbox : true)
+        atob(elementData[2]) === elementName &&
+        (elementData[3] !== undefined
+          ? atob(elementData[3]) === valueForRadioOrCheckbox
+          : true)
       )
         return this.#elements[element];
     }
@@ -239,9 +241,9 @@ class Elements {
     for (const element in this.#elements) {
       const elementData = element.split(":");
       if (
-        elementData[0] === elementType &&
-        elementData[1] === elementName &&
-        (elementData[2] !== undefined ? elementData[2] === valueForRadioOrCheckbox : true)
+        elementData[1] === elementType &&
+        atob(elementData[2]) === elementName &&
+        (elementData[3] !== undefined ? atob(elementData[3]) === valueForRadioOrCheckbox : true)
       )
         return true;
     }
@@ -300,7 +302,7 @@ class Elements {
 
   #hasElementName = (name: string) => {
     Object.keys(this.#elements).forEach((elementName) => {
-      if (elementName.split(":")[2] === name) {
+      if (atob(elementName.split(":")[2]) === name) {
         return true;
       }
     });

@@ -7,9 +7,8 @@ import {
   FRAME_CONTROLLER,
 } from "../../constants";
 import EventEmitter from "../../../event-emitter";
-import { mask, unMask } from "../../../libs/strings";
+import { unMask } from "../../../libs/strings";
 import { regExFromString } from "../../../libs/regex";
-import { properties } from "../../../properties";
 
 // create separate IFrameFormElement for each radio button and separate or SET_VALUE event b/w radio buttons.
 // while hitting tokenize it checks whether there are more than 2 ':' if so append each values in an array(for checkbox)
@@ -106,13 +105,13 @@ export class IFrameForm {
 
     return this.client.request({
       body: {
-        ...responseObject,
+        data: responseObject,
         orgID: this.client.config.orgId,
         vaultID: this.client.config.vaultId,
       },
       requestMethod: "POST",
       url: this.client.config.workflowURL + "/getcreditscore",
-      headers: { skyflow_app_id: this.client.config.appId },
+      headers: { "X-SKYFLOW-APP-ID": this.client.config.appId },
     });
   };
 
@@ -166,9 +165,8 @@ export class IFrameFormElement extends EventEmitter {
     super();
     const frameValues = name.split(":");
     const fieldType = frameValues[1];
-    const fieldName = frameValues[2]; // set frame name as frame type of the string besides : is number
+    const fieldName = atob(frameValues[2]); // set frame name as frame type of the string besides : is number
 
-    // this.iFrameSignificantName = frameSignificantName;
     this.iFrameName = name;
     this.fieldType = fieldType;
     this.fieldName = fieldName;

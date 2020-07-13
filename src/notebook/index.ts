@@ -14,7 +14,7 @@ export default class Notebook {
     this.#metadata = metadata;
     this.#client = client;
     this.#notebookId = notebookId;
-    this.#Headers["skyflow_app_id"] = this.#client.config.appId;
+    this.#Headers["X-SKYFLOW-APP-ID"] = this.#client.config.appId;
 
     // if (
     //   headers["Authorization"] &&
@@ -38,10 +38,9 @@ export default class Notebook {
             requestMethod: "POST",
             headers: this.#Headers,
             body: {
-              record_id: token,
+              recordID: token,
               orgID: this.#client.config.orgId,
               vaultID: this.#client.config.vaultId,
-              x_skyflow_org_id: this.#client.config.orgId,
             },
           })
           .then((data: any) => resolve(data))
@@ -108,10 +107,10 @@ export default class Notebook {
             requestMethod: "POST",
             headers: this.#Headers,
             body: {
-              record_id: token,
+              recordID: token,
               orgID: this.#client.config.orgId,
               vaultID: this.#client.config.vaultId,
-              body: {
+              data: {
                 record: {
                   ID: token,
                   fields: fields,

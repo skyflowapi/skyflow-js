@@ -1,22 +1,8 @@
-import {
-  ELEMENT_EVENTS_TO_CLIENT,
-  ELEMENTS,
-  ELEMENT_EVENTS_TO_IFRAME,
-  STYLE_TYPE,
-} from "../../constants";
-import iframer, { setAttributes, getIframeSrc } from "../../../iframe-libs/iframer";
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from "../../constants";
 import EventEmitter from "../../../event-emitter";
 import Bus from "../../../libs/Bus";
 import deepClone from "../../../libs/deepClone";
-import {
-  getStylesFromClass,
-  buildStylesFromClassesAndStyles,
-} from "../../../libs/styles";
-import {
-  validateElementOptions,
-  getElements,
-  validateAndSetupGroupOptions,
-} from "../../../libs/element-options";
+import { getElements, validateAndSetupGroupOptions } from "../../../libs/element-options";
 import IFrame from "./IFrame";
 
 class Element {
@@ -180,9 +166,19 @@ class Element {
 
   getOptions = () => {
     // todo: remove all names
-    const options = deepClone(this.#group);
-    delete options.options;
-    delete options.value;
+    let options = deepClone(this.#group);
+
+    if (this.#isSingleElementAPI) {
+      options = options.rows[0].elements[0];
+    } else {
+      options.rows.forEach((row) => {
+        row.elements.forEach((element) => {
+          delete element.elementName;
+        });
+      });
+    }
+
+    delete options.elementName;
 
     return options;
   };
@@ -202,9 +198,6 @@ class Element {
   // methods to invoke element events
   blur = () => {
     let name = this.#iframe.name;
-    // if (this.isSingleElementAPI) {
-    //   name = this.elements[0].elementName;
-    // }
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: name,
       event: ELEMENT_EVENTS_TO_CLIENT.BLUR,
@@ -213,9 +206,6 @@ class Element {
 
   focus = () => {
     let name = this.#iframe.name;
-    // if (this.isSingleElementAPI) {
-    //   name = this.elements[0].name;
-    // }
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: name,
       event: ELEMENT_EVENTS_TO_CLIENT.FOCUS,
@@ -225,9 +215,6 @@ class Element {
   destroy = () => {
     // todo: destroy all the internal elements
     let name = this.#iframe.name;
-    // if (this.isSingleElementAPI) {
-    //   name = this.elements[0].name;
-    // }
 
     //todo: fix this
     this.#bus.emit(

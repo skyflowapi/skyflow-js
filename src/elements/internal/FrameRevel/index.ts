@@ -76,7 +76,7 @@ export default class FrameRevel {
     // todo: once vault API is ready call the request directly using #client
     try {
       this.#notebook.getRecord(this.#options.token).then((data: any) => {
-        const value = data.Records.fields[0].value;
+        const value = data.fields[0].value;
         this.#container.title = value;
         $(document).ready(() => {
           this.#container.textContent = value;
