@@ -8,15 +8,15 @@ import {
   FRAME_CONTROLLER,
   INPUT_STYLES,
 } from "../constants";
+import $ from "jquery";
 import bus from "framebus";
 import injectStylesheet from "inject-stylesheet";
 import Client from "../../client";
 import { IFrameForm, IFrameFormElement } from "./iFrameForm";
 import { setAttributes, setStyles } from "../../iframe-libs/iframer";
 import { splitStyles } from "../../libs/styles";
-import Element from "../external/element";
 import { validateElementOptions } from "../../libs/element-options";
-import { escapeStrings } from "../../libs/strings";
+import "jquery-mask-plugin/dist/jquery.mask.min";
 
 export class FrameController {
   static controller?: FrameController;
@@ -84,12 +84,7 @@ export class FrameElement {
     inputElement.onblur = (event) => {
       this.onFocusChange(event, false);
     };
-    inputElement.oninput = (event) => {
-      this.onInputChange(event);
-    };
 
-    // events from client or on pressing tab, label etc
-    // this.iFrameFormElement?.on()
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, () => {
       this.focusChange(true);
     });
@@ -97,19 +92,8 @@ export class FrameElement {
       this.focusChange(false);
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
-      if (
-        state.value &&
-        this.iFrameFormElement.fieldType === ELEMENTS.radio.name
-      ) {
-        (<HTMLInputElement>this.domInput).checked =
-          this.options.value === state.value;
-      } else if (
-        this.iFrameFormElement.fieldType !== ELEMENTS.radio.name &&
-        this.iFrameFormElement.fieldType !== ELEMENTS.checkbox.name
-      ) {
-        if (this.options.mask || this.options.replacePattern) {
-          this.setValue(state.value);
-        }
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.radio.name) {
+        (<HTMLInputElement>this.domInput).checked = this.options.value === state.value;
       }
       this.updateStyleClasses(state);
     });
@@ -139,30 +123,28 @@ export class FrameElement {
       maxLength: this.options.maxLength,
       minLength: this.options.minLength,
       autocomplete: this.options.autocomplete,
+      disabled: this.options.disabled ? true : undefined,
+      readOnly: this.options.readOnly ? true : undefined,
+      required: this.options.validation?.includes("required") || undefined,
     };
 
-    if (
-      this.domInput &&
-      this.iFrameFormElement.fieldType === ELEMENTS.dropdown.name
-    ) {
+    if (this.domInput && this.iFrameFormElement.fieldType === ELEMENTS.dropdown.name) {
       this.domInput.innerHTML = "";
       this.options.options.forEach((option) => {
         const optionElement = document.createElement("option");
         optionElement.value = option.value;
-        optionElement.innerText = option.text;
+        optionElement.textContent = option.text;
         this.domInput?.append(optionElement);
       });
     }
 
     setAttributes(this.domInput, attr);
-    if (this.domInput) {
-      this.domInput.disabled = this.options.disabled ? true : false;
-      this.domInput.required = this.options.validation?.includes("required");
-      (<HTMLInputElement>this.domInput).readOnly = this.options.readonly
-        ? true
-        : false;
-    }
-    let newInputValue = this.iFrameFormElement.getValue();
+    // if (this.domInput) {
+    //   this.domInput.disabled = this.options.disabled ? true : false;
+    //   this.domInput.required = this.options.validation?.includes("required");
+    //   (<HTMLInputElement>this.domInput).readOnly = this.options.readonly ? true : false;
+    // }
+    let newInputValue = this.domInput?.value || this.iFrameFormElement.getValue();
 
     // HTML don't support validity on radio
     if (this.iFrameFormElement.getValue() === undefined) {
@@ -192,17 +174,13 @@ export class FrameElement {
         this.iFrameFormElement.fieldType === ELEMENTS.radio.name
       ) {
         this.domInput.value = this.options.value;
-        (<HTMLInputElement>this.domInput).checked =
-          this.options.value === newInputValue;
+        (<HTMLInputElement>this.domInput).checked = this.options.value === newInputValue;
       } else {
         this.domInput.value = newInputValue || "";
       }
     }
 
-    this.iFrameFormElement.setValue(
-      newInputValue,
-      this.domInput?.checkValidity()
-    );
+    this.iFrameFormElement.setValue(newInputValue, this.domInput?.checkValidity());
   }
 
   updateParentDiv = (newDiv: HTMLDivElement) => {
@@ -240,12 +218,7 @@ export class FrameElement {
       if (styles[classType] && Object.keys(styles).length !== 0) {
         const [nonPseudoStyles, pseudoStyles] = splitStyles(styles[classType]);
         stylesByClassName[
-          ".SkyflowElement-" +
-            preText +
-            "-" +
-            this.options.name +
-            "-" +
-            classType
+          ".SkyflowElement-" + preText + "-" + this.options.name + "-" + classType
         ] = nonPseudoStyles;
         for (const pseudoStyle in pseudoStyles) {
           if (ALLOWED_PSEUDO_STYLES.includes(pseudoStyle))
@@ -295,8 +268,7 @@ export class FrameElement {
         if (types.includes(type)) classes.push(type);
       });
       classes = classes.map(
-        (type) =>
-          "SkyflowElement-" + preText + "-" + this.options.name + "-" + type
+        (type) => "SkyflowElement-" + preText + "-" + this.options.name + "-" + type
       );
 
       dom.className = classes.join(" ");
@@ -306,11 +278,7 @@ export class FrameElement {
   updateOptions(options) {
     const newOptions = { ...this.options, ...options };
 
-    validateElementOptions(
-      this.iFrameFormElement.fieldType,
-      this.options,
-      newOptions
-    );
+    validateElementOptions(this.iFrameFormElement.fieldType, this.options, newOptions);
 
     this.options = newOptions;
 
@@ -328,16 +296,51 @@ export class FrameElement {
       this.injectInputStyles(options?.labelStyles?.styles, "label");
     }
 
-    if (this.domLabel)
-      this.domLabel.innerText = escapeStrings(this.options.label);
+    if (this.domLabel) this.domLabel.textContent = this.options.label;
 
-    this.iFrameFormElement.setValidation(this.options.validation);
-    this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
-    this.iFrameFormElement.setMask(this.options.mask);
+    $(document).ready(() => {
+      const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
 
-    this.setupInputField(
-      options.hasOwnProperty("value") &&
-        options.value !== this.iFrameFormElement.getValue()
-    );
+      this.iFrameFormElement.setValidation(this.options.validation);
+      this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
+      this.iFrameFormElement.setMask(this.options.mask);
+
+      const mask = this.iFrameFormElement.mask;
+      $(id).off("input");
+      (<any>$).jMaskGlobals.translation = {};
+      (<any>$).jMaskGlobals.clearIfNotMatch = true;
+
+      $(id).unmask();
+
+      if (mask) {
+        const translation = {};
+        Object.keys(mask[2]).forEach((key) => {
+          translation[key] = { pattern: mask[2][key] };
+        });
+
+        $(id).mask(mask[0], {
+          translation,
+        });
+      }
+
+      if (this.domInput) {
+        const replacePattern = this.iFrameFormElement.replacePattern;
+        if (replacePattern) {
+          $(id).on("input", (event) => {
+            event.target.value = event.target.value.replace(
+              replacePattern[0],
+              replacePattern[1]
+            );
+          });
+        }
+
+        $(id).on("input", this.onInputChange);
+      }
+
+      this.setupInputField(
+        options.hasOwnProperty("value") &&
+          options.value !== this.iFrameFormElement.getValue()
+      );
+    });
   }
 }

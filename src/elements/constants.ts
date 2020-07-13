@@ -1,5 +1,9 @@
 export const FRAME_CONTROLLER = "controller";
 
+export const FRAME_REVEL = "revel";
+
+export const FRAME_ELEMENT = "element";
+
 export const ELEMENT_EVENTS_TO_CLIENT = {
   CHANGE: "Change",
   READY: "Ready",
@@ -8,6 +12,7 @@ export const ELEMENT_EVENTS_TO_CLIENT = {
   ESCAPE: "Escape",
   CLICK: "Click",
   ERROR: "Error",
+  SUCCESS: "Success",
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {
@@ -17,6 +22,7 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
   INPUT_EVENT: "INPUT_EVENT",
   DESTROY_FRAME: "DESTROY FRAME",
   SET_VALUE: "SET_VALUE",
+  CLIENT_REQUEST: "CLIENT_REQUEST",
 };
 //   'ADD_CLASS',
 //   'AUTOFILL_EXPIRATION_DATE',

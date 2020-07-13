@@ -1,14 +1,8 @@
 import { FrameElement } from ".";
 import bus from "framebus";
-import {
-  ELEMENT_EVENTS_TO_IFRAME,
-  ALLOWED_MULTIPLE_FIELDS_STYLES,
-} from "../constants";
+import { ELEMENT_EVENTS_TO_IFRAME, ALLOWED_MULTIPLE_FIELDS_STYLES } from "../constants";
 import injectStylesheet from "inject-stylesheet";
-import {
-  getValueAndItsUnit,
-  validateAndSetupGroupOptions,
-} from "../../libs/element-options";
+import { getValueAndItsUnit, validateAndSetupGroupOptions } from "../../libs/element-options";
 import { getFlexGridStyles } from "../../libs/styles";
 
 export default class FrameElements {
@@ -31,24 +25,17 @@ export default class FrameElements {
 
   // called on iframe loaded im html file
   static start = () => {
-    bus.emit(
-      ELEMENT_EVENTS_TO_IFRAME.FRAME_READY,
-      { name: window.name },
-      (group: any) => {
-        FrameElements.group = group;
-        if (FrameElements.frameElements) {
-          FrameElements.frameElements.setup(); // start the process
-        }
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, { name: window.name }, (group: any) => {
+      FrameElements.group = group;
+      if (FrameElements.frameElements) {
+        FrameElements.frameElements.setup(); // start the process
       }
-    );
+    });
   };
 
   // called by IFrameForm
   static init = (getOrCreateIFrameFormElement: Function, metaData) => {
-    FrameElements.frameElements = new FrameElements(
-      getOrCreateIFrameFormElement,
-      metaData
-    );
+    FrameElements.frameElements = new FrameElements(getOrCreateIFrameFormElement, metaData);
   };
 
   setup = () => {
@@ -62,27 +49,18 @@ export default class FrameElements {
     this.updateOptions(FrameElements.group);
 
     // on bus event call update again
-    bus
-      .target(this.metaData.clientDomain)
-      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
-        if (
-          location.origin === this.metaData.clientDomain &&
-          data.name === this.name
-        ) {
-          if (data.options !== undefined) {
-            // for updating options
-            this.updateOptions(data.options);
-          }
+    bus.target(this.metaData.clientDomain).on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+      if (location.origin === this.metaData.clientDomain && data.name === this.name) {
+        if (data.options !== undefined) {
+          // for updating options
+          this.updateOptions(data.options);
         }
-      });
+      }
+    });
   };
 
   updateOptions = (newGroup) => {
-    FrameElements.group = validateAndSetupGroupOptions(
-      FrameElements.group,
-      newGroup,
-      false
-    );
+    FrameElements.group = validateAndSetupGroupOptions(FrameElements.group, newGroup, false);
     const group = FrameElements.group;
     const rows = group.rows;
     const elements = this.elements;
@@ -123,8 +101,6 @@ export default class FrameElements {
         ALLOWED_MULTIPLE_FIELDS_STYLES
       );
 
-      const elementsInRow: any[] = [];
-
       // elements
       row.elements.forEach((element) => {
         const elementDiv = document.createElement("div");
@@ -144,14 +120,8 @@ export default class FrameElements {
         } else {
           // create a iframeelement
           // create element by passing iframeformelement and options and mount by default returns
-          const iFrameFormElement = this.getOrCreateIFrameFormElement(
-            element.elementName
-          );
-          elements[element.elementName] = new FrameElement(
-            iFrameFormElement,
-            element,
-            elementDiv
-          );
+          const iFrameFormElement = this.getOrCreateIFrameFormElement(element.elementName);
+          elements[element.elementName] = new FrameElement(iFrameFormElement, element, elementDiv);
         }
 
         rowDiv.append(elementDiv);

@@ -1,7 +1,8 @@
-import { FRAME_CONTROLLER } from "./elements/constants";
+import { FRAME_CONTROLLER, FRAME_REVEL, FRAME_ELEMENT } from "./elements/constants";
 import { FrameController } from "./elements/internal";
 import "core-js/stable";
 import FrameElements from "./elements/internal/FrameElements";
+import FrameRevel from "./elements/internal/FrameRevel";
 
 if (typeof window.console === "undefined") {
   (<any>window).console = <any>{
@@ -12,10 +13,13 @@ if (typeof window.console === "undefined") {
 
 (function (root: any) {
   try {
-    if (root.name.split(":")[0] === FRAME_CONTROLLER) {
+    const names = root.name.split(":");
+    if (names[0] === FRAME_CONTROLLER && names[1] === undefined) {
       root.Skyflow = FrameController;
       FrameController.init(location.hash);
-    } else {
+    } else if (names[0] === FRAME_REVEL) {
+      FrameRevel.init();
+    } else if (names[0] === FRAME_ELEMENT) {
       root.Skyflow = FrameElements;
       FrameElements.start();
     }
