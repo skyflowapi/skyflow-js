@@ -4,14 +4,21 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
+  FRAME_CONTROLLER,
 } from "../../constants";
 import EventEmitter from "../../../event-emitter";
+import { mask, unMask } from "../../../libs/strings";
+import { regExFromString } from "../../../libs/regex";
+import { properties } from "../../../properties";
 
+// create separate IFrameFormElement for each radio button and separate or SET_VALUE event b/w radio buttons.
+// while hitting tokenize it checks whether there are more than 2 ':' if so append each values in an array(for checkbox)
 export class IFrameForm {
   // single form to all form elements
-  iFrameFormElements: Record<string, IFrameFormElement> = {};
-  client?: Client;
-
+  private iFrameFormElements: Record<string, IFrameFormElement> = {};
+  private client?: Client;
+  private clientMetaData?: any;
+  private callbacks: Function[] = [];
   constructor() {
     bus
       .target(location.origin)
@@ -19,16 +26,26 @@ export class IFrameForm {
         if (!data.name) {
           throw new Error("Required params are not provided");
         }
+        if (data.name === FRAME_CONTROLLER) {
+          return;
+        }
         const frameGlobalName: string = <string>data.name;
-        IFrameForm.initializeFrame(
-          window.parent,
-          frameGlobalName,
-          this.iFrameFormElements
-        );
+        if (this.clientMetaData) this.initializeFrame(window.parent, frameGlobalName);
+        else
+          this.callbacks.push(() => {
+            this.initializeFrame(window.parent, frameGlobalName);
+          });
       });
 
     bus.on(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST, (data, callback) => {
-      callback(this.tokenize());
+      // todo: Do we need to reset the data!?
+      this.tokenize()
+        .then((data) => {
+          callback(data);
+        })
+        .catch((error) => {
+          callback(error);
+        });
     });
 
     bus.on(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME, (data, callback) => {
@@ -42,52 +59,87 @@ export class IFrameForm {
     });
   }
 
+  setClient(client) {
+    this.client = client;
+  }
+
+  setClientMetadata(clientMetaData: any) {
+    this.clientMetaData = clientMetaData;
+    this.callbacks.forEach((func) => {
+      func();
+    });
+    this.callbacks = [];
+  }
+
+  private getOrCreateIFrameFormElement = (frameName) => {
+    this.iFrameFormElements[frameName] =
+      this.iFrameFormElements[frameName] ||
+      new IFrameFormElement(frameName, {
+        ...this.clientMetaData,
+      });
+    return this.iFrameFormElements[frameName];
+  };
+
   tokenize = () => {
+    if (!this.client) throw new Error("client connection not established");
     const responseObject: any = {};
     for (const iFrameFormElement in this.iFrameFormElements) {
       const state = this.iFrameFormElements[iFrameFormElement].state;
       if (!state.isValid || !state.isComplete) {
-        return { error: "Provide complete and valid inputs" };
+        return Promise.reject({ error: "Provide complete and valid inputs" });
       }
-      responseObject[state.name] = state.value;
+
+      if (
+        this.iFrameFormElements[iFrameFormElement].fieldType === ELEMENTS.checkbox.name
+      ) {
+        if (responseObject[state.name]) {
+          responseObject[state.name] = `${responseObject[state.name]},${state.value}`;
+        } else {
+          responseObject[state.name] = state.value;
+        }
+      } else {
+        responseObject[state.name] = this.iFrameFormElements[
+          iFrameFormElement
+        ].getUnformattedValue();
+      }
     }
 
-    return responseObject;
+    return this.client.request({
+      body: {
+        ...responseObject,
+        orgID: this.client.config.orgId,
+        vaultID: this.client.config.vaultId,
+      },
+      requestMethod: "POST",
+      url: this.client.config.workflowURL + "/getcreditscore",
+      headers: { skyflow_app_id: this.client.config.appId },
+    });
   };
 
-  static initializeFrame = (
-    root: Window,
-    frameGlobalName: string,
-    iFrameFormElements: Record<string, IFrameFormElement>
-  ) => {
+  private initializeFrame = (root: Window, frameGlobalName: string) => {
     let frameInstance: any = undefined;
     for (let i = 0; i < root.frames.length; i++) {
       const frame: any = root.frames[i];
 
       try {
-        if (
-          frame.location.href === location.href &&
-          frame.name === frameGlobalName
-        ) {
+        if (frame.location.href === location.href && frame.name === frameGlobalName) {
           frameInstance = frame;
           break;
         }
       } catch (e) {
         /* ignored */
-        console.log("error");
       }
     }
 
     if (!frameInstance) {
       throw new Error("frame not found: " + frameGlobalName);
     } else {
-      iFrameFormElements[frameGlobalName] =
-        iFrameFormElements[frameGlobalName] ||
-        new IFrameFormElement(frameGlobalName, {});
-
-      // todo: if old form element is present sent an frame ready event again
-
-      frameInstance.Skyflow.init(iFrameFormElements[frameGlobalName]);
+      if (frameInstance?.Skyflow?.init) {
+        frameInstance.Skyflow.init(
+          this.getOrCreateIFrameFormElement,
+          this.clientMetaData
+        );
+      }
     }
   };
 }
@@ -95,31 +147,37 @@ export class IFrameForm {
 export class IFrameFormElement extends EventEmitter {
   // All external Events and state events will be handled here
   state = {
-    value: "",
+    value: <undefined | string>undefined,
     isFocused: false,
     isValid: false,
     isEmpty: true,
     isComplete: false,
-    // isPotentiallyValid: false, todo: check whether this is useful or not
     name: "",
   };
   readonly fieldType: string;
+  private sensitive: boolean;
   fieldName: string;
   iFrameName: string;
-  constructor(frameGlobalName: string, options) {
-    // todo: create each class for each fieldType and assign to a local variable variable
+  metaData;
+  private regex?: RegExp;
+  replacePattern?: [RegExp, string];
+  mask?: any;
+  constructor(name: string, metaData) {
     super();
-    const frameValues = frameGlobalName.split(":");
-    const fieldType = frameValues[0];
-    const fieldName = isNaN(parseInt(frameValues[1])) // set frame name as frame type of the string besides : is number
-      ? frameValues[1]
-      : frameValues[0];
+    const frameValues = name.split(":");
+    const fieldType = frameValues[1];
+    const fieldName = frameValues[2]; // set frame name as frame type of the string besides : is number
 
-    this.iFrameName = frameGlobalName;
+    // this.iFrameSignificantName = frameSignificantName;
+    this.iFrameName = name;
     this.fieldType = fieldType;
     this.fieldName = fieldName;
 
+    this.sensitive = ELEMENTS[this.fieldType].sensitive;
+
     this.state.name = fieldName;
+
+    this.metaData = metaData;
 
     this.collectBusEvents();
   }
@@ -127,9 +185,7 @@ export class IFrameFormElement extends EventEmitter {
   onFocusChange = (focus: boolean) => {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: this.iFrameName,
-      event: focus
-        ? ELEMENT_EVENTS_TO_CLIENT.FOCUS
-        : ELEMENT_EVENTS_TO_CLIENT.BLUR,
+      event: focus ? ELEMENT_EVENTS_TO_CLIENT.FOCUS : ELEMENT_EVENTS_TO_CLIENT.BLUR,
     });
     this.changeFocus(focus);
   };
@@ -138,14 +194,72 @@ export class IFrameFormElement extends EventEmitter {
     this.state.isFocused = focus;
 
     this.sendChangeStatus();
+
+    if (this.mask) {
+      this.setValue(this.state.value, true);
+    }
   };
 
+  setReplacePattern(pattern: string[]) {
+    if (!pattern) return;
+    this.replacePattern = [regExFromString(pattern[0]), pattern[1] || ""];
+  }
+
+  setMask(mask: string[]) {
+    if (!mask) {
+      return;
+    }
+    const newMask: any[] = [];
+    newMask[0] = mask[0];
+    newMask[1] = null; //todo: replacer options
+    newMask[2] = mask[1];
+    if (newMask[2]) {
+      Object.keys(newMask[2]).forEach((key) => {
+        newMask[2][key] = new RegExp(newMask[2][key]);
+      });
+    } else {
+      newMask[2]["9"] = /[0-9]/;
+      newMask[2]["a"] = /[a-zA-Z]/;
+      newMask[2]["*"] = /[a-zA-Z0-9]/;
+    }
+    this.mask = newMask;
+  }
+
+  setValidation(validations: string[] | undefined) {
+    if (validations) {
+      if (validations.includes("default")) this.regex = ELEMENTS[this.fieldType].regex;
+      else {
+        validations.forEach((value) => {
+          if (value !== "default" && value !== "required") {
+            this.regex = regExFromString(value);
+          }
+        });
+      }
+    }
+  }
+
+  setSensitive(sensitive: boolean = this.sensitive) {
+    if (this.sensitive === false && sensitive === true) {
+      this.sensitive = sensitive;
+    } else if (this.sensitive === true && sensitive === false) {
+      throw Error("Sensitivity is not backward compatible");
+    }
+  }
+
   // todo: send error message of the field
-  setValue = (value: string | undefined) => {
-    // todo: validate by the type of class
-    if (!value) value = "";
-    this.state.value = value;
-    if (this.fieldType === "dob") {
+  setValue = (value: string = "", valid: boolean = true) => {
+    if (this.fieldType === ELEMENTS.checkbox.name) {
+      // toggle for checkbox
+      if (this.state.value === value) {
+        this.state.value = "";
+      } else {
+        this.state.value = value;
+      }
+    } else {
+      this.state.value = value;
+    }
+
+    if (this.fieldType === "dob" && typeof value === "string" && value) {
       this.state.value = new Date(value)
         .toISOString()
         .slice(0, 10)
@@ -153,13 +267,14 @@ export class IFrameFormElement extends EventEmitter {
         .reverse()
         .join("/");
     }
-    if (value && this.state.isEmpty) {
+
+    if (this.getUnformattedValue() && this.state.isEmpty) {
       this.state.isEmpty = false;
-    } else if (!value && !this.state.isEmpty) {
+    } else if (!this.getUnformattedValue() && !this.state.isEmpty) {
       this.state.isEmpty = true;
     }
 
-    if (ELEMENTS[this.fieldType].validator(this.state.value)) {
+    if (valid && this.validator(this.state.value)) {
       this.state.isValid = true;
       this.state.isComplete = true;
     } else {
@@ -167,15 +282,23 @@ export class IFrameFormElement extends EventEmitter {
       this.state.isComplete = false;
     }
 
-    this.sendChangeStatus();
+    this.sendChangeStatus(true);
   };
 
   getValue = () => {
-    // todo: return part of the value if the field is readonly and make state as private
-    if (this.fieldType === "dob") {
+    if (
+      this.fieldType === "dob" &&
+      this.state.value &&
+      typeof this.state.value === "string"
+    ) {
       return this.state.value.split("/").reverse().join("-");
     }
     return this.state.value;
+  };
+
+  getUnformattedValue = () => {
+    if (!this.mask) return this.state.value;
+    return unMask(this.state.value, this.mask);
   };
 
   getStatus = () => {
@@ -184,42 +307,93 @@ export class IFrameFormElement extends EventEmitter {
       isValid: this.state.isValid,
       isEmpty: this.state.isEmpty,
       isComplete: this.state.isComplete,
+      ...(!this.sensitive && { value: this.state.value }),
     };
   };
 
+  validator(value: string) {
+    if (this.regex) {
+      return this.regex.test(value);
+    } else {
+      return true;
+    }
+  }
+
   // on client force focus
   collectBusEvents = () => {
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, (data, callback) => {
-      if (data.name === this.iFrameName) {
-        if (data.event === ELEMENT_EVENTS_TO_CLIENT.FOCUS) {
-          this.changeFocus(true);
-          this._emit(ELEMENT_EVENTS_TO_CLIENT.FOCUS);
-        } else if (data.event === ELEMENT_EVENTS_TO_CLIENT.BLUR) {
-          this.changeFocus(false);
-          this._emit(ELEMENT_EVENTS_TO_CLIENT.BLUR);
+    bus
+      .target(this.metaData.clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, (data, callback) => {
+        if (bus.origin === this.metaData.clientDomain)
+          if (data.name === this.iFrameName) {
+            if (data.event === ELEMENT_EVENTS_TO_CLIENT.FOCUS) {
+              this.changeFocus(true);
+              this._emit(ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+            } else if (data.event === ELEMENT_EVENTS_TO_CLIENT.BLUR) {
+              this.changeFocus(false);
+              this._emit(ELEMENT_EVENTS_TO_CLIENT.BLUR);
+            }
+          } else {
+            // empty
+          }
+      });
+
+    bus
+      .target(this.metaData.clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+        if (
+          location.origin === this.metaData.clientDomain &&
+          data.name === this.iFrameName
+        ) {
+          if (data.value !== undefined) {
+            // for setting value
+            this.setValue(<string | undefined>data.value);
+          } else if (data.options !== undefined) {
+            // for updating options
+            this._emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+              options: data.options,
+            });
+          }
         }
-        // todo: listen to remaining events
-      } else {
-        // empty
-      }
-    });
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
-      if (data.name === this.iFrameName) {
-        this.setValue(<string | undefined>data.value);
-      }
-    });
+      });
+
+    // for radio buttons
+    if (this.fieldType === ELEMENTS.radio.name) {
+      bus.target(location.origin).on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+        if (
+          data.value !== null &&
+          data.value !== undefined &&
+          data.value !== "" &&
+          data.fieldName === this.fieldName &&
+          data.fieldType === this.fieldType &&
+          data.value !== this.state.value
+        ) {
+          this.setValue(<string | undefined>data.value);
+        }
+      });
+    }
   };
 
-  // todo: add setMethods to state object and emit this event in that methods
-  sendChangeStatus = () => {
-    // todo: need to emit it on any state change
+  sendChangeStatus = (inputEvent: boolean = false) => {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: this.iFrameName,
       event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
       value: this.getStatus(),
     });
 
-    this._emit(ELEMENT_EVENTS_TO_CLIENT.CHANGE, this.getStatus());
+    this._emit(ELEMENT_EVENTS_TO_CLIENT.CHANGE, {
+      ...this.getStatus(),
+      value: this.state.value,
+    });
+
+    // send change states for radio button(sync)
+    if (inputEvent && this.fieldType === ELEMENTS.radio.name) {
+      bus.target(location.origin).emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+        fieldName: this.fieldName,
+        fieldType: this.fieldType,
+        value: this.state.value,
+      });
+    }
   };
 
   resetData() {

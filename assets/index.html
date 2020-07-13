@@ -3,65 +3,380 @@
   <head>
     <meta charset="UTF-8" />
     <style>
+      iframe::selection {
+        background-color: transparent;
+      }
       .base {
         color: #3f51b5;
+      }
+      .base:hover {
+        /* this wont work */
+        color: aqua;
       }
       .complete {
         color: #4caf50;
       }
       .empty {
       }
-      .focus {
-        color: #000;
-      }
       .invalid {
         color: #f44336;
       }
+
+      #form {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        height: 100vh;
+      }
+
+      #form div {
+        width: 300px !important;
+        height: 200px !important;
+      }
     </style>
+    <script>
+      const startDate = new Date();
+    </script>
   </head>
   <body>
     <form action="#" id="form">
       <label>First Name</label>
       <div id="first_name"></div>
-      <label>Last Name</label>
-      <div id="last_name"></div>
+
+      <label>Multiple Fields</label>
+      <div id="multiple"></div>
+      <label>Email</label>
+      <div id="email"></div>
+      <label>ssn</label>
+      <div id="ssn"></div>
       <label>Date of Birth</label>
       <div id="dob"></div>
       <label>Phone Number</label>
       <div id="phone_number"></div>
+
+      <label>Text</label>
+      <div id="text"></div>
+      <label>Text Area</label>
+      <div id="textarea"></div>
+      <label>Checkbox</label>
+      <div id="checkbox1"></div>
+      <label>Checkbox</label>
+      <div id="checkbox2"></div>
+      <label>Radio</label>
+      <div id="radio1"></div>
+      <label>Radio</label>
+      <div id="radio2"></div>
+      <label>Password</label>
+      <div id="password"></div>
+      <label>Number</label>
+      <div id="number"></div>
+      <label>Dropdown</label>
+      <div id="dropdown"></div>
+      <label>Revel</label>
+      <div id="revel"></div>
       <button type="submit">Submit</button>
+      <button id="fistNameUpdate">Update FirstName</button>
+      <button id="multipleUpdate">Update Multiple</button>
     </form>
     <script>
       const options = {
-        classes: {
-          base: ".base", // default
-          complete: ".complete",
-          empty: ".empty",
-          focus: ".focus",
-          invalid: ".invalid",
-        },
+        // classes: {
+        //   base: ".base", // default
+        //   complete: ".complete",
+        //   empty: ".empty",
+        //   invalid: ".invalid",
+        // },
         styles: {
-          base: {}, // default
-          complete: {},
+          base: {
+            color: "#3f51b5",
+            ":hover": {
+              color: "#f1f",
+            },
+          }, // default
+          complete: {
+            color: "#4caf50",
+          },
           empty: {},
           focus: {},
-          invalid: {},
+          invalid: {
+            color: "#f44336",
+          },
         },
         // value: "",
         // disabled: false,
       };
-      skyflow = new Skyflow("", "", "");
+      const newStyles = {
+        styles: {
+          ...options.styles,
+          base: {
+            border: "1px solid rgb(234, 232, 238)",
+            padding: "10px 16px",
+            "border-radius": "4px",
+            ...options.styles.base,
+          },
+        },
+      };
+      const Label = {
+        styles: {
+          base: {
+            margin: "0 0 8px",
+            color: "rgb(105, 105, 105)",
+            "font-size": "12px",
+          },
+        },
+      };
+
+      skyflow = new Skyflow({
+        username: "client.sdk@z-mail.io",
+        password: "Client@Sdk1",
+        orgId: "c117973f904011ea95ba2e321592fd49", //
+        orgAppId: "c0e915a9904011ea95ba2e321592fd49",
+        orgAppSecret: "MpdB0NTs8KT3oBG7rhSTwB5kJ1c=",
+        vaultId: "dcc8c9f0c1c111ea8b6656f20d016af2", //
+        notebookId: "e3765a18c1c111ea8b6656f20d016af2",
+        appId: "tc348cbec1c211ea8b6656f20d016af2", //
+        workflowURL: "http://localhost:9999",
+
+        // skygraphURL
+        // orgID
+        // orgAppID
+        // orgAppSecret
+        // workflow url(Experian workflow)
+      });
       elements = skyflow.elements({});
-      firstName = elements.create("firstName", options);
-      firstName.mount("#first_name", options);
-      lastName = elements.create("lastName", options);
-      lastName.mount("#last_name");
-      dob = elements.create("dob", options);
+      firstName = elements.create("text", {
+        ...options,
+        name: "first-name",
+        placeholder: "\u0061\u006c\u0065\u0072\u0074\u0028\u0032\u0032\u0029",
+        value: "\u0061\u006c\u0065\u0072\u0074\u0028\u0032\u0032\u0029",
+        label: "\u0061\u006c\u0065\u0072\u0074\u0028\u0032\u0032\u0029",
+        minLength: "\u0061\u006c\u0065\u0072\u0074\u0028\u0032\u0032\u0029",
+        // replacePattern: ["/[0-9]+/g", ""],
+      });
+      firstName.mount("#first_name");
+      multiple = elements.createMultipleElement({
+        name: "group-1",
+        // display flex by default(not changeable)
+        justifyContent: "", //default flex-start
+        alignItems: "", //default stretch
+        spacing: "10px",
+        rows: [
+          {
+            // row 1, display flex by default(not changeable)
+            justifyContent: "", //default flex-start
+            alignItems: "", //default stretch
+            spacing: "5px", // default 0px
+            elements: [
+              {
+                elementType: "text",
+                ...newStyles,
+                label: "label-1",
+                labelStyles: {
+                  ...Label,
+                },
+                name: "first-name2",
+                readOnly: false,
+                disabled: false,
+                validation: ["required"],
+              },
+            ],
+          },
+          {
+            /* row2 */
+            spacing: "5px",
+            elements: [
+              {
+                elementType: "text",
+                ...newStyles,
+                label: "label-2",
+                labelStyles: {
+                  ...Label,
+                },
+                name: "multiple-2",
+              },
+              {
+                elementType: "password",
+                ...newStyles,
+                label: "label-3",
+                labelStyles: {
+                  ...Label,
+                },
+                name: "multiple-3",
+              },
+            ],
+          },
+        ],
+      });
+      multiple.mount("#multiple");
+      email = elements.create("email", {
+        ...options,
+        name: "email",
+        validation: ["default"],
+      });
+      email.mount("#email");
+      ssn = elements.create("ssn", {
+        ...options,
+        name: "ssn",
+        validation: ["required", "default"],
+        placeholder: "XXX-XX-XXXX",
+        mask: ["XXX-XX-XXXX", { X: "[0-9]" }],
+      });
+      ssn.mount("#ssn");
+      dob = elements.create("dob", { ...options, name: "dob" });
       dob.mount("#dob");
-      phoneNumber = elements.create("mobileNumber", options);
+      phoneNumber = elements.create("mobileNumber", {
+        ...options,
+        name: "mobile-number",
+      });
       phoneNumber.mount("#phone_number");
 
-      document.getElementById("form").onsubmit = elements.onSubmit;
+      text = elements.create("text", { ...options, name: "text" });
+      text.mount("#text");
+
+      textarea = elements.create("textarea", { ...options, name: "textarea" });
+      textarea.mount("#textarea");
+
+      checkbox1 = elements.create("checkbox", {
+        ...options,
+        name: "checkbox",
+        value: "checkbox1",
+      });
+      checkbox1.mount("#checkbox1");
+      checkbox2 = elements.create("checkbox", {
+        ...options,
+        name: "checkbox",
+        value: "checkbox2",
+      });
+      checkbox2.mount("#checkbox2");
+
+      radio1 = elements.create("radio", {
+        ...options,
+        name: "radio",
+        value: "radio1",
+      });
+      radio1.mount("#radio1");
+      radio2 = elements.create("radio", {
+        ...options,
+        name: "radio",
+        value: "radio2",
+      });
+      radio2.mount("#radio2");
+
+      password = elements.create("password", {
+        ...options,
+        name: "password",
+        sensitive: true,
+        // validation: ["required"],
+      });
+      password.mount("#password");
+
+      number = elements.create("text", {
+        ...options,
+        name: "number",
+        placeholder: "+91 (XXX) XXX-XX-XX--",
+        mask: ["+91 (XXX) XXX-XX-XX--", { X: "[0-9]" }],
+      });
+      number.mount("#number");
+
+      dropdown = elements.create("dropdown", {
+        ...options,
+        name: "dropdown",
+        options: [
+          { text: "text1", value: "value1" },
+          { text: "text2", value: "value2" },
+        ],
+      });
+      dropdown.mount("#dropdown");
+
+      notebook = skyflow.notebook();
+      notebook.revelToken("0102000cb28ef0d2882c3d39bc7cf0c1", "#revel");
+
+      // const test = document.getElementById("form");
+
+      // function pushElement(name) {
+      //   firstName = elements.create("firstName", {
+      //     ...options,
+      //     name: name + "",
+      //     value: name + "",
+      //   });
+      //   const elementDiv = document.createElement("div");
+      //   test.append(elementDiv);
+      //   firstName.mount(elementDiv);
+      // }
+
+      // for (let i = 0; i < 30; i++) {
+      //   pushElement(i);
+      // }
+
+      document.getElementById("fistNameUpdate").onclick = (event) => {
+        event.preventDefault();
+        firstName.update({ mask: ["XXX-XX-XXX", { X: "[0-9]" }] });
+        // firstName.update({ replacePattern: ["/[^a-z ]+/gi", ""] });
+      };
+
+      document.getElementById("multipleUpdate").onclick = (event) => {
+        event.preventDefault();
+        multiple.update({
+          spacing: "5px",
+          rows: [
+            {
+              elements: [
+                {
+                  label: "label-1(new)",
+                },
+              ],
+            },
+            {
+              elements: [
+                {},
+                {
+                  label: "label-3(new)",
+                },
+              ],
+            },
+          ],
+        });
+      };
+
+      document.getElementById("form").onsubmit = (event) => {
+        event.preventDefault();
+        multiple.update({
+          spacing: "5px",
+          rows: [
+            {
+              elements: [
+                {
+                  label: "label-1(new)",
+                },
+              ],
+            },
+            {
+              elements: [
+                {},
+                {
+                  label: "label-3(new)",
+                },
+              ],
+            },
+          ],
+        });
+      };
+
+      document.getElementById("form").onsubmit = (event) => {
+        elements.tokenize();
+      };
+
+      // window.onload = () => {
+      //   console.log(
+      //     "loaded: ",
+      //     new Date(new Date().getTime() - startDate.getTime())
+      //   );
+      // };
     </script>
   </body>
 </html>
+
+<!--
+  need to check the skyflow object
+  should we need to  mock the analyst review screen
+-->

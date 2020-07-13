@@ -11,10 +11,11 @@ module.exports = () => {
   return merge(common, {
     mode: "production",
     optimization: {
-      splitChunks: {
-        chunks: "all",
-      },
+      // splitChunks: {
+      //   chunks: "all",
+      // },
       runtimeChunk: false,
+      minimizer: [new UglifyJsPlugin()],
     },
     module: {
       rules: [],
@@ -24,7 +25,7 @@ module.exports = () => {
         verbose: true,
         dry: false,
       }),
-      new UglifyJsPlugin(),
+      // new UglifyJsPlugin(),
       new ManifestPlugin(),
       new webpack.DefinePlugin({
         "process.env": JSON.stringify(process.env),

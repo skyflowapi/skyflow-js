@@ -1,5 +1,9 @@
 export const FRAME_CONTROLLER = "controller";
 
+export const FRAME_REVEL = "revel";
+
+export const FRAME_ELEMENT = "element";
+
 export const ELEMENT_EVENTS_TO_CLIENT = {
   CHANGE: "Change",
   READY: "Ready",
@@ -8,6 +12,7 @@ export const ELEMENT_EVENTS_TO_CLIENT = {
   ESCAPE: "Escape",
   CLICK: "Click",
   ERROR: "Error",
+  SUCCESS: "Success",
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {
@@ -17,6 +22,7 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
   INPUT_EVENT: "INPUT_EVENT",
   DESTROY_FRAME: "DESTROY FRAME",
   SET_VALUE: "SET_VALUE",
+  CLIENT_REQUEST: "CLIENT_REQUEST",
 };
 //   'ADD_CLASS',
 //   'AUTOFILL_EXPIRATION_DATE',
@@ -38,136 +44,157 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
 //   'TRIGGER_INPUT_FOCUS',
 //   'VALIDATE_STRICT'
 
-export const ELEMENTS: Record<
-  string,
-  { attributes: any; sensitive: boolean; validator: (string) => boolean }
-> = {
-  firstName: {
+export const ELEMENTS = {
+  text: {
+    name: "text",
     attributes: {
       type: "text",
     },
     sensitive: false,
-    validator: function (value: string) {
-      return /^([A-Z][a-z]+([ ]?[a-z]?['-]?[A-Z][a-z]+)*)$/.test(value);
+  },
+  textarea: {
+    name: "textarea",
+    attributes: {
+      type: "textarea",
     },
+    sensitive: false,
+  },
+  checkbox: {
+    name: "checkbox",
+    attributes: {
+      type: "checkbox",
+    },
+    sensitive: false,
+  },
+  radio: {
+    name: "radio",
+    attributes: {
+      type: "radio",
+    },
+    sensitive: false,
+  },
+  password: {
+    name: "password",
+    attributes: {
+      type: "password",
+    },
+    sensitive: false,
+  },
+  number: {
+    name: "number",
+    attributes: {
+      type: "number",
+    },
+    sensitive: false,
+  },
+  dropdown: {
+    name: "dropdown",
+    attributes: {
+      type: "select",
+    },
+    sensitive: false,
+  },
+  firstName: {
+    name: "firstName",
+    attributes: {
+      type: "text",
+    },
+    sensitive: false,
+    replacePattern: ["/[^a-zA-Z'-\\s]/g"],
+    regex: /^([A-Z][a-z]+([ ]?[a-z]?['-]?[A-Z][a-z]+)*)$/,
   },
   lastName: {
+    name: "lastName",
     attributes: {
       type: "text",
     },
     sensitive: false,
-    validator: function (value: string) {
-      return /^([A-Z][a-z]+([ ]?[a-z]?['-]?[A-Z][a-z]+)*)$/.test(value);
-    },
+    replacePattern: ["/[^a-zA-Z'-\\s]/g"],
+    regex: /^([A-Z][a-z]+([ ]?[a-z]?['-]?[A-Z][a-z]+)*)$/,
   },
   email: {
+    name: "email",
     attributes: {
       type: "email",
     },
-    sensitive: true,
-    validator: function (value: string) {
-      return /^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)$/s.test(
-        value
-      );
-    },
+    sensitive: false,
+    regex: /^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)$/i,
   },
   dob: {
+    name: "dob",
     attributes: {
       type: "date",
       pattern: "\\d{2}/\\d{2}/\\d{4}",
     },
-    sensitive: true,
-    validator: function (value: string) {
-      return /^(((0[1-9]|[12][0-9]|3[01])[- /.](0[13578]|1[02])|(0[1-9]|[12][0-9]|30)[- /.](0[469]|11)|(0[1-9]|1\d|2[0-8])[- /.]02)[- /.]\d{4}|29[- /.]02[- /.](\d{2}(0[48]|[2468][048]|[13579][26])|([02468][048]|[1359][26])00))$/s.test(
-        value
-      );
-    },
+    sensitive: false,
+    regex: /^(((0[1-9]|[12][0-9]|3[01])[- /.](0[13578]|1[02])|(0[1-9]|[12][0-9]|30)[- /.](0[469]|11)|(0[1-9]|1\d|2[0-8])[- /.]02)[- /.]\d{4}|29[- /.]02[- /.](\d{2}(0[48]|[2468][048]|[13579][26])|([02468][048]|[1359][26])00))$/,
   },
   mobileNumber: {
+    name: "mobileNumber",
     attributes: {
-      type: "number",
+      type: "text",
     },
+    replacePattern: ["/[^0-9()+-\\s]/g"],
     sensitive: false,
-    validator: function (value: string) {
-      return /^((\+?( |-|\.)?\d{1,2}( |-|\.)?)?(\(?\d{3}\)?|\d{3})( |-|\.)?(\d{3}( |-|\.)?\d{4}))$/.test(
-        value
-      );
-    },
+    regex: /^((\+?( |-|\.)?\d{1,2}( |-|\.)?)?(\(?\d{3}\)?|\d{3})( |-|\.)?(\d{3}( |-|\.)?\d{4}))$/,
   },
   ssn: {
+    name: "ssn",
     attributes: {
       type: "text",
     },
     sensitive: true,
-    validator: function (value: string) {
-      return /^(([0-9]{9})|([0-9]{3}-[0-9]{2}-[0-9]{4})|([0-9]{2}-[0-9]{7}))$/.test(
-        value
-      );
-    },
+    replacePattern: ["/[^0-9-]/g"],
+    regex: /^(([0-9]{9})|([0-9]{3}-[0-9]{2}-[0-9]{4})|([0-9]{2}-[0-9]{7}))$/,
   },
   address: {
+    name: "address",
     attributes: {
       type: "text",
     },
     sensitive: false,
-    validator: function (value: string) {
-      return /^[#.0-9a-zA-Z\s,-]+$/.test(value);
-    },
+    regex: /^[#.0-9a-zA-Z\s,-]+$/,
   },
   street: {
+    name: "street",
     attributes: {
       type: "text",
     },
     sensitive: false,
-    validator: function (value: string) {
-      return true;
-    },
   },
   zipCode: {
+    name: "zipCode",
     attributes: {
-      type: "number",
+      type: "text",
     },
     sensitive: false,
-    validator: function (value: string) {
-      return /^[0-9]{4,}$/.test(value);
-    },
+    replacePattern: ["/[^0-9-\\s]/g"],
+    regex: /^[0-9]{4,}$/,
   },
   city: {
+    name: "city",
     attributes: {
       type: "text",
     },
     sensitive: false,
-    validator: function (value: string) {
-      return /^[A-Za-z]+(\s[A-Za-z]+)?$/.test(value);
-    },
+    regex: /^[A-Za-z]+(\s[A-Za-z]+)?$/,
   },
   state: {
+    name: "state",
     attributes: {
       type: "text",
     },
     sensitive: false,
-    validator: function (value: string) {
-      return /^[A-Za-z]+(\s[A-Za-z]+)?$/.test(value);
-    },
+    regex: /^[A-Za-z]+(\s[A-Za-z]+)?$/,
   },
   income: {
+    name: "income",
     attributes: {
       type: "number",
     },
     sensitive: false,
-    validator: function (value: string) {
-      return /^[0-9]+$/.test(value);
-    },
+    regex: /^[0-9]+$/,
   },
-};
-
-export const INPUT_DEFAULT_STYLES = {
-  height: "100%",
-  width: "100%",
-  margin: 0,
-  padding: 0,
-  border: 0,
-  position: "relative",
 };
 
 export const IFRAME_DEFAULT_STYLES = {
@@ -179,6 +206,7 @@ export const IFRAME_DEFAULT_STYLES = {
   position: "absolute",
   top: 0,
   left: 0,
+  "user-select": "none",
 };
 
 export const CONTROLLER_STYLES = {
@@ -188,6 +216,16 @@ export const CONTROLLER_STYLES = {
   height: 0,
   visibility: "hidden",
   left: "-99999999px",
+  "user-select": "none",
+};
+
+export const INPUT_STYLES = {
+  width: "100%",
+  height: "100%",
+  border: "0",
+  padding: "0",
+  margin: "0",
+  outline: "none",
 };
 
 export const ALLOWED_ATTRIBUTES = {
@@ -207,6 +245,9 @@ export const ALLOWED_STYLES = [
   "-webkit-tap-highlight-color",
   "-webkit-transition",
   "appearance",
+  "background-color",
+  "border",
+  "border-radius",
   "color",
   "direction",
   "font",
@@ -222,14 +263,39 @@ export const ALLOWED_STYLES = [
   "font-variant-ligatures",
   "font-variant-numeric",
   "font-weight",
+  "height",
   "letter-spacing",
   "line-height",
   "margin",
   "opacity",
   "outline",
   "padding",
+  "text-decoration",
   "text-shadow",
+  "text-transform",
   "transition",
+  "width",
+];
+
+export const ALLOWED_PSEUDO_STYLES = [
+  ":hover",
+  ":focus",
+  "::placeholder",
+  "::selection",
+  ":disabled",
+  ":-webkit-autofill",
+];
+
+export const ALLOWED_MULTIPLE_FIELDS_STYLES = [
+  "height",
+  "width",
+  "padding",
+  "margin",
+  "position",
+  "display",
+  "flex-direction",
+  "align-items",
+  "justify-content",
 ];
 
 // should be in the order of applying the styles

@@ -1,47 +1,70 @@
-class Client {
-  appSecret: string;
-  appId: string;
-  username: string;
-  password: string;
-  metaData: any;
-  constructor(
-    username: string,
-    password: string,
-    appId: string,
-    appSecret: string = "",
-    metaData: any
-  ) {
-    this.appId = appId;
-    this.appSecret = appSecret;
-    this.username = username;
-    this.password = password;
-    this.metaData = metaData;
-  }
+import { properties } from "../properties";
+import { ISkyflow } from "../Skyflow";
 
-  getAppSecret() {
-    // get appSecret
+export interface IClientRequest {
+  body?: Record<string, any>;
+  headers?: Record<string, string>;
+  requestMethod:
+    | "GET"
+    | "HEAD"
+    | "POST"
+    | "PUT"
+    | "DELETE"
+    | "CONNECT"
+    | "OPTIONS"
+    | "PATCH";
+  url: string;
+}
+
+class Client {
+  config: ISkyflow;
+  #metaData: any;
+  constructor(config: ISkyflow, metadata) {
+    this.config = config;
+    this.#metaData = metadata;
   }
 
   toJSON() {
-    return {
-      appId: this.appId,
-      appSecret: this.appSecret,
-      username: this.username,
-      password: this.password,
-    };
+    return { config: this.config, metaData: this.#metaData };
   }
 
   static fromJSON(json) {
-    // const client = new Client()
-    // // get appSec
-    // return client;
+    return new Client(json.config, json.metadata);
   }
 
-  init() {}
+  request = (request: IClientRequest) => {
+    // todo: link has to be https
+    return new Promise((resolve, reject) => {
+      const httpRequest = new XMLHttpRequest();
+      if (!httpRequest) {
+        reject("Error while initializing the connection");
+      }
 
-  deliverPayload(body) {
+      httpRequest.open(request.requestMethod, request.url);
 
-  }
+      if (request.headers) {
+        const headers = request.headers;
+        httpRequest.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        Object.keys(request.headers).forEach((key) => {
+          httpRequest.setRequestHeader(key, headers[key]);
+        });
+      }
+
+      httpRequest.responseType = "json";
+      httpRequest.send(JSON.stringify({ ...request.body }));
+
+      httpRequest.onload = () => {
+        if (httpRequest.status < 200 || httpRequest.status >= 400)
+          reject(httpRequest.response);
+
+        resolve(httpRequest.response);
+      };
+
+      httpRequest.onerror = (error) => {
+        reject(new Error("An error occurred during transaction"));
+      };
+    });
+  };
 }
 
 export default Client;

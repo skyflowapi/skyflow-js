@@ -2,10 +2,23 @@ const path = require("path");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
+const minify = {
+  collapseWhitespace: true,
+  removeComments: true,
+  removeRedundantAttributes: true,
+  removeScriptTypeAttributes: true,
+  removeStyleLinkTypeAttributes: true,
+  useShortDoctype: true,
+  minifyCSS: true,
+  minifyJS: true,
+};
 module.exports = {
   entry: {
-    skyflow: path.resolve(__dirname, "src/index.ts"),
-    iframe: path.resolve(__dirname, "src/index-internal.ts"),
+    skyflow: ["core-js/stable", path.resolve(__dirname, "src/index.ts")],
+    iframe: [
+      "core-js/stable",
+      path.resolve(__dirname, "src/index-internal.ts"),
+    ],
   },
 
   output: {
@@ -27,15 +40,11 @@ module.exports = {
   plugins: [
     new ForkTsCheckerWebpackPlugin(),
     new HtmlWebPackPlugin({
-      template: "assets/index.html",
-      chunks: ["skyflow"],
-      inject: "head",
-    }),
-    new HtmlWebPackPlugin({
       filename: "iframe.html",
       template: "assets/iframe.html",
       chunks: ["iframe"],
       inject: "head",
+      minify,
     }),
   ],
 };
