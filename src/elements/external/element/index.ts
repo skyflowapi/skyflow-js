@@ -297,7 +297,6 @@ class Element {
                   ...this.getState(),
                   elementType: this.elementType,
                 };
-                console.log(data.name, this.getState().value);
                 break;
               case ELEMENT_EVENTS_TO_CLIENT.READY:
                 emitEvent = ELEMENT_EVENTS_TO_CLIENT.READY;
