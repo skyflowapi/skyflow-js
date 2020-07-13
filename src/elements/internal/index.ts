@@ -139,12 +139,8 @@ export class FrameElement {
     }
 
     setAttributes(this.domInput, attr);
-    // if (this.domInput) {
-    //   this.domInput.disabled = this.options.disabled ? true : false;
-    //   this.domInput.required = this.options.validation?.includes("required");
-    //   (<HTMLInputElement>this.domInput).readOnly = this.options.readonly ? true : false;
-    // }
-    let newInputValue = this.domInput?.value || this.iFrameFormElement.getValue();
+
+    let newInputValue = this.iFrameFormElement.getValue();
 
     // HTML don't support validity on radio
     if (this.iFrameFormElement.getValue() === undefined) {

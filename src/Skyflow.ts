@@ -4,17 +4,16 @@ import uuid from "./libs/uuid";
 import { properties } from "./properties";
 import Notebook from "./notebook";
 
-export interface ISkyflow {
-  workflowURL: string;
+export interface ISkyflowConstructor {
   orgId: string;
-  // orgAppId: string;
-  // orgAppSecret: string;
   vaultId: string;
-  // notebookId: string;
   appId: string;
-  // username: string;
-  // password: string;
 }
+
+export interface ISkyflow extends ISkyflowConstructor {
+  workflowURL: string;
+}
+
 class Skyflow {
   #client: Client;
   static version = properties.VERSION;
@@ -24,8 +23,11 @@ class Skyflow {
     clientDomain: location.origin,
   };
 
-  constructor(config: ISkyflow) {
-    this.#client = new Client(config, this.#metadata);
+  constructor(config: ISkyflowConstructor) {
+    this.#client = new Client(
+      { ...config, workflowURL: properties.WORKFLOW_URL },
+      this.#metadata
+    );
   }
 
   // elements({
