@@ -1,6 +1,6 @@
 export const FRAME_CONTROLLER = "controller";
 
-export const FRAME_REVEL = "revel";
+export const FRAME_REVEAL = "reveal";
 
 export const FRAME_ELEMENT = "element";
 

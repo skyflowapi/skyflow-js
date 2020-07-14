@@ -1,6 +1,6 @@
 import Client from "../client";
 import { properties } from "../properties";
-import RevelElement from "./RevelElement";
+import RevealElement from "./RevealElement";
 
 export default class Notebook {
   #notebookId: string;
@@ -56,14 +56,14 @@ export default class Notebook {
   };
 
   /*
-  revelToken("123123wwe", "#wwe", {
+  revealToken("123123wwe", "#wwe", {
     class: ".base", // todo
     styles: {
       "font-size": "12px"
     }
   })
   */
-  revelToken = (token: string, domSelectorOrElement: Element | string, options = {}) => {
+  revealToken = (token: string, domSelectorOrElement: Element | string, options = {}) => {
     return new Promise((resolve, reject) => {
       const callback = () => {
         options = {
@@ -71,7 +71,7 @@ export default class Notebook {
           headers: this.#Headers,
           token: token,
         };
-        const element = new RevelElement(
+        const element = new RevealElement(
           btoa(new Date().getTime() + "").slice(0, -2),
           this.#metadata,
           options,

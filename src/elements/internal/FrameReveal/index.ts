@@ -11,8 +11,8 @@ import "jquery-mask-plugin/dist/jquery.mask.min";
 import Client from "../../../client";
 import Notebook from "../../../notebook";
 
-export default class FrameRevel {
-  static frameRevel: FrameRevel;
+export default class FrameReveal {
+  static frameReveal: FrameReveal;
   #options;
   #client: Client;
   #notebook: Notebook;
@@ -23,7 +23,7 @@ export default class FrameRevel {
 
   static init() {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, { name: window.name }, (data: any) => {
-      FrameRevel.frameRevel = new FrameRevel(
+      FrameReveal.frameReveal = new FrameReveal(
         data.options,
         data.clientObject,
         data.metadata
@@ -45,7 +45,7 @@ export default class FrameRevel {
     );
 
     this.#container = document.createElement("span");
-    this.#container.className = "Skyflow-revel";
+    this.#container.className = "Skyflow-reveal";
     this.#setMask(options.mask);
     injectStylesheet.injectWithAllowlist(
       {

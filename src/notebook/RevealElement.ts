@@ -4,10 +4,10 @@ import Bus from "../libs/Bus";
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENT_EVENTS_TO_CLIENT,
-  FRAME_REVEL,
+  FRAME_REVEAL,
 } from "../elements/constants";
 
-export default class RevelElement {
+export default class RevealElement {
   #iframe: IFrame;
   #metadata;
   #options;
@@ -22,7 +22,7 @@ export default class RevelElement {
   #resolve?: Function;
   #reject?: Function;
   constructor(name: string, metadata, options: any = {}, clientObject) {
-    name = `${FRAME_REVEL}:${name}`
+    name = `${FRAME_REVEAL}:${name}`
     this.#iframe = new IFrame(name, metadata);
     this.#metadata = metadata;
     this.#clientObject = clientObject;
