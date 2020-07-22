@@ -67,6 +67,7 @@ class Element {
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
+        this.#onGroupEmitRemoveLocalValueForSensitiveFields();
         this.#bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
       }
     };
@@ -115,6 +116,8 @@ class Element {
         options: this.#group,
       });
     }
+
+    this.#onGroupEmitRemoveLocalValueForSensitiveFields();
   };
 
   #onUpdate = (callback) => {
@@ -308,6 +311,17 @@ class Element {
         });
       }
     });
+  };
+
+  #onGroupEmitRemoveLocalValueForSensitiveFields = () => {
+    const rows = this.#group.rows;
+    rows.forEach((row) => {
+      row.elements.forEach((element) => {
+        element.value = undefined;
+      });
+    });
+
+    this.#elements = getElements(this.#group);
   };
 }
 
