@@ -174,6 +174,12 @@ export class FrameElement {
       } else {
         this.domInput.value = newInputValue || "";
       }
+
+      if (this.iFrameFormElement.mask || this.iFrameFormElement.replacePattern) {
+        $(document).ready(() => {
+          $(this.domInput as any).trigger("input");
+        });
+      }
     }
 
     this.iFrameFormElement.setValue(newInputValue, this.domInput?.checkValidity());
