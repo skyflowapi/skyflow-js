@@ -340,13 +340,12 @@ export class IFrameFormElement extends EventEmitter {
       .target(this.metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
         if (
-          location.origin === this.metaData.clientDomain &&
           data.name === this.iFrameName
         ) {
           if (data.value !== undefined) {
             // for setting value
             this.setValue(<string | undefined>data.value);
-          } else if (data.options !== undefined) {
+          } else if (data.options !== undefined && data.isSingleElementAPI === true) {
             // for updating options
             this._emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
               options: data.options,

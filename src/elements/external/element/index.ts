@@ -1,4 +1,4 @@
-import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from "../../constants";
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS } from "../../constants";
 import EventEmitter from "../../../event-emitter";
 import Bus from "../../../libs/Bus";
 import deepClone from "../../../libs/deepClone";
@@ -25,6 +25,9 @@ class Element {
   #bus = new Bus();
 
   #iframe: IFrame;
+
+  #updateCallbacks: Function[] = [];
+  #mounted = false;
 
   constructor(
     elementGroup: any,
@@ -67,9 +70,12 @@ class Element {
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
-        this.#onGroupEmitRemoveLocalValueForSensitiveFields();
+        this.#onGroupEmitRemoveLocalValue();
         this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
         this.#bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+        this.#mounted = true;
+        this.#updateCallbacks.forEach((func) => func());
+        this.#updateCallbacks = [];
       }
     };
     this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
@@ -82,43 +88,54 @@ class Element {
   update = (group) => {
     group = deepClone(group);
 
-    if (this.#isSingleElementAPI) {
-      group = {
-        rows: [
-          {
-            elements: [
-              {
-                ...group,
-              },
-            ],
-          },
-        ],
-      };
-    }
-    this.#group = validateAndSetupGroupOptions(this.#group, group);
-    this.#elements = getElements(this.#group);
+    const callback = () => {
+      if (this.#isSingleElementAPI) {
+        group = {
+          rows: [
+            {
+              elements: [
+                {
+                  ...group,
+                },
+              ],
+            },
+          ],
+        };
+      }
+      this.#group = validateAndSetupGroupOptions(this.#group, group);
+      this.#elements = getElements(this.#group);
 
-    if (this.#isSingleElementAPI) {
-      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
-        name: this.#iframe.name,
-        options: this.#elements[0],
-      });
-    } else {
-      // todo: check whether we need to update
-      this.#elements.forEach((elementOptions) => {
+      if (this.#isSingleElementAPI) {
         this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
-          name: elementOptions.elementName,
-          options: elementOptions,
+          name: this.#iframe.name,
+          options: this.#elements[0],
+          isSingleElementAPI: true,
         });
-      });
+      } else {
+        // todo: check whether we need to update
+        this.#elements.forEach((elementOptions) => {
+          this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+            name: elementOptions.elementName,
+            options: elementOptions,
+            isSingleElementAPI: true,
+          });
+        });
 
-      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
-        name: this.#iframe.name,
-        options: this.#group,
-      });
+        this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+          name: this.#iframe.name,
+          options: this.#group,
+          isSingleElementAPI: false,
+        });
+      }
+
+      this.#onGroupEmitRemoveLocalValue();
+    };
+
+    if (this.#mounted) {
+      callback();
+    } else {
+      this.#updateCallbacks.push(callback);
     }
-
-    this.#onGroupEmitRemoveLocalValueForSensitiveFields();
   };
 
   #onUpdate = (callback) => {
@@ -314,11 +331,15 @@ class Element {
     });
   };
 
-  #onGroupEmitRemoveLocalValueForSensitiveFields = () => {
+  #onGroupEmitRemoveLocalValue = () => {
     const rows = this.#group.rows;
     rows.forEach((row) => {
       row.elements.forEach((element) => {
-        element.value = undefined;
+        if (
+          element.elementType !== ELEMENTS.radio.name &&
+          element.elementType !== ELEMENTS.checkbox.name
+        )
+          element.value = undefined;
       });
     });
 
