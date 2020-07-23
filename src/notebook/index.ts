@@ -34,7 +34,7 @@ export default class Notebook {
       const callback = () => {
         this.#client
           .request({
-            url: properties.WORKFLOW_URL + `/getrecords`,
+            url: this.#client.config.workflowURL + `/getrecords`,
             requestMethod: "POST",
             headers: this.#Headers,
             body: {
@@ -103,7 +103,7 @@ export default class Notebook {
       const callback = () => {
         this.#client
           .request({
-            url: properties.WORKFLOW_URL + `/updaterecords`,
+            url: this.#client.config.workflowURL + `/updaterecords`,
             requestMethod: "POST",
             headers: this.#Headers,
             body: {
