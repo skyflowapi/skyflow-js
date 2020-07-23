@@ -340,7 +340,7 @@ export class FrameElement {
       }
 
       this.setupInputField(
-        options.hasOwnProperty("value") &&
+        (options.value !== undefined && options.value !== null) &&
           options.value !== this.iFrameFormElement.getValue()
       );
     });

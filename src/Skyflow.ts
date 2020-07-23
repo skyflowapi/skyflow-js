@@ -8,6 +8,8 @@ export interface ISkyflowConstructor {
   orgId: string;
   vaultId: string;
   appId: string;
+  production: boolean;
+  // authToken: string;
 }
 
 export interface ISkyflow extends ISkyflowConstructor {
@@ -25,7 +27,12 @@ class Skyflow {
 
   constructor(config: ISkyflowConstructor) {
     this.#client = new Client(
-      { ...config, workflowURL: properties.WORKFLOW_URL },
+      {
+        ...config,
+        workflowURL: config.production
+          ? properties.PROD_WORKFLOW_URL
+          : properties.WORKFLOW_URL,
+      },
       this.#metadata
     );
   }

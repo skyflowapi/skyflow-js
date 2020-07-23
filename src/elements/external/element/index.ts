@@ -68,6 +68,7 @@ class Element {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
         this.#onGroupEmitRemoveLocalValueForSensitiveFields();
+        this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
         this.#bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
       }
     };
