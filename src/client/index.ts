@@ -1,5 +1,5 @@
-import { properties } from "../properties";
 import { ISkyflow } from "../Skyflow";
+import { isTokenValid } from "../utils/jwtUtils";
 
 export interface IClientRequest {
   body?: Record<string, any>;
@@ -18,14 +18,19 @@ export interface IClientRequest {
 
 class Client {
   config: ISkyflow;
+  #accessToken: string;
   #metaData: any;
   constructor(config: ISkyflow, metadata) {
     this.config = config;
     this.#metaData = metadata;
+    this.#accessToken = "";
   }
 
   toJSON() {
-    return { config: this.config, metaData: this.#metaData };
+    return {
+      config: this.config,
+      metaData: this.#metaData
+    };
   }
 
   static fromJSON(json) {
@@ -34,7 +39,7 @@ class Client {
 
   request = (request: IClientRequest) => {
     // todo: link has to be https
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const httpRequest = new XMLHttpRequest();
       if (!httpRequest) {
         reject("Error while initializing the connection");
@@ -42,9 +47,20 @@ class Client {
 
       httpRequest.open(request.requestMethod, request.url);
 
+      if (!this.#accessToken || !isTokenValid(this.#accessToken)) {
+        this.#accessToken = await this.config.getAccessToken();
+      }
+      httpRequest.setRequestHeader(
+        "Authorization",
+        "Bearer " + this.#accessToken
+      );
+      httpRequest.setRequestHeader(
+        "Content-Type",
+        "application/json; charset=utf-8"
+      );
+
       if (request.headers) {
         const headers = request.headers;
-        httpRequest.setRequestHeader("Content-Type", "application/json; charset=utf-8");
         Object.keys(request.headers).forEach((key) => {
           httpRequest.setRequestHeader(key, headers[key]);
         });

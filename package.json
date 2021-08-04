@@ -22,7 +22,8 @@
     "framebus": "^4.0.0",
     "inject-stylesheet": "^2.0.0",
     "jquery": "^3.5.1",
-    "jquery-mask-plugin": "^1.14.16"
+    "jquery-mask-plugin": "^1.14.16",
+    "jwt-decode": "^3.1.2"
   },
   "engines": {
     "node": ">=12.0",
