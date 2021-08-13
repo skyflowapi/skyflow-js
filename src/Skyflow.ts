@@ -5,7 +5,7 @@ import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,
 } from "./utils/helpers";
-import { fetchRecordsByTokenId, fetchRecordsBySkyflowId } from "./core/reveal";
+import { fetchRecordsByTokenId } from "./core/reveal";
 
 export interface IInsertRecord {
   table: string;
@@ -32,15 +32,12 @@ export enum RedactionType {
   REDACTED = "REDACTED",
 }
 export interface IRevealRecord {
-  column: string; // optional, not needed for TOKEN type
-  table: string; // optional, not needed for TOKEN type
   id: string;
-  type: RecordType;
   redaction: RedactionType;
 }
-
 export interface revealResponseType {
   records: Record<string, string>[];
+  errors: Record<string, string>[];
 }
 
 class Skyflow {
@@ -95,41 +92,11 @@ class Skyflow {
     });
   }
 
-  reveal(
+  get(
     records: IRevealRecord[],
-    options?: Record<string, any>
+    options: any = {}
   ): Promise<revealResponseType> {
-    const skyflowIdRecords: IRevealRecord[] = records.filter(
-      (record) => record.type === RecordType.SKYFLOW_ID
-    );
-    const tokenRecords: IRevealRecord[] = records.filter(
-      (record) => record.type === RecordType.TOKEN
-    );
-
-    let skyflowIdRecordsResponse = fetchRecordsBySkyflowId(
-      skyflowIdRecords,
-      this.#client
-    );
-    let tokenIdRecordsResponse = fetchRecordsByTokenId(
-      tokenRecords,
-      this.#client
-    );
-
-    return new Promise((resolve, _) => {
-      Promise.allSettled([
-        skyflowIdRecordsResponse,
-        tokenIdRecordsResponse,
-      ]).then((resultSet) => {
-        let sdkResponse: Record<string, string>[] = [];
-        resultSet.forEach((result) => {
-          if (result.status === "fulfilled") {
-            sdkResponse.push(...(result.value as Record<string, string>[]));
-          }
-        });
-        resolve({ records: sdkResponse });
-      });
-    });
+    return fetchRecordsByTokenId(records, this.#client);
   }
 }
-
 export default Skyflow;
