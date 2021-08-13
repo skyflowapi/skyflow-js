@@ -5,6 +5,7 @@ import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,
 } from "./utils/helpers";
+import { fetchRecordsByTokenId } from "./core/reveal";
 
 export interface IInsertRecord {
   table: string;
@@ -20,6 +21,25 @@ export interface ISkyflow {
   getAccessToken: () => Promise<string>;
   options: Record<string, any>;
 }
+export enum RecordType {
+  SKYFLOW_ID = "SKYFLOW_ID",
+  TOKEN = "TOKEN",
+}
+export enum RedactionType {
+  DEFAULT = "DEFAULT",
+  PLAIN_TEXT = "PLAIN_TEXT",
+  MASKED = "MASKED",
+  REDACTED = "REDACTED",
+}
+export interface IRevealRecord {
+  id: string;
+  redaction: RedactionType;
+}
+export interface revealResponseType {
+  records: Record<string, string>[];
+  errors: Record<string, string>[];
+}
+
 class Skyflow {
   #client: Client;
   static version = properties.VERSION;
@@ -36,6 +56,9 @@ class Skyflow {
       },
       this.#metadata
     );
+  }
+  static init(config: ISkyflow): Skyflow {
+    return new Skyflow(config);
   }
 
   insert(
@@ -68,6 +91,12 @@ class Skyflow {
         });
     });
   }
-}
 
+  get(
+    records: IRevealRecord[],
+    options: any = {}
+  ): Promise<revealResponseType> {
+    return fetchRecordsByTokenId(records, this.#client);
+  }
+}
 export default Skyflow;
