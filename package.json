@@ -23,7 +23,8 @@
     "inject-stylesheet": "^2.0.0",
     "jquery": "^3.5.1",
     "jquery-mask-plugin": "^1.14.16",
-    "jwt-decode": "^3.1.2"
+    "jwt-decode": "^3.1.2",
+    "set-value": "^4.0.0"
   },
   "engines": {
     "node": ">=12.0",

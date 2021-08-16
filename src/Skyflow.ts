@@ -1,11 +1,13 @@
 import Client from "./client";
+import CollectContainer from "./container/external/CollectContainer";
+import RevealContainer from "./container/external/RevealContainer";
 import uuid from "./libs/uuid";
 import { properties } from "./properties";
+import { fetchRecordsByTokenId } from "./core/reveal";
 import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,
-} from "./utils/helpers";
-import { fetchRecordsByTokenId } from "./core/reveal";
+} from "./core/collect";
 
 export interface IInsertRecord {
   table: string;
@@ -14,6 +16,11 @@ export interface IInsertRecord {
 
 export interface IInsertRecordInput {
   records: IInsertRecord[];
+}
+
+export enum ContainerType {
+  COLLECT = "COLLECT",
+  REVEAL = "REVEAL",
 }
 export interface ISkyflow {
   vaultId: string;
@@ -59,6 +66,20 @@ class Skyflow {
   }
   static init(config: ISkyflow): Skyflow {
     return new Skyflow(config);
+  }
+
+  container(type: ContainerType, options?: Record<string, any>) {
+    switch (type) {
+      case ContainerType.COLLECT:
+        return new CollectContainer(options, {
+          ...this.#metadata,
+          clientJSON: this.#client.toJSON(),
+        });
+      case ContainerType.REVEAL:
+        return new RevealContainer(options);
+      default:
+        throw new Error("Invalid container type");
+    }
   }
 
   insert(

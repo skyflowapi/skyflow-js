@@ -1,10 +1,10 @@
-import { IInsertRecord, IInsertRecordInput } from "../../Skyflow";
+import { IInsertRecordInput, IInsertRecord } from "../Skyflow";
 
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
-  options: Record<string, any>
+  options: Record<string, any> = { token: true }
 ) => {
-  let requestBody: Record<string, any> = [];
+  let requestBody: any = [];
   if (options.tokens) {
     records.records.forEach((record, index) => {
       requestBody.push({
@@ -55,4 +55,17 @@ export const constructInsertRecordResponse = (
       })),
     };
   }
+};
+
+export const constructElementsInsertReq = (req, options) => {
+  const records: IInsertRecord[] = [];
+
+  Object.keys(req).forEach((table) => {
+    records.push({
+      table,
+      fields: req[table],
+    });
+  });
+
+  return constructInsertRecordRequest({ records }, options);
 };

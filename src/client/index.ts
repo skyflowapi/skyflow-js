@@ -18,18 +18,18 @@ export interface IClientRequest {
 
 class Client {
   config: ISkyflow;
-  #accessToken: string;
+  accessToken: string;
   #metaData: any;
   constructor(config: ISkyflow, metadata) {
     this.config = config;
     this.#metaData = metadata;
-    this.#accessToken = "";
+    this.accessToken = "";
   }
 
   toJSON() {
     return {
       config: this.config,
-      metaData: this.#metaData
+      metaData: this.#metaData,
     };
   }
 
@@ -47,13 +47,21 @@ class Client {
 
       httpRequest.open(request.requestMethod, request.url);
 
-      if (!this.#accessToken || !isTokenValid(this.#accessToken)) {
-        this.#accessToken = await this.config.getAccessToken();
+      try {
+        if (
+          this.config.getAccessToken &&
+          (!this.accessToken || !isTokenValid(this.accessToken))
+        ) {
+          this.accessToken = await this.config.getAccessToken();
+        }
+      } catch (err) {
+        reject(err);
       }
-      httpRequest.setRequestHeader(
-        "Authorization",
-        "Bearer " + this.#accessToken
-      );
+      !request.headers?.Authorization &&
+        httpRequest.setRequestHeader(
+          "Authorization",
+          "Bearer " + this.accessToken
+        );
       httpRequest.setRequestHeader(
         "Content-Type",
         "application/json; charset=utf-8"
@@ -70,8 +78,9 @@ class Client {
       httpRequest.send(JSON.stringify({ ...request.body }));
 
       httpRequest.onload = () => {
-        if (httpRequest.status < 200 || httpRequest.status >= 400)
+        if (httpRequest.status < 200 || httpRequest.status >= 400) {
           reject(httpRequest.response);
+        }
 
         resolve(httpRequest.response);
       };

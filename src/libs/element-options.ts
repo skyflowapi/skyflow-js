@@ -1,4 +1,4 @@
-import { ELEMENTS, INPUT_STYLES } from "../elements/constants";
+import { ELEMENTS, INPUT_STYLES } from "../container/constants";
 import { buildStylesFromClassesAndStyles } from "./styles";
 
 export function validateAndSetupGroupOptions(
@@ -59,7 +59,11 @@ export function validateElementOptions(
     throw new Error("Provide valid element type");
   }
 
-  if (!oldOptions.name) {
+  if (!oldOptions.table) {
+    throw new Error("Provide a valid table name");
+  }
+
+  if (!oldOptions.column) {
     throw new Error("Provide a valid element name");
   }
 
@@ -132,19 +136,6 @@ export function validateElementOptions(
     );
   }
 
-  if (
-    newOptions.hasOwnProperty("validation") &&
-    !Array.isArray(newOptions.validation)
-  ) {
-    throw new Error("Validation has to be an array");
-  } else if (newOptions.hasOwnProperty("validation")) {
-    newOptions.validation.forEach((value: any) => {
-      // todo: need to support regex
-      if (typeof value !== "string") {
-        throw new Error("only strings are allowed in validation array");
-      }
-    });
-  }
 }
 
 export const getElements = (group: any) => {

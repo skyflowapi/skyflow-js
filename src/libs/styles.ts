@@ -1,4 +1,5 @@
-import { ALLOWED_STYLES, STYLE_TYPE } from "../elements/constants";
+
+import { ALLOWED_STYLES, STYLE_TYPE } from "../container/constants";
 import { getValueAndItsUnit } from "./element-options";
 
 export function getStylesFromClass(cssClass) {
