@@ -1,4 +1,7 @@
-import { IFRAME_DEFAULT_STYLES } from "../container/constants";
+import {
+  IFRAME_DEFAULT_STYLES,
+  CONTROLLER_STYLES,
+} from "../container/constants";
 import { properties } from "../properties";
 
 export default (options = {}) => {

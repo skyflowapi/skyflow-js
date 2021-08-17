@@ -44,7 +44,7 @@ export interface IRevealRecord {
 }
 export interface revealResponseType {
   records: Record<string, string>[];
-  errors: Record<string, string>[];
+  errors: Record<string, any>[];
 }
 
 class Skyflow {
@@ -75,8 +75,13 @@ class Skyflow {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
         });
+      // case ContainerType.REVEAL:
+      //   return new RevealContainer(options);
       case ContainerType.REVEAL:
-        return new RevealContainer(options);
+        return new RevealContainer({
+          ...this.#metadata,
+          clientJSON: this.#client.toJSON(),
+        });
       default:
         throw new Error("Invalid container type");
     }

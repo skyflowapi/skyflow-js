@@ -1,4 +1,5 @@
-export const FRAME_CONTROLLER = "controller";
+export const COLLECT_FRAME_CONTROLLER = "collect_controller";
+export const REVEAL_FRAME_CONTROLLER = "reveal_controller";
 
 export const FRAME_REVEAL = "reveal";
 
@@ -23,7 +24,10 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
   DESTROY_FRAME: "DESTROY FRAME",
   SET_VALUE: "SET_VALUE",
   CLIENT_REQUEST: "CLIENT_REQUEST",
-  GET_ACCESS_TOKEN: "GET_ACCESS_TOKEN"
+  GET_ACCESS_TOKEN: "GET_ACCESS_TOKEN",
+  REVEAL_REQUEST: "REVEAL_REQUEST",
+  REVEAL_RESPONSE_READY: "REVEAL_RESPONSE_READY",
+  REVEAL_FRAME_READY: "REVEAL_FRAME_READY",
 };
 
 export const ELEMENTS = {
@@ -101,7 +105,8 @@ export const ELEMENTS = {
       type: "email",
     },
     sensitive: false,
-    regex: /^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)$/i,
+    regex:
+      /^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)$/i,
   },
   dob: {
     name: "dob",
@@ -110,7 +115,8 @@ export const ELEMENTS = {
       pattern: "\\d{2}/\\d{2}/\\d{4}",
     },
     sensitive: false,
-    regex: /^(((0[1-9]|[12][0-9]|3[01])[- /.](0[13578]|1[02])|(0[1-9]|[12][0-9]|30)[- /.](0[469]|11)|(0[1-9]|1\d|2[0-8])[- /.]02)[- /.]\d{4}|29[- /.]02[- /.](\d{2}(0[48]|[2468][048]|[13579][26])|([02468][048]|[1359][26])00))$/,
+    regex:
+      /^(((0[1-9]|[12][0-9]|3[01])[- /.](0[13578]|1[02])|(0[1-9]|[12][0-9]|30)[- /.](0[469]|11)|(0[1-9]|1\d|2[0-8])[- /.]02)[- /.]\d{4}|29[- /.]02[- /.](\d{2}(0[48]|[2468][048]|[13579][26])|([02468][048]|[1359][26])00))$/,
   },
   mobileNumber: {
     name: "mobileNumber",
@@ -119,7 +125,8 @@ export const ELEMENTS = {
     },
     replacePattern: ["/[^0-9()+-\\s]/g"],
     sensitive: false,
-    regex: /^((\+?( |-|\.)?\d{1,2}( |-|\.)?)?(\(?\d{3}\)?|\d{3})( |-|\.)?(\d{3}( |-|\.)?\d{4}))$/,
+    regex:
+      /^((\+?( |-|\.)?\d{1,2}( |-|\.)?)?(\(?\d{3}\)?|\d{3})( |-|\.)?(\d{3}( |-|\.)?\d{4}))$/,
   },
   ssn: {
     name: "ssn",
@@ -193,7 +200,8 @@ export const ELEMENTS = {
     },
     sensitive: true,
     mask: ["XXXX  XXXX XXXX XXXX", { X: "[0-9]" }],
-    regex: /^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$/
+    regex:
+      /^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$/,
   },
   expireDate: {
     name: "expireDate",
@@ -202,16 +210,16 @@ export const ELEMENTS = {
     },
     sensitive: true,
     mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
-    regex: /^(0[1-9]|1[0-2])\/([0-9]{4}|[0-9]{2})$/
+    regex: /^(0[1-9]|1[0-2])\/([0-9]{4}|[0-9]{2})$/,
   },
-  cvv:{
+  cvv: {
     name: "cvv",
     attributes: {
       type: "text",
     },
     sensitive: true,
     regex: /^$|^[0-9]{3,4}$/,
-  }
+  },
 };
 
 export const IFRAME_DEFAULT_STYLES = {
@@ -314,6 +322,8 @@ export const ALLOWED_MULTIPLE_FIELDS_STYLES = [
   "align-items",
   "justify-content",
 ];
+
+export const ALLOWED_REVEAL_ELEMENT_STYLES = ["color", "font-size"];
 
 // should be in the order of applying the styles
 export const STYLE_TYPE = {

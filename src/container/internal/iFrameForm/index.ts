@@ -4,7 +4,7 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
-  FRAME_CONTROLLER,
+  COLLECT_FRAME_CONTROLLER,
 } from "../../constants";
 import EventEmitter from "../../../event-emitter";
 import { unMask } from "../../../libs/strings";
@@ -35,7 +35,7 @@ export class IFrameForm {
         if (!data.name) {
           throw new Error("Required params are not provided");
         }
-        if (data.name === FRAME_CONTROLLER) {
+        if (data.name === COLLECT_FRAME_CONTROLLER) {
           return;
         }
         const frameGlobalName: string = <string>data.name;

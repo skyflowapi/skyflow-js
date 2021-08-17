@@ -12,7 +12,7 @@ import {
   ELEMENTS,
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
-  FRAME_CONTROLLER,
+  COLLECT_FRAME_CONTROLLER,
   INPUT_STYLES,
   STYLE_TYPE,
 } from "../constants";
@@ -26,7 +26,7 @@ export class FrameController {
     this.#iFrameForm = new IFrameForm();
     bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.FRAME_READY,
-      { name: FRAME_CONTROLLER },
+      { name: COLLECT_FRAME_CONTROLLER },
       (clientMetaData: any) => {
         const clientJSON = clientMetaData.clientJSON;
         this.#iFrameForm.setClientMetadata(clientMetaData);
@@ -290,12 +290,7 @@ export class FrameElement {
       });
       classes = classes.map(
         (type) =>
-          "SkyflowElement-" +
-          preText +
-          "-" +
-          this.options.name +
-          "-" +
-          type
+          "SkyflowElement-" + preText + "-" + this.options.name + "-" + type
       );
 
       dom.className = classes.join(" ");

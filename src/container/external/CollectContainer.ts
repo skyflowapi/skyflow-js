@@ -6,7 +6,7 @@ import iframer, {
 } from "../../iframe-libs/iframer";
 import deepClone from "../../libs/deepClone";
 import {
-  FRAME_CONTROLLER,
+  COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
@@ -28,14 +28,14 @@ class CollectContainer {
   #metaData: any;
   constructor(options, metaData) {
     this.#metaData = metaData;
-    const iframe = iframer({ name: FRAME_CONTROLLER });
+    const iframe = iframer({ name: COLLECT_FRAME_CONTROLLER });
     setAttributes(iframe, {
       src: getIframeSrc(this.#metaData.uuid),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
 
     const sub = (data, callback) => {
-      if (data.name === FRAME_CONTROLLER) {
+      if (data.name === COLLECT_FRAME_CONTROLLER) {
         callback({ ...metaData });
         bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
       }
@@ -43,12 +43,12 @@ class CollectContainer {
     bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
 
     const getToken = (data, callback) => {
-      metaData.clientJSON.config.getAccessToken().then(token => {
-        callback(token)
-      })
-    }
+      metaData.clientJSON.config.getAccessToken().then((token) => {
+        callback(token);
+      });
+    };
 
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN, getToken)
+    bus.on(ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN, getToken);
 
     document.body.append(iframe);
   }
