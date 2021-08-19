@@ -1,11 +1,11 @@
-# Skyflow-JS 
+# skyflow-js
 ---
 The SDK for JavaScript is provided as a JavaScript file with support included for a set of services. This file is typically loaded into browser scripts using a ```<script>``` tag that references the hosted SDK package. 
 
 # Table of Contents
 - **Install** 
 - [**Skyflow Client Initialization**](#skyflow-client)
-- **Insert records into to vault**
+- **Insert records into vault**
     - [without using skyflow elements](#without-using-skyflow-elements)
     - [using skyflow elements](#using-skyflow-elements)
 - **Reveal records from the vault**
@@ -16,6 +16,7 @@ The SDK for JavaScript is provided as a JavaScript file with support included fo
 ---
 ### In the Browser
 - To use the SDK in the browser, simply add the following script tag to your HTML pages:
+
 ```<script src="https://skyflow-js.s3-us-west-2.amazonaws.com/skyflow.js"></script>```
 
 ## Skyflow Client
@@ -23,7 +24,7 @@ The SDK for JavaScript is provided as a JavaScript file with support included fo
 To get started, create a **skyflow client.**
 you have to set your **vault id, vault url** and **getAccessToken.**
 ```
-const skyflow = new window.Skyflow.init({
+const skyflow = Skyflow.init({
    vaultId: <vaultId>, 
    vaultURL: <vaultURL>, 
    getAccessToken: <getAccessToken callback>
@@ -123,13 +124,20 @@ skyflow.insert({
 - Create a container if you want to insert data into the vault using **skyflow elements**
 ### container(type): Container
 
-- **type : "COLLECT"** to create collect type container object
+- **type : COLLECT** to create collect type container object
+```
+export enum ContainerType {
+  COLLECT = "COLLECT",
+  REVEAL = "REVEAL",
+}
+```
 ### Steps to use container
 
 ###### First step : create collect container
-```const container = skyflow.container("COLLECT");``` 
+- We pass ContainerType.COLLECT for collect container
+```const container = skyflow.container(ContainerType.COLLECT);``` 
 - Use this container instance to create and manage a group of individual skyflow element instances.
-- Using the type option can create a respective container, type is **"COLLECT"** here for collect container
+- Using the type option can create a respective container, type is **COLLECT** here for collect container
 
 ###### Second step :  create skyflow elements using this container instance
 ```const element = container.create(collectElement, options)```
@@ -192,7 +200,7 @@ styles:{
   }
 }
 ```
-
+**It uses JSS Syntax, [doc link](https://cssinjs.org/?v=v10.7.1)**
 ###### Third step :  Create empty div elements
 - We need to create empty div elements to specify where our iframe elements will be rendered
 - Sample code demonstrates the use of div elements-
@@ -340,7 +348,11 @@ skyflow.get([{
 ---
 ## using skyflow element
     container(type): Container
-    Use type: "REVEAL" to create reveal container object
+    Use type: REVEAL to create reveal container object
+    export enum ContainerType {
+        COLLECT = "COLLECT",
+        REVEAL = "REVEAL",
+    }
 
 ##### reveal(options?) : Promise
 - creates container which manages reveal elements
@@ -348,7 +360,8 @@ skyflow.get([{
 ### Steps to use container
 
 ###### First step : create reveal container
-```const container = skyflow.container("REVEAL");``` 
+- We pass ContainerType.REVEAl for collect container
+    ```const container = skyflow.container(REVEAL);``` 
 - Use this container instance to create and manage a group of individual skyflow reveal elements.
 - we pass **REVEAL** to create reveal type container object
 
