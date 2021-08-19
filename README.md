@@ -1,4 +1,4 @@
-# Skyflow-JS
+# Skyflow-JS 
 ---
 The SDK for JavaScript is provided as a JavaScript file with support included for a set of services. This file is typically loaded into browser scripts using a ```<script>``` tag that references the hosted SDK package. 
 
