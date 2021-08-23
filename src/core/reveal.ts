@@ -1,5 +1,22 @@
 import Client from "../client";
-import { IRevealRecord, RedactionType,revealResponseType } from "../Skyflow";
+import { IRevealRecord, RedactionType, revealResponseType } from "../Skyflow";
+
+interface IApiSuccessResponse {
+  records: [
+    {
+      token_id: string;
+      fields: Record<string, string>;
+    }
+  ];
+}
+interface IApiFailureResponse {
+  error: {
+    http_code: number;
+    grpc_code: number;
+    http_status: string;
+    message: string;
+  };
+}
 
 export const fetchRecordsByTokenId = (
   tokenIdRecords: IRevealRecord[],
@@ -19,37 +36,16 @@ export const fetchRecordsByTokenId = (
         let apiResponse: any = [];
         getTokenRecordsFromVault(tokenIds, RedactionType[redaction], client)
           .then(
-            (response:{
-              records:[{
-                token_id:string,
-                fields:Record<string,string>,
-              }]
-            }) => {
-              const currentResponseRecords = response["records"];
-              const fieldsData = currentResponseRecords.map((record) => {
-                return { id: record["token_id"], ...record["fields"] };
-              });
+            (response: IApiSuccessResponse) => {
+              const fieldsData = formatForPureJsSuccess(response);
               apiResponse.push(...fieldsData);
             },
-            (cause: {
-              error: {
-                http_code: number;
-                grpc_code: number;
-                http_status: string;
-                message: string;
-              };
-            }) => {
-              let errorSet = tokenIds.map((tokenId) => ({
-                id: tokenId,
-                error: {
-                  code: cause.error.http_code,
-                  description: cause.error.message,
-                },
-              }));
-
+            (cause: IApiFailureResponse) => {
+              let errorSet = formatForPureJsFailure(cause, tokenIds);
               apiResponse.push(...errorSet);
             }
-          ).finally(() => {
+          )
+          .finally(() => {
             resolve(apiResponse);
           });
       });
@@ -75,7 +71,7 @@ export const fetchRecordsByTokenId = (
     });
   });
 };
-const getTokenRecordsFromVault= (
+const getTokenRecordsFromVault = (
   queryRecordIds: string[],
   redactionType: RedactionType,
   client: Client
@@ -87,8 +83,42 @@ const getTokenRecordsFromVault= (
   });
 
   const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultId}/tokens?${paramList}redaction=${redactionType}`;
+
   return client.request({
     requestMethod: "GET",
     url: vaultEndPointurl,
   });
+};
+
+const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
+  const currentResponseRecords = response["records"];
+  return currentResponseRecords.map((record) => {
+    return { id: record["token_id"], ...record["fields"] };
+  });
+};
+
+const formatForPureJsFailure = (cause: IApiFailureResponse, tokenIds) => {
+  return tokenIds.map((tokenId) => ({
+    id: tokenId,
+    error: {
+      code: cause.error.http_code,
+      description: cause.error.message,
+    },
+  }));
+};
+
+export const formatRecordsForIframe = (response: revealResponseType) => {
+  const result: Record<string, string> = {};
+  response.records.forEach((record) => {
+    const values = Object.values(record);
+    result[values[0]] = values[1];
+  });
+  return result;
+};
+
+export const formatRecordsForClient = (response: revealResponseType) => {
+  const successRecords = response.records.map((record) => ({
+    id: record.id,
+  }));
+  return { success: successRecords, errors: response.errors };
 };
