@@ -1,7 +1,6 @@
-import EventEmitter from "../../../event-emitter";
 import bus from "framebus";
 import {
-  ELEMENT_EVENTS_TO_CLIENT,
+  ELEMENT_EVENTS_TO_CONTAINER,
   ELEMENT_EVENTS_TO_IFRAME,
   FRAME_REVEAL,
 } from "../../constants";
@@ -10,29 +9,39 @@ import { IRevealElementInput } from "../RevealContainer";
 
 class RevealElement {
   #iframe: IFrame;
-  #eventEmitter: EventEmitter = new EventEmitter();
   #metaData: any;
   #recordData: any;
-  constructor(record: IRevealElementInput, metaData: any) {
+  #containerId: string;
+
+  constructor(record: IRevealElementInput, metaData: any, containerId: string) {
     this.#metaData = metaData;
     this.#recordData = record;
-    this.#iframe = new IFrame(`${FRAME_REVEAL}:${record.label}`, { metaData });
+    this.#containerId = containerId;
+    this.#iframe = new IFrame(
+      `${FRAME_REVEAL}:${record.label}:${this.#containerId}`,
+      { metaData }
+    );
   }
   mount(domElementSelector) {
-    // TODO: Mount on client HTML
-    console.log("Mount Method", domElementSelector);
     this.#iframe.mount(domElementSelector);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
-        callback({ ...this.#metaData, record: this.#recordData });
-        // this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
-        // bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+        callback({
+          ...this.#metaData,
+          record: this.#recordData,
+        });
+
         bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
 
-        bus.emit("mounted", { id: this.#recordData.id });
+        bus.emit(
+          ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
+          {
+            id: this.#recordData.id,
+            containerId: this.#containerId,
+          }
+        );
       }
     };
-    // bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
     bus.on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
   }
 }

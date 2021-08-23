@@ -22,7 +22,6 @@ export const fetchRecordsByTokenId = (
   tokenIdRecords: IRevealRecord[],
   client: Client
 ): Promise<revealResponseType> => {
-  console.log(tokenIdRecords);
   let tokenRequest: Record<string, string[]> = {};
 
   tokenIdRecords.forEach((tokenRecord) => {
@@ -42,7 +41,6 @@ export const fetchRecordsByTokenId = (
               apiResponse.push(...fieldsData);
             },
             (cause: IApiFailureResponse) => {
-              console.log(cause);
               let errorSet = formatForPureJsFailure(cause, tokenIds);
               apiResponse.push(...errorSet);
             }
@@ -115,9 +113,12 @@ export const formatRecordsForIframe = (response: revealResponseType) => {
     const values = Object.values(record);
     result[values[0]] = values[1];
   });
-  response.errors.map((record) => {
-    result[record.id] = record.error.description;
-  });
-  console.log(result);
   return result;
+};
+
+export const formatRecordsForClient = (response: revealResponseType) => {
+  const successRecords = response.records.map((record) => ({
+    id: record.id,
+  }));
+  return { success: successRecords, errors: response.errors };
 };

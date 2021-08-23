@@ -9,9 +9,12 @@ import {
   REVEAL_FRAME_CONTROLLER,
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
+  ELEMENT_EVENTS_TO_CONTAINER,
 } from "../constants";
 import RevealElement from "./reveal/RevealElement";
 import { properties } from "../../properties";
+import uuid from "../../libs/uuid";
+import EventEmitter from "../../event-emitter";
 
 export interface IRevealElementInput {
   id: string;
@@ -22,13 +25,22 @@ export interface IRevealElementInput {
 
 class RevealContainer {
   #revealRecords: IRevealElementInput[] = [];
-  #revealElements: RevealElement[] = [];
   #mountedRecords: { id: string }[] = [];
+  static hasAccessTokenListner: boolean = false;
   #metaData: any;
+  #containerId: string;
+  #eventEmmiter: EventEmitter;
+  #isRevealCalled: boolean = false;
+  #isElementsMounted: boolean = false;
+
   constructor(metaData) {
     this.#metaData = metaData;
-    const iframe = iframer({ name: REVEAL_FRAME_CONTROLLER });
-    console.log("Reveal Container Intialized");
+    this.#containerId = uuid();
+    this.#eventEmmiter = new EventEmitter();
+
+    const iframe = iframer({
+      name: `${REVEAL_FRAME_CONTROLLER}:${this.#containerId}`,
+    });
     setAttributes(iframe, {
       src: getIframeSrc(this.#metaData.uuid),
     });
@@ -37,58 +49,90 @@ class RevealContainer {
     const sub = (data, callback) => {
       if (data.name === REVEAL_FRAME_CONTROLLER) {
         callback({ ...metaData });
-        // bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
-        bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
+          .off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
       }
     };
     bus
-      // .target(properties.IFRAME_SECURE_ORGIN)
-      // .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+      .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
 
     document.body.append(iframe);
-    const getToken = (data, callback) => {
-      metaData.clientJSON.config.getAccessToken().then((token) => {
-        callback(token);
-      });
-    };
 
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN, getToken);
+    if (!RevealContainer.hasAccessTokenListner) {
+      const getToken = (_, callback) => {
+        metaData.clientJSON.config.getAccessToken().then((token) => {
+          callback(token);
+        });
+      };
+      bus
+        .target(properties.IFRAME_SECURE_ORGIN)
+        .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_GET_ACCESS_TOKEN, getToken);
+      RevealContainer.hasAccessTokenListner = true;
+    }
+    bus.on(
+      ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
+      (data, _) => {
+        this.#mountedRecords.push(data as any);
 
-    bus.on("mounted", (data, _) => {
-      console.log(data);
-      this.#mountedRecords.push(data as any);
-    });
+        this.#isElementsMounted =
+          this.#mountedRecords.length === this.#revealRecords.length;
+
+        if (this.#isRevealCalled && this.#isElementsMounted) {
+          this.#eventEmmiter._emit(
+            ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED +
+              this.#containerId,
+            {
+              containerId: this.#containerId,
+            }
+          );
+        }
+      }
+    );
   }
 
   create(record: IRevealElementInput) {
-    this.validateRevealElementInput(record);
     this.#revealRecords.push(record);
-    const revealElement = new RevealElement(record, this.#metaData);
-    this.#revealElements.push(revealElement);
-    return revealElement;
+    return new RevealElement(record, this.#metaData, this.#containerId);
   }
 
   reveal() {
-    // TODO : Add Data to All The Elements
-    console.log(this.#revealRecords);
-    console.log(this.#revealElements);
-    console.log(window.location.origin);
-    bus
-      .target(properties.IFRAME_SECURE_ORGIN)
-      .emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST, {
-        records: this.#revealRecords,
+    this.#isRevealCalled = true;
+    if (this.#isElementsMounted) {
+      return new Promise((resolve, _) => {
+        bus.target(properties.IFRAME_SECURE_ORGIN).emit(
+          ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
+          {
+            records: this.#revealRecords,
+          },
+          (data) => {
+            this.#mountedRecords = [];
+            this.#revealRecords = [];
+            resolve(data);
+          }
+        );
       });
-
-    // console.log(res);
-  }
-  private validateRevealElementInput(record: IRevealElementInput) {
-    const recordId = record.id;
-    if (!recordId || typeof recordId !== "string")
-      throw new Error(`Invalid Token Id ${recordId}`);
-    const recordRedaction = record.redaction;
-    if (!Object.values(RedactionType).includes(recordRedaction))
-      throw new Error(`Invalid Redaction Type ${recordRedaction}`);
+    } else {
+      return new Promise((resolve, _) => {
+        this.#eventEmmiter.on(
+          ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
+          () => {
+            bus.target(properties.IFRAME_SECURE_ORGIN).emit(
+              ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
+              {
+                records: this.#revealRecords,
+              },
+              (apiData) => {
+                this.#revealRecords = [];
+                this.#mountedRecords = [];
+                resolve(apiData);
+              }
+            );
+          }
+        );
+      });
+    }
   }
 }
 export default RevealContainer;

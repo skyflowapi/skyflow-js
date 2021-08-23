@@ -25,9 +25,9 @@ if (typeof window.console === "undefined") {
     if (names[0] === COLLECT_FRAME_CONTROLLER && names[1] === undefined) {
       root.Skyflow = FrameController;
       FrameController.init(location.hash);
-    } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] === undefined) {
+    } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] !== undefined) {
       root.Skyflow = FrameController;
-      RevealFrameController.init();
+      RevealFrameController.init(names[1]);
     } else if (names[0] === FRAME_ELEMENT) {
       root.Skyflow = FrameElements;
       FrameElements.start();

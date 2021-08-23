@@ -75,8 +75,6 @@ class Skyflow {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
         });
-      // case ContainerType.REVEAL:
-      //   return new RevealContainer(options);
       case ContainerType.REVEAL:
         return new RevealContainer({
           ...this.#metadata,
