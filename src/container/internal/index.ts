@@ -15,18 +15,21 @@ import {
   COLLECT_FRAME_CONTROLLER,
   INPUT_STYLES,
   STYLE_TYPE,
+  ERROR_TEXT_STYLES,
 } from "../constants";
 import { IFrameForm, IFrameFormElement } from "./iFrameForm";
 
 export class FrameController {
-  static controller?: FrameController;
+  controller?: FrameController;
+  controllerId: string;
   #client?: Client;
   #iFrameForm: IFrameForm;
-  constructor() {
-    this.#iFrameForm = new IFrameForm();
+  constructor(controllerId: string) {
+    this.#iFrameForm = new IFrameForm(controllerId);
+    this.controllerId = controllerId;
     bus.emit(
-      ELEMENT_EVENTS_TO_IFRAME.FRAME_READY,
-      { name: COLLECT_FRAME_CONTROLLER },
+      ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
+      { name: COLLECT_FRAME_CONTROLLER + controllerId },
       (clientMetaData: any) => {
         const clientJSON = clientMetaData.clientJSON;
         this.#iFrameForm.setClientMetadata(clientMetaData);
@@ -36,8 +39,7 @@ export class FrameController {
     );
   }
   static init(uuid: string) {
-    if (this.controller) return this.controller; //? why is this static. can't we create 2 containers?
-    this.controller = new FrameController();
+    return new FrameController(uuid);
   }
 }
 
@@ -48,6 +50,7 @@ export class FrameElement {
   private iFrameFormElement: IFrameFormElement;
   private domLabel?: HTMLLabelElement;
   private domInput?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+  private domError?: HTMLSpanElement;
 
   constructor(
     iFrameFormElement: IFrameFormElement,
@@ -66,6 +69,8 @@ export class FrameElement {
     this.iFrameFormElement.resetEvents();
     this.domLabel = document.createElement("label");
     this.domLabel.htmlFor = this.iFrameFormElement.iFrameName;
+
+    this.domError = document.createElement("span");
 
     const inputElement = document.createElement(
       this.iFrameFormElement.fieldType === ELEMENTS.dropdown.name
@@ -98,6 +103,13 @@ export class FrameElement {
       ) {
         (<HTMLInputElement>this.domInput).checked =
           this.options.value === state.value;
+      }
+      if (state.isValid && this.domError) {
+        this.domError.innerText = "";
+      } else if (!state.isEmpty && !state.isValid && this.domError) {
+        this.domError.innerText = this.options.label
+          ? "Invalid " + this.options.label
+          : "Invalid value";
       }
       this.updateStyleClasses(state);
     });
@@ -201,7 +213,11 @@ export class FrameElement {
 
   updateParentDiv = (newDiv: HTMLDivElement) => {
     this.htmlDivElement = newDiv;
-    this.htmlDivElement.append(this.domLabel || "", this.domInput || "");
+    this.htmlDivElement.append(
+      this.domLabel || "",
+      this.domInput || "",
+      this.domError || ""
+    );
   };
 
   setValue = (value) => {
@@ -280,6 +296,8 @@ export class FrameElement {
 
     this.setClass(classes, this.domInput);
     this.setClass(classes, this.domLabel, "label");
+
+    if (!state.isValid) this.setClass(classes, this.domError, "error");
   }
 
   setClass(types: string[], dom?: HTMLElement, preText: string = "") {
@@ -316,6 +334,13 @@ export class FrameElement {
         ...options.styles.base,
       };
       this.injectInputStyles(options.styles);
+
+      let errorStyles = {
+        invalid: {
+          ...ERROR_TEXT_STYLES,
+        },
+      };
+      this.injectInputStyles(errorStyles, "error");
     }
     if (options?.labelStyles?.styles) {
       // update label styles

@@ -1,6 +1,9 @@
 import { FrameElement } from ".";
 import bus from "framebus";
-import { ELEMENT_EVENTS_TO_IFRAME, ALLOWED_MULTIPLE_FIELDS_STYLES } from "../constants";
+import {
+  ELEMENT_EVENTS_TO_IFRAME,
+  ALLOWED_MULTIPLE_FIELDS_STYLES,
+} from "../constants";
 import injectStylesheet from "inject-stylesheet";
 import {
   getValueAndItsUnit,
@@ -28,8 +31,9 @@ export default class FrameElements {
 
   // called on iframe loaded im html file
   static start = () => {
+    const names = window.name.split(":");
     bus.emit(
-      ELEMENT_EVENTS_TO_IFRAME.FRAME_READY,
+      ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + names[3],
       { name: window.name },
       (group: any) => {
         FrameElements.group = group;

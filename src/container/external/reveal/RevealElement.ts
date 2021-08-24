@@ -18,8 +18,9 @@ class RevealElement {
     this.#recordData = record;
     this.#containerId = containerId;
     this.#iframe = new IFrame(
-      `${FRAME_REVEAL}:${record.label}:${this.#containerId}`,
-      { metaData }
+      `${FRAME_REVEAL}:${record.label}`,
+      { metaData },
+      this.#containerId
     );
   }
   mount(domElementSelector) {

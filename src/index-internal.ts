@@ -22,9 +22,9 @@ if (typeof window.console === "undefined") {
 (function (root: any) {
   try {
     const names = root.name.split(":");
-    if (names[0] === COLLECT_FRAME_CONTROLLER && names[1] === undefined) {
+    if (names[0] === COLLECT_FRAME_CONTROLLER && names[1] !== undefined) {
       root.Skyflow = FrameController;
-      FrameController.init(location.hash);
+      FrameController.init(names[1]);
     } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] !== undefined) {
       root.Skyflow = FrameController;
       RevealFrameController.init(names[1]);

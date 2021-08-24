@@ -5,6 +5,7 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
   COLLECT_FRAME_CONTROLLER,
+  SkyflowElementType,
 } from "../../constants";
 import EventEmitter from "../../../event-emitter";
 import { unMask } from "../../../libs/strings";
@@ -28,35 +29,44 @@ export class IFrameForm {
   private client?: Client;
   private clientMetaData?: any;
   private callbacks: Function[] = [];
-  constructor() {
+  private controllerId: string;
+  constructor(controllerId: string) {
+    this.controllerId = controllerId;
     bus
       .target(location.origin)
-      .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, (data, callback) => {
-        if (!data.name) {
-          throw new Error("Required params are not provided");
-        }
-        if (data.name === COLLECT_FRAME_CONTROLLER) {
-          return;
-        }
-        const frameGlobalName: string = <string>data.name;
-        if (this.clientMetaData)
-          this.initializeFrame(window.parent, frameGlobalName);
-        else
-          this.callbacks.push(() => {
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.controllerId,
+        (data, callback) => {
+          if (!data.name) {
+            throw new Error("Required params are not provided");
+          }
+          // @ts-ignore
+          if (data.name && data.name.includes(COLLECT_FRAME_CONTROLLER)) {
+            return;
+          }
+          const frameGlobalName: string = <string>data.name;
+          if (this.clientMetaData)
             this.initializeFrame(window.parent, frameGlobalName);
-          });
-      });
+          else
+            this.callbacks.push(() => {
+              this.initializeFrame(window.parent, frameGlobalName);
+            });
+        }
+      );
 
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST, (data, callback) => {
-      // todo: Do we need to reset the data!?
-      this.tokenize(data)
-        .then((data) => {
-          callback(data);
-        })
-        .catch((error) => {
-          callback(error);
-        });
-    });
+    bus.on(
+      ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.controllerId,
+      (data, callback) => {
+        // todo: Do we need to reset the data!?
+        this.tokenize(data)
+          .then((data) => {
+            callback(data);
+          })
+          .catch((error) => {
+            callback(error);
+          });
+      }
+    );
 
     bus.on(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME, (data, callback) => {
       for (const iFrameFormElement in this.iFrameFormElements) {
@@ -103,7 +113,9 @@ export class IFrameForm {
       const state = this.iFrameFormElements[iFrameFormElement].state;
       const tableName = this.iFrameFormElements[iFrameFormElement].tableName;
       if (!state.isValid || !state.isComplete) {
-        return Promise.reject({ error: "Provide complete and valid inputs" });
+        return Promise.reject({
+          error: [state.name] + ": Provide complete and valid inputs",
+        });
       }
 
       if (
@@ -171,7 +183,7 @@ export class IFrameForm {
           .catch((err) => reject(err));
       } else {
         bus.emit(
-          ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN,
+          ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN + this.controllerId,
           {},
           (token: any) => {
             client.accessToken = token;
@@ -384,12 +396,12 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   validator(value: string) {
-    if (this.fieldType === "cardNumber") {
+    if (this.fieldType === SkyflowElementType.CARDNUMBER) {
       value = value.replace(/\D/g, "");
       if (!validateCreditCardNumber(value)) {
         return false;
       }
-    } else if (this.fieldType === "expireDate") {
+    } else if (this.fieldType === SkyflowElementType.EXPIRATIONDATE) {
       if (this.regex) {
         return this.regex.test(value) && validateExpiryDate(value);
       } else {

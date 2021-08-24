@@ -5,42 +5,48 @@ import iframer, {
   setStyles,
 } from "../../iframe-libs/iframer";
 import deepClone from "../../libs/deepClone";
+import uuid from "../../libs/uuid";
 import {
   COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
   FRAME_ELEMENT,
+  SkyflowElementType,
 } from "../constants";
 import Element from "./element";
 
 interface CollectElementInput {
   table: string;
   column: string;
-  styles: any;
-  label: string;
-  placeholder: string;
-  type: string;
+  styles?: any;
+  label?: string;
+  placeholder?: string;
+  type: SkyflowElementType;
 }
 
 class CollectContainer {
+  #containerId: string;
   #elements: Record<string, Element> = {};
   #metaData: any;
   constructor(options, metaData) {
+    this.#containerId = uuid();
     this.#metaData = metaData;
-    const iframe = iframer({ name: COLLECT_FRAME_CONTROLLER });
+    const iframe = iframer({
+      name: COLLECT_FRAME_CONTROLLER + ":" + this.#containerId,
+    });
     setAttributes(iframe, {
       src: getIframeSrc(this.#metaData.uuid),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
 
     const sub = (data, callback) => {
-      if (data.name === COLLECT_FRAME_CONTROLLER) {
+      if (data.name === COLLECT_FRAME_CONTROLLER + this.#containerId) {
         callback({ ...metaData });
-        bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+        bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
       }
     };
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+    bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
 
     const getToken = (data, callback) => {
       metaData.clientJSON.config.getAccessToken().then((token) => {
@@ -48,7 +54,10 @@ class CollectContainer {
       });
     };
 
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN, getToken);
+    bus.on(
+      ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN + this.#containerId,
+      getToken
+    );
 
     document.body.append(iframe);
   }
@@ -101,6 +110,7 @@ class CollectContainer {
         }
 
         options.elementName = `${FRAME_ELEMENT}:${options.elementName}`;
+        options.label = element.label;
 
         elements.push(options);
       });
@@ -129,6 +139,7 @@ class CollectContainer {
       element = new Element(
         multipleElements,
         this.#metaData,
+        this.#containerId,
         isSingleElementAPI,
         this.#destroyCallback,
         this.#updateCallback
@@ -185,7 +196,7 @@ class CollectContainer {
       bus
         // .target(getIframeSrc(this.metaData.uuid))
         .emit(
-          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST,
+          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
           options,
           function (data: any) {
             if (data.error) {

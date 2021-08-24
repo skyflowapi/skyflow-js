@@ -8,7 +8,6 @@ import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,
 } from "./core/collect";
-
 export interface IInsertRecord {
   table: string;
   fields: Record<string, any>;
@@ -26,7 +25,7 @@ export interface ISkyflow {
   vaultId: string;
   vaultURL: string;
   getAccessToken: () => Promise<string>;
-  options: Record<string, any>;
+  options?: Record<string, any>;
 }
 export enum RecordType {
   SKYFLOW_ID = "SKYFLOW_ID",
@@ -64,6 +63,7 @@ class Skyflow {
       this.#metadata
     );
   }
+
   static init(config: ISkyflow): Skyflow {
     return new Skyflow(config);
   }

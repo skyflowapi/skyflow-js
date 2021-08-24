@@ -18,8 +18,8 @@ import EventEmitter from "../../event-emitter";
 
 export interface IRevealElementInput {
   id: string;
-  styles: object;
-  label: string;
+  styles?: object;
+  label?: string;
   redaction: RedactionType;
 }
 

@@ -36,6 +36,13 @@ export const ELEMENT_EVENTS_TO_CONTAINER = {
   ALL_ELEMENTS_MOUNTED: "ALL_ELEMENTS_MOUNTED",
 };
 
+export enum SkyflowElementType {
+  CVV = "cvv",
+  EXPIRATIONDATE = "expirationDate",
+  CARDNUMBER = "cardNumber",
+  CARDHOLDERNAME = "cardHolderName",
+}
+
 export const ELEMENTS = {
   text: {
     name: "text",
@@ -205,18 +212,17 @@ export const ELEMENTS = {
       type: "text",
     },
     sensitive: true,
-    mask: ["XXXX  XXXX XXXX XXXX", { X: "[0-9]" }],
-    regex:
-      /^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$/,
+    // mask: ["XXXX  XXXX XXXX XXXX", { X: "[0-9]" }],
+    regex: /^(0[1-9]|1[0-2])\/?([0-9]{4})$/,
   },
-  expireDate: {
-    name: "expireDate",
+  expirationDate: {
+    name: "expirationDate",
     attributes: {
       type: "text",
     },
     sensitive: true,
-    mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
-    regex: /^(0[1-9]|1[0-2])\/([0-9]{4}|[0-9]{2})$/,
+    // mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
+    regex: /^(0[1-9]|1[0-2])-([0-9]{4}|[0-9]{2})$/,
   },
   cvv: {
     name: "cvv",
@@ -257,6 +263,11 @@ export const INPUT_STYLES = {
   padding: "0",
   margin: "0",
   outline: "none",
+};
+
+export const ERROR_TEXT_STYLES = {
+  color: "#f44336",
+  padding: "2px",
 };
 
 export const ALLOWED_ATTRIBUTES = {

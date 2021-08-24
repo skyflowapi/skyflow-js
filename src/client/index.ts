@@ -40,9 +40,19 @@ class Client {
   request = (request: IClientRequest) => {
     // todo: link has to be https
     return new Promise(async (resolve, reject) => {
+      if (
+        !this.config.vaultId ||
+        !this.config.vaultURL ||
+        !this.config.getAccessToken
+      ) {
+        reject("Invalid client credentials");
+        return;
+      }
+
       const httpRequest = new XMLHttpRequest();
       if (!httpRequest) {
         reject("Error while initializing the connection");
+        return;
       }
 
       httpRequest.open(request.requestMethod, request.url);
@@ -56,6 +66,7 @@ class Client {
         }
       } catch (err) {
         reject(err);
+        return;
       }
       !request.headers?.Authorization &&
         httpRequest.setRequestHeader(
@@ -86,7 +97,7 @@ class Client {
       };
 
       httpRequest.onerror = (error) => {
-        reject(new Error("An error occurred during transaction"));
+        reject("An error occurred during transaction");
       };
     });
   };
