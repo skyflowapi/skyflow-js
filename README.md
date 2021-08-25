@@ -23,7 +23,7 @@ The SDK for JavaScript is provided as a JavaScript file with support included fo
 ----
 To get started, create a **skyflow client.**
 you have to set your **vault id, vault url** and **getAccessToken.**
-```
+```javascript
 const skyflow = Skyflow.init({
    vaultId: <vaultId>, 
    vaultURL: <vaultURL>, 
