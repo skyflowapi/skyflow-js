@@ -13,19 +13,7 @@ const minify = {
   minifyJS: true,
 };
 module.exports = {
-  entry: {
-    skyflow: ["core-js/stable", path.resolve(__dirname, "src/index.ts")],
-    iframe: [
-      "core-js/stable",
-      path.resolve(__dirname, "src/index-internal.ts"),
-    ],
-  },
-
-  output: {
-    filename: "[name].js",
-    path: path.resolve(__dirname, "dist"),
-  },
-
+  target: "web",
   resolve: {
     extensions: [".ts", ".js", ".json"],
   },
