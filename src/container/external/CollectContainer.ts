@@ -5,6 +5,7 @@ import iframer, {
   setStyles,
 } from "../../iframe-libs/iframer";
 import deepClone from "../../libs/deepClone";
+import { validateElementOptions } from "../../libs/element-options";
 import uuid from "../../libs/uuid";
 import {
   COLLECT_FRAME_CONTROLLER,
@@ -90,6 +91,7 @@ class CollectContainer {
       row.elements.forEach((element) => {
         const options = element;
         const elementType = options.elementType;
+        validateElementOptions(elementType,options)
 
         options.sensitive =
           options.sensitive || ELEMENTS[elementType].sensitive;

@@ -213,7 +213,7 @@ export const ELEMENTS = {
     },
     sensitive: true,
     // mask: ["XXXX  XXXX XXXX XXXX", { X: "[0-9]" }],
-    regex: /^(0[1-9]|1[0-2])\/?([0-9]{4})$/,
+    regex: /$|^[\s]*?([0-9]{2,6}[ -]?){3,5}[\s]*/,
   },
   expirationDate: {
     name: "expirationDate",
@@ -222,12 +222,13 @@ export const ELEMENTS = {
     },
     sensitive: true,
     // mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
-    regex: /^(0[1-9]|1[0-2])-([0-9]{4}|[0-9]{2})$/,
+    regex: /^(0[1-9]|1[0-2])\/?([0-9]{4})$/,
   },
   cvv: {
     name: "cvv",
     attributes: {
       type: "text",
+      maxLength: 4
     },
     sensitive: true,
     regex: /^$|^[0-9]{3,4}$/,
