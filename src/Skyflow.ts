@@ -99,11 +99,10 @@ class Skyflow {
         .request({
           body: { records: requestBody },
           requestMethod: "POST",
-          url: "/vault/v1/vaults/" + this.#client.config.vaultId,
-          // url:
-          //   this.#client.config.vaultURL +
-          //   "/v1/vaults/" +
-          //   this.#client.config.vaultId,
+          url:
+            this.#client.config.vaultURL +
+            "/v1/vaults/" +
+            this.#client.config.vaultId,
         })
         .then((response: any) => {
           resolve(
@@ -115,7 +114,6 @@ class Skyflow {
           );
         })
         .catch((error) => {
-          console.log(error);
           reject(error);
         });
     });

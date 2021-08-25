@@ -158,8 +158,7 @@ export class IFrameForm {
               records: finalRequest,
             },
             requestMethod: "POST",
-            url: "/vault/v1/vaults/" + client.config.vaultId,
-            // url: client.config.vaultURL + "/v1/vaults/" + client.config.vaultId,
+            url: client.config.vaultURL + "/v1/vaults/" + client.config.vaultId,
             ...(token ? { headers: { Authorization: "Bearer " + token } } : {}),
           })
           .then((response: any) => {
