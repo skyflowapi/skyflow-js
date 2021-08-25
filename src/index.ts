@@ -1,5 +1,6 @@
-import Skyflow from "./Skyflow";
 import "core-js/stable";
+import Skyflow, { ContainerType, RedactionType } from "./Skyflow";
+import { SkyflowElementType } from "./container/constants";
 
 if (typeof window.console === "undefined") {
   (<any>window).console = <any>{
@@ -10,4 +11,7 @@ if (typeof window.console === "undefined") {
 
 (function (root: any) {
   root.Skyflow = root.Skyflow || Skyflow;
+  root.ContainerType = root.ContainerType || ContainerType;
+  root.RedactionType = root.RedactionType || RedactionType;
+  root.SkyflowElementType = root.SkyflowElementType || SkyflowElementType;
 })(window);

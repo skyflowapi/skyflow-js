@@ -8,6 +8,7 @@ import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,
 } from "./core/collect";
+import { SkyflowElementType } from "./container/constants";
 export interface IInsertRecord {
   table: string;
   fields: Record<string, any>;
@@ -93,16 +94,16 @@ class Skyflow {
     options: Record<string, any> = { tokens: true }
   ) {
     const requestBody = constructInsertRecordRequest(records, options);
-
     return new Promise((resolve, reject) => {
       this.#client
         .request({
           body: { records: requestBody },
           requestMethod: "POST",
-          url:
-            this.#client.config.vaultURL +
-            "/v1/vaults/" +
-            this.#client.config.vaultId,
+          url: "/vault/v1/vaults/" + this.#client.config.vaultId,
+          // url:
+          //   this.#client.config.vaultURL +
+          //   "/v1/vaults/" +
+          //   this.#client.config.vaultId,
         })
         .then((response: any) => {
           resolve(
@@ -114,6 +115,7 @@ class Skyflow {
           );
         })
         .catch((error) => {
+          console.log(error);
           reject(error);
         });
     });
@@ -124,6 +126,16 @@ class Skyflow {
     options: any = {}
   ): Promise<revealResponseType> {
     return fetchRecordsByTokenId(records, this.#client);
+  }
+
+  static get ContainerType() {
+    return ContainerType;
+  }
+  static get ElementType() {
+    return SkyflowElementType;
+  }
+  static get RedactionType() {
+    return RedactionType;
   }
 }
 export default Skyflow;

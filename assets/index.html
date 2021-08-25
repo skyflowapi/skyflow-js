@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      iframe::selection {
+        background-color: transparent;
+      }
+      .base {
+        color: #3f51b5;
+      }
+      .base:hover {
+        /* this wont work */
+        color: aqua;
+      }
+      .complete {
+        color: #4caf50;
+      }
+      .empty {
+      }
+      .invalid {
+        color: #f44336;
+      }
+
+      #form {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        height: 100vh;
+        padding-top: 30px;
+      }
+
+      #form div {
+        width: 300px !important;
+        height: 60px !important;
+      }
+
+      .button {
+        width: 100px
+      }
+    </style>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- <script src="./../node_modules/framework-for-building-front-end-libraries/dist/my-library.js"></script> -->
+  </head>
+  <body>
+    <button id="insert">Pure js Insert</button>
+    <pre id="pureJsResp"></pre>
+    <form action="#" id="form">
+      <label>cvv</label>
+      <div id="cvv"></div>
+      <label>card number</label>
+      <div id="cardNumber"></div>
+      <label>expire date</label>
+      <div id="expireDate"></div>
+      <label>name</label>
+      <div id="name"></div>
+      <button class="button" id="submit" type="submit">Submit</button>
+      <pre id="secureJsResp"></pre>
+
+      <!-- <label>last name</label>
+      <div id="lastName"></div>
+      <button class="button" id="submit2" type="submit">Submit</button>
+      <pre id="container2"></pre> -->
+    </form>
+   
+    <script>
+      // const { isPrimeNumber } = window.MyLibrary;
+      // console.log(isPrimeNumber(2))
+      const insertBtn = document.getElementById('insert'); 
+      const options = {
+        styles: {
+          base: {
+            border: "1px solid #eae8ee",
+            padding: "10px 16px",
+            "border-radius": "4px",
+            color: "#1d1d1d",
+          },
+          complete: {
+            color: "#4caf50",
+          },
+          empty: {},
+          focus: {},
+          invalid: {
+            color: "#f44336",
+          },
+        }
+        // value: "",
+        // disabled: false,
+      };
+
+      const skyflow = new Skyflow.init({
+        vaultId: "e20afc3ae1b54f0199f24130e51e0c11",
+        vaultURL: "sb.area51.vault.skyflowapis.dev",
+        getAccessToken: () => {
+          return axios
+            .get("http://localhost:8000/js/userToken")
+            .then((res) => res.data.accessToken);
+        },
+      });
+
+      insertBtn.addEventListener('click', () => {
+        console.log('in click....')
+        const res = skyflow.insert(
+        {
+          records: [
+            {
+              fields: {
+                primary_card: {
+                  cvv: "123",
+                  card_number: "4111111111111111",
+                  expiry_date: "12-2029"
+                },
+                first_name: "first"
+                // first_name: "<h1 onmouseenter=location/**/=/**/'javascript'/**/+':[1].some(alert/*(1)*/)'>click me for poc</h1>"
+              },
+              table: "pii_fields",
+            },
+          ],
+        },
+        { tokens: true }
+      );
+
+      let div = document.getElementById('pureJsResp');
+      res.then(r => {
+        console.log(r)
+        // div.innerHTML = JSON.stringify(r)
+        div.innerHTML = JSON.stringify(r, undefined, 4)
+      }).catch(e => {
+        console.log(e)
+        div.innerHTML = JSON.stringify(e)
+      })
+
+      })
+
+      const container = skyflow.container("COLLECT")
+
+      const cvvElement = container.create({
+        table: "pii_fields",
+        column: "primary_card.cvv",
+        ...options,
+        placeholder: "cvv",
+        // label: "CVV",
+        type: "cvv"
+      })
+
+      cvvElement.mount("#cvv")
+
+      const cardNumber = container.create({
+        table: "pii_fields",
+        column: "primary_card.card_number",
+        ...options,
+        // placeholder: "XXXX XXXX XXXX XXXX",
+        type: "cardNumber"
+      })
+
+      cardNumber.mount("#cardNumber")
+
+      const expireDate = container.create({
+        table: "pii_fields",
+        column: "primary_card.expiry_date",
+        ...options,
+        placeholder: "MM/YYYY",
+        type: "expirationDate"
+      })
+
+      expireDate.mount("#expireDate")
+
+      const name = container.create({
+        table: "pii_fields",
+        column: "first_name",
+        ...options,
+        type: "cardHolderName"
+      })
+
+      name.mount("#name")
+
+      const insertBtn1 = document.getElementById('submit'); 
+
+      if(insertBtn1){
+        let div = document.getElementById('secureJsResp');
+        insertBtn1.addEventListener('click', () => {
+        container.collect().then((res)=>{
+          console.log(res)
+          // div.innerHTML = JSON.stringify(res)
+          div.innerHTML = JSON.stringify(res, undefined, 4)
+        }).catch(e => div.innerHTML = JSON.stringify(e))
+      })
+      }
+
+// creating 2nd container --------------
+
+      // const container2 = skyflow.container("COLLECT")
+
+      // const lastName = container2.create({
+      //   table: "pii_fields",
+      //   column: "last_name",
+      //   ...options,
+      //   type: "text"
+      // })
+
+      // lastName.mount("#lastName")
+
+      // const insertBtn2 = document.getElementById('submit2'); 
+
+      // if(insertBtn2){
+      //   let div = document.getElementById('container2');
+      //   insertBtn2.addEventListener('click', () => {
+      //     console.log('click2....')
+      //   container2.collect().then((res)=>{
+      //     console.log(res)
+      //     // div.innerHTML = JSON.stringify(res)
+      //     div.innerHTML = JSON.stringify(res, undefined, 4)
+      //   }).catch(e => {
+      //     console.log(e)
+      //     div.innerHTML = JSON.stringify(e)
+      //   })
+      // })
+      // }
+
+    </script>
+  </body>
+</html>
+
+<!--
+  need to check the skyflow object
+  should we need to  mock the analyst review screen
+-->
