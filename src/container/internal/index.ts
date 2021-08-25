@@ -18,6 +18,7 @@ import {
   ERROR_TEXT_STYLES,
 } from "../constants";
 import { IFrameForm, IFrameFormElement } from "./iFrameForm";
+import { getCssClassesFromJss } from "../../libs/jss-styles";
 
 export class FrameController {
   controller?: FrameController;
@@ -245,34 +246,7 @@ export class FrameElement {
   destroy = () => {};
 
   injectInputStyles(styles, preText: string = "") {
-    const stylesByClassName = {};
-    Object.values(STYLE_TYPE).forEach((classType) => {
-      if (styles[classType] && Object.keys(styles).length !== 0) {
-        const [nonPseudoStyles, pseudoStyles] = splitStyles(styles[classType]);
-        stylesByClassName[
-          ".SkyflowElement-" +
-            preText +
-            "-" +
-            this.options.name.replace(/\./g, "\\.") +
-            "-" +
-            classType
-        ] = nonPseudoStyles;
-        for (const pseudoStyle in pseudoStyles) {
-          if (ALLOWED_PSEUDO_STYLES.includes(pseudoStyle))
-            stylesByClassName[
-              ".SkyflowElement-" +
-                preText +
-                "-" +
-                this.options.name.replace(/\./g, "\\.") +
-                "-" +
-                classType +
-                pseudoStyle
-            ] = pseudoStyles[pseudoStyle];
-        }
-      }
-    });
-
-    injectStylesheet.injectWithAllowlist(stylesByClassName, ALLOWED_STYLES);
+    getCssClassesFromJss(styles, `${preText}-${this.options.name}`);
   }
 
   updateStyleClasses(state: {

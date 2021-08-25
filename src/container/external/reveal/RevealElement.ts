@@ -1,4 +1,5 @@
 import bus from "framebus";
+import { properties } from "../../../properties";
 import {
   ELEMENT_EVENTS_TO_CONTAINER,
   ELEMENT_EVENTS_TO_IFRAME,
@@ -18,7 +19,7 @@ class RevealElement {
     this.#recordData = record;
     this.#containerId = containerId;
     this.#iframe = new IFrame(
-      `${FRAME_REVEAL}:${record.label}`,
+      `${FRAME_REVEAL}:${btoa(record.label || record.id)}`,
       { metaData },
       this.#containerId
     );
@@ -34,16 +35,20 @@ class RevealElement {
 
         bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
 
-        bus.emit(
-          ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
-          {
-            id: this.#recordData.id,
-            containerId: this.#containerId,
-          }
-        );
+        bus
+          .target(location.origin)
+          .emit(
+            ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
+            {
+              id: this.#recordData.id,
+              containerId: this.#containerId,
+            }
+          );
       }
     };
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+    bus
+      .target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
   }
 }
 
