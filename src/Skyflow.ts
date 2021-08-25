@@ -65,6 +65,9 @@ class Skyflow {
   }
 
   static init(config: ISkyflow): Skyflow {
+    if (!config.vaultId || !config.vaultURL || !config.getAccessToken) {
+      throw new Error("Invalid client credentials");
+    }
     return new Skyflow(config);
   }
 

@@ -14,31 +14,37 @@ import {
 import { properties } from "../../../properties";
 
 class RevealFrameController {
-  static client: Client;
+  #client!: Client;
   #clientMetadata: any;
   #containerId: any;
+  #clientDomain: string;
 
   constructor(containerId) {
     this.#containerId = containerId;
-    bus.emit(
-      ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY,
+    this.#clientDomain = document.referrer.slice(0, -1);
+    bus.target(this.#clientDomain).emit(
+      ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId,
       {
         name: REVEAL_FRAME_CONTROLLER,
       },
       (clientMetaData: any) => {
         const clientJSON = clientMetaData.clientJSON;
         this.#clientMetadata = clientMetaData;
-        RevealFrameController.client = Client.fromJSON(clientJSON);
+        this.#client = Client.fromJSON(clientJSON);
       }
     );
     const sub = (data, callback) => {
       this.revealData(data["records"] as any).then((res) => {
         callback(res);
       });
-      bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId, sub);
+      bus
+        .target(this.#clientDomain)
+        .off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId, sub);
     };
 
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId, sub);
+    bus
+      .target(this.#clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId, sub);
   }
 
   static init(containerId: string) {
@@ -48,45 +54,42 @@ class RevealFrameController {
   revealData(revealRecords: IRevealRecord[]) {
     return new Promise((resolve, _) => {
       if (
-        RevealFrameController.client &&
-        RevealFrameController.client.accessToken &&
-        isTokenValid(RevealFrameController.client.accessToken)
+        this.#client &&
+        this.#client.accessToken &&
+        isTokenValid(this.#client.accessToken)
       ) {
-        fetchRecordsByTokenId(revealRecords, RevealFrameController.client).then(
-          (result) => {
-            const formattedResult = formatRecordsForIframe(result);
-            bus
-              .target(properties.IFRAME_SECURE_SITE)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY +
-                  this.#containerId,
-                formattedResult
-              );
-            resolve(formatRecordsForClient(result));
-          }
-        );
+        fetchRecordsByTokenId(revealRecords, this.#client).then((result) => {
+          const formattedResult = formatRecordsForIframe(result);
+          bus
+            .target(properties.IFRAME_SECURE_SITE)
+            .emit(
+              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY +
+                this.#containerId,
+              formattedResult
+            );
+          resolve(formatRecordsForClient(result));
+        });
       } else {
         bus
-          .target(this.#clientMetadata.clientDomain)
+          .target(this.#clientDomain)
           .emit(
             ELEMENT_EVENTS_TO_IFRAME.REVEAL_GET_ACCESS_TOKEN,
             {},
             (accessToken: any) => {
-              RevealFrameController.client.accessToken = accessToken as string;
-              fetchRecordsByTokenId(
-                revealRecords,
-                RevealFrameController.client
-              ).then((result) => {
-                const formattedResult = formatRecordsForIframe(result);
-                bus
-                  .target(properties.IFRAME_SECURE_SITE)
-                  .emit(
-                    ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY +
-                      this.#containerId,
-                    formattedResult
-                  );
-                resolve(formatRecordsForClient(result));
-              });
+              this.#client.accessToken = accessToken as string;
+              fetchRecordsByTokenId(revealRecords, this.#client).then(
+                (result) => {
+                  const formattedResult = formatRecordsForIframe(result);
+                  bus
+                    .target(properties.IFRAME_SECURE_SITE)
+                    .emit(
+                      ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY +
+                        this.#containerId,
+                      formattedResult
+                    );
+                  resolve(formatRecordsForClient(result));
+                }
+              );
             }
           );
       }

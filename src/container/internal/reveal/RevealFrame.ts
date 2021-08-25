@@ -1,9 +1,6 @@
 import bus from "framebus";
-import {
-  ALLOWED_REVEAL_ELEMENT_STYLES,
-  ELEMENT_EVENTS_TO_IFRAME,
-} from "../../constants";
-import injectStylesheet from "inject-stylesheet";
+import { ELEMENT_EVENTS_TO_IFRAME, STYLE_TYPE } from "../../constants";
+import { getCssClassesFromJss } from "../../../libs/jss-styles";
 
 class RevealFrame {
   static revealFrame: RevealFrame;
@@ -11,15 +8,18 @@ class RevealFrame {
   #name: string;
   #record: any;
   #containerId: string;
+  #styles!: object;
 
   static init() {
-    bus.emit(
-      ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY,
-      { name: window.name },
-      (data: any) => {
-        RevealFrame.revealFrame = new RevealFrame(data.record);
-      }
-    );
+    bus
+      .target(document.referrer.slice(0, -1))
+      .emit(
+        ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY,
+        { name: window.name },
+        (data: any) => {
+          RevealFrame.revealFrame = new RevealFrame(data.record);
+        }
+      );
   }
 
   constructor(record) {
@@ -27,15 +27,16 @@ class RevealFrame {
     this.#containerId = this.#name.split(":")[2];
     this.#record = record;
     this.#domContainer = document.createElement("span");
-    this.#domContainer.className = "Skyflow-reveal";
     this.#domContainer.innerText = this.#record.id;
-    injectStylesheet.injectWithAllowlist(
-      {
-        [".Skyflow-reveal"]: this.#record.styles.base,
-      },
-      ALLOWED_REVEAL_ELEMENT_STYLES
-    );
+    this.#styles = this.#record.styles;
 
+    const classes = getCssClassesFromJss(
+      this.#styles,
+      btoa(this.#record.label)
+    );
+    Object.values(STYLE_TYPE).forEach((variant) => {
+      if (classes[variant]) this.#domContainer.classList.add(classes[variant]);
+    });
     document.body.append(this.#domContainer);
 
     const sub = (data, _) => {

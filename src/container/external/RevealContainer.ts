@@ -51,12 +51,15 @@ class RevealContainer {
         callback({ ...metaData });
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
-          .off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+          .off(
+            ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId,
+            sub
+          );
       }
     };
     bus
       .target(properties.IFRAME_SECURE_ORGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId, sub);
 
     document.body.append(iframe);
 
@@ -71,28 +74,33 @@ class RevealContainer {
         .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_GET_ACCESS_TOKEN, getToken);
       RevealContainer.hasAccessTokenListner = true;
     }
-    bus.on(
-      ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
-      (data, _) => {
-        this.#mountedRecords.push(data as any);
+    bus
+      .target(location.origin)
+      .on(
+        ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
+        (data, _) => {
+          this.#mountedRecords.push(data as any);
 
-        this.#isElementsMounted =
-          this.#mountedRecords.length === this.#revealRecords.length;
+          this.#isElementsMounted =
+            this.#mountedRecords.length === this.#revealRecords.length;
 
-        if (this.#isRevealCalled && this.#isElementsMounted) {
-          this.#eventEmmiter._emit(
-            ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED +
-              this.#containerId,
-            {
-              containerId: this.#containerId,
-            }
-          );
+          if (this.#isRevealCalled && this.#isElementsMounted) {
+            this.#eventEmmiter._emit(
+              ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED +
+                this.#containerId,
+              {
+                containerId: this.#containerId,
+              }
+            );
+          }
         }
-      }
-    );
+      );
   }
 
   create(record: IRevealElementInput) {
+    if (!record.label) record.label = record.id;
+    if (!record.styles) record.styles = {};
+    this.validateRevealElementInput(record);
     this.#revealRecords.push(record);
     return new RevealElement(record, this.#metaData, this.#containerId);
   }
@@ -133,6 +141,15 @@ class RevealContainer {
         );
       });
     }
+  }
+
+  private validateRevealElementInput(record: IRevealElementInput) {
+    const recordId = record.id;
+    if (!recordId || typeof recordId !== "string")
+      throw new Error(`Invalid Token Id ${recordId}`);
+    const recordRedaction = record.redaction;
+    if (!Object.values(RedactionType).includes(recordRedaction))
+      throw new Error(`Invalid Redaction Type ${recordRedaction}`);
   }
 }
 export default RevealContainer;
