@@ -8,7 +8,8 @@ import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,
 } from "./core/collect";
-import { SkyflowElementType } from "./container/constants";
+import { ElementType } from "./container/constants";
+
 export interface IInsertRecord {
   table: string;
   fields: Record<string, any>;
@@ -28,10 +29,7 @@ export interface ISkyflow {
   getAccessToken: () => Promise<string>;
   options?: Record<string, any>;
 }
-export enum RecordType {
-  SKYFLOW_ID = "SKYFLOW_ID",
-  TOKEN = "TOKEN",
-}
+
 export enum RedactionType {
   DEFAULT = "DEFAULT",
   PLAIN_TEXT = "PLAIN_TEXT",
@@ -130,7 +128,7 @@ class Skyflow {
     return ContainerType;
   }
   static get ElementType() {
-    return SkyflowElementType;
+    return ElementType;
   }
   static get RedactionType() {
     return RedactionType;

@@ -5,10 +5,9 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
   COLLECT_FRAME_CONTROLLER,
-  SkyflowElementType,
+  ElementType,
 } from "../../constants";
 import EventEmitter from "../../../event-emitter";
-import { unMask } from "../../../libs/strings";
 import { regExFromString } from "../../../libs/regex";
 import {
   validateCreditCardNumber,
@@ -396,12 +395,12 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   validator(value: string) {
-    if (this.fieldType === SkyflowElementType.CARDNUMBER) {
+    if (this.fieldType === ElementType.CARD_NUMBER) {
       value = value.replace(/\D/g, "");
       if (!validateCreditCardNumber(value)) {
         return false;
       }
-    } else if (this.fieldType === SkyflowElementType.EXPIRATIONDATE) {
+    } else if (this.fieldType === ElementType.EXPIRATION_DATE) {
       if (this.regex) {
         return this.regex.test(value) && validateExpiryDate(value);
       } else {

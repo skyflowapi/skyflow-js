@@ -13,7 +13,7 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
   FRAME_ELEMENT,
-  SkyflowElementType,
+  ElementType,
 } from "../constants";
 import Element from "./element";
 
@@ -23,7 +23,7 @@ interface CollectElementInput {
   styles?: any;
   label?: string;
   placeholder?: string;
-  type: SkyflowElementType;
+  type: ElementType;
 }
 
 class CollectContainer {
@@ -91,7 +91,7 @@ class CollectContainer {
       row.elements.forEach((element) => {
         const options = element;
         const elementType = options.elementType;
-        validateElementOptions(elementType,options)
+        validateElementOptions(elementType, options);
 
         options.sensitive =
           options.sensitive || ELEMENTS[elementType].sensitive;
