@@ -65,7 +65,7 @@ class RevealContainer {
 
     if (!RevealContainer.hasAccessTokenListner) {
       const getToken = (_, callback) => {
-        metaData.clientJSON.config.getAccessToken().then((token) => {
+        metaData.clientJSON.config.getBearerToken().then((token) => {
           callback(token);
         });
       };

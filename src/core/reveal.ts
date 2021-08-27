@@ -82,7 +82,7 @@ const getTokenRecordsFromVault = (
     paramList += `token_ids=${recordId}&`;
   });
 
-  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultId}/tokens?${paramList}redaction=${redactionType}`;
+  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/tokens?${paramList}redaction=${redactionType}`;
 
   return client.request({
     requestMethod: "GET",
