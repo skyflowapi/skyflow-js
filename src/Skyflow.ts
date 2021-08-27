@@ -8,6 +8,7 @@ import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,
 } from "./core/collect";
+import validateRecordsInput from "./utils/validators/insert-record";
 
 export interface IInsertRecord {
   table: string;
@@ -91,6 +92,9 @@ class Skyflow {
     records: IInsertRecordInput,
     options: Record<string, any> = { tokens: true }
   ) {
+
+    validateRecordsInput(records);
+
     const requestBody = constructInsertRecordRequest(records, options);
 
     return new Promise((resolve, reject) => {
