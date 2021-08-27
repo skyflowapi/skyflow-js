@@ -9,6 +9,7 @@ import {
   constructInsertRecordResponse,
 } from "./core/collect";
 import { ElementType } from "./container/constants";
+import { validateInsertRecords, validateGetRecords } from "./utils/validators";
 
 export interface IInsertRecord {
   table: string;
@@ -91,6 +92,7 @@ class Skyflow {
     records: IInsertRecordInput,
     options: Record<string, any> = { tokens: true }
   ) {
+    validateInsertRecords(records);
     const requestBody = constructInsertRecordRequest(records, options);
     return new Promise((resolve, reject) => {
       this.#client
@@ -121,6 +123,7 @@ class Skyflow {
     records: IRevealRecord[],
     options: any = {}
   ): Promise<revealResponseType> {
+    validateGetRecords(records);
     return fetchRecordsByTokenId(records, this.#client);
   }
 
