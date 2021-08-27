@@ -42,10 +42,17 @@ export const constructInsertRecordResponse = (
     return {
       records: responseBody.responses
         .filter((res, index) => index % 2 != 0)
-        .map((res, index) => ({
-          table: records[index].table,
-          fields: res.fields,
-        })),
+        .map((res, index) => {
+          let skyflow_id = res.fields["*"];
+          delete res.fields["*"];
+          return {
+            table: records[index].table,
+            fields: {
+              skyflow_id,
+              ...res.fields,
+            },
+          };
+        }),
     };
   } else {
     return {

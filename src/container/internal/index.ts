@@ -25,19 +25,23 @@ export class FrameController {
   controllerId: string;
   #client?: Client;
   #iFrameForm: IFrameForm;
+  private clientDomain: string;
   constructor(controllerId: string) {
-    this.#iFrameForm = new IFrameForm(controllerId);
+    this.clientDomain = document.referrer.split('/').slice(0,3).join('/');
+    this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain);
     this.controllerId = controllerId;
-    bus.emit(
-      ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
-      { name: COLLECT_FRAME_CONTROLLER + controllerId },
-      (clientMetaData: any) => {
-        const clientJSON = clientMetaData.clientJSON;
-        this.#iFrameForm.setClientMetadata(clientMetaData);
-        this.#iFrameForm.setClient(Client.fromJSON(clientJSON));
-        delete clientMetaData.clientJSON;
-      }
-    );
+    bus
+      .target(this.clientDomain)
+      .emit(
+        ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
+        { name: COLLECT_FRAME_CONTROLLER + controllerId },
+        (clientMetaData: any) => {
+          const clientJSON = clientMetaData.clientJSON;
+          this.#iFrameForm.setClientMetadata(clientMetaData);
+          this.#iFrameForm.setClient(Client.fromJSON(clientJSON));
+          delete clientMetaData.clientJSON;
+        }
+      );
   }
   static init(uuid: string) {
     return new FrameController(uuid);
@@ -105,7 +109,7 @@ export class FrameElement {
         (<HTMLInputElement>this.domInput).checked =
           this.options.value === state.value;
       }
-      if (state.isValid && this.domError) {
+      if ((state.isEmpty || state.isValid) && this.domError) {
         this.domError.innerText = "";
       } else if (!state.isEmpty && !state.isValid && this.domError) {
         this.domError.innerText = this.options.label
@@ -303,18 +307,18 @@ export class FrameElement {
         ...options.styles.base,
       };
       this.injectInputStyles(options.styles);
-
-      let errorStyles = {
-        invalid: {
-          ...ERROR_TEXT_STYLES,
-        },
-      };
-      this.injectInputStyles(errorStyles, "error");
     }
     if (options?.labelStyles?.styles) {
       // update label styles
       this.injectInputStyles(options?.labelStyles?.styles, "label");
     }
+
+    let errorStyles = {
+      invalid: {
+        ...ERROR_TEXT_STYLES,
+      },
+    };
+    this.injectInputStyles(errorStyles, "error");
 
     if (this.domLabel) this.domLabel.textContent = this.options.label;
 

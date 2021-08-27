@@ -7,6 +7,7 @@ import iframer, {
 import deepClone from "../../libs/deepClone";
 import { validateElementOptions } from "../../libs/element-options";
 import uuid from "../../libs/uuid";
+import { properties } from "../../properties";
 import {
   COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES,
@@ -44,10 +45,14 @@ class CollectContainer {
     const sub = (data, callback) => {
       if (data.name === COLLECT_FRAME_CONTROLLER + this.#containerId) {
         callback({ ...metaData });
-        bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
+          .off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
       }
     };
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
+    bus
+      .target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
 
     const getToken = (data, callback) => {
       metaData.clientJSON.config.getBearerToken().then((token) => {
@@ -55,10 +60,12 @@ class CollectContainer {
       });
     };
 
-    bus.on(
-      ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN + this.#containerId,
-      getToken
-    );
+    bus
+      .target(properties.IFRAME_SECURE_ORGIN)
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN + this.#containerId,
+        getToken
+      );
 
     document.body.append(iframe);
   }
@@ -196,7 +203,7 @@ class CollectContainer {
   collect = (options: any = { tokens: true }) => {
     return new Promise((resolve, reject) => {
       bus
-        // .target(getIframeSrc(this.metaData.uuid))
+        .target(properties.IFRAME_SECURE_ORGIN)
         .emit(
           ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
           options,

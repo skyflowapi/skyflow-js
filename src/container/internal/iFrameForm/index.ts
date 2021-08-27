@@ -29,8 +29,10 @@ export class IFrameForm {
   private clientMetaData?: any;
   private callbacks: Function[] = [];
   private controllerId: string;
-  constructor(controllerId: string) {
+  private clientDomain: string;
+  constructor(controllerId: string, clientDomain: string) {
     this.controllerId = controllerId;
+    this.clientDomain = clientDomain
     bus
       .target(location.origin)
       .on(
@@ -53,19 +55,21 @@ export class IFrameForm {
         }
       );
 
-    bus.on(
-      ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.controllerId,
-      (data, callback) => {
-        // todo: Do we need to reset the data!?
-        this.tokenize(data)
-          .then((data) => {
-            callback(data);
-          })
-          .catch((error) => {
-            callback(error);
-          });
-      }
-    );
+    bus
+      .target(this.clientDomain)
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.controllerId,
+        (data, callback) => {
+          // todo: Do we need to reset the data!?
+          this.tokenize(data)
+            .then((data) => {
+              callback(data);
+            })
+            .catch((error) => {
+              callback(error);
+            });
+        }
+      );
 
     bus.on(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME, (data, callback) => {
       for (const iFrameFormElement in this.iFrameFormElements) {
