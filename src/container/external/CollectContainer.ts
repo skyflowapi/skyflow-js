@@ -50,7 +50,7 @@ class CollectContainer {
     bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
 
     const getToken = (data, callback) => {
-      metaData.clientJSON.config.getAccessToken().then((token) => {
+      metaData.clientJSON.config.getBearerToken().then((token) => {
         callback(token);
       });
     };

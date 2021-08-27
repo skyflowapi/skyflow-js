@@ -24,9 +24,9 @@ export enum ContainerType {
   REVEAL = "REVEAL",
 }
 export interface ISkyflow {
-  vaultId: string;
+  vaultID: string;
   vaultURL: string;
-  getAccessToken: () => Promise<string>;
+  getBearerToken: () => Promise<string>;
   options?: Record<string, any>;
 }
 
@@ -64,7 +64,7 @@ class Skyflow {
   }
 
   static init(config: ISkyflow): Skyflow {
-    if (!config.vaultId || !config.vaultURL || !config.getAccessToken) {
+    if (!config.vaultID || !config.vaultURL || !config.getBearerToken) {
       throw new Error("Invalid client credentials");
     }
     return new Skyflow(config);
@@ -100,7 +100,7 @@ class Skyflow {
           url:
             this.#client.config.vaultURL +
             "/v1/vaults/" +
-            this.#client.config.vaultId,
+            this.#client.config.vaultID,
         })
         .then((response: any) => {
           resolve(

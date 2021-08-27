@@ -50,10 +50,10 @@ class Client {
 
       try {
         if (
-          this.config.getAccessToken &&
+          this.config.getBearerToken &&
           (!this.accessToken || !isTokenValid(this.accessToken))
         ) {
-          this.accessToken = await this.config.getAccessToken();
+          this.accessToken = await this.config.getBearerToken();
         }
       } catch (err) {
         reject(err);
