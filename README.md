@@ -40,7 +40,7 @@ const skyflowClient = Skyflow.init({
 ```
 For the `getBearerToken` parameter, pass in a helper function that retrieves a Skyflow bearer token from your backend. This function will be invoked when the SDK needs to insert or retrieve data from the vault. A sample implementation is shown below: 
 
-Assuming response is in the below format, after getting bearer token from your backend 
+For example, if the response of the consumer tokenAPI is in the below format
 
 ```
 {
@@ -49,20 +49,26 @@ Assuming response is in the below format, after getting bearer token from your b
 }
 
 ```
+then, your getBearerToken Implementation should be as below
 
 ```javascript
-const getBearerToken = () => {
-  const Http = new XMLHttpRequest();
-  
-  Http.onreadystatechange=function(e) {
-    var skyflowToken = e.accessToken
-    return Promise.resolve(skyflowToken)
-  }
-  
-  const url = 'https://api.acmecorp.com/skyflowToken'
-  Http.open('GET', url)
-  Http.send()
+getBearerToken: () => {
+  return new Promise((resolve, reject) => {
+    const Http = new XMLHttpRequest();
+
+    Http.onreadystatechange = () => {
+      if (Http.readyState == 4 && Http.status == 200) {
+        const response = JSON.parse(Http.responseText);
+        resolve(response.accessToken)
+      }
+    };
+    const url = "https://api.acmecorp.com/skyflowToken";
+    Http.open("GET", url);
+    Http.send();
+  })
+
 }
+
 ```
 
 ---
@@ -73,19 +79,21 @@ const getBearerToken = () => {
 
 ## Inserting data into the vault
 
-To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes an array of records to be inserted into the vault. The `options` parameter takes a dictionary of optional parameters for the insertion. See below: 
+To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes a dictionary of optional parameters for the insertion. See below: 
 
 ```javascript
-var records = [
-  {
-    table: "string",                  //table into which record should be inserted
-    fields: {                         
-      column1 : "value",              //column names should match vault column names
-      //...additional fields here
+var records = {
+  "records": [
+  	{
+      table: "string", //table into which record should be inserted
+      fields: {
+        column1: "value", //column names should match vault column names
+        //...additional fields here
+      }
     }
-  }
-  //...additional records here
-]
+    //...additional records here
+  ]
+}
 
 var options = {
   tokens: true  //indicates whether or not tokens should be returned for the inserted data. Defaults to 'true'  
@@ -299,7 +307,7 @@ For non-PCI use cases, to retrieve data from the vault and reveal it in the brow
 ```javascript
 var records = [
   { 
-    id: "string",                       //Skyflow ID or token for the record to be fetched
+    id: "string",                       //Token for the record to be fetched
     redaction: Skyflow.RedactionType    //redaction to be applied to the retrieved data
   }
 ]
