@@ -1,5 +1,4 @@
 import EventEmitter from "./index";
-// import mock
 
 describe("Event emitter test", () => {
   const eventObj = new EventEmitter();
@@ -32,15 +31,10 @@ describe("Event emitter test", () => {
     eventObj.off("Focus", () => {});
     expect(eventObj.hasListener("Focus")).toBe(false);
   });
-  /**
-   *
-   */
   test("test haslistener() ", () => {
     expect(eventObj.hasListener("Change")).toBe(true);
   });
-  /**
-   *
-   */
+
   test("test no existing events", () => {
     expect(eventObj.hasListener("Escape")).toBe(false);
   });

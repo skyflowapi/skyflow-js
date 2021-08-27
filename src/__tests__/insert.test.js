@@ -34,9 +34,6 @@ describe("Insert Records Test", () => {
     expect(response.hasOwnProperty("records")).toBe(true);
   });
 
-  /*
-   * invalid table name insertion fails, catch block holds error object
-   */
   test("should fail inserting records  ", async () => {
     var skyflow = Skyflow.init({
       vaultId: "e20afc3ae1b54f0199f24130e51e0c11",
@@ -70,10 +67,6 @@ describe("Insert Records Test", () => {
       expect(error.hasOwnProperty("error")).toBe(true);
     }
   });
-
-  /**
-   * table name not passed, error thrown message-  Notebook ID Passed is Blank
-   */
 
   test("test of inserting records with wrong table name passed", async () => {
     try {
@@ -109,9 +102,6 @@ describe("Insert Records Test", () => {
     }
   });
 
-  /**
-   * fields parameter not passed, throws message-> Batch Operation Failed. No Fields Present for Insert/Update
-   */
   test("fails in insertion due to absence of field parameter", async () => {
     try {
       var skyflow = Skyflow.init({
@@ -148,10 +138,7 @@ describe("Insert Records Test", () => {
     }
   });
 
-  /**
-   * wrong field name , throws error message ->
-   * Invalid field present in JSON name
-   */
+  
    test("fails in insertion due to absence of field parameter", async () => {
     try {
       var skyflow = Skyflow.init({
@@ -187,11 +174,7 @@ describe("Insert Records Test", () => {
       );
     }
   });
-  /** 
-   * changed object key name records
-  error thrown->TypeError: Cannot read property 'forEach' of undefined
-  at constructInsertRecordRequest
-  */
+  
   test("fails in insertion due to wrong key passed instead of records key", async () => {
     try {
       var skyflow = Skyflow.init({
@@ -226,10 +209,6 @@ describe("Insert Records Test", () => {
     }
   });
 
-  /**
-   * tokens paramter is optional, it should be either passed as tokens:true, or not passed
-   * if other keys passed throws error
-   */
   test("fails in insertion due to empty table name passed", async () => {
     try {
       var skyflow = Skyflow.init({
