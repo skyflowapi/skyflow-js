@@ -10,7 +10,7 @@ interface IApiSuccessResponse {
   ];
 }
 interface IApiFailureResponse {
-  error: {
+  error?: {
     http_code: number;
     grpc_code: number;
     http_status: string;
@@ -101,8 +101,8 @@ const formatForPureJsFailure = (cause: IApiFailureResponse, tokenIds) => {
   return tokenIds.map((tokenId) => ({
     id: tokenId,
     error: {
-      code: cause.error.http_code,
-      description: cause.error.message,
+      code: cause?.error?.http_code || "",
+      description: cause?.error?.message || "",
     },
   }));
 };
