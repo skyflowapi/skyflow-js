@@ -1,4 +1,5 @@
-export const FRAME_CONTROLLER = "controller";
+export const COLLECT_FRAME_CONTROLLER = "collect_controller";
+export const REVEAL_FRAME_CONTROLLER = "reveal_controller";
 
 export const FRAME_REVEAL = "reveal";
 
@@ -23,7 +24,24 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
   DESTROY_FRAME: "DESTROY FRAME",
   SET_VALUE: "SET_VALUE",
   CLIENT_REQUEST: "CLIENT_REQUEST",
+  GET_ACCESS_TOKEN: "GET_ACCESS_TOKEN",
+  REVEAL_REQUEST: "REVEAL_REQUEST",
+  REVEAL_RESPONSE_READY: "REVEAL_RESPONSE_READY",
+  REVEAL_FRAME_READY: "REVEAL_FRAME_READY",
+  REVEAL_GET_ACCESS_TOKEN: "REVEAL_GET_ACCESS_TOKEN",
 };
+
+export const ELEMENT_EVENTS_TO_CONTAINER = {
+  ELEMENT_MOUNTED: "ELEMENT_MOUNTED",
+  ALL_ELEMENTS_MOUNTED: "ALL_ELEMENTS_MOUNTED",
+};
+
+export enum ElementType {
+  CVV = "CVV",
+  EXPIRATION_DATE = "EXPIRATION_DATE",
+  CARD_NUMBER = "CARD_NUMBER",
+  CARDHOLDER_NAME = "CARDHOLDER_NAME",
+}
 
 export const ELEMENTS = {
   text: {
@@ -32,6 +50,7 @@ export const ELEMENTS = {
       type: "text",
     },
     sensitive: false,
+    // mask: ["XXX-XX-XXXX", { X: "[0-9]" }]
   },
   textarea: {
     name: "textarea",
@@ -99,7 +118,8 @@ export const ELEMENTS = {
       type: "email",
     },
     sensitive: false,
-    regex: /^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)$/i,
+    regex:
+      /^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)$/i,
   },
   dob: {
     name: "dob",
@@ -108,7 +128,8 @@ export const ELEMENTS = {
       pattern: "\\d{2}/\\d{2}/\\d{4}",
     },
     sensitive: false,
-    regex: /^(((0[1-9]|[12][0-9]|3[01])[- /.](0[13578]|1[02])|(0[1-9]|[12][0-9]|30)[- /.](0[469]|11)|(0[1-9]|1\d|2[0-8])[- /.]02)[- /.]\d{4}|29[- /.]02[- /.](\d{2}(0[48]|[2468][048]|[13579][26])|([02468][048]|[1359][26])00))$/,
+    regex:
+      /^(((0[1-9]|[12][0-9]|3[01])[- /.](0[13578]|1[02])|(0[1-9]|[12][0-9]|30)[- /.](0[469]|11)|(0[1-9]|1\d|2[0-8])[- /.]02)[- /.]\d{4}|29[- /.]02[- /.](\d{2}(0[48]|[2468][048]|[13579][26])|([02468][048]|[1359][26])00))$/,
   },
   mobileNumber: {
     name: "mobileNumber",
@@ -117,7 +138,8 @@ export const ELEMENTS = {
     },
     replacePattern: ["/[^0-9()+-\\s]/g"],
     sensitive: false,
-    regex: /^((\+?( |-|\.)?\d{1,2}( |-|\.)?)?(\(?\d{3}\)?|\d{3})( |-|\.)?(\d{3}( |-|\.)?\d{4}))$/,
+    regex:
+      /^((\+?( |-|\.)?\d{1,2}( |-|\.)?)?(\(?\d{3}\)?|\d{3})( |-|\.)?(\d{3}( |-|\.)?\d{4}))$/,
   },
   ssn: {
     name: "ssn",
@@ -176,6 +198,41 @@ export const ELEMENTS = {
     sensitive: false,
     regex: /^[0-9]+$/,
   },
+  [ElementType.CARDHOLDER_NAME]: {
+    name: "cardHolderName",
+    attributes: {
+      type: "text",
+    },
+    sensitive: true,
+    regex: /^([a-zA-Z0-9\\ \\,\\.\\-\\']{2,})$/,
+  },
+  [ElementType.CARD_NUMBER]: {
+    name: "cardNumber",
+    attributes: {
+      type: "text",
+    },
+    sensitive: true,
+    // mask: ["XXXX  XXXX XXXX XXXX", { X: "[0-9]" }],
+    regex: /$|^[\s]*?([0-9]{2,6}[ -]?){3,5}[\s]*/,
+  },
+  [ElementType.EXPIRATION_DATE]: {
+    name: "expirationDate",
+    attributes: {
+      type: "text",
+    },
+    sensitive: true,
+    // mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
+    regex: /^(0[1-9]|1[0-2])\/?([0-9]{4})$/,
+  },
+  [ElementType.CVV]: {
+    name: "cvv",
+    attributes: {
+      type: "text",
+      maxLength: 4,
+    },
+    sensitive: true,
+    regex: /^$|^[0-9]{3,4}$/,
+  },
 };
 
 export const IFRAME_DEFAULT_STYLES = {
@@ -207,6 +264,11 @@ export const INPUT_STYLES = {
   padding: "0",
   margin: "0",
   outline: "none",
+};
+
+export const ERROR_TEXT_STYLES = {
+  color: "#f44336",
+  padding: "2px",
 };
 
 export const ALLOWED_ATTRIBUTES = {
@@ -278,6 +340,8 @@ export const ALLOWED_MULTIPLE_FIELDS_STYLES = [
   "align-items",
   "justify-content",
 ];
+
+export const ALLOWED_REVEAL_ELEMENT_STYLES = ["color", "font-size"];
 
 // should be in the order of applying the styles
 export const STYLE_TYPE = {

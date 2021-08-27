@@ -1,12 +1,15 @@
-import iframer, { setAttributes, getIframeSrc } from "../../../iframe-libs/iframer";
+import iframer, {
+  setAttributes,
+  getIframeSrc,
+} from "../../../iframe-libs/iframer";
 
 export default class IFrame {
   name: string;
   metadata: any;
   iframe: HTMLIFrameElement;
   container?: Element;
-  constructor(name, metadata) {
-    this.name = name;
+  constructor(name, metadata, containerId) {
+    this.name = name + ":" + containerId;
     this.metadata = metadata;
     this.iframe = iframer({ name: this.name });
   }

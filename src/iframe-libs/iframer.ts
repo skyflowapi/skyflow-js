@@ -1,5 +1,8 @@
+import {
+  IFRAME_DEFAULT_STYLES,
+  CONTROLLER_STYLES,
+} from "../container/constants";
 import { properties } from "../properties";
-import { IFRAME_DEFAULT_STYLES } from "../elements/constants";
 
 export default (options = {}) => {
   const iframe = document.createElement("iframe");

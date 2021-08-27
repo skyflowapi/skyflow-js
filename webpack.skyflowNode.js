@@ -10,12 +10,23 @@ const CompressionPlugin = require("compression-webpack-plugin");
 module.exports = () => {
   return merge(common, {
     mode: "production",
+    entry: {
+      index: [
+        "core-js/stable",
+        path.resolve(__dirname, "src/index-node.ts"),
+      ],
+    },
+    output: {
+      filename: "[name].js",
+      path: path.resolve(__dirname, "dist/sdkNodeBuild"),
+      library: "Skyflow",
+      libraryTarget: "umd",
+      globalObject: "this",
+      umdNamedDefine: true,
+    },
     optimization: {
-      // splitChunks: {
-      //   chunks: "all",
-      // },
       runtimeChunk: false,
-      minimizer: [new UglifyJsPlugin()],
+      // minimizer: [new UglifyJsPlugin()],
     },
     module: {
       rules: [],

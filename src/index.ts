@@ -1,5 +1,5 @@
-import Skyflow from "./Skyflow";
 import "core-js/stable";
+import Skyflow from "./Skyflow";
 
 if (typeof window.console === "undefined") {
   (<any>window).console = <any>{

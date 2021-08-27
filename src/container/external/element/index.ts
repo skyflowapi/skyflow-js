@@ -1,12 +1,20 @@
-import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS } from "../../constants";
+import {
+  ELEMENT_EVENTS_TO_CLIENT,
+  ELEMENT_EVENTS_TO_IFRAME,
+  ELEMENTS,
+} from "../../constants";
 import EventEmitter from "../../../event-emitter";
 import Bus from "../../../libs/Bus";
 import deepClone from "../../../libs/deepClone";
-import { getElements, validateAndSetupGroupOptions } from "../../../libs/element-options";
+import {
+  getElements,
+  validateAndSetupGroupOptions,
+} from "../../../libs/element-options";
 import IFrame from "./IFrame";
 
 class Element {
   elementType: string;
+  containerId: string;
   #isSingleElementAPI: boolean = false;
   #states: any[];
   #elements: any[];
@@ -32,17 +40,21 @@ class Element {
   constructor(
     elementGroup: any,
     metaData: any,
+    containerId: string,
     isSingleElementAPI: boolean = false,
     destroyCallback: Function,
     updateCallback: Function
   ) {
+    this.containerId = containerId;
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
     if (this.#isSingleElementAPI && this.#elements.length > 1) {
       throw new Error("Unknown Error");
     }
-    this.elementType = this.#isSingleElementAPI ? this.#elements[0].elementType : "group";
+    this.elementType = this.#isSingleElementAPI
+      ? this.#elements[0].elementType
+      : "group";
 
     this.#states = [];
     this.#elements.forEach((element) => {
@@ -57,7 +69,11 @@ class Element {
       });
     });
 
-    this.#iframe = new IFrame(this.#group.elementName, metaData);
+    this.#iframe = new IFrame(
+      this.#group.elementName,
+      metaData,
+      this.containerId
+    );
 
     this.#registerIFrameBusListener();
 
@@ -72,13 +88,16 @@ class Element {
         callback(this.#group);
         this.#onGroupEmitRemoveLocalValue();
         this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
-        this.#bus.off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+        this.#bus.off(
+          ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId,
+          sub
+        );
         this.#mounted = true;
         this.#updateCallbacks.forEach((func) => func());
         this.#updateCallbacks = [];
       }
     };
-    this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, sub);
+    this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
   };
 
   unmount = () => {
@@ -160,17 +179,21 @@ class Element {
         this.#state.isFocused = elementState.isFocused;
         this.#state.value = {};
         const key = this.#elements[index].elementName;
-        const value = this.#elements[index].sensitive ? undefined : elementState.value;
+        const value = this.#elements[index].sensitive
+          ? undefined
+          : elementState.value;
         if (this.#isSingleElementAPI) this.#state.value = value;
         else this.#state.value[key] = value;
       } else {
         this.#state.isEmpty = this.#state.isEmpty || elementState.isEmpty;
-        this.#state.isComplete = this.#state.isComplete && elementState.isComplete;
+        this.#state.isComplete =
+          this.#state.isComplete && elementState.isComplete;
         this.#state.isValid = this.#state.isValid && elementState.isValid;
         this.#state.isFocused = this.#state.isFocused || elementState.isFocused;
         if (!this.#state.value) this.#state.value = {};
         if (!this.#elements[index].sensitive)
-          this.#state.value[this.#elements[index].elementName] = elementState.value || "";
+          this.#state.value[this.#elements[index].elementName] =
+            elementState.value || "";
       }
     });
   };

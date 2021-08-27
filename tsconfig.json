@@ -3,7 +3,7 @@
     "sourceMap": true,
     "noImplicitAny": false,
     "target": "es6",
-    "lib": ["es2015", "es2017", "dom"],
+    "lib": ["es2015", "es2017", "dom", "ES2020.Promise"],
     "esModuleInterop": true,
     "module": "commonjs",
     "removeComments": true,
@@ -15,7 +15,9 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": false,
-    "noEmit": false
+    "noEmit": false,
+    "declaration": true,
+    "outDir": "types"
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

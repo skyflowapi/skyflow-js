@@ -4,11 +4,21 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
-  FRAME_CONTROLLER,
+  COLLECT_FRAME_CONTROLLER,
+  ElementType,
 } from "../../constants";
 import EventEmitter from "../../../event-emitter";
-import { unMask } from "../../../libs/strings";
 import { regExFromString } from "../../../libs/regex";
+import {
+  validateCreditCardNumber,
+  validateExpiryDate,
+} from "../../../utils/validators";
+import { isTokenValid } from "../../../utils/jwtUtils";
+import {
+  constructElementsInsertReq,
+  constructInsertRecordResponse,
+} from "../../../core/collect";
+const set = require("set-value");
 
 // create separate IFrameFormElement for each radio button and separate or SET_VALUE event b/w radio buttons.
 // while hitting tokenize it checks whether there are more than 2 ':' if so append each values in an array(for checkbox)
@@ -18,34 +28,48 @@ export class IFrameForm {
   private client?: Client;
   private clientMetaData?: any;
   private callbacks: Function[] = [];
-  constructor() {
+  private controllerId: string;
+  private clientDomain: string;
+  constructor(controllerId: string, clientDomain: string) {
+    this.controllerId = controllerId;
+    this.clientDomain = clientDomain
     bus
       .target(location.origin)
-      .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY, (data, callback) => {
-        if (!data.name) {
-          throw new Error("Required params are not provided");
-        }
-        if (data.name === FRAME_CONTROLLER) {
-          return;
-        }
-        const frameGlobalName: string = <string>data.name;
-        if (this.clientMetaData) this.initializeFrame(window.parent, frameGlobalName);
-        else
-          this.callbacks.push(() => {
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.controllerId,
+        (data, callback) => {
+          if (!data.name) {
+            throw new Error("Required params are not provided");
+          }
+          // @ts-ignore
+          if (data.name && data.name.includes(COLLECT_FRAME_CONTROLLER)) {
+            return;
+          }
+          const frameGlobalName: string = <string>data.name;
+          if (this.clientMetaData)
             this.initializeFrame(window.parent, frameGlobalName);
-          });
-      });
+          else
+            this.callbacks.push(() => {
+              this.initializeFrame(window.parent, frameGlobalName);
+            });
+        }
+      );
 
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST, (data, callback) => {
-      // todo: Do we need to reset the data!?
-      this.tokenize()
-        .then((data) => {
-          callback(data);
-        })
-        .catch((error) => {
-          callback(error);
-        });
-    });
+    bus
+      .target(this.clientDomain)
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.controllerId,
+        (data, callback) => {
+          // todo: Do we need to reset the data!?
+          this.tokenize(data)
+            .then((data) => {
+              callback(data);
+            })
+            .catch((error) => {
+              callback(error);
+            });
+        }
+      );
 
     bus.on(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME, (data, callback) => {
       for (const iFrameFormElement in this.iFrameFormElements) {
@@ -79,39 +103,99 @@ export class IFrameForm {
     return this.iFrameFormElements[frameName];
   };
 
-  tokenize = () => {
+  // {
+  //   "table" : {
+
+  //   }
+  // }
+
+  tokenize = (options) => {
     if (!this.client) throw new Error("client connection not established");
     const responseObject: any = {};
     for (const iFrameFormElement in this.iFrameFormElements) {
       const state = this.iFrameFormElements[iFrameFormElement].state;
+      const tableName = this.iFrameFormElements[iFrameFormElement].tableName;
       if (!state.isValid || !state.isComplete) {
-        return Promise.reject({ error: "Provide complete and valid inputs" });
+        return Promise.reject({
+          error: [state.name] + ": Provide complete and valid inputs",
+        });
       }
 
       if (
-        this.iFrameFormElements[iFrameFormElement].fieldType === ELEMENTS.checkbox.name
+        this.iFrameFormElements[iFrameFormElement].fieldType ===
+        ELEMENTS.checkbox.name
       ) {
         if (responseObject[state.name]) {
-          responseObject[state.name] = `${responseObject[state.name]},${state.value}`;
+          responseObject[state.name] = `${responseObject[state.name]},${
+            state.value
+          }`;
         } else {
           responseObject[state.name] = state.value;
         }
       } else {
-        responseObject[state.name] = this.iFrameFormElements[
-          iFrameFormElement
-        ].getUnformattedValue();
+        if (responseObject[tableName]) {
+          set(
+            responseObject[tableName],
+            state.name,
+            this.iFrameFormElements[iFrameFormElement].getUnformattedValue()
+          );
+        } else {
+          responseObject[tableName] = {};
+          set(
+            responseObject[tableName],
+            state.name,
+            this.iFrameFormElements[iFrameFormElement].getUnformattedValue()
+          );
+        }
       }
     }
+    const finalRequest = constructElementsInsertReq(responseObject, options);
 
-    return this.client.request({
-      body: {
-        data: responseObject,
-        orgID: this.client.config.orgId,
-        vaultID: this.client.config.vaultId,
-      },
-      requestMethod: "POST",
-      url: this.client.config.workflowURL + "/getcreditscore",
-      headers: { "X-SKYFLOW-APP-ID": this.client.config.appId },
+    let client = this.client;
+
+    let sendRequest = (token?: string) => {
+      return new Promise((resolve, reject) => {
+        client
+          .request({
+            body: {
+              records: finalRequest,
+            },
+            requestMethod: "POST",
+            url: client.config.vaultURL + "/v1/vaults/" + client.config.vaultID,
+            ...(token ? { headers: { Authorization: "Bearer " + token } } : {}),
+          })
+          .then((response: any) => {
+            resolve(
+              constructInsertRecordResponse(
+                response,
+                options.tokens,
+                finalRequest
+              )
+            );
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    };
+
+    return new Promise((resolve, reject) => {
+      if (client.accessToken && isTokenValid(client.accessToken)) {
+        sendRequest(client.accessToken)
+          .then((res) => resolve(res))
+          .catch((err) => reject(err));
+      } else {
+        bus.emit(
+          ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN + this.controllerId,
+          {},
+          (token: any) => {
+            client.accessToken = token;
+            sendRequest(token)
+              .then((res) => resolve(res))
+              .catch((err) => reject(err));
+          }
+        );
+      }
     });
   };
 
@@ -121,7 +205,10 @@ export class IFrameForm {
       const frame: any = root.frames[i];
 
       try {
-        if (frame.location.href === location.href && frame.name === frameGlobalName) {
+        if (
+          frame.location.href === location.href &&
+          frame.name === frameGlobalName
+        ) {
           frameInstance = frame;
           break;
         }
@@ -155,6 +242,7 @@ export class IFrameFormElement extends EventEmitter {
   };
   readonly fieldType: string;
   private sensitive: boolean;
+  tableName: string;
   fieldName: string;
   iFrameName: string;
   metaData;
@@ -165,10 +253,15 @@ export class IFrameFormElement extends EventEmitter {
     super();
     const frameValues = name.split(":");
     const fieldType = frameValues[1];
-    const fieldName = atob(frameValues[2]); // set frame name as frame type of the string besides : is number
-
+    const field = atob(frameValues[2]); // set frame name as frame type of the string besides : is number
+    const [tableName, fieldName] = [
+      field.substr(0, field.indexOf(".")),
+      field.substr(field.indexOf(".") + 1),
+    ];
     this.iFrameName = name;
     this.fieldType = fieldType;
+
+    this.tableName = tableName;
     this.fieldName = fieldName;
 
     this.sensitive = ELEMENTS[this.fieldType].sensitive;
@@ -183,7 +276,9 @@ export class IFrameFormElement extends EventEmitter {
   onFocusChange = (focus: boolean) => {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: this.iFrameName,
-      event: focus ? ELEMENT_EVENTS_TO_CLIENT.FOCUS : ELEMENT_EVENTS_TO_CLIENT.BLUR,
+      event: focus
+        ? ELEMENT_EVENTS_TO_CLIENT.FOCUS
+        : ELEMENT_EVENTS_TO_CLIENT.BLUR,
     });
     this.changeFocus(focus);
   };
@@ -223,16 +318,9 @@ export class IFrameFormElement extends EventEmitter {
     this.mask = newMask;
   }
 
-  setValidation(validations: string[] | undefined) {
-    if (validations) {
-      if (validations.includes("default")) this.regex = ELEMENTS[this.fieldType].regex;
-      else {
-        validations.forEach((value) => {
-          if (value !== "default" && value !== "required") {
-            this.regex = regExFromString(value);
-          }
-        });
-      }
+  setValidation() {
+    if (ELEMENTS[this.fieldType].regex) {
+      this.regex = ELEMENTS[this.fieldType].regex;
     }
   }
 
@@ -295,8 +383,9 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   getUnformattedValue = () => {
-    if (!this.mask) return this.state.value;
-    return unMask(this.state.value, this.mask);
+    return this.state.value;
+    // if (!this.mask) return this.state.value;
+    // return unMask(this.state.value, this.mask);
   };
 
   getStatus = () => {
@@ -310,6 +399,19 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   validator(value: string) {
+    if (this.fieldType === ElementType.CARD_NUMBER) {
+      value = value.replace(/\D/g, "");
+      if (!validateCreditCardNumber(value)) {
+        return false;
+      }
+    } else if (this.fieldType === ElementType.EXPIRATION_DATE) {
+      if (this.regex) {
+        return this.regex.test(value) && validateExpiryDate(value);
+      } else {
+        return validateExpiryDate(value);
+      }
+    }
+
     if (this.regex) {
       return this.regex.test(value);
     } else {
@@ -339,13 +441,14 @@ export class IFrameFormElement extends EventEmitter {
     bus
       .target(this.metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
-        if (
-          data.name === this.iFrameName
-        ) {
+        if (data.name === this.iFrameName) {
           if (data.value !== undefined) {
             // for setting value
             this.setValue(<string | undefined>data.value);
-          } else if (data.options !== undefined && data.isSingleElementAPI === true) {
+          } else if (
+            data.options !== undefined &&
+            data.isSingleElementAPI === true
+          ) {
             // for updating options
             this._emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
               options: data.options,
@@ -356,18 +459,20 @@ export class IFrameFormElement extends EventEmitter {
 
     // for radio buttons
     if (this.fieldType === ELEMENTS.radio.name) {
-      bus.target(location.origin).on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
-        if (
-          data.value !== null &&
-          data.value !== undefined &&
-          data.value !== "" &&
-          data.fieldName === this.fieldName &&
-          data.fieldType === this.fieldType &&
-          data.value !== this.state.value
-        ) {
-          this.setValue(<string | undefined>data.value);
-        }
-      });
+      bus
+        .target(location.origin)
+        .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+          if (
+            data.value !== null &&
+            data.value !== undefined &&
+            data.value !== "" &&
+            data.fieldName === this.fieldName &&
+            data.fieldType === this.fieldType &&
+            data.value !== this.state.value
+          ) {
+            this.setValue(<string | undefined>data.value);
+          }
+        });
     }
   };
 
