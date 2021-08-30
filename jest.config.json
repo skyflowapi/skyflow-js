@@ -1,0 +1,7 @@
+{
+  "verbose": true,
+  "collectCoverage": true,
+  "testEnvironment": "jsdom",
+  "testTimeout": 30000,
+  "testURL": "https://sb.area51.vault.skyflowapis.dev"
+}
