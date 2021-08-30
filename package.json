@@ -19,7 +19,8 @@
     "dev": "webpack-dev-server --config=webpack.dev.js --open --hot ",
     "build-browser-sdk": "webpack --config=webpack.skyflowBrowser.js",
     "build-node-sdk": "webpack --config=webpack.skyflowNode.js",
-    "build-iframe": "webpack --config=webpack.iframe.js"
+    "build-iframe": "webpack --config=webpack.iframe.js",
+    "test": "jest --config=jest.config.json --watch"
   },
   "dependencies": {
     "core-js": "^3.6.5",
