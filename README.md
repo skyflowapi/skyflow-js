@@ -57,11 +57,20 @@ getBearerToken: () => {
     const Http = new XMLHttpRequest();
 
     Http.onreadystatechange = () => {
-      if (Http.readyState == 4 && Http.status == 200) {
-        const response = JSON.parse(Http.responseText);
-        resolve(response.accessToken)
+      if (Http.readyState == 4) {
+        if (Http.status == 200) {
+          const response = JSON.parse(Http.responseText);
+          resolve(response.accessToken);
+        } else {
+          reject("Error occured");
+        }
       }
     };
+
+    Http.onerror = (error) => {
+      reject("Error occured");
+    };
+
     const url = "https://api.acmecorp.com/skyflowToken";
     Http.open("GET", url);
     Http.send();
