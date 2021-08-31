@@ -1,8 +1,8 @@
 {
-  "name": "skyflow-client-sdk",
+  "name": "skyflow-js",
   "preferGlobal": true,
   "analyze": false,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "Skyflow",
   "description": "Skyflow JavaScript SDK",
   "main": "./dist/sdkNodeBuild/index.js",
