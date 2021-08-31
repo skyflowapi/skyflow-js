@@ -240,7 +240,7 @@ class Element {
   }
 
   // methods to invoke element events
-  blur = () => {
+  #blur = () => {
     let name = this.#iframe.name;
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: name,
@@ -248,7 +248,7 @@ class Element {
     });
   };
 
-  focus = () => {
+  #focus = () => {
     let name = this.#iframe.name;
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: name,
@@ -256,7 +256,7 @@ class Element {
     });
   };
 
-  destroy = () => {
+  #destroy = () => {
     // todo: destroy all the internal elements
     let name = this.#iframe.name;
 
@@ -288,7 +288,7 @@ class Element {
     );
   };
 
-  resetEvents = () => {
+  #resetEvents = () => {
     this.#eventEmitter.resetEvents();
   };
 

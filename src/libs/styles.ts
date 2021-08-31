@@ -1,39 +1,5 @@
-
 import { ALLOWED_STYLES, STYLE_TYPE } from "../container/constants";
 import { getValueAndItsUnit } from "./element-options";
-
-export function getStylesFromClass(cssClass) {
-  return undefined;
-  if (!cssClass) return {};
-  var element = document.createElement("input");
-  var styles = {};
-  var computedStyles;
-
-  if (cssClass[0] === ".") {
-    cssClass = cssClass.substring(1);
-  }
-
-  element.className = cssClass;
-  element.style.display = "none !important";
-  element.style.position = "fixed !important";
-  element.style.left = "-99999px !important";
-  element.style.top = "-99999px !important";
-  document.body.appendChild(element);
-
-  computedStyles = window.getComputedStyle(element);
-
-  ALLOWED_STYLES.forEach(function (style) {
-    var value = computedStyles[style];
-
-    if (value) {
-      styles[style] = value;
-    }
-  });
-
-  document.body.removeChild(element);
-
-  return styles;
-}
 
 export function splitStyles(styles) {
   const pseudoStyles = {};
@@ -56,7 +22,6 @@ export function buildStylesFromClassesAndStyles(classes, styles) {
       switch (classType) {
         case STYLE_TYPE.BASE:
           styles[classType] = {
-            ...getStylesFromClass(classes[classType]),
             ...styles[classType],
           };
           break;
@@ -64,7 +29,6 @@ export function buildStylesFromClassesAndStyles(classes, styles) {
           styles[STYLE_TYPE.BASE] = {
             ...styles[STYLE_TYPE.BASE],
             ":focus": {
-              ...getStylesFromClass(classes[classType]),
               ...(styles[STYLE_TYPE.BASE] && styles[STYLE_TYPE.BASE][":focus"]),
             },
           };
@@ -73,7 +37,6 @@ export function buildStylesFromClassesAndStyles(classes, styles) {
           styles[STYLE_TYPE.BASE] = {
             ...styles[STYLE_TYPE.BASE],
             ":-webkit-autofill": {
-              ...getStylesFromClass(classes[classType]),
               ...(styles[STYLE_TYPE.BASE] &&
                 styles[STYLE_TYPE.BASE][":-webkit-autofill"]),
             },
@@ -82,7 +45,6 @@ export function buildStylesFromClassesAndStyles(classes, styles) {
         default:
           styles[classType] = {
             ...styles[STYLE_TYPE.BASE],
-            ...getStylesFromClass(classes[classType]),
             ...styles[classType],
           };
       }

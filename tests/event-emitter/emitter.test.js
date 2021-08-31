@@ -1,4 +1,4 @@
-import EventEmitter from "../src/event-emitter/index";
+import EventEmitter from "../../src/event-emitter/index";
 describe("Event emitter test", () => {
   const eventObj = new EventEmitter();
   eventObj.on(

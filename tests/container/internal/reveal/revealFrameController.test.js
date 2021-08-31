@@ -1,7 +1,7 @@
 import bus from "framebus";
-import uuid from "../src/libs/uuid";
-import { RedactionType } from "../src/Skyflow";
-import RevealFrameController from "../src/container/internal/reveal/RevealFrameController";
+import uuid from "../../../../src/libs/uuid";
+import { RedactionType } from "../../../../src/Skyflow";
+import RevealFrameController from "../../../../src/container/internal/reveal/RevealFrameController";
 
 const _on = jest.fn();
 const _emit = jest.fn();

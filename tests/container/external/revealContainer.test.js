@@ -1,9 +1,9 @@
-import RevealContainer from "../src/container/external/RevealContainer";
-import { REVEAL_FRAME_CONTROLLER } from "../src/container/constants";
+import RevealContainer from "../../../src/container/external/RevealContainer";
+import { REVEAL_FRAME_CONTROLLER } from "../../../src/container/constants";
 import bus from "framebus";
-import EventEmitter from "../src/event-emitter";
-import { RedactionType } from "../src/Skyflow";
-import RevealElement from "../src/container/external/reveal/RevealElement";
+import EventEmitter from "../../../src/event-emitter";
+import { RedactionType } from "../../../src/Skyflow";
+import RevealElement from "../../../src/container/external/reveal/RevealElement";
 
 const mockBusOn = jest.fn();
 const mockBusEmit = jest.fn();

@@ -1,6 +1,6 @@
-import Skyflow from "../src/Skyflow";
+import Skyflow from "../../src/Skyflow";
 
-jest.setTimeout(15000);
+jest.setTimeout(30000);
 describe("Insert Records Test", () => {
   /**
    * success inserting records
@@ -21,7 +21,7 @@ describe("Insert Records Test", () => {
     });
   };
 
-  test("should insert records", async () => {
+  test("should insert records with tokens", async () => {
     var skyflow = Skyflow.init({
       vaultID: "e20afc3ae1b54f0199f24130e51e0c11",
       vaultURL: "https://sb.area51.vault.skyflowapis.dev",
@@ -44,6 +44,34 @@ describe("Insert Records Test", () => {
       },
       {
         tokens: true,
+      }
+    );
+    expect(response.hasOwnProperty("records")).toBe(true);
+  });
+
+  test("should insert records without tokens", async () => {
+    var skyflow = Skyflow.init({
+      vaultID: "e20afc3ae1b54f0199f24130e51e0c11",
+      vaultURL: "https://sb.area51.vault.skyflowapis.dev",
+      getBearerToken: () => {
+        return Promise.resolve(httpRequestToken());
+      },
+    });
+    const response = await skyflow.insert(
+      {
+        records: [
+          {
+            table: "pii_fields",
+            fields: {
+              first_name: "Joseph",
+              middle_name: "Dave",
+              last_name: "Gomez",
+            },
+          },
+        ],
+      },
+      {
+        tokens: false,
       }
     );
     expect(response.hasOwnProperty("records")).toBe(true);
