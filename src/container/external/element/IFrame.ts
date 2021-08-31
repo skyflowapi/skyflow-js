@@ -17,9 +17,13 @@ export default class IFrame {
   mount = (domElement) => {
     this.unmount();
     try {
-      if (typeof domElement === "string")
+      if (typeof domElement === "string") {
         this.container = document.querySelector(domElement) || undefined;
-      else this.container = domElement;
+        if(!this.container) {
+          throw new Error("Provided element selector is not valid or not found");
+        }
+      }
+        else this.container = domElement;
     } catch (e) {
       throw new Error("Provided element selector is not valid or not found");
     }

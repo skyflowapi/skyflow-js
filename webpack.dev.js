@@ -75,6 +75,13 @@ module.exports = () => {
         inject: "head",
         minify,
       }),
+      new HtmlWebpackPlugin({
+        filename: "iframe.html",
+        template: "assets/iframe.html",
+        chunks: ["iframe"],
+        inject: "head",
+        minify,
+      })
     ],
   });
 };

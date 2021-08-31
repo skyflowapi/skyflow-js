@@ -1,7 +1,7 @@
 import bus from "framebus";
-import { getCssClassesFromJss } from "../src/libs/jss-styles";
-import { RedactionType } from "../src/Skyflow";
-import RevealFrame from "../src/container/internal/reveal/RevealFrame";
+import { getCssClassesFromJss } from "../../../../src/libs/jss-styles";
+import { RedactionType } from "../../../../src/Skyflow";
+import RevealFrame from "../../../../src/container/internal/reveal/RevealFrame";
 
 const testRecord = {
   id: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",

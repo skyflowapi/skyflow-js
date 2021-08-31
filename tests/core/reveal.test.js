@@ -1,4 +1,4 @@
-import Skyflow, { RedactionType } from "../src/Skyflow";
+import Skyflow, { RedactionType } from "../../src/Skyflow";
 const testTokenId = "1677f7bd-c087-4645-b7da-80a6fd1a81a4";
 const testRedactionType = RedactionType.PLAIN_TEXT;
 const testInvalidTokenId = "80a6fd1a81a4-b7da-c087-4645";

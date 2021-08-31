@@ -1,7 +1,7 @@
-import uuid from "../src/libs/uuid";
-import { RedactionType } from "../src/Skyflow";
-import { FRAME_REVEAL } from "../src/container/constants";
-import RevealElement from "../src/container/external/reveal/RevealElement";
+import uuid from "../../../../src/libs/uuid";
+import { RedactionType } from "../../../../src/Skyflow";
+import { FRAME_REVEAL } from "../../../../src/container/constants";
+import RevealElement from "../../../../src/container/external/reveal/RevealElement";
 import bus from "framebus";
 
 const _on = jest.fn();
