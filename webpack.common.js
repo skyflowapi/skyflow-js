@@ -6,14 +6,11 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".js", ".json"],
   },
-
   module: {
     rules: [
       { test: /\.(ts|js)x?$/, loader: "babel-loader", exclude: /node_modules/ },
     ],
   },
 
-  plugins: [
-    new ForkTsCheckerWebpackPlugin(),
-  ],
+  plugins: [new ForkTsCheckerWebpackPlugin()],
 };

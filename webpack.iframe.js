@@ -1,10 +1,10 @@
-const merge = require("webpack-merge");
+const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
 const path = require("path");
 const webpack = require("webpack");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const ManifestPlugin = require("webpack-manifest-plugin");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
+const terserWebpackPlugin = require("terser-webpack-plugin");
 const CompressionPlugin = require("compression-webpack-plugin");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
@@ -37,7 +37,7 @@ module.exports = () => {
 
     optimization: {
       runtimeChunk: false,
-      // minimizer: [new UglifyJsPlugin()],
+      minimizer: [new terserWebpackPlugin()],
     },
     module: {
       rules: [],
@@ -56,8 +56,7 @@ module.exports = () => {
         verbose: true,
         dry: false,
       }),
-      // new UglifyJsPlugin(),
-      new ManifestPlugin(),
+      new WebpackManifestPlugin(),
       new webpack.DefinePlugin({
         "process.env": JSON.stringify(process.env),
       }),
