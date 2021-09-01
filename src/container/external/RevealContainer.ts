@@ -98,7 +98,6 @@ class RevealContainer {
   }
 
   create(record: IRevealElementInput) {
-    if (!record.label) record.label = record.id;
     if (!record.styles) record.styles = {};
     this.validateRevealElementInput(record);
     this.#revealRecords.push(record);
@@ -147,9 +146,14 @@ class RevealContainer {
     const recordId = record.id;
     if (!recordId || typeof recordId !== "string")
       throw new Error(`Invalid Token Id ${recordId}`);
+
     const recordRedaction = record.redaction;
     if (!Object.values(RedactionType).includes(recordRedaction))
       throw new Error(`Invalid Redaction Type ${recordRedaction}`);
+
+    const recordLabel = record.label;
+    if (recordLabel && typeof recordLabel !== "string")
+      throw new Error(`Invalid Record Label Type`);
   }
 }
 export default RevealContainer;

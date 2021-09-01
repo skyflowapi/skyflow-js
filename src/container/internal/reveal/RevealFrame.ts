@@ -1,10 +1,16 @@
 import bus from "framebus";
-import { ELEMENT_EVENTS_TO_IFRAME, STYLE_TYPE } from "../../constants";
+import {
+  ELEMENT_EVENTS_TO_IFRAME,
+  STYLE_TYPE,
+  REVEAL_ELEMENT_DEFAULT_STYLES,
+} from "../../constants";
 import { getCssClassesFromJss } from "../../../libs/jss-styles";
 
 class RevealFrame {
   static revealFrame: RevealFrame;
-  #domContainer: HTMLSpanElement;
+  #elementContainer: HTMLDivElement;
+  #dataElememt: HTMLSpanElement;
+  #labelElement: HTMLSpanElement;
   #name: string;
   #record: any;
   #containerId: string;
@@ -26,22 +32,32 @@ class RevealFrame {
     this.#name = window.name;
     this.#containerId = this.#name.split(":")[2];
     this.#record = record;
-    this.#domContainer = document.createElement("span");
-    this.#domContainer.innerText = this.#record.id;
-    this.#styles = this.#record.styles;
 
-    const classes = getCssClassesFromJss(
-      this.#styles,
-      btoa(this.#record.label)
-    );
+    this.#elementContainer = document.createElement("div");
+    this.#elementContainer.className = "SkyflowElement--container";
+    this.#labelElement = document.createElement("span");
+    this.#labelElement.className = "SkyflowElement--label";
+    this.#dataElememt = document.createElement("span");
+
+    if (this.#record.label) {
+      this.#labelElement.innerText = this.#record.label;
+      this.#elementContainer.append(this.#labelElement);
+    }
+    this.#dataElememt.innerText = this.#record.id;
+    getCssClassesFromJss(REVEAL_ELEMENT_DEFAULT_STYLES, "");
+    this.#styles = this.#record.styles;
+    const classes = getCssClassesFromJss(this.#styles, btoa(this.#record.id));
+
     Object.values(STYLE_TYPE).forEach((variant) => {
-      if (classes[variant]) this.#domContainer.classList.add(classes[variant]);
+      if (classes[variant]) this.#dataElememt.classList.add(classes[variant]);
     });
-    document.body.append(this.#domContainer);
+
+    this.#elementContainer.appendChild(this.#dataElememt);
+    document.body.append(this.#elementContainer);
 
     const sub = (data, _) => {
       if (data[this.#record.id]) {
-        this.#domContainer.innerText = data[this.#record.id] as string;
+        this.#dataElememt.innerText = data[this.#record.id] as string;
         bus
           .target(location.origin)
           .off(
