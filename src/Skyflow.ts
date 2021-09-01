@@ -3,13 +3,9 @@ import CollectContainer from "./container/external/CollectContainer";
 import RevealContainer from "./container/external/RevealContainer";
 import uuid from "./libs/uuid";
 import { properties } from "./properties";
-import { fetchRecordsByTokenId } from "./core/reveal";
-import {
-  constructInsertRecordRequest,
-  constructInsertRecordResponse,
-} from "./core/collect";
 import { ElementType } from "./container/constants";
 import { validateInsertRecords, validateGetRecords } from "./utils/validators";
+import PureJsController from "./container/external/PureJsController";
 
 export interface IInsertRecord {
   table: string;
@@ -54,6 +50,7 @@ class Skyflow {
     uuid: this.#uuid,
     clientDomain: location.origin,
   };
+  #pureJsController: PureJsController;
 
   constructor(config: ISkyflow) {
     this.#client = new Client(
@@ -62,12 +59,14 @@ class Skyflow {
       },
       this.#metadata
     );
+    this.#pureJsController = new PureJsController(this.#client);
   }
 
   static init(config: ISkyflow): Skyflow {
     if (!config.vaultID || !config.vaultURL || !config.getBearerToken) {
       throw new Error("Invalid client credentials");
     }
+
     return new Skyflow(config);
   }
 
@@ -93,30 +92,7 @@ class Skyflow {
     options: Record<string, any> = { tokens: true }
   ) {
     validateInsertRecords(records);
-    const requestBody = constructInsertRecordRequest(records, options);
-    return new Promise((resolve, reject) => {
-      this.#client
-        .request({
-          body: { records: requestBody },
-          requestMethod: "POST",
-          url:
-            this.#client.config.vaultURL +
-            "/v1/vaults/" +
-            this.#client.config.vaultID,
-        })
-        .then((response: any) => {
-          resolve(
-            constructInsertRecordResponse(
-              response,
-              options.tokens,
-              records.records
-            )
-          );
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
+    return this.#pureJsController._insert(records, options);
   }
 
   get(
@@ -124,7 +100,7 @@ class Skyflow {
     options: any = {}
   ): Promise<revealResponseType> {
     validateGetRecords(records);
-    return fetchRecordsByTokenId(records, this.#client);
+    return this.#pureJsController._get(records);
   }
 
   static get ContainerType() {
