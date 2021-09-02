@@ -20,6 +20,28 @@ jobs:
       - run: export IFRAME_SECURE_SITE=${{ secrets.IFRAME_SECURE_SITE }}
       - run : export IFRAME_SECURE_ORGIN=${{secrets.IFRAME_SECURE_ORGIN}}
       - run: npm run build-browser-sdk
+      - name: Deploy to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.BLITZ_AWS_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
+          AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
+          SOURCE_DIR: "dist/sdkBrowserBuild"
+          DEST_DIR: "v1/sdkBrowserBuild"
+
+  build-iframe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.17.6
+      - run: npm install
+      - run: export IFRAME_SECURE_SITE=${{ secrets.IFRAME_SECURE_SITE }}
+      - run : export IFRAME_SECURE_ORGIN=${{secrets.IFRAME_SECURE_ORGIN}}
       - run: npm run build-iframe
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
@@ -31,4 +53,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
           AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
           SOURCE_DIR: "dist/sdkBrowserBuild"
-          DEST_DIR: "v1/"
+          DEST_DIR: "v1/iframe"
