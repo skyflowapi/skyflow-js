@@ -1,9 +1,14 @@
 export const COLLECT_FRAME_CONTROLLER = "collect_controller";
 export const REVEAL_FRAME_CONTROLLER = "reveal_controller";
-
+export const PUREJS_FRAME_CONTROLLER = "purejs_controller";
 export const FRAME_REVEAL = "reveal";
 
 export const FRAME_ELEMENT = "element";
+
+export const PUREJS_TYPES = {
+  INSERT: "INSERT",
+  GET: "GET",
+};
 
 export const ELEMENT_EVENTS_TO_CLIENT = {
   CHANGE: "Change",
@@ -29,6 +34,9 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
   REVEAL_RESPONSE_READY: "REVEAL_RESPONSE_READY",
   REVEAL_FRAME_READY: "REVEAL_FRAME_READY",
   REVEAL_GET_ACCESS_TOKEN: "REVEAL_GET_ACCESS_TOKEN",
+  PUREJS_REQUEST: "PUREJS_REQUEST",
+  PUREJS_FRAME_READY: "PUREJS_FRAME_READY",
+  PUREJS_GET_ACCESS_TOKEN: "PUREJS_GET_ACCESS_TOKEN",
 };
 
 export const ELEMENT_EVENTS_TO_CONTAINER = {

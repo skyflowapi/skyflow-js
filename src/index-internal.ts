@@ -7,9 +7,11 @@ import {
   COLLECT_FRAME_CONTROLLER,
   FRAME_ELEMENT,
   FRAME_REVEAL,
+  PUREJS_FRAME_CONTROLLER,
   REVEAL_FRAME_CONTROLLER,
 } from "./container/constants";
 import RevealFrameController from "./container/internal/reveal/RevealFrameController";
+import PureJsFrameController from "./container/internal/pureJs/PureJsFrameController";
 
 if (typeof window.console === "undefined") {
   (<any>window).console = <any>{
@@ -28,6 +30,8 @@ if (typeof window.console === "undefined") {
     } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] !== undefined) {
       root.Skyflow = FrameController;
       RevealFrameController.init(names[1]);
+    } else if (names[0] === PUREJS_FRAME_CONTROLLER && names[1] === undefined) {
+      PureJsFrameController.init();
     } else if (names[0] === FRAME_ELEMENT) {
       root.Skyflow = FrameElements;
       FrameElements.start();
