@@ -32,7 +32,7 @@ module.exports = () => {
 
     output: {
       filename: "[name].js",
-      path: path.resolve(__dirname, "dist/iframeBuild"),
+      path: path.resolve(__dirname, "dist/v1/elements"),
     },
 
     optimization: {

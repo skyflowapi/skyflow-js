@@ -17,7 +17,7 @@ module.exports = () => {
 
     output: {
       filename: "[name].js",
-      path: path.resolve(__dirname, "dist/sdkBrowserBuild"),
+      path: path.resolve(__dirname, "dist/v1"),
     },
     optimization: {
       // splitChunks: {
