@@ -7,6 +7,10 @@
   "description": "Skyflow JavaScript SDK",
   "main": "./dist/sdkNodeBuild/index.js",
   "types": "./types/index-node.d.ts",
+  "files": [
+    "dist/sdkNodeBuild",
+    "types"
+  ],
   "keywords": [
     "client",
     "sdk",

@@ -1,7 +1,6 @@
 export const properties = {
   IFRAME_SECURE_SITE:
-    process.env.IFRAME_SECURE_SITE || "http://localhost:3040/iframe.html",
-  VERSION: process.env.npm_package_version || "0.1.1",
+    process.env.IFRAME_SECURE_SITE || "https://js.skyflow.com/v1/elements/index.html",
   IFRAME_SECURE_ORGIN:
-    process.env.IFRAME_SECURE_ORGIN || "http://localhost:3040",
+    process.env.IFRAME_SECURE_ORGIN || "https://js.skyflow.com/v1/elements",
 };

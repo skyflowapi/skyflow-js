@@ -44,7 +44,6 @@ export interface revealResponseType {
 
 class Skyflow {
   #client: Client;
-  static version = properties.VERSION;
   #uuid: string = uuid();
   #metadata = {
     uuid: this.#uuid,
