@@ -341,8 +341,6 @@ export const ALLOWED_MULTIPLE_FIELDS_STYLES = [
   "justify-content",
 ];
 
-export const ALLOWED_REVEAL_ELEMENT_STYLES = ["color", "font-size"];
-
 // should be in the order of applying the styles
 export const STYLE_TYPE = {
   WEBPACKAUTOFILL: "-webkit-autofill",
@@ -351,4 +349,14 @@ export const STYLE_TYPE = {
   COMPLETE: "complete",
   EMPTY: "empty",
   INVALID: "invalid",
+};
+export const REVEAL_ELEMENT_DEFAULT_STYLES = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+  label: {
+    marginBottom: "4px",
+  },
 };
