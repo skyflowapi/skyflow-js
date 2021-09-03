@@ -26,7 +26,7 @@ export interface IRevealElementInput {
 class RevealContainer {
   #revealRecords: IRevealElementInput[] = [];
   #mountedRecords: { id: string }[] = [];
-  static hasAccessTokenListner: boolean = false;
+
   #metaData: any;
   #containerId: string;
   #eventEmmiter: EventEmitter;
@@ -48,7 +48,17 @@ class RevealContainer {
 
     const sub = (data, callback) => {
       if (data.name === REVEAL_FRAME_CONTROLLER) {
-        callback({ ...metaData });
+        callback({
+          ...metaData,
+          clientJSON: {
+            ...metaData.clientJSON,
+            config: {
+              ...metaData.clientJSON.config,
+              getBearerToken:
+                metaData.clientJSON.config.getBearerToken.toString(),
+            },
+          },
+        });
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .off(
@@ -62,18 +72,6 @@ class RevealContainer {
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId, sub);
 
     document.body.append(iframe);
-
-    if (!RevealContainer.hasAccessTokenListner) {
-      const getToken = (_, callback) => {
-        metaData.clientJSON.config.getBearerToken().then((token) => {
-          callback(token);
-        });
-      };
-      bus
-        .target(properties.IFRAME_SECURE_ORGIN)
-        .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_GET_ACCESS_TOKEN, getToken);
-      RevealContainer.hasAccessTokenListner = true;
-    }
     bus
       .target(location.origin)
       .on(

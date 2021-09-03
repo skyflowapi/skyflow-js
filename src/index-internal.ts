@@ -28,7 +28,6 @@ if (typeof window.console === "undefined") {
       root.Skyflow = FrameController;
       FrameController.init(names[1]);
     } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] !== undefined) {
-      root.Skyflow = FrameController;
       RevealFrameController.init(names[1]);
     } else if (names[0] === PUREJS_FRAME_CONTROLLER && names[1] === undefined) {
       PureJsFrameController.init();

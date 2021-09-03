@@ -32,7 +32,7 @@ export class IFrameForm {
   private clientDomain: string;
   constructor(controllerId: string, clientDomain: string) {
     this.controllerId = controllerId;
-    this.clientDomain = clientDomain
+    this.clientDomain = clientDomain;
     bus
       .target(location.origin)
       .on(
@@ -102,12 +102,6 @@ export class IFrameForm {
       });
     return this.iFrameFormElements[frameName];
   };
-
-  // {
-  //   "table" : {
-
-  //   }
-  // }
 
   tokenize = (options) => {
     if (!this.client) throw new Error("client connection not established");
@@ -180,22 +174,9 @@ export class IFrameForm {
     };
 
     return new Promise((resolve, reject) => {
-      if (client.accessToken && isTokenValid(client.accessToken)) {
-        sendRequest(client.accessToken)
-          .then((res) => resolve(res))
-          .catch((err) => reject(err));
-      } else {
-        bus.emit(
-          ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN + this.controllerId,
-          {},
-          (token: any) => {
-            client.accessToken = token;
-            sendRequest(token)
-              .then((res) => resolve(res))
-              .catch((err) => reject(err));
-          }
-        );
-      }
+      sendRequest()
+        .then((res) => resolve(res))
+        .catch((err) => reject(err));
     });
   };
 

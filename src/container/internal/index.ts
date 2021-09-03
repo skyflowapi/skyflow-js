@@ -27,7 +27,7 @@ export class FrameController {
   #iFrameForm: IFrameForm;
   private clientDomain: string;
   constructor(controllerId: string) {
-    this.clientDomain = document.referrer.split('/').slice(0,3).join('/');
+    this.clientDomain = document.referrer.split("/").slice(0, 3).join("/");
     this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain);
     this.controllerId = controllerId;
     bus
@@ -36,6 +36,18 @@ export class FrameController {
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
         { name: COLLECT_FRAME_CONTROLLER + controllerId },
         (clientMetaData: any) => {
+          clientMetaData = {
+            ...clientMetaData,
+            clientJSON: {
+              ...clientMetaData.clientJSON,
+              config: {
+                ...clientMetaData.clientJSON.config,
+                getBearerToken: new Function(
+                  "return " + clientMetaData.clientJSON.config.getBearerToken
+                )(),
+              },
+            },
+          };
           const clientJSON = clientMetaData.clientJSON;
           this.#iFrameForm.setClientMetadata(clientMetaData);
           this.#iFrameForm.setClient(Client.fromJSON(clientJSON));

@@ -29,61 +29,60 @@ class PureJsController {
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
-      this.#isControllerFrameReady = true;
-    });
-    const getToken = (_, callback) => {
-      this.#client.config.getBearerToken().then((token) => {
-        callback(token);
-      });
-    };
     bus
-      // .target(properties.IFRAME_SECURE_ORGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_GET_ACCESS_TOKEN, getToken);
+      .target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, (data, callback) => {
+        callback({
+          client: this.#client,
+          bearerToken: this.#client.config.getBearerToken.toString(),
+        });
+        this.#isControllerFrameReady = true;
+      });
   }
 
   _get(records: IRevealRecord[]): Promise<any> {
     if (this.#isControllerFrameReady) {
-      return new Promise((resolve, _) => {
-        bus.emit(
+      return new Promise((resolve, reject) => {
+        bus.target(properties.IFRAME_SECURE_ORGIN).emit(
           ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
           {
             type: PUREJS_TYPES.GET,
             records: records,
-            client: this.#client,
           },
-          (revealData) => {
-            resolve(revealData);
+          (revealData: any) => {
+            if (revealData.error) reject(revealData);
+            else resolve(revealData);
           }
         );
       });
     } else {
-      return new Promise((resolve, _) => {
-        bus.on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
-          bus.emit(
-            ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
-            {
-              type: PUREJS_TYPES.GET,
-              records: records,
-              client: this.#client,
-            },
-            (revealData) => {
-              resolve(revealData);
-            }
-          );
-        });
+      return new Promise((resolve, reject) => {
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+            bus.emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              {
+                type: PUREJS_TYPES.GET,
+                records: records,
+              },
+              (revealData: any) => {
+                if (revealData.error) reject(revealData);
+                else resolve(revealData);
+              }
+            );
+          });
       });
     }
   }
   _insert(records, options): Promise<any> {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, _) => {
-        bus.emit(
+        bus.target(properties.IFRAME_SECURE_ORGIN).emit(
           ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
           {
             type: PUREJS_TYPES.INSERT,
             records: records,
-            client: this.#client,
             options: options,
           },
           (insertedData) => {
@@ -93,20 +92,21 @@ class PureJsController {
       });
     } else {
       return new Promise((resolve, _) => {
-        bus.on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
-          bus.emit(
-            ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
-            {
-              type: PUREJS_TYPES.INSERT,
-              records: records,
-              client: this.#client,
-              options: options,
-            },
-            (insertedData) => {
-              resolve(insertedData);
-            }
-          );
-        });
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+            bus.emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              {
+                type: PUREJS_TYPES.INSERT,
+                records: records,
+                options: options,
+              },
+              (insertedData) => {
+                resolve(insertedData);
+              }
+            );
+          });
       });
     }
   }

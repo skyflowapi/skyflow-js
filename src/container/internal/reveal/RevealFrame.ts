@@ -18,7 +18,7 @@ class RevealFrame {
 
   static init() {
     bus
-      .target(document.referrer.slice(0, -1))
+      .target(document.referrer.split("/").slice(0, 3).join("/"))
       .emit(
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY,
         { name: window.name },

@@ -44,7 +44,17 @@ class CollectContainer {
 
     const sub = (data, callback) => {
       if (data.name === COLLECT_FRAME_CONTROLLER + this.#containerId) {
-        callback({ ...metaData });
+        callback({
+          ...metaData,
+          clientJSON: {
+            ...metaData.clientJSON,
+            config: {
+              ...metaData.clientJSON.config,
+              getBearerToken:
+                metaData.clientJSON.config.getBearerToken.toString(),
+            },
+          },
+        });
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
@@ -53,20 +63,6 @@ class CollectContainer {
     bus
       .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
-
-    const getToken = (data, callback) => {
-      metaData.clientJSON.config.getBearerToken().then((token) => {
-        callback(token);
-      });
-    };
-
-    bus
-      .target(properties.IFRAME_SECURE_ORGIN)
-      .on(
-        ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN + this.#containerId,
-        getToken
-      );
-
     document.body.append(iframe);
   }
 
