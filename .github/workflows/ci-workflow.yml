@@ -29,8 +29,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
           AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
-          SOURCE_DIR: "dist/sdkBrowserBuild"
-          DEST_DIR: "v1/sdkBrowserBuild"
+          SOURCE_DIR: "dist/v1"
+          DEST_DIR: "v1/"
 
   build-iframe:
     runs-on: ubuntu-latest
@@ -53,4 +53,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
           AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
           SOURCE_DIR: "dist/v1/elements/"
-          DEST_DIR: "v1/iframe"
+          DEST_DIR: "v1/elements"
