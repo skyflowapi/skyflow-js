@@ -1,5 +1,6 @@
 import Client from "../client";
 import { IRevealRecord, RedactionType, revealResponseType } from "../Skyflow";
+import { isTokenValid } from "../utils/jwtUtils";
 
 interface IApiSuccessResponse {
   records: [
@@ -18,10 +19,22 @@ interface IApiFailureResponse {
   };
 }
 
-export const fetchRecordsByTokenId = (
+export const fetchRecordsByTokenId = async (
   tokenIdRecords: IRevealRecord[],
   client: Client
 ): Promise<revealResponseType> => {
+  console.log(client);
+  try {
+    if (
+      client.config.getBearerToken &&
+      (!client.accessToken || !isTokenValid(client.accessToken))
+    ) {
+      client.accessToken = await client.config.getBearerToken();
+    }
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
   let tokenRequest: Record<string, string[]> = {};
 
   tokenIdRecords.forEach((tokenRecord) => {

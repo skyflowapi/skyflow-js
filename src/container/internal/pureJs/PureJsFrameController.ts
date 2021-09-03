@@ -12,42 +12,42 @@ class PureJsFrameController {
   #clientDomain: string;
   #client!: Client;
   constructor() {
-    this.#clientDomain = document.referrer.slice(0, -1);
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
-      this.#client = Client.fromJSON(data.client) as any;
-      if (data.type === PUREJS_TYPES.GET) {
-        bus.emit(
-          ELEMENT_EVENTS_TO_IFRAME.PUREJS_GET_ACCESS_TOKEN,
-          {},
-          (accessToken) => {
-            this.#client.accessToken = accessToken as string;
-            fetchRecordsByTokenId(data.records as IRevealRecord[], this.#client)
-              .then((result) => {
-                callback(result);
-              })
-              .catch((error) => {
-                console.log(error);
-              });
-          }
-        );
-      } else if (data.type === PUREJS_TYPES.INSERT) {
-        bus.emit(
-          ELEMENT_EVENTS_TO_IFRAME.PUREJS_GET_ACCESS_TOKEN,
-          {},
-          (accessToken) => {
-            this.#client.accessToken = accessToken as string;
-            this.insertData(data.records, data.options)
-              .then((result) => {
-                callback(result);
-              })
-              .catch((error) => {
-                console.log(error);
-              });
-          }
-        );
-      }
-    });
-    bus.emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    this.#clientDomain = document.referrer.split("/").slice(0, 3).join("/");
+    bus
+      .target(this.#clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
+        if (data.type === PUREJS_TYPES.GET) {
+          console.log(this.#client);
+          fetchRecordsByTokenId(data.records as IRevealRecord[], this.#client)
+            .then((result) => {
+              callback(result);
+            })
+            .catch((error) => {
+              callback({ error });
+              console.log(error);
+            });
+        } else if (data.type === PUREJS_TYPES.INSERT) {
+          this.insertData(data.records, data.options)
+            .then((result) => {
+              callback(result);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
+      });
+    bus
+      .target(this.#clientDomain)
+      .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, {}, (data: any) => {
+        const deserializedBearerToken = new Function(
+          "return " + data.bearerToken
+        )();
+        data.client.config = {
+          ...data.client.config,
+          getBearerToken: deserializedBearerToken,
+        };
+        this.#client = Client.fromJSON(data.client) as any;
+      });
   }
 
   static init() {
