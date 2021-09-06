@@ -220,7 +220,7 @@ var options = {
   required: false  //indicates whether the field is marked as required. Defaults to 'false'
 }
 
-const element = container.create(element, options)
+const element = container.create(collectElement, options)
 ```
 
 ### Step 3: Mount Elements to the DOM
