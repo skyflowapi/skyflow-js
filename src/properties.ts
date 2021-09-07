@@ -1,4 +1,4 @@
 export const properties = {
-  IFRAME_SECURE_SITE: process.env.IFRAME_SECURE_SITE || "https://js.skyflow.dev/v1/elements/index.html",
-  IFRAME_SECURE_ORGIN: process.env.IFRAME_SECURE_ORGIN || "https://js.skyflow.dev",
+  IFRAME_SECURE_SITE: process.env.IFRAME_SECURE_SITE || "",
+  IFRAME_SECURE_ORGIN: process.env.IFRAME_SECURE_ORGIN || "",
 };
