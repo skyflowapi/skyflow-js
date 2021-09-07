@@ -23,7 +23,6 @@ export const fetchRecordsByTokenId = async (
   tokenIdRecords: IRevealRecord[],
   client: Client
 ): Promise<revealResponseType> => {
-  console.log(client);
   try {
     if (
       client.config.getBearerToken &&
@@ -32,7 +31,6 @@ export const fetchRecordsByTokenId = async (
       client.accessToken = await client.config.getBearerToken();
     }
   } catch (err) {
-    console.log(err);
     throw err;
   }
   let tokenRequest: Record<string, string[]> = {};

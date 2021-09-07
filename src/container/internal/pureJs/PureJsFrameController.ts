@@ -17,14 +17,12 @@ class PureJsFrameController {
       .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
         if (data.type === PUREJS_TYPES.GET) {
-          console.log(this.#client);
           fetchRecordsByTokenId(data.records as IRevealRecord[], this.#client)
             .then((result) => {
               callback(result);
             })
             .catch((error) => {
               callback({ error });
-              console.log(error);
             });
         } else if (data.type === PUREJS_TYPES.INSERT) {
           this.insertData(data.records, data.options)
@@ -32,7 +30,7 @@ class PureJsFrameController {
               callback(result);
             })
             .catch((error) => {
-              console.log(error);
+              callback(error);
             });
         }
       });
