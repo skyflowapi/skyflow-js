@@ -17,7 +17,9 @@ jobs:
         with:
           node-version: 14.17.6
       - run: npm install
-      - run: npm run build-browser-sdk
+      
+      - name: npm build
+        run: npm run build-browser-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
           IFRAME_SECURE_SITE: ${{ IFRAME_SECURE_SITE }}
@@ -42,7 +44,8 @@ jobs:
         with:
           node-version: 14.17.6
       - run: npm install
-      - run: npm run build-iframe
+      - name: npm build
+        run: npm run build-iframe
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
           IFRAME_SECURE_SITE: ${{ IFRAME_SECURE_SITE }}      
