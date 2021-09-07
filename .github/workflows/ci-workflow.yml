@@ -22,7 +22,7 @@ jobs:
         run: npm run build-browser-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
           
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
@@ -48,7 +48,7 @@ jobs:
         run: npm run build-iframe
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ IFRAME_SECURE_SITE }}      
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}      
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         with:
