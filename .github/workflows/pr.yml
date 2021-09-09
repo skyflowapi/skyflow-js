@@ -1,0 +1,44 @@
+name: CI
+
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  ci-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.17.6
+      - name: install modules
+      - run: npm ci
+
+      - name: Check code quality
+      - run: eslint . --ext .js, .ts
+      
+      - name: Browser Build
+        run: npm run build-browser-sdk
+        env:
+          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+
+      - name: Build iFrame
+        run: npm run build-iframe
+        env:
+          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+
+      - name: Build Node SDK
+        env:
+          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+        run: |
+          curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
+          npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
+          npm config set unsafe-perm true
+          npm run build:types 
+          npm run build-node-sdk

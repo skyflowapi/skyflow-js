@@ -1,11 +1,9 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
+name: Internal Release
 
-name: Node.js Package
-
-on: 
+on:
   push:
-    branches:
+    tags: 'v*.*.*'
+    branch:
       - master
       
 jobs:
@@ -13,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+          
       - uses: actions/setup-node@v1
         with:
           node-version: 14.17.6
@@ -21,14 +23,14 @@ jobs:
       - name: npm build
         run: npm run build-browser-sdk
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
 
       - name: npm build iframe
         run: npm run build-iframe
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
  
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
@@ -41,6 +43,40 @@ jobs:
           AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
           SOURCE_DIR: "dist/v1"
           DEST_DIR: "v1/"
+
+      - name: build node-sdk
+        env:
+          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+        run: |
+          curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
+          npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
+          npm config set unsafe-perm true
+          npm run build:types 
+          npm run build-node-sdk
+
+      - name: Get Previous tag
+        id: previoustag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+        with:
+          fallback: 1.0.0
+
+      - name: Bump Version
+        run: npm version "${{ github.event.inputs.version_number }}"
+
+      - name: Commit changes
+        run: |
+           git config user.name "skyflow-tejesh-reddy"
+           git config user.email "tejesh.skyflow@gmail.com"
+           git add dummy-pod-for-cd.podspec
+           git commit -m "[AUTOMATED] Public Release"
+           git tag "${{ github.event.inputs.version_number }}"
+           git push origin main
+
+          
+      - name: publish to npm
+        run: |
+            npm publish  
 
 #   build-iframe:
 #     runs-on: ubuntu-latest
@@ -78,9 +114,9 @@ jobs:
     - name: Configure AWS credentials Prod account
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
+        aws-access-key-id: ${{ secrets.PUBLIC_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.PUBLIC_AWS_ACCESS_KEY_SECRET }}
         aws-region: us-east-1
     - name: invalidate-cf-distribution
-      run: aws cloudfront create-invalidation --distribution-id ${{ secrets.BLITZ_CF_DISTRIBUTION_ID }} --paths "/*"
+      run: aws cloudfront create-invalidation --distribution-id ${{ secrets.PUBLIC_CF_DISTRIBUTION_ID }} --paths "/*"
             
