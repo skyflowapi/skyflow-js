@@ -68,10 +68,10 @@ jobs:
         run: |
            git config user.name "skyflow-tejesh-reddy"
            git config user.email "tejesh.skyflow@gmail.com"
-           git add dummy-pod-for-cd.podspec
+           git add package.json
            git commit -m "[AUTOMATED] Public Release"
            git tag "${{ github.event.inputs.version_number }}"
-           git push origin main
+           git push origin master
 
           
       - name: publish to npm
