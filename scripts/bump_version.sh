@@ -1,4 +1,4 @@
-echo "Bumping package version to $1.$2"
+echo "Bumping package version to $1-$2"
 
 Version=$1
 SEMVER=${Version:1}
@@ -11,4 +11,4 @@ else
 fi
 
 echo --------------------------
-echo "Done, Package now at $1.$2"
+echo "Done, Package now at $SEMVER-$2"

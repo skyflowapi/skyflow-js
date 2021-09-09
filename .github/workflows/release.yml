@@ -1,4 +1,4 @@
-name: Internal Release
+name: Production Release
 
 on:
   push:
@@ -49,9 +49,6 @@ jobs:
           IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
           IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
         run: |
-          curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
-          npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
-          npm config set unsafe-perm true
           npm run build:types 
           npm run build-node-sdk
 
@@ -66,8 +63,8 @@ jobs:
 
       - name: Commit changes
         run: |
-           git config user.name "skyflow-tejesh-reddy"
-           git config user.email "tejesh.skyflow@gmail.com"
+           git config user.name ${{ github.actor }}
+           git config user.email ${{ github.actor }}@users.noreply.github.com
            git add package.json
            git commit -m "[AUTOMATED] Public Release"
            git tag "${{ github.event.inputs.version_number }}"
