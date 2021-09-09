@@ -17,7 +17,7 @@ import uuid from "../../libs/uuid";
 import EventEmitter from "../../event-emitter";
 
 export interface IRevealElementInput {
-  id: string;
+  token: string;
   styles?: object;
   label?: string;
   redaction: RedactionType;
@@ -141,9 +141,9 @@ class RevealContainer {
   }
 
   private validateRevealElementInput(record: IRevealElementInput) {
-    const recordId = record.id;
-    if (!recordId || typeof recordId !== "string")
-      throw new Error(`Invalid Token Id ${recordId}`);
+    const recordToken = record.token;
+    if (!recordToken || typeof recordToken !== "string")
+      throw new Error(`Invalid Token Id ${recordToken}`);
 
     const recordRedaction = record.redaction;
     if (!Object.values(RedactionType).includes(recordRedaction))

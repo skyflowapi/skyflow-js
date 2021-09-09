@@ -28,7 +28,7 @@ const metaData = {
   },
 };
 const testRecord = {
-  id: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+  token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
   redaction: RedactionType.PLAIN_TEXT,
 };
 
@@ -56,7 +56,7 @@ describe("Reveal Element Class", () => {
     testRevealElement.mount("#testDiv");
     expect(document.querySelector("iframe")).toBeTruthy();
     expect(document.querySelector("iframe")?.name).toBe(
-      `${FRAME_REVEAL}:${btoa(testRecord.id)}:${containerId}`
+      `${FRAME_REVEAL}:${btoa(testRecord.token)}:${containerId}`
     );
 
     expect(_on).toBeCalledTimes(1);

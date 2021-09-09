@@ -37,8 +37,8 @@ export const fetchRecordsByTokenId = async (
 
   tokenIdRecords.forEach((tokenRecord) => {
     if (tokenRequest[tokenRecord.redaction])
-      tokenRequest[tokenRecord.redaction].push(tokenRecord.id);
-    else tokenRequest[tokenRecord.redaction] = [tokenRecord.id];
+      tokenRequest[tokenRecord.redaction].push(tokenRecord.token);
+    else tokenRequest[tokenRecord.redaction] = [tokenRecord.token];
   });
 
   const vaultResponseSet: Promise<any>[] = Object.entries(tokenRequest).map(
@@ -104,13 +104,13 @@ const getTokenRecordsFromVault = (
 const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
   const currentResponseRecords = response["records"];
   return currentResponseRecords.map((record) => {
-    return { id: record["token_id"], ...record["fields"] };
+    return { token: record["token_id"], ...record["fields"] };
   });
 };
 
 const formatForPureJsFailure = (cause: IApiFailureResponse, tokenIds) => {
   return tokenIds.map((tokenId) => ({
-    id: tokenId,
+    token: tokenId,
     error: {
       code: cause?.error?.http_code || "",
       description: cause?.error?.message || "",
@@ -129,7 +129,7 @@ export const formatRecordsForIframe = (response: revealResponseType) => {
 
 export const formatRecordsForClient = (response: revealResponseType) => {
   const successRecords = response.records.map((record) => ({
-    id: record.id,
+    token: record.token,
   }));
   return { success: successRecords, errors: response.errors };
 };

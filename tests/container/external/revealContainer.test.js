@@ -33,7 +33,7 @@ describe("Reveal Container Class", () => {
   };
 
   const testRecord = {
-    id: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+    token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
     redaction: RedactionType.PLAIN_TEXT,
     label: "",
     styles: {
@@ -59,13 +59,16 @@ describe("Reveal Container Class", () => {
   });
   test("create() will throw error if record id invalid", () => {
     try {
-      testRevealContainer.create({ id: "", redaction: RedactionType.REDACTED });
+      testRevealContainer.create({
+        token: "",
+        redaction: RedactionType.REDACTED,
+      });
     } catch (error) {
       expect(error.message).toBe("Invalid Token Id ");
     }
     try {
       testRevealContainer.create({
-        id: true,
+        token: true,
         redaction: RedactionType.PLAIN_TEXT,
       });
     } catch (error) {
@@ -75,7 +78,7 @@ describe("Reveal Container Class", () => {
   test("create() will throw error if record redaction is invalid", () => {
     try {
       testRevealContainer.create({
-        id: "jfdkaj-fksdkjfksa-kej",
+        token: "jfdkaj-fksdkjfksa-kej",
         redaction: "",
       });
     } catch (error) {
@@ -83,7 +86,7 @@ describe("Reveal Container Class", () => {
     }
     try {
       testRevealContainer.create({
-        id: "jfdkaj-fksdkjfksa-kej",
+        token: "jfdkaj-fksdkjfksa-kej",
         redaction: "PLAIN",
       });
     } catch (error) {

@@ -54,9 +54,9 @@ export const validateGetRecords = (records: IRevealRecord[]) => {
     if (Object.keys(record).length === 0)
       throw new Error("Record cannot be Empty Object");
 
-    const recordId = record.id;
-    if (!recordId) throw new Error("Missing id property");
-    if (recordId === "" || typeof recordId !== "string")
+    const recordToken = record.token;
+    if (!recordToken) throw new Error("Missing id property");
+    if (recordToken === "" || typeof recordToken !== "string")
       throw new Error("Invalid Token Id");
 
     const recordRedaction = record.redaction;

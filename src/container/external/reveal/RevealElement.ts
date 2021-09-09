@@ -19,7 +19,7 @@ class RevealElement {
     this.#recordData = record;
     this.#containerId = containerId;
     this.#iframe = new IFrame(
-      `${FRAME_REVEAL}:${btoa(record.id)}`,
+      `${FRAME_REVEAL}:${btoa(record.token)}`,
       { metaData },
       this.#containerId
     );
@@ -40,7 +40,7 @@ class RevealElement {
           .emit(
             ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
             {
-              id: this.#recordData.id,
+              id: this.#recordData.token,
               containerId: this.#containerId,
             }
           );

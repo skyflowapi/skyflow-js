@@ -54,7 +54,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: testTokenId,
+          token: testTokenId,
         },
       ]);
     } catch (error) {
@@ -65,7 +65,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: "",
+          token: "",
         },
       ]);
     } catch (error) {
@@ -76,7 +76,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: true,
+          token: true,
         },
       ]);
     } catch (error) {
@@ -85,7 +85,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: 24,
+          token: 24,
         },
       ]);
     } catch (error) {
@@ -94,7 +94,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: {},
+          token: {},
         },
       ]);
     } catch (error) {
@@ -105,7 +105,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: testTokenId,
+          token: testTokenId,
           redaction: "",
         },
       ]);
@@ -117,7 +117,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: testTokenId,
+          token: testTokenId,
           redaction: "INVALID",
         },
       ]);
@@ -127,7 +127,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: testTokenId,
+          token: testTokenId,
           redaction: true,
         },
       ]);
@@ -137,7 +137,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: testTokenId,
+          token: testTokenId,
           redaction: {},
         },
       ]);
@@ -147,7 +147,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: testTokenId,
+          token: testTokenId,
           redaction: 899,
         },
       ]);
@@ -159,7 +159,7 @@ describe("Reveal PureJs- get() Method Input", () => {
     try {
       skyflow.get([
         {
-          id: testTokenId,
+          token: testTokenId,
           redaction: testRedactionType,
         },
       ]);
@@ -172,24 +172,24 @@ describe("Reveal PureJs- get() Method Input", () => {
 describe("Reveal Pure Js - get() Method Response", () => {
   const singleValidTokenResponse = skyflow.get([
     {
-      id: testTokenId,
+      token: testTokenId,
       redaction: testRedactionType,
     },
   ]);
   const singleInvalidTokenResponse = skyflow.get([
     {
-      id: testInvalidTokenId,
+      token: testInvalidTokenId,
       redaction: testRedactionType,
     },
   ]);
 
   const validMultiRedactionResponse = skyflow.get([
     {
-      id: testTokenId,
+      token: testTokenId,
       redaction: testRedactionType,
     },
     {
-      id: "be9ca047-0c17-4b8f-acf4-a8793d5dd479",
+      token: "be9ca047-0c17-4b8f-acf4-a8793d5dd479",
       redaction: RedactionType.DEFAULT,
     },
   ]);
@@ -219,7 +219,7 @@ describe("Reveal Pure Js - get() Method Response", () => {
   test("For Single valid Token, records should have id with testTokenId", () => {
     return singleValidTokenResponse
       .then((result) => {
-        expect(result.records[0].id).toBe(testTokenId);
+        expect(result.records[0].token).toBe(testTokenId);
       })
       .catch((error) => {
         expect(error).toBe(false);
@@ -240,7 +240,7 @@ describe("Reveal Pure Js - get() Method Response", () => {
   test("For Single invalid Token,errors should have id with testInvalidTokenId", () => {
     return singleInvalidTokenResponse
       .then((result) => {
-        expect(result.errors[0].id).toBe(testInvalidTokenId);
+        expect(result.errors[0].token).toBe(testInvalidTokenId);
       })
       .catch((error) => {
         console.log(error).toBe(false);

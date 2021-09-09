@@ -43,10 +43,13 @@ class RevealFrame {
       this.#labelElement.innerText = this.#record.label;
       this.#elementContainer.append(this.#labelElement);
     }
-    this.#dataElememt.innerText = this.#record.id;
+    this.#dataElememt.innerText = this.#record.token;
     getCssClassesFromJss(REVEAL_ELEMENT_DEFAULT_STYLES, "");
     this.#styles = this.#record.styles;
-    const classes = getCssClassesFromJss(this.#styles, btoa(this.#record.id));
+    const classes = getCssClassesFromJss(
+      this.#styles,
+      btoa(this.#record.token)
+    );
 
     Object.values(STYLE_TYPE).forEach((variant) => {
       if (classes[variant]) this.#dataElememt.classList.add(classes[variant]);
@@ -56,8 +59,8 @@ class RevealFrame {
     document.body.append(this.#elementContainer);
 
     const sub = (data, _) => {
-      if (data[this.#record.id]) {
-        this.#dataElememt.innerText = data[this.#record.id] as string;
+      if (data[this.#record.token]) {
+        this.#dataElememt.innerText = data[this.#record.token] as string;
         bus
           .target(location.origin)
           .off(
