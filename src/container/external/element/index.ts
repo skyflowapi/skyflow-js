@@ -45,7 +45,7 @@ class Element {
   #updateCallbacks: Function[] = [];
 
   #mounted = false;
-
+  #isDebug = false;
   constructor(
     elementGroup: any,
     metaData: any,
@@ -53,8 +53,10 @@ class Element {
     isSingleElementAPI: boolean = false,
     destroyCallback: Function,
     updateCallback: Function,
+    isDebug: any
   ) {
     this.containerId = containerId;
+    this.#isDebug = isDebug;
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
@@ -189,10 +191,9 @@ class Element {
         this.#state.isFocused = elementState.isFocused;
         this.#state.value = {};
         const key = this.#elements[index].elementName;
-        const value = this.#elements[index].sensitive
-          ? undefined
-          : elementState.value;
-        if (this.#isSingleElementAPI) this.#state.value = value;
+        const value = this.#isDebug ? elementState.value : undefined;
+        if (this.#isSingleElementAPI)
+          this.#state.value = this.#isDebug ? value : undefined;
         else this.#state.value[key] = value;
       } else {
         this.#state.isEmpty = this.#state.isEmpty || elementState.isEmpty;

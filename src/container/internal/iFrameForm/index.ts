@@ -190,13 +190,15 @@ export class IFrameFormElement extends EventEmitter {
   // return unMask(this.state.value, this.mask);
   ;
 
-  getStatus = () => ({
-    isFocused: this.state.isFocused,
-    isValid: this.state.isValid,
-    isEmpty: this.state.isEmpty,
-    isComplete: this.state.isComplete,
-    ...(!this.sensitive && { value: this.state.value }),
-  });
+  getStatus = () => {
+    return {
+      isFocused: this.state.isFocused,
+      isValid: this.state.isValid,
+      isEmpty: this.state.isEmpty,
+      isComplete: this.state.isComplete,
+      value:this.metaData.options?.debug? this.state.value:undefined
+    };
+  };
 
   validator(value: string) {
     if (this.fieldType === ElementType.CARD_NUMBER) {

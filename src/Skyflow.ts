@@ -94,6 +94,7 @@ class Skyflow {
 
   #bearerToken:string = '';
 
+  #options:any;
   constructor(config: ISkyflow) {
     this.#client = new Client(
       {
