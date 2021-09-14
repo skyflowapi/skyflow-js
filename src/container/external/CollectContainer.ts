@@ -40,9 +40,11 @@ class CollectContainer {
   #containerId: string;
   #elements: Record<string, Element> = {};
   #metaData: any;
+  #isDebug:boolean=false;
   constructor(options, metaData) {
     this.#containerId = uuid();
     this.#metaData = metaData;
+    this.#isDebug=metaData.clientJSON.config.options?.debug;
     const iframe = iframer({
       name: COLLECT_FRAME_CONTROLLER + ":" + this.#containerId,
     });
@@ -63,6 +65,7 @@ class CollectContainer {
                 metaData.clientJSON.config.getBearerToken.toString(),
             },
           },
+          options:metaData.clientJSON.config.options
         });
         bus
           // .target(properties.IFRAME_SECURE_ORGIN)
@@ -157,7 +160,8 @@ class CollectContainer {
         this.#containerId,
         isSingleElementAPI,
         this.#destroyCallback,
-        this.#updateCallback
+        this.#updateCallback,
+        this.#isDebug
       );
       this.#elements[multipleElements.elementName] = element;
     }

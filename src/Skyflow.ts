@@ -67,7 +67,7 @@ class Skyflow {
     clientDomain: location.origin,
   };
   #pureJsController: PureJsController;
-
+  #options:any;
   constructor(config: ISkyflow) {
     this.#client = new Client(
       {

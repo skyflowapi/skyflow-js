@@ -382,7 +382,7 @@ export class IFrameFormElement extends EventEmitter {
       isValid: this.state.isValid,
       isEmpty: this.state.isEmpty,
       isComplete: this.state.isComplete,
-      ...(!this.sensitive && { value: this.state.value }),
+      value:this.metaData.options?.debug? this.state.value:undefined
     };
   };
 
