@@ -15,7 +15,7 @@ Skyflow’s Javascript SDK can be used to securely collect, tokenize, and reveal
 Using script tag
 
 ```html
-<script src="https://js.skyflow.com/v1"></script>
+<script src="https://js.skyflow.com/v1/index.js"></script>
 ```
 
 
