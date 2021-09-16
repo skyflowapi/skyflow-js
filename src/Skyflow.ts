@@ -61,7 +61,12 @@ class Skyflow {
   }
 
   static init(config: ISkyflow): Skyflow {
-    if (!config.vaultID || !config.vaultURL || !config.getBearerToken) {
+    if (
+      !config ||
+      !config.vaultID ||
+      !config.vaultURL ||
+      !config.getBearerToken
+    ) {
       throw new Error("Invalid client credentials");
     }
 
