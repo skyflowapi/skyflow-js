@@ -293,7 +293,7 @@ When the form is ready to be submitted, call the `collect(options?)` method on t
 var options = {
   tokens: true  //optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'
   additionalFields: {  
-    "records": [
+    records: [
       {
         table: "string", //table into which record should be inserted
         fields: {
@@ -331,7 +331,7 @@ const element = container.create({
         fontSize: "12px",
         fontWeight: "bold"
       }
-  }
+  },
   errorTextStyles: {
       base: {
         color: "#f44336"
@@ -443,12 +443,12 @@ The sample response:
 ```javascript
 {
   "records": [
-        {
-          ids: string[],                      // array of SkyflowID's of the records to be fetched
-          table: string                       // table holding the above skyflow_id's
-          redaction: Skyflow.RedactionType    // redaction to be applied to retrieved data
-        }
-      ]
+    {
+      ids: string[],                      // array of SkyflowID's of the records to be fetched
+      table: string                       // table holding the above skyflow_id's
+      redaction: Skyflow.RedactionType    // redaction to be applied to retrieved data
+    }
+  ]
 }
 ```
 
@@ -458,7 +458,7 @@ An example of getById call:
 
 skyflow.getById({
   "records": [{
-    ids: ["f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9","da26de53-95d5-4bdb-99db-8d8c66a35ff9"]
+    ids: ["f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9","da26de53-95d5-4bdb-99db-8d8c66a35ff9"],
     table: "cards",
     redaction: Skyflow.RedactionType.PLAIN_TEXT
   }]
@@ -515,12 +515,13 @@ var revealElement = {
   inputStyles: {},                    //optional styles to be applied to the element
   labelStyles: {},                    //optional, styles to be applied to the label of the reveal element
   errorTextStyles: {},                //optional styles that will be applied to the errorText of the reveal element
-  label: "string"                     //label for the form element
+  label: "string",                     //label for the form element
   altText: "string"                   //optional, string that is shown before reveal, will show token if altText is not provided
 }
 ```
 
 For a list of acceptable RedactionTypes, see the [section above](#Retrieving-data-from-the-vault).
+
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data but only a single variant is available i.e. base. 
 
 An example of a inputStyles object:
@@ -593,8 +594,19 @@ const cardNumberElement = container.create({
       base: {
         color: "#1d1d1d",
       },
-    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: "12px",
+    }
+  },
+  errorTextStyles: {
+    base: {
+      color: "#f44336"
+    }
+  }, 
   label: "card_number",
+  altText: "XXXX XXXX XXXX XXXX" 
 })
 
 const cvvElement = container.create({             
@@ -606,6 +618,7 @@ const cvvElement = container.create({
       },
     },
   label: "cvv",
+  altText: "XXX" 
 })
 
 //Step 3
