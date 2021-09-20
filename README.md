@@ -115,14 +115,16 @@ skyflowClient.insert(records, options={})
 
 An example of an insert call: 
 ```javascript
-skyflowClient.insert([
+skyflowClient.insert({
+  "records": [
   {
     "table": "cards",
     "fields": {
       "cardNumber": "41111111111",
       "cvv": "123",
     }
-  }]);
+  }]
+});
 ```
 
 The sample response:
@@ -160,15 +162,18 @@ A Skyflow collect Element is defined as shown below:
 var collectElement =  {
    table: "string",             //the table this data belongs to
    column: "string",            //the column into which this data should be inserted
-   styles: {},                  //optional styles that should be applied to the form element
+   type: Skyflow.ElementType,   //Skyflow.ElementType enum
+   inputStyles: {},             //optional styles that should be applied to the form element
+   labelStyles: {},             //optional styles that will be applied to the label of the collect element
+   errorTextStyles:{},          //optional styles that will be applied to the errorText of the collect element
    label: "string",             //optional label for the form element
    placeholder: "string",       //optional placeholder for the form element
-   type: Skyflow.ElementType    //Skyflow.ElementType enum
+   altText: "string"            //optional string that acts as an initial value for the collect element
 }
 ```
 The `table` and `column` fields indicate which table and column in the vault the Element corresponds to. **Note**:  Use dot delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`). 
 
-The `styles` field accepts a style object which consists of CSS properties that should be applied to the form element in the following states:
+The `inputStyles` field accepts a style object which consists of CSS properties that should be applied to the form element in the following states:
 - `base`: all other variants inherit from these styles
 - `complete`: applied when the Element has valid input
 - `empty`: applied when the Element has no input
@@ -177,9 +182,9 @@ The `styles` field accepts a style object which consists of CSS properties that 
 
 Styles are specified with [JSS](https://cssinjs.org/?v=v10.7.1). 
 
-An example of a styles object:
+An example of a inputStyles object:
 ```javascript
-styles:{
+inputStyles:{
     base: {
       border: "1px solid #eae8ee",
       padding: "10px 16px",
@@ -197,6 +202,33 @@ styles:{
   }
 }
 ```
+The states that are available for `labelStyles` are `base` and `focus`.
+
+An example of a labelStyles object:
+
+```javascript
+labelStyles: {
+    base: {
+      fontSize: "12px",
+      fontWeight: "bold"
+    },
+    focus: {
+      color: "#1d1d1d"
+    }
+}
+```
+
+The state that is available for `errorTextStyles` is only the `base` state, it shows up when there is some error in the collect element.
+
+An example of a errorTextStyles object:
+
+```javascript
+errorTextStyles: {
+    base: {
+      color: "#f44336"
+    }
+}
+```
 
 Finally, the `type` field takes a Skyflow ElementType. Each type applies the appropriate regex and validations to the form element. There are currently 4 types:
 - `CARDHOLDER_NAME`
@@ -210,10 +242,13 @@ Once the Element object has been defined, add it to the container using the `cre
 var collectElement =  {
    table: "string",             //the table this data belongs to
    column: "string",            //the column into which this data should be inserted
-   styles: {},                  //optional styles that should be applied to the form element
+   type: Skyflow.ElementType,   //Skyflow.ElementType enum
+   inputStyles: {},             //optional styles that should be applied to the form element
+   labelStyles: {},             //optional styles that will be applied to the label of the collect element
+   errorTextStyles:{},          //optional styles that will be applied to the errorText of the collect element
    label: "string",             //optional label for the form element
    placeholder: "string",       //optional placeholder for the form element
-   type: Skyflow.ElementType    //Skyflow.ElementType enum
+   altText: "string"            //optional string that acts as an initial value for the collect element
 }
 
 var options = {
@@ -251,9 +286,24 @@ element.mount("#cardNumber")
 
 When the form is ready to be submitted, call the `collect(options?)` method on the container object. The `options` parameter takes a dictionary of optional parameters as shown below: 
 
+- `tokens`: indicates whether tokens for the collected data should be returned or not. Defaults to 'true'
+- `additionalFields`: Non-PCI elements data to be inserted into the vault which should be in the `records` object format as described in the above [Inserting data into vault](#inserting-data-into-the-vault) section.
+
 ```javascript
 var options = {
-  tokens: true  //indicates whether tokens for the collected data should be returned. Defaults to 'true'
+  tokens: true  //optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'
+  additionalFields: {  
+    "records": [
+      {
+        table: "string", //table into which record should be inserted
+        fields: {
+          column1: "value", //column names should match vault column names
+          //...additional fields here
+        }
+      }
+      //...additional records here
+    ]
+  } //optional
 }
 
 container.collect(options={})
@@ -271,11 +321,22 @@ const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
 const element = container.create({           
   table: "cards",
   column: "cardNumber",
-  styles: {
+  inputstyles: {
       base: {
         color: "#1d1d1d",
       },
-    },
+  },
+  labelStyles: {
+      base: {
+        fontSize: "12px",
+        fontWeight: "bold"
+      }
+  }
+  errorTextStyles: {
+      base: {
+        color: "#f44336"
+      }
+  },
   placeholder: "Card Number",
   label: "card_number",
   type: Skyflow.ElementType.CARD_NUMBER
@@ -285,7 +346,22 @@ const element = container.create({
 element.mount("#cardNumber")  //assumes there is a div with id="#cardNumber" in the webpage
 
 // Step 4
-container.collect()
+
+const nonPCIRecords = {
+    "records": [
+      {
+        "table": "cards",
+        "fields": {
+          "gender": "MALE"
+        }
+      }
+    ]
+  }
+
+container.collect({
+  tokens: true,
+  additionalFields: nonPCIRecords
+})
 ```
 
 **Sample Response :**
@@ -295,7 +371,8 @@ container.collect()
     {
       "table": "cards",
       "fields": {
-        "cardNumber": "f3907186-e7e2-466f-91e5-48e12c2bcbc1"
+        "cardNumber": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+        "gender": "12f670af-6c7d-4837-83fb-30365fbc0b1e"
       }
     }
   ]
@@ -311,17 +388,22 @@ container.collect()
 
 ## Retrieving data from the vault
 
-For non-PCI use cases, to retrieve data from the vault and reveal it in the browser, use the `get(records)` method of the Skyflow client. The `records` parameter takes an array of records to be fetched as shown below. 
+For non-PCI use-cases, retrieving data from the vault and revealing it in the browser can be done either using the SkyflowID's or tokens as described below
+
+- ### Using Skyflow tokens
+    For retrieving using tokens, use the `detokenize(records)` method. The records parameter takes a JSON object that contains `records` to be fetched as shown below.
 
 ```javascript
-var records = [
-  { 
-    id: "string",                       //Token for the record to be fetched
-    redaction: Skyflow.RedactionType    //redaction to be applied to the retrieved data
-  }
-]
+var records = {
+  "records": [
+      {
+        token: "string",                    // token for the record to be fetched
+        redaction: Skyflow.RedactionType    //redaction to be applied to retrieved data
+      }
+  ]
+}
 
-skyflow.get(records)
+skyflow.detokenize(records)
 ```
 
 There are 4 accepted values in Skyflow.RedactionTypes:
@@ -333,12 +415,14 @@ There are 4 accepted values in Skyflow.RedactionTypes:
 An example of a get call: 
 
 ```javascript
-skyflow.get([
-  {
-    id: "131e70dc-6f76-4319-bdd3-96281e051051",
-    redaction: Skyflow.RedactionType.PLAIN_TEXT
-  }
-])
+skyflow.detokenize({
+  "records": [
+    {
+      token: "131e70dc-6f76-4319-bdd3-96281e051051",
+      redaction: Skyflow.RedactionType.PLAIN_TEXT
+    }
+  ]
+})
 ```
 
 The sample response:
@@ -346,12 +430,68 @@ The sample response:
 {
   "records": [
     {
-      "id": "131e70dc-6f76-4319-bdd3-96281e051051",
+      "token": "131e70dc-6f76-4319-bdd3-96281e051051",
       "date_of_birth": "1990-01-01",
     }
   ]
 }
 ```
+
+- ### Using Skyflow ID's
+    For retrieving using SkyflowID's, use the `getById(records)` method.The records parameter takes a JSON object that contains `records` to be fetched as shown below.
+
+```javascript
+{
+  "records": [
+        {
+          ids: string[],                      // array of SkyflowID's of the records to be fetched
+          table: string                       // table holding the above skyflow_id's
+          redaction: Skyflow.RedactionType    // redaction to be applied to retrieved data
+        }
+      ]
+}
+```
+
+An example of getById call:
+
+```javascript
+
+skyflow.getById({
+  "records": [{
+    ids: ["f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9","da26de53-95d5-4bdb-99db-8d8c66a35ff9"]
+    table: "cards",
+    redaction: Skyflow.RedactionType.PLAIN_TEXT
+  }]
+})
+```
+
+The sample response:
+```javascript
+{
+    "records": [
+        {
+            "fields": {
+                "card_number": "4111111111111111",
+                "cvv": "127",
+                "expiry_date": "11/35",
+                "fullname": "myname",
+                "skyflow_id": "f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9"
+            },
+            "table": "cards"
+        }
+    ],
+    "errors": [
+        {
+            "error": {
+                "code": "404",
+                "description": "No Records Found"
+            },
+            "skyflow_ids": ["da26de53-95d5-4bdb-99db-8d8c66a35ff9"]
+        }
+    ]
+}
+```
+
 
 ## Using Skyflow Elements to reveal data
 
@@ -370,14 +510,49 @@ Then define a Skyflow Element to reveal data as shown below.
 
 ```javascript
 var revealElement = {
-  id: "string",                       //token of the data being revealed 
+  token: "string",                    //token of the data being revealed 
   redaction: Skyflow.RedactionType,   //redaction type to be applied to the data when revealed
-  styles: {},                         //optional styles to be applied to the element
+  inputStyles: {},                    //optional styles to be applied to the element
+  labelStyles: {},                    //optional, styles to be applied to the label of the reveal element
+  errorTextStyles: {},                //optional styles that will be applied to the errorText of the reveal element
   label: "string"                     //label for the form element
+  altText: "string"                   //optional, string that is shown before reveal, will show token if altText is not provided
 }
 ```
 
-The `styles` parameter accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. For a list of acceptable RedactionTypes, see the [section above](#Retrieving-data-from-the-vault).
+For a list of acceptable RedactionTypes, see the [section above](#Retrieving-data-from-the-vault).
+The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data but only a single variant is available i.e. base. 
+
+An example of a inputStyles object:
+
+```javascript
+inputStyles: {
+    base: {
+      color: "#1d1d1d"
+    }
+}
+```
+
+An example of a labelStyles object:
+
+```javascript
+labelStyles: {
+    base: {
+      fontSize: "12px",
+      fontWeight: "bold"
+    }
+}
+```
+
+An example of a errorTextStyles object:
+
+```javascript
+errorTextStyles: {
+    base: {
+      color: "#f44336"
+    }
+}
+```
 
 Once you've defined a Skyflow Element, you can use the `create(element)` method of the container to create the Element as shown below: 
 
@@ -412,9 +587,9 @@ const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
 
 //Step 2
 const cardNumberElement = container.create({             
-  id: "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+  token: "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
   redaction: Skyflow.RedactionType.DEFAULT,
-  styles: {
+  inputStyles: {
       base: {
         color: "#1d1d1d",
       },
@@ -423,9 +598,9 @@ const cardNumberElement = container.create({
 })
 
 const cvvElement = container.create({             
-  id: "89024714-6a26-4256-b9d4-55ad69aa4047",
+  token: "89024714-6a26-4256-b9d4-55ad69aa4047",
   redaction: Skyflow.RedactionType.DEFAULT,
-  styles: {
+  inputStyles: {
       base: {
         color: "#1d1d1d",
       },
@@ -456,12 +631,12 @@ The response below shows that some tokens assigned to the reveal elements get re
 {
   "success": [
     {
-      "id": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75"
+      "token": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75"
     }
   ],
  "errors": [
     {
-       "id": "89024714-6a26-4256-b9d4-55ad69aa4047",
+       "token": "89024714-6a26-4256-b9d4-55ad69aa4047",
        "error": {
          "code": 404,
          "description": "Tokens not found for 89024714-6a26-4256-b9d4-55ad69aa4047"
