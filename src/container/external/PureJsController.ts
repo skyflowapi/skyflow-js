@@ -1,6 +1,5 @@
 import bus from "framebus";
 import Client from "../../client";
-import { fetchRecordsByTokenId } from "../../core/reveal";
 import iframer, {
   getIframeSrc,
   setAttributes,
@@ -40,7 +39,7 @@ class PureJsController {
       });
   }
 
-  _get(records: IRevealRecord[]): Promise<any> {
+  _detokenize(records: IRevealRecord[]): Promise<any> {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         bus.target(properties.IFRAME_SECURE_ORGIN).emit(
@@ -50,7 +49,7 @@ class PureJsController {
             records: records,
           },
           (revealData: any) => {
-            if (revealData.error) reject(revealData);
+            if (revealData.error) reject(revealData.error);
             else resolve(revealData);
           }
         );
@@ -67,7 +66,7 @@ class PureJsController {
                 records: records,
               },
               (revealData: any) => {
-                if (revealData.error) reject(revealData);
+                if (revealData.error) reject(revealData.error);
                 else resolve(revealData);
               }
             );

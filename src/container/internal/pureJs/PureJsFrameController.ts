@@ -18,9 +18,14 @@ class PureJsFrameController {
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
         if (data.type === PUREJS_TYPES.GET) {
           fetchRecordsByTokenId(data.records as IRevealRecord[], this.#client)
-            .then((result) => {
-              callback(result);
-            })
+            .then(
+              (resolvedResult) => {
+                callback(resolvedResult);
+              },
+              (rejectedResult) => {
+                callback({ error: rejectedResult });
+              }
+            )
             .catch((error) => {
               callback({ error });
             });

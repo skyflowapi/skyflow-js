@@ -3,7 +3,10 @@ import CollectContainer from "./container/external/CollectContainer";
 import RevealContainer from "./container/external/RevealContainer";
 import uuid from "./libs/uuid";
 import { ElementType } from "./container/constants";
-import { validateInsertRecords, validateGetRecords } from "./utils/validators";
+import {
+  validateInsertRecords,
+  validateDetokenizeInput,
+} from "./utils/validators";
 import PureJsController from "./container/external/PureJsController";
 
 export interface IInsertRecord {
@@ -37,8 +40,11 @@ export interface IRevealRecord {
   redaction: RedactionType;
 }
 export interface revealResponseType {
-  records: Record<string, string>[];
-  errors: Record<string, any>[];
+  records?: Record<string, string>[];
+  errors?: Record<string, any>[];
+}
+export interface IDetokenizeInput {
+  records: IRevealRecord[];
 }
 
 class Skyflow {
@@ -98,12 +104,12 @@ class Skyflow {
     return this.#pureJsController._insert(records, options);
   }
 
-  get(
-    records: IRevealRecord[],
+  detokenize(
+    detokenizeInput: IDetokenizeInput,
     options: any = {}
   ): Promise<revealResponseType> {
-    validateGetRecords(records);
-    return this.#pureJsController._get(records);
+    validateDetokenizeInput(detokenizeInput);
+    return this.#pureJsController._detokenize(detokenizeInput.records);
   }
 
   static get ContainerType() {

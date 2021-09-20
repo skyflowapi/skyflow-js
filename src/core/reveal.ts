@@ -63,7 +63,7 @@ export const fetchRecordsByTokenId = async (
     }
   );
 
-  return new Promise((resolve, _) => {
+  return new Promise((resolve, reject) => {
     Promise.allSettled(vaultResponseSet).then((resultSet) => {
       let recordsResponse: Record<string, any>[] = [];
       let errorResponse: Record<string, any>[] = [];
@@ -78,7 +78,12 @@ export const fetchRecordsByTokenId = async (
           });
         }
       });
-      resolve({ records: recordsResponse, errors: errorResponse });
+      if (errorResponse.length === 0) {
+        resolve({ records: recordsResponse });
+      } else {
+        if (recordsResponse.length === 0) reject({ errors: errorResponse });
+        else reject({ records: recordsResponse, errors: errorResponse });
+      }
     });
   });
 };
@@ -120,16 +125,23 @@ const formatForPureJsFailure = (cause: IApiFailureResponse, tokenIds) => {
 
 export const formatRecordsForIframe = (response: revealResponseType) => {
   const result: Record<string, string> = {};
-  response.records.forEach((record) => {
-    const values = Object.values(record);
-    result[values[0]] = values[1];
-  });
+  if (response.records) {
+    response.records.forEach((record) => {
+      const values = Object.values(record);
+      result[values[0]] = values[1];
+    });
+  }
   return result;
 };
 
 export const formatRecordsForClient = (response: revealResponseType) => {
-  const successRecords = response.records.map((record) => ({
-    token: record.token,
-  }));
-  return { success: successRecords, errors: response.errors };
+  if (response.records) {
+    const successRecords = response.records.map((record) => ({
+      token: record.token,
+    }));
+    if (response.errors)
+      return { success: successRecords, errors: response.errors };
+    else return { success: successRecords };
+  }
+  return { errors: response.errors };
 };

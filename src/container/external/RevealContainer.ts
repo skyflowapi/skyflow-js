@@ -107,21 +107,22 @@ class RevealContainer {
   reveal() {
     this.#isRevealCalled = true;
     if (this.#isElementsMounted) {
-      return new Promise((resolve, _) => {
+      return new Promise((resolve, reject) => {
         bus.target(properties.IFRAME_SECURE_ORGIN).emit(
           ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
           {
             records: this.#revealRecords,
           },
-          (data) => {
+          (revealData: any) => {
             this.#mountedRecords = [];
             this.#revealRecords = [];
-            resolve(data);
+            if (revealData.error) reject(revealData.error);
+            else resolve(revealData);
           }
         );
       });
     } else {
-      return new Promise((resolve, _) => {
+      return new Promise((resolve, reject) => {
         this.#eventEmmiter.on(
           ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
           () => {
@@ -130,10 +131,11 @@ class RevealContainer {
               {
                 records: this.#revealRecords,
               },
-              (apiData) => {
+              (revealData: any) => {
                 this.#revealRecords = [];
                 this.#mountedRecords = [];
-                resolve(apiData);
+                if (revealData.error) reject(revealData.error);
+                else resolve(revealData);
               }
             );
           }

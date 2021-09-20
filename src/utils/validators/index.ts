@@ -1,4 +1,5 @@
 import {
+  IDetokenizeInput,
   IInsertRecordInput,
   IRevealRecord,
   RedactionType,
@@ -48,7 +49,11 @@ export const validateInsertRecords = (recordObj: IInsertRecordInput) => {
   });
 };
 
-export const validateGetRecords = (records: IRevealRecord[]) => {
+export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
+  if (!detokenizeInput.hasOwnProperty("records"))
+    throw new Error("Missing records property");
+
+  const records: IRevealRecord[] = detokenizeInput.records;
   if (records.length === 0) throw new Error("Empty Records");
   records.forEach((record) => {
     if (Object.keys(record).length === 0)
