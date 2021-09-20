@@ -33,7 +33,7 @@ export function validateAndSetupGroupOptions(
       const classes = newElement.classes || {};
       const styles = newElement.styles || {};
       styles.base = { ...INPUT_STYLES, ...styles.base };
-      setup && buildStylesFromClassesAndStyles(classes, styles);
+      // setup && buildStylesFromClassesAndStyles(classes, styles);
 
       newElement.classes = classes;
       newElement.styles = styles;
@@ -135,7 +135,6 @@ export function validateElementOptions(
       "Element dropdown requires options attribute with an array of objects containing value and text attributes"
     );
   }
-
 }
 
 export const getElements = (group: any) => {

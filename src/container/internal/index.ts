@@ -2,13 +2,9 @@ import bus from "framebus";
 import Client from "../../client";
 import { setAttributes } from "../../iframe-libs/iframer";
 import { validateElementOptions } from "../../libs/element-options";
-import { splitStyles } from "../../libs/styles";
-import injectStylesheet from "inject-stylesheet";
 import $ from "jquery";
 import "jquery-mask-plugin/dist/jquery.mask.min";
 import {
-  ALLOWED_PSEUDO_STYLES,
-  ALLOWED_STYLES,
   ELEMENTS,
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
@@ -16,6 +12,7 @@ import {
   INPUT_STYLES,
   STYLE_TYPE,
   ERROR_TEXT_STYLES,
+  COLLECT_ELEMENT_LABEL_DEFAULT_STYLES,
 } from "../constants";
 import { IFrameForm, IFrameFormElement } from "./iFrameForm";
 import { getCssClassesFromJss } from "../../libs/jss-styles";
@@ -225,11 +222,10 @@ export class FrameElement {
 
   updateParentDiv = (newDiv: HTMLDivElement) => {
     this.htmlDivElement = newDiv;
-    this.htmlDivElement.append(
-      this.domLabel || "",
-      this.domInput || "",
-      this.domError || ""
-    );
+    if (this.options.hasOwnProperty("label"))
+      this.htmlDivElement.append(this.domLabel || "");
+
+    this.htmlDivElement.append(this.domInput || "", this.domError || "");
   };
 
   setValue = (value) => {
@@ -257,7 +253,13 @@ export class FrameElement {
   destroy = () => {};
 
   injectInputStyles(styles, preText: string = "") {
-    getCssClassesFromJss(styles, `${preText}-${this.options.name}`);
+    let customStyles: Record<string, any> = {};
+    Object.values(STYLE_TYPE).forEach((type) => {
+      if (styles.hasOwnProperty(type)) {
+        customStyles[type] = styles[type];
+      }
+    });
+    getCssClassesFromJss(customStyles, `${preText}-${this.options.name}`);
   }
 
   updateStyleClasses(state: {
@@ -267,7 +269,12 @@ export class FrameElement {
     isComplete: boolean;
   }) {
     const classes: string[] = [];
+    const labelClasses: string[] = [];
 
+    if (state.isFocused) {
+      classes.push(STYLE_TYPE.FOCUS);
+      labelClasses.push(STYLE_TYPE.FOCUS);
+    }
     if (state.isEmpty) {
       classes.push(STYLE_TYPE.EMPTY);
     } else {
@@ -280,9 +287,9 @@ export class FrameElement {
     }
 
     this.setClass(classes, this.domInput);
-    this.setClass(classes, this.domLabel, "label");
+    this.setClass(labelClasses, this.domLabel, "label");
 
-    if (!state.isValid) this.setClass(classes, this.domError, "error");
+    if (!state.isValid) this.setClass([], this.domError, "error");
   }
 
   setClass(types: string[], dom?: HTMLElement, preText: string = "") {
@@ -295,14 +302,12 @@ export class FrameElement {
         (type) =>
           "SkyflowElement-" + preText + "-" + this.options.name + "-" + type
       );
-
       dom.className = classes.join(" ");
     }
   }
 
   updateOptions(options) {
     const newOptions = { ...this.options, ...options };
-
     validateElementOptions(
       this.iFrameFormElement.fieldType,
       this.options,
@@ -310,27 +315,55 @@ export class FrameElement {
     );
 
     this.options = newOptions;
-
-    // todo: clear old styles
-    if (options.styles) {
+    if (options.inputStyles) {
       // update element styles
-      options.styles.base = {
+      options.inputStyles.base = {
         ...INPUT_STYLES,
-        ...options.styles.base,
+        ...options.inputStyles.base,
       };
-      this.injectInputStyles(options.styles);
+      this.injectInputStyles(options.inputStyles);
     }
-    if (options?.labelStyles?.styles) {
-      // update label styles
-      this.injectInputStyles(options?.labelStyles?.styles, "label");
+    if (options.hasOwnProperty("label")) {
+      if (options?.labelStyles) {
+        let labelStyles = {};
+        labelStyles[STYLE_TYPE.BASE] = {
+          ...COLLECT_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.BASE],
+        };
+        if (options.labelStyles?.[STYLE_TYPE.BASE]) {
+          labelStyles[STYLE_TYPE.BASE] = {
+            ...labelStyles[STYLE_TYPE.BASE],
+            ...options.labelStyles[STYLE_TYPE.BASE],
+          };
+        }
+        if (options.labelStyles?.[STYLE_TYPE.FOCUS]) {
+          labelStyles[STYLE_TYPE.FOCUS] = {
+            ...options.labelStyles[STYLE_TYPE.FOCUS],
+          };
+        }
+        this.injectInputStyles(labelStyles, "label");
+      } else {
+        this.injectInputStyles(COLLECT_ELEMENT_LABEL_DEFAULT_STYLES, "label");
+      }
     }
-
-    let errorStyles = {
-      invalid: {
-        ...ERROR_TEXT_STYLES,
-      },
-    };
-    this.injectInputStyles(errorStyles, "error");
+    if (
+      options?.errorTextStyles &&
+      options.errorTextStyles.hasOwnProperty(STYLE_TYPE.BASE)
+    ) {
+      let errorStyles = {
+        [STYLE_TYPE.BASE]: {
+          ...ERROR_TEXT_STYLES,
+          ...options.errorTextStyles[STYLE_TYPE.BASE],
+        },
+      };
+      this.injectInputStyles(errorStyles, "error");
+    } else {
+      let errorStyles = {
+        [STYLE_TYPE.BASE]: {
+          ...ERROR_TEXT_STYLES,
+        },
+      };
+      this.injectInputStyles(errorStyles, "error");
+    }
 
     if (this.domLabel) this.domLabel.textContent = this.options.label;
 

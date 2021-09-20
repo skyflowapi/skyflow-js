@@ -21,8 +21,10 @@ import Element from "./element";
 interface CollectElementInput {
   table: string;
   column: string;
-  styles?: any;
+  inputStyles?: object;
   label?: string;
+  labelStyles?: object;
+  errorTextStyles?: object;
   placeholder?: string;
   type: ElementType;
 }

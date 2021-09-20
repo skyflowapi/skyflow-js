@@ -18,9 +18,12 @@ import EventEmitter from "../../event-emitter";
 
 export interface IRevealElementInput {
   token: string;
-  styles?: object;
-  label?: string;
   redaction: RedactionType;
+  inputStyles?: object;
+  label?: string;
+  labelStyles?: object;
+  altText?: string;
+  errorTextStyles?: object;
 }
 
 class RevealContainer {
@@ -96,7 +99,6 @@ class RevealContainer {
   }
 
   create(record: IRevealElementInput) {
-    if (!record.styles) record.styles = {};
     this.validateRevealElementInput(record);
     this.#revealRecords.push(record);
     return new RevealElement(record, this.#metaData, this.#containerId);
@@ -149,9 +151,11 @@ class RevealContainer {
     if (!Object.values(RedactionType).includes(recordRedaction))
       throw new Error(`Invalid Redaction Type ${recordRedaction}`);
 
-    const recordLabel = record.label;
-    if (recordLabel && typeof recordLabel !== "string")
+    if (record.hasOwnProperty("label") && typeof record.label !== "string")
       throw new Error(`Invalid Record Label Type`);
+
+    if (record.hasOwnProperty("altText") && typeof record.altText !== "string")
+      throw new Error(`Invalid Record altText Type`);
   }
 }
 export default RevealContainer;
