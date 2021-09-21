@@ -106,6 +106,9 @@ export const validateGetByIdInput = (getByIdInput: IGetByIdInput) => {
 };
 
 export const isValidURL = (url: string) => {
+  if (url.substring(0, 5).toLowerCase() !== "https") {
+    return false;
+  }
   try {
     new URL(url);
   } catch (err) {
