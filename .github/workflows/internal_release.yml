@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          token: ${{ PAT_ACTIONS }}
+          token: ${{ secrets.PAT_ACTIONS }}
           fetch-depth: 0
           
       - uses: actions/setup-node@v1

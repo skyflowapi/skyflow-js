@@ -2,7 +2,7 @@ name: Public Release
 
 on:
   push:
-    tags: 'v*'
+    tags: '*.*.*'
       
 jobs:
   build-sdk:
@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          token: ${{ PAT_ACTIONS }}
+          token: ${{ secrets.PAT_ACTIONS }}
           ref: master
           fetch-depth: 0
 
