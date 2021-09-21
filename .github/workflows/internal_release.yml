@@ -102,4 +102,3 @@ jobs:
         aws-region: us-east-1
     - name: invalidate-cf-distribution
       run: aws cloudfront create-invalidation --distribution-id ${{ secrets.BLITZ_CF_DISTRIBUTION_ID }} --paths "/*"
-            
