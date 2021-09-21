@@ -2,7 +2,6 @@ import Client from "./client";
 import CollectContainer from "./container/external/CollectContainer";
 import RevealContainer from "./container/external/RevealContainer";
 import uuid from "./libs/uuid";
-import { properties } from "./properties";
 import { ElementType } from "./container/constants";
 import { validateInsertRecords, validateGetRecords } from "./utils/validators";
 import PureJsController from "./container/external/PureJsController";
@@ -34,7 +33,7 @@ export enum RedactionType {
   REDACTED = "REDACTED",
 }
 export interface IRevealRecord {
-  id: string;
+  token: string;
   redaction: RedactionType;
 }
 export interface revealResponseType {

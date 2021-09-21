@@ -358,13 +358,30 @@ export const STYLE_TYPE = {
   EMPTY: "empty",
   INVALID: "invalid",
 };
-export const REVEAL_ELEMENT_DEFAULT_STYLES = {
+export const REVEAL_ELEMENT_DIV_STYLE = {
   container: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
   },
-  label: {
+};
+
+export const REVEAL_ELEMENT_LABEL_DEFAULT_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    "margin-bottom": "4px",
+  },
+};
+
+export const REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    marginTop: "4px",
+  },
+};
+
+export const REVEAL_ELEMENT_ERROR_TEXT = "Invalid Token";
+
+export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
+  [STYLE_TYPE.BASE]: {
     marginBottom: "4px",
   },
 };

@@ -2,7 +2,10 @@ import bus from "framebus";
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
-  REVEAL_ELEMENT_DEFAULT_STYLES,
+  REVEAL_ELEMENT_ERROR_TEXT,
+  REVEAL_ELEMENT_LABEL_DEFAULT_STYLES,
+  REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
+  REVEAL_ELEMENT_DIV_STYLE,
 } from "../../constants";
 import { getCssClassesFromJss } from "../../../libs/jss-styles";
 
@@ -11,10 +14,13 @@ class RevealFrame {
   #elementContainer: HTMLDivElement;
   #dataElememt: HTMLSpanElement;
   #labelElement: HTMLSpanElement;
+  #errorElement: HTMLSpanElement;
   #name: string;
   #record: any;
   #containerId: string;
-  #styles!: object;
+  #inputStyles!: object;
+  #labelStyles!: object;
+  #errorTextStyles!: object;
 
   static init() {
     bus
@@ -34,36 +40,75 @@ class RevealFrame {
     this.#record = record;
 
     this.#elementContainer = document.createElement("div");
-    this.#elementContainer.className = "SkyflowElement--container";
-    this.#labelElement = document.createElement("span");
-    this.#labelElement.className = "SkyflowElement--label";
-    this.#dataElememt = document.createElement("span");
+    this.#elementContainer.className = "SkyflowElement-div-container";
+    getCssClassesFromJss(REVEAL_ELEMENT_DIV_STYLE, "div");
 
-    if (this.#record.label) {
+    this.#labelElement = document.createElement("span");
+    this.#labelElement.className = `SkyflowElement-label-${STYLE_TYPE.BASE}`;
+
+    this.#dataElememt = document.createElement("span");
+    this.#dataElememt.className = `SkyflowElement-content-${STYLE_TYPE.BASE}`;
+
+    this.#errorElement = document.createElement("span");
+    this.#errorElement.className = `SkyflowElement-error-${STYLE_TYPE.BASE}`;
+
+    if (this.#record.hasOwnProperty("label")) {
       this.#labelElement.innerText = this.#record.label;
       this.#elementContainer.append(this.#labelElement);
-    }
-    this.#dataElememt.innerText = this.#record.id;
-    getCssClassesFromJss(REVEAL_ELEMENT_DEFAULT_STYLES, "");
-    this.#styles = this.#record.styles;
-    const classes = getCssClassesFromJss(this.#styles, btoa(this.#record.id));
 
-    Object.values(STYLE_TYPE).forEach((variant) => {
-      if (classes[variant]) this.#dataElememt.classList.add(classes[variant]);
-    });
+      if (this.#record.hasOwnProperty("labelStyles")) {
+        this.#labelStyles = this.#record.labelStyles;
+        this.#labelStyles[STYLE_TYPE.BASE] = {
+          ...REVEAL_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.BASE],
+          ...this.#labelStyles[STYLE_TYPE.BASE],
+        };
+        getCssClassesFromJss(this.#labelStyles, "label");
+      } else {
+        getCssClassesFromJss(REVEAL_ELEMENT_LABEL_DEFAULT_STYLES, "label");
+      }
+    }
+
+    if (this.#record.hasOwnProperty("altText"))
+      this.#dataElememt.innerText = this.#record.altText;
+    else this.#dataElememt.innerText = this.#record.token;
+
+    if (this.#record.hasOwnProperty("inputStyles")) {
+      this.#inputStyles = this.#record.inputStyles;
+      getCssClassesFromJss(this.#inputStyles, "content");
+    }
 
     this.#elementContainer.appendChild(this.#dataElememt);
+
     document.body.append(this.#elementContainer);
 
     const sub = (data, _) => {
-      if (data[this.#record.id]) {
-        this.#dataElememt.innerText = data[this.#record.id] as string;
+      if (data[this.#record.token]) {
+        this.#dataElememt.innerText = data[this.#record.token] as string;
         bus
           .target(location.origin)
           .off(
             ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
             sub
           );
+      } else {
+        this.#errorElement.innerText = REVEAL_ELEMENT_ERROR_TEXT;
+        if (
+          this.#record.hasOwnProperty("errorTextStyles") &&
+          this.#record.errorTextStyles.hasOwnProperty(STYLE_TYPE.BASE)
+        ) {
+          this.#errorTextStyles = this.#record.errorTextStyles;
+          this.#errorTextStyles[STYLE_TYPE.BASE] = {
+            ...REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES[STYLE_TYPE.BASE],
+            ...this.#errorTextStyles[STYLE_TYPE.BASE],
+          };
+          getCssClassesFromJss(this.#errorTextStyles, "error");
+        } else {
+          getCssClassesFromJss(
+            REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
+            "error"
+          );
+        }
+        this.#elementContainer.appendChild(this.#errorElement);
       }
     };
 

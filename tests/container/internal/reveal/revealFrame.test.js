@@ -4,7 +4,7 @@ import { RedactionType } from "../../../../src/Skyflow";
 import RevealFrame from "../../../../src/container/internal/reveal/RevealFrame";
 
 const testRecord = {
-  id: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+  token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
   redaction: RedactionType.DEFAULT,
   label: "date_of_birth",
   styles: {
