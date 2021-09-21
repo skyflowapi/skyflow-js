@@ -1,6 +1,6 @@
 import bus from "framebus";
 import Client from "../../client";
-import { fetchRecordsByTokenId } from "../../core/reveal";
+import { fetchRecordsBySkyflowID } from "../../core/reveal";
 import iframer, {
   getIframeSrc,
   setAttributes,
@@ -8,7 +8,7 @@ import iframer, {
 } from "../../iframe-libs/iframer";
 import uuid from "../../libs/uuid";
 import { properties } from "../../properties";
-import { IRevealRecord } from "../../Skyflow";
+import { IRevealRecord, ISkyflowIdRecord } from "../../Skyflow";
 import {
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
@@ -40,17 +40,17 @@ class PureJsController {
       });
   }
 
-  _get(records: IRevealRecord[]): Promise<any> {
+  _detokenize(records: IRevealRecord[]): Promise<any> {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         bus.target(properties.IFRAME_SECURE_ORGIN).emit(
           ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
           {
-            type: PUREJS_TYPES.GET,
+            type: PUREJS_TYPES.DETOKENIZE,
             records: records,
           },
           (revealData: any) => {
-            if (revealData.error) reject(revealData);
+            if (revealData.error) reject(revealData.error);
             else resolve(revealData);
           }
         );
@@ -63,11 +63,11 @@ class PureJsController {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
               {
-                type: PUREJS_TYPES.GET,
+                type: PUREJS_TYPES.DETOKENIZE,
                 records: records,
               },
               (revealData: any) => {
-                if (revealData.error) reject(revealData);
+                if (revealData.error) reject(revealData.error);
                 else resolve(revealData);
               }
             );
@@ -104,6 +104,41 @@ class PureJsController {
               },
               (insertedData) => {
                 resolve(insertedData);
+              }
+            );
+          });
+      });
+    }
+  }
+  _getById(records: ISkyflowIdRecord[]) {
+    if (this.#isControllerFrameReady) {
+      return new Promise((resolve, reject) => {
+        bus.target(properties.IFRAME_SECURE_ORGIN).emit(
+          ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+          {
+            type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+            records: records,
+          },
+          (revealData: any) => {
+            if (revealData.error) reject(revealData.error);
+            else resolve(revealData);
+          }
+        );
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+            bus.emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              {
+                type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+                records: records,
+              },
+              (revealData: any) => {
+                if (revealData.error) reject(revealData.error);
+                else resolve(revealData);
               }
             );
           });

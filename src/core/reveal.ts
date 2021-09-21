@@ -1,5 +1,10 @@
 import Client from "../client";
-import { IRevealRecord, RedactionType, revealResponseType } from "../Skyflow";
+import {
+  IRevealRecord,
+  ISkyflowIdRecord,
+  RedactionType,
+  revealResponseType,
+} from "../Skyflow";
 import { isTokenValid } from "../utils/jwtUtils";
 
 interface IApiSuccessResponse {
@@ -63,7 +68,7 @@ export const fetchRecordsByTokenId = async (
     }
   );
 
-  return new Promise((resolve, _) => {
+  return new Promise((resolve, reject) => {
     Promise.allSettled(vaultResponseSet).then((resultSet) => {
       let recordsResponse: Record<string, any>[] = [];
       let errorResponse: Record<string, any>[] = [];
@@ -78,7 +83,12 @@ export const fetchRecordsByTokenId = async (
           });
         }
       });
-      resolve({ records: recordsResponse, errors: errorResponse });
+      if (errorResponse.length === 0) {
+        resolve({ records: recordsResponse });
+      } else {
+        if (recordsResponse.length === 0) reject({ errors: errorResponse });
+        else reject({ records: recordsResponse, errors: errorResponse });
+      }
     });
   });
 };
@@ -120,16 +130,119 @@ const formatForPureJsFailure = (cause: IApiFailureResponse, tokenIds) => {
 
 export const formatRecordsForIframe = (response: revealResponseType) => {
   const result: Record<string, string> = {};
-  response.records.forEach((record) => {
-    const values = Object.values(record);
-    result[values[0]] = values[1];
-  });
+  if (response.records) {
+    response.records.forEach((record) => {
+      const values = Object.values(record);
+      result[values[0]] = values[1];
+    });
+  }
   return result;
 };
 
 export const formatRecordsForClient = (response: revealResponseType) => {
-  const successRecords = response.records.map((record) => ({
-    token: record.token,
-  }));
-  return { success: successRecords, errors: response.errors };
+  if (response.records) {
+    const successRecords = response.records.map((record) => ({
+      token: record.token,
+    }));
+    if (response.errors)
+      return { success: successRecords, errors: response.errors };
+    else return { success: successRecords };
+  }
+  return { errors: response.errors };
+};
+
+/** SKYFLOW ID  */
+
+export const fetchRecordsBySkyflowID = async (
+  skyflowIdRecords: ISkyflowIdRecord[],
+  client: Client
+) => {
+  try {
+    if (
+      client.config.getBearerToken &&
+      (!client.accessToken || !isTokenValid(client.accessToken))
+    ) {
+      client.accessToken = await client.config.getBearerToken();
+    }
+  } catch (err) {
+    throw err;
+  }
+  const vaultResponseSet: Promise<any>[] = skyflowIdRecords.map(
+    (skyflowIdRecord) => {
+      return new Promise((resolve, reject) => {
+        getSkyflowIdRecordsFromVault(skyflowIdRecord, client)
+          .then(
+            (resolvedResult: any) => {
+              let response: any[] = [];
+              const recordsData: any[] = resolvedResult.records;
+              recordsData.map((fieldData) => {
+                let id = fieldData.fields["skyflow_id"];
+                let currentRecord = {
+                  fields: {
+                    id,
+                    ...fieldData.fields,
+                  },
+                  table: skyflowIdRecord.table,
+                };
+                delete currentRecord.fields.skyflow_id;
+                response.push(currentRecord);
+              });
+              resolve(response);
+            },
+            (rejectedResult) => {
+              let errorResponse = rejectedResult;
+              if (rejectedResult && rejectedResult.error) {
+                errorResponse = {
+                  error: {
+                    code: rejectedResult.error.http_code,
+                    description: rejectedResult.error.message,
+                  },
+                  ids: skyflowIdRecord.ids,
+                };
+              }
+              reject(errorResponse);
+            }
+          )
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    }
+  );
+  return new Promise((resolve, reject) => {
+    Promise.allSettled(vaultResponseSet).then((resultSet) => {
+      let recordsResponse: any[] = [];
+      let errorsResponse: any[] = [];
+      resultSet.forEach((result) => {
+        if (result.status === "fulfilled") {
+          recordsResponse.push(...result.value);
+        } else {
+          errorsResponse.push(result.reason);
+        }
+      });
+      if (errorsResponse.length === 0) {
+        resolve({ records: recordsResponse });
+      } else {
+        if (recordsResponse.length === 0) reject({ errors: errorsResponse });
+        else reject({ records: recordsResponse, errors: errorsResponse });
+      }
+    });
+  });
+};
+
+const getSkyflowIdRecordsFromVault = (
+  skyflowIdRecord: ISkyflowIdRecord,
+  client: Client
+) => {
+  let paramList: string = "";
+
+  skyflowIdRecord.ids.forEach((skyflowId) => {
+    paramList += `skyflow_ids=${skyflowId}&`;
+  });
+
+  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}?${paramList}redaction=${skyflowIdRecord.redaction}`;
+  return client.request({
+    requestMethod: "GET",
+    url: vaultEndPointurl,
+  });
 };

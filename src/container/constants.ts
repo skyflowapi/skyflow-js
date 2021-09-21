@@ -7,7 +7,8 @@ export const FRAME_ELEMENT = "element";
 
 export const PUREJS_TYPES = {
   INSERT: "INSERT",
-  GET: "GET",
+  DETOKENIZE: "DETOKENIZE",
+  GET_BY_SKYFLOWID: "GET_BY_SKYFLOWID",
 };
 
 export const ELEMENT_EVENTS_TO_CLIENT = {

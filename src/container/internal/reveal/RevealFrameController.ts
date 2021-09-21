@@ -46,9 +46,14 @@ class RevealFrameController {
       }
     );
     const sub = (data, callback) => {
-      this.revealData(data["records"] as any).then((res) => {
-        callback(res);
-      });
+      this.revealData(data["records"] as any).then(
+        (resolvedResult) => {
+          callback(resolvedResult);
+        },
+        (rejectedResult) => {
+          callback({ error: rejectedResult });
+        }
+      );
       bus
         .target(this.#clientDomain)
         .off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId, sub);
@@ -64,17 +69,31 @@ class RevealFrameController {
   }
 
   revealData(revealRecords: IRevealRecord[]) {
-    return new Promise((resolve, _) => {
-      fetchRecordsByTokenId(revealRecords, this.#client).then((result) => {
-        const formattedResult = formatRecordsForIframe(result);
-        bus
-          .target(properties.IFRAME_SECURE_SITE)
-          .emit(
-            ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
-            formattedResult
-          );
-        resolve(formatRecordsForClient(result));
-      });
+    return new Promise((resolve, reject) => {
+      fetchRecordsByTokenId(revealRecords, this.#client).then(
+        (resolvedResult) => {
+          const formattedResult = formatRecordsForIframe(resolvedResult);
+          bus
+            .target(properties.IFRAME_SECURE_SITE)
+            .emit(
+              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY +
+                this.#containerId,
+              formattedResult
+            );
+          resolve(formatRecordsForClient(resolvedResult));
+        },
+        (rejectedResult) => {
+          const formattedResult = formatRecordsForIframe(rejectedResult);
+          bus
+            .target(properties.IFRAME_SECURE_SITE)
+            .emit(
+              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY +
+                this.#containerId,
+              formattedResult
+            );
+          reject(formatRecordsForClient(rejectedResult));
+        }
+      );
     });
   }
 }
