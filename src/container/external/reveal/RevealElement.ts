@@ -36,7 +36,7 @@ class RevealElement {
         bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
 
         bus
-          .target(location.origin)
+          // .target(location.origin)
           .emit(
             ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
             {
@@ -47,7 +47,7 @@ class RevealElement {
       }
     };
     bus
-      .target(properties.IFRAME_SECURE_ORGIN)
+      // .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
   }
 }

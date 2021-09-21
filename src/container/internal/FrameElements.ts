@@ -63,7 +63,7 @@ export default class FrameElements {
 
     // on bus event call update again
     bus
-      .target(this.#metaData.clientDomain)
+      // .target(this.#metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
         if (data.name === this.#name && data.isSingleElementAPI === false) {
           if (data.options !== undefined) {

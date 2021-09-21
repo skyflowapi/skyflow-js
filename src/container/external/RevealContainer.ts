@@ -63,7 +63,7 @@ class RevealContainer {
           },
         });
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORGIN)
           .off(
             ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId,
             sub
@@ -71,12 +71,12 @@ class RevealContainer {
       }
     };
     bus
-      .target(properties.IFRAME_SECURE_ORGIN)
+      // .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId, sub);
 
     document.body.append(iframe);
     bus
-      .target(location.origin)
+      // .target(location.origin)
       .on(
         ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
         (data, _) => {
@@ -108,7 +108,9 @@ class RevealContainer {
     this.#isRevealCalled = true;
     if (this.#isElementsMounted) {
       return new Promise((resolve, reject) => {
-        bus.target(properties.IFRAME_SECURE_ORGIN).emit(
+        bus
+        // .target(properties.IFRAME_SECURE_ORGIN)
+        .emit(
           ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
           {
             records: this.#revealRecords,
@@ -126,7 +128,9 @@ class RevealContainer {
         this.#eventEmmiter.on(
           ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
           () => {
-            bus.target(properties.IFRAME_SECURE_ORGIN).emit(
+            bus
+            // .target(properties.IFRAME_SECURE_ORGIN)
+            .emit(
               ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
               {
                 records: this.#revealRecords,
