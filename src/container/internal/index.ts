@@ -28,7 +28,7 @@ export class FrameController {
     this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain);
     this.controllerId = controllerId;
     bus
-      .target(this.clientDomain)
+      // .target(this.clientDomain)
       .emit(
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
         { name: COLLECT_FRAME_CONTROLLER + controllerId },

@@ -24,7 +24,7 @@ class RevealFrame {
 
   static init() {
     bus
-      .target(document.referrer.split("/").slice(0, 3).join("/"))
+      // .target(document.referrer.split("/").slice(0, 3).join("/"))
       .emit(
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY,
         { name: window.name },
@@ -85,7 +85,7 @@ class RevealFrame {
       if (data[this.#record.token]) {
         this.#dataElememt.innerText = data[this.#record.token] as string;
         bus
-          .target(location.origin)
+          // .target(location.origin)
           .off(
             ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
             sub
@@ -113,7 +113,7 @@ class RevealFrame {
     };
 
     bus
-      .target(location.origin)
+      // .target(location.origin)
       .on(
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
         sub

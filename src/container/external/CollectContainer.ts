@@ -65,12 +65,12 @@ class CollectContainer {
           },
         });
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORGIN)
           .off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
       }
     };
     bus
-      .target(properties.IFRAME_SECURE_ORGIN)
+      // .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
     document.body.append(iframe);
   }
@@ -209,7 +209,7 @@ class CollectContainer {
   collect = (options: ICollectOptions = { tokens: true }) => {
     return new Promise((resolve, reject) => {
       bus
-        .target(properties.IFRAME_SECURE_ORGIN)
+        // .target(properties.IFRAME_SECURE_ORGIN)
         .emit(
           ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
           {

@@ -30,7 +30,7 @@ class PureJsController {
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
     bus
-      .target(properties.IFRAME_SECURE_ORGIN)
+      // .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, (data, callback) => {
         callback({
           client: this.#client,
@@ -43,7 +43,9 @@ class PureJsController {
   _detokenize(records: IRevealRecord[]): Promise<any> {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
-        bus.target(properties.IFRAME_SECURE_ORGIN).emit(
+        bus
+        // .target(properties.IFRAME_SECURE_ORGIN)
+        .emit(
           ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
           {
             type: PUREJS_TYPES.DETOKENIZE,
@@ -58,7 +60,7 @@ class PureJsController {
     } else {
       return new Promise((resolve, reject) => {
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
@@ -78,7 +80,9 @@ class PureJsController {
   _insert(records, options): Promise<any> {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, _) => {
-        bus.target(properties.IFRAME_SECURE_ORGIN).emit(
+        bus
+        // .target(properties.IFRAME_SECURE_ORGIN)
+        .emit(
           ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
           {
             type: PUREJS_TYPES.INSERT,
@@ -93,7 +97,7 @@ class PureJsController {
     } else {
       return new Promise((resolve, _) => {
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
@@ -113,7 +117,9 @@ class PureJsController {
   _getById(records: ISkyflowIdRecord[]) {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
-        bus.target(properties.IFRAME_SECURE_ORGIN).emit(
+        bus
+        // .target(properties.IFRAME_SECURE_ORGIN)
+        .emit(
           ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
           {
             type: PUREJS_TYPES.GET_BY_SKYFLOWID,
@@ -128,7 +134,7 @@ class PureJsController {
     } else {
       return new Promise((resolve, reject) => {
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
