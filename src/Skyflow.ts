@@ -6,6 +6,8 @@ import { ElementType } from "./container/constants";
 import {
   validateInsertRecords,
   validateDetokenizeInput,
+  validateGetByIdInput,
+  isValidURL,
 } from "./utils/validators";
 import PureJsController from "./container/external/PureJsController";
 
@@ -47,6 +49,16 @@ export interface IDetokenizeInput {
   records: IRevealRecord[];
 }
 
+export interface ISkyflowIdRecord {
+  ids: string[];
+  redaction: RedactionType;
+  table: string;
+}
+
+export interface IGetByIdInput {
+  records: ISkyflowIdRecord[];
+}
+
 class Skyflow {
   #client: Client;
   #uuid: string = uuid();
@@ -70,11 +82,16 @@ class Skyflow {
     if (
       !config ||
       !config.vaultID ||
-      !config.vaultURL ||
+      !isValidURL(config.vaultURL) ||
       !config.getBearerToken
     ) {
       throw new Error("Invalid client credentials");
     }
+
+    config.vaultURL =
+      config.vaultURL.slice(-1) === "/"
+        ? config.vaultURL.slice(0, -1)
+        : config.vaultURL;
 
     return new Skyflow(config);
   }
@@ -110,6 +127,11 @@ class Skyflow {
   ): Promise<revealResponseType> {
     validateDetokenizeInput(detokenizeInput);
     return this.#pureJsController._detokenize(detokenizeInput.records);
+  }
+
+  getById(getByIdInput: IGetByIdInput) {
+    validateGetByIdInput(getByIdInput);
+    return this.#pureJsController._getById(getByIdInput.records);
   }
 
   static get ContainerType() {

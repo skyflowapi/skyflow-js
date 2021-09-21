@@ -76,15 +76,43 @@ class Client {
         });
       }
 
-      httpRequest.responseType = "json";
+      // httpRequest.responseType = "json";
+
       httpRequest.send(JSON.stringify({ ...request.body }));
 
       httpRequest.onload = () => {
+        const responseHeaders = httpRequest.getAllResponseHeaders();
+        const headersList = responseHeaders.trim().split(/[\r\n]+/);
+        const headerMap = {};
+        headersList.forEach((line) => {
+          const parts = line.split(": ");
+          const header = parts.shift() || "";
+          const value = parts.join(": ");
+          headerMap[header] = value;
+        });
+        const contentType = headerMap["content-type"];
         if (httpRequest.status < 200 || httpRequest.status >= 400) {
-          reject(httpRequest.response);
+          if (contentType === "application/json")
+            reject(JSON.parse(httpRequest.response));
+          else if (contentType === "text/plain") {
+            const error = {
+              http_code: httpRequest.status,
+              message: httpRequest.response,
+            };
+            reject({ error });
+          } else {
+            const error = {
+              http_code: httpRequest.status,
+              message: "Error occurred",
+            };
+            reject({ error });
+          }
         }
-
-        resolve(httpRequest.response);
+        if (contentType === "application/json") {
+          resolve(JSON.parse(httpRequest.response));
+        } else {
+          resolve(httpRequest.response);
+        }
       };
 
       httpRequest.onerror = (error) => {

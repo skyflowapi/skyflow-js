@@ -4,8 +4,11 @@ import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,
 } from "../../../core/collect";
-import { fetchRecordsByTokenId } from "../../../core/reveal";
-import { IRevealRecord } from "../../../Skyflow";
+import {
+  fetchRecordsBySkyflowID,
+  fetchRecordsByTokenId,
+} from "../../../core/reveal";
+import { IRevealRecord, ISkyflowIdRecord } from "../../../Skyflow";
 import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from "../../constants";
 
 class PureJsFrameController {
@@ -16,7 +19,7 @@ class PureJsFrameController {
     bus
       .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
-        if (data.type === PUREJS_TYPES.GET) {
+        if (data.type === PUREJS_TYPES.DETOKENIZE) {
           fetchRecordsByTokenId(data.records as IRevealRecord[], this.#client)
             .then(
               (resolvedResult) => {
@@ -34,6 +37,22 @@ class PureJsFrameController {
             .then((result) => {
               callback(result);
             })
+            .catch((error) => {
+              callback(error);
+            });
+        } else if (data.type === PUREJS_TYPES.GET_BY_SKYFLOWID) {
+          fetchRecordsBySkyflowID(
+            data.records as ISkyflowIdRecord[],
+            this.#client
+          )
+            .then(
+              (resolvedResult) => {
+                callback(resolvedResult);
+              },
+              (rejectedResult) => {
+                callback({ error: rejectedResult });
+              }
+            )
             .catch((error) => {
               callback(error);
             });

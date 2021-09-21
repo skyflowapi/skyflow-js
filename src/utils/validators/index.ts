@@ -1,7 +1,9 @@
 import {
   IDetokenizeInput,
+  IGetByIdInput,
   IInsertRecordInput,
   IRevealRecord,
+  ISkyflowIdRecord,
   RedactionType,
 } from "../../Skyflow";
 
@@ -60,7 +62,7 @@ export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
       throw new Error("Record cannot be Empty Object");
 
     const recordToken = record.token;
-    if (!recordToken) throw new Error("Missing id property");
+    if (!recordToken) throw new Error("Missing token property");
     if (recordToken === "" || typeof recordToken !== "string")
       throw new Error("Invalid Token Id");
 
@@ -69,4 +71,46 @@ export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
     if (!Object.values(RedactionType).includes(recordRedaction))
       throw new Error("Invalid Redaction Type");
   });
+};
+
+export const validateGetByIdInput = (getByIdInput: IGetByIdInput) => {
+  if (!getByIdInput.hasOwnProperty("records"))
+    throw new Error("Missing records property");
+  const records: ISkyflowIdRecord[] = getByIdInput.records;
+  if (records.length === 0) throw new Error("Empty Records");
+
+  records.forEach((record) => {
+    if (Object.keys(record).length === 0)
+      throw new Error("Record cannot be Empty Object");
+
+    const recordIds = record.ids;
+    if (!recordIds) throw new Error("Missing ids property");
+    if (recordIds.length === 0) throw new Error("Record ids cannot be Empty");
+    recordIds.forEach((skyflowId) => {
+      if (typeof skyflowId !== "string")
+        throw new Error("Invalid Type of Records Id");
+    });
+
+    const recordRedaction = record.redaction;
+    if (!recordRedaction) throw new Error("Missing Redaction property");
+    if (!Object.values(RedactionType).includes(recordRedaction))
+      throw new Error("Invalid Redaction Type");
+
+    const recordTable = record.table;
+    if (!record.hasOwnProperty("table"))
+      throw new Error("Missing Table Property");
+
+    if (recordTable === "" || typeof recordTable !== "string")
+      throw new Error("Invalid Record Table value");
+  });
+};
+
+export const isValidURL = (url: string) => {
+  try {
+    new URL(url);
+  } catch (err) {
+    return false;
+  }
+
+  return true;
 };
