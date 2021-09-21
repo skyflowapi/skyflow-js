@@ -143,7 +143,14 @@ export class IFrameForm {
         }
       }
     }
-    const finalRequest = constructElementsInsertReq(responseObject, options);
+    let finalRequest;
+    try {
+      finalRequest = constructElementsInsertReq(responseObject, options);
+    } catch (error) {
+      return Promise.reject({
+        error: error.message ,
+      });
+    }
 
     let client = this.client;
 

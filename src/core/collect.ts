@@ -1,8 +1,10 @@
 import { IInsertRecordInput, IInsertRecord } from "../Skyflow";
+import { validateInsertRecords } from "../utils/validators";
+import _ from "lodash";
 
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
-  options: Record<string, any> = { token: true }
+  options: Record<string, any> = { tokens: true }
 ) => {
   let requestBody: any = [];
   if (options.tokens) {
@@ -65,9 +67,26 @@ export const constructInsertRecordResponse = (
 };
 
 export const constructElementsInsertReq = (req, options) => {
+  const tables = Object.keys(req);
+  const additionalFields = options?.additionalFields;
+  if (additionalFields) {
+    validateInsertRecords(additionalFields);
+
+    //merge additionalFields in req
+    additionalFields.records.forEach((record) => {
+      if (tables.includes(record.table)) {
+        checkDuplicateColumns(record.fields, req[record.table], record.table);
+        const temp = record.fields;
+        _.merge(temp, req[record.table]);
+        req[record.table] = temp;
+      } else {
+        req[record.table] = record.fields;
+      }
+    });
+  }
   const records: IInsertRecord[] = [];
 
-  Object.keys(req).forEach((table) => {
+  tables.forEach((table) => {
     records.push({
       table,
       fields: req[table],
@@ -76,3 +95,23 @@ export const constructElementsInsertReq = (req, options) => {
 
   return constructInsertRecordRequest({ records }, options);
 };
+
+const checkDuplicateColumns = (additionalColumns, columns, table) => {
+  const keys = keyify(additionalColumns);
+  keys.forEach((key) => {
+    const value = _.get(columns, key);
+    if (value) {
+      throw new Error("Duplicate column " + key + " found in " + table);
+    }
+  });
+};
+
+const keyify = (obj, prefix = "") =>
+  Object.keys(obj).reduce((res: any, el) => {
+    if (Array.isArray(obj[el])) {
+      return [...res, prefix + el];
+    } else if (typeof obj[el] === "object" && obj[el] !== null) {
+      return [...res, ...keyify(obj[el], prefix + el + ".")];
+    }
+    return [...res, prefix + el];
+  }, []);

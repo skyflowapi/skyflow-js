@@ -8,6 +8,7 @@ import deepClone from "../../libs/deepClone";
 import { validateElementOptions } from "../../libs/element-options";
 import uuid from "../../libs/uuid";
 import { properties } from "../../properties";
+import { IInsertRecordInput } from "../../Skyflow";
 import {
   COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES,
@@ -27,6 +28,12 @@ interface CollectElementInput {
   errorTextStyles?: object;
   placeholder?: string;
   type: ElementType;
+  altText?: string;
+}
+
+interface ICollectOptions {
+  tokens?: boolean;
+  additionalFields?: IInsertRecordInput;
 }
 
 class CollectContainer {
@@ -76,6 +83,7 @@ class CollectContainer {
             {
               elementType: input.type,
               name: input.column,
+              ...(input.altText ? { value: input.altText } : {}),
               ...input,
               ...options,
             },
@@ -198,13 +206,16 @@ class CollectContainer {
     return false;
   };
 
-  collect = (options: any = { tokens: true }) => {
+  collect = (options: ICollectOptions = { tokens: true }) => {
     return new Promise((resolve, reject) => {
       bus
         .target(properties.IFRAME_SECURE_ORGIN)
         .emit(
           ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
-          options,
+          {
+            ...options,
+            tokens: options.tokens != undefined ? options.tokens : true,
+          },
           function (data: any) {
             if (data.error) {
               reject(data);
