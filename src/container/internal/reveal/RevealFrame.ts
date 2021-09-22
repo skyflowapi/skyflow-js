@@ -82,7 +82,7 @@ class RevealFrame {
     document.body.append(this.#elementContainer);
 
     const sub = (data, _) => {
-      if (data[this.#record.token]) {
+      if (data.hasOwnProperty(this.#record.token)) {
         this.#dataElememt.innerText = data[this.#record.token] as string;
         bus
           // .target(location.origin)
