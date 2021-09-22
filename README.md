@@ -457,15 +457,23 @@ An example of getById call:
 ```javascript
 
 skyflow.getById({
-  "records": [{
-    ids: ["f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9","da26de53-95d5-4bdb-99db-8d8c66a35ff9"],
-    table: "cards",
-    redaction: Skyflow.RedactionType.PLAIN_TEXT
-  }]
-})
+  records: [
+    {
+      ids: ["f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9"],
+      table: "cards",
+      redaction: Skyflow.RedactionType.PLAIN_TEXT,
+    },
+    {
+      ids: ["da26de53-95d5-4bdb-99db-8d8c66a35ff9"],
+      table: "contacts",
+      redaction: Skyflow.RedactionType.PLAIN_TEXT,
+    },
+  ],
+});
 ```
 
 The sample response:
+
 ```javascript
 {
     "records": [
@@ -475,7 +483,7 @@ The sample response:
                 "cvv": "127",
                 "expiry_date": "11/2035",
                 "fullname": "myname",
-                "skyflow_id": "f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9"
+                "id": "f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9"
             },
             "table": "cards"
         }
@@ -486,12 +494,11 @@ The sample response:
                 "code": "404",
                 "description": "No Records Found"
             },
-            "skyflow_ids": ["da26de53-95d5-4bdb-99db-8d8c66a35ff9"]
+            "ids": ["da26de53-95d5-4bdb-99db-8d8c66a35ff9"]
         }
     ]
 }
 ```
-
 
 ## Using Skyflow Elements to reveal data
 
