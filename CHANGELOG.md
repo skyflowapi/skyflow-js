@@ -23,6 +23,6 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Renamed get method to `detokenize`
-- Renamed styles to inputSytles in CollectElement
-- Renamed styles to inputSytles in RevealElement
+- Renamed styles to inputStyles in CollectElement
+- Renamed styles to inputStyles in RevealElement
 - Renamed id to token in request and response of detokenize and `container.reveal()`
