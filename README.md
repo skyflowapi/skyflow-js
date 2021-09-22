@@ -473,7 +473,7 @@ The sample response:
             "fields": {
                 "card_number": "4111111111111111",
                 "cvv": "127",
-                "expiry_date": "11/35",
+                "expiry_date": "11/2035",
                 "fullname": "myname",
                 "skyflow_id": "f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9"
             },
