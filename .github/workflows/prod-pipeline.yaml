@@ -3,7 +3,7 @@ name: publish-sdk-workflow
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
 on:
-  workflow_dispatch:
+  workflow_dispatch
 
 jobs:
   build-sdk:
