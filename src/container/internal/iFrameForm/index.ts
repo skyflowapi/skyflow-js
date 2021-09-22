@@ -66,7 +66,7 @@ export class IFrameForm {
               callback(data);
             })
             .catch((error) => {
-              callback(error);
+              callback({ error });
             });
         }
       );
@@ -148,7 +148,7 @@ export class IFrameForm {
       finalRequest = constructElementsInsertReq(responseObject, options);
     } catch (error) {
       return Promise.reject({
-        error: error.message ,
+        error: error?.message,
       });
     }
 
