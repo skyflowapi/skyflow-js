@@ -39,7 +39,7 @@ jobs:
           SOURCE_DIR: "dist/v1"
           DEST_DIR: "v1/"
           
- aws-cf-invalidate:
+  aws-cf-invalidate:
     runs-on: ubuntu-latest
     needs: [build-sdk]
     steps: 
