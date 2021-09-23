@@ -47,7 +47,7 @@ class RevealElement {
       }
     };
     bus
-      // .target(properties.IFRAME_SECURE_ORGIN)
+      .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
   }
 }

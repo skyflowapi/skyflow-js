@@ -34,7 +34,7 @@ export class IFrameForm {
     this.controllerId = controllerId;
     this.clientDomain = clientDomain;
     bus
-      // .target(location.origin)
+      .target(location.origin)
       .on(
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.controllerId,
         (data, callback) => {
@@ -56,7 +56,7 @@ export class IFrameForm {
       );
 
     bus
-      // .target(this.clientDomain)
+      .target(this.clientDomain)
       .on(
         ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.controllerId,
         (data, callback) => {
@@ -388,7 +388,6 @@ export class IFrameFormElement extends EventEmitter {
 
   validator(value: string) {
     if (this.fieldType === ElementType.CARD_NUMBER) {
-      value = value.replace(/\D/g, "");
       if (!validateCreditCardNumber(value)) {
         return false;
       }
@@ -410,7 +409,7 @@ export class IFrameFormElement extends EventEmitter {
   // on client force focus
   collectBusEvents = () => {
     bus
-      // .target(this.metaData.clientDomain)
+      .target(this.metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, (data, callback) => {
         if (bus.origin === this.metaData.clientDomain)
           if (data.name === this.iFrameName) {
@@ -427,7 +426,7 @@ export class IFrameFormElement extends EventEmitter {
       });
 
     bus
-      // .target(this.metaData.clientDomain)
+      .target(this.metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
         if (data.name === this.iFrameName) {
           if (data.value !== undefined) {

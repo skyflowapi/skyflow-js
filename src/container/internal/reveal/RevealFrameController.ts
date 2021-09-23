@@ -57,12 +57,12 @@ class RevealFrameController {
         }
       );
       bus
-        // .target(this.#clientDomain)
+        .target(this.#clientDomain)
         .off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId, sub);
     };
 
     bus
-      // .target(this.#clientDomain)
+      .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId, sub);
   }
 
@@ -76,7 +76,7 @@ class RevealFrameController {
         (resolvedResult) => {
           const formattedResult = formatRecordsForIframe(resolvedResult);
           bus
-            // .target(properties.IFRAME_SECURE_SITE)
+            .target(properties.IFRAME_SECURE_SITE)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY +
                 this.#containerId,
@@ -87,7 +87,7 @@ class RevealFrameController {
         (rejectedResult) => {
           const formattedResult = formatRecordsForIframe(rejectedResult);
           bus
-            // .target(properties.IFRAME_SECURE_SITE)
+            .target(properties.IFRAME_SECURE_SITE)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY +
                 this.#containerId,

@@ -8,7 +8,7 @@ import {
 } from "../../Skyflow";
 
 export const validateCreditCardNumber = (cardNumber: string) => {
-  let value = cardNumber.replace(/\D/g, "");
+  let value = cardNumber.replace(/[\s-]/g, "");
   let sum = 0;
   let shouldDouble = false;
 
