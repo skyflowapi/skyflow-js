@@ -7,7 +7,6 @@ name: Public Release
     #   - "package.json"
     #   - "package-lock.json"
     #   - "*.md"
-
 on:
   push:
     tags-ignore:
