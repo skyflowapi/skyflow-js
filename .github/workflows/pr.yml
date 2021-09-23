@@ -15,10 +15,10 @@ jobs:
         with:
           node-version: 14.17.6
       - name: install modules
-      - run: npm ci
+        run: npm ci
 
       - name: Check code quality
-      - run: eslint . --ext .js, .ts
+        run: eslint . --ext .js, .ts
       
       - name: Browser Build
         run: npm run build-browser-sdk
