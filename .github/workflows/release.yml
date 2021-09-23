@@ -1,22 +1,13 @@
 name: Public Release
 
-# on:
-#   push:
-#     tags: '*.*.*'
-    # paths-ignore:
-    #   - "package.json"
-    #   - "package-lock.json"
-    #   - "*.md"
 on:
   push:
-    tags-ignore:
-      - '*.*'
+    tags: '*.*.*'
     paths-ignore:
       - "package.json"
       - "package-lock.json"
       - "*.md"
-    branches:
-      - task/update-workflow
+
       
 jobs:
   build-sdk:
@@ -25,7 +16,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           token: ${{ secrets.PAT_ACTIONS }}
-          ref: task/update-workflow
+          ref: master
           fetch-depth: 0
 
       - uses: actions/setup-node@v2
@@ -34,29 +25,29 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: npm install
       
-      # - name: npm build
-      #   run: npm run build-browser-sdk
-      #   env:
-      #     IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-      #     IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+      - name: npm build
+        run: npm run build-browser-sdk
+        env:
+          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
 
-      # - name: npm build iframe
-      #   run: npm run build-iframe
-      #   env:
-      #     IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-      #     IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+      - name: npm build iframe
+        run: npm run build-iframe
+        env:
+          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
  
-      # - name: Deploy to S3
-      #   uses: jakejarvis/s3-sync-action@master
-      #   with:
-      #     args: --acl public-read --delete
-      #   env:
-      #     AWS_S3_BUCKET: ${{ secrets.BLITZ_AWS_BUCKET_NAME }}
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
-      #     AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
-      #     SOURCE_DIR: "dist/v1"
-      #     DEST_DIR: "v1/"
+      - name: Deploy to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.BLITZ_AWS_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
+          AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
+          SOURCE_DIR: "dist/v1"
+          DEST_DIR: "v1/"
 
       - name: build node-sdk
         env:
