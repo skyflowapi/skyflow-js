@@ -18,7 +18,7 @@ jobs:
         run: npm ci
 
       - name: Check code quality
-      - uses: stefanoeb/eslint-action@1.0.2
+        uses: stefanoeb/eslint-action@1.0.2
 
       # - name: Check code quality
       #   run: eslint . --ext .js, .ts
