@@ -16,8 +16,12 @@ jobs:
           node-version: 14.17.6
       - name: install modules
         run: npm ci
+
       - name: Check code quality
-        run: eslint . --ext .js, .ts
+      - uses: stefanoeb/eslint-action@1.0.2
+
+      # - name: Check code quality
+      #   run: eslint . --ext .js, .ts
       
       - name: Browser Build
         run: npm run build-browser-sdk
