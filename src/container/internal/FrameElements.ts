@@ -72,7 +72,7 @@ export default class FrameElements {
     bus
       .target(this.#metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
-        if (data.name === this.#name && data.isSingleElementAPI === false) {
+        if (data.name === this.#name) {
           if (data.options !== undefined) {
             // for updating options
             this.updateOptions(data.options);
@@ -142,9 +142,6 @@ export default class FrameElements {
           ALLOWED_MULTIPLE_FIELDS_STYLES,
         );
 
-        if (elements[element.elementName]) {
-          elements[element.elementName].updateParentDiv(elementDiv);
-        } else {
           // create a iframeelement
           // create element by passing iframeformelement and options and mount by default returns
           const iFrameFormElement = this.getOrCreateIFrameFormElement(
@@ -155,7 +152,7 @@ export default class FrameElements {
             element,
             elementDiv,
           );
-        }
+        
 
         rowDiv.append(elementDiv);
       });

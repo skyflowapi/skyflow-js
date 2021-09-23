@@ -226,7 +226,7 @@ class CollectContainer {
             tokens: options.tokens !== undefined ? options.tokens : true,
           },
           (data: any) => {
-            if (data.error) {
+            if (!data || data?.error) {
               reject(data);
             } else {
               resolve(data);
