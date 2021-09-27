@@ -94,7 +94,7 @@ class RevealFrame {
       if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
         this.#dataElememt.innerText = data[this.#record.token] as string;
         bus
-          .target(location.origin)
+          .target(window.location.origin)
           .off(
             ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
             sub,
@@ -122,7 +122,7 @@ class RevealFrame {
     };
 
     bus
-      .target(location.origin)
+      .target(window.location.origin)
       .on(
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
         sub,

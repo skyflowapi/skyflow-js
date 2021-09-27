@@ -15,6 +15,7 @@ import RevealElement from './reveal/RevealElement';
 import uuid from '../../libs/uuid';
 import EventEmitter from '../../event-emitter';
 import { validateRevealElementInput } from '../../utils/validators';
+import properties from '../../properties';
 
 export interface IRevealElementInput {
   token: string;
@@ -81,7 +82,7 @@ class RevealContainer {
 
     document.body.append(iframe);
     bus
-      .target(location.origin)
+      .target(window.location.origin)
       .on(
         ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
         (data) => {
