@@ -30,7 +30,7 @@ class PureJsController {
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
     bus
-      // .target(properties.IFRAME_SECURE_ORGIN)
+      .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, (data, callback) => {
         callback({
           client: this.#client,
@@ -44,23 +44,23 @@ class PureJsController {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         bus
-        // .target(properties.IFRAME_SECURE_ORGIN)
-        .emit(
-          ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
-          {
-            type: PUREJS_TYPES.DETOKENIZE,
-            records: records,
-          },
-          (revealData: any) => {
-            if (revealData.error) reject(revealData.error);
-            else resolve(revealData);
-          }
-        );
+          // .target(properties.IFRAME_SECURE_ORGIN)
+          .emit(
+            ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+            {
+              type: PUREJS_TYPES.DETOKENIZE,
+              records: records,
+            },
+            (revealData: any) => {
+              if (revealData.error) reject(revealData.error);
+              else resolve(revealData);
+            }
+          );
       });
     } else {
       return new Promise((resolve, reject) => {
         bus
-          // .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
@@ -79,25 +79,26 @@ class PureJsController {
   }
   _insert(records, options): Promise<any> {
     if (this.#isControllerFrameReady) {
-      return new Promise((resolve, _) => {
-        bus
-        // .target(properties.IFRAME_SECURE_ORGIN)
-        .emit(
-          ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
-          {
-            type: PUREJS_TYPES.INSERT,
-            records: records,
-            options: options,
-          },
-          (insertedData) => {
-            resolve(insertedData);
-          }
-        );
-      });
-    } else {
-      return new Promise((resolve, _) => {
+      return new Promise((resolve, reject) => {
         bus
           // .target(properties.IFRAME_SECURE_ORGIN)
+          .emit(
+            ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+            {
+              type: PUREJS_TYPES.INSERT,
+              records: records,
+              options: options,
+            },
+            (insertedData: any) => {
+              if (insertedData.error) reject(insertedData.error);
+              else resolve(insertedData);
+            }
+          );
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
@@ -106,8 +107,9 @@ class PureJsController {
                 records: records,
                 options: options,
               },
-              (insertedData) => {
-                resolve(insertedData);
+              (insertedData: any) => {
+                if (insertedData.error) reject(insertedData.error);
+                else resolve(insertedData);
               }
             );
           });
@@ -118,23 +120,23 @@ class PureJsController {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         bus
-        // .target(properties.IFRAME_SECURE_ORGIN)
-        .emit(
-          ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
-          {
-            type: PUREJS_TYPES.GET_BY_SKYFLOWID,
-            records: records,
-          },
-          (revealData: any) => {
-            if (revealData.error) reject(revealData.error);
-            else resolve(revealData);
-          }
-        );
+          // .target(properties.IFRAME_SECURE_ORGIN)
+          .emit(
+            ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+            {
+              type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+              records: records,
+            },
+            (revealData: any) => {
+              if (revealData.error) reject(revealData.error);
+              else resolve(revealData);
+            }
+          );
       });
     } else {
       return new Promise((resolve, reject) => {
         bus
-          // .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,

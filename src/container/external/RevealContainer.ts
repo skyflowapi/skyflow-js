@@ -63,7 +63,7 @@ class RevealContainer {
           },
         });
         bus
-          // .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORGIN)
           .off(
             ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId,
             sub
@@ -71,12 +71,12 @@ class RevealContainer {
       }
     };
     bus
-      // .target(properties.IFRAME_SECURE_ORGIN)
+      .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId, sub);
 
     document.body.append(iframe);
     bus
-      // .target(location.origin)
+      .target(location.origin)
       .on(
         ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
         (data, _) => {

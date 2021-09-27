@@ -17,7 +17,7 @@ class PureJsFrameController {
   constructor() {
     this.#clientDomain = document.referrer.split("/").slice(0, 3).join("/");
     bus
-      // .target(this.#clientDomain)
+      .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
         if (data.type === PUREJS_TYPES.DETOKENIZE) {
           fetchRecordsByTokenId(data.records as IRevealRecord[], this.#client)
