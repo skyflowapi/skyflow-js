@@ -1,4 +1,5 @@
 import bus from 'framebus';
+import properties from '../../../properties';
 import {
   ELEMENT_EVENTS_TO_CONTAINER,
   ELEMENT_EVENTS_TO_IFRAME,

@@ -7,6 +7,7 @@ import iframer, {
 import deepClone from '../../libs/deepClone';
 import { validateElementOptions } from '../../libs/element-options';
 import uuid from '../../libs/uuid';
+import properties from '../../properties';
 import { IInsertRecordInput } from '../../Skyflow';
 import {
   COLLECT_FRAME_CONTROLLER,

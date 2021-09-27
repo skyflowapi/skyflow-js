@@ -5,6 +5,7 @@ import {
   formatRecordsForClient,
   formatRecordsForIframe,
 } from '../../../core/reveal';
+import properties from '../../../properties';
 import { IRevealRecord } from '../../../Skyflow';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
