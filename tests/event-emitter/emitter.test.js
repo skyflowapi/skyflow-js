@@ -1,58 +1,59 @@
-import EventEmitter from "../../src/event-emitter/index";
-describe("Event emitter test", () => {
+import EventEmitter from '../../src/event-emitter/index';
+
+describe('Event emitter test', () => {
   const eventObj = new EventEmitter();
   eventObj.on(
-    "Change",
+    'Change',
     () => {
-      console.log(" Change event");
+      console.log(' Change event');
     },
-    false
+    false,
   );
-  
+
   eventObj.on(
-    "Ready",
+    'Ready',
     () => {
-      console.log("Ready event");
+      console.log('Ready event');
     },
-    false
+    false,
   );
-  
+
   eventObj.on(
-    "Focus",
+    'Focus',
     () => {
-      console.log("Focus");
+      console.log('Focus');
     },
-    false
+    false,
   );
 
   /**
    * off event
    */
-  test("test off() event ", () => {
-    eventObj.off("Focus", () => {});
-    expect(eventObj.hasListener("Focus")).toBe(false);
+  test('test off() event ', () => {
+    eventObj.off('Focus', () => {});
+    expect(eventObj.hasListener('Focus')).toBe(false);
   });
-  test("test haslistener() ", () => {
-    expect(eventObj.hasListener("Change")).toBe(true);
+  test('test haslistener() ', () => {
+    expect(eventObj.hasListener('Change')).toBe(true);
   });
 
-  test("test no existing events", () => {
-    expect(eventObj.hasListener("Escape")).toBe(false);
+  test('test no existing events', () => {
+    expect(eventObj.hasListener('Escape')).toBe(false);
   });
 
   /**
    * _emit testing
    */
-  jest.spyOn(eventObj, "_emit");
-  test("event emitter test", () => {
-    eventObj._emit("event2");
+  jest.spyOn(eventObj, '_emit');
+  test('event emitter test', () => {
+    eventObj._emit('event2');
     expect(eventObj._emit).toHaveBeenCalledTimes(1);
   });
   /**
    * testing create child method
    */
-  test("should ", () => {
-    const mockStaticF = jest.fn().mockReturnValue("worked");
+  test('should ', () => {
+    const mockStaticF = jest.fn().mockReturnValue('worked');
     EventEmitter.createChild = mockStaticF;
     mockStaticF();
     expect(mockStaticF).toHaveBeenCalledTimes(1);
@@ -60,16 +61,16 @@ describe("Event emitter test", () => {
   /**
    * resetEvents test
    */
-  test("should resetAll events", () => {
+  test('should resetAll events', () => {
     const eventObjReset = new EventEmitter();
     eventObjReset.on(
-      "Ready",
+      'Ready',
       () => {
-        console.log("Ready event");
+        console.log('Ready event');
       },
-      false
+      false,
     );
     eventObjReset.resetEvents();
-    expect(eventObjReset.hasListener("Ready")).toBe(false);
+    expect(eventObjReset.hasListener('Ready')).toBe(false);
   });
 });

@@ -1,46 +1,47 @@
 class EventEmitter {
-  _events: Record<string, { priority: boolean; callback: Function }[]>;
+  events: Record<string, { priority: boolean; callback: Function }[]>;
 
   constructor() {
-    this._events = {};
+    this.events = {};
   }
 
   on(event: string, callback: Function, priority: boolean = false): void {
-    if (this._events[event]) {
-      this._events[event].push({ priority, callback });
+    if (this.events[event]) {
+      this.events[event].push({ priority, callback });
     } else {
-      this._events[event] = [{ priority, callback }];
+      this.events[event] = [{ priority, callback }];
     }
   }
 
   off(event: string, callback: Function): void {
-    const eventCallbacks = this._events[event];
+    const eventCallbacks = this.events[event];
 
     if (!eventCallbacks) {
       return;
     }
 
     const indexOfCallback = eventCallbacks.findIndex(
-      (event) => event.callback === callback
+      (iEvent) => iEvent.callback === callback,
     );
 
     eventCallbacks.splice(indexOfCallback, 1);
   }
 
+  // eslint-disable-next-line no-underscore-dangle
   _emit(event: string, ...args): void {
-    const eventCallbacks = this._events[event];
+    const eventCallbacks = this.events[event];
 
     if (!eventCallbacks) {
       return;
     }
 
-    eventCallbacks.forEach(function (event) {
-      event.callback(...args);
+    eventCallbacks.forEach((iEvent) => {
+      iEvent.callback(...args);
     });
   }
 
   hasListener(event: string): boolean {
-    const eventCallbacks = this._events[event];
+    const eventCallbacks = this.events[event];
 
     if (!eventCallbacks) {
       return false;
@@ -50,19 +51,19 @@ class EventEmitter {
   }
 
   resetEvents() {
-    const _newEvents: any = {};
-    for (const eventName in this._events) {
-      const events = this._events[eventName];
+    const tempEvents: any = {};
+    Object.keys(this.events).forEach((eventName) => {
+      const events = this.events[eventName];
       if (events && events.length > 0) {
         const newEvents: any[] = [];
         events.forEach((event) => {
           if (event.priority) newEvents.push(event);
         });
-        _newEvents[eventName] = newEvents;
+        tempEvents[eventName] = newEvents;
       }
-    }
+    });
 
-    this._events = _newEvents;
+    this.events = tempEvents;
   }
 
   static createChild(ChildObject): void {

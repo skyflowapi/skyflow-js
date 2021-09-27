@@ -1,31 +1,31 @@
-import { IInsertRecordInput, IInsertRecord } from "../Skyflow";
-import { validateInsertRecords } from "../utils/validators";
-import _ from "lodash";
+import _ from 'lodash';
+import { IInsertRecordInput, IInsertRecord } from '../Skyflow';
+import { validateInsertRecords } from '../utils/validators';
 
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
-  options: Record<string, any> = { tokens: true }
+  options: Record<string, any> = { tokens: true },
 ) => {
-  let requestBody: any = [];
+  const requestBody: any = [];
   if (options.tokens) {
     records.records.forEach((record, index) => {
       requestBody.push({
-        method: "POST",
+        method: 'POST',
         quorum: true,
         tableName: record.table,
         fields: record.fields,
       });
       requestBody.push({
-        method: "GET",
+        method: 'GET',
         tableName: record.table,
-        ID: "$responses." + 2 * index + ".records.0.skyflow_id",
+        ID: `$responses.${2 * index}.records.0.skyflow_id`,
         tokenization: true,
       });
     });
   } else {
-    records.records.forEach((record, index) => {
+    records.records.forEach((record) => {
       requestBody.push({
-        method: "POST",
+        method: 'POST',
         quorum: true,
         tableName: record.table,
         fields: record.fields,
@@ -38,32 +38,50 @@ export const constructInsertRecordRequest = (
 export const constructInsertRecordResponse = (
   responseBody: any,
   tokens: boolean,
-  records: IInsertRecord[]
+  records: IInsertRecord[],
 ) => {
   if (tokens) {
     return {
       records: responseBody.responses
-        .filter((res, index) => index % 2 != 0)
+        .filter((res, index) => index % 2 !== 0)
         .map((res, index) => {
-          let skyflow_id = res.fields["*"];
-          delete res.fields["*"];
+          const skyflowId = res.fields['*'];
+          delete res.fields['*'];
           return {
             table: records[index].table,
             fields: {
-              skyflow_id,
+              skyflow_id: skyflowId,
               ...res.fields,
             },
           };
         }),
     };
-  } else {
-    return {
-      records: responseBody.responses.map((res, index) => ({
-        table: records[index].table,
-        skyflow_id: res.records[0].skyflow_id,
-      })),
-    };
   }
+  return {
+    records: responseBody.responses.map((res, index) => ({
+      table: records[index].table,
+      skyflow_id: res.records[0].skyflow_id,
+    })),
+  };
+};
+
+const keyify = (obj, prefix = '') => Object.keys(obj).reduce((res: any, el) => {
+  if (Array.isArray(obj[el])) {
+    return [...res, prefix + el];
+  } if (typeof obj[el] === 'object' && obj[el] !== null) {
+    return [...res, ...keyify(obj[el], `${prefix + el}.`)];
+  }
+  return [...res, prefix + el];
+}, []);
+
+const checkDuplicateColumns = (additionalColumns, columns, table) => {
+  const keys = keyify(additionalColumns);
+  keys.forEach((key) => {
+    const value = _.get(columns, key);
+    if (value) {
+      throw new Error(`Duplicate column ${key} found in ${table}`);
+    }
+  });
 };
 
 export const constructElementsInsertReq = (req, options) => {
@@ -72,7 +90,7 @@ export const constructElementsInsertReq = (req, options) => {
   if (additionalFields) {
     validateInsertRecords(additionalFields);
 
-    //merge additionalFields in req
+    // merge additionalFields in req
     additionalFields.records.forEach((record) => {
       if (tables.includes(record.table)) {
         checkDuplicateColumns(record.fields, req[record.table], record.table);
@@ -95,23 +113,3 @@ export const constructElementsInsertReq = (req, options) => {
 
   return constructInsertRecordRequest({ records }, options);
 };
-
-const checkDuplicateColumns = (additionalColumns, columns, table) => {
-  const keys = keyify(additionalColumns);
-  keys.forEach((key) => {
-    const value = _.get(columns, key);
-    if (value) {
-      throw new Error("Duplicate column " + key + " found in " + table);
-    }
-  });
-};
-
-const keyify = (obj, prefix = "") =>
-  Object.keys(obj).reduce((res: any, el) => {
-    if (Array.isArray(obj[el])) {
-      return [...res, prefix + el];
-    } else if (typeof obj[el] === "object" && obj[el] !== null) {
-      return [...res, ...keyify(obj[el], prefix + el + ".")];
-    }
-    return [...res, prefix + el];
-  }, []);

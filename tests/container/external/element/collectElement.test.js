@@ -1,6 +1,6 @@
-import Element from "../../../../src/container/external/element";
+import Element from '../../../../src/container/external/element';
 
-const bus = require("framebus");
+const bus = require('framebus');
 
 const _on = jest.fn();
 const _off = jest.fn();
@@ -12,16 +12,16 @@ bus.target = jest.fn().mockReturnValue({
 });
 
 const input = {
-  table: "pii_fields",
-  column: "primary_card.cvv",
+  table: 'pii_fields',
+  column: 'primary_card.cvv',
   styles: {
     base: {
-      color: "#1d1d1d",
+      color: '#1d1d1d',
     },
   },
-  placeholder: "cvv",
-  label: "cvv",
-  type: "CVV",
+  placeholder: 'cvv',
+  label: 'cvv',
+  type: 'CVV',
 };
 
 const rows = [
@@ -39,28 +39,28 @@ const rows = [
 const destroyCallback = jest.fn();
 const updateCallback = jest.fn();
 
-describe("collect element", () => {
-  it("constructor", async () => {
+describe('collect element', () => {
+  it('constructor', async () => {
     const element = new Element(
       { rows },
       {},
-      "containerId",
+      'containerId',
       true,
       destroyCallback,
-      updateCallback
+      updateCallback,
     );
 
     expect(element.elementType).toBe(input.type);
   });
 
-  it("get options", async () => {
+  it('get options', async () => {
     const element = new Element(
       { rows },
       {},
-      "containerId",
+      'containerId',
       true,
       destroyCallback,
-      updateCallback
+      updateCallback,
     );
 
     const options = element.getOptions();

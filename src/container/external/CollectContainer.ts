@@ -1,14 +1,13 @@
-import bus from "framebus";
+import bus from 'framebus';
 import iframer, {
   setAttributes,
   getIframeSrc,
   setStyles,
-} from "../../iframe-libs/iframer";
-import deepClone from "../../libs/deepClone";
-import { validateElementOptions } from "../../libs/element-options";
-import uuid from "../../libs/uuid";
-import { properties } from "../../properties";
-import { IInsertRecordInput } from "../../Skyflow";
+} from '../../iframe-libs/iframer';
+import deepClone from '../../libs/deepClone';
+import { validateElementOptions } from '../../libs/element-options';
+import uuid from '../../libs/uuid';
+import { IInsertRecordInput } from '../../Skyflow';
 import {
   COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES,
@@ -16,8 +15,8 @@ import {
   ELEMENTS,
   FRAME_ELEMENT,
   ElementType,
-} from "../constants";
-import Element from "./element";
+} from '../constants';
+import Element from './element';
 
 interface CollectElementInput {
   table: string;
@@ -38,16 +37,19 @@ interface ICollectOptions {
 
 class CollectContainer {
   #containerId: string;
+
   #elements: Record<string, Element> = {};
+
   #metaData: any;
+
   constructor(options, metaData) {
     this.#containerId = uuid();
     this.#metaData = metaData;
     const iframe = iframer({
-      name: COLLECT_FRAME_CONTROLLER + ":" + this.#containerId,
+      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}`,
     });
     setAttributes(iframe, {
-      src: getIframeSrc(this.#metaData.uuid),
+      src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
 
@@ -96,30 +98,28 @@ class CollectContainer {
 
   #createMultipleElement = (
     multipleElements: any,
-    isSingleElementAPI: boolean = false
+    isSingleElementAPI: boolean = false,
   ) => {
-    let elements: any[] = [];
-    multipleElements = deepClone(multipleElements);
-    multipleElements.rows.forEach((row) => {
+    const elements: any[] = [];
+    const tempElements = deepClone(multipleElements);
+    tempElements.rows.forEach((row) => {
       row.elements.forEach((element) => {
         const options = element;
-        const elementType = options.elementType;
+        const { elementType } = options;
         validateElementOptions(elementType, options);
 
-        options.sensitive =
-          options.sensitive || ELEMENTS[elementType].sensitive;
-        options.replacePattern =
-          options.replacePattern || ELEMENTS[elementType].replacePattern;
+        options.sensitive = options.sensitive || ELEMENTS[elementType].sensitive;
+        options.replacePattern = options.replacePattern || ELEMENTS[elementType].replacePattern;
         options.mask = options.mask || ELEMENTS[elementType].mask;
 
-        options.elementName = options.table + "." + options.name;
+        options.elementName = `${options.table}.${options.name}`;
         options.elementName = `${options.elementType}:${btoa(
-          options.elementName
+          options.elementName,
         )}`;
 
         if (
-          options.elementType === ELEMENTS.radio.name ||
-          options.elementType === ELEMENTS.checkbox.name
+          options.elementType === ELEMENTS.radio.name
+          || options.elementType === ELEMENTS.checkbox.name
         ) {
           options.elementName = `${options.elementName}:${btoa(options.value)}`;
         }
@@ -131,44 +131,44 @@ class CollectContainer {
       });
     });
 
-    multipleElements.elementName = isSingleElementAPI
+    tempElements.elementName = isSingleElementAPI
       ? elements[0].elementName
-      : `${FRAME_ELEMENT}:group:${btoa(multipleElements.name)}`;
+      : `${FRAME_ELEMENT}:group:${btoa(tempElements.name)}`;
 
     if (
-      isSingleElementAPI &&
-      !this.#elements[elements[0].elementName] &&
-      this.#hasElementName(elements[0].name)
+      isSingleElementAPI
+      && !this.#elements[elements[0].elementName]
+      && this.#hasElementName(elements[0].name)
     ) {
-      throw new Error("The element name has to unique: " + elements[0].name);
+      throw new Error(`The element name has to unique: ${elements[0].name}`);
     }
 
-    let element = this.#elements[multipleElements.elementName];
+    let element = this.#elements[tempElements.elementName];
     if (element) {
       if (isSingleElementAPI) {
         element.update(elements[0]);
       } else {
-        element.update(multipleElements);
+        element.update(tempElements);
       }
     } else {
       element = new Element(
-        multipleElements,
+        tempElements,
         this.#metaData,
         this.#containerId,
         isSingleElementAPI,
         this.#destroyCallback,
-        this.#updateCallback
+        this.#updateCallback,
       );
-      this.#elements[multipleElements.elementName] = element;
+      this.#elements[tempElements.elementName] = element;
     }
 
     if (!isSingleElementAPI) {
-      elements.forEach((element) => {
-        const name = element.elementName;
+      elements.forEach((iElement) => {
+        const name = iElement.elementName;
         if (!this.#elements[name]) {
-          this.#elements[name] = this.create(element.elementType, element);
+          this.#elements[name] = this.create(iElement.elementType, element);
         } else {
-          this.#elements[name].update(element);
+          this.#elements[name].update(iElement);
         }
       });
     }
@@ -177,9 +177,9 @@ class CollectContainer {
   };
 
   #removeElement = (elementName: string) => {
-    for (let element in this.#elements) {
+    Object.keys(this.#elements).forEach((element) => {
       if (element === elementName) delete this.#elements[element];
-    }
+    });
   };
 
   #destroyCallback = (elementNames: string[]) => {
@@ -197,35 +197,33 @@ class CollectContainer {
   };
 
   #hasElementName = (name: string) => {
-    Object.keys(this.#elements).forEach((elementName) => {
-      if (atob(elementName.split(":")[2]) === name) {
+    const tempElements = Object.keys(this.#elements);
+    for (let i = 0; i < tempElements.length; i += 1) {
+      if (atob(tempElements[i].split(':')[2]) === name) {
         return true;
       }
-    });
-
+    }
     return false;
   };
 
-  collect = (options: ICollectOptions = { tokens: true }) => {
-    return new Promise((resolve, reject) => {
-      bus
-        // .target(properties.IFRAME_SECURE_ORGIN)
-        .emit(
-          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
-          {
-            ...options,
-            tokens: options.tokens != undefined ? options.tokens : true,
-          },
-          function (data: any) {
-            if (data.error) {
-              reject(data);
-            } else {
-              resolve(data);
-            }
+  collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
+    bus
+    // .target(properties.IFRAME_SECURE_ORGIN)
+      .emit(
+        ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
+        {
+          ...options,
+          tokens: options.tokens !== undefined ? options.tokens : true,
+        },
+        (data: any) => {
+          if (data.error) {
+            reject(data);
+          } else {
+            resolve(data);
           }
-        );
-    });
-  };
+        },
+      );
+  });
 }
 
 export default CollectContainer;

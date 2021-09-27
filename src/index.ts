@@ -1,13 +1,13 @@
-import "core-js/stable";
-import Skyflow from "./Skyflow";
+import 'core-js/stable';
+import Skyflow from './Skyflow';
 
-if (typeof window.console === "undefined") {
+if (typeof window.console === 'undefined') {
   (<any>window).console = <any>{
-    error: (arg: any) => {},
-    log: (arg: any) => {},
+    error: () => {},
+    log: () => {},
   };
 }
 
-(function (root: any) {
+(function intit(root: any) {
   root.Skyflow = root.Skyflow || Skyflow;
-})(window);
+}(window));

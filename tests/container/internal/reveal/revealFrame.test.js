@@ -1,5 +1,5 @@
 import bus from "framebus";
-import { getCssClassesFromJss } from "../../../../src/libs/jss-styles";
+import  getCssClassesFromJss  from "../../../../src/libs/jss-styles";
 import { RedactionType } from "../../../../src/Skyflow";
 import RevealFrame from "../../../../src/container/internal/reveal/RevealFrame";
 

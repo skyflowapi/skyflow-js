@@ -1,17 +1,19 @@
-import bus from "framebus";
-import { properties } from "../../../properties";
+import bus from 'framebus';
 import {
   ELEMENT_EVENTS_TO_CONTAINER,
   ELEMENT_EVENTS_TO_IFRAME,
   FRAME_REVEAL,
-} from "../../constants";
-import IFrame from "../../external/element/IFrame";
-import { IRevealElementInput } from "../RevealContainer";
+} from '../../constants';
+import IFrame from '../element/IFrame';
+import { IRevealElementInput } from '../RevealContainer';
 
 class RevealElement {
   #iframe: IFrame;
+
   #metaData: any;
+
   #recordData: any;
+
   #containerId: string;
 
   constructor(record: IRevealElementInput, metaData: any, containerId: string) {
@@ -21,9 +23,10 @@ class RevealElement {
     this.#iframe = new IFrame(
       `${FRAME_REVEAL}:${btoa(record.token)}`,
       { metaData },
-      this.#containerId
+      this.#containerId,
     );
   }
+
   mount(domElementSelector) {
     this.#iframe.mount(domElementSelector);
     const sub = (data, callback) => {
@@ -42,7 +45,7 @@ class RevealElement {
             {
               id: this.#recordData.token,
               containerId: this.#containerId,
-            }
+            },
           );
       }
     };

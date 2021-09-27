@@ -1,25 +1,32 @@
-import { FrameElement } from ".";
-import bus from "framebus";
+import bus from 'framebus';
+import injectStylesheet from 'inject-stylesheet';
+import { FrameElement } from '.';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   ALLOWED_MULTIPLE_FIELDS_STYLES,
-} from "../constants";
-import injectStylesheet from "inject-stylesheet";
+} from '../constants';
 import {
   getValueAndItsUnit,
   validateAndSetupGroupOptions,
-} from "../../libs/element-options";
-import { getFlexGridStyles } from "../../libs/styles";
+} from '../../libs/element-options';
+import { getFlexGridStyles } from '../../libs/styles';
 
 export default class FrameElements {
   // private frameElements?: Record<string, FrameElement> = [];
   private static group?: any;
+
   private static frameElements?: any;
+
   private getOrCreateIFrameFormElement: Function;
+
   #domForm?: HTMLFormElement;
+
   #elements: Record<string, FrameElement> = {};
+
   #name?: string;
+
   #metaData: any;
+
   constructor(getOrCreateIFrameFormElement, metaData: any) {
     this.#name = window.name;
     this.#metaData = metaData;
@@ -31,7 +38,7 @@ export default class FrameElements {
 
   // called on iframe loaded im html file
   static start = () => {
-    const names = window.name.split(":");
+    const names = window.name.split(':');
     bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + names[3],
       { name: window.name },
@@ -40,7 +47,7 @@ export default class FrameElements {
         if (FrameElements.frameElements) {
           FrameElements.frameElements.setup(); // start the process
         }
-      }
+      },
     );
   };
 
@@ -48,13 +55,13 @@ export default class FrameElements {
   static init = (getOrCreateIFrameFormElement: Function, metaData) => {
     FrameElements.frameElements = new FrameElements(
       getOrCreateIFrameFormElement,
-      metaData
+      metaData,
     );
   };
 
   setup = () => {
-    this.#domForm = document.createElement("form");
-    this.#domForm.action = "#";
+    this.#domForm = document.createElement('form');
+    this.#domForm.action = '#';
     this.#domForm.onsubmit = (event) => {
       event.preventDefault();
     };
@@ -78,60 +85,61 @@ export default class FrameElements {
     FrameElements.group = validateAndSetupGroupOptions(
       FrameElements.group,
       newGroup,
-      false
+      false,
     );
-    const group = FrameElements.group;
-    const rows = group.rows;
+    const { group } = FrameElements;
+    const { rows } = group;
     const elements = this.#elements;
 
-    group.spacing = getValueAndItsUnit(group.spacing).join("");
+    group.spacing = getValueAndItsUnit(group.spacing).join('');
 
-    const rootDiv = document.createElement("div");
-    rootDiv.className = "container";
+    const rootDiv = document.createElement('div');
+    rootDiv.className = 'container';
     const containerStylesByClassName = getFlexGridStyles({
-      "align-items": group.alignItems || "stretch",
-      "justify-content": group.justifyContent || "flex-start",
+      'align-items': group.alignItems || 'stretch',
+      'justify-content': group.justifyContent || 'flex-start',
       spacing: group.spacing,
     });
 
     injectStylesheet.injectWithAllowlist(
       {
-        ["." + rootDiv.className]: containerStylesByClassName,
+        [`.${rootDiv.className}`]: containerStylesByClassName,
       },
-      ALLOWED_MULTIPLE_FIELDS_STYLES
+      ALLOWED_MULTIPLE_FIELDS_STYLES,
     );
 
     // rows
     let count = 0;
     rows.forEach((row, rowIndex) => {
-      row.spacing = getValueAndItsUnit(row.spacing).join("");
-      const rowDiv = document.createElement("div");
-      rowDiv.className = "row-" + rowIndex;
+      row.spacing = getValueAndItsUnit(row.spacing).join('');
+      const rowDiv = document.createElement('div');
+      rowDiv.className = `row-${rowIndex}`;
       const rowStylesByClassName = getFlexGridStyles({
-        "align-items": row.alignItems || "stretch",
-        "justify-content": row.justifyContent || "flex-start",
+        'align-items': row.alignItems || 'stretch',
+        'justify-content': row.justifyContent || 'flex-start',
         spacing: row.spacing,
         padding: group.spacing,
       });
       injectStylesheet.injectWithAllowlist(
         {
-          ["." + rowDiv.className]: rowStylesByClassName,
+          [`.${rowDiv.className}`]: rowStylesByClassName,
         },
-        ALLOWED_MULTIPLE_FIELDS_STYLES
+        ALLOWED_MULTIPLE_FIELDS_STYLES,
       );
 
       // elements
       row.elements.forEach((element) => {
-        const elementDiv = document.createElement("div");
-        elementDiv.className = "element-" + count++;
+        const elementDiv = document.createElement('div');
+        elementDiv.className = `element-${count}`;
+        count += 1;
         const elementStylesByClassName = {
           padding: row.spacing,
         };
         injectStylesheet.injectWithAllowlist(
           {
-            ["." + elementDiv.className]: elementStylesByClassName,
+            [`.${elementDiv.className}`]: elementStylesByClassName,
           },
-          ALLOWED_MULTIPLE_FIELDS_STYLES
+          ALLOWED_MULTIPLE_FIELDS_STYLES,
         );
 
         if (elements[element.elementName]) {
@@ -140,12 +148,12 @@ export default class FrameElements {
           // create a iframeelement
           // create element by passing iframeformelement and options and mount by default returns
           const iFrameFormElement = this.getOrCreateIFrameFormElement(
-            element.elementName
+            element.elementName,
           );
           elements[element.elementName] = new FrameElement(
             iFrameFormElement,
             element,
-            elementDiv
+            elementDiv,
           );
         }
 
@@ -156,8 +164,8 @@ export default class FrameElements {
 
     if (this.#domForm) {
       // for cleaning
-      this.#domForm.innerHTML = "";
-      document.body.innerHTML = "";
+      this.#domForm.innerHTML = '';
+      document.body.innerHTML = '';
       this.#domForm.append(rootDiv);
       document.body.append(this.#domForm);
     }

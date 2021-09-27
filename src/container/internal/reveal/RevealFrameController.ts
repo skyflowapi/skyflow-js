@@ -1,60 +1,62 @@
-import bus from "framebus";
-import Client from "../../../client";
+import bus from 'framebus';
+import Client from '../../../client';
 import {
   fetchRecordsByTokenId,
   formatRecordsForClient,
   formatRecordsForIframe,
-} from "../../../core/reveal";
-import { IRevealRecord } from "../../../Skyflow";
-import { isTokenValid } from "../../../utils/jwtUtils";
+} from '../../../core/reveal';
+import { IRevealRecord } from '../../../Skyflow';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   REVEAL_FRAME_CONTROLLER,
-} from "../../constants";
-import { properties } from "../../../properties";
+} from '../../constants';
 
 class RevealFrameController {
   #client!: Client;
+
   #clientMetadata: any;
+
   #containerId: any;
+
   #clientDomain: string;
 
   constructor(containerId) {
     this.#containerId = containerId;
-    this.#clientDomain = document.referrer.split("/").slice(0, 3).join("/");
+    this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/');
     bus
     // .target(this.#clientDomain)
-    .emit(
-      ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId,
-      {
-        name: REVEAL_FRAME_CONTROLLER,
-      },
-      (clientMetaData: any) => {
-        clientMetaData = {
-          ...clientMetaData,
-          clientJSON: {
-            ...clientMetaData.clientJSON,
-            config: {
-              ...clientMetaData.clientJSON.config,
-              getBearerToken: new Function(
-                "return " + clientMetaData.clientJSON.config.getBearerToken
-              )(),
+      .emit(
+        ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId,
+        {
+          name: REVEAL_FRAME_CONTROLLER,
+        },
+        (clientMetaData: any) => {
+          const tempData = {
+            ...clientMetaData,
+            clientJSON: {
+              ...clientMetaData.clientJSON,
+              config: {
+                ...clientMetaData.clientJSON.config,
+                // eslint-disable-next-line @typescript-eslint/no-implied-eval
+                getBearerToken: new Function(
+                  `return ${clientMetaData.clientJSON.config.getBearerToken}`,
+                )(),
+              },
             },
-          },
-        };
-        const clientJSON = clientMetaData.clientJSON;
-        this.#clientMetadata = clientMetaData;
-        this.#client = Client.fromJSON(clientJSON);
-      }
-    );
+          };
+          const clientJSON = tempData.clientJSON;
+          this.#clientMetadata = tempData;
+          this.#client = Client.fromJSON(clientJSON);
+        },
+      );
     const sub = (data, callback) => {
-      this.revealData(data["records"] as any).then(
+      this.revealData(data.records as any).then(
         (resolvedResult) => {
           callback(resolvedResult);
         },
         (rejectedResult) => {
           callback({ error: rejectedResult });
-        }
+        },
       );
       bus
         .target(this.#clientDomain)
@@ -78,9 +80,9 @@ class RevealFrameController {
           bus
             .target(properties.IFRAME_SECURE_SITE)
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY +
-                this.#containerId,
-              formattedResult
+              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
+                + this.#containerId,
+              formattedResult,
             );
           resolve(formatRecordsForClient(resolvedResult));
         },
@@ -89,12 +91,12 @@ class RevealFrameController {
           bus
             .target(properties.IFRAME_SECURE_SITE)
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY +
-                this.#containerId,
-              formattedResult
+              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
+                + this.#containerId,
+              formattedResult,
             );
           reject(formatRecordsForClient(rejectedResult));
-        }
+        },
       );
     });
   }

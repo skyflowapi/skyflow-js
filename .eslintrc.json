@@ -1,0 +1,36 @@
+{
+    "extends": [
+        "airbnb-base",
+        "airbnb-typescript/base"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": "./tsconfig.json"
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx"
+                ]
+            }
+        }
+    },
+    "rules": {
+        "import/no-cycle": "off",
+        "prefer-promise-reject-errors": "off",
+        "max-classes-per-file": [
+            "error",
+            2
+        ],
+        "no-param-reassign": "off",
+        "prefer-destructuring": "off",
+        "@typescript-eslint/no-implied-eval": "off"
+    }
+}
