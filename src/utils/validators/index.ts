@@ -1,9 +1,11 @@
 import { IRevealElementInput } from '../../container/external/RevealContainer';
 import {
+  IGatewayConfig,
   IDetokenizeInput,
   IGetByIdInput,
   IInsertRecordInput,
   RedactionType,
+  RequestMethod,
 } from '../../Skyflow';
 
 export const validateCreditCardNumber = (cardNumber: string) => {
@@ -100,7 +102,8 @@ export const validateRevealElementInput = (record: IRevealElementInput) => {
   if (!recordToken || typeof recordToken !== 'string') throw new Error(`Invalid Token Id ${recordToken}`);
 
   const recordRedaction = record.redaction;
-  if (!Object.values(RedactionType).includes(recordRedaction)) throw new Error(`Invalid Redaction Type ${recordRedaction}`);
+  if (!recordRedaction) throw new Error('Missing Redaction property');
+  if (!Object.values(RedactionType).includes(recordRedaction)) throw new Error('Invalid Redaction Type');
 
   if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') throw new Error('Invalid Record Label Type');
 
@@ -119,4 +122,21 @@ export const isValidURL = (url: string) => {
   }
 
   return true;
+};
+
+export const validateGatewayConfig = (config:IGatewayConfig) => {
+  if (!Object.prototype.hasOwnProperty.call(config, 'gatewayURL')) {
+    throw new Error('gateway URL Key is Missing');
+  }
+  if (typeof config.gatewayURL !== 'string') {
+    throw new Error('Invalid gateway URL type');
+  }
+  if (!isValidURL(config.gatewayURL)) {
+    throw new Error('Invalid gateway URL');
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(config, 'methodName')) {
+    throw new Error('methodName Key is Missing');
+  }
+  if (!Object.values(RequestMethod).includes(config.methodName)) { throw new Error('Invalid methodName value'); }
 };

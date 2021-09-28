@@ -59,6 +59,24 @@ export interface IGetByIdInput {
   records: ISkyflowIdRecord[];
 }
 
+export enum RequestMethod{
+  GET = 'GET',
+  POST = 'POST',
+  PUT = 'PUT',
+  PATCH = 'PATCH',
+  DELETE = 'DELETE',
+}
+
+export interface IGatewayConfig {
+  gatewayURL: string;
+  methodName:RequestMethod;
+  pathParams?: any;
+  queryParams?: any;
+  requestBody?: any;
+  requestHeader?: any;
+  responseBody?: any;
+}
+
 class Skyflow {
   #client: Client;
 
@@ -136,6 +154,10 @@ class Skyflow {
     return this.#pureJsController.getById(getByIdInput.records);
   }
 
+  invokeGateway(config: IGatewayConfig) {
+    this.#pureJsController.invokeGateway(config);
+  }
+
   static get ContainerType() {
     return ContainerType;
   }
@@ -146,6 +168,10 @@ class Skyflow {
 
   static get RedactionType() {
     return RedactionType;
+  }
+
+  static get RequestMethod() {
+    return RequestMethod;
   }
 }
 export default Skyflow;

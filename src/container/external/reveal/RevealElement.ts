@@ -1,4 +1,5 @@
 import bus from 'framebus';
+import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
 import {
   ELEMENT_EVENTS_TO_CONTAINER,
@@ -22,7 +23,7 @@ class RevealElement {
     this.#recordData = record;
     this.#containerId = containerId;
     this.#iframe = new IFrame(
-      `${FRAME_REVEAL}:${btoa(record.token)}`,
+      `${FRAME_REVEAL}:${btoa(record.token || uuid())}`,
       { metaData },
       this.#containerId,
     );
@@ -53,6 +54,15 @@ class RevealElement {
     bus
       .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+  }
+
+  // Gateway
+  get token(): string {
+    return this.#recordData.token;
+  }
+
+  get iframeName(): string {
+    return this.#iframe.name;
   }
 }
 

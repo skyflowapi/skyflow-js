@@ -10,13 +10,13 @@ export function validateElementOptions(
     throw new Error('Provide valid element type');
   }
 
-  if (!oldOptions.table) {
-    throw new Error('Provide a valid table name');
-  }
+  // if (!oldOptions.table) {
+  //   throw new Error("Provide a valid table name");
+  // }
 
-  if (!oldOptions.column) {
-    throw new Error('Provide a valid element name');
-  }
+  // if (!oldOptions.column) {
+  //   throw new Error("Provide a valid element name");
+  // }
 
   if (Object.prototype.hasOwnProperty.call(newOptions, 'name') && newOptions.name !== oldOptions.name) {
     throw new Error("Name attribute can't be updated");

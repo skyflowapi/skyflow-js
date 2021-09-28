@@ -373,6 +373,11 @@ class Element {
 
     this.#elements = getElements(this.#group);
   };
+
+  // Gateway
+  get iframeName(): string {
+    return this.#iframe.name;
+  }
 }
 
 export default Element;

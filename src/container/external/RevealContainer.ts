@@ -14,12 +14,11 @@ import {
 import RevealElement from './reveal/RevealElement';
 import uuid from '../../libs/uuid';
 import EventEmitter from '../../event-emitter';
-import { validateRevealElementInput } from '../../utils/validators';
 import properties from '../../properties';
 
 export interface IRevealElementInput {
-  token: string;
-  redaction: RedactionType;
+  token?: string;
+  redaction?: RedactionType;
   inputStyles?: object;
   label?: string;
   labelStyles?: object;
@@ -105,12 +104,13 @@ class RevealContainer {
   }
 
   create(record: IRevealElementInput) {
-    validateRevealElementInput(record);
+    // validateRevealElementInput(record);
     this.#revealRecords.push(record);
     return new RevealElement(record, this.#metaData, this.#containerId);
   }
 
   reveal() {
+    // this.validateRevealElementRecords(this.#revealRecords);
     this.#isRevealCalled = true;
     if (this.#isElementsMounted) {
       return new Promise((resolve, reject) => {

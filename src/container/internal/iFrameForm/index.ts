@@ -271,6 +271,17 @@ export class IFrameFormElement extends EventEmitter {
           }
         });
     }
+
+    // for gateway
+    bus.target(window.location.origin).on('test', (data, callback) => {
+      // console.log(this.iFrameName);
+      if (data.name === this.iFrameName) {
+        // console.log({ ...this.getStatus(), value: this.state.value });
+        // console.log(data);
+        // console.log(callback);
+        callback({ ...this.getStatus(), value: this.state.value });
+      }
+    });
   };
 
   sendChangeStatus = (inputEvent: boolean = false) => {

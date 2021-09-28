@@ -8,6 +8,8 @@ import {
   fetchRecordsBySkyflowID,
   fetchRecordsByTokenId,
 } from '../../../core/reveal';
+import { collectObjectParse } from '../../../libs/objectParse';
+// import { containerObjectParse } from '../../../libs/objectParse';
 import { IRevealRecord, ISkyflowIdRecord } from '../../../Skyflow';
 import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../constants';
 
@@ -58,6 +60,22 @@ class PureJsFrameController {
             .catch((error) => {
               callback(error);
             });
+        } else if (data.type === PUREJS_TYPES.INVOKE_GATEWAY) {
+          const config = data.config as any;
+          // containerObjectParse(config.requestBody);
+          // console.log(config);
+          const promiseList = [];
+          collectObjectParse(config.requestBody, promiseList);
+
+          // console.log(promiseList);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          Promise.all(promiseList).then((res) => {
+            // console.log(res);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          }).catch((err) => {
+            // console.log(err);
+          });
+          // console.log('Final', config.requestBody);
         }
       });
     bus

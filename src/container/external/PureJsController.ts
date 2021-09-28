@@ -5,11 +5,14 @@ import iframer, {
   setAttributes,
   setStyles,
 } from '../../iframe-libs/iframer';
+import { containerObjectParse } from '../../libs/objectParse';
 import properties from '../../properties';
-import { IRevealRecord, ISkyflowIdRecord } from '../../Skyflow';
+import { IGatewayConfig, IRevealRecord, ISkyflowIdRecord } from '../../Skyflow';
+import { validateGatewayConfig } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
+  gatewayConfigParseKeys,
   PUREJS_FRAME_CONTROLLER,
   PUREJS_TYPES,
 } from '../constants';
@@ -147,6 +150,48 @@ class PureJsController {
             (revealData: any) => {
               if (revealData.error) reject(revealData.error);
               else resolve(revealData);
+            },
+          );
+        });
+    });
+  }
+
+  invokeGateway(config: IGatewayConfig) {
+    validateGatewayConfig(config);
+    gatewayConfigParseKeys.forEach((configKey) => {
+      if (config[configKey]) {
+        containerObjectParse(config[configKey]);
+      }
+    });
+    if (this.#isControllerFrameReady) {
+      return new Promise((resolve, reject) => {
+        bus
+          .emit(
+            ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+            {
+              type: PUREJS_TYPES.INVOKE_GATEWAY,
+              config,
+            },
+            (response: any) => {
+              if (response.error) reject(response.error);
+              else resolve(response);
+            },
+          );
+      });
+    }
+    return new Promise((resolve, reject) => {
+      bus
+        .target(properties.IFRAME_SECURE_ORGIN)
+        .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+          bus.emit(
+            ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+            {
+              type: PUREJS_TYPES.INVOKE_GATEWAY,
+              config,
+            },
+            (response: any) => {
+              if (response.error) reject(response.error);
+              else resolve(response);
             },
           );
         });

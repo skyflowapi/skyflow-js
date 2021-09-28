@@ -20,8 +20,8 @@ import {
 import Element from './element';
 
 interface CollectElementInput {
-  table: string;
-  column: string;
+  table?: string;
+  column?: string;
   inputStyles?: object;
   label?: string;
   labelStyles?: object;
