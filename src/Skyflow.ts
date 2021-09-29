@@ -155,7 +155,7 @@ class Skyflow {
   }
 
   invokeGateway(config: IGatewayConfig) {
-    this.#pureJsController.invokeGateway(config);
+    return this.#pureJsController.invokeGateway(config);
   }
 
   static get ContainerType() {

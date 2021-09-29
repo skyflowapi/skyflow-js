@@ -8,9 +8,9 @@ import {
   fetchRecordsBySkyflowID,
   fetchRecordsByTokenId,
 } from '../../../core/reveal';
-import { collectObjectParse } from '../../../libs/objectParse';
+import { deletePropertyPath, fillUrlWithPathAndQueryParams, flattenObject } from '../../../libs/objectParse';
 // import { containerObjectParse } from '../../../libs/objectParse';
-import { IRevealRecord, ISkyflowIdRecord } from '../../../Skyflow';
+import { IGatewayConfig, IRevealRecord, ISkyflowIdRecord } from '../../../Skyflow';
 import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../constants';
 
 class PureJsFrameController {
@@ -61,11 +61,11 @@ class PureJsFrameController {
               callback(error);
             });
         } else if (data.type === PUREJS_TYPES.INVOKE_GATEWAY) {
-          const config = data.config as any;
+          const config = data.config as IGatewayConfig;
           // containerObjectParse(config.requestBody);
           // console.log(config);
           const promiseList = [];
-          collectObjectParse(config.requestBody, promiseList);
+          // collectObjectParse(config.requestBody, promiseList);
 
           // console.log(promiseList);
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -76,6 +76,13 @@ class PureJsFrameController {
             // console.log(err);
           });
           // console.log('Final', config.requestBody);
+          const filledUrl = fillUrlWithPathAndQueryParams(config.gatewayURL, config.pathParams);
+          config.gatewayURL = filledUrl;
+          this.sendInvokeGateWayRequest(config).then((resultResponse) => {
+            callback(resultResponse);
+          }).catch((rejectedResponse) => {
+            callback({ error: rejectedResponse });
+          });
         }
       });
     bus
@@ -120,6 +127,41 @@ class PureJsFrameController {
         .catch((error) => {
           reject(error);
         });
+    });
+  }
+
+  sendInvokeGateWayRequest(config:IGatewayConfig) {
+    console.log(config);
+    console.log(config.responseBody);
+    const invokeRequest = this.#client.request({
+      url: config.gatewayURL,
+      requestMethod: config.methodName,
+      body: config.requestBody,
+      headers: config.requestHeader,
+    });
+    return new Promise((resolve, reject) => {
+      invokeRequest.then((response) => {
+        if (config.responseBody) {
+          const flattenResponseBody = flattenObject(config.responseBody);
+          const flattenGatewayResponse = flattenObject(response);
+          Object.entries(flattenResponseBody).forEach(([key, value]) => {
+            const responseValue = flattenGatewayResponse[key];
+            const elementIFrame = window.parent.frames[value as string];
+            if (elementIFrame) {
+              const revealSpanElement = elementIFrame
+                .document.getElementById(value) as HTMLSpanElement;
+              if (revealSpanElement) {
+                revealSpanElement.innerText = responseValue;
+              }
+              deletePropertyPath(response, key);
+              console.log(response);
+            }
+          });
+        }
+        resolve(response);
+      }).catch((err) => {
+        reject(err);
+      });
     });
   }
 }

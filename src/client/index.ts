@@ -50,15 +50,16 @@ class Client {
     httpRequest.open(request.requestMethod, request.url);
 
     const sendRequest = () => {
-      if (!request.headers?.Authorization) {
-        httpRequest.setRequestHeader(
-          'Authorization',
-          `Bearer ${this.accessToken}`,
-        );
-      }
+      // if (!request.headers?.Authorization) {
+      //   httpRequest.setRequestHeader(
+      //     'Authorization',
+      //     `Bearer ${this.accessToken}`,
+      //   );
+      // }
       httpRequest.setRequestHeader(
         'Content-Type',
-        'application/json; charset=utf-8',
+        // 'application/json; charset=utf-8',
+        'application/json',
       );
 
       if (request.headers) {
@@ -98,6 +99,8 @@ class Client {
       if (httpRequest.status < 200 || httpRequest.status >= 400) {
         if (contentType === 'application/json') {
           reject(JSON.parse(httpRequest.response));
+        } else if (contentType === 'application/json;charset=UTF-8') {
+          reject(JSON.parse(httpRequest.response));
         } else if (contentType === 'text/plain') {
           const error = {
             http_code: httpRequest.status,
@@ -113,8 +116,12 @@ class Client {
         }
       }
       if (contentType === 'application/json') {
+        console.log('It is not comming here');
+        resolve(JSON.parse(httpRequest.response));
+      } else if (contentType === 'application/json;charset=UTF-8') {
         resolve(JSON.parse(httpRequest.response));
       }
+      console.log(contentType);
       resolve(httpRequest.response);
     };
 

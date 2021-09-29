@@ -58,6 +58,7 @@ class RevealFrame {
 
     this.#dataElememt = document.createElement('span');
     this.#dataElememt.className = `SkyflowElement-content-${STYLE_TYPE.BASE}`;
+    this.#dataElememt.id = this.#name;
 
     this.#errorElement = document.createElement('span');
     this.#errorElement.className = `SkyflowElement-error-${STYLE_TYPE.BASE}`;
