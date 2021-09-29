@@ -1,0 +1,44 @@
+name: CI
+
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  ci-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.17.6
+      - name: install modules
+        run: npm ci
+
+      - name: Check code quality
+        uses: stefanoeb/eslint-action@1.0.2
+
+      # - name: Check code quality
+      #   run: eslint . --ext .js, .ts
+      
+      - name: Browser Build
+        run: npm run build-browser-sdk
+        env:
+          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+
+      - name: Build iFrame
+        run: npm run build-iframe
+        env:
+          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+
+      - name: Build Node SDK
+        env:
+          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+        run: |
+          npm run build:types 
+          npm run build-node-sdk

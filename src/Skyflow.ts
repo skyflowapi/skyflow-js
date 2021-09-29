@@ -1,15 +1,15 @@
-import Client from "./client";
-import CollectContainer from "./container/external/CollectContainer";
-import RevealContainer from "./container/external/RevealContainer";
-import uuid from "./libs/uuid";
-import { ElementType } from "./container/constants";
+import Client from './client';
+import CollectContainer from './container/external/CollectContainer';
+import RevealContainer from './container/external/RevealContainer';
+import uuid from './libs/uuid';
+import { ElementType } from './container/constants';
 import {
   validateInsertRecords,
   validateDetokenizeInput,
   validateGetByIdInput,
   isValidURL,
-} from "./utils/validators";
-import PureJsController from "./container/external/PureJsController";
+} from './utils/validators';
+import PureJsController from './container/external/PureJsController';
 
 export interface IInsertRecord {
   table: string;
@@ -21,8 +21,8 @@ export interface IInsertRecordInput {
 }
 
 export enum ContainerType {
-  COLLECT = "COLLECT",
-  REVEAL = "REVEAL",
+  COLLECT = 'COLLECT',
+  REVEAL = 'REVEAL',
 }
 export interface ISkyflow {
   vaultID: string;
@@ -32,16 +32,16 @@ export interface ISkyflow {
 }
 
 export enum RedactionType {
-  DEFAULT = "DEFAULT",
-  PLAIN_TEXT = "PLAIN_TEXT",
-  MASKED = "MASKED",
-  REDACTED = "REDACTED",
+  DEFAULT = 'DEFAULT',
+  PLAIN_TEXT = 'PLAIN_TEXT',
+  MASKED = 'MASKED',
+  REDACTED = 'REDACTED',
 }
 export interface IRevealRecord {
   token: string;
   redaction: RedactionType;
 }
-export interface revealResponseType {
+export interface IRevealResponseType {
   records?: Record<string, string>[];
   errors?: Record<string, any>[];
 }
@@ -61,11 +61,14 @@ export interface IGetByIdInput {
 
 class Skyflow {
   #client: Client;
+
   #uuid: string = uuid();
+
   #metadata = {
     uuid: this.#uuid,
-    clientDomain: location.origin,
+    clientDomain: window.location.origin,
   };
+
   #pureJsController: PureJsController;
 
   constructor(config: ISkyflow) {
@@ -73,27 +76,27 @@ class Skyflow {
       {
         ...config,
       },
-      this.#metadata
+      this.#metadata,
     );
     this.#pureJsController = new PureJsController(this.#client);
   }
 
   static init(config: ISkyflow): Skyflow {
     if (
-      !config ||
-      !config.vaultID ||
-      !isValidURL(config.vaultURL) ||
-      !config.getBearerToken
+      !config
+      || !config.vaultID
+      || !isValidURL(config.vaultURL)
+      || !config.getBearerToken
     ) {
-      throw new Error("Invalid client credentials");
+      throw new Error('Invalid client credentials');
     }
 
-    config.vaultURL =
-      config.vaultURL.slice(-1) === "/"
-        ? config.vaultURL.slice(0, -1)
-        : config.vaultURL;
+    const tempConfig = config;
+    tempConfig.vaultURL = config.vaultURL.slice(-1) === '/'
+      ? config.vaultURL.slice(0, -1)
+      : config.vaultURL;
 
-    return new Skyflow(config);
+    return new Skyflow(tempConfig);
   }
 
   container(type: ContainerType, options?: Record<string, any>) {
@@ -109,37 +112,38 @@ class Skyflow {
           clientJSON: this.#client.toJSON(),
         });
       default:
-        throw new Error("Invalid container type");
+        throw new Error('Invalid container type');
     }
   }
 
   insert(
     records: IInsertRecordInput,
-    options: Record<string, any> = { tokens: true }
+    options: Record<string, any> = { tokens: true },
   ) {
     validateInsertRecords(records);
-    return this.#pureJsController._insert(records, options);
+    return this.#pureJsController.insert(records, options);
   }
 
   detokenize(
     detokenizeInput: IDetokenizeInput,
-    options: any = {}
-  ): Promise<revealResponseType> {
+  ): Promise<IRevealResponseType> {
     validateDetokenizeInput(detokenizeInput);
-    return this.#pureJsController._detokenize(detokenizeInput.records);
+    return this.#pureJsController.detokenize(detokenizeInput.records);
   }
 
   getById(getByIdInput: IGetByIdInput) {
     validateGetByIdInput(getByIdInput);
-    return this.#pureJsController._getById(getByIdInput.records);
+    return this.#pureJsController.getById(getByIdInput.records);
   }
 
   static get ContainerType() {
     return ContainerType;
   }
+
   static get ElementType() {
     return ElementType;
   }
+
   static get RedactionType() {
     return RedactionType;
   }

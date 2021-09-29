@@ -1,6 +1,6 @@
-import jwt_decode, { JwtPayload } from "jwt-decode";
+import jwt_decode, { JwtPayload } from 'jwt-decode';
 
-export const isTokenValid = (token: string) => {
+const isTokenValid = (token: string) => {
   let isJwtExpired = false;
   const decoded: JwtPayload = jwt_decode(token);
   const currentTime = new Date().getTime() / 1000;
@@ -11,4 +11,6 @@ export const isTokenValid = (token: string) => {
   }
 
   return !isJwtExpired;
-}; 
+};
+
+export default isTokenValid;

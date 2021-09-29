@@ -1,9 +1,9 @@
-const path = require("path");
-const { merge } = require("webpack-merge");
-const common = require("./webpack.common.js");
-const webpack = require("webpack");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const BundleAnalyser = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const path = require('path');
+const { merge } = require('webpack-merge');
+const common = require('./webpack.common.js');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const BundleAnalyser = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const minify = {
   collapseWhitespace: true,
@@ -16,70 +16,68 @@ const minify = {
   minifyJS: true,
 };
 
-module.exports = () => {
-  return merge(common, {
-    entry: {
-      skyflow: ["core-js/stable", path.resolve(__dirname, "src/index.ts")],
-      iframe: [
-        "core-js/stable",
-        path.resolve(__dirname, "src/index-internal.ts"),
-      ],
-    },
-
-    output: {
-      filename: "[name].js",
-      path: path.resolve(__dirname, "dist"),
-    },
-    mode: "development",
-    devtool: "inline-source-map",
-    devServer: {
-      port: 3040,
-      historyApiFallback: true,
-      open: true,
-      //todo: add routes for iframe and index ex: / for index.html and iframe for iframe.html
-      proxy: {
-        "/v1": {
-          target: "https://manage.skyflowapis.dev",
-          pathRewrite: { "^/v1": "/v1" },
-          secure: false,
-          changeOrigin: true,
-        },
-        "/vault": {
-          target: "https://sb.area51.vault.skyflowapis.dev", //https://sb.area51.vault.skyflowapis.dev/v1
-          pathRewrite: { "^/vault": "" },
-          secure: false,
-          changeOrigin: true,
-        },
-      },
-      // contentBase: commonPaths.outputPath,
-      compress: true,
-      hot: true,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods":
-          "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        "Access-Control-Allow-Headers":
-          "X-Requested-With, content-type, Authorization",
-      },
-    },
-    plugins: [
-      new BundleAnalyser({ analyzerPort: 8881 }),
-      new webpack.DefinePlugin({
-        "process.env": JSON.stringify(process.env),
-      }),
-      new HtmlWebpackPlugin({
-        template: "assets/index.html",
-        chunks: ["skyflow"],
-        inject: "head",
-        minify,
-      }),
-      new HtmlWebpackPlugin({
-        filename: "iframe.html",
-        template: "assets/iframe.html",
-        chunks: ["iframe"],
-        inject: "head",
-        minify,
-      }),
+module.exports = () => merge(common, {
+  entry: {
+    skyflow: ['core-js/stable', path.resolve(__dirname, 'src/index.ts')],
+    iframe: [
+      'core-js/stable',
+      path.resolve(__dirname, 'src/index-internal.ts'),
     ],
-  });
-};
+  },
+
+  output: {
+    filename: '[name].js',
+    path: path.resolve(__dirname, 'dist'),
+  },
+  mode: 'development',
+  devtool: 'inline-source-map',
+  devServer: {
+    port: 3040,
+    historyApiFallback: true,
+    open: true,
+    // todo: add routes for iframe and index ex: / for index.html and iframe for iframe.html
+    proxy: {
+      '/v1': {
+        target: 'https://manage.skyflowapis.dev',
+        pathRewrite: { '^/v1': '/v1' },
+        secure: false,
+        changeOrigin: true,
+      },
+      '/vault': {
+        target: 'https://sb.area51.vault.skyflowapis.dev', // https://sb.area51.vault.skyflowapis.dev/v1
+        pathRewrite: { '^/vault': '' },
+        secure: false,
+        changeOrigin: true,
+      },
+    },
+    // contentBase: commonPaths.outputPath,
+    compress: true,
+    hot: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods':
+          'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers':
+          'X-Requested-With, content-type, Authorization',
+    },
+  },
+  plugins: [
+    new BundleAnalyser({ analyzerPort: 8881 }),
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify(process.env),
+    }),
+    new HtmlWebpackPlugin({
+      template: 'assets/index.html',
+      chunks: ['skyflow'],
+      inject: 'head',
+      minify,
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'iframe.html',
+      template: 'assets/iframe.html',
+      chunks: ['iframe'],
+      inject: 'head',
+      minify,
+    }),
+  ],
+});

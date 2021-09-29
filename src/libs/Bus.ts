@@ -1,23 +1,25 @@
 // todo: implement bus to save event id/functions and on kill remove those events(turn off)
 
-import bus from "framebus";
+import bus from 'framebus';
 import {
   FramebusOnHandler,
   FramebusReplyHandler,
-} from "framebus/dist/lib/types";
+} from 'framebus/dist/lib/types';
 
 class Bus {
-  _listeners: any[];
-  _isDestroyed: boolean;
+  listeners: any[];
+
+  isDestroyed: boolean;
+
   constructor() {
-    this._listeners = [];
-    this._isDestroyed = false;
+    this.listeners = [];
+    this.isDestroyed = false;
   }
 
   on(eventName: string, callback: FramebusOnHandler) {
     bus.on(eventName, callback);
 
-    this._listeners.push({
+    this.listeners.push({
       eventName,
       callback,
     });
@@ -26,35 +28,38 @@ class Bus {
   off(eventName: string, callback: FramebusOnHandler) {
     bus.off(eventName, callback);
 
-    const indexOfListener = this._listeners.findIndex(
-      (obj) => obj.eventName === eventName && callback === callback
+    const indexOfListener = this.listeners.findIndex(
+      (obj) => obj.eventName === eventName,
     );
 
-    indexOfListener !== -1 && this._listeners.splice(indexOfListener, 1);
+    if (indexOfListener !== -1) {
+      this.listeners.splice(indexOfListener, 1);
+    }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   emit(
     eventName: string,
     data: Record<string, unknown> | undefined,
-    callback: FramebusReplyHandler | undefined = undefined
+    callback: FramebusReplyHandler | undefined = undefined,
   ) {
     bus.emit(eventName, data, callback);
   }
 
   hasListener(eventName: string): boolean {
-    const indexOfListener = this._listeners.findIndex(
-      (obj) => obj.eventName === eventName
+    const indexOfListener = this.listeners.findIndex(
+      (obj) => obj.eventName === eventName,
     );
 
     return indexOfListener !== -1;
   }
 
   teardown() {
-    this._listeners.forEach((listener) => {
+    this.listeners.forEach((listener) => {
       bus.off(listener.eventName, listener.handler);
     });
 
-    this._listeners = [];
+    this.listeners = [];
   }
 }
 

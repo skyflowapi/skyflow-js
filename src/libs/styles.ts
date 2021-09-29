@@ -1,16 +1,16 @@
-import { ALLOWED_STYLES, STYLE_TYPE } from "../container/constants";
-import { getValueAndItsUnit } from "./element-options";
+import { STYLE_TYPE } from '../container/constants';
+import { getValueAndItsUnit } from './element-options';
 
 export function splitStyles(styles) {
   const pseudoStyles = {};
   const nonPseudoStyles = {};
-  for (const style in styles) {
-    if (style && style[0] === ":") {
+  Object.keys(styles).forEach((style) => {
+    if (style && style[0] === ':') {
       pseudoStyles[style] = styles[style];
     } else {
       nonPseudoStyles[style] = styles[style];
     }
-  }
+  });
 
   return [nonPseudoStyles, pseudoStyles];
 }
@@ -18,7 +18,7 @@ export function splitStyles(styles) {
 export function buildStylesFromClassesAndStyles(classes, styles) {
   // if focus add to base styles with psudo element tag
   Object.values(STYLE_TYPE).forEach((classType) => {
-    if (classes[classType] || styles[classType])
+    if (classes[classType] || styles[classType]) {
       switch (classType) {
         case STYLE_TYPE.BASE:
           styles[classType] = {
@@ -28,17 +28,17 @@ export function buildStylesFromClassesAndStyles(classes, styles) {
         case STYLE_TYPE.FOCUS:
           styles[STYLE_TYPE.BASE] = {
             ...styles[STYLE_TYPE.BASE],
-            ":focus": {
-              ...(styles[STYLE_TYPE.BASE] && styles[STYLE_TYPE.BASE][":focus"]),
+            ':focus': {
+              ...(styles[STYLE_TYPE.BASE] && styles[STYLE_TYPE.BASE][':focus']),
             },
           };
           break;
         case STYLE_TYPE.WEBPACKAUTOFILL:
           styles[STYLE_TYPE.BASE] = {
             ...styles[STYLE_TYPE.BASE],
-            ":-webkit-autofill": {
-              ...(styles[STYLE_TYPE.BASE] &&
-                styles[STYLE_TYPE.BASE][":-webkit-autofill"]),
+            ':-webkit-autofill': {
+              ...(styles[STYLE_TYPE.BASE]
+                && styles[STYLE_TYPE.BASE][':-webkit-autofill']),
             },
           };
           break;
@@ -48,17 +48,17 @@ export function buildStylesFromClassesAndStyles(classes, styles) {
             ...styles[classType],
           };
       }
+    }
   });
 
   Object.keys(styles).forEach((styleType) => {
-    const autofillStyles = styles[styleType][":-webkit-autofill"];
-    if (typeof autofillStyles === "object") {
+    const autofillStyles = styles[styleType][':-webkit-autofill'];
+    if (typeof autofillStyles === 'object') {
       Object.keys(autofillStyles).forEach((styleKey) => {
         if (
-          autofillStyles[styleKey] &&
-          !autofillStyles[styleKey].includes("!important")
-        )
-          autofillStyles[styleKey] = autofillStyles[styleKey] + " !important";
+          autofillStyles[styleKey]
+          && !autofillStyles[styleKey].includes('!important')
+        ) autofillStyles[styleKey] = `${autofillStyles[styleKey]} !important`;
       });
     }
   });
@@ -67,21 +67,21 @@ export function buildStylesFromClassesAndStyles(classes, styles) {
 export const getFlexGridStyles = (obj: any) => {
   const spacingValueAndUnit = getValueAndItsUnit(obj.spacing);
   const styles = {
-    "align-items": obj["align-items"] || "stretch",
-    "justify-content": obj["justify-content"] || "flex-start",
+    'align-items': obj['align-items'] || 'stretch',
+    'justify-content': obj['justify-content'] || 'flex-start',
     height:
-      "auto" ||
-      `calc(100% + ${
-        Number.parseInt(spacingValueAndUnit[0]) * 2 + spacingValueAndUnit[1]
+      'auto'
+      || `calc(100% + ${
+        Number.parseInt(spacingValueAndUnit[0], 10) * 2 + spacingValueAndUnit[1]
       })`,
     width: `calc(100% + ${
-      Number.parseInt(spacingValueAndUnit[0]) * 2 + spacingValueAndUnit[1]
+      Number.parseInt(spacingValueAndUnit[0], 10) * 2 + spacingValueAndUnit[1]
     }))`,
     margin: `-${spacingValueAndUnit[0] + spacingValueAndUnit[1]}`,
-    padding: "0px",
+    padding: '0px',
   };
   if (obj.padding) {
-    styles.padding = getValueAndItsUnit(obj.padding).join("");
+    styles.padding = getValueAndItsUnit(obj.padding).join('');
   }
 
   return styles;

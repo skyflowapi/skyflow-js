@@ -1,23 +1,29 @@
+/* eslint-disable no-underscore-dangle */
 import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
-} from "../../constants";
-import EventEmitter from "../../../event-emitter";
-import Bus from "../../../libs/Bus";
-import deepClone from "../../../libs/deepClone";
+} from '../../constants';
+import EventEmitter from '../../../event-emitter';
+import Bus from '../../../libs/Bus';
+import deepClone from '../../../libs/deepClone';
 import {
   getElements,
   validateAndSetupGroupOptions,
-} from "../../../libs/element-options";
-import IFrame from "./IFrame";
+} from '../../../libs/element-options';
+import IFrame from './IFrame';
 
 class Element {
   elementType: string;
+
   containerId: string;
+
   #isSingleElementAPI: boolean = false;
+
   #states: any[];
+
   #elements: any[];
+
   #state = {
     isEmpty: true,
     isComplete: false,
@@ -25,16 +31,19 @@ class Element {
     isFocused: false,
     value: <string | Object | undefined>undefined,
   };
+
   #group: any;
 
   // label focus
 
   #eventEmitter: EventEmitter = new EventEmitter();
+
   #bus = new Bus();
 
   #iframe: IFrame;
 
   #updateCallbacks: Function[] = [];
+
   #mounted = false;
 
   constructor(
@@ -43,18 +52,18 @@ class Element {
     containerId: string,
     isSingleElementAPI: boolean = false,
     destroyCallback: Function,
-    updateCallback: Function
+    updateCallback: Function,
   ) {
     this.containerId = containerId;
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
     if (this.#isSingleElementAPI && this.#elements.length > 1) {
-      throw new Error("Unknown Error");
+      throw new Error('Unknown Error');
     }
     this.elementType = this.#isSingleElementAPI
       ? this.#elements[0].elementType
-      : "group";
+      : 'group';
 
     this.#states = [];
     this.#elements.forEach((element) => {
@@ -72,7 +81,7 @@ class Element {
     this.#iframe = new IFrame(
       this.#group.elementName,
       metaData,
-      this.containerId
+      this.containerId,
     );
 
     this.#registerIFrameBusListener();
@@ -90,7 +99,7 @@ class Element {
         this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
         this.#bus.off(
           ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId,
-          sub
+          sub,
         );
         this.#mounted = true;
         this.#updateCallbacks.forEach((func) => func());
@@ -101,27 +110,28 @@ class Element {
   };
 
   unmount = () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     this.#iframe.unmount;
   };
 
   update = (group) => {
-    group = deepClone(group);
+    let tempGroup = deepClone(group);
 
     const callback = () => {
       if (this.#isSingleElementAPI) {
-        group = {
+        tempGroup = {
           rows: [
             {
               elements: [
                 {
-                  ...group,
+                  ...tempGroup,
                 },
               ],
             },
           ],
         };
       }
-      this.#group = validateAndSetupGroupOptions(this.#group, group);
+      this.#group = validateAndSetupGroupOptions(this.#group, tempGroup);
       this.#elements = getElements(this.#group);
 
       if (this.#isSingleElementAPI) {
@@ -165,7 +175,7 @@ class Element {
         () => {
           callback(this.#elements);
         },
-        true
+        true,
       );
     }
   };
@@ -186,27 +196,22 @@ class Element {
         else this.#state.value[key] = value;
       } else {
         this.#state.isEmpty = this.#state.isEmpty || elementState.isEmpty;
-        this.#state.isComplete =
-          this.#state.isComplete && elementState.isComplete;
+        this.#state.isComplete = this.#state.isComplete && elementState.isComplete;
         this.#state.isValid = this.#state.isValid && elementState.isValid;
         this.#state.isFocused = this.#state.isFocused || elementState.isFocused;
         if (!this.#state.value) this.#state.value = {};
-        if (!this.#elements[index].sensitive)
-          this.#state.value[this.#elements[index].elementName] =
-            elementState.value || "";
+        if (!this.#elements[index].sensitive) this.#state.value[this.#elements[index].elementName] = elementState.value || '';
       }
     });
   };
 
-  getState = () => {
-    return {
-      isEmpty: this.#state.isEmpty,
-      isComplete: this.#state.isComplete,
-      isValid: this.#state.isValid,
-      isFocused: this.#state.isFocused,
-      value: this.#state.value,
-    };
-  };
+  getState = () => ({
+    isEmpty: this.#state.isEmpty,
+    isComplete: this.#state.isComplete,
+    isValid: this.#state.isValid,
+    isFocused: this.#state.isFocused,
+    value: this.#state.value,
+  });
 
   getOptions = () => {
     // todo: remove all names
@@ -235,36 +240,36 @@ class Element {
         handler(data);
       });
     } else {
-      throw new Error("Provide valid event listener");
+      throw new Error('Provide valid event listener');
     }
   }
 
   // methods to invoke element events
   #blur = () => {
-    let name = this.#iframe.name;
+    const { name } = this.#iframe;
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
-      name: name,
+      name,
       event: ELEMENT_EVENTS_TO_CLIENT.BLUR,
     });
   };
 
   #focus = () => {
-    let name = this.#iframe.name;
+    const { name } = this.#iframe;
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
-      name: name,
+      name,
       event: ELEMENT_EVENTS_TO_CLIENT.FOCUS,
     });
   };
 
   #destroy = () => {
     // todo: destroy all the internal elements
-    let name = this.#iframe.name;
+    const { name } = this.#iframe;
 
-    //todo: fix this
+    // todo: fix this
     this.#bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
       {
-        name: name,
+        name,
       },
       () => {
         this.unmount();
@@ -272,7 +277,7 @@ class Element {
         this.#eventEmitter.resetEvents();
         this.#eventEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME);
         delete this.#iframe.iframe;
-      }
+      },
     );
   };
 
@@ -284,7 +289,7 @@ class Element {
         if (!this.#isSingleElementAPI) names.push(this.#iframe.name);
         callback(names);
       },
-      true
+      true,
     );
   };
 
@@ -295,16 +300,16 @@ class Element {
   #registerIFrameBusListener = () => {
     this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, (data: any) => {
       if (
-        this.#isSingleElementAPI &&
-        data.event === ELEMENT_EVENTS_TO_CLIENT.READY &&
-        data.name === this.#iframe.name
+        this.#isSingleElementAPI
+        && data.event === ELEMENT_EVENTS_TO_CLIENT.READY
+        && data.name === this.#iframe.name
       ) {
         this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
       } else {
         this.#elements.forEach((element, index) => {
           if (data.name === element.elementName) {
-            let emitEvent = "",
-              emitData: any = undefined;
+            let emitEvent = '';
+            let emitData: any;
             switch (data.event) {
               case ELEMENT_EVENTS_TO_CLIENT.FOCUS:
                 emitEvent = ELEMENT_EVENTS_TO_CLIENT.FOCUS;
@@ -317,8 +322,7 @@ class Element {
                 this.#states[index].isComplete = data.value.isComplete;
                 this.#states[index].isValid = data.value.isValid;
                 this.#states[index].isFocused = data.value.isFocused;
-                if (data.value.hasOwnProperty("value"))
-                  this.#states[index].value = data.value.value;
+                if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
                 else this.#states[index].value = undefined;
 
                 this.#updateState();
@@ -332,19 +336,19 @@ class Element {
               case ELEMENT_EVENTS_TO_CLIENT.READY:
                 emitEvent = ELEMENT_EVENTS_TO_CLIENT.READY;
                 break;
-              // todo: need to implement the below events
-              // case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
-              //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
-              //   break;
-              // case ELEMENT_EVENTS_TO_CLIENT.CLICK:
-              //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CLICK);
-              //   break;
-              // case ELEMENT_EVENTS_TO_CLIENT.ERROR:
-              //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ERROR);
-              //   break;
+                // todo: need to implement the below events
+                // case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
+                //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
+                //   break;
+                // case ELEMENT_EVENTS_TO_CLIENT.CLICK:
+                //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CLICK);
+                //   break;
+                // case ELEMENT_EVENTS_TO_CLIENT.ERROR:
+                //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ERROR);
+                //   break;
 
               default:
-                throw new Error("Provide a valid event type");
+                throw new Error('Provide a valid event type');
             }
 
             this.#eventEmitter._emit(emitEvent, emitData);
@@ -355,14 +359,15 @@ class Element {
   };
 
   #onGroupEmitRemoveLocalValue = () => {
-    const rows = this.#group.rows;
+    const { rows } = this.#group;
     rows.forEach((row) => {
       row.elements.forEach((element) => {
         if (
-          element.elementType !== ELEMENTS.radio.name &&
-          element.elementType !== ELEMENTS.checkbox.name
-        )
+          element.elementType !== ELEMENTS.radio.name
+          && element.elementType !== ELEMENTS.checkbox.name
+        ) {
           element.value = undefined;
+        }
       });
     });
 

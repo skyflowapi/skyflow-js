@@ -4,10 +4,14 @@ interface ISkyflowError {
   message: string;
 }
 export default class SkyflowError extends Error {
-  readonly name = "Skyflow";
+  readonly name = 'Skyflow';
+
   type: string;
+
   code: string;
+
   message: string;
+
   constructor(obj: ISkyflowError) {
     super();
     this.type = obj.type;
@@ -16,11 +20,10 @@ export default class SkyflowError extends Error {
   }
 
   static TYPES = {
-    CUSTOMER: "CUSTOMER",
-    MERCHANT: "MERCHANT",
-    NETWORK: "NETWORK",
-    INTERNAL: "INTERNAL",
-    UNKNOWN: "UNKNOWN",
+    CUSTOMER: 'CUSTOMER',
+    MERCHANT: 'MERCHANT',
+    NETWORK: 'NETWORK',
+    INTERNAL: 'INTERNAL',
+    UNKNOWN: 'UNKNOWN',
   };
 }
-

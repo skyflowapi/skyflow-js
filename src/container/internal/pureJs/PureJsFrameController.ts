@@ -1,21 +1,23 @@
-import bus from "framebus";
-import Client from "../../../client";
+import bus from 'framebus';
+import Client from '../../../client';
 import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,
-} from "../../../core/collect";
+} from '../../../core/collect';
 import {
   fetchRecordsBySkyflowID,
   fetchRecordsByTokenId,
-} from "../../../core/reveal";
-import { IRevealRecord, ISkyflowIdRecord } from "../../../Skyflow";
-import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from "../../constants";
+} from '../../../core/reveal';
+import { IRevealRecord, ISkyflowIdRecord } from '../../../Skyflow';
+import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../constants';
 
 class PureJsFrameController {
   #clientDomain: string;
+
   #client!: Client;
+
   constructor() {
-    this.#clientDomain = document.referrer.split("/").slice(0, 3).join("/");
+    this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/');
     bus
       .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
@@ -27,7 +29,7 @@ class PureJsFrameController {
               },
               (rejectedResult) => {
                 callback({ error: rejectedResult });
-              }
+              },
             )
             .catch((error) => {
               callback({ error });
@@ -43,7 +45,7 @@ class PureJsFrameController {
         } else if (data.type === PUREJS_TYPES.GET_BY_SKYFLOWID) {
           fetchRecordsBySkyflowID(
             data.records as ISkyflowIdRecord[],
-            this.#client
+            this.#client,
           )
             .then(
               (resolvedResult) => {
@@ -51,7 +53,7 @@ class PureJsFrameController {
               },
               (rejectedResult) => {
                 callback({ error: rejectedResult });
-              }
+              },
             )
             .catch((error) => {
               callback(error);
@@ -62,7 +64,7 @@ class PureJsFrameController {
       // .target(this.#clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, {}, (data: any) => {
         const deserializedBearerToken = new Function(
-          "return " + data.bearerToken
+          `return ${data.bearerToken}`,
         )();
         data.client.config = {
           ...data.client.config,
@@ -82,19 +84,19 @@ class PureJsFrameController {
       this.#client
         .request({
           body: { records: requestBody },
-          requestMethod: "POST",
+          requestMethod: 'POST',
           url:
-            this.#client.config.vaultURL +
-            "/v1/vaults/" +
-            this.#client.config.vaultID,
+            `${this.#client.config.vaultURL
+            }/v1/vaults/${
+              this.#client.config.vaultID}`,
         })
         .then((response: any) => {
           resolve(
             constructInsertRecordResponse(
               response,
               options.tokens,
-              records.records
-            )
+              records.records,
+            ),
           );
         })
         .catch((error) => {
