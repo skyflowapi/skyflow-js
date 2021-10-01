@@ -8,6 +8,7 @@ Skyflow’s Javascript SDK can be used to securely collect, tokenize, and reveal
 - [**Initializing Skyflow.js**](#Initializing-Skyflowjs)
 - [**Securely collecting data client-side**](#Securely-collecting-data-client-side)
 - [**Securely revealing data client-side**](#Securely-revealing-data-client-side)
+- [**Securely invoking gateway client-side**](#Securely-invoking-gateway-client-side)
 
 ---
 
@@ -160,8 +161,8 @@ A Skyflow collect Element is defined as shown below:
 
 ```javascript
 var collectElement =  {
-   table: "string",             //the table this data belongs to
-   column: "string",            //the column into which this data should be inserted
+   table: "string",             //optional, the table this data belongs to
+   column: "string",            //optional, the column into which this data should be inserted
    type: Skyflow.ElementType,   //Skyflow.ElementType enum
    inputStyles: {},             //optional styles that should be applied to the form element
    labelStyles: {},             //optional styles that will be applied to the label of the collect element
@@ -171,7 +172,9 @@ var collectElement =  {
    altText: "string"            //optional string that acts as an initial value for the collect element
 }
 ```
-The `table` and `column` fields indicate which table and column in the vault the Element corresponds to. **Note**:  Use dot delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`). 
+The `table` and `column` fields indicate which table and column in the vault the Element corresponds to. **Note**: 
+-  Use dot delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`)
+-  `table` and `column` are optional only if the element is being used in invokeGateway()
 
 The `inputStyles` field accepts a style object which consists of CSS properties that should be applied to the form element in the following states:
 - `base`: all other variants inherit from these styles
@@ -517,7 +520,7 @@ Then define a Skyflow Element to reveal data as shown below.
 
 ```javascript
 var revealElement = {
-  token: "string",                    //token of the data being revealed 
+  token: "string",                    //optional, token of the data being revealed 
   redaction: Skyflow.RedactionType,   //redaction type to be applied to the data when revealed
   inputStyles: {},                    //optional styles to be applied to the element
   labelStyles: {},                    //optional, styles to be applied to the label of the reveal element
@@ -526,6 +529,8 @@ var revealElement = {
   altText: "string"                   //optional, string that is shown before reveal, will show token if altText is not provided
 }
 ```
+`Note`: 
+- `token` is optional only if it is being used in invokeGateway()
 
 For a list of acceptable RedactionTypes, see the [section above](#Retrieving-data-from-the-vault).
 
@@ -665,3 +670,147 @@ The response below shows that some tokens assigned to the reveal elements get re
   ]
 }
 ```
+
+# Securely invoking gateway client-side
+Using Skyflow gateway, end-user applications can integrate checkout/card issuance flow without any of their apps/systems touching the PCI compliant fields like cvv, card number. To invoke gateway, use the `invokeGateway(gatewayConfig)` method of the Skyflow client.
+
+```javascript
+const gatewayConfig = {
+  gatewayURL: string, // gateway url recevied when creating a skyflow gateway integration
+  methodName: Skyflow.RequestMethod,
+  pathParams: any,	// optional
+  queryParams: any,	// optional
+  requestHeader: any, // optional
+  requestBody: any,	// optional
+  responseBody: any	// optional
+}
+
+const response =  skyflowClient.invokeGateway(gatewayConfig);
+```
+`methodName` supports the following methods:
+
+- GET
+- POST
+- PUT
+- PATCH
+- DELETE
+
+**pathParams, queryParams, requestHeader, requestBody** are the JSON objects that will be sent through the gateway integration url.
+
+The values in the above parameters can contain collect elements, reveal elements or actual values. When elements are provided inplace of values, they get replaced with the value entered in the collect elements or value present in the reveal elements
+
+**responseBody**:  
+It is a JSON object that specifies where to render the response in the UI. The values in the responseBody can contain collect elements or reveal elements. 
+
+Sample use-cases on using invokeGateway():
+
+###  Sample use-case 1:
+
+Merchant acceptance - customers should be able to complete payment checkout without cvv touching their application. This means that the merchant should be able to receive a CVV and process a payment without exposing their front-end to any PCI data
+
+```javascript
+// step 1
+const skyflowClient = skyflow.init({
+	 vaultID: <vault_Id>, 
+	 vaultURL: <vault_url>, 
+	 getBearerToken: <helperFunc>
+});
+
+// step 2
+const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT)
+
+// step 3
+const cardNumberElement = collectContainer.create({           
+  type: skyflow.ElementType.CARD_NUMBER
+})
+cardNumberElement.mount("#cardNumber")
+
+const cvvElement = collectContainer.create({
+    type: skyflow.ElementType.CVV
+})
+cvvElement.mount("#cvv")
+
+// step 4
+const gatewayConfig = { 
+  gatewayURL: "https://area51.gateway.skyflow.com/v1/gateway/inboundRoutes/abc-1213/v2/pay”,
+  methodName: Skyflow.METHODTYPE.POST,
+  requestBody: {
+   card_number: cardNumberElement, //it can be skyflow element(collect or reveal) or actual value
+   cvv: cvvElement,  
+  }
+}
+
+const response =  skyflowClient.invokeGateway(gatewayConfig);
+```
+
+Sample Response:
+```javascript
+{
+   "receivedTimestamp": "2019-05-29 21:49:56.625",
+   "processingTimeinMs": 116
+}
+```
+In the above example,  CVV is being collected from the user input at the time of checkout and not stored anywhere in the vault
+
+`Note:`  
+- card_number can be either container element or plain text value (tokens or actual value)
+- `table` and `column` names are not required for creating collect element, if it is used for invokeGateway method, since they will not be stored in the vault
+
+ ### Sample use-case 2:
+ 
+ Card issuance -  customers want to issue cards from card issuer service and should generate the CVV dynamically without increasing their PCI scope.
+```javascript
+// step 1
+const skyflowClient = skyflow.init({
+	 vaultID: <vault_Id>, 
+	 vaultURL: <vault_url>, 
+	 getBearerToken: <helperFunc>
+});
+
+// step 2
+const revealContainer = skyflowClient.container(Skyflow.ContainerType.REVEAL)
+const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT)
+
+// step 3
+const cvvElement = revealContainer.create({
+    type: skyflow.RedactionType.PLAIN_TEXT,
+})
+cvvElement.mount("#cvv")
+
+const expiryDateElement = collectContainer.create({
+    type: skyflow.ElementType.EXPIRATION_DATE
+})
+expiryDateElement.mount("#expirationDate")
+
+//step 3
+const gatewayConfig = { 
+  gatewayURL: "https://area51.gateway.skyflow.com/v1/gateway/inboundRoutes/abc-1213/cards/{card_number}/cvv2generation",
+  methodName: Skyflow.METHODTYPE.POST,
+  pathParams: {
+     card_number: "0905-8672-0773-0628"	//it can be skyflow element(collect/reveal) or token or actual value
+  },
+  requestBody: {
+    expirationDate: expiryDateElement //it can be skyflow element(collect/reveal) or token or actual value
+ },
+ responseBody: {
+     resource: {
+         cvv2: cvvElement   // pass the element where the cvv response from the gateway will be mounted
+       }
+     }  
+   }
+}
+
+const response = skyflowClient.invokeGateway(gatewayConfig);
+```
+
+Sample Response:
+```javascript
+{
+   "receivedTimestamp": "2019-05-29 21:49:56.625",
+   "processingTimeinMs": 116
+}
+```
+
+`Note`:
+- `token` and `redaction` are optional for creating reveal element, if it is used for invokeGateway
+- responseBody contains collect or reveal elements to render the response from the gateway on UI 
