@@ -77,7 +77,8 @@ class PureJsFrameController {
           });
 
           Promise.all(promiseList).then(() => {
-            const filledUrl = fillUrlWithPathAndQueryParams(config.gatewayURL, config.pathParams);
+            const filledUrl = fillUrlWithPathAndQueryParams(config.gatewayURL,
+              config.pathParams, config.queryParams);
             config.gatewayURL = filledUrl;
             this.sendInvokeGateWayRequest(config).then((resultResponse) => {
               callback(resultResponse);

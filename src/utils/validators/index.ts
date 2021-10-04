@@ -97,17 +97,25 @@ export const validateGetByIdInput = (getByIdInput: IGetByIdInput) => {
   });
 };
 
-export const validateRevealElementInput = (record: IRevealElementInput) => {
-  const recordToken = record.token;
-  if (!recordToken || typeof recordToken !== 'string') throw new Error(`Invalid Token Id ${recordToken}`);
+export const validateRevealElementRecords = (records: IRevealElementInput[]) => {
+  if (records.length === 0) throw new Error('Empty Records');
+  records.forEach((record) => {
+    if (!Object.prototype.hasOwnProperty.call(record, 'token')) {
+      throw new Error('token key is Missing');
+    }
+    const recordToken = record.token;
+    if (!recordToken || typeof recordToken !== 'string') throw new Error(`Invalid Token ${recordToken}`);
+    if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
+      throw new Error('redaction key is Missing');
+    }
+    const recordRedaction = record.redaction;
+    if (!recordRedaction) throw new Error('Missing redaction value');
+    if (!Object.values(RedactionType).includes(recordRedaction)) throw new Error('Invalid Redaction Type');
 
-  const recordRedaction = record.redaction;
-  if (!recordRedaction) throw new Error('Missing Redaction property');
-  if (!Object.values(RedactionType).includes(recordRedaction)) throw new Error('Invalid Redaction Type');
+    if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') throw new Error('Invalid Record Label Type');
 
-  if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') throw new Error('Invalid Record Label Type');
-
-  if (Object.prototype.hasOwnProperty.call(record, 'altText') && typeof record.altText !== 'string') throw new Error('Invalid Record altText Type');
+    if (Object.prototype.hasOwnProperty.call(record, 'altText') && typeof record.altText !== 'string') throw new Error('Invalid Record altText Type');
+  });
 };
 
 export const isValidURL = (url: string) => {

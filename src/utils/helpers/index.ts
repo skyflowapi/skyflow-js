@@ -56,7 +56,11 @@ export function fillUrlWithPathAndQueryParams(url:string,
     });
   }
   if (queryParams) {
-    // TODO
+    filledUrl += '?';
+    Object.entries(queryParams).forEach(([key, value]) => {
+      filledUrl += `${key}=${value}&`;
+    });
+    filledUrl = filledUrl.substring(0, filledUrl.length - 1);
   }
   return filledUrl;
 }

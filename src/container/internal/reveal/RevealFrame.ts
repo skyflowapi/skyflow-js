@@ -82,7 +82,7 @@ class RevealFrame {
     }
 
     if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) this.#dataElememt.innerText = this.#record.altText;
-    else this.#dataElememt.innerText = this.#record.token;
+    else if (Object.prototype.hasOwnProperty.call(this.#record, 'token')) this.#dataElememt.innerText = this.#record.token;
 
     if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
       this.#inputStyles = this.#record.inputStyles;

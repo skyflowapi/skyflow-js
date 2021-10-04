@@ -6,16 +6,19 @@ import { getCollectElementValue, getRevealElementValue } from '../utils/busEvent
 
 const set = require('set-value');
 
-export function gatewayConfigParser(data) {
+export function gatewayConfigParser(data, configKey) {
   Object.entries(data).forEach(([key, value]) => {
     if (value instanceof RevealElement) {
       if (!value.isMounted()) { throw new Error('Element Not Mounted'); }
       data[key] = value.iframeName;
+      if (configKey !== 'responseBody') {
+        if (!value.hasToken()) { throw new Error('Element must have token'); }
+      }
     } else if (value instanceof Element) {
       if (!value.isMounted()) { throw new Error('Element Not Mounted'); }
       data[key] = value.iframeName;
     } else if (value instanceof Object) {
-      gatewayConfigParser(value);
+      gatewayConfigParser(value, configKey);
     }
   });
 }

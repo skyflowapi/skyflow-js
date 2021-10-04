@@ -163,11 +163,11 @@ class PureJsController {
           validateGatewayConfig(config);
           gatewayConfigParseKeys.forEach((configKey) => {
             if (config[configKey]) {
-              gatewayConfigParser(config[configKey]);
+              gatewayConfigParser(config[configKey], configKey);
             }
           });
           if (config.responseBody) {
-            gatewayConfigParser(config.responseBody);
+            gatewayConfigParser(config.responseBody, 'responseBody');
           }
 
           bus
@@ -189,13 +189,13 @@ class PureJsController {
     }
     return new Promise((resolve, reject) => {
       try {
-        // validateGatewayConfig(config);
+        validateGatewayConfig(config);
         gatewayConfigParseKeys.forEach((configKey) => {
           if (config[configKey]) {
-            gatewayConfigParser(config[configKey]);
+            gatewayConfigParser(config[configKey], configKey);
           }
           if (config.responseBody) {
-            gatewayConfigParser(config.responseBody);
+            gatewayConfigParser(config.responseBody, 'responseBody');
           }
         });
         bus
