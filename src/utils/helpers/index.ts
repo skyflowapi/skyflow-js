@@ -1,0 +1,45 @@
+export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
+
+export function deletePropertyPath(obj, path) {
+  if (!obj || !path) {
+    return;
+  }
+
+  if (typeof path === 'string') {
+    path = path.split('.');
+  }
+
+  for (let i = 0; i < path.length - 1; i += 1) {
+    obj = obj[path[i]];
+
+    if (typeof obj === 'undefined') {
+      return;
+    }
+  }
+
+  delete obj[path.pop()];
+}
+
+export function formatFrameNameToId(name: string) {
+  const arr = name.split(':');
+  if (arr.length > 1) {
+    arr.pop();
+    return arr.join(':');
+  }
+  return '';
+}
+
+export function fillUrlWithPathAndQueryParams(url:string,
+  pathParams?:object,
+  queryParams?:object) {
+  let filledUrl = url;
+  if (pathParams) {
+    Object.entries(pathParams).forEach(([key, value]) => {
+      filledUrl = url.replace(`{${key}}`, value);
+    });
+  }
+  if (queryParams) {
+    // TODO
+  }
+  return filledUrl;
+}

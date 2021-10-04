@@ -20,8 +20,8 @@ import {
 import Element from './element';
 
 interface CollectElementInput {
-  table: string;
-  column: string;
+  table?: string;
+  column?: string;
   inputStyles?: object;
   label?: string;
   labelStyles?: object;
@@ -114,6 +114,9 @@ class CollectContainer {
         options.mask = options.mask || ELEMENTS[elementType].mask;
 
         options.elementName = `${options.table}.${options.name}`;
+        options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
+          options.elementName,
+        )}` : `${options.elementType}:${uuid()}`;
         options.elementName = `${options.elementType}:${btoa(
           options.elementName,
         )}`;

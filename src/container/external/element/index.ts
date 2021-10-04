@@ -373,6 +373,15 @@ class Element {
 
     this.#elements = getElements(this.#group);
   };
+
+  // Gateway
+  get iframeName(): string {
+    return this.#iframe.name;
+  }
+
+  isMounted():boolean {
+    return this.#mounted;
+  }
 }
 
 export default Element;

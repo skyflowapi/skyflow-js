@@ -49,6 +49,12 @@ module.exports = () => merge(common, {
         secure: false,
         changeOrigin: true,
       },
+      '/gatewayProxy': {
+        target: 'https://sb.area51.gateway.skyflowapis.dev',
+        pathRewrite: { '^/gatewayProxy': '' },
+        secure: false,
+        changeOrigin: true,
+      }
     },
     // contentBase: commonPaths.outputPath,
     compress: true,

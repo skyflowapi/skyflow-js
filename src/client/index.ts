@@ -1,5 +1,4 @@
 import { ISkyflow } from '../Skyflow';
-import isTokenValid from '../utils/jwtUtils';
 
 export interface IClientRequest {
   body?: Record<string, any>;
@@ -19,14 +18,11 @@ export interface IClientRequest {
 class Client {
   config: ISkyflow;
 
-  accessToken: string;
-
   #metaData: any;
 
   constructor(config: ISkyflow, metadata) {
     this.config = config;
     this.#metaData = metadata;
-    this.accessToken = '';
   }
 
   toJSON() {
@@ -49,40 +45,14 @@ class Client {
 
     httpRequest.open(request.requestMethod, request.url);
 
-    const sendRequest = () => {
-      if (!request.headers?.Authorization) {
-        httpRequest.setRequestHeader(
-          'Authorization',
-          `Bearer ${this.accessToken}`,
-        );
-      }
-      httpRequest.setRequestHeader(
-        'Content-Type',
-        'application/json; charset=utf-8',
-      );
-
-      if (request.headers) {
-        const { headers } = request;
-        Object.keys(request.headers).forEach((key) => {
-          httpRequest.setRequestHeader(key, headers[key]);
-        });
-      }
-
-      httpRequest.send(JSON.stringify({ ...request.body }));
-    };
-
-    if (this.config.getBearerToken
-        && (!this.accessToken || !isTokenValid(this.accessToken))
-    ) {
-      this.config.getBearerToken().then((token: string) => {
-        this.accessToken = token;
-        sendRequest();
-      }).catch((err) => reject(err));
-    } else {
-      sendRequest();
+    if (request.headers) {
+      const { headers } = request;
+      Object.keys(request.headers).forEach((key) => {
+        httpRequest.setRequestHeader(key, headers[key]);
+      });
     }
 
-    // httpRequest.responseType = "json";
+    httpRequest.send(JSON.stringify({ ...request.body }));
 
     httpRequest.onload = () => {
       const responseHeaders = httpRequest.getAllResponseHeaders();
@@ -96,9 +66,9 @@ class Client {
       });
       const contentType = headerMap['content-type'];
       if (httpRequest.status < 200 || httpRequest.status >= 400) {
-        if (contentType === 'application/json') {
+        if (contentType.includes('application/json')) {
           reject(JSON.parse(httpRequest.response));
-        } else if (contentType === 'text/plain') {
+        } else if (contentType.includes('text/plain')) {
           const error = {
             http_code: httpRequest.status,
             message: httpRequest.response,
@@ -112,7 +82,7 @@ class Client {
           reject({ error });
         }
       }
-      if (contentType === 'application/json') {
+      if (contentType.includes('application/json')) {
         resolve(JSON.parse(httpRequest.response));
       }
       resolve(httpRequest.response);

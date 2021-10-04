@@ -1,4 +1,5 @@
 import bus from 'framebus';
+import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
 import {
   ELEMENT_EVENTS_TO_CONTAINER,
@@ -17,12 +18,14 @@ class RevealElement {
 
   #containerId: string;
 
+  #isMounted:boolean = false;
+
   constructor(record: IRevealElementInput, metaData: any, containerId: string) {
     this.#metaData = metaData;
     this.#recordData = record;
     this.#containerId = containerId;
     this.#iframe = new IFrame(
-      `${FRAME_REVEAL}:${btoa(record.token)}`,
+      `${FRAME_REVEAL}:${btoa(record.token || uuid())}`,
       { metaData },
       this.#containerId,
     );
@@ -48,11 +51,21 @@ class RevealElement {
               containerId: this.#containerId,
             },
           );
+        this.#isMounted = true;
       }
     };
     bus
       .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+  }
+
+  // Gateway
+  get iframeName(): string {
+    return this.#iframe.name;
+  }
+
+  isMounted():boolean {
+    return this.#isMounted;
   }
 }
 
