@@ -136,6 +136,7 @@ class RevealContainer {
     }
     return new Promise((resolve, reject) => {
       try {
+        validateRevealElementRecords(this.#revealRecords);
         const elementMountTimeOut = setTimeout(() => {
           reject('Elements Not Mounted');
         }, 30000);
