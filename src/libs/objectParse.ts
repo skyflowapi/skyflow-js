@@ -2,7 +2,7 @@ import RevealElement from '../container/external/reveal/RevealElement';
 import Element from '../container/external/element';
 import { FRAME_ELEMENT, FRAME_REVEAL } from '../container/constants';
 import { flattenObject } from '../utils/helpers';
-import { processIframeElement, processRevealFrameElement } from '../utils/busEvents';
+import { getCollectElementValue, getRevealElementValue } from '../utils/busEvents';
 
 const set = require('set-value');
 
@@ -20,7 +20,7 @@ export function gatewayConfigParser(data) {
   });
 }
 
-export function collectObjectParser(data) {
+export function constructInvokeGatewayRequest(data) {
   const flattenData = flattenObject(data);
   const collectElements = {};
   const revealElements = {};
@@ -41,10 +41,10 @@ export function collectObjectParser(data) {
   const promiseList : any = [];
 
   Object.entries(collectElements).forEach(([key, value]) => {
-    promiseList.push(processIframeElement(key, value));
+    promiseList.push(getCollectElementValue(key, value));
   });
   Object.entries(revealElements).forEach(([key, value]) => {
-    promiseList.push(processRevealFrameElement(key, value));
+    promiseList.push(getRevealElementValue(key, value));
   });
 
   return Promise.all(promiseList).then((res) => {

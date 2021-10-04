@@ -20,6 +20,23 @@ export function deletePropertyPath(obj, path) {
   delete obj[path.pop()];
 }
 
+export function clearEmpties(o) {
+  const keys = Object.keys(o);
+
+  for (let i = 0; i < keys.length; i += 1) {
+    const k = keys[i];
+    if (!o[k] || typeof o[k] !== 'object') {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    clearEmpties(o[k]);
+    if (Object.keys(o[k]).length === 0) {
+      delete o[k];
+    }
+  }
+}
+
 export function formatFrameNameToId(name: string) {
   const arr = name.split(':');
   if (arr.length > 1) {

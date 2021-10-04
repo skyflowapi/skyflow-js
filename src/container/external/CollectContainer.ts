@@ -116,10 +116,7 @@ class CollectContainer {
         options.elementName = `${options.table}.${options.name}`;
         options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
           options.elementName,
-        )}` : `${options.elementType}:${uuid()}`;
-        options.elementName = `${options.elementType}:${btoa(
-          options.elementName,
-        )}`;
+        )}` : `${options.elementType}:${btoa(uuid())}`;
 
         if (
           options.elementType === ELEMENTS.radio.name
