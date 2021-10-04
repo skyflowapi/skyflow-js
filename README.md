@@ -733,7 +733,7 @@ cvvElement.mount("#cvv")
 // step 4
 const gatewayConfig = { 
   gatewayURL: "https://area51.gateway.skyflow.com/v1/gateway/inboundRoutes/abc-1213/v2/pay”,
-  methodName: Skyflow.METHODTYPE.POST,
+  methodName: Skyflow.RequestMethod.POST,
   requestBody: {
    card_number: cardNumberElement, //it can be skyflow element(collect or reveal) or actual value
    cvv: cvvElement,  
@@ -782,10 +782,10 @@ const expiryDateElement = collectContainer.create({
 })
 expiryDateElement.mount("#expirationDate")
 
-//step 3
+//step 4
 const gatewayConfig = { 
   gatewayURL: "https://area51.gateway.skyflow.com/v1/gateway/inboundRoutes/abc-1213/cards/{card_number}/cvv2generation",
-  methodName: Skyflow.METHODTYPE.POST,
+  methodName: Skyflow.RequestMethod.POST,
   pathParams: {
      card_number: "0905-8672-0773-0628"	//it can be skyflow element(collect/reveal) or token or actual value
   },
