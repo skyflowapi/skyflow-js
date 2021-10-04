@@ -60,7 +60,7 @@ class RevealElement {
   }
 
   // Gateway
-  get iframeName(): string {
+  iframeName(): string {
     return this.#iframe.name;
   }
 
