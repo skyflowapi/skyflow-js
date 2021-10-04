@@ -116,10 +116,7 @@ class CollectContainer {
         options.elementName = `${options.table}.${options.name}`;
         options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
           options.elementName,
-        )}` : `${options.elementType}:${uuid()}`;
-        options.elementName = `${options.elementType}:${btoa(
-          options.elementName,
-        )}`;
+        )}` : `${options.elementType}:${btoa(uuid())}`;
 
         if (
           options.elementType === ELEMENTS.radio.name
@@ -211,22 +208,31 @@ class CollectContainer {
   };
 
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
-    bus
-    // .target(properties.IFRAME_SECURE_ORGIN)
-      .emit(
-        ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
-        {
-          ...options,
-          tokens: options.tokens !== undefined ? options.tokens : true,
-        },
-        (data: any) => {
-          if (data.error) {
-            reject(data);
-          } else {
-            resolve(data);
-          }
-        },
-      );
+    try {
+      const collectElements = Object.values(this.#elements);
+      collectElements.forEach((element) => {
+        if (!element.isMounted()) { throw new Error('Elements not Mounted'); }
+        if (!element.isValidElement()) { throw new Error('Invalid table or column'); }
+      });
+      bus
+      // .target(properties.IFRAME_SECURE_ORGIN)
+        .emit(
+          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
+          {
+            ...options,
+            tokens: options.tokens !== undefined ? options.tokens : true,
+          },
+          (data: any) => {
+            if (data.error) {
+              reject(data);
+            } else {
+              resolve(data);
+            }
+          },
+        );
+    } catch (err) {
+      reject(err?.message);
+    }
   });
 }
 

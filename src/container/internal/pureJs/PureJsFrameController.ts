@@ -8,11 +8,12 @@ import {
   fetchRecordsBySkyflowID,
   fetchRecordsByTokenId,
 } from '../../../core/reveal';
-import { collectObjectParser } from '../../../libs/objectParse';
+import { constructInvokeGatewayRequest } from '../../../libs/objectParse';
 
 import { IGatewayConfig, IRevealRecord, ISkyflowIdRecord } from '../../../Skyflow';
 import { getAccessToken } from '../../../utils/busEvents';
 import {
+  clearEmpties,
   deletePropertyPath, fillUrlWithPathAndQueryParams, flattenObject, formatFrameNameToId,
 } from '../../../utils/helpers';
 import {
@@ -71,12 +72,13 @@ class PureJsFrameController {
           const promiseList = [] as any;
           gatewayConfigParseKeys.forEach((key) => {
             if (config[key]) {
-              promiseList.push(collectObjectParser(config[key]));
+              promiseList.push(constructInvokeGatewayRequest(config[key]));
             }
           });
 
           Promise.all(promiseList).then(() => {
-            const filledUrl = fillUrlWithPathAndQueryParams(config.gatewayURL, config.pathParams);
+            const filledUrl = fillUrlWithPathAndQueryParams(config.gatewayURL,
+              config.pathParams, config.queryParams);
             config.gatewayURL = filledUrl;
             this.sendInvokeGateWayRequest(config).then((resultResponse) => {
               callback(resultResponse);
@@ -174,6 +176,7 @@ class PureJsFrameController {
                   }
                 }
                 deletePropertyPath(response, key);
+                clearEmpties(response);
               }
             });
           }

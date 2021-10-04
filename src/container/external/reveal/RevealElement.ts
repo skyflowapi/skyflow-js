@@ -67,6 +67,11 @@ class RevealElement {
   isMounted():boolean {
     return this.#isMounted;
   }
+
+  hasToken():boolean {
+    if (this.#recordData.token) return true;
+    return false;
+  }
 }
 
 export default RevealElement;

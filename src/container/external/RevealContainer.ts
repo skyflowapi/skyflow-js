@@ -15,6 +15,7 @@ import RevealElement from './reveal/RevealElement';
 import uuid from '../../libs/uuid';
 import EventEmitter from '../../event-emitter';
 import properties from '../../properties';
+import { validateRevealElementRecords } from '../../utils/validators';
 
 export interface IRevealElementInput {
   token?: string;
@@ -104,52 +105,64 @@ class RevealContainer {
   }
 
   create(record: IRevealElementInput) {
-    // validateRevealElementInput(record);
     this.#revealRecords.push(record);
     return new RevealElement(record, this.#metaData, this.#containerId);
   }
 
   reveal() {
-    // this.validateRevealElementRecords(this.#revealRecords);
     this.#isRevealCalled = true;
     if (this.#isElementsMounted) {
       return new Promise((resolve, reject) => {
-        bus
-        // .target(properties.IFRAME_SECURE_ORGIN)
-          .emit(
-            ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
-            {
-              records: this.#revealRecords,
-            },
-            (revealData: any) => {
-              this.#mountedRecords = [];
-              this.#revealRecords = [];
-              if (revealData.error) reject(revealData.error);
-              else resolve(revealData);
-            },
-          );
-      });
-    }
-    return new Promise((resolve, reject) => {
-      this.#eventEmmiter.on(
-        ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
-        () => {
+        try {
+          validateRevealElementRecords(this.#revealRecords);
           bus
-            // .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORGIN)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
               {
                 records: this.#revealRecords,
               },
               (revealData: any) => {
-                this.#revealRecords = [];
                 this.#mountedRecords = [];
+                this.#revealRecords = [];
                 if (revealData.error) reject(revealData.error);
                 else resolve(revealData);
               },
             );
-        },
-      );
+        } catch (err) {
+          reject(err?.message);
+        }
+      });
+    }
+    return new Promise((resolve, reject) => {
+      try {
+        validateRevealElementRecords(this.#revealRecords);
+        const elementMountTimeOut = setTimeout(() => {
+          reject('Elements Not Mounted');
+        }, 30000);
+        this.#eventEmmiter.on(
+          ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
+          () => {
+            clearTimeout(elementMountTimeOut);
+            bus
+              // .target(properties.IFRAME_SECURE_ORGIN)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
+                {
+                  records: this.#revealRecords,
+                },
+                (revealData: any) => {
+                  this.#revealRecords = [];
+                  this.#mountedRecords = [];
+                  if (revealData.error) reject(revealData.error);
+                  else resolve(revealData);
+                },
+              );
+          },
+        );
+      } catch (err) {
+        reject(err?.message);
+      }
     });
   }
 }

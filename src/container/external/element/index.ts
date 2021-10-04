@@ -375,12 +375,19 @@ class Element {
   };
 
   // Gateway
-  get iframeName(): string {
+  iframeName(): string {
     return this.#iframe.name;
   }
 
   isMounted():boolean {
     return this.#mounted;
+  }
+
+  isValidElement():boolean {
+    for (let i = 0; i < this.#elements.length; i += 1) {
+      if (!(this.#elements[i].table && this.#elements[i].column)) { return false; }
+    }
+    return true;
   }
 }
 
