@@ -162,7 +162,7 @@
     const payButton = document.getElementById("payMerchant");
     payButton.addEventListener("click", () => {
       const sdkResponse = skyflow.invokeGateway({
-        gatewayURL:"https://sky.com/v1/gateway/outboundRoutes/ee15eebd-8b1c-4759-8aee-19c665ed010f/visadirect/fundstransfer/v1/pullfundstransactions",
+        gatewayURL:"https://sb.area51.gateway.skyflowapis.dev/v1/gateway/outboundRoutes/56e7b291-57bf-4227-8f42-3008255a2f56/visadirect/fundstransfer/v1/pullfundstransactions",
         methodName: Skyflow.RequestMethod.POST,
         requestHeader: {
           "Authorization": "Basic QjBORFNKUEcyMzhTMjJOSlU5QjIyMVJfQTBMT3ZLZE1xS3JRQTJOQXpBXzFQQVIyRTozZ0Z3NlNmMUU5VDMxeWo2a3FQMzJmY1VBOU4weUQ5WjlDbA==",
