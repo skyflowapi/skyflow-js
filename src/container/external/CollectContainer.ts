@@ -114,6 +114,9 @@ class CollectContainer {
         options.mask = options.mask || ELEMENTS[elementType].mask;
 
         options.elementName = `${options.table}.${options.name}`;
+        options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
+          options.elementName,
+        )}` : `${options.elementType}:${uuid()}`;
         options.elementName = `${options.elementType}:${btoa(
           options.elementName,
         )}`;

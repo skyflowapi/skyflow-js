@@ -5,10 +5,10 @@ import iframer, {
   setAttributes,
   setStyles,
 } from '../../iframe-libs/iframer';
-import { containerObjectParse, responseBodyObjectParse } from '../../libs/objectParse';
+import { gatewayConfigParser } from '../../libs/objectParse';
 import properties from '../../properties';
 import { IGatewayConfig, IRevealRecord, ISkyflowIdRecord } from '../../Skyflow';
-// import { validateGatewayConfig } from '../../utils/validators';
+import { validateGatewayConfig } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
@@ -157,47 +157,65 @@ class PureJsController {
   }
 
   invokeGateway(config: IGatewayConfig) {
-    // validateGatewayConfig(config);
-    gatewayConfigParseKeys.forEach((configKey) => {
-      if (config[configKey]) {
-        containerObjectParse(config[configKey]);
-      }
-    });
-    if (config.responseBody) {
-      responseBodyObjectParse(config.responseBody);
-    }
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
-        bus
-          .emit(
-            ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
-            {
-              type: PUREJS_TYPES.INVOKE_GATEWAY,
-              config,
-            },
-            (response: any) => {
-              if (response.error) reject(response.error);
-              else resolve(response);
-            },
-          );
+        try {
+          validateGatewayConfig(config);
+          gatewayConfigParseKeys.forEach((configKey) => {
+            if (config[configKey]) {
+              gatewayConfigParser(config[configKey]);
+            }
+          });
+          if (config.responseBody) {
+            gatewayConfigParser(config.responseBody);
+          }
+
+          bus
+            .emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              {
+                type: PUREJS_TYPES.INVOKE_GATEWAY,
+                config,
+              },
+              (response: any) => {
+                if (response.error) reject(response.error);
+                else resolve(response);
+              },
+            );
+        } catch (error) {
+          reject(error?.message);
+        }
       });
     }
     return new Promise((resolve, reject) => {
-      bus
-        .target(properties.IFRAME_SECURE_ORGIN)
-        .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
-          bus.emit(
-            ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
-            {
-              type: PUREJS_TYPES.INVOKE_GATEWAY,
-              config,
-            },
-            (response: any) => {
-              if (response.error) reject(response.error);
-              else resolve(response);
-            },
-          );
+      try {
+        // validateGatewayConfig(config);
+        gatewayConfigParseKeys.forEach((configKey) => {
+          if (config[configKey]) {
+            gatewayConfigParser(config[configKey]);
+          }
+          if (config.responseBody) {
+            gatewayConfigParser(config.responseBody);
+          }
         });
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+            bus.emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              {
+                type: PUREJS_TYPES.INVOKE_GATEWAY,
+                config,
+              },
+              (response: any) => {
+                if (response.error) reject(response.error);
+                else resolve(response);
+              },
+            );
+          });
+      } catch (error) {
+        reject(error?.message);
+      }
     });
   }
 }

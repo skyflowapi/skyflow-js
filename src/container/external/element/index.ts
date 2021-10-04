@@ -378,6 +378,10 @@ class Element {
   get iframeName(): string {
     return this.#iframe.name;
   }
+
+  isMounted():boolean {
+    return this.#mounted;
+  }
 }
 
 export default Element;

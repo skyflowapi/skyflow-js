@@ -32,6 +32,8 @@ class RevealFrame {
 
   #errorTextStyles!: object;
 
+  #revealedValue!:string;
+
   static init() {
     bus
       // .target(document.referrer.split("/").slice(0, 3).join("/"))
@@ -93,7 +95,9 @@ class RevealFrame {
 
     const sub = (data) => {
       if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
-        this.#dataElememt.innerText = data[this.#record.token] as string;
+        const responseValue = data[this.#record.token] as string;
+        this.#revealedValue = responseValue;
+        this.#dataElememt.innerText = responseValue;
         bus
           .target(window.location.origin)
           .off(
@@ -128,6 +132,16 @@ class RevealFrame {
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
         sub,
       );
+
+    // for gateway
+    bus.target(window.location.origin).on(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT,
+      (data, callback) => {
+        if (data.name === this.#name) {
+          if (this.#revealedValue) {
+            callback(this.#revealedValue);
+          } else { callback(this.#record.token); }
+        }
+      });
   }
 }
 

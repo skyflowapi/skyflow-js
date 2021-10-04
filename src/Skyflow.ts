@@ -1,8 +1,9 @@
+import bus from 'framebus';
 import Client from './client';
 import CollectContainer from './container/external/CollectContainer';
 import RevealContainer from './container/external/RevealContainer';
 import uuid from './libs/uuid';
-import { ElementType } from './container/constants';
+import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from './container/constants';
 import {
   validateInsertRecords,
   validateDetokenizeInput,
@@ -10,6 +11,8 @@ import {
   isValidURL,
 } from './utils/validators';
 import PureJsController from './container/external/PureJsController';
+import properties from './properties';
+import isTokenValid from './utils/jwtUtils';
 
 export interface IInsertRecord {
   table: string;
@@ -89,6 +92,8 @@ class Skyflow {
 
   #pureJsController: PureJsController;
 
+  #bearerToken:string = '';
+
   constructor(config: ISkyflow) {
     this.#client = new Client(
       {
@@ -97,6 +102,22 @@ class Skyflow {
       this.#metadata,
     );
     this.#pureJsController = new PureJsController(this.#client);
+    bus.target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN,
+        (data, callback) => {
+          if (this.#client.config.getBearerToken
+        && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
+          ) {
+            this.#client.config.getBearerToken().then((bearerToken) => {
+              this.#bearerToken = bearerToken;
+              callback({ authToken: this.#bearerToken });
+            }).catch((err) => {
+              callback({ error: err });
+            });
+          } else {
+            callback({ authToken: this.#bearerToken });
+          }
+        });
   }
 
   static init(config: ISkyflow): Skyflow {

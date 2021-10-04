@@ -18,6 +18,7 @@ import {
   constructElementsInsertReq,
   constructInsertRecordResponse,
 } from '../../../core/collect';
+import { getAccessToken } from '../../../utils/busEvents';
 
 const set = require('set-value');
 
@@ -273,15 +274,12 @@ export class IFrameFormElement extends EventEmitter {
     }
 
     // for gateway
-    bus.target(window.location.origin).on('test', (data, callback) => {
-      // console.log(this.iFrameName);
-      if (data.name === this.iFrameName) {
-        // console.log({ ...this.getStatus(), value: this.state.value });
-        // console.log(data);
-        // console.log(callback);
-        callback({ ...this.getStatus(), value: this.state.value });
-      }
-    });
+    bus.target(window.location.origin).on(ELEMENT_EVENTS_TO_IFRAME.GET_COLLECT_ELEMENT,
+      (data, callback) => {
+        if (data.name === this.iFrameName) {
+          callback({ ...this.getStatus(), value: this.state.value });
+        }
+      });
   };
 
   sendChangeStatus = (inputEvent: boolean = false) => {
@@ -462,29 +460,35 @@ export class IFrameForm {
     }
 
     const { client } = this;
-
-    const sendRequest = (token?: string) => new Promise((resolve, reject) => {
-      client
-        .request({
-          body: {
-            records: finalRequest,
-          },
-          requestMethod: 'POST',
-          url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
-          ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
-        })
-        .then((response: any) => {
-          resolve(
-            constructInsertRecordResponse(
-              response,
-              options.tokens,
-              finalRequest,
-            ),
-          );
-        })
-        .catch((error) => {
-          reject(error);
-        });
+    const sendRequest = () => new Promise((rootResolve, rootReject) => {
+      getAccessToken().then((authToken) => {
+        client
+          .request({
+            body: {
+              records: finalRequest,
+            },
+            requestMethod: 'POST',
+            url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((response: any) => {
+            rootResolve(
+              constructInsertRecordResponse(
+                response,
+                options.tokens,
+                finalRequest,
+              ),
+            );
+          })
+          .catch((error) => {
+            rootReject(error);
+          });
+      }).catch((err) => {
+        rootReject(err);
+      });
     });
 
     return new Promise((resolve, reject) => {

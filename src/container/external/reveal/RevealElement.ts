@@ -18,6 +18,8 @@ class RevealElement {
 
   #containerId: string;
 
+  #isMounted:boolean = false;
+
   constructor(record: IRevealElementInput, metaData: any, containerId: string) {
     this.#metaData = metaData;
     this.#recordData = record;
@@ -49,6 +51,7 @@ class RevealElement {
               containerId: this.#containerId,
             },
           );
+        this.#isMounted = true;
       }
     };
     bus
@@ -57,12 +60,12 @@ class RevealElement {
   }
 
   // Gateway
-  get token(): string {
-    return this.#recordData.token;
-  }
-
   get iframeName(): string {
     return this.#iframe.name;
+  }
+
+  isMounted():boolean {
+    return this.#isMounted;
   }
 }
 

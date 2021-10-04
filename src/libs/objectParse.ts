@@ -1,110 +1,58 @@
-import bus from 'framebus';
 import RevealElement from '../container/external/reveal/RevealElement';
 import Element from '../container/external/element';
-import { FRAME_ELEMENT } from '../container/constants';
+import { FRAME_ELEMENT, FRAME_REVEAL } from '../container/constants';
+import { flattenObject } from '../utils/helpers';
+import { processIframeElement, processRevealFrameElement } from '../utils/busEvents';
 
-export function containerObjectParse(data) {
+const set = require('set-value');
+
+export function gatewayConfigParser(data) {
   Object.entries(data).forEach(([key, value]) => {
     if (value instanceof RevealElement) {
-      data[key] = value.token;
+      if (!value.isMounted()) { throw new Error('Element Not Mounted'); }
+      data[key] = value.iframeName;
     } else if (value instanceof Element) {
+      if (!value.isMounted()) { throw new Error('Element Not Mounted'); }
       data[key] = value.iframeName;
     } else if (value instanceof Object) {
-      containerObjectParse(value);
+      gatewayConfigParser(value);
     }
   });
 }
 
-export function formatFrameNameToId(name: string) {
-  const arr = name.split(':');
-  if (arr.length > 1) {
-    arr.pop();
-    return arr.join(':');
-  }
-  return '';
-}
+export function collectObjectParser(data) {
+  const flattenData = flattenObject(data);
+  const collectElements = {};
+  const revealElements = {};
 
-function processIframeElement(elementIframename) {
-  // const elementIFrame = window.parent.frames[elementIframename];
-  // if (elementIFrame) {
-  //   const id = formatFrameNameToId(elementIframename);
-  //   const elementInput = elementIFrame.document.getElementById(id) as HTMLInputElement;
-  //   if (elementInput) return elementInput.value;
-  //   return elementIframename;
-  // }
-  // return elementIframename;
-  // let elementState;
-  return new Promise((resolve, reject) => {
-    bus.emit('test', { name: formatFrameNameToId(elementIframename) }, (state:any) => {
-      // console.log(state);
-      if (!state.isValid) {
-        reject('Invalid Field');
-      }
-      resolve(state.value);
-    });
-  });
-}
-
-export function collectObjectParse(data, promiseList) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Object.entries(data).forEach(([key, value]) => {
+  Object.entries(flattenData).forEach(([key, value]) => {
     if (typeof value === 'string') {
       const isCollectElement = value.startsWith(`${FRAME_ELEMENT}:`);
+      const isRevealElememt = value.startsWith(`${FRAME_REVEAL}:`);
       if (isCollectElement) {
-        promiseList.push(processIframeElement(value));
+        collectElements[key] = value;
+      }
+      if (isRevealElememt) {
+        revealElements[key] = value;
       }
     }
-    if (value instanceof Object) {
-      collectObjectParse(value, promiseList);
-    }
   });
-}
 
-export function responseBodyObjectParse(responseBody:object) {
-  Object.entries(responseBody).forEach(([key, value]) => {
-    if (value instanceof RevealElement) {
-      responseBody[key] = value.iframeName;
-    } else if (value instanceof Element) {
-      // TODO
-    } else if (value instanceof Object) {
-      responseBodyObjectParse(value);
-    }
+  const promiseList : any = [];
+
+  Object.entries(collectElements).forEach(([key, value]) => {
+    promiseList.push(processIframeElement(key, value));
   });
-}
+  Object.entries(revealElements).forEach(([key, value]) => {
+    promiseList.push(processRevealFrameElement(key, value));
+  });
 
-export function fillUrlWithPathAndQueryParams(gatewayUrl:string,
-  pathParams?:object,
-  queryParams?:object) {
-  let filledGatewayUrl = gatewayUrl;
-  if (pathParams) {
-    Object.entries(pathParams).forEach(([key, value]) => {
-      filledGatewayUrl = gatewayUrl.replace(`{${key}}`, value);
+  return Promise.all(promiseList).then((res) => {
+    res.forEach((element:any) => {
+      set(data, element.key, element.value);
     });
-  }
-  if (queryParams) {
-    // TODO
-  }
-  return filledGatewayUrl;
-}
-
-export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
-
-export function deletePropertyPath(obj, path) {
-  if (!obj || !path) {
-    return;
-  }
-
-  if (typeof path === 'string') {
-    path = path.split('.');
-  }
-
-  for (let i = 0; i < path.length - 1; i += 1) {
-    obj = obj[path[i]];
-
-    if (typeof obj === 'undefined') {
-      return;
-    }
-  }
-
-  delete obj[path.pop()];
+    return data;
+  }).catch((err) => {
+    throw err;
+  });
 }
