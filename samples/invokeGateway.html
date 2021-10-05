@@ -98,7 +98,7 @@
     const revealButton = document.getElementById("genrateCvv");
     revealButton.addEventListener("click", () => {
       const sdkResponse = skyflow.invokeGateway({
-        gatewayURL:"https://sb.area51.gateway.skyflowapis.dev/v1/gateway/outboundRoutes/bf9b3f06-e1ba-4ef2-8758-9409c735859e/dcas/cardservices/v1/cards/{card_number}/cvv2generation",
+        gatewayURL:"https://sb.area51.gateway.skyflowapis.dev/v1/gateway/outboundRoutes/ddb7b87f78cf42f9a9e87f7df8abc9d8/dcas/cardservices/v1/cards/{card_number}/cvv2generation",
         methodName: Skyflow.RequestMethod.POST,
         requestHeader: {
           "Authorization": "Basic QjBORFNKUEcyMzhTMjJOSlU5QjIyMVJfQTBMT3ZLZE1xS3JRQTJOQXpBXzFQQVIyRTozZ0Z3NlNmMUU5VDMxeWo2a3FQMzJmY1VBOU4weUQ5WjlDbA==",
