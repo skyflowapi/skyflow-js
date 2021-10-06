@@ -3,6 +3,8 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
+  LogLevel,
+  MessageType,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import Bus from '../../../libs/Bus';
@@ -12,6 +14,9 @@ import {
   validateAndSetupGroupOptions,
 } from '../../../libs/element-options';
 import IFrame from './IFrame';
+import { LogLevelOptions, printLog, getElementName } from '../../../utils/helper';
+import { logs } from '../../../utils/logs';
+import { Context } from '../../../Skyflow';
 
 class Element {
   elementType: string;
@@ -45,7 +50,15 @@ class Element {
   #updateCallbacks: Function[] = [];
 
   #mounted = false;
-  #isDebug = false;
+
+  #logLevel = LogLevel.PROD;
+
+  #showErrorLogs: boolean;
+
+  #showInfoLogs: boolean;
+
+  #doesReturnValue:boolean;
+
   constructor(
     elementGroup: any,
     metaData: any,
@@ -53,16 +66,20 @@ class Element {
     isSingleElementAPI: boolean = false,
     destroyCallback: Function,
     updateCallback: Function,
-    isDebug: any
+    context: Context,
   ) {
     this.containerId = containerId;
-    this.#isDebug = isDebug;
+    this.#logLevel = context.logLevel;
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
     if (this.#isSingleElementAPI && this.#elements.length > 1) {
-      throw new Error('Unknown Error');
+      throw new Error(logs.errorLogs.UNKNOWN_ERROR);
     }
+    const { showInfoLogs, showErrorLogs, doesReturnValue } = LogLevelOptions[this.#logLevel];
+    this.#showInfoLogs = showInfoLogs;
+    this.#showErrorLogs = showErrorLogs;
+    this.#doesReturnValue = doesReturnValue;
     this.elementType = this.#isSingleElementAPI
       ? this.#elements[0].elementType
       : 'group';
@@ -93,7 +110,9 @@ class Element {
   }
 
   mount = (domElement) => {
+    const elementName = this.#iframe.name;
     this.#iframe.mount(domElement);
+    printLog(`${getElementName(this.#iframe.name)} ${logs.infoLogs.ELEMENT_MOUNTED}`, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
@@ -191,10 +210,8 @@ class Element {
         this.#state.isFocused = elementState.isFocused;
         this.#state.value = {};
         const key = this.#elements[index].elementName;
-        const value = this.#isDebug ? elementState.value : undefined;
-        if (this.#isSingleElementAPI)
-          this.#state.value = this.#isDebug ? value : undefined;
-        else this.#state.value[key] = value;
+        const value = this.#doesReturnValue ? elementState.value : undefined;
+        if (this.#isSingleElementAPI) { this.#state.value = this.#doesReturnValue ? value : undefined; } else this.#state.value[key] = value;
       } else {
         this.#state.isEmpty = this.#state.isEmpty || elementState.isEmpty;
         this.#state.isComplete = this.#state.isComplete && elementState.isComplete;
@@ -241,7 +258,7 @@ class Element {
         handler(data);
       });
     } else {
-      throw new Error('Provide valid event listener');
+      throw new Error(logs.errorLogs.INVALID_EVENT_LISTENER);
     }
   }
 
@@ -349,7 +366,7 @@ class Element {
                 //   break;
 
               default:
-                throw new Error('Provide a valid event type');
+                throw new Error(logs.errorLogs.INVALID_EVENT_TYPE);
             }
 
             this.#eventEmitter._emit(emitEvent, emitData);

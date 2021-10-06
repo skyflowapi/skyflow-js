@@ -11,6 +11,7 @@ import {
 } from './container/constants';
 import RevealFrameController from './container/internal/reveal/RevealFrameController';
 import PureJsFrameController from './container/internal/pureJs/PureJsFrameController';
+import { logs } from './utils/logs';
 
 if (typeof window.console === 'undefined') {
   (<any>window).console = <any>{
@@ -36,6 +37,6 @@ if (typeof window.console === 'undefined') {
       RevealFrame.init();
     }
   } catch (e) {
-    throw new Error('Expecting a valid Iframe');
+    throw new Error(logs.errorLogs.INVALID_IFRAME);
   }
 }(window));

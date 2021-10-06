@@ -2,6 +2,7 @@ import iframer, {
   setAttributes,
   getIframeSrc,
 } from '../../../iframe-libs/iframer';
+import { logs } from '../../../utils/logs';
 
 export default class IFrame {
   name: string;
@@ -24,11 +25,11 @@ export default class IFrame {
       if (typeof domElement === 'string') {
         this.container = document.querySelector(domElement) || undefined;
         if (!this.container) {
-          throw new Error('Provided element selector is not valid or not found');
+          throw new Error(logs.errorLogs.INVALID_ELEMENT_SELECTOR);
         }
       } else this.container = domElement;
     } catch (e) {
-      throw new Error('Provided element selector is not valid or not found');
+      throw new Error(logs.errorLogs.INVALID_ELEMENT_SELECTOR);
     }
 
     setAttributes(this.iframe, { src: getIframeSrc() });

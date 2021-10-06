@@ -1,4 +1,5 @@
 import bus from 'framebus';
+import { Context } from 'vm';
 import { RedactionType } from '../../Skyflow';
 import iframer, {
   setAttributes,
@@ -16,6 +17,7 @@ import uuid from '../../libs/uuid';
 import EventEmitter from '../../event-emitter';
 import properties from '../../properties';
 import { validateRevealElementRecords } from '../../utils/validators';
+import { LogLevelOptions } from '../../utils/helper';
 
 export interface IRevealElementInput {
   token?: string;
@@ -42,11 +44,17 @@ class RevealContainer {
 
   #isElementsMounted: boolean = false;
 
-  constructor(metaData) {
+  #showErrorLogs: boolean;
+
+  #showInfoLogs: boolean;
+
+  #context:Context;
+
+  constructor(metaData, context) {
     this.#metaData = metaData;
     this.#containerId = uuid();
     this.#eventEmmiter = new EventEmitter();
-
+    this.#context = context;
     const iframe = iframer({
       name: `${REVEAL_FRAME_CONTROLLER}:${this.#containerId}`,
     });
@@ -54,7 +62,10 @@ class RevealContainer {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-
+    const { showInfoLogs, showErrorLogs } = LogLevelOptions[
+      context.logLevel];
+    this.#showInfoLogs = showInfoLogs;
+    this.#showErrorLogs = showErrorLogs;
     const sub = (data, callback) => {
       if (data.name === REVEAL_FRAME_CONTROLLER) {
         callback({

@@ -1,18 +1,25 @@
 import bus from 'framebus';
+import uuid from './libs/uuid';
+import {
+  ElementType,
+  ELEMENT_EVENTS_TO_IFRAME,
+  LogLevel,
+  MessageType,
+} from './container/constants';
 import Client from './client';
 import CollectContainer from './container/external/CollectContainer';
 import RevealContainer from './container/external/RevealContainer';
-import uuid from './libs/uuid';
-import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from './container/constants';
 import {
   validateInsertRecords,
   validateDetokenizeInput,
   validateGetByIdInput,
   isValidURL,
 } from './utils/validators';
-import PureJsController from './container/external/PureJsController';
 import properties from './properties';
 import isTokenValid from './utils/jwtUtils';
+import PureJsController from './container/external/PureJsController';
+import { logs } from './utils/logs';
+import { LogLevelOptions, printLog } from './utils/helper';
 
 export interface IInsertRecord {
   table: string;
@@ -62,7 +69,11 @@ export interface IGetByIdInput {
   records: ISkyflowIdRecord[];
 }
 
-export enum RequestMethod{
+export interface Context{
+  logLevel:LogLevel
+}
+
+export enum RequestMethod {
   GET = 'GET',
   POST = 'POST',
   PUT = 'PUT',
@@ -72,7 +83,7 @@ export enum RequestMethod{
 
 export interface IGatewayConfig {
   gatewayURL: string;
-  methodName:RequestMethod;
+  methodName: RequestMethod;
   pathParams?: any;
   queryParams?: any;
   requestBody?: any;
@@ -92,9 +103,16 @@ class Skyflow {
 
   #pureJsController: PureJsController;
 
-  #bearerToken:string = '';
+  #bearerToken: string = '';
 
-  #options:any;
+  #options: any;
+
+  #showErrorLogs: boolean;
+
+  #showInfoLogs: boolean;
+
+  #logLevel:LogLevel;
+
   constructor(config: ISkyflow) {
     this.#client = new Client(
       {
@@ -103,56 +121,69 @@ class Skyflow {
       this.#metadata,
     );
     this.#pureJsController = new PureJsController(this.#client);
-    bus.target(properties.IFRAME_SECURE_ORGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN,
-        (data, callback) => {
-          if (this.#client.config.getBearerToken
-        && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
-          ) {
-            this.#client.config.getBearerToken().then((bearerToken) => {
+    this.#logLevel = config?.options?.logLevel;
+    const { showInfoLogs, showErrorLogs } = LogLevelOptions[this.#logLevel];
+
+    this.#showInfoLogs = showInfoLogs;
+    this.#showErrorLogs = showErrorLogs;
+    bus
+      .target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, (data, callback) => {
+        if (
+          this.#client.config.getBearerToken
+          && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
+        ) {
+          this.#client.config
+            .getBearerToken()
+            .then((bearerToken) => {
               this.#bearerToken = bearerToken;
               callback({ authToken: this.#bearerToken });
-            }).catch((err) => {
+            })
+            .catch((err) => {
               callback({ error: err });
             });
-          } else {
-            callback({ authToken: this.#bearerToken });
-          }
-        });
+        } else {
+          callback({ authToken: this.#bearerToken });
+        }
+      });
   }
 
   static init(config: ISkyflow): Skyflow {
+    const { showInfoLogs, showErrorLogs } = LogLevelOptions[config?.options?.logLevel];
     if (
       !config
       || !config.vaultID
       || !isValidURL(config.vaultURL)
       || !config.getBearerToken
     ) {
-      throw new Error('Invalid client credentials');
+      if (showErrorLogs) throw new Error(logs.errorLogs.INVALID_CREDENTIALS);
     }
-
     const tempConfig = config;
     tempConfig.vaultURL = config.vaultURL.slice(-1) === '/'
       ? config.vaultURL.slice(0, -1)
       : config.vaultURL;
-
+    printLog(logs.infoLogs.INITIALIZE_CLIENT, MessageType.INFO, showInfoLogs, showErrorLogs);
     return new Skyflow(tempConfig);
   }
 
   container(type: ContainerType, options?: Record<string, any>) {
     switch (type) {
       case ContainerType.COLLECT:
+        printLog(logs.infoLogs.CREATE_COLLECT_CONTAINER, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
         return new CollectContainer(options, {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
-        });
+        },
+        { logLevel: this.#logLevel });
       case ContainerType.REVEAL:
+        printLog(logs.infoLogs.CREATE_REVEAL_CONTAINER, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
         return new RevealContainer({
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
-        });
+        },
+        { logLevel: this.#logLevel });
       default:
-        throw new Error('Invalid container type');
+        if (this.#showErrorLogs) throw new Error(logs.errorLogs.INVALID_CONTAINER_TYPE);
     }
   }
 
@@ -160,13 +191,13 @@ class Skyflow {
     records: IInsertRecordInput,
     options: Record<string, any> = { tokens: true },
   ) {
+    printLog(logs.infoLogs.VALIDATE_RECORDS, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
     validateInsertRecords(records);
     return this.#pureJsController.insert(records, options);
   }
 
-  detokenize(
-    detokenizeInput: IDetokenizeInput,
-  ): Promise<IRevealResponseType> {
+  detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
+    printLog(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
     validateDetokenizeInput(detokenizeInput);
     return this.#pureJsController.detokenize(detokenizeInput.records);
   }

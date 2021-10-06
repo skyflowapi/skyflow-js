@@ -7,6 +7,7 @@ import {
   ELEMENTS,
   COLLECT_FRAME_CONTROLLER,
   ElementType,
+  LogLevel,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -19,6 +20,9 @@ import {
   constructInsertRecordResponse,
 } from '../../../core/collect';
 import { getAccessToken } from '../../../utils/busEvents';
+import { LogLevelOptions } from '../../../utils/helper';
+import { logs } from '../../../utils/logs';
+import { Context } from '../../../Skyflow';
 
 const set = require('set-value');
 
@@ -51,7 +55,9 @@ export class IFrameFormElement extends EventEmitter {
 
   mask?: any;
 
-  constructor(name: string, metaData) {
+  context:Context;
+
+  constructor(name: string, metaData, context:Context) {
     super();
     const frameValues = name.split(':');
     const fieldType = frameValues[1];
@@ -72,7 +78,7 @@ export class IFrameFormElement extends EventEmitter {
     this.state.name = fieldName;
 
     this.metaData = metaData;
-
+    this.context = context;
     this.collectBusEvents();
   }
 
@@ -131,7 +137,7 @@ export class IFrameFormElement extends EventEmitter {
     if (this.sensitive === false && sensitive === true) {
       this.sensitive = sensitive;
     } else if (this.sensitive === true && sensitive === false) {
-      throw Error('Sensitivity is not backward compatible');
+      throw Error(logs.errorLogs.SENSITIVITY_INCOMPATIBLE);
     }
   }
 
@@ -190,15 +196,13 @@ export class IFrameFormElement extends EventEmitter {
   // return unMask(this.state.value, this.mask);
   ;
 
-  getStatus = () => {
-    return {
-      isFocused: this.state.isFocused,
-      isValid: this.state.isValid,
-      isEmpty: this.state.isEmpty,
-      isComplete: this.state.isComplete,
-      value:this.metaData.options?.debug? this.state.value:undefined
-    };
-  };
+  getStatus = () => ({
+    isFocused: this.state.isFocused,
+    isValid: this.state.isValid,
+    isEmpty: this.state.isEmpty,
+    isComplete: this.state.isComplete,
+    value: LogLevelOptions[this.metaData.options?.logLevel].doesReturnValue ? this.state.value : undefined,
+  });
 
   validator(value: string) {
     if (this.fieldType === ElementType.CARD_NUMBER) {
@@ -350,7 +354,7 @@ export class IFrameForm {
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.controllerId,
         (data) => {
           if (!data.name) {
-            throw new Error('Required params are not provided');
+            throw new Error(logs.errorLogs.REQUIRED_PARAMS_NOT_PROVIDED);
           }
           // @ts-ignore
           if (data.name && data.name.includes(COLLECT_FRAME_CONTROLLER)) {
@@ -409,12 +413,12 @@ export class IFrameForm {
     this.iFrameFormElements[frameName] = this.iFrameFormElements[frameName]
       || new IFrameFormElement(frameName, {
         ...this.clientMetaData,
-      });
+      }, { logLevel: this.clientMetaData.options?.logLevel });
     return this.iFrameFormElements[frameName];
   };
 
   tokenize = (options) => {
-    if (!this.client) throw new Error('client connection not established');
+    if (!this.client) throw new Error(logs.errorLogs.CLIENT_CONNECTION);
     const responseObject: any = {};
     const formElements = Object.keys(this.iFrameFormElements);
     for (let i = 0; i < formElements.length; i += 1) {
@@ -422,7 +426,7 @@ export class IFrameForm {
       const { tableName } = this.iFrameFormElements[formElements[i]];
       if (!state.isValid || !state.isComplete) {
         return Promise.reject({
-          error: `${[state.name]}: Provide complete and valid inputs`,
+          error: `${[state.name]}: ${logs.errorLogs.COMPLETE_AND_VALID_INPUTS}`,
         });
       }
 
@@ -470,7 +474,7 @@ export class IFrameForm {
               records: finalRequest,
             },
             requestMethod: 'POST',
-            url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+            url: `vault/v1/vaults/${client.config.vaultID}`,
             headers: {
               Authorization: `Bearer ${authToken}`,
               'Content-Type': 'application/json',
@@ -519,7 +523,7 @@ export class IFrameForm {
     }
 
     if (!frameInstance) {
-      throw new Error(`frame not found: ${frameGlobalName}`);
+      throw new Error(`${logs.errorLogs.FRAME_NOT_FOUND} ${frameGlobalName}`);
     } else if (frameInstance?.Skyflow?.init) {
       frameInstance.Skyflow.init(
         this.getOrCreateIFrameFormElement,

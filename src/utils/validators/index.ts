@@ -1,4 +1,4 @@
-import { IRevealElementInput } from '../../container/external/RevealContainer';
+import { IRevealElementInput } from "../../container/external/RevealContainer";
 import {
   IGatewayConfig,
   IDetokenizeInput,
@@ -6,10 +6,11 @@ import {
   IInsertRecordInput,
   RedactionType,
   RequestMethod,
-} from '../../Skyflow';
+} from "../../Skyflow";
+import { logs } from "../logs";
 
 export const validateCreditCardNumber = (cardNumber: string) => {
-  const value = cardNumber.replace(/[\s-]/g, '');
+  const value = cardNumber.replace(/[\s-]/g, "");
   let sum = 0;
   let shouldDouble = false;
 
@@ -28,7 +29,7 @@ export const validateCreditCardNumber = (cardNumber: string) => {
 };
 
 export const validateExpiryDate = (date: string) => {
-  const [month, year] = date.includes('/') ? date.split('/') : date.split('-');
+  const [month, year] = date.includes("/") ? date.split("/") : date.split("-");
   const expiryDate = new Date(`${year}-${month}-01`);
   const today = new Date();
 
@@ -36,90 +37,100 @@ export const validateExpiryDate = (date: string) => {
 };
 
 export const validateInsertRecords = (recordObj: IInsertRecordInput) => {
-  if (!('records' in recordObj)) {
-    throw new Error('records object key value not found');
+  if (!("records" in recordObj)) {
+    throw new Error(logs.errorLogs.RECORDS_KEY_NOT_FOUND);
   }
   const { records } = recordObj;
   if (records.length === 0) {
-    throw new Error('records object is empty');
+    throw new Error(logs.errorLogs.EMPTY_RECORD);
   }
   records.forEach((record) => {
-    if (!('table' in record && 'fields' in record)) {
-      throw new Error('table or fields parameter cannot be passed as empty');
+    if (!("table" in record && "fields" in record)) {
+      throw new Error(logs.errorLogs.EMPTY_TABLE_AND_FIELDS);
     }
-    if (record.table === '') {
-      throw new Error("Table can't be passed as empty");
+    if (record.table === "") {
+      throw new Error(logs.errorLogs.EMPTY_TABLE);
     }
   });
 };
 
 export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
-  if (!Object.prototype.hasOwnProperty.call(detokenizeInput, 'records')) throw new Error('Missing records property');
+  if (!Object.prototype.hasOwnProperty.call(detokenizeInput, "records"))
+    throw new Error(logs.errorLogs.MISSING_RECORDS);
 
   const { records } = detokenizeInput;
-  if (records.length === 0) throw new Error('Empty Records');
+  if (records.length === 0) throw new Error(logs.errorLogs.EMPTY_RECORDS);
   records.forEach((record) => {
-    if (Object.keys(record).length === 0) throw new Error('Record cannot be Empty Object');
+    if (Object.keys(record).length === 0)
+      throw new Error(logs.errorLogs.EMPTY_RECORD_OBJECT);
 
     const recordToken = record.token;
-    if (!recordToken) throw new Error('Missing token property');
-    if (recordToken === '' || typeof recordToken !== 'string') throw new Error('Invalid Token Id');
+    if (!recordToken) throw new Error(logs.errorLogs.MISSING_TOKEN);
+    if (recordToken === "" || typeof recordToken !== "string")
+      throw new Error(logs.errorLogs.INVALID_TOKEN_ID);
 
     const recordRedaction = record.redaction;
-    if (!recordRedaction) throw new Error('Missing Redaction property');
-    if (!Object.values(RedactionType).includes(recordRedaction)) throw new Error('Invalid Redaction Type');
+    if (!recordRedaction) throw new Error(logs.errorLogs.MISSING_REDACTION);
+    if (!Object.values(RedactionType).includes(recordRedaction))
+      throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE);
   });
 };
 
 export const validateGetByIdInput = (getByIdInput: IGetByIdInput) => {
-  if (!Object.prototype.hasOwnProperty.call(getByIdInput, 'records')) throw new Error('Missing records property');
+  if (!Object.prototype.hasOwnProperty.call(getByIdInput, "records"))
+    throw new Error(logs.errorLogs.MISSING_RECORDS);
   const { records } = getByIdInput;
-  if (records.length === 0) throw new Error('Empty Records');
+  if (records.length === 0) throw new Error(logs.errorLogs.EMPTY_RECORDS);
 
   records.forEach((record) => {
-    if (Object.keys(record).length === 0) throw new Error('Record cannot be Empty Object');
+    if (Object.keys(record).length === 0)
+      throw new Error(logs.errorLogs.EMPTY_RECORD_OBJECT);
 
     const recordIds = record.ids;
-    if (!recordIds) throw new Error('Missing ids property');
-    if (recordIds.length === 0) throw new Error('Record ids cannot be Empty');
+    if (!recordIds) throw new Error(logs.errorLogs.MISSING_IDS);
+    if (recordIds.length === 0) throw new Error(logs.errorLogs.EMPTY_RECORD_IDS);
     recordIds.forEach((skyflowId) => {
-      if (typeof skyflowId !== 'string') throw new Error('Invalid Type of Records Id');
+      if (typeof skyflowId !== "string")
+        throw new Error(logs.errorLogs.INVALID_RECORD_ID_TYPE);
     });
 
     const recordRedaction = record.redaction;
-    if (!recordRedaction) throw new Error('Missing Redaction property');
-    if (!Object.values(RedactionType).includes(recordRedaction)) throw new Error('Invalid Redaction Type');
+    if (!recordRedaction) throw new Error(logs.errorLogs.MISSING_REDACTION);
+    if (!Object.values(RedactionType).includes(recordRedaction))
+      throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE);
 
     const recordTable = record.table;
-    if (!Object.prototype.hasOwnProperty.call(record, 'table')) throw new Error('Missing Table Property');
+    if (!Object.prototype.hasOwnProperty.call(record, "table"))
+      throw new Error(logs.errorLogs.MISSING_TABLE);
 
-    if (recordTable === '' || typeof recordTable !== 'string') throw new Error('Invalid Record Table value');
+    if (recordTable === "" || typeof recordTable !== "string")
+      throw new Error(logs.errorLogs.INVALID_RECORD_TABLE_VALUE);
   });
 };
 
 export const validateRevealElementRecords = (records: IRevealElementInput[]) => {
-  if (records.length === 0) throw new Error('Empty Records');
+  if (records.length === 0) throw new Error(logs.errorLogs.EMPTY_RECORDS);
   records.forEach((record) => {
     if (!Object.prototype.hasOwnProperty.call(record, 'token')) {
-      throw new Error('token key is Missing');
+      throw new Error(logs.errorLogs.MISSING_TOKEN_KEY);
     }
     const recordToken = record.token;
     if (!recordToken || typeof recordToken !== 'string') throw new Error(`Invalid Token ${recordToken}`);
     if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
-      throw new Error('redaction key is Missing');
+      throw new Error(logs.errorLogs.MISSING_REDACTION);
     }
     const recordRedaction = record.redaction;
-    if (!recordRedaction) throw new Error('Missing redaction value');
-    if (!Object.values(RedactionType).includes(recordRedaction)) throw new Error('Invalid Redaction Type');
+    if (!recordRedaction) throw new Error(logs.errorLogs.MISSING_REDACTION_VALUE);
+    if (!Object.values(RedactionType).includes(recordRedaction)) throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE);
 
-    if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') throw new Error('Invalid Record Label Type');
+    if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') throw new Error(logs.errorLogs.INVALID_RECORD_LABEL);
 
-    if (Object.prototype.hasOwnProperty.call(record, 'altText') && typeof record.altText !== 'string') throw new Error('Invalid Record altText Type');
+    if (Object.prototype.hasOwnProperty.call(record, 'altText') && typeof record.altText !== 'string') throw new Error(logs.errorLogs.INVALID_RECORD_ALT_TEXT);
   });
 };
 
 export const isValidURL = (url: string) => {
-  if (url.substring(0, 5).toLowerCase() !== 'https') {
+  if (url.substring(0, 5).toLowerCase() !== "https") {
     return false;
   }
   try {
@@ -132,19 +143,21 @@ export const isValidURL = (url: string) => {
   return true;
 };
 
-export const validateGatewayConfig = (config:IGatewayConfig) => {
-  if (!Object.prototype.hasOwnProperty.call(config, 'gatewayURL')) {
-    throw new Error('gateway URL Key is Missing');
+export const validateGatewayConfig = (config: IGatewayConfig) => {
+  if (!Object.prototype.hasOwnProperty.call(config, "gatewayURL")) {
+    throw new Error(logs.errorLogs.MISSING_GATEWAY_URL);
   }
-  if (typeof config.gatewayURL !== 'string') {
-    throw new Error('Invalid gateway URL type');
+  if (typeof config.gatewayURL !== "string") {
+    throw new Error(logs.errorLogs.INVALID_GATEWAY_URL_TYPE);
   }
   if (!isValidURL(config.gatewayURL)) {
-    throw new Error('Invalid gateway URL');
+    throw new Error(logs.errorLogs.INVALID_GATEWAY_URL);
   }
 
-  if (!Object.prototype.hasOwnProperty.call(config, 'methodName')) {
-    throw new Error('methodName Key is Missing');
+  if (!Object.prototype.hasOwnProperty.call(config, "methodName")) {
+    throw new Error(logs.errorLogs.MISSING_METHODNAME_KEY);
   }
-  if (!Object.values(RequestMethod).includes(config.methodName)) { throw new Error('Invalid methodName value'); }
+  if (!Object.values(RequestMethod).includes(config.methodName)) {
+    throw new Error(logs.errorLogs.INVALID_METHODNAME_VALUE);
+  }
 };

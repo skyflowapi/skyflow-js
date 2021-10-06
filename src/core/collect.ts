@@ -43,18 +43,19 @@ export const constructInsertRecordResponse = (
   if (tokens) {
     return {
       records: responseBody.responses
-        .filter((res, index) => index % 2 !== 0)
         .map((res, index) => {
-          const skyflowId = res.fields['*'];
-          delete res.fields['*'];
-          return {
-            table: records[index].table,
-            fields: {
-              skyflow_id: skyflowId,
-              ...res.fields,
-            },
-          };
-        }),
+          if (index % 2 !== 0) {
+            const skyflowId = responseBody.responses[index - 1].records[0].skyflow_id;
+            delete res.fields['*'];
+            return {
+              table: records[index].table,
+              fields: {
+                skyflow_id: skyflowId,
+                ...res.fields,
+              },
+            };
+          }
+        }).filter((res, index) => index % 2 !== 0),
     };
   }
   return {

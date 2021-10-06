@@ -16,8 +16,12 @@ import {
   ELEMENTS,
   FRAME_ELEMENT,
   ElementType,
+  LogLevel,
+  MessageType,
 } from '../constants';
 import Element from './element';
+import { logs } from '../../utils/logs';
+import { LogLevelOptions, printLog } from '../../utils/helper';
 
 interface CollectElementInput {
   table?: string;
@@ -42,11 +46,17 @@ class CollectContainer {
   #elements: Record<string, Element> = {};
 
   #metaData: any;
-  #isDebug:boolean=false;
-  constructor(options, metaData) {
+
+  #logLevel:LogLevel = LogLevel.PROD;
+
+  #showErrorLogs: boolean;
+
+  #showInfoLogs: boolean;
+
+  constructor(options, metaData, context) {
     this.#containerId = uuid();
     this.#metaData = metaData;
-    this.#isDebug=metaData.clientJSON.config.options?.debug;
+    this.#logLevel = context.logLevel;
     const iframe = iframer({
       name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}`,
     });
@@ -54,7 +64,9 @@ class CollectContainer {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-
+    const { showInfoLogs, showErrorLogs } = LogLevelOptions[this.#logLevel];
+    this.#showInfoLogs = showInfoLogs;
+    this.#showErrorLogs = showErrorLogs;
     const sub = (data, callback) => {
       if (data.name === COLLECT_FRAME_CONTROLLER + this.#containerId) {
         callback({
@@ -67,7 +79,7 @@ class CollectContainer {
                 metaData.clientJSON.config.getBearerToken.toString(),
             },
           },
-          options:metaData.clientJSON.config.options
+          options: metaData.clientJSON.config.options,
         });
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
@@ -143,7 +155,7 @@ class CollectContainer {
       && !this.#elements[elements[0].elementName]
       && this.#hasElementName(elements[0].name)
     ) {
-      throw new Error(`The element name has to unique: ${elements[0].name}`);
+      throw new Error(`${logs.errorLogs.UNIQUE_ELEMENT_NAME} ${elements[0].name}`);
     }
 
     let element = this.#elements[tempElements.elementName];
@@ -161,7 +173,7 @@ class CollectContainer {
         isSingleElementAPI,
         this.#destroyCallback,
         this.#updateCallback,
-        this.#isDebug
+        { logLevel: this.#logLevel },
       );
       this.#elements[tempElements.elementName] = element;
     }
@@ -214,8 +226,8 @@ class CollectContainer {
     try {
       const collectElements = Object.values(this.#elements);
       collectElements.forEach((element) => {
-        if (!element.isMounted()) { throw new Error('Elements not Mounted'); }
-        if (!element.isValidElement()) { throw new Error('Invalid table or column'); }
+        if (!element.isMounted()) { throw new Error(logs.errorLogs.ELEMENT_NOT_MOUNTED); }
+        if (!element.isValidElement()) { throw new Error(logs.errorLogs.INVALID_TABLE_OR_COLUMN); }
       });
       bus
       // .target(properties.IFRAME_SECURE_ORGIN)
@@ -227,8 +239,10 @@ class CollectContainer {
           },
           (data: any) => {
             if (!data || data?.error) {
+              printLog(`Error: ${data?.error}`, MessageType.ERROR, this.#showInfoLogs, this.#showErrorLogs);
               reject(data);
             } else {
+              printLog(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
               resolve(data);
             }
           },
@@ -238,5 +252,4 @@ class CollectContainer {
     }
   });
 }
-
 export default CollectContainer;
