@@ -22,7 +22,7 @@ import {
 } from '../../../core/collect';
 import { getAccessToken } from '../../../utils/busEvents';
 import { LogLevelOptions, printLog, parameterizedString } from '../../../utils/helper';
-import { logs } from '../../../utils/logs';
+import logs from '../../../utils/logs';
 import { Context } from '../../../Skyflow';
 
 const set = require('set-value');
@@ -380,7 +380,9 @@ export class IFrameForm {
         (data, callback) => {
           const { showInfoLogs, showErrorLogs } = LogLevelOptions[this.logLevel];
 
-          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST), MessageType.INFO, showErrorLogs, showInfoLogs);
+          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+            ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+          MessageType.INFO, showErrorLogs, showInfoLogs);
           // todo: Do we need to reset the data!?
           this.tokenize(data)
             .then((response) => {

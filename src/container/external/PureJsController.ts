@@ -8,7 +8,7 @@ import iframer, {
 import { gatewayConfigParser } from '../../libs/objectParse';
 import properties from '../../properties';
 import {
-  IGatewayConfig, IRevealRecord, ISkyflowIdRecord, Context, IDetokenizeInput, IGetByIdInput,
+  IGatewayConfig, Context, IDetokenizeInput, IGetByIdInput,
 } from '../../Skyflow';
 import {
   validateGatewayConfig, validateInsertRecords, validateDetokenizeInput, validateGetByIdInput,
@@ -22,7 +22,7 @@ import {
   MessageType,
 } from '../constants';
 import { LogLevelOptions, printLog, parameterizedString } from '../../utils/helper';
-import { logs } from '../../utils/logs';
+import logs from '../../utils/logs';
 
 class PureJsController {
   #client: Client;
@@ -52,7 +52,8 @@ class PureJsController {
     bus
       .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, (data, callback) => {
-        printLog(logs.infoLogs.CAPTURE_PUREJS_FRAME, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(logs.infoLogs.CAPTURE_PUREJS_FRAME, MessageType.INFO,
+          this.#showErrorLogs, this.#showInfoLogs);
         callback({
           client: this.#client,
           bearerToken: this.#client.config.getBearerToken.toString(),
@@ -60,14 +61,16 @@ class PureJsController {
         });
         this.#isControllerFrameReady = true;
       });
-    printLog(logs.infoLogs.PUREJS_CONTROLLER_INITIALIZED, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    printLog(logs.infoLogs.PUREJS_CONTROLLER_INITIALIZED, MessageType.INFO,
+      this.#showErrorLogs, this.#showInfoLogs);
   }
 
   detokenize(detokenizeInput: IDetokenizeInput): Promise<any> {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
-          printLog(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, MessageType.INFO,
+            this.#showErrorLogs, this.#showInfoLogs);
 
           validateDetokenizeInput(detokenizeInput);
           bus
@@ -83,7 +86,8 @@ class PureJsController {
                 else resolve(revealData);
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.DETOKENIZE), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.DETOKENIZE),
+            MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         } catch (e) {
           printLog(e.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
           reject(e);
@@ -92,7 +96,8 @@ class PureJsController {
     }
     return new Promise((resolve, reject) => {
       try {
-        printLog(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, MessageType.INFO,
+          this.#showErrorLogs, this.#showInfoLogs);
 
         validateDetokenizeInput(detokenizeInput);
         bus
@@ -110,7 +115,8 @@ class PureJsController {
               },
             );
           });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.DETOKENIZE), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.DETOKENIZE),
+          MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
       } catch (e) {
         printLog(e.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
         reject(e);
@@ -122,7 +128,8 @@ class PureJsController {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
-          printLog(logs.infoLogs.VALIDATE_RECORDS, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(logs.infoLogs.VALIDATE_RECORDS, MessageType.INFO,
+            this.#showErrorLogs, this.#showInfoLogs);
 
           validateInsertRecords(records);
           bus
@@ -139,7 +146,8 @@ class PureJsController {
                 else resolve(insertedData);
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.INSERT), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.INSERT),
+            MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         } catch (e) {
           printLog(e.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
 
@@ -149,7 +157,8 @@ class PureJsController {
     }
     return new Promise((resolve, reject) => {
       try {
-        printLog(logs.infoLogs.VALIDATE_RECORDS, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(logs.infoLogs.VALIDATE_RECORDS, MessageType.INFO,
+          this.#showErrorLogs, this.#showInfoLogs);
 
         validateInsertRecords(records);
         bus
@@ -168,7 +177,8 @@ class PureJsController {
               },
             );
           });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.INSERT), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.INSERT),
+          MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
       } catch (e) {
         printLog(e.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
 
@@ -181,7 +191,8 @@ class PureJsController {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
-          printLog(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT, MessageType.INFO,
+            this.#showErrorLogs, this.#showInfoLogs);
 
           validateGetByIdInput(getByIdInput);
 
@@ -198,7 +209,9 @@ class PureJsController {
                 else resolve(revealData);
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.GET_BY_SKYFLOWID), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
+            PUREJS_TYPES.GET_BY_SKYFLOWID),
+          MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         } catch (e) {
           printLog(e.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
 
@@ -208,7 +221,8 @@ class PureJsController {
     }
     return new Promise((resolve, reject) => {
       try {
-        printLog(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT, MessageType.INFO,
+          this.#showErrorLogs, this.#showInfoLogs);
 
         validateGetByIdInput(getByIdInput);
         bus
@@ -226,7 +240,9 @@ class PureJsController {
               },
             );
           });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.GET_BY_SKYFLOWID), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
+          PUREJS_TYPES.GET_BY_SKYFLOWID),
+        MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
       } catch (e) {
         printLog(e.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
 
@@ -239,7 +255,8 @@ class PureJsController {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
-          printLog(logs.infoLogs.VALIDATE_GATEWAY_CONFIG, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(logs.infoLogs.VALIDATE_GATEWAY_CONFIG, MessageType.INFO,
+            this.#showErrorLogs, this.#showInfoLogs);
 
           validateGatewayConfig(config);
           gatewayConfigParseKeys.forEach((configKey) => {
@@ -263,7 +280,9 @@ class PureJsController {
                 else resolve(response);
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.INVOKE_GATEWAY), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
+            PUREJS_TYPES.INVOKE_GATEWAY),
+          MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         } catch (error) {
           printLog(error.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
 
@@ -273,7 +292,8 @@ class PureJsController {
     }
     return new Promise((resolve, reject) => {
       try {
-        printLog(logs.infoLogs.VALIDATE_GATEWAY_CONFIG, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(logs.infoLogs.VALIDATE_GATEWAY_CONFIG, MessageType.INFO,
+          this.#showErrorLogs, this.#showInfoLogs);
 
         validateGatewayConfig(config);
         gatewayConfigParseKeys.forEach((configKey) => {
@@ -299,7 +319,9 @@ class PureJsController {
               },
             );
           });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, PUREJS_TYPES.INVOKE_GATEWAY), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
+          PUREJS_TYPES.INVOKE_GATEWAY),
+        MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
       } catch (error) {
         printLog(error.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
 

@@ -7,7 +7,7 @@ import {
   RedactionType,
   RequestMethod,
 } from '../../Skyflow';
-import { logs } from '../logs';
+import logs from '../logs';
 import { parameterizedString } from '../helper';
 
 export const validateCreditCardNumber = (cardNumber: string) => {
@@ -69,7 +69,9 @@ export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
 
     const recordRedaction = record.redaction;
     if (!recordRedaction) throw new Error(logs.errorLogs.MISSING_REDACTION);
-    if (!Object.values(RedactionType).includes(recordRedaction)) { throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE); }
+    if (!Object.values(RedactionType).includes(recordRedaction)) {
+      throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE);
+    }
   });
 };
 
@@ -90,12 +92,18 @@ export const validateGetByIdInput = (getByIdInput: IGetByIdInput) => {
 
     const recordRedaction = record.redaction;
     if (!recordRedaction) throw new Error(logs.errorLogs.MISSING_REDACTION);
-    if (!Object.values(RedactionType).includes(recordRedaction)) { throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE); }
+    if (!Object.values(RedactionType).includes(recordRedaction)) {
+      throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE);
+    }
 
     const recordTable = record.table;
-    if (!Object.prototype.hasOwnProperty.call(record, 'table')) { throw new Error(logs.errorLogs.MISSING_TABLE); }
+    if (!Object.prototype.hasOwnProperty.call(record, 'table')) {
+      throw new Error(logs.errorLogs.MISSING_TABLE);
+    }
 
-    if (recordTable === '' || typeof recordTable !== 'string') { throw new Error(logs.errorLogs.INVALID_RECORD_TABLE_VALUE); }
+    if (recordTable === '' || typeof recordTable !== 'string') {
+      throw new Error(logs.errorLogs.INVALID_RECORD_TABLE_VALUE);
+    }
   });
 };
 
@@ -112,7 +120,9 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
     }
     const recordRedaction = record.redaction;
     if (!recordRedaction) throw new Error(logs.errorLogs.MISSING_REDACTION_VALUE);
-    if (!Object.values(RedactionType).includes(recordRedaction)) throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE);
+    if (!Object.values(RedactionType).includes(recordRedaction)) {
+      throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE);
+    }
 
     if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') throw new Error(logs.errorLogs.INVALID_RECORD_LABEL);
 

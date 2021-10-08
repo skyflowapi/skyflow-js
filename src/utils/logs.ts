@@ -1,4 +1,4 @@
-export const logs = {
+const logs = {
   infoLogs: {
     INITIALIZE_CLIENT: 'Initializing skyflow client.',
     CLIENT_INITIALIZED: 'Initialized skyflow client successfully.',
@@ -136,3 +136,5 @@ export const logs = {
 
   },
 };
+
+export default logs;

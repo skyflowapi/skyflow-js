@@ -142,17 +142,16 @@ export default class FrameElements {
           ALLOWED_MULTIPLE_FIELDS_STYLES,
         );
 
-          // create a iframeelement
-          // create element by passing iframeformelement and options and mount by default returns
-          const iFrameFormElement = this.getOrCreateIFrameFormElement(
-            element.elementName,
-          );
-          elements[element.elementName] = new FrameElement(
-            iFrameFormElement,
-            element,
-            elementDiv,
-          );
-        
+        // create a iframeelement
+        // create element by passing iframeformelement and options and mount by default returns
+        const iFrameFormElement = this.getOrCreateIFrameFormElement(
+          element.elementName,
+        );
+        elements[element.elementName] = new FrameElement(
+          iFrameFormElement,
+          element,
+          elementDiv,
+        );
 
         rowDiv.append(elementDiv);
       });

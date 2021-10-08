@@ -1,4 +1,4 @@
-import { LogLevel, MessageType } from '../container/constants';
+import { MessageType } from '../container/constants';
 
 export const LogLevelOptions = {
   INFO: { showInfoLogs: true, showErrorLogs: true, doesReturnValue: false },
@@ -11,10 +11,13 @@ export const LogLevelOptions = {
   },
 };
 
-export const printLog = (message: string, messageType:MessageType, showErrorLogs:boolean, showInfoLogs:boolean) => {
+export const printLog = (message: string, messageType:MessageType,
+  showErrorLogs:boolean, showInfoLogs:boolean) => {
   if (messageType === MessageType.INFO && showInfoLogs) {
+    // eslint-disable-next-line no-console
     console.log(message);
   } else if (messageType === MessageType.ERROR && showErrorLogs) {
+    // eslint-disable-next-line no-console
     console.error(message);
   }
 };

@@ -57,15 +57,15 @@ export enum ElementType {
 }
 
 export enum LogLevel{
-  DEMO="DEMO",
-  INFO="INFO",
-  DEBUG="DEBUG",
-  PROD="PROD"
+  DEMO = 'DEMO',
+  INFO = 'INFO',
+  DEBUG = 'DEBUG',
+  PROD = 'PROD',
 }
 
 export enum MessageType{
-  INFO="INFO",
-  ERROR="ERROR"
+  INFO = 'INFO',
+  ERROR = 'ERROR',
 }
 
 export const ELEMENTS = {

@@ -10,8 +10,7 @@ import {
 } from '../../constants';
 import getCssClassesFromJss from '../../../libs/jss-styles';
 import { printLog, parameterizedString, LogLevelOptions } from '../../../utils/helper';
-import { Context } from '../../../Skyflow';
-import { logs } from '../../../utils/logs';
+import logs from '../../../utils/logs';
 
 class RevealFrame {
   static revealFrame: RevealFrame;
@@ -109,7 +108,8 @@ class RevealFrame {
         const responseValue = data[this.#record.token] as string;
         this.#revealedValue = responseValue;
         this.#dataElememt.innerText = responseValue;
-        printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED, this.#record.token), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
+          this.#record.token), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         bus
           .target(window.location.origin)
           .off(
@@ -146,14 +146,16 @@ class RevealFrame {
       );
 
     // for gateway
-    bus.target(window.location.origin).on(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT,
+    bus.target(window.location.origin).on(
+      ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT,
       (data, callback) => {
         if (data.name === this.#name) {
           if (this.#revealedValue) {
             callback(this.#revealedValue);
           } else { callback(this.#record.token); }
         }
-      });
+      },
+    );
   }
 }
 

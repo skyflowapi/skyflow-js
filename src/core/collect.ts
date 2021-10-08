@@ -1,9 +1,8 @@
 import _ from 'lodash';
 import { IInsertRecordInput, IInsertRecord } from '../Skyflow';
 import { validateInsertRecords } from '../utils/validators';
-import { logs } from '../utils/logs';
+import logs from '../utils/logs';
 import { parameterizedString } from '../utils/helper';
-import { MessageType } from '../container/constants';
 
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
@@ -58,6 +57,7 @@ export const constructInsertRecordResponse = (
               },
             };
           }
+          return res;
         }).filter((res, index) => index % 2 !== 0),
     };
   }

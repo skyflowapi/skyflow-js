@@ -38,15 +38,15 @@ export class FrameController {
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
         { name: COLLECT_FRAME_CONTROLLER + controllerId },
         (data: any) => {
-          let { context, ...clientMetaData } = data;
-          clientMetaData = {
-            ...clientMetaData,
+          const { context, ...metaData } = data;
+          const clientMetaData = {
+            ...metaData,
             clientJSON: {
-              ...clientMetaData.clientJSON,
+              ...metaData.clientJSON,
               config: {
-                ...clientMetaData.clientJSON.config,
+                ...metaData.clientJSON.config,
                 getBearerToken: new Function(
-                  `return ${clientMetaData.clientJSON.config.getBearerToken}`,
+                  `return ${metaData.clientJSON.config.getBearerToken}`,
                 )(),
               },
             },

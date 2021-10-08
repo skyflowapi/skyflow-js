@@ -20,7 +20,7 @@ import {
   MessageType,
 } from '../constants';
 import Element from './element';
-import { logs } from '../../utils/logs';
+import logs from '../../utils/logs';
 import { LogLevelOptions, printLog, parameterizedString } from '../../utils/helper';
 
 interface CollectElementInput {
@@ -67,7 +67,8 @@ class CollectContainer {
     const { showInfoLogs, showErrorLogs } = LogLevelOptions[this.#logLevel];
     this.#showInfoLogs = showInfoLogs;
     this.#showErrorLogs = showErrorLogs;
-    printLog(logs.infoLogs.CREATE_COLLECT_CONTAINER, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    printLog(logs.infoLogs.CREATE_COLLECT_CONTAINER, MessageType.INFO,
+      this.#showErrorLogs, this.#showInfoLogs);
 
     const sub = (data, callback) => {
       if (data.name === COLLECT_FRAME_CONTROLLER + this.#containerId) {
@@ -244,12 +245,15 @@ class CollectContainer {
               printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
               reject(data);
             } else {
-              printLog(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+              printLog(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, MessageType.INFO,
+                this.#showErrorLogs, this.#showInfoLogs);
               resolve(data);
             }
           },
         );
-      printLog(parameterizedString(logs.infoLogs.EMIT_EVENT, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+      printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
+        ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+      MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
     } catch (err) {
       printLog(`${err.message}`, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
       reject(err?.message);

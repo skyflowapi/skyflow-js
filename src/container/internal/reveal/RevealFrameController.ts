@@ -13,7 +13,7 @@ import {
   MessageType,
 } from '../../constants';
 import { LogLevelOptions, parameterizedString, printLog } from '../../../utils/helper';
-import { logs } from '../../../utils/logs';
+import logs from '../../../utils/logs';
 
 class RevealFrameController {
   #client!: Client;
@@ -61,7 +61,9 @@ class RevealFrameController {
         },
       );
     const sub = (data, callback) => {
-      printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+      printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+        ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
+      MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
 
       this.revealData(data.records as any).then(
         (resolvedResult) => {

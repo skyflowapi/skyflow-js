@@ -11,7 +11,7 @@ import {
 import { constructInvokeGatewayRequest } from '../../../libs/objectParse';
 
 import {
-  IGatewayConfig, IRevealRecord, ISkyflowIdRecord, Context,
+  IGatewayConfig, IRevealRecord, ISkyflowIdRecord,
 } from '../../../Skyflow';
 import { getAccessToken } from '../../../utils/busEvents';
 import {
@@ -19,10 +19,11 @@ import {
   deletePropertyPath, fillUrlWithPathAndQueryParams, flattenObject, formatFrameNameToId,
 } from '../../../utils/helpers';
 import {
-  ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, FRAME_REVEAL, gatewayConfigParseKeys, PUREJS_TYPES, MessageType,
+  ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, FRAME_REVEAL,
+  gatewayConfigParseKeys, PUREJS_TYPES, MessageType,
 } from '../../constants';
 import { LogLevelOptions, printLog, parameterizedString } from '../../../utils/helper';
-import { logs } from '../../../utils/logs';
+import logs from '../../../utils/logs';
 
 class PureJsFrameController {
   #clientDomain: string;
@@ -38,13 +39,15 @@ class PureJsFrameController {
     bus
       .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
-        printLog(parameterizedString(logs.infoLogs.CAPTURE_PURE_JS_REQUEST, data.type), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(parameterizedString(logs.infoLogs.CAPTURE_PURE_JS_REQUEST, data.type),
+          MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
 
         if (data.type === PUREJS_TYPES.DETOKENIZE) {
           fetchRecordsByTokenId(data.records as IRevealRecord[], this.#client)
             .then(
               (resolvedResult) => {
-                printLog(logs.infoLogs.FETCH_RECORDS_RESOLVED, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+                printLog(logs.infoLogs.FETCH_RECORDS_RESOLVED, MessageType.INFO,
+                  this.#showErrorLogs, this.#showInfoLogs);
                 callback(resolvedResult);
               },
               (rejectedResult) => {
@@ -120,10 +123,18 @@ class PureJsFrameController {
         }
       });
 
-    printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST, PUREJS_TYPES.INSERT), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
-    printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST, PUREJS_TYPES.DETOKENIZE), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
-    printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST, PUREJS_TYPES.GET_BY_SKYFLOWID), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
-    printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST, PUREJS_TYPES.GET_BY_SKYFLOWID), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+      PUREJS_TYPES.INSERT),
+    MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+      PUREJS_TYPES.DETOKENIZE),
+    MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+      PUREJS_TYPES.GET_BY_SKYFLOWID),
+    MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+      PUREJS_TYPES.GET_BY_SKYFLOWID),
+    MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
 
     bus
       // .target(this.#clientDomain)
@@ -140,7 +151,8 @@ class PureJsFrameController {
         };
         this.#client = Client.fromJSON(data.client) as any;
       });
-    printLog(logs.infoLogs.EMIT_PURE_JS_CONTROLLER, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    printLog(logs.infoLogs.EMIT_PURE_JS_CONTROLLER, MessageType.INFO,
+      this.#showErrorLogs, this.#showInfoLogs);
   }
 
   static init() {

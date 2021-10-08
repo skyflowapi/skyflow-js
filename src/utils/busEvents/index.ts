@@ -1,7 +1,7 @@
 import bus from 'framebus';
 import { ELEMENT_EVENTS_TO_IFRAME } from '../../container/constants';
 import { formatFrameNameToId } from '../helpers';
-import { logs } from '../logs';
+import logs from '../logs';
 
 export function getCollectElementValue(key, elementIframename) {
   return new Promise((resolve, reject) => {

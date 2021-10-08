@@ -18,7 +18,7 @@ import EventEmitter from '../../event-emitter';
 import properties from '../../properties';
 import { validateRevealElementRecords } from '../../utils/validators';
 import { LogLevelOptions, printLog, parameterizedString } from '../../utils/helper';
-import { logs } from '../../utils/logs';
+import logs from '../../utils/logs';
 
 export interface IRevealElementInput {
   token?: string;
@@ -67,7 +67,8 @@ class RevealContainer {
       context.logLevel];
     this.#showInfoLogs = showInfoLogs;
     this.#showErrorLogs = showErrorLogs;
-    printLog(logs.infoLogs.CREATE_REVEAL_CONTAINER, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    printLog(logs.infoLogs.CREATE_REVEAL_CONTAINER, MessageType.INFO,
+      this.#showErrorLogs, this.#showInfoLogs);
 
     const sub = (data, callback) => {
       if (data.name === REVEAL_FRAME_CONTROLLER) {
@@ -130,7 +131,8 @@ class RevealContainer {
     if (this.#isElementsMounted) {
       return new Promise((resolve, reject) => {
         try {
-          printLog(logs.infoLogs.VALIDATE_REVEAL_RECORDS, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(logs.infoLogs.VALIDATE_REVEAL_RECORDS, MessageType.INFO,
+            this.#showErrorLogs, this.#showInfoLogs);
 
           validateRevealElementRecords(this.#revealRecords);
           bus
@@ -149,14 +151,18 @@ class RevealContainer {
 
                   reject(revealData.error);
                 } else {
-                  printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+                  printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.INFO,
+                    this.#showErrorLogs, this.#showInfoLogs);
                   resolve(revealData);
                 }
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
+            ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
+          MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         } catch (err) {
-          printLog(`Error: ${err.message}`, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(`Error: ${err.message}`, MessageType.ERROR,
+            this.#showErrorLogs, this.#showInfoLogs);
 
           reject(err?.message);
         }
@@ -164,10 +170,12 @@ class RevealContainer {
     }
     return new Promise((resolve, reject) => {
       try {
-        printLog(logs.infoLogs.VALIDATE_REVEAL_RECORDS, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(logs.infoLogs.VALIDATE_REVEAL_RECORDS, MessageType.INFO,
+          this.#showErrorLogs, this.#showInfoLogs);
         validateRevealElementRecords(this.#revealRecords);
         const elementMountTimeOut = setTimeout(() => {
-          printLog(logs.errorLogs.ELEMENT_NOT_MOUNTED, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
+          printLog(logs.errorLogs.ELEMENT_NOT_MOUNTED, MessageType.ERROR,
+            this.#showErrorLogs, this.#showInfoLogs);
           reject('Elements Not Mounted');
         }, 30000);
         this.#eventEmmiter.on(
@@ -187,7 +195,8 @@ class RevealContainer {
                   if (revealData.error) {
                     reject(revealData.error);
                   } else {
-                    printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+                    printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.INFO,
+                      this.#showErrorLogs, this.#showInfoLogs);
 
                     resolve(revealData);
                   }
@@ -196,7 +205,8 @@ class RevealContainer {
           },
         );
       } catch (err) {
-        printLog(err.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(err.message, MessageType.ERROR,
+          this.#showErrorLogs, this.#showInfoLogs);
 
         reject(err?.message);
       }

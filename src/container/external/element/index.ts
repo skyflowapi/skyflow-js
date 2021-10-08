@@ -17,7 +17,7 @@ import IFrame from './IFrame';
 import {
   LogLevelOptions, printLog, getElementName, parameterizedString,
 } from '../../../utils/helper';
-import { logs } from '../../../utils/logs';
+import logs from '../../../utils/logs';
 import { Context } from '../../../Skyflow';
 
 class Element {
@@ -53,7 +53,7 @@ class Element {
 
   #mounted = false;
 
-  #logLevel = LogLevel.PROD;
+  #logLevel;
 
   #showErrorLogs: boolean;
 
@@ -109,11 +109,12 @@ class Element {
 
     this.#onDestroy(destroyCallback);
     this.#onUpdate(updateCallback);
-    printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, getElementName(this.#iframe.name)), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT,
+      getElementName(this.#iframe.name)), MessageType.INFO,
+    this.#showErrorLogs, this.#showInfoLogs);
   }
 
   mount = (domElement) => {
-    const elementName = this.#iframe.name;
     this.#iframe.mount(domElement);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
@@ -214,7 +215,9 @@ class Element {
         this.#state.value = {};
         const key = this.#elements[index].elementName;
         const value = this.#doesReturnValue ? elementState.value : undefined;
-        if (this.#isSingleElementAPI) { this.#state.value = this.#doesReturnValue ? value : undefined; } else this.#state.value[key] = value;
+        if (this.#isSingleElementAPI) {
+          this.#state.value = this.#doesReturnValue ? value : undefined;
+        } else this.#state.value[key] = value;
       } else {
         this.#state.isEmpty = this.#state.isEmpty || elementState.isEmpty;
         this.#state.isComplete = this.#state.isComplete && elementState.isComplete;
