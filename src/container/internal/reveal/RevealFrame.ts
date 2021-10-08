@@ -6,8 +6,12 @@ import {
   REVEAL_ELEMENT_LABEL_DEFAULT_STYLES,
   REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
   REVEAL_ELEMENT_DIV_STYLE,
+  MessageType,
 } from '../../constants';
 import getCssClassesFromJss from '../../../libs/jss-styles';
+import { printLog, parameterizedString, LogLevelOptions } from '../../../utils/helper';
+import { Context } from '../../../Skyflow';
+import { logs } from '../../../utils/logs';
 
 class RevealFrame {
   static revealFrame: RevealFrame;
@@ -34,6 +38,10 @@ class RevealFrame {
 
   #revealedValue!:string;
 
+  #showInfoLogs!:boolean;
+
+  #showErrorLogs!:boolean;
+
   static init() {
     bus
       // .target(document.referrer.split("/").slice(0, 3).join("/"))
@@ -41,12 +49,15 @@ class RevealFrame {
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY,
         { name: window.name },
         (data: any) => {
-          RevealFrame.revealFrame = new RevealFrame(data.record);
+          RevealFrame.revealFrame = new RevealFrame(data.record, data.context);
         },
       );
   }
 
-  constructor(record) {
+  constructor(record, context) {
+    const { showInfoLogs, showErrorLogs } = LogLevelOptions[context];
+    this.#showInfoLogs = showInfoLogs;
+    this.#showErrorLogs = showErrorLogs;
     this.#name = window.name;
     this.#containerId = this.#name.split(':')[2];
     this.#record = record;
@@ -98,6 +109,7 @@ class RevealFrame {
         const responseValue = data[this.#record.token] as string;
         this.#revealedValue = responseValue;
         this.#dataElememt.innerText = responseValue;
+        printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED, this.#record.token), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         bus
           .target(window.location.origin)
           .off(

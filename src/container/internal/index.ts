@@ -37,7 +37,8 @@ export class FrameController {
       .emit(
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
         { name: COLLECT_FRAME_CONTROLLER + controllerId },
-        (clientMetaData: any) => {
+        (data: any) => {
+          let { context, ...clientMetaData } = data;
           clientMetaData = {
             ...clientMetaData,
             clientJSON: {
@@ -53,6 +54,7 @@ export class FrameController {
           const { clientJSON } = clientMetaData;
           this.#iFrameForm.setClientMetadata(clientMetaData);
           this.#iFrameForm.setClient(Client.fromJSON(clientJSON));
+          this.#iFrameForm.setLogLevel(context.logLevel);
           delete clientMetaData.clientJSON;
         },
       );

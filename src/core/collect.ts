@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import { IInsertRecordInput, IInsertRecord } from '../Skyflow';
 import { validateInsertRecords } from '../utils/validators';
+import { logs } from '../utils/logs';
+import { parameterizedString } from '../utils/helper';
+import { MessageType } from '../container/constants';
 
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
@@ -80,7 +83,7 @@ const checkDuplicateColumns = (additionalColumns, columns, table) => {
   keys.forEach((key) => {
     const value = _.get(columns, key);
     if (value) {
-      throw new Error(`Duplicate column ${key} found in ${table}`);
+      throw new Error(parameterizedString(logs.errorLogs.DUPLICATE_ELEMENT, key, table));
     }
   });
 };

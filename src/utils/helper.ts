@@ -14,9 +14,19 @@ export const LogLevelOptions = {
 export const printLog = (message: string, messageType:MessageType, showErrorLogs:boolean, showInfoLogs:boolean) => {
   if (messageType === MessageType.INFO && showInfoLogs) {
     console.log(message);
-  } else if (showErrorLogs) {
+  } else if (messageType === MessageType.ERROR && showErrorLogs) {
     console.error(message);
   }
 };
 
-export const getElementName = (name:string) => (name ? name.substring(name.indexOf(':') + 1, name.indexOf(':', name.indexOf(':') + 1)) : '');
+export const parameterizedString = (...args: any[]) => {
+  const str = args[0];
+  const params = args.filter((arg, index) => index !== 0);
+  if (!str) return '';
+  return str.replace(/%s[0-9]+/g, (matchedStr: any) => {
+    const variableIndex = matchedStr.replace('%s', '') - 1;
+    return params[variableIndex];
+  });
+};
+
+export const getElementName = (name:string) => atob(name.split(':')[2]);

@@ -5,9 +5,13 @@ import {
   ELEMENT_EVENTS_TO_CONTAINER,
   ELEMENT_EVENTS_TO_IFRAME,
   FRAME_REVEAL,
+  MessageType,
 } from '../../constants';
 import IFrame from '../element/IFrame';
 import { IRevealElementInput } from '../RevealContainer';
+import { LogLevelOptions, parameterizedString, printLog } from '../../../utils/helper';
+import { Context } from '../../../Skyflow';
+import { logs } from '../../../utils/logs';
 
 class RevealElement {
   #iframe: IFrame;
@@ -20,15 +24,25 @@ class RevealElement {
 
   #isMounted:boolean = false;
 
-  constructor(record: IRevealElementInput, metaData: any, containerId: string) {
+  #showErrorLogs: boolean;
+
+  #showInfoLogs: boolean;
+
+  #context:Context;
+
+  constructor(record: IRevealElementInput, metaData: any, containerId: string, context:Context) {
     this.#metaData = metaData;
     this.#recordData = record;
     this.#containerId = containerId;
+    this.#context = context;
     this.#iframe = new IFrame(
       `${FRAME_REVEAL}:${btoa(record.token || uuid())}`,
       { metaData },
       this.#containerId,
     );
+    this.#showErrorLogs = LogLevelOptions[context.logLevel].showErrorLogs;
+    this.#showInfoLogs = LogLevelOptions[context.logLevel].showInfoLogs;
+    printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, `${record.token || ''}reveal`), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
   }
 
   mount(domElementSelector) {
@@ -38,6 +52,7 @@ class RevealElement {
         callback({
           ...this.#metaData,
           record: this.#recordData,
+          context: this.#context,
         });
 
         bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);

@@ -14,7 +14,9 @@ import {
   validateAndSetupGroupOptions,
 } from '../../../libs/element-options';
 import IFrame from './IFrame';
-import { LogLevelOptions, printLog, getElementName } from '../../../utils/helper';
+import {
+  LogLevelOptions, printLog, getElementName, parameterizedString,
+} from '../../../utils/helper';
 import { logs } from '../../../utils/logs';
 import { Context } from '../../../Skyflow';
 
@@ -107,12 +109,12 @@ class Element {
 
     this.#onDestroy(destroyCallback);
     this.#onUpdate(updateCallback);
+    printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, getElementName(this.#iframe.name)), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
   }
 
   mount = (domElement) => {
     const elementName = this.#iframe.name;
     this.#iframe.mount(domElement);
-    printLog(`${getElementName(this.#iframe.name)} ${logs.infoLogs.ELEMENT_MOUNTED}`, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
@@ -123,6 +125,7 @@ class Element {
           sub,
         );
         this.#mounted = true;
+        printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, getElementName(this.#iframe.name))} `, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         this.#updateCallbacks.forEach((func) => func());
         this.#updateCallbacks = [];
       }

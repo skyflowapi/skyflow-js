@@ -1,4 +1,4 @@
-import { IRevealElementInput } from "../../container/external/RevealContainer";
+import { IRevealElementInput } from '../../container/external/RevealContainer';
 import {
   IGatewayConfig,
   IDetokenizeInput,
@@ -6,11 +6,12 @@ import {
   IInsertRecordInput,
   RedactionType,
   RequestMethod,
-} from "../../Skyflow";
-import { logs } from "../logs";
+} from '../../Skyflow';
+import { logs } from '../logs';
+import { parameterizedString } from '../helper';
 
 export const validateCreditCardNumber = (cardNumber: string) => {
-  const value = cardNumber.replace(/[\s-]/g, "");
+  const value = cardNumber.replace(/[\s-]/g, '');
   let sum = 0;
   let shouldDouble = false;
 
@@ -29,7 +30,7 @@ export const validateCreditCardNumber = (cardNumber: string) => {
 };
 
 export const validateExpiryDate = (date: string) => {
-  const [month, year] = date.includes("/") ? date.split("/") : date.split("-");
+  const [month, year] = date.includes('/') ? date.split('/') : date.split('-');
   const expiryDate = new Date(`${year}-${month}-01`);
   const today = new Date();
 
@@ -37,74 +38,64 @@ export const validateExpiryDate = (date: string) => {
 };
 
 export const validateInsertRecords = (recordObj: IInsertRecordInput) => {
-  if (!("records" in recordObj)) {
+  if (!('records' in recordObj)) {
     throw new Error(logs.errorLogs.RECORDS_KEY_NOT_FOUND);
   }
   const { records } = recordObj;
   if (records.length === 0) {
-    throw new Error(logs.errorLogs.EMPTY_RECORD);
+    throw new Error(logs.errorLogs.EMPTY_RECORDS);
   }
-  records.forEach((record) => {
-    if (!("table" in record && "fields" in record)) {
-      throw new Error(logs.errorLogs.EMPTY_TABLE_AND_FIELDS);
+  records.forEach((record, index) => {
+    if (!('table' in record && 'fields' in record)) {
+      throw new Error(parameterizedString(logs.errorLogs.EMPTY_TABLE_AND_FIELDS, index));
     }
-    if (record.table === "") {
-      throw new Error(logs.errorLogs.EMPTY_TABLE);
+    if (record.table === '') {
+      throw new Error(parameterizedString(logs.errorLogs.EMPTY_TABLE, index));
     }
   });
 };
 
 export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
-  if (!Object.prototype.hasOwnProperty.call(detokenizeInput, "records"))
-    throw new Error(logs.errorLogs.MISSING_RECORDS);
+  if (!Object.prototype.hasOwnProperty.call(detokenizeInput, 'records')) { throw new Error(logs.errorLogs.MISSING_RECORDS); }
 
   const { records } = detokenizeInput;
   if (records.length === 0) throw new Error(logs.errorLogs.EMPTY_RECORDS);
   records.forEach((record) => {
-    if (Object.keys(record).length === 0)
-      throw new Error(logs.errorLogs.EMPTY_RECORD_OBJECT);
+    if (Object.keys(record).length === 0) { throw new Error(logs.errorLogs.EMPTY_RECORDS); }
 
     const recordToken = record.token;
     if (!recordToken) throw new Error(logs.errorLogs.MISSING_TOKEN);
-    if (recordToken === "" || typeof recordToken !== "string")
-      throw new Error(logs.errorLogs.INVALID_TOKEN_ID);
+    if (recordToken === '' || typeof recordToken !== 'string') { throw new Error(logs.errorLogs.INVALID_TOKEN_ID); }
 
     const recordRedaction = record.redaction;
     if (!recordRedaction) throw new Error(logs.errorLogs.MISSING_REDACTION);
-    if (!Object.values(RedactionType).includes(recordRedaction))
-      throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE);
+    if (!Object.values(RedactionType).includes(recordRedaction)) { throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE); }
   });
 };
 
 export const validateGetByIdInput = (getByIdInput: IGetByIdInput) => {
-  if (!Object.prototype.hasOwnProperty.call(getByIdInput, "records"))
-    throw new Error(logs.errorLogs.MISSING_RECORDS);
+  if (!Object.prototype.hasOwnProperty.call(getByIdInput, 'records')) { throw new Error(logs.errorLogs.MISSING_RECORDS); }
   const { records } = getByIdInput;
   if (records.length === 0) throw new Error(logs.errorLogs.EMPTY_RECORDS);
 
   records.forEach((record) => {
-    if (Object.keys(record).length === 0)
-      throw new Error(logs.errorLogs.EMPTY_RECORD_OBJECT);
+    if (Object.keys(record).length === 0) { throw new Error(logs.errorLogs.EMPTY_RECORDS); }
 
     const recordIds = record.ids;
     if (!recordIds) throw new Error(logs.errorLogs.MISSING_IDS);
     if (recordIds.length === 0) throw new Error(logs.errorLogs.EMPTY_RECORD_IDS);
     recordIds.forEach((skyflowId) => {
-      if (typeof skyflowId !== "string")
-        throw new Error(logs.errorLogs.INVALID_RECORD_ID_TYPE);
+      if (typeof skyflowId !== 'string') { throw new Error(logs.errorLogs.INVALID_RECORD_ID_TYPE); }
     });
 
     const recordRedaction = record.redaction;
     if (!recordRedaction) throw new Error(logs.errorLogs.MISSING_REDACTION);
-    if (!Object.values(RedactionType).includes(recordRedaction))
-      throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE);
+    if (!Object.values(RedactionType).includes(recordRedaction)) { throw new Error(logs.errorLogs.INVALID_REDACTION_TYPE); }
 
     const recordTable = record.table;
-    if (!Object.prototype.hasOwnProperty.call(record, "table"))
-      throw new Error(logs.errorLogs.MISSING_TABLE);
+    if (!Object.prototype.hasOwnProperty.call(record, 'table')) { throw new Error(logs.errorLogs.MISSING_TABLE); }
 
-    if (recordTable === "" || typeof recordTable !== "string")
-      throw new Error(logs.errorLogs.INVALID_RECORD_TABLE_VALUE);
+    if (recordTable === '' || typeof recordTable !== 'string') { throw new Error(logs.errorLogs.INVALID_RECORD_TABLE_VALUE); }
   });
 };
 
@@ -115,7 +106,7 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
       throw new Error(logs.errorLogs.MISSING_TOKEN_KEY);
     }
     const recordToken = record.token;
-    if (!recordToken || typeof recordToken !== 'string') throw new Error(`Invalid Token ${recordToken}`);
+    if (!recordToken || typeof recordToken !== 'string') throw new Error(parameterizedString(logs.errorLogs.INVALID_TOKEN_ID_WITH_ID, recordToken));
     if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
       throw new Error(logs.errorLogs.MISSING_REDACTION);
     }
@@ -130,7 +121,7 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
 };
 
 export const isValidURL = (url: string) => {
-  if (url.substring(0, 5).toLowerCase() !== "https") {
+  if (url.substring(0, 5).toLowerCase() !== 'https') {
     return false;
   }
   try {
@@ -144,17 +135,17 @@ export const isValidURL = (url: string) => {
 };
 
 export const validateGatewayConfig = (config: IGatewayConfig) => {
-  if (!Object.prototype.hasOwnProperty.call(config, "gatewayURL")) {
+  if (!Object.prototype.hasOwnProperty.call(config, 'gatewayURL')) {
     throw new Error(logs.errorLogs.MISSING_GATEWAY_URL);
   }
-  if (typeof config.gatewayURL !== "string") {
+  if (typeof config.gatewayURL !== 'string') {
     throw new Error(logs.errorLogs.INVALID_GATEWAY_URL_TYPE);
   }
   if (!isValidURL(config.gatewayURL)) {
     throw new Error(logs.errorLogs.INVALID_GATEWAY_URL);
   }
 
-  if (!Object.prototype.hasOwnProperty.call(config, "methodName")) {
+  if (!Object.prototype.hasOwnProperty.call(config, 'methodName')) {
     throw new Error(logs.errorLogs.MISSING_METHODNAME_KEY);
   }
   if (!Object.values(RequestMethod).includes(config.methodName)) {

@@ -120,15 +120,18 @@ class Skyflow {
       },
       this.#metadata,
     );
-    this.#pureJsController = new PureJsController(this.#client);
-    this.#logLevel = config?.options?.logLevel;
+    this.#logLevel = config?.options?.logLevel || LogLevel.PROD;
+    this.#pureJsController = new PureJsController(this.#client, { logLevel: this.#logLevel });
+
     const { showInfoLogs, showErrorLogs } = LogLevelOptions[this.#logLevel];
 
     this.#showInfoLogs = showInfoLogs;
     this.#showErrorLogs = showErrorLogs;
+
     bus
       .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, (data, callback) => {
+        printLog(logs.infoLogs.CAPTURED_BEARER_TOKEN_EVENT, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         if (
           this.#client.config.getBearerToken
           && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
@@ -136,20 +139,25 @@ class Skyflow {
           this.#client.config
             .getBearerToken()
             .then((bearerToken) => {
+              printLog(logs.infoLogs.BEARER_TOKEN_RESOLVED, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
               this.#bearerToken = bearerToken;
               callback({ authToken: this.#bearerToken });
             })
             .catch((err) => {
+              printLog(logs.errorLogs.BEARER_TOKEN_REJECTED, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
               callback({ error: err });
             });
         } else {
+          // ask
           callback({ authToken: this.#bearerToken });
         }
       });
+    printLog(logs.infoLogs.BEARER_TOKEN_LISTENER, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
   }
 
   static init(config: ISkyflow): Skyflow {
-    const { showInfoLogs, showErrorLogs } = LogLevelOptions[config?.options?.logLevel];
+    const { showInfoLogs, showErrorLogs } = LogLevelOptions[config?.options?.logLevel || LogLevel.PROD];
+    printLog(logs.infoLogs.INITIALIZE_CLIENT, MessageType.INFO, showErrorLogs, showInfoLogs);
     if (
       !config
       || !config.vaultID
@@ -162,21 +170,21 @@ class Skyflow {
     tempConfig.vaultURL = config.vaultURL.slice(-1) === '/'
       ? config.vaultURL.slice(0, -1)
       : config.vaultURL;
-    printLog(logs.infoLogs.INITIALIZE_CLIENT, MessageType.INFO, showInfoLogs, showErrorLogs);
+    printLog(logs.infoLogs.CLIENT_INITIALIZED, MessageType.INFO, showErrorLogs, showInfoLogs);
     return new Skyflow(tempConfig);
   }
 
   container(type: ContainerType, options?: Record<string, any>) {
     switch (type) {
       case ContainerType.COLLECT:
-        printLog(logs.infoLogs.CREATE_COLLECT_CONTAINER, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
+        printLog(logs.infoLogs.COLLECT_CONTAINER_CREATED, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         return new CollectContainer(options, {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
         },
         { logLevel: this.#logLevel });
       case ContainerType.REVEAL:
-        printLog(logs.infoLogs.CREATE_REVEAL_CONTAINER, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
+        printLog(logs.infoLogs.REVEAL_CONTAINER_CREATED, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         return new RevealContainer({
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
@@ -191,23 +199,23 @@ class Skyflow {
     records: IInsertRecordInput,
     options: Record<string, any> = { tokens: true },
   ) {
-    printLog(logs.infoLogs.VALIDATE_RECORDS, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
-    validateInsertRecords(records);
+    printLog(logs.infoLogs.INSERT_TRIGGERED, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
     return this.#pureJsController.insert(records, options);
   }
 
   detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
-    printLog(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, MessageType.INFO, this.#showInfoLogs, this.#showErrorLogs);
-    validateDetokenizeInput(detokenizeInput);
-    return this.#pureJsController.detokenize(detokenizeInput.records);
+    printLog(logs.infoLogs.DETOKENIZE_TRIGGERED, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    return this.#pureJsController.detokenize(detokenizeInput);
   }
 
   getById(getByIdInput: IGetByIdInput) {
-    validateGetByIdInput(getByIdInput);
-    return this.#pureJsController.getById(getByIdInput.records);
+    printLog(logs.infoLogs.GET_BY_ID_TRIGGERED, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    return this.#pureJsController.getById(getByIdInput);
   }
 
   invokeGateway(config: IGatewayConfig) {
+    printLog(logs.infoLogs.INVOKE_GATEWAY_TRIGGERED, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+
     return this.#pureJsController.invokeGateway(config);
   }
 

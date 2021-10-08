@@ -8,6 +8,7 @@ import {
   COLLECT_FRAME_CONTROLLER,
   ElementType,
   LogLevel,
+  MessageType,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -20,7 +21,7 @@ import {
   constructInsertRecordResponse,
 } from '../../../core/collect';
 import { getAccessToken } from '../../../utils/busEvents';
-import { LogLevelOptions } from '../../../utils/helper';
+import { LogLevelOptions, printLog, parameterizedString } from '../../../utils/helper';
 import { logs } from '../../../utils/logs';
 import { Context } from '../../../Skyflow';
 
@@ -137,7 +138,7 @@ export class IFrameFormElement extends EventEmitter {
     if (this.sensitive === false && sensitive === true) {
       this.sensitive = sensitive;
     } else if (this.sensitive === true && sensitive === false) {
-      throw Error(logs.errorLogs.SENSITIVITY_INCOMPATIBLE);
+      throw Error('Sensitivity is not backward compatible');
     }
   }
 
@@ -201,7 +202,7 @@ export class IFrameFormElement extends EventEmitter {
     isValid: this.state.isValid,
     isEmpty: this.state.isEmpty,
     isComplete: this.state.isComplete,
-    value: LogLevelOptions[this.metaData.options?.logLevel].doesReturnValue ? this.state.value : undefined,
+    value: LogLevelOptions[this.context.logLevel]?.doesReturnValue ? this.state.value : undefined,
   });
 
   validator(value: string) {
@@ -345,6 +346,8 @@ export class IFrameForm {
 
   private clientDomain: string;
 
+  private logLevel!:LogLevel;
+
   constructor(controllerId: string, clientDomain: string) {
     this.controllerId = controllerId;
     this.clientDomain = clientDomain;
@@ -352,7 +355,7 @@ export class IFrameForm {
       .target(window.location.origin)
       .on(
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.controllerId,
-        (data) => {
+        (data:any) => {
           if (!data.name) {
             throw new Error(logs.errorLogs.REQUIRED_PARAMS_NOT_PROVIDED);
           }
@@ -375,6 +378,9 @@ export class IFrameForm {
       .on(
         ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.controllerId,
         (data, callback) => {
+          const { showInfoLogs, showErrorLogs } = LogLevelOptions[this.logLevel];
+
+          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST), MessageType.INFO, showErrorLogs, showInfoLogs);
           // todo: Do we need to reset the data!?
           this.tokenize(data)
             .then((response) => {
@@ -409,11 +415,15 @@ export class IFrameForm {
     this.callbacks = [];
   }
 
+  setLogLevel(logLevel:LogLevel) {
+    this.logLevel = logLevel;
+  }
+
   private getOrCreateIFrameFormElement = (frameName) => {
     this.iFrameFormElements[frameName] = this.iFrameFormElements[frameName]
       || new IFrameFormElement(frameName, {
         ...this.clientMetaData,
-      }, { logLevel: this.clientMetaData.options?.logLevel });
+      }, { logLevel: this.logLevel });
     return this.iFrameFormElements[frameName];
   };
 
@@ -474,7 +484,7 @@ export class IFrameForm {
               records: finalRequest,
             },
             requestMethod: 'POST',
-            url: `vault/v1/vaults/${client.config.vaultID}`,
+            url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
             headers: {
               Authorization: `Bearer ${authToken}`,
               'Content-Type': 'application/json',
@@ -523,7 +533,7 @@ export class IFrameForm {
     }
 
     if (!frameInstance) {
-      throw new Error(`${logs.errorLogs.FRAME_NOT_FOUND} ${frameGlobalName}`);
+      throw new Error(`${parameterizedString(logs.errorLogs.FRAME_NOT_FOUND, frameGlobalName)}`);
     } else if (frameInstance?.Skyflow?.init) {
       frameInstance.Skyflow.init(
         this.getOrCreateIFrameFormElement,

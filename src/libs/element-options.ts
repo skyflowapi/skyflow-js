@@ -20,14 +20,14 @@ export function validateElementOptions(
   // }
 
   if (Object.prototype.hasOwnProperty.call(newOptions, 'name') && newOptions.name !== oldOptions.name) {
-    throw new Error(logs.errorLogs.CANNOT_UPDATE_NAME);
+    throw new Error("Name attribute can't be updated");
   }
 
   if (
     oldOptions.sensitive === true
     && Object.prototype.hasOwnProperty.call(newOptions, 'sensitive')
     && newOptions.sensitive !== oldOptions.sensitive
-  ) throw new Error(logs.errorLogs.CANNOT_UPDATE_SENSITIVE);
+  ) throw new Error("Sensitive attribute can't be updated");
 
   newOptions = { ...oldOptions, ...newOptions };
 
@@ -40,7 +40,7 @@ export function validateElementOptions(
   }
 
   if (!newOptions.mask === undefined && !Array.isArray(newOptions.mask)) {
-    throw new Error(logs.errorLogs.MASK_REQUIRED);
+    throw new Error('mask option has to be array or undefined');
   }
 
   // todo: replacer should be a char in mask[1]
@@ -51,7 +51,7 @@ export function validateElementOptions(
       // (array[1] ? typeof array[1] !== "string" : false) ||
       || (array[1] ? typeof array[1] !== 'object' : false)
     ) {
-      throw new Error(logs.errorLogs.MASK_ARRAY_STRING);
+      throw new Error('mask array values has to be string');
     }
   }
 
@@ -62,7 +62,7 @@ export function validateElementOptions(
       // (array[1] ? typeof array[1] !== "string" : false) ||
       || (array[1] ? typeof array[1] !== 'string' : false)
     ) {
-      throw new Error(logs.errorLogs.REPLACE_PATTERN_ERROR);
+      throw new Error('replacePatterns array values has to be string');
     }
   }
 
@@ -71,7 +71,7 @@ export function validateElementOptions(
       || elementType === ELEMENTS.checkbox.name)
     && !newOptions.value
   ) {
-    throw new Error(logs.errorLogs.REQUIRE_RADIO_CHECKBOX_VALUE);
+    throw new Error('Elements radio and checkbox requires value attribute');
   }
 
   // todo: validate the objects in the newOptions array
@@ -84,7 +84,7 @@ export function validateElementOptions(
     )
   ) {
     throw new Error(
-      logs.errorLogs.ELEMENT_DROPDOWN_ERROR,
+      'Element dropdown requires options attribute with an array of objects containing value and text attributes',
     );
   }
 }

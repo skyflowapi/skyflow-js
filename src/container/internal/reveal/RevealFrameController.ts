@@ -10,7 +10,10 @@ import { IRevealRecord } from '../../../Skyflow';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   REVEAL_FRAME_CONTROLLER,
+  MessageType,
 } from '../../constants';
+import { LogLevelOptions, parameterizedString, printLog } from '../../../utils/helper';
+import { logs } from '../../../utils/logs';
 
 class RevealFrameController {
   #client!: Client;
@@ -20,6 +23,10 @@ class RevealFrameController {
   #containerId: any;
 
   #clientDomain: string;
+
+  #showInfoLogs!:boolean;
+
+  #showErrorLogs!:boolean;
 
   constructor(containerId) {
     this.#containerId = containerId;
@@ -32,6 +39,9 @@ class RevealFrameController {
           name: REVEAL_FRAME_CONTROLLER,
         },
         (clientMetaData: any) => {
+          const { showInfoLogs, showErrorLogs } = LogLevelOptions[clientMetaData.context];
+          this.#showInfoLogs = showInfoLogs;
+          this.#showErrorLogs = showErrorLogs;
           const tempData = {
             ...clientMetaData,
             clientJSON: {
@@ -51,6 +61,8 @@ class RevealFrameController {
         },
       );
     const sub = (data, callback) => {
+      printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+
       this.revealData(data.records as any).then(
         (resolvedResult) => {
           callback(resolvedResult);
