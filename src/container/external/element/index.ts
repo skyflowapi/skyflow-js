@@ -3,7 +3,6 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
-  LogLevel,
   MessageType,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
