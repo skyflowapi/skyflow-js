@@ -22,8 +22,8 @@ import {
 } from '../../../core/collect';
 import { getAccessToken } from '../../../utils/busEvents';
 import { LogLevelOptions, printLog, parameterizedString } from '../../../utils/helper';
-import logs from '../../../utils/logs';
 import { Context } from '../../../Skyflow';
+import logs from '../../../utils/logsHelper';
 
 const set = require('set-value');
 
@@ -244,7 +244,7 @@ export class IFrameFormElement extends EventEmitter {
       });
 
     bus
-      // .target(this.metaData.clientDomain)
+      .target(this.metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data:any) => {
         if (data.options.elementName === this.iFrameName) {
           if (data.options.value !== undefined) {

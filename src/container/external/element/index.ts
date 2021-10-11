@@ -16,7 +16,7 @@ import IFrame from './IFrame';
 import {
   LogLevelOptions, printLog, getElementName, parameterizedString,
 } from '../../../utils/helper';
-import logs from '../../../utils/logs';
+import logs from '../../../utils/logsHelper';
 import { Context } from '../../../Skyflow';
 
 class Element {
@@ -215,7 +215,7 @@ class Element {
         const key = this.#elements[index].elementName;
         const value = this.#doesReturnValue ? elementState.value : undefined;
         if (this.#isSingleElementAPI) {
-          this.#state.value = this.#doesReturnValue ? value : undefined;
+          this.#state.value = value;
         } else this.#state.value[key] = value;
       } else {
         this.#state.isEmpty = this.#state.isEmpty || elementState.isEmpty;

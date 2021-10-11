@@ -11,7 +11,7 @@ import {
 } from './container/constants';
 import RevealFrameController from './container/internal/reveal/RevealFrameController';
 import PureJsFrameController from './container/internal/pureJs/PureJsFrameController';
-import logs from './utils/logs';
+import logs from './utils/logsHelper';
 
 if (typeof window.console === 'undefined') {
   (<any>window).console = <any>{

@@ -15,8 +15,8 @@ import {
 import properties from './properties';
 import isTokenValid from './utils/jwtUtils';
 import PureJsController from './container/external/PureJsController';
-import logs from './utils/logs';
 import { LogLevelOptions, printLog } from './utils/helper';
+import logs from './utils/logsHelper';
 
 export interface IInsertRecord {
   table: string;
@@ -148,7 +148,8 @@ class Skyflow {
               callback({ error: err });
             });
         } else {
-          // ask
+          printLog(logs.infoLogs.REUSE_BEARER_TOKEN, MessageType.INFO,
+            this.#showErrorLogs, this.#showInfoLogs);
           callback({ authToken: this.#bearerToken });
         }
       });
@@ -174,28 +175,33 @@ class Skyflow {
     tempConfig.vaultURL = config.vaultURL.slice(-1) === '/'
       ? config.vaultURL.slice(0, -1)
       : config.vaultURL;
+    const skyflow = new Skyflow(tempConfig);
     printLog(logs.infoLogs.CLIENT_INITIALIZED, MessageType.INFO, showErrorLogs, showInfoLogs);
-    return new Skyflow(tempConfig);
+    return skyflow;
   }
 
   container(type: ContainerType, options?: Record<string, any>) {
     switch (type) {
-      case ContainerType.COLLECT:
+      case ContainerType.COLLECT: {
+        const collectContainer = new CollectContainer(options, {
+          ...this.#metadata,
+          clientJSON: this.#client.toJSON(),
+        },
+        { logLevel: this.#logLevel });
         printLog(logs.infoLogs.COLLECT_CONTAINER_CREATED, MessageType.INFO,
           this.#showErrorLogs, this.#showInfoLogs);
-        return new CollectContainer(options, {
+        return collectContainer;
+      }
+      case ContainerType.REVEAL: {
+        const revealContainer = new RevealContainer({
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
         },
         { logLevel: this.#logLevel });
-      case ContainerType.REVEAL:
         printLog(logs.infoLogs.REVEAL_CONTAINER_CREATED, MessageType.INFO,
           this.#showErrorLogs, this.#showInfoLogs);
-        return new RevealContainer({
-          ...this.#metadata,
-          clientJSON: this.#client.toJSON(),
-        },
-        { logLevel: this.#logLevel });
+        return revealContainer;
+      }
       default:
         throw new Error(logs.errorLogs.INVALID_CONTAINER_TYPE);
     }

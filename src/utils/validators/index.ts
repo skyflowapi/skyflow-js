@@ -7,8 +7,8 @@ import {
   RedactionType,
   RequestMethod,
 } from '../../Skyflow';
-import logs from '../logs';
 import { parameterizedString } from '../helper';
+import logs from '../logsHelper';
 
 export const validateCreditCardNumber = (cardNumber: string) => {
   const value = cardNumber.replace(/[\s-]/g, '');

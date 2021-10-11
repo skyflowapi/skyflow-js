@@ -10,7 +10,7 @@ import {
 } from '../../constants';
 import getCssClassesFromJss from '../../../libs/jss-styles';
 import { printLog, parameterizedString, LogLevelOptions } from '../../../utils/helper';
-import logs from '../../../utils/logs';
+import logs from '../../../utils/logsHelper';
 
 class RevealFrame {
   static revealFrame: RevealFrame;
@@ -54,7 +54,7 @@ class RevealFrame {
   }
 
   constructor(record, context) {
-    const { showInfoLogs, showErrorLogs } = LogLevelOptions[context];
+    const { showInfoLogs, showErrorLogs } = LogLevelOptions[context.logLevel];
     this.#showInfoLogs = showInfoLogs;
     this.#showErrorLogs = showErrorLogs;
     this.#name = window.name;

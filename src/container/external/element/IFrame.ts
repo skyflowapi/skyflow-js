@@ -2,7 +2,7 @@ import iframer, {
   setAttributes,
   getIframeSrc,
 } from '../../../iframe-libs/iframer';
-import logs from '../../../utils/logs';
+import logs from '../../../utils/logsHelper';
 
 export default class IFrame {
   name: string;

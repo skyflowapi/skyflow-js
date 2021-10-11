@@ -11,7 +11,7 @@ import IFrame from '../element/IFrame';
 import { IRevealElementInput } from '../RevealContainer';
 import { LogLevelOptions, parameterizedString, printLog } from '../../../utils/helper';
 import { Context } from '../../../Skyflow';
-import logs from '../../../utils/logs';
+import logs from '../../../utils/logsHelper';
 
 class RevealElement {
   #iframe: IFrame;

@@ -1,6 +1,6 @@
 import { ELEMENTS, INPUT_STYLES } from '../container/constants';
 import { buildStylesFromClassesAndStyles } from './styles';
-import logs from '../utils/logs';
+import logs from '../utils/logsHelper';
 
 export function validateElementOptions(
   elementType: string,

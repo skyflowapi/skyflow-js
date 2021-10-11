@@ -18,7 +18,7 @@ import EventEmitter from '../../event-emitter';
 import properties from '../../properties';
 import { validateRevealElementRecords } from '../../utils/validators';
 import { LogLevelOptions, printLog, parameterizedString } from '../../utils/helper';
-import logs from '../../utils/logs';
+import logs from '../../utils/logsHelper';
 
 export interface IRevealElementInput {
   token?: string;
@@ -146,8 +146,8 @@ class RevealContainer {
                 this.#mountedRecords = [];
                 this.#revealRecords = [];
                 if (revealData.error) {
-                  // message
-                  // printLog(, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
+                  printLog(logs.errorLogs.FAILED_REVEAL, MessageType.ERROR,
+                    this.#showErrorLogs, this.#showInfoLogs);
 
                   reject(revealData.error);
                 } else {
@@ -193,6 +193,8 @@ class RevealContainer {
                   this.#revealRecords = [];
                   this.#mountedRecords = [];
                   if (revealData.error) {
+                    printLog(logs.errorLogs.FAILED_REVEAL, MessageType.ERROR,
+                      this.#showErrorLogs, this.#showInfoLogs);
                     reject(revealData.error);
                   } else {
                     printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.INFO,

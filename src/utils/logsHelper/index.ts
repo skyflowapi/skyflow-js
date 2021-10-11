@@ -29,6 +29,7 @@ const logs = {
     BEARER_TOKEN_LISTENER: 'Get bearer token listener added.',
     CAPTURED_BEARER_TOKEN_EVENT: 'Captured bearer token event.',
     BEARER_TOKEN_RESOLVED: 'GetBearerToken promise resolved successfully.',
+    REUSE_BEARER_TOKEN: 'Reusing the bearer token.',
 
     PUREJS_CONTROLLER_INITIALIZED: 'Pure js controller initialized.',
     PUREJS_LISTENER_READY: 'Purejs listener ready.',
@@ -46,13 +47,12 @@ const logs = {
     CAPTURE_PUREJS_FRAME: 'Captured Skyflow controller frame ready event.',
 
     FETCH_RECORDS_RESOLVED: 'Detokenize request is resolved.',
-    FETCH_RECORDS_REJECTED: 'Detokenize request is rejected.',
+
     INSERT_RECORDS_RESOLVED: 'Insert request is resolved.',
-    INSERT_RECORDS_REJECTED: 'Insert request is rejected.',
+
     GET_BY_SKYFLOWID_RESOLVED: 'GetById request is resolved.',
-    GET_BY_SKYFLOWID_REJECTED: 'GetById request is rejected.',
+
     SEND_INVOKE_GATEWAY_RESOLVED: 'Invoke gateway request resolved.',
-    SEND_INVOKE_GATEWAY_REJECTED: 'Invoke gateway request rejected.',
 
     EMIT_EVENT: '%s1 event emitted.',
     CAPTURE_EVENT: 'Captured event %s1.',
@@ -80,10 +80,17 @@ const logs = {
     INVALID_RECORD_LABEL: 'Invalid Record Label Type.',
     INVALID_RECORD_ALT_TEXT: 'Invalid Record altText Type.',
 
+    FETCH_RECORDS_REJECTED: 'Detokenize request is rejected.',
+    INSERT_RECORDS_REJECTED: 'Insert request is rejected.',
+    GET_BY_SKYFLOWID_REJECTED: 'GetById request is rejected.',
+    SEND_INVOKE_GATEWAY_REJECTED: 'Invoke gateway request rejected.',
+
+    FAILED_REVEAL: 'Failed to reveal data',
+
     INVALID_TABLE_NAME: 'Table Name passed doesn’t exist in the vault with id.',
     EMPTY_TABLE_NAME: 'Table Name is empty.',
     EMPTY_TABLE_AND_FIELDS:
-    'table or fields parameter cannot be passed as empty atindex %s1 in records array.',
+      'table or fields parameter cannot be passed as empty atindex %s1 in records array.',
     EMPTY_TABLE: "Table can't be passed as empty at index %s1 in records array.",
     TABLE_KEY_ERROR: 'Key “table” is missing or payload is incorrectly formatted.',
     FIELDS_KEY_ERROR: 'Key “fields” is missing or payload is incorrectly formatted.',
@@ -113,7 +120,7 @@ const logs = {
     DUPLICATE_ELEMENT: 'Duplicate column %s1 found in %s2.',
     INVALID_ELEMENT_TYPE: 'Provide valid element type.',
     INVALID_ELEMENT_SELECTOR:
-        'Provided element selector is not valid or not found.',
+          'Provided element selector is not valid or not found.',
     CANNOT_CHANGE_ELEMENT: "Element can't be changed.",
 
     MISSING_GATEWAY_URL: 'gateway URL Key is Missing.',

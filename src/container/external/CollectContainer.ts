@@ -20,7 +20,7 @@ import {
   MessageType,
 } from '../constants';
 import Element from './element';
-import logs from '../../utils/logs';
+import logs from '../../utils/logsHelper';
 import { LogLevelOptions, printLog, parameterizedString } from '../../utils/helper';
 
 interface CollectElementInput {
@@ -82,7 +82,6 @@ class CollectContainer {
                 metaData.clientJSON.config.getBearerToken.toString(),
             },
           },
-          options: metaData.clientJSON.config.options,
           context,
         });
         bus

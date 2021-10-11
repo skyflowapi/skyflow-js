@@ -22,7 +22,7 @@ import {
   MessageType,
 } from '../constants';
 import { LogLevelOptions, printLog, parameterizedString } from '../../utils/helper';
-import logs from '../../utils/logs';
+import logs from '../../utils/logsHelper';
 
 class PureJsController {
   #client: Client;

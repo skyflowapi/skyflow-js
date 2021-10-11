@@ -1,5 +1,5 @@
 import { ISkyflow } from '../Skyflow';
-import logs from '../utils/logs';
+import logs from '../utils/logsHelper';
 
 export interface IClientRequest {
   body?: Record<string, any>;

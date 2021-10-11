@@ -13,7 +13,7 @@ import {
   MessageType,
 } from '../../constants';
 import { LogLevelOptions, parameterizedString, printLog } from '../../../utils/helper';
-import logs from '../../../utils/logs';
+import logs from '../../../utils/logsHelper';
 
 class RevealFrameController {
   #client!: Client;
@@ -39,7 +39,10 @@ class RevealFrameController {
           name: REVEAL_FRAME_CONTROLLER,
         },
         (clientMetaData: any) => {
-          const { showInfoLogs, showErrorLogs } = LogLevelOptions[clientMetaData.context];
+          const {
+            showInfoLogs,
+            showErrorLogs,
+          } = LogLevelOptions[clientMetaData.clientJSON.context.logLevel];
           this.#showInfoLogs = showInfoLogs;
           this.#showErrorLogs = showErrorLogs;
           const tempData = {

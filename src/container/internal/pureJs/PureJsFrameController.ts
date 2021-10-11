@@ -23,7 +23,7 @@ import {
   gatewayConfigParseKeys, PUREJS_TYPES, MessageType,
 } from '../../constants';
 import { LogLevelOptions, printLog, parameterizedString } from '../../../utils/helper';
-import logs from '../../../utils/logs';
+import logs from '../../../utils/logsHelper';
 
 class PureJsFrameController {
   #clientDomain: string;
@@ -51,7 +51,7 @@ class PureJsFrameController {
                 callback(resolvedResult);
               },
               (rejectedResult) => {
-                printLog(logs.infoLogs.FETCH_RECORDS_REJECTED, MessageType.ERROR,
+                printLog(logs.errorLogs.FETCH_RECORDS_REJECTED, MessageType.ERROR,
                   this.#showErrorLogs, this.#showInfoLogs);
 
                 callback({ error: rejectedResult });
@@ -83,7 +83,7 @@ class PureJsFrameController {
               callback(resolvedResult);
             },
             (rejectedResult) => {
-              printLog(logs.infoLogs.GET_BY_SKYFLOWID_REJECTED, MessageType.ERROR,
+              printLog(logs.errorLogs.GET_BY_SKYFLOWID_REJECTED, MessageType.ERROR,
                 this.#showErrorLogs, this.#showInfoLogs);
 
               callback({ error: rejectedResult });
@@ -109,13 +109,13 @@ class PureJsFrameController {
 
               callback(resultResponse);
             }).catch((rejectedResponse) => {
-              printLog(logs.infoLogs.SEND_INVOKE_GATEWAY_REJECTED, MessageType.ERROR,
+              printLog(logs.errorLogs.SEND_INVOKE_GATEWAY_REJECTED, MessageType.ERROR,
                 this.#showErrorLogs, this.#showInfoLogs);
 
               callback({ error: rejectedResponse });
             });
           }).catch((error) => {
-            printLog(logs.infoLogs.SEND_INVOKE_GATEWAY_REJECTED, MessageType.ERROR,
+            printLog(logs.errorLogs.SEND_INVOKE_GATEWAY_REJECTED, MessageType.ERROR,
               this.#showErrorLogs, this.#showInfoLogs);
 
             callback({ error });
