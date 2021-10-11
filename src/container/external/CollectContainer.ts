@@ -6,6 +6,7 @@ import iframer, {
 } from '../../iframe-libs/iframer';
 import deepClone from '../../libs/deepClone';
 import { validateElementOptions } from '../../libs/element-options';
+import SkyflowError from '../../libs/SkyflowError';
 import uuid from '../../libs/uuid';
 import properties from '../../properties';
 import { IInsertRecordInput } from '../../Skyflow';
@@ -20,11 +21,12 @@ import {
   MessageType,
 } from '../constants';
 import Element from './element';
-import logs from '../../utils/logs';
 import {
   LogLevelOptions, printLog,
   parameterizedString,
 } from '../../utils/logsHelper';
+import logs from '../../utils/logs';
+import SKYFLOW_ERROR_CODE from '../../utils/constants';
 
 interface CollectElementInput {
   table?: string;
@@ -161,7 +163,7 @@ class CollectContainer {
       && !this.#elements[elements[0].elementName]
       && this.#hasElementName(elements[0].name)
     ) {
-      throw new Error(`${parameterizedString(logs.errorLogs.UNIQUE_ELEMENT_NAME, elements[0].name)}`);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [`${elements[0].name}`], true);
     }
 
     let element = this.#elements[tempElements.elementName];
@@ -231,8 +233,12 @@ class CollectContainer {
     try {
       const collectElements = Object.values(this.#elements);
       collectElements.forEach((element) => {
-        if (!element.isMounted()) { throw new Error(logs.errorLogs.ELEMENT_NOT_MOUNTED); }
-        if (!element.isValidElement()) { throw new Error(logs.errorLogs.INVALID_TABLE_OR_COLUMN); }
+        if (!element.isMounted()) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
+        }
+        if (!element.isValidElement()) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_OR_COLUMN, [], true);
+        }
       });
       bus
       // .target(properties.IFRAME_SECURE_ORGIN)
@@ -258,7 +264,7 @@ class CollectContainer {
       MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
     } catch (err) {
       printLog(`${err.message}`, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
-      reject(err?.message);
+      reject(err);
     }
   });
 }

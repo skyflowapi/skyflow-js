@@ -289,7 +289,7 @@ class PureJsController {
         } catch (error) {
           printLog(error.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
 
-          reject(error?.message);
+          reject(error);
         }
       });
     }
@@ -328,7 +328,7 @@ class PureJsController {
       } catch (error) {
         printLog(error.message, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
 
-        reject(error?.message);
+        reject(error);
       }
     });
   }

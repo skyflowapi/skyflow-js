@@ -16,8 +16,10 @@ import IFrame from './IFrame';
 import {
   LogLevelOptions, printLog, getElementName, parameterizedString,
 } from '../../../utils/logsHelper';
-import logs from '../../../utils/logs';
 import { Context } from '../../../Skyflow';
+import SkyflowError from '../../../libs/SkyflowError';
+import SKYFLOW_ERROR_CODE from '../../../utils/constants';
+import logs from '../../../utils/logs';
 
 class Element {
   elementType: string;
@@ -75,7 +77,7 @@ class Element {
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
     if (this.#isSingleElementAPI && this.#elements.length > 1) {
-      throw new Error(logs.errorLogs.UNKNOWN_ERROR);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNKNOWN_ERROR, [], true);
     }
     const { showInfoLogs, showErrorLogs, doesReturnValue } = LogLevelOptions[this.#logLevel];
     this.#showInfoLogs = showInfoLogs;
@@ -263,7 +265,7 @@ class Element {
         handler(data);
       });
     } else {
-      throw new Error(logs.errorLogs.INVALID_EVENT_LISTENER);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER, [], true);
     }
   }
 
@@ -371,7 +373,7 @@ class Element {
                 //   break;
 
               default:
-                throw new Error(logs.errorLogs.INVALID_EVENT_TYPE);
+                throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_TYPE, [], true);
             }
 
             this.#eventEmitter._emit(emitEvent, emitData);

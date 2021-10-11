@@ -26,6 +26,8 @@ import {
   parameterizedString,
 } from '../../../utils/logsHelper';
 import { Context } from '../../../Skyflow';
+import SkyflowError from '../../../libs/SkyflowError';
+import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 
 const set = require('set-value');
@@ -360,7 +362,7 @@ export class IFrameForm {
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.controllerId,
         (data:any) => {
           if (!data.name) {
-            throw new Error(logs.errorLogs.REQUIRED_PARAMS_NOT_PROVIDED);
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.REQUIRED_PARAMS_NOT_PROVIDED, [], true);
           }
           // @ts-ignore
           if (data.name && data.name.includes(COLLECT_FRAME_CONTROLLER)) {
@@ -433,7 +435,7 @@ export class IFrameForm {
   };
 
   tokenize = (options) => {
-    if (!this.client) throw new Error(logs.errorLogs.CLIENT_CONNECTION);
+    if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const responseObject: any = {};
     const formElements = Object.keys(this.iFrameFormElements);
     for (let i = 0; i < formElements.length; i += 1) {
@@ -538,7 +540,7 @@ export class IFrameForm {
     }
 
     if (!frameInstance) {
-      throw new Error(`${parameterizedString(logs.errorLogs.FRAME_NOT_FOUND, frameGlobalName)}`);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.FRAME_NOT_FOUND, [`${frameGlobalName}`], true);
     } else if (frameInstance?.Skyflow?.init) {
       frameInstance.Skyflow.init(
         this.getOrCreateIFrameFormElement,
