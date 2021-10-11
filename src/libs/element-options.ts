@@ -1,5 +1,6 @@
 import { ELEMENTS, INPUT_STYLES } from '../container/constants';
 import { buildStylesFromClassesAndStyles } from './styles';
+import logs from '../utils/logs';
 
 export function validateElementOptions(
   elementType: string,
@@ -7,7 +8,7 @@ export function validateElementOptions(
   newOptions: any = {},
 ) {
   if (elementType !== 'group' && !Object.prototype.hasOwnProperty.call(ELEMENTS, elementType)) {
-    throw new Error('Provide valid element type');
+    throw new Error(logs.errorLogs.INVALID_ELEMENT_TYPE);
   }
 
   // if (!oldOptions.table) {
@@ -107,7 +108,7 @@ export function validateAndSetupGroupOptions(
         && oldElement.elementName
         && oldElement.elementName !== newElement.elementName
       ) {
-        throw new Error("Element can't be changed");
+        throw new Error(logs.errorLogs.CANNOT_CHANGE_ELEMENT);
       }
       validateElementOptions(oldElement.elementType, oldElement, newElement);
       newRow.elements[elementIndex] = {

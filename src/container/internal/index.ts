@@ -16,6 +16,8 @@ import {
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iFrameForm';
 import getCssClassesFromJss from '../../libs/jss-styles';
+import { parameterizedString } from '../../utils/logsHelper';
+import logs from '../../utils/logs';
 
 export class FrameController {
   controller?: FrameController;
@@ -37,15 +39,16 @@ export class FrameController {
       .emit(
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
         { name: COLLECT_FRAME_CONTROLLER + controllerId },
-        (clientMetaData: any) => {
-          clientMetaData = {
-            ...clientMetaData,
+        (data: any) => {
+          const { context, ...metaData } = data;
+          const clientMetaData = {
+            ...metaData,
             clientJSON: {
-              ...clientMetaData.clientJSON,
+              ...metaData.clientJSON,
               config: {
-                ...clientMetaData.clientJSON.config,
+                ...metaData.clientJSON.config,
                 getBearerToken: new Function(
-                  `return ${clientMetaData.clientJSON.config.getBearerToken}`,
+                  `return ${metaData.clientJSON.config.getBearerToken}`,
                 )(),
               },
             },
@@ -53,6 +56,7 @@ export class FrameController {
           const { clientJSON } = clientMetaData;
           this.#iFrameForm.setClientMetadata(clientMetaData);
           this.#iFrameForm.setClient(Client.fromJSON(clientJSON));
+          this.#iFrameForm.setLogLevel(context.logLevel);
           delete clientMetaData.clientJSON;
         },
       );
@@ -134,8 +138,9 @@ export class FrameElement {
         this.domError.innerText = '';
       } else if (!state.isEmpty && !state.isValid && this.domError) {
         this.domError.innerText = this.options.label
-          ? `Invalid ${this.options.label}`
-          : 'Invalid value';
+          ? `${parameterizedString(logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
+            this.options.label)}`
+          : logs.errorLogs.INVALID_COLLECT_VALUE;
       }
       this.updateStyleClasses(state);
     });

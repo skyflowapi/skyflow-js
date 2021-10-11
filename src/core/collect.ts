@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import { IInsertRecordInput, IInsertRecord } from '../Skyflow';
 import { validateInsertRecords } from '../utils/validators';
+import { parameterizedString } from '../utils/logsHelper';
+import logs from '../utils/logs';
 
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
@@ -43,18 +45,20 @@ export const constructInsertRecordResponse = (
   if (tokens) {
     return {
       records: responseBody.responses
-        .filter((res, index) => index % 2 !== 0)
         .map((res, index) => {
-          const skyflowId = res.fields['*'];
-          delete res.fields['*'];
-          return {
-            table: records[index].table,
-            fields: {
-              skyflow_id: skyflowId,
-              ...res.fields,
-            },
-          };
-        }),
+          if (index % 2 !== 0) {
+            const skyflowId = responseBody.responses[index - 1].records[0].skyflow_id;
+            delete res.fields['*'];
+            return {
+              table: records[index].table,
+              fields: {
+                skyflow_id: skyflowId,
+                ...res.fields,
+              },
+            };
+          }
+          return res;
+        }).filter((res, index) => index % 2 !== 0),
     };
   }
   return {
@@ -79,7 +83,7 @@ const checkDuplicateColumns = (additionalColumns, columns, table) => {
   keys.forEach((key) => {
     const value = _.get(columns, key);
     if (value) {
-      throw new Error(`Duplicate column ${key} found in ${table}`);
+      throw new Error(parameterizedString(logs.errorLogs.DUPLICATE_ELEMENT, key, table));
     }
   });
 };

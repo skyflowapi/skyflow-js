@@ -7,6 +7,8 @@ import {
   ELEMENTS,
   COLLECT_FRAME_CONTROLLER,
   ElementType,
+  LogLevel,
+  MessageType,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -19,6 +21,12 @@ import {
   constructInsertRecordResponse,
 } from '../../../core/collect';
 import { getAccessToken } from '../../../utils/busEvents';
+import {
+  LogLevelOptions, printLog,
+  parameterizedString,
+} from '../../../utils/logsHelper';
+import { Context } from '../../../Skyflow';
+import logs from '../../../utils/logs';
 
 const set = require('set-value');
 
@@ -51,7 +59,9 @@ export class IFrameFormElement extends EventEmitter {
 
   mask?: any;
 
-  constructor(name: string, metaData) {
+  context:Context;
+
+  constructor(name: string, metaData, context:Context) {
     super();
     const frameValues = name.split(':');
     const fieldType = frameValues[1];
@@ -72,7 +82,7 @@ export class IFrameFormElement extends EventEmitter {
     this.state.name = fieldName;
 
     this.metaData = metaData;
-
+    this.context = context;
     this.collectBusEvents();
   }
 
@@ -195,7 +205,7 @@ export class IFrameFormElement extends EventEmitter {
     isValid: this.state.isValid,
     isEmpty: this.state.isEmpty,
     isComplete: this.state.isComplete,
-    ...(!this.sensitive && { value: this.state.value }),
+    value: LogLevelOptions[this.context.logLevel]?.doesReturnValue ? this.state.value : undefined,
   });
 
   validator(value: string) {
@@ -238,11 +248,11 @@ export class IFrameFormElement extends EventEmitter {
 
     bus
       .target(this.metaData.clientDomain)
-      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
-        if (data.name === this.iFrameName) {
-          if (data.value !== undefined) {
+      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data:any) => {
+        if (data.options.elementName === this.iFrameName) {
+          if (data.options.value !== undefined) {
             // for setting value
-            this.setValue(<string | undefined>data.value);
+            this.setValue(<string | undefined>data.options.value);
           } else if (
             data.options !== undefined
             && data.isSingleElementAPI === true
@@ -339,6 +349,8 @@ export class IFrameForm {
 
   private clientDomain: string;
 
+  private logLevel!:LogLevel;
+
   constructor(controllerId: string, clientDomain: string) {
     this.controllerId = controllerId;
     this.clientDomain = clientDomain;
@@ -346,9 +358,9 @@ export class IFrameForm {
       .target(window.location.origin)
       .on(
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.controllerId,
-        (data) => {
+        (data:any) => {
           if (!data.name) {
-            throw new Error('Required params are not provided');
+            throw new Error(logs.errorLogs.REQUIRED_PARAMS_NOT_PROVIDED);
           }
           // @ts-ignore
           if (data.name && data.name.includes(COLLECT_FRAME_CONTROLLER)) {
@@ -369,6 +381,11 @@ export class IFrameForm {
       .on(
         ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.controllerId,
         (data, callback) => {
+          const { showInfoLogs, showErrorLogs } = LogLevelOptions[this.logLevel];
+
+          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+            ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+          MessageType.INFO, showErrorLogs, showInfoLogs);
           // todo: Do we need to reset the data!?
           this.tokenize(data)
             .then((response) => {
@@ -403,16 +420,20 @@ export class IFrameForm {
     this.callbacks = [];
   }
 
+  setLogLevel(logLevel:LogLevel) {
+    this.logLevel = logLevel;
+  }
+
   private getOrCreateIFrameFormElement = (frameName) => {
     this.iFrameFormElements[frameName] = this.iFrameFormElements[frameName]
       || new IFrameFormElement(frameName, {
         ...this.clientMetaData,
-      });
+      }, { logLevel: this.logLevel });
     return this.iFrameFormElements[frameName];
   };
 
   tokenize = (options) => {
-    if (!this.client) throw new Error('client connection not established');
+    if (!this.client) throw new Error(logs.errorLogs.CLIENT_CONNECTION);
     const responseObject: any = {};
     const formElements = Object.keys(this.iFrameFormElements);
     for (let i = 0; i < formElements.length; i += 1) {
@@ -420,7 +441,7 @@ export class IFrameForm {
       const { tableName } = this.iFrameFormElements[formElements[i]];
       if (!state.isValid || !state.isComplete) {
         return Promise.reject({
-          error: `${[state.name]}: Provide complete and valid inputs`,
+          error: `${[state.name]}: ${logs.errorLogs.COMPLETE_AND_VALID_INPUTS}`,
         });
       }
 
@@ -517,7 +538,7 @@ export class IFrameForm {
     }
 
     if (!frameInstance) {
-      throw new Error(`frame not found: ${frameGlobalName}`);
+      throw new Error(`${parameterizedString(logs.errorLogs.FRAME_NOT_FOUND, frameGlobalName)}`);
     } else if (frameInstance?.Skyflow?.init) {
       frameInstance.Skyflow.init(
         this.getOrCreateIFrameFormElement,

@@ -56,6 +56,18 @@ export enum ElementType {
   CARDHOLDER_NAME = 'CARDHOLDER_NAME',
 }
 
+export enum LogLevel{
+  DEMO = 'DEMO',
+  INFO = 'INFO',
+  DEBUG = 'DEBUG',
+  PROD = 'PROD',
+}
+
+export enum MessageType{
+  INFO = 'INFO',
+  ERROR = 'ERROR',
+}
+
 export const ELEMENTS = {
   text: {
     name: 'text',

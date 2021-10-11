@@ -3,6 +3,7 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
+  MessageType,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import Bus from '../../../libs/Bus';
@@ -12,6 +13,11 @@ import {
   validateAndSetupGroupOptions,
 } from '../../../libs/element-options';
 import IFrame from './IFrame';
+import {
+  LogLevelOptions, printLog, getElementName, parameterizedString,
+} from '../../../utils/logsHelper';
+import logs from '../../../utils/logs';
+import { Context } from '../../../Skyflow';
 
 class Element {
   elementType: string;
@@ -46,6 +52,14 @@ class Element {
 
   #mounted = false;
 
+  #logLevel;
+
+  #showErrorLogs: boolean;
+
+  #showInfoLogs: boolean;
+
+  #doesReturnValue:boolean;
+
   constructor(
     elementGroup: any,
     metaData: any,
@@ -53,14 +67,20 @@ class Element {
     isSingleElementAPI: boolean = false,
     destroyCallback: Function,
     updateCallback: Function,
+    context: Context,
   ) {
     this.containerId = containerId;
+    this.#logLevel = context.logLevel;
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
     if (this.#isSingleElementAPI && this.#elements.length > 1) {
-      throw new Error('Unknown Error');
+      throw new Error(logs.errorLogs.UNKNOWN_ERROR);
     }
+    const { showInfoLogs, showErrorLogs, doesReturnValue } = LogLevelOptions[this.#logLevel];
+    this.#showInfoLogs = showInfoLogs;
+    this.#showErrorLogs = showErrorLogs;
+    this.#doesReturnValue = doesReturnValue;
     this.elementType = this.#isSingleElementAPI
       ? this.#elements[0].elementType
       : 'group';
@@ -88,6 +108,9 @@ class Element {
 
     this.#onDestroy(destroyCallback);
     this.#onUpdate(updateCallback);
+    printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT,
+      getElementName(this.#iframe.name)), MessageType.INFO,
+    this.#showErrorLogs, this.#showInfoLogs);
   }
 
   mount = (domElement) => {
@@ -102,6 +125,7 @@ class Element {
           sub,
         );
         this.#mounted = true;
+        printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, getElementName(this.#iframe.name))} `, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         this.#updateCallbacks.forEach((func) => func());
         this.#updateCallbacks = [];
       }
@@ -189,11 +213,10 @@ class Element {
         this.#state.isFocused = elementState.isFocused;
         this.#state.value = {};
         const key = this.#elements[index].elementName;
-        const value = this.#elements[index].sensitive
-          ? undefined
-          : elementState.value;
-        if (this.#isSingleElementAPI) this.#state.value = value;
-        else this.#state.value[key] = value;
+        const value = this.#doesReturnValue ? elementState.value : undefined;
+        if (this.#isSingleElementAPI) {
+          this.#state.value = value;
+        } else this.#state.value[key] = value;
       } else {
         this.#state.isEmpty = this.#state.isEmpty || elementState.isEmpty;
         this.#state.isComplete = this.#state.isComplete && elementState.isComplete;
@@ -240,7 +263,7 @@ class Element {
         handler(data);
       });
     } else {
-      throw new Error('Provide valid event listener');
+      throw new Error(logs.errorLogs.INVALID_EVENT_LISTENER);
     }
   }
 
@@ -348,7 +371,7 @@ class Element {
                 //   break;
 
               default:
-                throw new Error('Provide a valid event type');
+                throw new Error(logs.errorLogs.INVALID_EVENT_TYPE);
             }
 
             this.#eventEmitter._emit(emitEvent, emitData);

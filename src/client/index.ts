@@ -1,4 +1,5 @@
 import { ISkyflow } from '../Skyflow';
+import logs from '../utils/logs';
 
 export interface IClientRequest {
   body?: Record<string, any>;
@@ -39,7 +40,7 @@ class Client {
   request = (request: IClientRequest) => new Promise((resolve, reject) => {
     const httpRequest = new XMLHttpRequest();
     if (!httpRequest) {
-      reject(new Error('Error while initializing the connection'));
+      reject(new Error(logs.errorLogs.CONNECTION_ERROR));
       return;
     }
 
@@ -77,7 +78,7 @@ class Client {
         } else {
           const error = {
             http_code: httpRequest.status,
-            message: 'Error occurred',
+            message: logs.errorLogs.ERROR_OCCURED,
           };
           reject({ error });
         }
@@ -89,7 +90,7 @@ class Client {
     };
 
     httpRequest.onerror = () => {
-      reject(new Error('An error occurred during transaction'));
+      reject(new Error(logs.errorLogs.TRANSACTION_ERROR));
     };
   });
 }

@@ -1,6 +1,7 @@
 import bus from 'framebus';
 import { ELEMENT_EVENTS_TO_IFRAME } from '../../container/constants';
 import { formatFrameNameToId } from '../helpers';
+import logs from '../logs';
 
 export function getCollectElementValue(key, elementIframename) {
   return new Promise((resolve, reject) => {
@@ -9,7 +10,7 @@ export function getCollectElementValue(key, elementIframename) {
         { name: formatFrameNameToId(elementIframename) },
         (state:any) => {
           if (!state.isValid) {
-            reject('Invalid Field');
+            reject(logs.errorLogs.INVALID_FIELD);
           }
           resolve({
             key,

@@ -1,18 +1,22 @@
 import bus from 'framebus';
+import uuid from './libs/uuid';
+import {
+  ElementType,
+  ELEMENT_EVENTS_TO_IFRAME,
+  LogLevel,
+  MessageType,
+} from './container/constants';
 import Client from './client';
 import CollectContainer from './container/external/CollectContainer';
 import RevealContainer from './container/external/RevealContainer';
-import uuid from './libs/uuid';
-import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from './container/constants';
 import {
-  validateInsertRecords,
-  validateDetokenizeInput,
-  validateGetByIdInput,
   isValidURL,
 } from './utils/validators';
-import PureJsController from './container/external/PureJsController';
 import properties from './properties';
 import isTokenValid from './utils/jwtUtils';
+import PureJsController from './container/external/PureJsController';
+import { LogLevelOptions, printLog } from './utils/logsHelper';
+import logs from './utils/logs';
 
 export interface IInsertRecord {
   table: string;
@@ -62,7 +66,11 @@ export interface IGetByIdInput {
   records: ISkyflowIdRecord[];
 }
 
-export enum RequestMethod{
+export interface Context{
+  logLevel:LogLevel
+}
+
+export enum RequestMethod {
   GET = 'GET',
   POST = 'POST',
   PUT = 'PUT',
@@ -72,7 +80,7 @@ export enum RequestMethod{
 
 export interface IGatewayConfig {
   gatewayURL: string;
-  methodName:RequestMethod;
+  methodName: RequestMethod;
   pathParams?: any;
   queryParams?: any;
   requestBody?: any;
@@ -92,7 +100,15 @@ class Skyflow {
 
   #pureJsController: PureJsController;
 
-  #bearerToken:string = '';
+  #bearerToken: string = '';
+
+  #options: any;
+
+  #showErrorLogs: boolean;
+
+  #showInfoLogs: boolean;
+
+  #logLevel:LogLevel;
 
   constructor(config: ISkyflow) {
     this.#client = new Client(
@@ -101,57 +117,93 @@ class Skyflow {
       },
       this.#metadata,
     );
-    this.#pureJsController = new PureJsController(this.#client);
-    bus.target(properties.IFRAME_SECURE_ORGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN,
-        (data, callback) => {
-          if (this.#client.config.getBearerToken
-        && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
-          ) {
-            this.#client.config.getBearerToken().then((bearerToken) => {
+    this.#logLevel = config?.options?.logLevel || LogLevel.PROD;
+    this.#pureJsController = new PureJsController(this.#client, { logLevel: this.#logLevel });
+
+    const { showInfoLogs, showErrorLogs } = LogLevelOptions[this.#logLevel];
+
+    this.#showInfoLogs = showInfoLogs;
+    this.#showErrorLogs = showErrorLogs;
+
+    bus
+      .target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, (data, callback) => {
+        printLog(logs.infoLogs.CAPTURED_BEARER_TOKEN_EVENT, MessageType.INFO,
+          this.#showErrorLogs, this.#showInfoLogs);
+        if (
+          this.#client.config.getBearerToken
+          && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
+        ) {
+          this.#client.config
+            .getBearerToken()
+            .then((bearerToken) => {
+              printLog(logs.infoLogs.BEARER_TOKEN_RESOLVED, MessageType.INFO,
+                this.#showErrorLogs, this.#showInfoLogs);
               this.#bearerToken = bearerToken;
               callback({ authToken: this.#bearerToken });
-            }).catch((err) => {
+            })
+            .catch((err) => {
+              printLog(logs.errorLogs.BEARER_TOKEN_REJECTED, MessageType.ERROR,
+                this.#showErrorLogs, this.#showInfoLogs);
               callback({ error: err });
             });
-          } else {
-            callback({ authToken: this.#bearerToken });
-          }
-        });
+        } else {
+          printLog(logs.infoLogs.REUSE_BEARER_TOKEN, MessageType.INFO,
+            this.#showErrorLogs, this.#showInfoLogs);
+          callback({ authToken: this.#bearerToken });
+        }
+      });
+    printLog(logs.infoLogs.BEARER_TOKEN_LISTENER, MessageType.INFO,
+      this.#showErrorLogs, this.#showInfoLogs);
   }
 
   static init(config: ISkyflow): Skyflow {
+    const {
+      showInfoLogs,
+      showErrorLogs,
+    } = LogLevelOptions[config?.options?.logLevel || LogLevel.PROD];
+    printLog(logs.infoLogs.INITIALIZE_CLIENT, MessageType.INFO, showErrorLogs, showInfoLogs);
     if (
       !config
       || !config.vaultID
       || !isValidURL(config.vaultURL)
       || !config.getBearerToken
     ) {
-      throw new Error('Invalid client credentials');
+      throw new Error(logs.errorLogs.INVALID_CREDENTIALS);
     }
-
     const tempConfig = config;
     tempConfig.vaultURL = config.vaultURL.slice(-1) === '/'
       ? config.vaultURL.slice(0, -1)
       : config.vaultURL;
-
-    return new Skyflow(tempConfig);
+    const skyflow = new Skyflow(tempConfig);
+    printLog(logs.infoLogs.CLIENT_INITIALIZED, MessageType.INFO, showErrorLogs, showInfoLogs);
+    return skyflow;
   }
 
   container(type: ContainerType, options?: Record<string, any>) {
     switch (type) {
-      case ContainerType.COLLECT:
-        return new CollectContainer(options, {
+      case ContainerType.COLLECT: {
+        const collectContainer = new CollectContainer(options, {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
-        });
-      case ContainerType.REVEAL:
-        return new RevealContainer({
+        },
+        { logLevel: this.#logLevel });
+        printLog(logs.infoLogs.COLLECT_CONTAINER_CREATED, MessageType.INFO,
+          this.#showErrorLogs, this.#showInfoLogs);
+        return collectContainer;
+      }
+      case ContainerType.REVEAL: {
+        const revealContainer = new RevealContainer({
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
-        });
+        },
+        { logLevel: this.#logLevel });
+        printLog(logs.infoLogs.REVEAL_CONTAINER_CREATED, MessageType.INFO,
+          this.#showErrorLogs, this.#showInfoLogs);
+        return revealContainer;
+      }
       default:
-        throw new Error('Invalid container type');
+        throw new Error(logs.errorLogs.INVALID_CONTAINER_TYPE);
     }
   }
 
@@ -159,23 +211,27 @@ class Skyflow {
     records: IInsertRecordInput,
     options: Record<string, any> = { tokens: true },
   ) {
-    validateInsertRecords(records);
+    printLog(logs.infoLogs.INSERT_TRIGGERED, MessageType.INFO,
+      this.#showErrorLogs, this.#showInfoLogs);
     return this.#pureJsController.insert(records, options);
   }
 
-  detokenize(
-    detokenizeInput: IDetokenizeInput,
-  ): Promise<IRevealResponseType> {
-    validateDetokenizeInput(detokenizeInput);
-    return this.#pureJsController.detokenize(detokenizeInput.records);
+  detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
+    printLog(logs.infoLogs.DETOKENIZE_TRIGGERED,
+      MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    return this.#pureJsController.detokenize(detokenizeInput);
   }
 
   getById(getByIdInput: IGetByIdInput) {
-    validateGetByIdInput(getByIdInput);
-    return this.#pureJsController.getById(getByIdInput.records);
+    printLog(logs.infoLogs.GET_BY_ID_TRIGGERED,
+      MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    return this.#pureJsController.getById(getByIdInput);
   }
 
   invokeGateway(config: IGatewayConfig) {
+    printLog(logs.infoLogs.INVOKE_GATEWAY_TRIGGERED,
+      MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+
     return this.#pureJsController.invokeGateway(config);
   }
 
@@ -193,6 +249,10 @@ class Skyflow {
 
   static get RequestMethod() {
     return RequestMethod;
+  }
+
+  static get LogLevel() {
+    return LogLevel;
   }
 }
 export default Skyflow;

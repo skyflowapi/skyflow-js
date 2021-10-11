@@ -1,5 +1,5 @@
 import bus from 'framebus';
-import { RedactionType } from '../../Skyflow';
+import { RedactionType, Context } from '../../Skyflow';
 import iframer, {
   setAttributes,
   getIframeSrc,
@@ -10,12 +10,18 @@ import {
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENT_EVENTS_TO_CONTAINER,
+  MessageType,
 } from '../constants';
 import RevealElement from './reveal/RevealElement';
 import uuid from '../../libs/uuid';
 import EventEmitter from '../../event-emitter';
 import properties from '../../properties';
 import { validateRevealElementRecords } from '../../utils/validators';
+import {
+  LogLevelOptions, printLog,
+  parameterizedString,
+} from '../../utils/logsHelper';
+import logs from '../../utils/logs';
 
 export interface IRevealElementInput {
   token?: string;
@@ -42,11 +48,17 @@ class RevealContainer {
 
   #isElementsMounted: boolean = false;
 
-  constructor(metaData) {
+  #showErrorLogs: boolean;
+
+  #showInfoLogs: boolean;
+
+  #context:Context;
+
+  constructor(metaData, context) {
     this.#metaData = metaData;
     this.#containerId = uuid();
     this.#eventEmmiter = new EventEmitter();
-
+    this.#context = context;
     const iframe = iframer({
       name: `${REVEAL_FRAME_CONTROLLER}:${this.#containerId}`,
     });
@@ -54,6 +66,12 @@ class RevealContainer {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
+    const { showInfoLogs, showErrorLogs } = LogLevelOptions[
+      context.logLevel];
+    this.#showInfoLogs = showInfoLogs;
+    this.#showErrorLogs = showErrorLogs;
+    printLog(logs.infoLogs.CREATE_REVEAL_CONTAINER, MessageType.INFO,
+      this.#showErrorLogs, this.#showInfoLogs);
 
     const sub = (data, callback) => {
       if (data.name === REVEAL_FRAME_CONTROLLER) {
@@ -66,6 +84,7 @@ class RevealContainer {
               getBearerToken:
                 metaData.clientJSON.config.getBearerToken.toString(),
             },
+            context,
           },
         });
         bus
@@ -106,7 +125,8 @@ class RevealContainer {
 
   create(record: IRevealElementInput) {
     this.#revealRecords.push(record);
-    return new RevealElement(record, this.#metaData, this.#containerId);
+
+    return new RevealElement(record, this.#metaData, this.#containerId, this.#context);
   }
 
   reveal() {
@@ -114,6 +134,9 @@ class RevealContainer {
     if (this.#isElementsMounted) {
       return new Promise((resolve, reject) => {
         try {
+          printLog(logs.infoLogs.VALIDATE_REVEAL_RECORDS, MessageType.INFO,
+            this.#showErrorLogs, this.#showInfoLogs);
+
           validateRevealElementRecords(this.#revealRecords);
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)
@@ -125,19 +148,37 @@ class RevealContainer {
               (revealData: any) => {
                 this.#mountedRecords = [];
                 this.#revealRecords = [];
-                if (revealData.error) reject(revealData.error);
-                else resolve(revealData);
+                if (revealData.error) {
+                  printLog(logs.errorLogs.FAILED_REVEAL, MessageType.ERROR,
+                    this.#showErrorLogs, this.#showInfoLogs);
+
+                  reject(revealData.error);
+                } else {
+                  printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.INFO,
+                    this.#showErrorLogs, this.#showInfoLogs);
+                  resolve(revealData);
+                }
               },
             );
+          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
+            ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
+          MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
         } catch (err) {
+          printLog(`Error: ${err.message}`, MessageType.ERROR,
+            this.#showErrorLogs, this.#showInfoLogs);
+
           reject(err?.message);
         }
       });
     }
     return new Promise((resolve, reject) => {
       try {
+        printLog(logs.infoLogs.VALIDATE_REVEAL_RECORDS, MessageType.INFO,
+          this.#showErrorLogs, this.#showInfoLogs);
         validateRevealElementRecords(this.#revealRecords);
         const elementMountTimeOut = setTimeout(() => {
+          printLog(logs.errorLogs.ELEMENT_NOT_MOUNTED, MessageType.ERROR,
+            this.#showErrorLogs, this.#showInfoLogs);
           reject('Elements Not Mounted');
         }, 30000);
         this.#eventEmmiter.on(
@@ -154,13 +195,24 @@ class RevealContainer {
                 (revealData: any) => {
                   this.#revealRecords = [];
                   this.#mountedRecords = [];
-                  if (revealData.error) reject(revealData.error);
-                  else resolve(revealData);
+                  if (revealData.error) {
+                    printLog(logs.errorLogs.FAILED_REVEAL, MessageType.ERROR,
+                      this.#showErrorLogs, this.#showInfoLogs);
+                    reject(revealData.error);
+                  } else {
+                    printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.INFO,
+                      this.#showErrorLogs, this.#showInfoLogs);
+
+                    resolve(revealData);
+                  }
                 },
               );
           },
         );
       } catch (err) {
+        printLog(err.message, MessageType.ERROR,
+          this.#showErrorLogs, this.#showInfoLogs);
+
         reject(err?.message);
       }
     });
