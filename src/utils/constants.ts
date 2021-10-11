@@ -45,6 +45,8 @@ const SKYFLOW_ERROR_CODE = {
   INVALID_EVENT_TYPE: { code: 400, description: logs.errorLogs.INVALID_EVENT_TYPE },
   INVALID_EVENT_LISTENER: { code: 400, description: logs.errorLogs.INVALID_EVENT_LISTENER },
   UNKNOWN_ERROR: { code: 400, description: logs.errorLogs.UNKNOWN_ERROR },
+  CONNECTION_ERROR: { code: 400, description: logs.errorLogs.CONNECTION_ERROR },
+  TRANSACTION_ERROR: { code: 400, description: logs.errorLogs.TRANSACTION_ERROR },
 };
 
 export default SKYFLOW_ERROR_CODE;

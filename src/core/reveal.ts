@@ -30,10 +30,13 @@ const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
   return currentResponseRecords.map((record) => ({ token: record.token_id, ...record.fields }));
 };
 
-const formatForPureJsFailure = (cause: IApiFailureResponse, tokenIds) => tokenIds.map((tokenId) => (
+const formatForPureJsFailure = (cause, tokenIds) => tokenIds.map((tokenId) => (
   {
     token: tokenId,
-    ...new SkyflowError({ code: cause?.error?.http_code || '', description: cause?.error?.message || '' }, [], true),
+    ...new SkyflowError({
+      code: cause?.error?.code,
+      description: cause?.error?.description,
+    }, [], true),
   }));
 const getSkyflowIdRecordsFromVault = (
   skyflowIdRecord: ISkyflowIdRecord,
