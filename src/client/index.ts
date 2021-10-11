@@ -1,4 +1,6 @@
+import SkyflowError from '../libs/SkyflowError';
 import { ISkyflow } from '../Skyflow';
+import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
 
 export interface IClientRequest {
@@ -40,7 +42,7 @@ class Client {
   request = (request: IClientRequest) => new Promise((resolve, reject) => {
     const httpRequest = new XMLHttpRequest();
     if (!httpRequest) {
-      reject(new Error(logs.errorLogs.CONNECTION_ERROR));
+      reject(new SkyflowError(SKYFLOW_ERROR_CODE.CONNECTION_ERROR, [], true));
       return;
     }
 
@@ -70,17 +72,15 @@ class Client {
         if (contentType.includes('application/json')) {
           reject(JSON.parse(httpRequest.response));
         } else if (contentType.includes('text/plain')) {
-          const error = {
-            http_code: httpRequest.status,
-            message: httpRequest.response,
-          };
-          reject({ error });
+          reject(new SkyflowError({
+            code: httpRequest.status,
+            description: httpRequest.response,
+          }, [], true));
         } else {
-          const error = {
-            http_code: httpRequest.status,
-            message: logs.errorLogs.ERROR_OCCURED,
-          };
-          reject({ error });
+          reject(new SkyflowError({
+            code: httpRequest.status,
+            description: logs.errorLogs.ERROR_OCCURED,
+          }, [], true));
         }
       }
       if (contentType.includes('application/json')) {
@@ -90,7 +90,7 @@ class Client {
     };
 
     httpRequest.onerror = () => {
-      reject(new Error(logs.errorLogs.TRANSACTION_ERROR));
+      reject(new SkyflowError(SKYFLOW_ERROR_CODE.TRANSACTION_ERROR, [], true));
     };
   });
 }

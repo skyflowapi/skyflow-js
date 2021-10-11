@@ -166,8 +166,7 @@ class RevealContainer {
         } catch (err) {
           printLog(`Error: ${err.message}`, MessageType.ERROR,
             this.#showErrorLogs, this.#showInfoLogs);
-
-          reject(err?.message);
+          reject(err);
         }
       });
     }
@@ -213,7 +212,7 @@ class RevealContainer {
         printLog(err.message, MessageType.ERROR,
           this.#showErrorLogs, this.#showInfoLogs);
 
-        reject(err?.message);
+        reject(err);
       }
     });
   }

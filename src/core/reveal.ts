@@ -6,6 +6,7 @@ import {
   IRevealResponseType,
 } from '../Skyflow';
 import { getAccessToken } from '../utils/busEvents';
+import SkyflowError from '../libs/SkyflowError';
 
 interface IApiSuccessResponse {
   records: [
@@ -29,15 +30,14 @@ const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
   return currentResponseRecords.map((record) => ({ token: record.token_id, ...record.fields }));
 };
 
-const formatForPureJsFailure = (cause: IApiFailureResponse, tokenIds) => tokenIds.map((tokenId) => (
+const formatForPureJsFailure = (cause, tokenIds) => tokenIds.map((tokenId) => (
   {
     token: tokenId,
-    error: {
-      code: cause?.error?.http_code || '',
-      description: cause?.error?.message || '',
-    },
+    ...new SkyflowError({
+      code: cause?.error?.code,
+      description: cause?.error?.description,
+    }, [], true),
   }));
-
 const getSkyflowIdRecordsFromVault = (
   skyflowIdRecord: ISkyflowIdRecord,
   client: Client,
@@ -49,9 +49,7 @@ const getSkyflowIdRecordsFromVault = (
     paramList += `skyflow_ids=${skyflowId}&`;
   });
 
-  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/
-  ${client.config.vaultID}/${skyflowIdRecord.table}?${paramList}
-  redaction=${skyflowIdRecord.redaction}`;
+  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}?${paramList}redaction=${skyflowIdRecord.redaction}`;
 
   return client.request({
     requestMethod: 'GET',

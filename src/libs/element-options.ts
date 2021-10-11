@@ -1,6 +1,8 @@
 import { ELEMENTS, INPUT_STYLES } from '../container/constants';
-import { buildStylesFromClassesAndStyles } from './styles';
+import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
+import SkyflowError from './SkyflowError';
+import { buildStylesFromClassesAndStyles } from './styles';
 
 export function validateElementOptions(
   elementType: string,
@@ -8,7 +10,7 @@ export function validateElementOptions(
   newOptions: any = {},
 ) {
   if (elementType !== 'group' && !Object.prototype.hasOwnProperty.call(ELEMENTS, elementType)) {
-    throw new Error(logs.errorLogs.INVALID_ELEMENT_TYPE);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_TYPE, [], true);
   }
 
   // if (!oldOptions.table) {

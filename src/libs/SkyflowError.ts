@@ -1,29 +1,28 @@
-interface ISkyflowError {
-  type: string;
-  code: string;
-  message: string;
+import { parameterizedString } from '../utils/logsHelper';
+
+export interface ISkyflowError{
+  code:string | number,
+  description:string,
 }
+
 export default class SkyflowError extends Error {
-  readonly name = 'Skyflow';
+  error?: ISkyflowError;
 
-  type: string;
+  errors?: ISkyflowError[];
 
-  code: string;
-
-  message: string;
-
-  constructor(obj: ISkyflowError) {
-    super();
-    this.type = obj.type;
-    this.code = obj.code;
-    this.message = obj.message;
+  constructor(errorCode: ISkyflowError,
+    args?: any[], isSingularError: boolean = false) {
+    super(errorCode.description);
+    const formattedError = {
+      code: errorCode.code,
+      description: (args && args?.length > 0)
+        ? parameterizedString(errorCode.description, ...args)
+        : errorCode.description,
+    };
+    if (isSingularError) {
+      this.error = formattedError;
+    } else {
+      this.errors = [formattedError];
+    }
   }
-
-  static TYPES = {
-    CUSTOMER: 'CUSTOMER',
-    MERCHANT: 'MERCHANT',
-    NETWORK: 'NETWORK',
-    INTERNAL: 'INTERNAL',
-    UNKNOWN: 'UNKNOWN',
-  };
 }

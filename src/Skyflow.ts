@@ -16,7 +16,9 @@ import properties from './properties';
 import isTokenValid from './utils/jwtUtils';
 import PureJsController from './container/external/PureJsController';
 import { LogLevelOptions, printLog } from './utils/logsHelper';
+import SkyflowError from './libs/SkyflowError';
 import logs from './utils/logs';
+import SKYFLOW_ERROR_CODE from './utils/constants';
 
 export interface IInsertRecord {
   table: string;
@@ -169,7 +171,7 @@ class Skyflow {
       || !isValidURL(config.vaultURL)
       || !config.getBearerToken
     ) {
-      throw new Error(logs.errorLogs.INVALID_CREDENTIALS);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CREDENTIALS, [], true);
     }
     const tempConfig = config;
     tempConfig.vaultURL = config.vaultURL.slice(-1) === '/'
@@ -203,7 +205,7 @@ class Skyflow {
         return revealContainer;
       }
       default:
-        throw new Error(logs.errorLogs.INVALID_CONTAINER_TYPE);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTAINER_TYPE, [], true);
     }
   }
 
