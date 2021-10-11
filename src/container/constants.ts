@@ -13,14 +13,14 @@ export const PUREJS_TYPES = {
 };
 
 export const ELEMENT_EVENTS_TO_CLIENT = {
-  CHANGE: 'Change',
-  READY: 'Ready',
-  FOCUS: 'Focus',
-  BLUR: 'Blur',
-  ESCAPE: 'Escape',
-  CLICK: 'Click',
-  ERROR: 'Error',
-  SUCCESS: 'Success',
+  CHANGE: 'CHANGE',
+  READY: 'READY',
+  FOCUS: 'FOCUS',
+  BLUR: 'BLUR',
+  ESCAPE: 'ESCAPE',
+  CLICK: 'CLICK',
+  ERROR: 'ERROR',
+  SUCCESS: 'SUCCESS',
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {
