@@ -37,6 +37,9 @@ const skyflowClient = Skyflow.init({
    vaultID: "string",          //Id of the vault that the client should connect to 
    vaultURL: "string",         //URL of the vault that the client should connect to
    getBearerToken: helperFunc  //helper function that retrieves a Skyflow bearer token from your backend
+   options:{
+     logLevel:Skyflow.LogLevel // optional, if not specified default is PROD  
+   }
 })
 ```
 For the `getBearerToken` parameter, pass in a helper function that retrieves a Skyflow bearer token from your backend. This function will be invoked when the SDK needs to insert or retrieve data from the vault. A sample implementation is shown below: 
@@ -80,13 +83,32 @@ getBearerToken: () => {
 }
 
 ```
+For `logLevel` parameter, there are 3 accepted values in Skyflow.LogLevel
+
+- `INFO`
+    
+  When `Skyflow.LogLevel.INFO` is passed, will get info logs for every event that has occurred during the SDK flow execution along with error logs on the console.
+
+- `DEBUG`
+
+  Logs will be same as in `INFO`. 
+  
+  In Event Listeners actual vaule of element can be accessed inside the handler. 
+
+- `PROD`
+
+  When `Skyflow.LogLevel.PROD` is passed, will get only error logs on the console.
+
+`Note`:
+  - since `logLevel` is optional, by default the logLevel will be  `PROD`.
+  - Use `logLevel` option with caution, make sure the logLevel is set to `PROD` when using `skyflow-js` in production. 
 
 ---
 
 # Securely collecting data client-side
 -  [**Inserting data into the vault**](#inserting-data-into-the-vault)
 -  [**Using Skyflow Elements to collect data**](#using-skyflow-elements-to-collect-data)
-
+-  [**Event Listener on Collect Elements**](#event-listener-on-collect-elements)
 ## Inserting data into the vault
 
 To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes a dictionary of optional parameters for the insertion. See below: 
@@ -382,6 +404,99 @@ container.collect({
 }
 ```
 
+
+### Event Listener on Collect Elements
+
+
+Helps to communicate with skyflow elements / iframes by listening to an event
+
+```javascript
+element.on(Skyflow.EventName,handler:function)
+```
+
+There are 4 events in `Skyflow.EventName`
+- `CHANGE`  
+  Change event is triggered when the Element's value changes.
+
+- `READY`   
+   Ready event is triggered when the Element is fully rendered
+
+- `FOCUS`   
+ Focus event is triggered when the Element gains focus
+
+- `BLUR`    
+  Blur event is triggered when the Element loses focus.
+
+The handler ```function(state) => void```   is a callback function you provide, that will be called when the event is fired with the state object as shown below. 
+
+```javascript
+state : {
+  elementType: Skyflow.ElementType
+  isComplete: boolean
+  isEmpty: boolean 
+  isFocused: boolean
+  isValid: boolean
+  value: string | undefined 
+}
+```
+
+`Note:`
+values of SkyflowElements will be returned in elementstate object only when LogLevel is  `DEBUG`,  else it is `undefined`
+
+##### Sample code snippet for using listeners
+```javascript
+//create skyflow client with loglevel:"DEBUG"
+const skyflowClient = Skyflow.init({
+   vaultID: <VAULT_ID>,          
+   vaultURL: <VAULT_URL>,
+   getBearerToken: ()=>{},
+   options: { 
+     logLevel: Skyflow.LogLevel.DEBUG
+   }
+})
+
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
+
+const cardNumber = container.create({
+        table: "pii_fields",
+        column: "primary_card.card_number",
+        type: Skyflow.ElementType.CARD_NUMBER,
+      });
+
+cardNumber.mount("#cardNumberContainer");
+
+//subscribing to CHANGE event, which gets triggered when element changes
+cardNumber.on(Skyflow.EventName.CHANGE,(state) => {
+  // Your implementation when Change event occurs
+  console.log(state)
+});
+```
+##### Sample Element state object when `logLevel` is `DEBUG`
+
+```javascript
+{
+   elementType: "CARD_NUMBER"
+   isComplete: false
+   isEmpty: false
+   isFocused: true
+   isValid: false
+   value: "411"
+}
+
+```
+##### Sample Element state object when `logLevel` is `PROD` or `INFO`
+
+```javascript
+{
+   elementType: "CARD_NUMBER"
+   isComplete: false
+   isEmpty: false
+   isFocused: true
+   isValid: false
+   value: undefined
+}
+```
+
 ---
 
 
@@ -415,7 +530,7 @@ There are 4 accepted values in Skyflow.RedactionTypes:
 - `REDACTED`
 - `DEFAULT`
 
-An example of a get call: 
+An example of a detokenize call: 
 
 ```javascript
 skyflow.detokenize({
