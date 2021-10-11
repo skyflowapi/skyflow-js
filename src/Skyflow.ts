@@ -15,8 +15,8 @@ import {
 import properties from './properties';
 import isTokenValid from './utils/jwtUtils';
 import PureJsController from './container/external/PureJsController';
-import { LogLevelOptions, printLog } from './utils/helper';
-import logs from './utils/logsHelper';
+import { LogLevelOptions, printLog } from './utils/logsHelper';
+import logs from './utils/logs';
 
 export interface IInsertRecord {
   table: string;
@@ -249,6 +249,10 @@ class Skyflow {
 
   static get RequestMethod() {
     return RequestMethod;
+  }
+
+  static get LogLevel() {
+    return LogLevel;
   }
 }
 export default Skyflow;

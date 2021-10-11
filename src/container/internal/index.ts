@@ -16,6 +16,8 @@ import {
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iFrameForm';
 import getCssClassesFromJss from '../../libs/jss-styles';
+import { parameterizedString } from '../../utils/logsHelper';
+import logs from '../../utils/logs';
 
 export class FrameController {
   controller?: FrameController;
@@ -136,8 +138,9 @@ export class FrameElement {
         this.domError.innerText = '';
       } else if (!state.isEmpty && !state.isValid && this.domError) {
         this.domError.innerText = this.options.label
-          ? `Invalid ${this.options.label}`
-          : 'Invalid value';
+          ? `${parameterizedString(logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
+            this.options.label)}`
+          : logs.errorLogs.INVALID_COLLECT_VALUE;
       }
       this.updateStyleClasses(state);
     });

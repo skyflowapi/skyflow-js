@@ -9,9 +9,12 @@ import {
 } from '../../constants';
 import IFrame from '../element/IFrame';
 import { IRevealElementInput } from '../RevealContainer';
-import { LogLevelOptions, parameterizedString, printLog } from '../../../utils/helper';
+import {
+  LogLevelOptions, parameterizedString,
+  printLog,
+} from '../../../utils/logsHelper';
 import { Context } from '../../../Skyflow';
-import logs from '../../../utils/logsHelper';
+import logs from '../../../utils/logs';
 
 class RevealElement {
   #iframe: IFrame;

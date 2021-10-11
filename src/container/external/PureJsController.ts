@@ -21,8 +21,11 @@ import {
   PUREJS_TYPES,
   MessageType,
 } from '../constants';
-import { LogLevelOptions, printLog, parameterizedString } from '../../utils/helper';
-import logs from '../../utils/logsHelper';
+import {
+  LogLevelOptions, printLog,
+  parameterizedString,
+} from '../../utils/logsHelper';
+import logs from '../../utils/logs';
 
 class PureJsController {
   #client: Client;

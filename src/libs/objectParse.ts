@@ -3,7 +3,7 @@ import Element from '../container/external/element';
 import { FRAME_ELEMENT, FRAME_REVEAL } from '../container/constants';
 import { flattenObject } from '../utils/helpers';
 import { getCollectElementValue, getRevealElementValue } from '../utils/busEvents';
-import logs from '../utils/logsHelper';
+import logs from '../utils/logs';
 
 const set = require('set-value');
 

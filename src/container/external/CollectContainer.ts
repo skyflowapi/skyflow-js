@@ -20,8 +20,11 @@ import {
   MessageType,
 } from '../constants';
 import Element from './element';
-import logs from '../../utils/logsHelper';
-import { LogLevelOptions, printLog, parameterizedString } from '../../utils/helper';
+import logs from '../../utils/logs';
+import {
+  LogLevelOptions, printLog,
+  parameterizedString,
+} from '../../utils/logsHelper';
 
 interface CollectElementInput {
   table?: string;

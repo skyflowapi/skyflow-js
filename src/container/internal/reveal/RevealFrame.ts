@@ -9,8 +9,11 @@ import {
   MessageType,
 } from '../../constants';
 import getCssClassesFromJss from '../../../libs/jss-styles';
-import { printLog, parameterizedString, LogLevelOptions } from '../../../utils/helper';
-import logs from '../../../utils/logsHelper';
+import {
+  printLog, parameterizedString,
+  LogLevelOptions,
+} from '../../../utils/logsHelper';
+import logs from '../../../utils/logs';
 
 class RevealFrame {
   static revealFrame: RevealFrame;

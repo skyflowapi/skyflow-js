@@ -17,8 +17,11 @@ import uuid from '../../libs/uuid';
 import EventEmitter from '../../event-emitter';
 import properties from '../../properties';
 import { validateRevealElementRecords } from '../../utils/validators';
-import { LogLevelOptions, printLog, parameterizedString } from '../../utils/helper';
-import logs from '../../utils/logsHelper';
+import {
+  LogLevelOptions, printLog,
+  parameterizedString,
+} from '../../utils/logsHelper';
+import logs from '../../utils/logs';
 
 export interface IRevealElementInput {
   token?: string;

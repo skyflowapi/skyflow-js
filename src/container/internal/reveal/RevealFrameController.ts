@@ -12,8 +12,8 @@ import {
   REVEAL_FRAME_CONTROLLER,
   MessageType,
 } from '../../constants';
-import { LogLevelOptions, parameterizedString, printLog } from '../../../utils/helper';
-import logs from '../../../utils/logsHelper';
+import { LogLevelOptions, parameterizedString, printLog } from '../../../utils/logsHelper';
+import logs from '../../../utils/logs';
 
 class RevealFrameController {
   #client!: Client;

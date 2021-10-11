@@ -21,9 +21,12 @@ import {
   constructInsertRecordResponse,
 } from '../../../core/collect';
 import { getAccessToken } from '../../../utils/busEvents';
-import { LogLevelOptions, printLog, parameterizedString } from '../../../utils/helper';
+import {
+  LogLevelOptions, printLog,
+  parameterizedString,
+} from '../../../utils/logsHelper';
 import { Context } from '../../../Skyflow';
-import logs from '../../../utils/logsHelper';
+import logs from '../../../utils/logs';
 
 const set = require('set-value');
 

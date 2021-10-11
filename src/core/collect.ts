@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { IInsertRecordInput, IInsertRecord } from '../Skyflow';
 import { validateInsertRecords } from '../utils/validators';
-import { parameterizedString } from '../utils/helper';
-import logs from '../utils/logsHelper';
+import { parameterizedString } from '../utils/logsHelper';
+import logs from '../utils/logs';
 
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,

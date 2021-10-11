@@ -15,8 +15,8 @@ import {
 import IFrame from './IFrame';
 import {
   LogLevelOptions, printLog, getElementName, parameterizedString,
-} from '../../../utils/helper';
-import logs from '../../../utils/logsHelper';
+} from '../../../utils/logsHelper';
+import logs from '../../../utils/logs';
 import { Context } from '../../../Skyflow';
 
 class Element {
