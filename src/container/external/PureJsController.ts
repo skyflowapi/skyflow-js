@@ -8,9 +8,6 @@ import iframer, {
 import { gatewayConfigParser } from '../../libs/objectParse';
 import properties from '../../properties';
 import {
-  IGatewayConfig, Context, IDetokenizeInput, IGetByIdInput,
-} from '../../Skyflow';
-import {
   validateGatewayConfig, validateInsertRecords, validateDetokenizeInput, validateGetByIdInput,
 } from '../../utils/validators';
 import {
@@ -26,13 +23,16 @@ import {
   parameterizedString,
 } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
+import {
+  IDetokenizeInput, IGetByIdInput, IGatewayConfig, Context,
+} from '../../utils/common';
 
 class PureJsController {
   #client: Client;
 
   #isControllerFrameReady: boolean = false;
 
-  #context:Context;
+  #context: Context;
 
   #showErrorLogs: boolean;
 

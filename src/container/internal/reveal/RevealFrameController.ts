@@ -6,7 +6,6 @@ import {
   formatRecordsForIframe,
 } from '../../../core/reveal';
 import properties from '../../../properties';
-import { IRevealRecord } from '../../../Skyflow';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   REVEAL_FRAME_CONTROLLER,
@@ -14,6 +13,7 @@ import {
 } from '../../constants';
 import { LogLevelOptions, parameterizedString, printLog } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
+import { IRevealRecord } from '../../../utils/common';
 
 class RevealFrameController {
   #client!: Client;

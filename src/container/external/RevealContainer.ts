@@ -1,5 +1,4 @@
 import bus from 'framebus';
-import { RedactionType, Context } from '../../Skyflow';
 import iframer, {
   setAttributes,
   getIframeSrc,
@@ -22,6 +21,7 @@ import {
   parameterizedString,
 } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
+import { Context, RedactionType } from '../../utils/common';
 
 export interface IRevealElementInput {
   token?: string;
@@ -52,7 +52,7 @@ class RevealContainer {
 
   #showInfoLogs: boolean;
 
-  #context:Context;
+  #context: Context;
 
   constructor(metaData, context) {
     this.#metaData = metaData;

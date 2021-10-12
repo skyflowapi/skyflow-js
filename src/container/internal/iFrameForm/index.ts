@@ -25,10 +25,10 @@ import {
   LogLevelOptions, printLog,
   parameterizedString,
 } from '../../../utils/logsHelper';
-import { Context } from '../../../Skyflow';
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
+import { Context } from '../../../utils/common';
 
 const set = require('set-value');
 
@@ -61,9 +61,9 @@ export class IFrameFormElement extends EventEmitter {
 
   mask?: any;
 
-  context:Context;
+  context: Context;
 
-  constructor(name: string, metaData, context:Context) {
+  constructor(name: string, metaData, context: Context) {
     super();
     const frameValues = name.split(':');
     const fieldType = frameValues[1];
@@ -95,6 +95,14 @@ export class IFrameFormElement extends EventEmitter {
         ? ELEMENT_EVENTS_TO_CLIENT.FOCUS
         : ELEMENT_EVENTS_TO_CLIENT.BLUR,
     });
+
+    if (!focus) {
+      this._emit(ELEMENT_EVENTS_TO_CLIENT.BLUR, {
+        ...this.getStatus(),
+        value: this.state.value,
+      });
+    }
+
     this.changeFocus(focus);
   };
 

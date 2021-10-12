@@ -4,6 +4,9 @@ import bus from "framebus";
 import EventEmitter from "../../../src/event-emitter";
 import { RedactionType } from "../../../src/Skyflow";
 import RevealElement from "../../../src/container/external/reveal/RevealElement";
+import * as iframerUtils from '../../../src/iframe-libs/iframer';
+
+iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 
 const mockBusOn = jest.fn();
 const mockBusEmit = jest.fn();
@@ -42,15 +45,13 @@ describe("Reveal Container Class", () => {
       },
     },
   };
-  const testRevealContainer = new RevealContainer(testMetaData);
+  const testRevealContainer = new RevealContainer(testMetaData, { logLevel: 'PROD' });
   test("constructor", () => {
     expect(testRevealContainer).toBeInstanceOf(RevealContainer);
     expect(document.querySelector("iframe")).toBeTruthy();
     expect(
       document.querySelector("iframe")?.name.includes(REVEAL_FRAME_CONTROLLER)
     ).toBe(true);
-    expect(mockBusOn).toBeCalledTimes(3);
-    expect(RevealContainer.hasAccessTokenListner).toBe(true);
   });
 
   test("create() will return a Reveal Element", () => {
@@ -92,15 +93,5 @@ describe("Reveal Container Class", () => {
     } catch (error) {
       expect(error.message).toBe("Invalid Redaction Type PLAIN");
     }
-  });
-
-  test("reval() will return a promise", () => {
-    const testRevealElement = testRevealContainer.create(testRecord);
-    const testDivElement = document.createElement("div");
-    testDivElement.setAttribute("id", "testDiv");
-    document.body.appendChild(testDivElement);
-    testRevealElement.mount("#testDiv");
-
-    testRevealContainer.reveal();
   });
 });

@@ -38,7 +38,8 @@ describe("Reveal Element Class", () => {
     const testRevealElement = new RevealElement(
       testRecord,
       metaData,
-      containerId
+      containerId,
+      { logLevel: 'PROD' }
     );
     expect(testRevealElement).toBeInstanceOf(RevealElement);
   });
@@ -46,7 +47,8 @@ describe("Reveal Element Class", () => {
     const testRevealElement = new RevealElement(
       testRecord,
       metaData,
-      containerId
+      containerId,
+      { logLevel: 'PROD'}
     );
     const testEmptyDiv = document.createElement("div");
     testEmptyDiv.setAttribute("id", "testDiv");

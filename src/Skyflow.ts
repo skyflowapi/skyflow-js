@@ -19,15 +19,16 @@ import { LogLevelOptions, printLog } from './utils/logsHelper';
 import SkyflowError from './libs/SkyflowError';
 import logs from './utils/logs';
 import SKYFLOW_ERROR_CODE from './utils/constants';
-
-export interface IInsertRecord {
-  table: string;
-  fields: Record<string, any>;
-}
-
-export interface IInsertRecordInput {
-  records: IInsertRecord[];
-}
+import {
+  IRevealResponseType,
+  IGatewayConfig,
+  RequestMethod,
+  IInsertRecordInput,
+  IDetokenizeInput,
+  IGetByIdInput,
+  RedactionType,
+  EventName,
+} from './utils/common';
 
 export enum ContainerType {
   COLLECT = 'COLLECT',
@@ -38,56 +39,6 @@ export interface ISkyflow {
   vaultURL: string;
   getBearerToken: () => Promise<string>;
   options?: Record<string, any>;
-}
-
-export enum RedactionType {
-  DEFAULT = 'DEFAULT',
-  PLAIN_TEXT = 'PLAIN_TEXT',
-  MASKED = 'MASKED',
-  REDACTED = 'REDACTED',
-}
-export interface IRevealRecord {
-  token: string;
-  redaction: RedactionType;
-}
-export interface IRevealResponseType {
-  records?: Record<string, string>[];
-  errors?: Record<string, any>[];
-}
-export interface IDetokenizeInput {
-  records: IRevealRecord[];
-}
-
-export interface ISkyflowIdRecord {
-  ids: string[];
-  redaction: RedactionType;
-  table: string;
-}
-
-export interface IGetByIdInput {
-  records: ISkyflowIdRecord[];
-}
-
-export interface Context{
-  logLevel:LogLevel
-}
-
-export enum RequestMethod {
-  GET = 'GET',
-  POST = 'POST',
-  PUT = 'PUT',
-  PATCH = 'PATCH',
-  DELETE = 'DELETE',
-}
-
-export interface IGatewayConfig {
-  gatewayURL: string;
-  methodName: RequestMethod;
-  pathParams?: any;
-  queryParams?: any;
-  requestBody?: any;
-  requestHeader?: any;
-  responseBody?: any;
 }
 
 class Skyflow {
@@ -255,6 +206,10 @@ class Skyflow {
 
   static get LogLevel() {
     return LogLevel;
+  }
+
+  static get EventName() {
+    return EventName;
   }
 }
 export default Skyflow;

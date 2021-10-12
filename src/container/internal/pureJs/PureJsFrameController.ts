@@ -9,10 +9,6 @@ import {
   fetchRecordsByTokenId,
 } from '../../../core/reveal';
 import { constructInvokeGatewayRequest } from '../../../libs/objectParse';
-
-import {
-  IGatewayConfig, IRevealRecord, ISkyflowIdRecord,
-} from '../../../Skyflow';
 import { getAccessToken } from '../../../utils/busEvents';
 import {
   clearEmpties,
@@ -24,6 +20,7 @@ import {
 } from '../../constants';
 import { LogLevelOptions, printLog, parameterizedString } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
+import { IRevealRecord, ISkyflowIdRecord, IGatewayConfig } from '../../../utils/common';
 
 class PureJsFrameController {
   #clientDomain: string;
@@ -66,10 +63,9 @@ class PureJsFrameController {
               callback(result);
             })
             .catch((error) => {
-              printLog(logs.infoLogs.INSERT_RECORDS_RESOLVED, MessageType.ERROR,
+              printLog(logs.errorLogs.INSERT_RECORDS_REJECTED, MessageType.ERROR,
                 this.#showErrorLogs, this.#showInfoLogs);
-
-              callback(error);
+              callback({ error });
             });
         } else if (data.type === PUREJS_TYPES.GET_BY_SKYFLOWID) {
           fetchRecordsBySkyflowID(

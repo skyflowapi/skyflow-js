@@ -93,7 +93,7 @@ const logs = {
     INVALID_TABLE_NAME: 'Table Name passed doesn’t exist in the vault with id.',
     EMPTY_TABLE_NAME: 'Table Name is empty.',
     EMPTY_TABLE_AND_FIELDS:
-        'table or fields parameter cannot be passed as empty atindex %s1 in records array.',
+        'table or fields parameter cannot be passed as empty at index %s1 in records array.',
     EMPTY_TABLE: "Table can't be passed as empty at index %s1 in records array.",
     TABLE_KEY_ERROR: 'Key “table” is missing or payload is incorrectly formatted.',
     FIELDS_KEY_ERROR: 'Key “fields” is missing or payload is incorrectly formatted.',

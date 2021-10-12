@@ -13,8 +13,8 @@ import {
   LogLevelOptions, parameterizedString,
   printLog,
 } from '../../../utils/logsHelper';
-import { Context } from '../../../Skyflow';
 import logs from '../../../utils/logs';
+import { Context } from '../../../utils/common';
 
 class RevealElement {
   #iframe: IFrame;
@@ -31,9 +31,9 @@ class RevealElement {
 
   #showInfoLogs: boolean;
 
-  #context:Context;
+  #context: Context;
 
-  constructor(record: IRevealElementInput, metaData: any, containerId: string, context:Context) {
+  constructor(record: IRevealElementInput, metaData: any, containerId: string, context: Context) {
     this.#metaData = metaData;
     this.#recordData = record;
     this.#containerId = containerId;

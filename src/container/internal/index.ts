@@ -124,16 +124,8 @@ export class FrameElement {
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, () => {
       this.focusChange(true);
     });
-    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, () => {
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
       this.focusChange(false);
-    });
-    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
-      if (
-        state.value
-        && this.iFrameFormElement.fieldType === ELEMENTS.radio.name
-      ) {
-        (<HTMLInputElement> this.domInput).checked = this.options.value === state.value;
-      }
       if ((state.isEmpty || state.isValid) && this.domError) {
         this.domError.innerText = '';
       } else if (!state.isEmpty && !state.isValid && this.domError) {
@@ -143,6 +135,14 @@ export class FrameElement {
           : logs.errorLogs.INVALID_COLLECT_VALUE;
       }
       this.updateStyleClasses(state);
+    });
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
+      if (
+        state.value
+        && this.iFrameFormElement.fieldType === ELEMENTS.radio.name
+      ) {
+        (<HTMLInputElement> this.domInput).checked = this.options.value === state.value;
+      }
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
       if (data.options) {

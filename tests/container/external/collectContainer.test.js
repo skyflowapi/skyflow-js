@@ -1,11 +1,14 @@
 import {
   COLLECT_FRAME_CONTROLLER,
   ELEMENT_EVENTS_TO_IFRAME,
+  LogLevel,
 } from '../../../src/container/constants';
 import CollectContainer from '../../../src/container/external/CollectContainer';
+import * as iframerUtils from '../../../src/iframe-libs/iframer';
 
 const bus = require('framebus');
 
+iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 const _off = jest.fn();
 const _target = jest.fn();
 const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve());
@@ -56,14 +59,14 @@ const cvvElement = {
 
 describe('Collect container', () => {
   it('contructor', async () => {
-    const container = new CollectContainer({}, metaData);
+    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.PROD });
     await new Promise((r) => setTimeout(r, 2000));
     expect(document.querySelector('iframe')).toBeTruthy();
-    expect(_on).toHaveBeenCalledTimes(2);
+    expect(_on).toHaveBeenCalledTimes(1);
   });
 
   it('Invalid element type', () => {
-    const container = new CollectContainer({}, metaData);
+    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.PROD });
     try {
       const cvv = container.create({ ...cvvElement, type: 'abc' });
     } catch (err) {
@@ -72,7 +75,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid table', () => {
-    const container = new CollectContainer({}, metaData);
+    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -84,7 +87,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid column', () => {
-    const container = new CollectContainer({}, metaData);
+    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -96,7 +99,7 @@ describe('Collect container', () => {
   });
 
   it('create valid Element', () => {
-    const container = new CollectContainer({}, metaData);
+    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.PROD });
     let cvv;
     try {
       cvv = container.create(cvvElement);

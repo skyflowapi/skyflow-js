@@ -16,10 +16,10 @@ import IFrame from './IFrame';
 import {
   LogLevelOptions, printLog, getElementName, parameterizedString,
 } from '../../../utils/logsHelper';
-import { Context } from '../../../Skyflow';
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
+import { Context } from '../../../utils/common';
 
 class Element {
   elementType: string;
@@ -99,7 +99,6 @@ class Element {
         name: element.elementName,
       });
     });
-
     this.#iframe = new IFrame(
       this.#group.elementName,
       metaData,

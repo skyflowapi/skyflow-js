@@ -9,7 +9,6 @@ import { validateElementOptions } from '../../libs/element-options';
 import SkyflowError from '../../libs/SkyflowError';
 import uuid from '../../libs/uuid';
 import properties from '../../properties';
-import { IInsertRecordInput } from '../../Skyflow';
 import {
   COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES,
@@ -27,6 +26,7 @@ import {
 } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import SKYFLOW_ERROR_CODE from '../../utils/constants';
+import { IInsertRecordInput } from '../../utils/common';
 
 interface CollectElementInput {
   table?: string;

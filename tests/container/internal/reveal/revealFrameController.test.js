@@ -7,8 +7,8 @@ const _on = jest.fn();
 const _emit = jest.fn();
 bus.target = jest.fn().mockReturnValue({
   on: _on,
-  emit: _emit,
 });
+bus.emit = _emit;
 
 describe('RevealFrameController Class', () => {
   const testFrameController = RevealFrameController.init(uuid());
