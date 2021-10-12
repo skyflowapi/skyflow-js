@@ -1,12 +1,9 @@
 import Client from '../client';
-import {
-  IRevealRecord,
-  ISkyflowIdRecord,
-  RedactionType,
-  IRevealResponseType,
-} from '../Skyflow';
 import { getAccessToken } from '../utils/busEvents';
 import SkyflowError from '../libs/SkyflowError';
+import {
+  ISkyflowIdRecord, RedactionType, IRevealRecord, IRevealResponseType,
+} from '../utils/common';
 
 interface IApiSuccessResponse {
   records: [

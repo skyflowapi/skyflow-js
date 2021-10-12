@@ -1,13 +1,8 @@
 import { IRevealElementInput } from '../../container/external/RevealContainer';
 import SkyflowError from '../../libs/SkyflowError';
 import {
-  IGatewayConfig,
-  IDetokenizeInput,
-  IGetByIdInput,
-  IInsertRecordInput,
-  RedactionType,
-  RequestMethod,
-} from '../../Skyflow';
+  IInsertRecordInput, IDetokenizeInput, RedactionType, IGetByIdInput, IGatewayConfig, RequestMethod,
+} from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 
 export const validateCreditCardNumber = (cardNumber: string) => {

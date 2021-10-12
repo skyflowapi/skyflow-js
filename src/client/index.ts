@@ -70,7 +70,10 @@ class Client {
       const contentType = headerMap['content-type'];
       if (httpRequest.status < 200 || httpRequest.status >= 400) {
         if (contentType.includes('application/json')) {
-          reject(JSON.parse(httpRequest.response));
+          reject(new SkyflowError({
+            code: httpRequest.status,
+            description: JSON.parse(httpRequest.response)?.error?.message,
+          }, [], true));
         } else if (contentType.includes('text/plain')) {
           reject(new SkyflowError({
             code: httpRequest.status,

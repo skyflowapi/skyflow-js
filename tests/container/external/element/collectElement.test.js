@@ -36,31 +36,49 @@ const rows = [
   },
 ];
 
+const updateElementInput = {
+  elementType: 'CARD_NUMBER',
+  name: input.column,
+  ...input,
+};
+
 const destroyCallback = jest.fn();
 const updateCallback = jest.fn();
 
 describe('collect element', () => {
   it('constructor', async () => {
-    const element = new Element(
-      { rows },
+    let element = new Element(
+      { 
+        elementName: 'element:CVV:cGlpX2ZpZWxkcy5wcmltYXJ5X2NhcmQuY3Z2',
+        rows 
+      },
       {},
       'containerId',
       true,
       destroyCallback,
       updateCallback,
+      { logLevel: 'PROD' }
     );
 
     expect(element.elementType).toBe(input.type);
+    expect(element.isMounted()).toBe(false)
+    expect(element.isValidElement()).toBe(true)
+
+    element.update(updateElementInput);
   });
 
   it('get options', async () => {
     const element = new Element(
-      { rows },
+      { 
+        elementName: 'element:CVV:cGlpX2ZpZWxkcy5wcmltYXJ5X2NhcmQuY3Z2',
+        rows 
+      },
       {},
       'containerId',
       true,
       destroyCallback,
       updateCallback,
+      { logLevel: 'PROD' }
     );
 
     const options = element.getOptions();
