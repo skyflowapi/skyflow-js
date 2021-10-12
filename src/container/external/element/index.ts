@@ -94,7 +94,7 @@ class Element {
         isComplete: false,
         isValid: false,
         isFocused: false,
-        value: undefined,
+        value: this.#doesReturnValue ? element.altText : undefined,
         elementType: element.elementType,
         name: element.elementName,
       });
@@ -120,7 +120,10 @@ class Element {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
         this.#onGroupEmitRemoveLocalValue();
-        this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
+        const { name, ...elementState } = this.#states[0];
+        this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY, {
+          ...elementState,
+        });
         this.#bus.off(
           ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId,
           sub,
@@ -261,6 +264,10 @@ class Element {
   on(eventName: string, handler) {
     if (Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       this.#eventEmitter.on(eventName, (data) => {
+        if (data.value === undefined) {
+          data.value = '';
+        }
+        delete data.isComplete;
         handler(data);
       });
     } else {
@@ -333,7 +340,6 @@ class Element {
         this.#elements.forEach((element, index) => {
           if (data.name === element.elementName) {
             let emitEvent = '';
-            let emitData: any;
             switch (data.event) {
               case ELEMENT_EVENTS_TO_CLIENT.FOCUS:
                 emitEvent = ELEMENT_EVENTS_TO_CLIENT.FOCUS;
@@ -342,20 +348,7 @@ class Element {
                 emitEvent = ELEMENT_EVENTS_TO_CLIENT.BLUR;
                 break;
               case ELEMENT_EVENTS_TO_CLIENT.CHANGE:
-                this.#states[index].isEmpty = data.value.isEmpty;
-                this.#states[index].isComplete = data.value.isComplete;
-                this.#states[index].isValid = data.value.isValid;
-                this.#states[index].isFocused = data.value.isFocused;
-                if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
-                else this.#states[index].value = undefined;
-
-                this.#updateState();
-
                 emitEvent = ELEMENT_EVENTS_TO_CLIENT.CHANGE;
-                emitData = {
-                  ...this.getState(),
-                  elementType: this.elementType,
-                };
                 break;
               case ELEMENT_EVENTS_TO_CLIENT.READY:
                 emitEvent = ELEMENT_EVENTS_TO_CLIENT.READY;
@@ -374,7 +367,19 @@ class Element {
               default:
                 throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_TYPE, [], true);
             }
+            this.#states[index].isEmpty = data.value.isEmpty;
+            this.#states[index].isValid = data.value.isValid;
+            this.#states[index].isComplete = data.value.isComplete;
+            this.#states[index].isFocused = data.value.isFocused;
+            if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
+            else this.#states[index].value = undefined;
 
+            this.#updateState();
+
+            const emitData = {
+              ...this.getState(),
+              elementType: this.elementType,
+            };
             this.#eventEmitter._emit(emitEvent, emitData);
           }
         });

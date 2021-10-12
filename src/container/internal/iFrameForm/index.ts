@@ -89,11 +89,14 @@ export class IFrameFormElement extends EventEmitter {
   }
 
   onFocusChange = (focus: boolean) => {
+    this.changeFocus(focus);
+
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: this.iFrameName,
       event: focus
         ? ELEMENT_EVENTS_TO_CLIENT.FOCUS
         : ELEMENT_EVENTS_TO_CLIENT.BLUR,
+      value: { ...this.getStatus() },
     });
 
     if (!focus) {
@@ -102,8 +105,6 @@ export class IFrameFormElement extends EventEmitter {
         value: this.state.value,
       });
     }
-
-    this.changeFocus(focus);
   };
 
   changeFocus = (focus: boolean) => {

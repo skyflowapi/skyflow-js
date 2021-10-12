@@ -31,7 +31,7 @@ const logs = {
     BEARER_TOKEN_RESOLVED: 'GetBearerToken promise resolved successfully.',
     REUSE_BEARER_TOKEN: 'Reusing the bearer token.',
 
-    PUREJS_CONTROLLER_INITIALIZED: 'Pure js controller initialized.',
+    PUREJS_CONTROLLER_INITIALIZED: 'SkyflowController initialized.',
     PUREJS_LISTENER_READY: 'Purejs listener ready.',
     EMIT_PURE_JS_CONTROLLER: 'Emitted Skyflow controller event.',
 
@@ -44,7 +44,7 @@ const logs = {
     CAPTURE_PURE_JS_REQUEST: 'Captured %s1 event.',
     LISTEN_PURE_JS_REQUEST: 'Listening to %s1 event',
 
-    CAPTURE_PUREJS_FRAME: 'Captured Skyflow controller frame ready event.',
+    CAPTURE_PUREJS_FRAME: 'Captured SkyflowController frame ready event.',
 
     FETCH_RECORDS_RESOLVED: 'Detokenize request is resolved.',
 

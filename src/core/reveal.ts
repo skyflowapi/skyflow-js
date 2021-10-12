@@ -193,8 +193,8 @@ export const fetchRecordsBySkyflowID = async (
               if (rejectedResult && rejectedResult.error) {
                 errorResponse = {
                   error: {
-                    code: rejectedResult.error.http_code,
-                    description: rejectedResult.error.message,
+                    code: rejectedResult?.error?.code,
+                    description: rejectedResult?.error?.description,
                   },
                   ids: skyflowIdRecord.ids,
                 };
