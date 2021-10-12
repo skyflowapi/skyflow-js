@@ -3,7 +3,7 @@ import EventEmitter from '../../src/event-emitter/index';
 describe('Event emitter test', () => {
   const eventObj = new EventEmitter();
   eventObj.on(
-    'Change',
+    'CHANGE',
     () => {
       console.log(' Change event');
     },
@@ -11,7 +11,7 @@ describe('Event emitter test', () => {
   );
 
   eventObj.on(
-    'Ready',
+    'READY',
     () => {
       console.log('Ready event');
     },
@@ -19,7 +19,7 @@ describe('Event emitter test', () => {
   );
 
   eventObj.on(
-    'Focus',
+    'FOCUS',
     () => {
       console.log('Focus');
     },
@@ -30,15 +30,15 @@ describe('Event emitter test', () => {
    * off event
    */
   test('test off() event ', () => {
-    eventObj.off('Focus', () => {});
-    expect(eventObj.hasListener('Focus')).toBe(false);
+    eventObj.off('FOCUS', () => {});
+    expect(eventObj.hasListener('FOCUS')).toBe(false);
   });
   test('test haslistener() ', () => {
-    expect(eventObj.hasListener('Change')).toBe(true);
+    expect(eventObj.hasListener('CHANGE')).toBe(true);
   });
 
   test('test no existing events', () => {
-    expect(eventObj.hasListener('Escape')).toBe(false);
+    expect(eventObj.hasListener('ESCAPE')).toBe(false);
   });
 
   /**
@@ -64,13 +64,13 @@ describe('Event emitter test', () => {
   test('should resetAll events', () => {
     const eventObjReset = new EventEmitter();
     eventObjReset.on(
-      'Ready',
+      'READY',
       () => {
         console.log('Ready event');
       },
       false,
     );
     eventObjReset.resetEvents();
-    expect(eventObjReset.hasListener('Ready')).toBe(false);
+    expect(eventObjReset.hasListener('READY')).toBe(false);
   });
 });
