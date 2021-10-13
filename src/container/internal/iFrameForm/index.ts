@@ -451,9 +451,7 @@ export class IFrameForm {
       const { state } = this.iFrameFormElements[formElements[i]];
       const { tableName } = this.iFrameFormElements[formElements[i]];
       if (!state.isValid || !state.isComplete) {
-        return Promise.reject({
-          error: `${[state.name]}: ${logs.errorLogs.COMPLETE_AND_VALID_INPUTS}`,
-        });
+        return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${[state.name]}`], true));
       }
 
       if (

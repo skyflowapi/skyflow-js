@@ -251,7 +251,7 @@ class CollectContainer {
           (data: any) => {
             if (!data || data?.error) {
               printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
-              reject(data);
+              reject(data?.error);
             } else {
               printLog(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, MessageType.INFO,
                 this.#showErrorLogs, this.#showInfoLogs);
