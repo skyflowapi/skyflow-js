@@ -89,11 +89,14 @@ export class IFrameFormElement extends EventEmitter {
   }
 
   onFocusChange = (focus: boolean) => {
+    this.changeFocus(focus);
+
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
       name: this.iFrameName,
       event: focus
         ? ELEMENT_EVENTS_TO_CLIENT.FOCUS
         : ELEMENT_EVENTS_TO_CLIENT.BLUR,
+      value: { ...this.getStatus() },
     });
 
     if (!focus) {
@@ -102,8 +105,6 @@ export class IFrameFormElement extends EventEmitter {
         value: this.state.value,
       });
     }
-
-    this.changeFocus(focus);
   };
 
   changeFocus = (focus: boolean) => {
@@ -450,9 +451,7 @@ export class IFrameForm {
       const { state } = this.iFrameFormElements[formElements[i]];
       const { tableName } = this.iFrameFormElements[formElements[i]];
       if (!state.isValid || !state.isComplete) {
-        return Promise.reject({
-          error: `${[state.name]}: ${logs.errorLogs.COMPLETE_AND_VALID_INPUTS}`,
-        });
+        return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${[state.name]}`], true));
       }
 
       if (

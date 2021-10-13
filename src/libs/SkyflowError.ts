@@ -12,13 +12,13 @@ export default class SkyflowError extends Error {
 
   constructor(errorCode: ISkyflowError,
     args?: any[], isSingularError: boolean = false) {
-    super(errorCode.description);
     const formattedError = {
       code: errorCode.code,
       description: (args && args?.length > 0)
         ? parameterizedString(errorCode.description, ...args)
         : errorCode.description,
     };
+    super(formattedError.description);
     if (isSingularError) {
       this.error = formattedError;
     } else {

@@ -47,6 +47,7 @@ const SKYFLOW_ERROR_CODE = {
   UNKNOWN_ERROR: { code: 400, description: logs.errorLogs.UNKNOWN_ERROR },
   CONNECTION_ERROR: { code: 400, description: logs.errorLogs.CONNECTION_ERROR },
   TRANSACTION_ERROR: { code: 400, description: logs.errorLogs.TRANSACTION_ERROR },
+  COMPLETE_AND_VALID_INPUTS: { code: 400, description: logs.errorLogs.COMPLETE_AND_VALID_INPUTS },
 };
 
 export default SKYFLOW_ERROR_CODE;
