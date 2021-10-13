@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2021-10-13
+
+### Added
+
+- `logLevel` option to allow different levels of logging and accessibilty of value
+- event listeners for collect element
+
+### Changed
+- Standardized error information for easier debugging
+
+### Fixed
+- Some error scenarios acting unexpectedly
+
+
 ## [1.2.0] - 2021-10-05
 
 ### Added
