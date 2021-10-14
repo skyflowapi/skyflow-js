@@ -21,14 +21,20 @@ export enum EventName {
 }
 
 export enum LogLevel{
-  DEMO = 'DEMO',
+  WARN = 'WARN',
   INFO = 'INFO',
   DEBUG = 'DEBUG',
+  ERROR = 'ERROR',
+}
+
+export enum Env{
+  DEV = 'DEV',
   PROD = 'PROD',
 }
 
 export enum MessageType{
-  INFO = 'INFO',
+  LOG = 'LOG',
+  WARN = 'WARN',
   ERROR = 'ERROR',
 }
 
@@ -67,6 +73,7 @@ export interface IGetByIdInput {
 
 export interface Context{
   logLevel:LogLevel
+  env:Env
 }
 
 export interface IGatewayConfig {

@@ -3,7 +3,6 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
-  MessageType,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import Bus from '../../../libs/Bus';
@@ -14,12 +13,12 @@ import {
 } from '../../../libs/element-options';
 import IFrame from './IFrame';
 import {
-  LogLevelOptions, printLog, getElementName, parameterizedString,
+  printLog, getElementName, parameterizedString, EnvOptions,
 } from '../../../utils/logsHelper';
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
-import { Context } from '../../../utils/common';
+import { Context, MessageType } from '../../../utils/common';
 
 class Element {
   elementType: string;
@@ -54,11 +53,7 @@ class Element {
 
   #mounted = false;
 
-  #logLevel;
-
-  #showErrorLogs: boolean;
-
-  #showInfoLogs: boolean;
+  #context:Context;
 
   #doesReturnValue:boolean;
 
@@ -72,17 +67,15 @@ class Element {
     context: Context,
   ) {
     this.containerId = containerId;
-    this.#logLevel = context.logLevel;
+    this.#context = context;
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
     if (this.#isSingleElementAPI && this.#elements.length > 1) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.UNKNOWN_ERROR, [], true);
     }
-    const { showInfoLogs, showErrorLogs, doesReturnValue } = LogLevelOptions[this.#logLevel];
-    this.#showInfoLogs = showInfoLogs;
-    this.#showErrorLogs = showErrorLogs;
-    this.#doesReturnValue = doesReturnValue;
+
+    this.#doesReturnValue = EnvOptions[this.#context.env].doesReturnValue;
     this.elementType = this.#isSingleElementAPI
       ? this.#elements[0].elementType
       : 'group';
@@ -110,8 +103,8 @@ class Element {
     this.#onDestroy(destroyCallback);
     this.#onUpdate(updateCallback);
     printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT,
-      getElementName(this.#iframe.name)), MessageType.INFO,
-    this.#showErrorLogs, this.#showInfoLogs);
+      getElementName(this.#iframe.name)), MessageType.LOG,
+    this.#context.logLevel);
   }
 
   mount = (domElement) => {
@@ -129,7 +122,8 @@ class Element {
           sub,
         );
         this.#mounted = true;
-        printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, getElementName(this.#iframe.name))} `, MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, getElementName(this.#iframe.name))} `, MessageType.LOG,
+          this.#context.logLevel);
         this.#updateCallbacks.forEach((func) => func());
         this.#updateCallbacks = [];
       }

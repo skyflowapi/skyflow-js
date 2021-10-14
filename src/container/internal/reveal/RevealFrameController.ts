@@ -9,11 +9,10 @@ import properties from '../../../properties';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   REVEAL_FRAME_CONTROLLER,
-  MessageType,
 } from '../../constants';
-import { LogLevelOptions, parameterizedString, printLog } from '../../../utils/logsHelper';
+import { parameterizedString, printLog } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
-import { IRevealRecord } from '../../../utils/common';
+import { Context, IRevealRecord, MessageType } from '../../../utils/common';
 
 class RevealFrameController {
   #client!: Client;
@@ -24,9 +23,7 @@ class RevealFrameController {
 
   #clientDomain: string;
 
-  #showInfoLogs!:boolean;
-
-  #showErrorLogs!:boolean;
+  #context!:Context;
 
   constructor(containerId) {
     this.#containerId = containerId;
@@ -39,12 +36,7 @@ class RevealFrameController {
           name: REVEAL_FRAME_CONTROLLER,
         },
         (clientMetaData: any) => {
-          const {
-            showInfoLogs,
-            showErrorLogs,
-          } = LogLevelOptions[clientMetaData.clientJSON.context.logLevel];
-          this.#showInfoLogs = showInfoLogs;
-          this.#showErrorLogs = showErrorLogs;
+          this.#context = clientMetaData.clientJSON.context;
           const tempData = {
             ...clientMetaData,
             clientJSON: {
@@ -66,7 +58,7 @@ class RevealFrameController {
     const sub = (data, callback) => {
       printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
-      MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+      MessageType.LOG, this.#context.logLevel);
 
       this.revealData(data.records as any).then(
         (resolvedResult) => {

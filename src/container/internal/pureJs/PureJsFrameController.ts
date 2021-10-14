@@ -16,20 +16,20 @@ import {
 } from '../../../utils/helpers';
 import {
   ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, FRAME_REVEAL,
-  gatewayConfigParseKeys, PUREJS_TYPES, MessageType,
+  gatewayConfigParseKeys, PUREJS_TYPES,
 } from '../../constants';
-import { LogLevelOptions, printLog, parameterizedString } from '../../../utils/logsHelper';
+import { printLog, parameterizedString } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
-import { IRevealRecord, ISkyflowIdRecord, IGatewayConfig } from '../../../utils/common';
+import {
+  IRevealRecord, ISkyflowIdRecord, IGatewayConfig, MessageType, Context,
+} from '../../../utils/common';
 
 class PureJsFrameController {
   #clientDomain: string;
 
   #client!: Client;
 
-  #showErrorLogs!: boolean;
-
-  #showInfoLogs!: boolean;
+  #context!:Context;
 
   constructor() {
     this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/');
@@ -37,19 +37,19 @@ class PureJsFrameController {
       .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
         printLog(parameterizedString(logs.infoLogs.CAPTURE_PURE_JS_REQUEST, data.type),
-          MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          MessageType.LOG, this.#context.logLevel);
 
         if (data.type === PUREJS_TYPES.DETOKENIZE) {
           fetchRecordsByTokenId(data.records as IRevealRecord[], this.#client)
             .then(
               (resolvedResult) => {
-                printLog(logs.infoLogs.FETCH_RECORDS_RESOLVED, MessageType.INFO,
-                  this.#showErrorLogs, this.#showInfoLogs);
+                printLog(logs.infoLogs.FETCH_RECORDS_RESOLVED, MessageType.LOG,
+                  this.#context.logLevel);
                 callback(resolvedResult);
               },
               (rejectedResult) => {
                 printLog(logs.errorLogs.FETCH_RECORDS_REJECTED, MessageType.ERROR,
-                  this.#showErrorLogs, this.#showInfoLogs);
+                  this.#context.logLevel);
 
                 callback({ error: rejectedResult });
               },
@@ -57,14 +57,14 @@ class PureJsFrameController {
         } else if (data.type === PUREJS_TYPES.INSERT) {
           this.insertData(data.records, data.options)
             .then((result) => {
-              printLog(logs.infoLogs.INSERT_RECORDS_RESOLVED, MessageType.INFO,
-                this.#showErrorLogs, this.#showInfoLogs);
+              printLog(logs.infoLogs.INSERT_RECORDS_RESOLVED, MessageType.LOG,
+                this.#context.logLevel);
 
               callback(result);
             })
             .catch((error) => {
               printLog(logs.errorLogs.INSERT_RECORDS_REJECTED, MessageType.ERROR,
-                this.#showErrorLogs, this.#showInfoLogs);
+                this.#context.logLevel);
               callback({ error });
             });
         } else if (data.type === PUREJS_TYPES.GET_BY_SKYFLOWID) {
@@ -73,14 +73,14 @@ class PureJsFrameController {
             this.#client,
           ).then(
             (resolvedResult) => {
-              printLog(logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED, MessageType.INFO,
-                this.#showErrorLogs, this.#showInfoLogs);
+              printLog(logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED, MessageType.LOG,
+                this.#context.logLevel);
 
               callback(resolvedResult);
             },
             (rejectedResult) => {
               printLog(logs.errorLogs.GET_BY_SKYFLOWID_REJECTED, MessageType.ERROR,
-                this.#showErrorLogs, this.#showInfoLogs);
+                this.#context.logLevel);
 
               callback({ error: rejectedResult });
             },
@@ -100,19 +100,19 @@ class PureJsFrameController {
               config.pathParams, config.queryParams);
             config.gatewayURL = filledUrl;
             this.sendInvokeGateWayRequest(config).then((resultResponse) => {
-              printLog(logs.infoLogs.SEND_INVOKE_GATEWAY_RESOLVED, MessageType.INFO,
-                this.#showErrorLogs, this.#showInfoLogs);
+              printLog(logs.infoLogs.SEND_INVOKE_GATEWAY_RESOLVED, MessageType.LOG,
+                this.#context.logLevel);
 
               callback(resultResponse);
             }).catch((rejectedResponse) => {
               printLog(logs.errorLogs.SEND_INVOKE_GATEWAY_REJECTED, MessageType.ERROR,
-                this.#showErrorLogs, this.#showInfoLogs);
+                this.#context.logLevel);
 
               callback({ error: rejectedResponse });
             });
           }).catch((error) => {
             printLog(logs.errorLogs.SEND_INVOKE_GATEWAY_REJECTED, MessageType.ERROR,
-              this.#showErrorLogs, this.#showInfoLogs);
+              this.#context.logLevel);
 
             callback({ error });
           });
@@ -122,9 +122,7 @@ class PureJsFrameController {
     bus
       // .target(this.#clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, {}, (data: any) => {
-        const { showInfoLogs, showErrorLogs } = LogLevelOptions[data.context.logLevel];
-        this.#showInfoLogs = showInfoLogs;
-        this.#showErrorLogs = showErrorLogs;
+        this.#context = data.context;
         const deserializedBearerToken = new Function(
           `return ${data.bearerToken}`,
         )();
@@ -136,19 +134,19 @@ class PureJsFrameController {
 
         printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
           PUREJS_TYPES.INSERT),
-        MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        MessageType.LOG, this.#context.logLevel);
         printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
           PUREJS_TYPES.DETOKENIZE),
-        MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        MessageType.LOG, this.#context.logLevel);
         printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
           PUREJS_TYPES.GET_BY_SKYFLOWID),
-        MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        MessageType.LOG, this.#context.logLevel);
         printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
           PUREJS_TYPES.INVOKE_GATEWAY),
-        MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+        MessageType.LOG, this.#context.logLevel);
       });
-    printLog(logs.infoLogs.EMIT_PURE_JS_CONTROLLER, MessageType.INFO,
-      this.#showErrorLogs, this.#showInfoLogs);
+    // printLog(logs.infoLogs.EMIT_PURE_JS_CONTROLLER, MessageType.LOG,
+    //   this.#context.logLevel);
   }
 
   static init() {
