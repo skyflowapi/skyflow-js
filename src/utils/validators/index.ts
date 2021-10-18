@@ -66,13 +66,13 @@ export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
     }
     if (recordToken === '' || typeof recordToken !== 'string') { throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID); }
 
-    const recordRedaction = record.redaction;
-    if (!recordRedaction) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
-    }
-    if (!Object.values(RedactionType).includes(recordRedaction)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
-    }
+    // const recordRedaction = record.redaction;
+    // if (!recordRedaction) {
+    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
+    // }
+    // if (!Object.values(RedactionType).includes(recordRedaction)) {
+    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
+    // }
   });
 };
 
@@ -121,14 +121,14 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
     const recordToken = record.token;
     if (!recordToken || typeof recordToken !== 'string') { throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID); }
 
-    if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
-    }
-    const recordRedaction = record.redaction;
-    if (!recordRedaction) throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION_VALUE);
-    if (!Object.values(RedactionType).includes(recordRedaction)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
-    }
+    // if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
+    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
+    // }
+    // const recordRedaction = record.redaction;
+    // if (!recordRedaction) throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION_VALUE);
+    // if (!Object.values(RedactionType).includes(recordRedaction)) {
+    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
+    // }
 
     if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') { throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORD_LABEL); }
 
