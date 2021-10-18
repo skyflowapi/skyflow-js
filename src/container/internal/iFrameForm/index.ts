@@ -7,8 +7,6 @@ import {
   ELEMENTS,
   COLLECT_FRAME_CONTROLLER,
   ElementType,
-  LogLevel,
-  MessageType,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -22,13 +20,17 @@ import {
 } from '../../../core/collect';
 import { getAccessToken } from '../../../utils/busEvents';
 import {
-  LogLevelOptions, printLog,
+  printLog,
   parameterizedString,
+  EnvOptions,
 } from '../../../utils/logsHelper';
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
-import { Context } from '../../../utils/common';
+import {
+  Context,
+  MessageType,
+} from '../../../utils/common';
 
 const set = require('set-value');
 
@@ -216,7 +218,7 @@ export class IFrameFormElement extends EventEmitter {
     isValid: this.state.isValid,
     isEmpty: this.state.isEmpty,
     isComplete: this.state.isComplete,
-    value: LogLevelOptions[this.context.logLevel]?.doesReturnValue ? this.state.value : undefined,
+    value: EnvOptions[this.context?.env]?.doesReturnValue ? this.state.value : undefined,
   });
 
   validator(value: string) {
@@ -360,7 +362,7 @@ export class IFrameForm {
 
   private clientDomain: string;
 
-  private logLevel!:LogLevel;
+  private context!:Context;
 
   constructor(controllerId: string, clientDomain: string) {
     this.controllerId = controllerId;
@@ -392,11 +394,9 @@ export class IFrameForm {
       .on(
         ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.controllerId,
         (data, callback) => {
-          const { showInfoLogs, showErrorLogs } = LogLevelOptions[this.logLevel];
-
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
-          MessageType.INFO, showErrorLogs, showInfoLogs);
+          MessageType.LOG, this.context.logLevel);
           // todo: Do we need to reset the data!?
           this.tokenize(data)
             .then((response) => {
@@ -431,15 +431,15 @@ export class IFrameForm {
     this.callbacks = [];
   }
 
-  setLogLevel(logLevel:LogLevel) {
-    this.logLevel = logLevel;
+  setContext(context:Context) {
+    this.context = context;
   }
 
   private getOrCreateIFrameFormElement = (frameName) => {
     this.iFrameFormElements[frameName] = this.iFrameFormElements[frameName]
       || new IFrameFormElement(frameName, {
         ...this.clientMetaData,
-      }, { logLevel: this.logLevel });
+      }, this.context);
     return this.iFrameFormElements[frameName];
   };
 

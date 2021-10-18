@@ -16,17 +16,19 @@ import {
   ELEMENTS,
   FRAME_ELEMENT,
   ElementType,
-  LogLevel,
-  MessageType,
 } from '../constants';
 import Element from './element';
 import {
-  LogLevelOptions, printLog,
+  printLog,
   parameterizedString,
 } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import SKYFLOW_ERROR_CODE from '../../utils/constants';
-import { IInsertRecordInput } from '../../utils/common';
+import {
+  Context,
+  IInsertRecordInput,
+  MessageType,
+} from '../../utils/common';
 
 interface CollectElementInput {
   table?: string;
@@ -52,16 +54,12 @@ class CollectContainer {
 
   #metaData: any;
 
-  #logLevel:LogLevel;
-
-  #showErrorLogs: boolean;
-
-  #showInfoLogs: boolean;
+  #context:Context;
 
   constructor(options, metaData, context) {
     this.#containerId = uuid();
     this.#metaData = metaData;
-    this.#logLevel = context.logLevel;
+    this.#context = context;
     const iframe = iframer({
       name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}`,
     });
@@ -69,11 +67,8 @@ class CollectContainer {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-    const { showInfoLogs, showErrorLogs } = LogLevelOptions[this.#logLevel];
-    this.#showInfoLogs = showInfoLogs;
-    this.#showErrorLogs = showErrorLogs;
-    printLog(logs.infoLogs.CREATE_COLLECT_CONTAINER, MessageType.INFO,
-      this.#showErrorLogs, this.#showInfoLogs);
+    printLog(logs.infoLogs.CREATE_COLLECT_CONTAINER, MessageType.LOG,
+      this.#context.logLevel);
 
     const sub = (data, callback) => {
       if (data.name === COLLECT_FRAME_CONTROLLER + this.#containerId) {
@@ -181,7 +176,7 @@ class CollectContainer {
         isSingleElementAPI,
         this.#destroyCallback,
         this.#updateCallback,
-        { logLevel: this.#logLevel },
+        this.#context,
       );
       this.#elements[tempElements.elementName] = element;
     }
@@ -250,20 +245,20 @@ class CollectContainer {
           },
           (data: any) => {
             if (!data || data?.error) {
-              printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
+              printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
               reject(data?.error);
             } else {
-              printLog(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, MessageType.INFO,
-                this.#showErrorLogs, this.#showInfoLogs);
+              printLog(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, MessageType.LOG,
+                this.#context.logLevel);
               resolve(data);
             }
           },
         );
       printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
         ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
-      MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+      MessageType.LOG, this.#context.logLevel);
     } catch (err) {
-      printLog(`${err.message}`, MessageType.ERROR, this.#showErrorLogs, this.#showInfoLogs);
+      printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
       reject(err);
     }
   });

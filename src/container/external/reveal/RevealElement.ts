@@ -5,16 +5,15 @@ import {
   ELEMENT_EVENTS_TO_CONTAINER,
   ELEMENT_EVENTS_TO_IFRAME,
   FRAME_REVEAL,
-  MessageType,
 } from '../../constants';
 import IFrame from '../element/IFrame';
 import { IRevealElementInput } from '../RevealContainer';
 import {
-  LogLevelOptions, parameterizedString,
+  parameterizedString,
   printLog,
 } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
-import { Context } from '../../../utils/common';
+import { Context, MessageType } from '../../../utils/common';
 
 class RevealElement {
   #iframe: IFrame;
@@ -26,10 +25,6 @@ class RevealElement {
   #containerId: string;
 
   #isMounted:boolean = false;
-
-  #showErrorLogs: boolean;
-
-  #showInfoLogs: boolean;
 
   #context: Context;
 
@@ -43,9 +38,7 @@ class RevealElement {
       { metaData },
       this.#containerId,
     );
-    this.#showErrorLogs = LogLevelOptions[context.logLevel].showErrorLogs;
-    this.#showInfoLogs = LogLevelOptions[context.logLevel].showInfoLogs;
-    printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, `${record.token || ''}reveal`), MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+    printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, `${record.token || ''}reveal`), MessageType.LOG, this.#context.logLevel);
   }
 
   mount(domElementSelector) {

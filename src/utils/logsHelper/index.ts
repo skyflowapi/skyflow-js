@@ -1,21 +1,42 @@
-import { MessageType } from '../../container/constants';
+import { LogLevel, MessageType } from '../common';
 
 export const LogLevelOptions = {
-  INFO: { showInfoLogs: true, showErrorLogs: true, doesReturnValue: false },
-  DEBUG: { showInfoLogs: true, showErrorLogs: true, doesReturnValue: true },
-  DEMO: { showInfoLogs: false, showErrorLogs: false, doesReturnValue: true },
-  PROD: {
-    showInfoLogs: false,
-    showErrorLogs: true,
-    doesReturnValue: false,
+  DEBUG: {
+    showDebugLogs: true, showInfoLogs: true, showWarnLogs: true, showErrorLogs: true,
+  },
+  INFO: {
+    showDebugLogs: false, showInfoLogs: true, showWarnLogs: true, showErrorLogs: true,
+  },
+  WARN: {
+    showDebugLogs: false, showInfoLogs: false, showWarnLogs: true, showErrorLogs: true,
+  },
+  ERROR: {
+    showDebugLogs: false, showInfoLogs: false, showWarnLogs: false, showErrorLogs: true,
   },
 };
 
-export const printLog = (message: string, messageType:MessageType,
-  showErrorLogs:boolean, showInfoLogs:boolean) => {
-  if (messageType === MessageType.INFO && showInfoLogs) {
+export const EnvOptions = {
+  PROD: {
+    doesReturnValue: false,
+  },
+  DEV: {
+    doesReturnValue: true,
+  },
+};
+
+export const printLog = (message: string, messageType:MessageType, logLevel:LogLevel) => {
+  const {
+    showDebugLogs, showInfoLogs, showWarnLogs, showErrorLogs,
+  } = LogLevelOptions[logLevel];
+  if (messageType === MessageType.LOG && showDebugLogs) {
     // eslint-disable-next-line no-console
     console.log(message);
+  } else if (messageType === MessageType.LOG && showInfoLogs) {
+    // eslint-disable-next-line no-console
+    console.log(message);
+  } else if (messageType === MessageType.WARN && showWarnLogs) {
+    // eslint-disable-next-line no-console
+    console.warn(message);
   } else if (messageType === MessageType.ERROR && showErrorLogs) {
     // eslint-disable-next-line no-console
     console.error(message);

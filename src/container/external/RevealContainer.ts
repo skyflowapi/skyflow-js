@@ -9,7 +9,6 @@ import {
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENT_EVENTS_TO_CONTAINER,
-  MessageType,
 } from '../constants';
 import RevealElement from './reveal/RevealElement';
 import uuid from '../../libs/uuid';
@@ -17,11 +16,11 @@ import EventEmitter from '../../event-emitter';
 import properties from '../../properties';
 import { validateRevealElementRecords } from '../../utils/validators';
 import {
-  LogLevelOptions, printLog,
+  printLog,
   parameterizedString,
 } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
-import { Context, RedactionType } from '../../utils/common';
+import { Context, RedactionType, MessageType } from '../../utils/common';
 
 export interface IRevealElementInput {
   token?: string;
@@ -48,10 +47,6 @@ class RevealContainer {
 
   #isElementsMounted: boolean = false;
 
-  #showErrorLogs: boolean;
-
-  #showInfoLogs: boolean;
-
   #context: Context;
 
   constructor(metaData, context) {
@@ -66,12 +61,8 @@ class RevealContainer {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-    const { showInfoLogs, showErrorLogs } = LogLevelOptions[
-      context.logLevel];
-    this.#showInfoLogs = showInfoLogs;
-    this.#showErrorLogs = showErrorLogs;
-    printLog(logs.infoLogs.CREATE_REVEAL_CONTAINER, MessageType.INFO,
-      this.#showErrorLogs, this.#showInfoLogs);
+    printLog(logs.infoLogs.CREATE_REVEAL_CONTAINER, MessageType.LOG,
+      this.#context.logLevel);
 
     const sub = (data, callback) => {
       if (data.name === REVEAL_FRAME_CONTROLLER) {
@@ -134,8 +125,8 @@ class RevealContainer {
     if (this.#isElementsMounted) {
       return new Promise((resolve, reject) => {
         try {
-          printLog(logs.infoLogs.VALIDATE_REVEAL_RECORDS, MessageType.INFO,
-            this.#showErrorLogs, this.#showInfoLogs);
+          printLog(logs.infoLogs.VALIDATE_REVEAL_RECORDS, MessageType.LOG,
+            this.#context.logLevel);
 
           validateRevealElementRecords(this.#revealRecords);
           bus
@@ -150,34 +141,34 @@ class RevealContainer {
                 this.#revealRecords = [];
                 if (revealData.error) {
                   printLog(logs.errorLogs.FAILED_REVEAL, MessageType.ERROR,
-                    this.#showErrorLogs, this.#showInfoLogs);
+                    this.#context.logLevel);
 
                   reject(revealData.error);
                 } else {
-                  printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.INFO,
-                    this.#showErrorLogs, this.#showInfoLogs);
+                  printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.LOG,
+                    this.#context.logLevel);
                   resolve(revealData);
                 }
               },
             );
           printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
             ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
-          MessageType.INFO, this.#showErrorLogs, this.#showInfoLogs);
+          MessageType.LOG, this.#context.logLevel);
         } catch (err) {
           printLog(`Error: ${err.message}`, MessageType.ERROR,
-            this.#showErrorLogs, this.#showInfoLogs);
+            this.#context.logLevel);
           reject(err);
         }
       });
     }
     return new Promise((resolve, reject) => {
       try {
-        printLog(logs.infoLogs.VALIDATE_REVEAL_RECORDS, MessageType.INFO,
-          this.#showErrorLogs, this.#showInfoLogs);
+        printLog(logs.infoLogs.VALIDATE_REVEAL_RECORDS, MessageType.LOG,
+          this.#context.logLevel);
         validateRevealElementRecords(this.#revealRecords);
         const elementMountTimeOut = setTimeout(() => {
           printLog(logs.errorLogs.ELEMENT_NOT_MOUNTED, MessageType.ERROR,
-            this.#showErrorLogs, this.#showInfoLogs);
+            this.#context.logLevel);
           reject('Elements Not Mounted');
         }, 30000);
         this.#eventEmmiter.on(
@@ -196,11 +187,11 @@ class RevealContainer {
                   this.#mountedRecords = [];
                   if (revealData.error) {
                     printLog(logs.errorLogs.FAILED_REVEAL, MessageType.ERROR,
-                      this.#showErrorLogs, this.#showInfoLogs);
+                      this.#context.logLevel);
                     reject(revealData.error);
                   } else {
-                    printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.INFO,
-                      this.#showErrorLogs, this.#showInfoLogs);
+                    printLog(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, MessageType.LOG,
+                      this.#context.logLevel);
 
                     resolve(revealData);
                   }
@@ -210,7 +201,7 @@ class RevealContainer {
         );
       } catch (err) {
         printLog(err.message, MessageType.ERROR,
-          this.#showErrorLogs, this.#showInfoLogs);
+          this.#context.logLevel);
 
         reject(err);
       }

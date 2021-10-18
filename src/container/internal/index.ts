@@ -56,7 +56,7 @@ export class FrameController {
           const { clientJSON } = clientMetaData;
           this.#iFrameForm.setClientMetadata(clientMetaData);
           this.#iFrameForm.setClient(Client.fromJSON(clientJSON));
-          this.#iFrameForm.setLogLevel(context.logLevel);
+          this.#iFrameForm.setContext(context);
           delete clientMetaData.clientJSON;
         },
       );
