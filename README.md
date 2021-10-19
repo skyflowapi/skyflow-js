@@ -36,9 +36,10 @@ import Skyflow from "skyflow-js" // If using script tag, this line is not requir
 const skyflowClient = Skyflow.init({
    vaultID: "string",          //Id of the vault that the client should connect to 
    vaultURL: "string",         //URL of the vault that the client should connect to
-   getBearerToken: helperFunc  //helper function that retrieves a Skyflow bearer token from your backend
+   getBearerToken: helperFunc,  //helper function that retrieves a Skyflow bearer token from your backend
    options:{
-     logLevel:Skyflow.LogLevel // optional, if not specified default is PROD  
+     logLevel: Skyflow.LogLevel, // optional, if not specified default is ERROR 
+     env: Skyflow.Env          // optional, if not specified default is PROD 
    }
 })
 ```
@@ -83,25 +84,41 @@ getBearerToken: () => {
 }
 
 ```
-For `logLevel` parameter, there are 3 accepted values in Skyflow.LogLevel
-
-- `INFO`
-    
-  When `Skyflow.LogLevel.INFO` is passed, will get info logs for every event that has occurred during the SDK flow execution along with error logs on the console.
+For `logLevel` parameter, there are 4 accepted values in Skyflow.LogLevel
 
 - `DEBUG`
+    
+  When `Skyflow.LogLevel.DEBUG` is passed, all level of logs will be printed(DEBUG, INFO, WARN, ERROR).
 
-  Logs will be same as in `INFO`. 
-  
-  In Event Listeners actual value of element can be accessed inside the handler. 
+- `INFO`
 
-- `PROD`
+  When `Skyflow.LogLevel.INFO` is passed, INFO logs for every event that has occurred during the SDK flow execution will be printed along with WARN and ERROR logs.
 
-  When `Skyflow.LogLevel.PROD` is passed, will get only error logs on the console.
+
+- `WARN`
+
+  When `Skyflow.LogLevel.WARN` is passed, WARN and ERROR logs will be printed.
+
+- `ERROR`
+
+  When `Skyflow.LogLevel.ERROR` is passed, only ERROR logs will be printed.
 
 `Note`:
-  - since `logLevel` is optional, by default the logLevel will be  `PROD`.
-  - Use `logLevel` option with caution, make sure the logLevel is set to `PROD` when using `skyflow-js` in production. 
+  - The ranking of logging levels is as follows :  DEBUG < INFO < WARN < ERROR
+  - since `logLevel` is optional, by default the logLevel will be  `ERROR`.
+
+
+
+For `env` parameter, there are 2 accepted values in Skyflow.Env
+
+- `PROD`
+- `DEV`
+
+  In [Event Listeners](#event-listener-on-collect-elements), actual value of element can only be accessed inside the handler when the `env` is set to `DEV`.
+
+`Note`:
+  - since `env` is optional, by default the env will be  `PROD`.
+  - Use `env` option with caution, make sure the env is set to `PROD` when using `skyflow-js` in production. 
 
 ---
 
@@ -435,12 +452,12 @@ state : {
   isEmpty: boolean 
   isFocused: boolean
   isValid: boolean
-  value: string  
+  value: string
 }
 ```
 
 `Note:`
-values of SkyflowElements will be returned in elementstate object only when LogLevel is  `DEBUG`,  else it is empty string i.e `""`
+values of SkyflowElements will be returned in elementstate object only when `env` is  `DEV`,  else it is empty string i.e, ''
 
 ##### Sample code snippet for using listeners
 ```javascript
@@ -450,7 +467,7 @@ const skyflowClient = Skyflow.init({
    vaultURL: <VAULT_URL>,
    getBearerToken: ()=>{},
    options: { 
-     logLevel: Skyflow.LogLevel.DEBUG
+     env: Skyflow.Env.DEV
    }
 })
 
@@ -470,7 +487,7 @@ cardNumber.on(Skyflow.EventName.CHANGE,(state) => {
   console.log(state)
 });
 ```
-##### Sample Element state object when `logLevel` is `DEBUG`
+##### Sample Element state object when `env` is `DEV`
 
 ```javascript
 {
@@ -482,7 +499,7 @@ cardNumber.on(Skyflow.EventName.CHANGE,(state) => {
 }
 
 ```
-##### Sample Element state object when `logLevel` is `PROD` or `INFO`
+##### Sample Element state object when `env` is `PROD`
 
 ```javascript
 {
@@ -490,7 +507,7 @@ cardNumber.on(Skyflow.EventName.CHANGE,(state) => {
    isEmpty: false
    isFocused: true
    isValid: false
-   value: ""
+   value: ''
 }
 ```
 
@@ -513,28 +530,19 @@ var records = {
   "records": [
       {
         token: "string",                    // token for the record to be fetched
-        redaction: Skyflow.RedactionType    //redaction to be applied to retrieved data
       }
   ]
 }
 
 skyflow.detokenize(records)
 ```
-
-There are 4 accepted values in Skyflow.RedactionTypes:
-- `PLAIN_TEXT`
-- `MASKED`
-- `REDACTED`
-- `DEFAULT`
-
 An example of a detokenize call: 
 
 ```javascript
 skyflow.detokenize({
   "records": [
     {
-      token: "131e70dc-6f76-4319-bdd3-96281e051051",
-      redaction: Skyflow.RedactionType.PLAIN_TEXT
+      token: "131e70dc-6f76-4319-bdd3-96281e051051"
     }
   ]
 })
@@ -546,7 +554,7 @@ The sample response:
   "records": [
     {
       "token": "131e70dc-6f76-4319-bdd3-96281e051051",
-      "date_of_birth": "1990-01-01",
+      "value": "1990-01-01",
     }
   ]
 }
@@ -566,6 +574,12 @@ The sample response:
   ]
 }
 ```
+
+There are 4 accepted values in Skyflow.RedactionTypes:
+- `PLAIN_TEXT`
+- `MASKED`
+- `REDACTED`
+- `DEFAULT`
 
 An example of getById call:
 
@@ -633,7 +647,6 @@ Then define a Skyflow Element to reveal data as shown below.
 ```javascript
 var revealElement = {
   token: "string",                    //optional, token of the data being revealed 
-  redaction: Skyflow.RedactionType,   //redaction type to be applied to the data when revealed
   inputStyles: {},                    //optional styles to be applied to the element
   labelStyles: {},                    //optional, styles to be applied to the label of the reveal element
   errorTextStyles: {},                //optional styles that will be applied to the errorText of the reveal element
@@ -643,8 +656,6 @@ var revealElement = {
 ```
 `Note`: 
 - `token` is optional only if it is being used in invokeGateway()
-
-For a list of acceptable RedactionTypes, see the [section above](#Retrieving-data-from-the-vault).
 
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data but only a single variant is available i.e. base. 
 
@@ -713,7 +724,6 @@ const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
 //Step 2
 const cardNumberElement = container.create({             
   token: "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
-  redaction: Skyflow.RedactionType.DEFAULT,
   inputStyles: {
       base: {
         color: "#1d1d1d",
@@ -735,7 +745,6 @@ const cardNumberElement = container.create({
 
 const cvvElement = container.create({             
   token: "89024714-6a26-4256-b9d4-55ad69aa4047",
-  redaction: Skyflow.RedactionType.DEFAULT,
   inputStyles: {
       base: {
         color: "#1d1d1d",
@@ -885,7 +894,7 @@ const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT)
 
 // step 3
 const cvvElement = revealContainer.create({
-    type: skyflow.RedactionType.PLAIN_TEXT,
+    altText: "###",
 })
 cvvElement.mount("#cvv")
 
@@ -924,5 +933,5 @@ Sample Response:
 ```
 
 `Note`:
-- `token` and `redaction` are optional for creating reveal element, if it is used for invokeGateway
+- `token` is optional for creating reveal element, if it is used for invokeGateway
 - responseBody contains collect or reveal elements to render the response from the gateway on UI 

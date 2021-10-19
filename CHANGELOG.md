@@ -2,19 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.3.0] - 2021-10-13
+## [1.3.0] - 2021-10-19
 
 ### Added
 
-- `logLevel` option to allow different levels of logging and accessibilty of value
+- `logLevel` option to allow different levels of logging
 - event listeners for collect element
+- `env` option for accessibilty of value in event listeners
 
 ### Changed
 - Standardized error information for easier debugging
+- deprecated redaction in `detokenize` method and `revealContainer.create` method
+- change in `detokenize` response format
 
 ### Fixed
 - Some error scenarios acting unexpectedly
-
 
 ## [1.2.0] - 2021-10-05
 
