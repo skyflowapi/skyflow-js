@@ -2,39 +2,32 @@ import Client from '../client';
 import { getAccessToken } from '../utils/busEvents';
 import SkyflowError from '../libs/SkyflowError';
 import {
-  ISkyflowIdRecord, RedactionType, IRevealRecord, IRevealResponseType,
+  ISkyflowIdRecord, IRevealRecord, IRevealResponseType,
 } from '../utils/common';
 
 interface IApiSuccessResponse {
   records: [
     {
-      token_id: string;
-      fields: Record<string, string>;
+      token: string;
+      valueType:string;
+      value:string;
     },
   ];
-}
-interface IApiFailureResponse {
-  error?: {
-    http_code: number;
-    grpc_code: number;
-    http_status: string;
-    message: string;
-  };
 }
 
 const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
   const currentResponseRecords = response.records;
-  return currentResponseRecords.map((record) => ({ token: record.token_id, ...record.fields }));
+  return currentResponseRecords.map((record) => ({ token: record.token, value: record.value }));
 };
 
-const formatForPureJsFailure = (cause, tokenIds) => tokenIds.map((tokenId) => (
-  {
-    token: tokenId,
-    ...new SkyflowError({
-      code: cause?.error?.code,
-      description: cause?.error?.description,
-    }, [], true),
-  }));
+const formatForPureJsFailure = (cause, tokenId:string) => ({
+  token: tokenId,
+  ...new SkyflowError({
+    code: cause?.error?.code,
+    description: cause?.error?.description,
+  }, [], true),
+});
+
 const getSkyflowIdRecordsFromVault = (
   skyflowIdRecord: ISkyflowIdRecord,
   client: Client,
@@ -59,25 +52,26 @@ const getSkyflowIdRecordsFromVault = (
 };
 
 const getTokenRecordsFromVault = (
-  queryRecordIds: string[],
-  redactionType: RedactionType,
+  token:string,
   client: Client,
   authToken:string,
 ): Promise<any> => {
-  let paramList: string = '';
-
-  queryRecordIds.forEach((recordId) => {
-    paramList += `token_ids=${recordId}&`;
-  });
-
-  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/tokens?${paramList}redaction=${redactionType}`;
+  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/detokenize`;
   return client.request({
-    requestMethod: 'GET',
+    requestMethod: 'POST',
     url: vaultEndPointurl,
     headers: {
       Authorization: `Bearer ${authToken}`,
       'Content-Type': 'application/json',
     },
+    body:
+      {
+        detokenizationParameters: [
+          {
+            token,
+          },
+        ],
+      },
   });
 };
 
@@ -86,27 +80,18 @@ export const fetchRecordsByTokenId = (
   client: Client,
 ): Promise<IRevealResponseType> => new Promise((rootResolve, rootReject) => {
   getAccessToken().then((authToken) => {
-    const tokenRequest: Record<string, string[]> = {};
-
-    tokenIdRecords.forEach((tokenRecord) => {
-      if (tokenRequest[tokenRecord.redaction]) {
-        tokenRequest[tokenRecord.redaction].push(tokenRecord.token);
-      } else {
-        tokenRequest[tokenRecord.redaction] = [tokenRecord.token];
-      }
-    });
-    const vaultResponseSet: Promise<any>[] = Object.entries(tokenRequest).map(
-      ([redaction, tokenIds]) => new Promise((resolve) => {
+    const vaultResponseSet: Promise<any>[] = tokenIdRecords.map(
+      (tokenRecord) => new Promise((resolve) => {
         const apiResponse: any = [];
-        getTokenRecordsFromVault(tokenIds, RedactionType[redaction], client, authToken as string)
+        getTokenRecordsFromVault(tokenRecord.token, client, authToken as string)
           .then(
             (response: IApiSuccessResponse) => {
               const fieldsData = formatForPureJsSuccess(response);
               apiResponse.push(...fieldsData);
             },
-            (cause: IApiFailureResponse) => {
-              const errorSet = formatForPureJsFailure(cause, tokenIds);
-              apiResponse.push(...errorSet);
+            (cause: any) => {
+              const errorData = formatForPureJsFailure(cause, tokenRecord.token);
+              apiResponse.push(errorData);
             },
           )
           .finally(() => {
@@ -142,8 +127,7 @@ export const formatRecordsForIframe = (response: IRevealResponseType) => {
   const result: Record<string, string> = {};
   if (response.records) {
     response.records.forEach((record) => {
-      const values = Object.values(record);
-      result[values[0]] = values[1];
+      result[record.token] = record.value;
     });
   }
   return result;
