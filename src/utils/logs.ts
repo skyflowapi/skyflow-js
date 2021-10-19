@@ -143,7 +143,7 @@ const logs = {
     TRANSACTION_ERROR: 'An error occurred during transaction.',
     CONNECTION_ERROR: 'Error while initializing the connection.',
     ERROR_OCCURED: 'Error occurred.',
-
+    RESPONSE_BODY_KEY_MISSING: '%s1 is missing in the response.',
   },
 };
 

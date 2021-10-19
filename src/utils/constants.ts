@@ -48,6 +48,7 @@ const SKYFLOW_ERROR_CODE = {
   CONNECTION_ERROR: { code: 400, description: logs.errorLogs.CONNECTION_ERROR },
   TRANSACTION_ERROR: { code: 400, description: logs.errorLogs.TRANSACTION_ERROR },
   COMPLETE_AND_VALID_INPUTS: { code: 400, description: logs.errorLogs.COMPLETE_AND_VALID_INPUTS },
+  RESPONSE_BODY_KEY_MISSING: { code: 404, description: logs.errorLogs.RESPONSE_BODY_KEY_MISSING },
 };
 
 export default SKYFLOW_ERROR_CODE;
