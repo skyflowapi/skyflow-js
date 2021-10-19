@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Standardized error information for easier debugging
-- deprecated redaction in `detokenize` method and `revealContainer.create` method
+- deprecated redaction in `detokenize` method
 - change in `detokenize` response format
 
 ### Fixed

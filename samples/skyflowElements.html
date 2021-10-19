@@ -70,6 +70,10 @@
             Http.send();
           });
         },
+        options:{
+          logLevel:Skyflow.LogLevel.DEBUG,
+          env:Skyflow.Env.DEV,
+        }
       });
 
       // create collect Container
@@ -150,6 +154,11 @@
       expiryDateElement.mount("#collectExpiryDate");
       cardHolderNameElement.mount("#collectCardholderName");
 
+      // add event listener to collect element
+      cardHolderNameElement.on(Skyflow.EventName.CHANGE,(state)=>{
+        console.log(state);
+      })
+
       // collect all elements data
       const collectButton = document.getElementById("collectPCIData");
       if (collectButton) {
@@ -193,7 +202,6 @@
               const revealCardNumberElement = revealContainer.create({
                 token: fieldsTokenData.primary_card.card_number,
                 label: "Card Number",
-                redaction: Skyflow.RedactionType.PLAIN_TEXT,
                 ...revealStyleOptions,
               });
               revealCardNumberElement.mount("#revealCardNumber");
@@ -201,7 +209,6 @@
               const revealCardCvvElement = revealContainer.create({
                 token: fieldsTokenData.primary_card.cvv,
                 label: "CVV",
-                redaction: Skyflow.RedactionType.PLAIN_TEXT,
                 ...revealStyleOptions,
                 altText: "###",
               });
@@ -210,7 +217,6 @@
               const revealCardExpiryElement = revealContainer.create({
                 token: fieldsTokenData.expiry_date,
                 label: "Card Expiry Date",
-                redaction: Skyflow.RedactionType.PLAIN_TEXT,
                 ...revealStyleOptions,
               });
               revealCardExpiryElement.mount("#revealExpiryDate");
@@ -218,7 +224,6 @@
               const revealCardholderNameElement = revealContainer.create({
                 token: fieldsTokenData.first_name,
                 label: "Card Holder Name",
-                redaction: Skyflow.RedactionType.PLAIN_TEXT,
                 ...revealStyleOptions,
               });
               revealCardholderNameElement.mount("#revealCardholderName");
