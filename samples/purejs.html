@@ -156,20 +156,18 @@
                     const revealResult = skyflow.detokenize({
                       records: [
                         {
-                          token: fieldsTokenData.primary_card.card_number,
-                          redaction: Skyflow.RedactionType.PLAIN_TEXT,
+                          token: fieldsTokenData.primary_card.card_number
                         },
                         {
-                          token: fieldsTokenData.primary_card.cvv,
-                          redaction: Skyflow.RedactionType.PLAIN_TEXT,
+                          token: fieldsTokenData.primary_card.cvv
+                          
                         },
                         {
-                          token: fieldsTokenData.expiry_date,
-                          redaction: Skyflow.RedactionType.PLAIN_TEXT,
+                          token: fieldsTokenData.expiry_date
+                          
                         },
                         {
-                          token: fieldsTokenData.first_name,
-                          redaction: Skyflow.RedactionType.PLAIN_TEXT,
+                          token: fieldsTokenData.first_name
                         },
                       ],
                     });
