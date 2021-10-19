@@ -49,7 +49,7 @@ export interface IInsertRecord {
 
 export interface IRevealRecord {
   token: string;
-  // redaction?: RedactionType;
+  redaction?: RedactionType;
 }
 
 export interface IRevealResponseType {

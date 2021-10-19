@@ -23,6 +23,8 @@ import logs from '../../../utils/logs';
 import {
   IRevealRecord, ISkyflowIdRecord, IGatewayConfig, MessageType, Context,
 } from '../../../utils/common';
+import SkyflowError from '../../../libs/SkyflowError';
+import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 
 class PureJsFrameController {
   #clientDomain: string;
@@ -201,33 +203,42 @@ class PureJsFrameController {
           if (config.responseBody) {
             const flattenResponseBody = flattenObject(config.responseBody);
             const flattenGatewayResponse = flattenObject(response);
+            const errorResponse:any[] = [];
             Object.entries(flattenResponseBody).forEach(([key, value]) => {
-              const responseValue = flattenGatewayResponse[key];
-              const elementIFrame = window.parent.frames[value as string];
-              if (elementIFrame) {
-                const frameName = value as string;
-                if (frameName.startsWith(`${FRAME_ELEMENT}:`)) {
-                  const elementId = formatFrameNameToId(frameName);
-                  const collectInputElement = elementIFrame
-                    .document.getElementById(elementId) as HTMLInputElement;
-                  if (collectInputElement) {
-                    collectInputElement.value = responseValue;
+              if (Object.prototype.hasOwnProperty.call(flattenGatewayResponse, key)) {
+                const responseValue = flattenGatewayResponse[key];
+                const elementIFrame = window.parent.frames[value as string];
+                if (elementIFrame) {
+                  const frameName = value as string;
+                  if (frameName.startsWith(`${FRAME_ELEMENT}:`)) {
+                    const elementId = formatFrameNameToId(frameName);
+                    const collectInputElement = elementIFrame
+                      .document.getElementById(elementId) as HTMLInputElement;
+                    if (collectInputElement) {
+                      collectInputElement.value = responseValue;
+                    }
+                  } else if (frameName.startsWith(`${FRAME_REVEAL}:`)) {
+                    const revealSpanElement = elementIFrame
+                      .document.getElementById(value) as HTMLSpanElement;
+                    if (revealSpanElement) {
+                      revealSpanElement.innerText = responseValue;
+                    }
                   }
-                } else if (frameName.startsWith(`${FRAME_REVEAL}:`)) {
-                  const revealSpanElement = elementIFrame
-                    .document.getElementById(value) as HTMLSpanElement;
-                  if (revealSpanElement) {
-                    revealSpanElement.innerText = responseValue;
-                  }
+                  deletePropertyPath(response, key);
+                  clearEmpties(response);
                 }
-                deletePropertyPath(response, key);
-                clearEmpties(response);
+              } else {
+                errorResponse.push(new SkyflowError(SKYFLOW_ERROR_CODE.RESPONSE_BODY_KEY_MISSING,
+                  [key], true));
               }
             });
+            if (errorResponse.length > 0) {
+              rootReject({ success: response, errors: [...errorResponse] });
+            }
           }
           rootResolve(response);
         }).catch((err) => {
-          rootReject(err);
+          rootReject({ errors: [err] });
         });
       }).catch((err) => {
         rootReject(err);
