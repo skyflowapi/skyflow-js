@@ -1,4 +1,5 @@
 import Element from '../../../../src/container/external/element';
+import { LogLevel,Env } from '../../../../src/utils/common';
 
 const bus = require('framebus');
 
@@ -57,7 +58,7 @@ describe('collect element', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: 'PROD' }
+       { logLevel: LogLevel.ERROR,env:Env.PROD } 
     );
 
     expect(element.elementType).toBe(input.type);
@@ -78,7 +79,7 @@ describe('collect element', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: 'PROD' }
+      { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
 
     const options = element.getOptions();
