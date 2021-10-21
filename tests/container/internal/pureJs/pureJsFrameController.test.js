@@ -1,9 +1,9 @@
 import bus from 'framebus';
 import PureJsFrameController from '../../../../src/container/internal/pureJs/PureJsFrameController';
-import { ELEMENT_EVENTS_TO_IFRAME, LogLevel, PUREJS_TYPES } from '../../../../src/container/constants';
+import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../../../src/container/constants';
 import clientModule from '../../../../src/client';
 import * as busEvents from '../../../../src/utils/busEvents';
-
+import { LogLevel, Env} from "../../../../src/utils/common";
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();
 
@@ -18,7 +18,7 @@ const clientData = {
     config: { ...skyflowConfig },
     metadata: {},
   },
-  context: { logLevel: LogLevel.PROD }
+  context: { logLevel: LogLevel.ERROR,env:Env.PROD }
 }
 
 const records = {
@@ -178,7 +178,7 @@ describe('Inserting records into the vault', () => {
 
 const detokenizeRecords = [{
   token: 'token1',
-  redaction: 'PLAIN_TEXT',
+  // redaction: 'PLAIN_TEXT',
 }];
 const detokenizeResponse = {
   records: [{

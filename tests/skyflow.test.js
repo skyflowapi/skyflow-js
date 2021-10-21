@@ -1,9 +1,10 @@
 import bus from 'framebus';
-import Skyflow from '../src/Skyflow';
+import Skyflow, { ContainerType } from '../src/Skyflow';
 import CollectContainer from '../src/container/external/CollectContainer';
 import RevealContainer from '../src/container/external/RevealContainer';
 import * as iframerUtils from '../src/iframe-libs/iframer';
-import { ELEMENT_EVENTS_TO_IFRAME } from '../src/container/constants';
+import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '../src/container/constants';
+import { Env, EventName, LogLevel, RedactionType, RequestMethod } from '../src/utils/common';
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 
@@ -222,7 +223,7 @@ describe('skyflow insert', () => {
 const detokenizeInput = {
   records: [{
     token: 'token1',
-    redaction: 'PLAIN_TEXT',
+    // redaction: 'PLAIN_TEXT',
   }],
 };
 
@@ -390,6 +391,27 @@ describe('skyflow getById', () => {
     } catch (err) {
     }
   });
+  test('getById invalid input-1',(done)=>{
+    const res = skyflow.getById({});
+    res.catch((err)=>{
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('getById invalid input-2',(done)=>{
+    const res = skyflow.getById({"records":[]});
+    res.catch((err)=>{
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('getById invalid input-3',(done)=>{
+    const res = skyflow.getById({"records":[{}]});
+    res.catch((err)=>{
+      expect(err).toBeDefined();
+      done();
+    });
+  });
 });
 
 const invokeGatewayReq = {
@@ -461,5 +483,124 @@ describe('skyflow invoke gateway', () => {
       }, 1000);
     } catch (err) {
     }
+  });
+});
+describe("Skyflow Enums",()=>{
+  test("Skyflow.ContainerType",()=>{
+    expect(Skyflow.ContainerType.COLLECT).toEqual(ContainerType.COLLECT);
+    expect(Skyflow.ContainerType.REVEAL).toEqual(ContainerType.REVEAL);
+  });
+
+  test("Skyflow.ElementType",()=>{
+      expect(Skyflow.ElementType.CARDHOLDER_NAME).toEqual(ElementType.CARDHOLDER_NAME);
+      expect(Skyflow.ElementType.CARD_NUMBER).toEqual(ElementType.CARD_NUMBER);
+      expect(Skyflow.ElementType.CVV).toEqual(ElementType.CVV);
+      expect(Skyflow.ElementType.EXPIRATION_DATE).toEqual(ElementType.EXPIRATION_DATE);
+  });
+
+  test("Skyflow.RedactionType",()=>{
+      expect(Skyflow.RedactionType.DEFAULT).toEqual(RedactionType.DEFAULT);
+      expect(Skyflow.RedactionType.MASKED).toEqual(RedactionType.MASKED);
+      expect(Skyflow.RedactionType.PLAIN_TEXT).toEqual(RedactionType.PLAIN_TEXT);
+      expect(Skyflow.RedactionType.REDACTED).toEqual(RedactionType.REDACTED);
+  });
+
+  test("Skyflow.RequestMethod",()=>{
+    expect(Skyflow.RequestMethod.GET).toEqual(RequestMethod.GET);
+    expect(Skyflow.RequestMethod.POST).toEqual(RequestMethod.POST);
+    expect(Skyflow.RequestMethod.PUT).toEqual(RequestMethod.PUT);
+    expect(Skyflow.RequestMethod.DELETE).toEqual(RequestMethod.DELETE);
+    expect(Skyflow.RequestMethod.PATCH).toEqual(RequestMethod.PATCH);
+  });
+
+  test("Skyflow.LogLevel",()=>{
+    expect(Skyflow.LogLevel.DEBUG).toEqual(LogLevel.DEBUG);
+    expect(Skyflow.LogLevel.ERROR).toEqual(LogLevel.ERROR);
+    expect(Skyflow.LogLevel.INFO).toEqual(LogLevel.INFO);
+    expect(Skyflow.LogLevel.WARN).toEqual(LogLevel.WARN);
+  });
+
+  test("Skyflow.EventName",()=>{
+    expect(Skyflow.EventName.CHANGE).toEqual(EventName.CHANGE);
+    expect(Skyflow.EventName.FOCUS).toEqual(EventName.FOCUS);
+    expect(Skyflow.EventName.READY).toEqual(EventName.READY);
+    expect(Skyflow.EventName.BLUR).toEqual(EventName.BLUR);
+  });
+
+  test("Skflow.Env",()=>{
+    expect(Skyflow.Env.DEV).toEqual(Env.DEV);
+    expect(Skyflow.Env.PROD).toEqual(Env.PROD);
+  });
+
+});
+
+describe("Get BearerToken Listener",()=>{
+  let emitSpy;
+  let targetSpy;
+  const on = jest.fn();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+  });
+  test("listener with valid Token",(done)=>{
+    const bearerFun = ()=>{
+      return new Promise((resolve,_)=>{
+        resolve("validBearerToken");
+      });
+    };
+      const skyflow =Skyflow.init({
+        vaultID:"1242",
+        vaultURL:"https://vault.url.com",
+        getBearerToken:bearerFun
+      });
+      const emitterCb = jest.fn();
+      bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN,{},emitterCb);
+
+      const onCbEvent = on.mock.calls
+            .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
+      expect(onCbEvent).toBeDefined(); 
+
+      const onCbName = onCbEvent[0][0];
+      expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
+      const onCb = onCbEvent[0][1];
+      onCb({}, emitterCb);
+      setTimeout(()=>{
+        expect(emitterCb).toBeCalledTimes(1);
+        expect(emitterCb).toBeCalledWith({"authToken":"validBearerToken"});
+        done();
+      },1000);
+  });
+
+  test("listener with Invalid Token",(done)=>{
+    const bearerFun = ()=>{
+      return new Promise((_,reject)=>{
+        reject("Error in userFunction");
+      });
+    };
+      const skyflow = Skyflow.init({
+        vaultID:"1242",
+        vaultURL:"https://vault.url.com",
+        getBearerToken:bearerFun
+      });
+      const emitterCb = jest.fn();
+      bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN,{},emitterCb);
+
+      const onCbEvent = on.mock.calls
+            .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
+      expect(onCbEvent).toBeDefined(); 
+
+      const onCbName = onCbEvent[0][0];
+      expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
+      const onCb = onCbEvent[0][1];
+      onCb({}, emitterCb);
+      setTimeout(()=>{
+        expect(emitterCb).toBeCalledTimes(1);
+        expect(emitterCb).toBeCalledWith({error:"Error in userFunction"});
+        done();
+      },1000);
   });
 });
