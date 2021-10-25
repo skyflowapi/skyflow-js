@@ -5,7 +5,10 @@ import RevealContainer from '../src/container/external/RevealContainer';
 import * as iframerUtils from '../src/iframe-libs/iframer';
 import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '../src/container/constants';
 import { Env, EventName, LogLevel, RedactionType, RequestMethod } from '../src/utils/common';
-
+jest.mock('../src/utils/jwtUtils',()=>({
+  __esModule: true,
+  default:jest.fn(()=>true),
+}));
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 
 describe('Skyflow initialization', () => {
@@ -167,11 +170,11 @@ describe('skyflow insert', () => {
       getBearerToken: jest.fn(),
     });
 
-    const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
-    const frameReadyCb = frameReayEvent[0][1];
-    const cb2 = jest.fn();
-    frameReadyCb({}, cb2);
+    // const frameReayEvent = on.mock.calls
+    //   .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    // const frameReadyCb = frameReayEvent[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({}, cb2);
   });
 
   afterEach(() => {
@@ -179,6 +182,11 @@ describe('skyflow insert', () => {
   });
 
   test('insert success', (done) => {
+    const frameReayEvent = on.mock.calls
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+  const frameReadyCb = frameReayEvent[0][1];
+  const cb2 = jest.fn();
+  frameReadyCb({}, cb2);
     try {
       const res = skyflow.insert(records);
 
@@ -200,6 +208,11 @@ describe('skyflow insert', () => {
   });
 
   test('insert error', (done) => {
+    const frameReayEvent = on.mock.calls
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+  const frameReadyCb = frameReayEvent[0][1];
+  const cb2 = jest.fn();
+  frameReadyCb({}, cb2);
     try {
       const res = skyflow.insert(records);
 
@@ -218,6 +231,48 @@ describe('skyflow insert', () => {
     } catch (err) {
     }
   });
+  test('insert success else',(done)=>{
+    try {
+      const res = skyflow.insert(records);
+
+      const frameReayEvent = on.mock.calls
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[1][1];
+    frameReadyCb();
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+      const emitCb = emitEvent[0][2];
+      emitCb(insertResponse);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('insert invalid input', (done) => {
+    const frameReayEvent = on.mock.calls
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+  const frameReadyCb = frameReayEvent[0][1];
+  const cb2 = jest.fn();
+  frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.insert({"records":[]});
+      let error;
+      res.catch((err) => error = err);
+
+      setTimeout(() => {
+        expect(error).toBeDefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
 });
 
 const detokenizeInput = {
@@ -226,7 +281,12 @@ const detokenizeInput = {
     // redaction: 'PLAIN_TEXT',
   }],
 };
-
+const invalidDetokenizeInput = {
+  recordscds: [{
+    token: 'token1',
+    // redaction: 'PLAIN_TEXT',
+  }],
+}
 const detokenizeRes = {
   records: [{
     token: 'token1',
@@ -238,11 +298,14 @@ describe('skyflow detokenize', () => {
   let emitSpy;
   let targetSpy;
   let skyflow;
+  const emit = jest.fn();
+  const on = jest.fn();
   beforeEach(() => {
     emitSpy = jest.spyOn(bus, 'emit');
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit
     });
 
     skyflow = Skyflow.init({
@@ -251,18 +314,25 @@ describe('skyflow detokenize', () => {
       getBearerToken: jest.fn(),
     });
 
-    const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
-    const frameReadyCb = frameReayEvent[0][1];
-    const cb2 = jest.fn();
-    frameReadyCb({}, cb2);
+    // const frameReayEvent = on.mock.calls
+    //   .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    // const frameReadyCb = frameReayEvent[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({}, cb2);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('detokenize success', (done) => {
+
+     const frameReayEvent = on.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
     try {
       const res = skyflow.detokenize(detokenizeInput);
 
@@ -284,6 +354,11 @@ describe('skyflow detokenize', () => {
   });
 
   test('detokenize error', (done) => {
+     const frameReayEvent = on.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
     try {
       const res = skyflow.detokenize(detokenizeInput);
 
@@ -300,6 +375,74 @@ describe('skyflow detokenize', () => {
         done();
       }, 1000);
     } catch (err) {
+    }
+  });
+
+  test('detokenize success else',(done)=>{
+ 
+    try {
+      const res = skyflow.detokenize(detokenizeInput);
+      
+      const frameReayEvent = on.mock.calls
+          .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+        const frameReadyCb = frameReayEvent[0][1];
+        const frameReadyCb2 = frameReayEvent[1][1];
+        frameReadyCb2(); 
+        const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+      const emitCb = emitEvent[0][2];
+      emitCb(detokenizeRes);
+      res.then((result)=>{
+        expect(result.records.length).toBe(1);
+        expect(result.error).toBeUndefined();
+        done();
+      });
+    }catch(err){
+    }
+  });
+  test('detokenize error else',(done)=>{
+ 
+    try {
+      const res = skyflow.detokenize(detokenizeInput);
+      
+      const frameReayEvent = on.mock.calls
+          .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+        const frameReadyCb = frameReayEvent[0][1];
+        const frameReadyCb2 = frameReayEvent[1][1];
+        frameReadyCb2(); 
+        const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+      const emitCb = emitEvent[0][2];
+      emitCb({ error: { message: "token doesn't exist", code: 404 } });
+      res.catch((err)=>{
+        expect(err).toBeDefined();
+        done();
+      });
+    }catch(err){
+    }
+  });
+  test('detokenize invalid input 1',()=>{
+    try {
+      const res = skyflow.detokenize(invalidDetokenizeInput);
+        res.catch((err)=>{
+          expect(err).toBeDefined();
+        })
+    }catch(err){
+    }
+  });
+  test('detokenize invalid input 2',()=>{
+    const frameReayEvent = on.mock.calls
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+  const frameReadyCb = frameReayEvent[0][1];
+  const cb2 = jest.fn();
+  frameReadyCb({}, cb2);
+    try {
+      
+      const res = skyflow.detokenize(invalidDetokenizeInput);
+        res.catch((err)=>{
+          expect(err).toBeDefined();
+        })
+    }catch(err){
     }
   });
 });
@@ -340,11 +483,11 @@ describe('skyflow getById', () => {
       getBearerToken: jest.fn(),
     });
 
-    const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
-    const frameReadyCb = frameReayEvent[0][1];
-    const cb2 = jest.fn();
-    frameReadyCb({}, cb2);
+    // const frameReayEvent = on.mock.calls
+    //   .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    // const frameReadyCb = frameReayEvent[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({}, cb2);
   });
 
   afterEach(() => {
@@ -352,6 +495,11 @@ describe('skyflow getById', () => {
   });
 
   test('getById success', (done) => {
+     const frameReayEvent = on.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
     try {
       const res = skyflow.getById(getByIdInput);
 
@@ -371,8 +519,37 @@ describe('skyflow getById', () => {
     } catch (err) {
     }
   });
+  test('getById success else', (done) => {
+    try {
+      const res = skyflow.getById(getByIdInput);
+      const frameReayEvent = on.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb2 = frameReayEvent[1][1];
+    frameReadyCb2(); 
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
 
   test('getById error', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
     try {
       const res = skyflow.getById(getByIdInput);
 
@@ -392,6 +569,11 @@ describe('skyflow getById', () => {
     }
   });
   test('getById invalid input-1',(done)=>{
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
     const res = skyflow.getById({});
     res.catch((err)=>{
       expect(err).toBeDefined();
@@ -399,6 +581,11 @@ describe('skyflow getById', () => {
     });
   });
   test('getById invalid input-2',(done)=>{
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
     const res = skyflow.getById({"records":[]});
     res.catch((err)=>{
       expect(err).toBeDefined();
@@ -406,6 +593,18 @@ describe('skyflow getById', () => {
     });
   });
   test('getById invalid input-3',(done)=>{
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.getById({"records":[{}]});
+    res.catch((err)=>{
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('getById invalid input-4',(done)=>{
     const res = skyflow.getById({"records":[{}]});
     res.catch((err)=>{
       expect(err).toBeDefined();
@@ -452,18 +651,24 @@ describe('skyflow invoke gateway', () => {
       getBearerToken: jest.fn(),
     });
 
-    const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
-    const frameReadyCb = frameReayEvent[0][1];
-    const cb2 = jest.fn();
-    frameReadyCb({}, cb2);
+    // const frameReayEvent = on.mock.calls
+    //   .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    // const frameReadyCb = frameReayEvent[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({}, cb2);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
-  test('getById success', (done) => {
+  test('invoke gateway success', (done) => {
+        const frameReayEvent = on.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
     try {
       const res = skyflow.invokeGateway(invokeGatewayReq);
 
@@ -484,7 +689,60 @@ describe('skyflow invoke gateway', () => {
     } catch (err) {
     }
   });
+  test('invoke gateway success else', (done) => {
+    try {
+      const res = skyflow.invokeGateway(invokeGatewayReq);
+      const frameReayEvent = on.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[1][1];
+    frameReadyCb();
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+      const emitCb = emitEvent[0][2];
+      emitCb(invokeGatewayRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data).toBeDefined();
+        expect(!('resource' in data)).toBeTruthy();
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('invoke gateway invalidInput -1 ',(done)=>{
+    try {
+      const res = skyflow.invokeGateway({gatewayURL:"invalid_url"});
+      res.catch((err)=>{
+        expect(err).toBeDefined();
+        done();
+      })
+    }catch(err){
+  
+    }
+  });
+  test('invoke gateway invalidInput -2 ',(done)=>{
+    const frameReayEvent = on.mock.calls
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+  const frameReadyCb = frameReayEvent[0][1];
+  const cb2 = jest.fn();
+  frameReadyCb({}, cb2);
+  try {
+    const res = skyflow.invokeGateway({gatewayURL:"invalid_url"});
+    res.catch((err)=>{
+      expect(err).toBeDefined();
+      done();
+    })
+  }catch(err){
+
+  }
+  });
+
 });
+
 describe("Skyflow Enums",()=>{
   test("Skyflow.ContainerType",()=>{
     expect(Skyflow.ContainerType.COLLECT).toEqual(ContainerType.COLLECT);
@@ -537,9 +795,9 @@ describe("Skyflow Enums",()=>{
 describe("Get BearerToken Listener",()=>{
   let emitSpy;
   let targetSpy;
-  const on = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetAllMocks();
     emitSpy = jest.spyOn(bus, 'emit');
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
