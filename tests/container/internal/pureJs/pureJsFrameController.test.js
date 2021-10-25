@@ -43,6 +43,7 @@ const insertResponse = {
   vaultID: 'vault123',
   responses: [
     {
+      table: 'table1',
       records: [
         {
           skyflow_id: 'testId',
@@ -50,6 +51,7 @@ const insertResponse = {
       ],
     },
     {
+      table: 'table1',
       fields: {
         '*': 'testId',
         first_name: 'token1',

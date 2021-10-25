@@ -269,43 +269,6 @@ class Element {
     }
   }
 
-  // methods to invoke element events
-  #blur = () => {
-    const { name } = this.#iframe;
-    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
-      name,
-      event: ELEMENT_EVENTS_TO_CLIENT.BLUR,
-    });
-  };
-
-  #focus = () => {
-    const { name } = this.#iframe;
-    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
-      name,
-      event: ELEMENT_EVENTS_TO_CLIENT.FOCUS,
-    });
-  };
-
-  #destroy = () => {
-    // todo: destroy all the internal elements
-    const { name } = this.#iframe;
-
-    // todo: fix this
-    this.#bus.emit(
-      ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
-      {
-        name,
-      },
-      () => {
-        this.unmount();
-        this.#bus.teardown();
-        this.#eventEmitter.resetEvents();
-        this.#eventEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME);
-        delete this.#iframe.iframe;
-      },
-    );
-  };
-
   #onDestroy = (callback) => {
     this.#eventEmitter.on(
       ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
@@ -316,10 +279,6 @@ class Element {
       },
       true,
     );
-  };
-
-  #resetEvents = () => {
-    this.#eventEmitter.resetEvents();
   };
 
   #registerIFrameBusListener = () => {
