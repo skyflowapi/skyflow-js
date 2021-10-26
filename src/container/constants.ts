@@ -1,3 +1,14 @@
+import defaultCardIcon from '../../assets/default.svg';
+import amexIcon from '../../assets/amex.svg';
+import dinnersClubIcon from '../../assets/diners-club.svg';
+import discoverIcon from '../../assets/discover.svg';
+import hipperCardIcon from '../../assets/hipercard.svg';
+import jcbIcon from '../../assets/jcb.svg';
+import maestroIcon from '../../assets/maestro.svg';
+import maseterCardIcon from '../../assets/mastercard.svg';
+import unionPayIcon from '../../assets/unionpay.svg';
+import visaCardIcon from '../../assets/visa.svg';
+
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';
 export const PUREJS_FRAME_CONTROLLER = 'purejs_controller';
@@ -220,7 +231,7 @@ export const ELEMENTS = {
     regex: /^([a-zA-Z0-9\\ \\,\\.\\-\\']{2,})$/,
   },
   [ElementType.CARD_NUMBER]: {
-    name: 'cardNumber',
+    name: 'CARD_NUMBER',
     attributes: {
       type: 'text',
     },
@@ -277,6 +288,12 @@ export const INPUT_STYLES = {
   padding: '0',
   margin: '0',
   outline: 'none',
+};
+
+export const INPUT_WITH_ICON_STYLES = {
+  'background-position': '7px 7px',
+  'background-repeat': 'no-repeat',
+  'text-indent': '36px',
 };
 
 export const ERROR_TEXT_STYLES = {
@@ -392,3 +409,40 @@ export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
 };
 
 export const gatewayConfigParseKeys = ['pathParams', 'queryParams', 'requestBody'];
+
+export enum CardType {
+  VISA = 'VISA',
+  MASTERCARD = 'MASTERCARD',
+  AMEX = 'AMEX',
+  DINERS_CLUB = 'DINERS_CLUB',
+  DISCOVER = 'DISCOVER',
+  JCB = 'JCB',
+  MAESTRO = 'MAESTRO',
+  UNIONPAY = 'UNIONPAY',
+  HIPERCARD = 'HIPERCARD',
+  DEFAULT = 'DEFAULT',
+}
+export const CARD_TYPE_REGEX = {
+  [CardType.VISA]: { regex: /^4\d*/, maxCardLength: 19 },
+  [CardType.MASTERCARD]: { regex: /^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[0-1]|2720)\d*/, maxCardLength: 16 },
+  [CardType.AMEX]: { regex: /^3[47]\d*/, maxCardLength: 15 },
+  [CardType.DINERS_CLUB]: { regex: /^(36|38|30[0-5])\d*/, maxCardLength: 16 },
+  [CardType.DISCOVER]: { regex: /^(6011|65|64[4-9]|622)\d*/, maxCardLength: 16 },
+  [CardType.JCB]: { regex: /^35\d*/, maxCardLength: 19 },
+  [CardType.HIPERCARD]: { regex: /^606282\d*/, maxCardLength: 19 },
+  [CardType.UNIONPAY]: { regex: /^62\d*/, maxCardLength: 19 },
+  [CardType.MAESTRO]: { regex: /^(5018|5020|5038|5043|5[6-9]|6020|6304|6703|6759|676[1-3])\d*/, maxCardLength: 19 },
+};
+
+export const CARD_ENCODED_ICONS = {
+  [CardType.DEFAULT]: `url(${defaultCardIcon})`,
+  [CardType.AMEX]: `url(${amexIcon})`,
+  [CardType.DINERS_CLUB]: `url(${dinnersClubIcon})`,
+  [CardType.DISCOVER]: `url(${discoverIcon})`,
+  [CardType.HIPERCARD]: `url(${hipperCardIcon})`,
+  [CardType.JCB]: `url(${jcbIcon})`,
+  [CardType.MAESTRO]: `url(${maestroIcon})`,
+  [CardType.MASTERCARD]: `url(${maseterCardIcon})`,
+  [CardType.UNIONPAY]: `url(${unionPayIcon})`,
+  [CardType.VISA]: `url(${visaCardIcon})`,
+};
