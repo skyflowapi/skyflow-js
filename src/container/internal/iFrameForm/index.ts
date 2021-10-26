@@ -16,6 +16,7 @@ import {
 } from '../../../utils/validators';
 import {
   constructElementsInsertReq,
+  constructInsertRecordRequest,
   constructInsertRecordResponse,
 } from '../../../core/collect';
 import { getAccessToken } from '../../../utils/busEvents';
@@ -480,9 +481,11 @@ export class IFrameForm {
         );
       }
     }
+    let finalRecords;
     let finalRequest;
     try {
-      finalRequest = constructElementsInsertReq(responseObject, options);
+      finalRecords = constructElementsInsertReq(responseObject, options);
+      finalRequest = constructInsertRecordRequest(finalRecords, options);
     } catch (error) {
       return Promise.reject({
         error: error?.message,
@@ -509,7 +512,7 @@ export class IFrameForm {
               constructInsertRecordResponse(
                 response,
                 options.tokens,
-                finalRequest,
+                finalRecords.records,
               ),
             );
           })

@@ -1,20 +1,6 @@
 import { STYLE_TYPE } from '../container/constants';
 import { getValueAndItsUnit } from './element-options';
 
-export function splitStyles(styles) {
-  const pseudoStyles = {};
-  const nonPseudoStyles = {};
-  Object.keys(styles).forEach((style) => {
-    if (style && style[0] === ':') {
-      pseudoStyles[style] = styles[style];
-    } else {
-      nonPseudoStyles[style] = styles[style];
-    }
-  });
-
-  return [nonPseudoStyles, pseudoStyles];
-}
-
 export function buildStylesFromClassesAndStyles(classes, styles) {
   // if focus add to base styles with psudo element tag
   Object.values(STYLE_TYPE).forEach((classType) => {

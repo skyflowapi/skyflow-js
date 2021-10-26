@@ -89,7 +89,7 @@ const checkDuplicateColumns = (additionalColumns, columns, table) => {
 };
 
 export const constructElementsInsertReq = (req, options) => {
-  const tables = Object.keys(req);
+  let tables = Object.keys(req);
   const additionalFields = options?.additionalFields;
   if (additionalFields) {
     validateInsertRecords(additionalFields);
@@ -108,12 +108,13 @@ export const constructElementsInsertReq = (req, options) => {
   }
   const records: IInsertRecord[] = [];
 
+  tables = Object.keys(req);
+
   tables.forEach((table) => {
     records.push({
       table,
       fields: req[table],
     });
   });
-
-  return constructInsertRecordRequest({ records }, options);
+  return { records };
 };
