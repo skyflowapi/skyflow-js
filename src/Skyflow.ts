@@ -102,7 +102,7 @@ class Skyflow {
           callback({ authToken: this.#bearerToken });
         }
       });
-    printLog(logs.infoLogs.BEARER_TOKEN_LISTENER, MessageType.WARN,
+    printLog(logs.infoLogs.BEARER_TOKEN_LISTENER, MessageType.LOG,
       this.#logLevel);
     printLog(this.#env, MessageType.LOG, this.#logLevel);
   }

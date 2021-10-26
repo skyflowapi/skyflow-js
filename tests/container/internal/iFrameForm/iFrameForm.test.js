@@ -165,7 +165,6 @@ describe('test iframeForm collect method', () => {
         tokenizationCb(data, cb2)
 
         setTimeout(() => {
-            console.log(cb2.mock.calls[0][0])
             expect(cb2.mock.calls[0][0].error.message).toBe('col Provide complete and valid inputs.')
         },1000)
 

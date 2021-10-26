@@ -1,3 +1,4 @@
+import { CardType, CARD_TYPE_REGEX } from '../../container/constants';
 import { IRevealElementInput } from '../../container/external/RevealContainer';
 import SkyflowError from '../../libs/SkyflowError';
 import {
@@ -22,6 +23,17 @@ export const validateCreditCardNumber = (cardNumber: string) => {
     shouldDouble = !shouldDouble;
   }
   return sum % 10 === 0;
+};
+
+export const detectCardType = (cardNumber: string) => {
+  const value = cardNumber.replace(/[\s-]/g, '');
+  let detectedType = CardType.DEFAULT;
+  Object.entries(CARD_TYPE_REGEX).forEach(([key, type]) => {
+    if (type.regex.test(value)) {
+      detectedType = key as CardType;
+    }
+  });
+  return detectedType;
 };
 
 export const validateExpiryDate = (date: string) => {
