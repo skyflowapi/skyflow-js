@@ -3,8 +3,8 @@ import {formatRecordsForClient,formatRecordsForIframe} from "../../src/core/reve
 const testTokenId = '1677f7bd-c087-4645-b7da-80a6fd1a81a4';
 const testInvalidTokenId = '80a6fd1a81a4-b7da-c087-4645';
 const skyflow = Skyflow.init({
-  vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
-  vaultURL: 'https://sb.area51.vault.skyflowapis.dev',
+  vaultID: 'vault_id',
+  vaultURL: 'https://vault.test.com',
   getBearerToken: () => new Promise((resolve, reject) => {
     const Http = new XMLHttpRequest();
 

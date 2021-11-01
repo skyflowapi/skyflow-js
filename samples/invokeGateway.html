@@ -48,8 +48,8 @@
     }
 
     const skyflow = Skyflow.init({
-      vaultID: "f344f53d46744968bfaa807ef05caa6d",
-      vaultURL: "https://sb.area51.vault.skyflowapis.dev",
+      vaultID: "<VAULT_ID>",
+      vaultURL: "<VAULT_URL>",
       getBearerToken: () => {
         return new Promise((resolve, reject) => {
           const Http = new XMLHttpRequest();
@@ -69,7 +69,7 @@
             reject("Error occured");
           };
 
-          const url = "http://localhost:8000/js/userToken";
+          const url = "<TOKEN_END_POINT_URL>";
           Http.open("GET", url);
           Http.send();
         });
@@ -97,10 +97,10 @@
     const revealButton = document.getElementById("genrateCvv");
     revealButton.addEventListener("click", () => {
       const sdkResponse = skyflow.invokeGateway({
-        gatewayURL:"https://sb.area51.gateway.skyflowapis.dev/v1/gateway/outboundRoutes/ddb7b87f78cf42f9a9e87f7df8abc9d8/dcas/cardservices/v1/cards/{card_number}/cvv2generation",
+        gatewayURL:"<GATEWAY_INTEGRATION_URL>",
         methodName: Skyflow.RequestMethod.POST,
         requestHeader: {
-          "Authorization": "Basic QjBORFNKUEcyMzhTMjJOSlU5QjIyMVJfQTBMT3ZLZE1xS3JRQTJOQXpBXzFQQVIyRTozZ0Z3NlNmMUU5VDMxeWo2a3FQMzJmY1VBOU4weUQ5WjlDbA==",
+          "Authorization": "",
         },
         pathParams: {
           card_number: revealCardElement
@@ -161,10 +161,10 @@
     const payButton = document.getElementById("payMerchant");
     payButton.addEventListener("click", () => {
       const sdkResponse = skyflow.invokeGateway({
-        gatewayURL:"https://sb.area51.gateway.skyflowapis.dev/v1/gateway/outboundRoutes/56e7b291-57bf-4227-8f42-3008255a2f56/visadirect/fundstransfer/v1/pullfundstransactions",
+        gatewayURL:"<GATEWAY_INTEGRATION_URL>",
         methodName: Skyflow.RequestMethod.POST,
         requestHeader: {
-          "Authorization": "Basic QjBORFNKUEcyMzhTMjJOSlU5QjIyMVJfQTBMT3ZLZE1xS3JRQTJOQXpBXzFQQVIyRTozZ0Z3NlNmMUU5VDMxeWo2a3FQMzJmY1VBOU4weUQ5WjlDbA==",
+          "Authorization": "",
           "Accept": "application/json"
         },
         requestBody:{

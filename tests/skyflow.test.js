@@ -14,8 +14,8 @@ iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 describe('Skyflow initialization', () => {
   test('should initialize the skyflow object  ', () => {
     const skyflow = Skyflow.init({
-      vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
-      vaultURL: 'https://sb.area51.vault.skyflowapis.dev',
+      vaultID: 'vault_id',
+      vaultURL: 'https://vault.test.com',
       getBearerToken: jest.fn(),
     });
     expect(skyflow.constructor === Skyflow).toBe(true);
@@ -24,7 +24,7 @@ describe('Skyflow initialization', () => {
   test('invalid vaultURL testing', async () => {
     try {
       const skyflow = Skyflow.init({
-        vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
+        vaultID: 'vault_id',
         vaultURL: 'vaultUrl',
         getBearerToken: jest.fn(),
       });
@@ -36,8 +36,8 @@ describe('Skyflow initialization', () => {
   test('invalid method name for getAccessToken', async () => {
     try {
       const skyflow = Skyflow.init({
-        vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
-        vaultURL: 'https://sb.area51.vault.skyflowapis.dev',
+        vaultID: 'vault_id',
+        vaultURL: 'https://vault.test.com',
         getTokens: () => Promise.resolve(httpRequestToken()),
       });
     } catch (error) {
@@ -50,8 +50,8 @@ describe('Create container', () => {
   let skyflow;
   beforeEach(() => {
     skyflow = Skyflow.init({
-      vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
-      vaultURL: 'https://sb.area51.vault.skyflowapis.dev',
+      vaultID: 'vault_id',
+      vaultURL: 'https://vault.test.com',
       getBearerToken: jest.fn(),
     });
   });
@@ -73,8 +73,8 @@ describe('Create container', () => {
 
 describe('skyflow insert validations', () => {
   const skyflow = Skyflow.init({
-    vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
-    vaultURL: 'https://sb.area51.vault.skyflowapis.dev',
+    vaultID: 'vault_id',
+    vaultURL: 'https://vault.test.com',
     getBearerToken: jest.fn(),
   });
 
