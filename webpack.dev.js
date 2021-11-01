@@ -36,26 +36,6 @@ module.exports = () => merge(common, {
     historyApiFallback: true,
     open: true,
     // todo: add routes for iframe and index ex: / for index.html and iframe for iframe.html
-    proxy: {
-      '/v1': {
-        target: 'https://manage.skyflowapis.dev',
-        pathRewrite: { '^/v1': '/v1' },
-        secure: false,
-        changeOrigin: true,
-      },
-      '/vault': {
-        target: 'https://sb.area51.vault.skyflowapis.dev', // https://sb.area51.vault.skyflowapis.dev/v1
-        pathRewrite: { '^/vault': '' },
-        secure: false,
-        changeOrigin: true,
-      },
-      '/gatewayProxy': {
-        target: 'https://sb.area51.gateway.skyflowapis.dev',
-        pathRewrite: { '^/gatewayProxy': '' },
-        secure: false,
-        changeOrigin: true,
-      }
-    },
     // contentBase: commonPaths.outputPath,
     compress: true,
     hot: true,
