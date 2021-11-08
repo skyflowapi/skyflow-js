@@ -297,7 +297,7 @@ export class IFrameFormElement extends EventEmitter {
         });
     }
 
-    // for gateway
+    // for connection
     bus.target(window.location.origin).on(ELEMENT_EVENTS_TO_IFRAME.GET_COLLECT_ELEMENT,
       (data, callback) => {
         if (data.name === this.iFrameName) {

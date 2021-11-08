@@ -81,7 +81,7 @@ describe("Reveal Frame Class",()=>{
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
     emitCb(data);
 
-    // gateway
+    // connection
     const emitterCb = jest.fn();
     const onCbName = on.mock.calls[1][0];
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
@@ -123,7 +123,7 @@ describe("Reveal Frame Class",()=>{
     const onRevealResponseCb = on.mock.calls[0][1];
     onRevealResponseCb({"1815-6223-1073-1425":"card_value"})
 
-    // gateway
+    // connection
     const emitterCb = jest.fn();
     const onCbName = on.mock.calls[1][0];
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
@@ -169,7 +169,7 @@ describe("Reveal Frame Class",()=>{
     const onRevealResponseCb = on.mock.calls[0][1];
     onRevealResponseCb({});
 
-    // gateway
+    // connection
     const emitterCb = jest.fn();
     const onCbName = on.mock.calls[1][0];
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);

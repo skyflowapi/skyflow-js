@@ -8,7 +8,7 @@ import SKYFLOW_ERROR_CODE from '../utils/constants';
 
 const set = require('set-value');
 
-export function gatewayConfigParser(data, configKey) {
+export function connectionConfigParser(data, configKey) {
   Object.entries(data).forEach(([key, value]) => {
     if (value instanceof RevealElement) {
       if (!value.isMounted()) {
@@ -26,12 +26,12 @@ export function gatewayConfigParser(data, configKey) {
       }
       data[key] = value.iframeName();
     } else if (value instanceof Object) {
-      gatewayConfigParser(value, configKey);
+      connectionConfigParser(value, configKey);
     }
   });
 }
 
-export function constructInvokeGatewayRequest(data) {
+export function constructInvokeConnectionRequest(data) {
   const flattenData = flattenObject(data);
   const collectElements = {};
   const revealElements = {};

@@ -8,7 +8,7 @@ import {
   fetchRecordsBySkyflowID,
   fetchRecordsByTokenId,
 } from '../../../core/reveal';
-import { constructInvokeGatewayRequest } from '../../../libs/objectParse';
+import { constructInvokeConnectionRequest } from '../../../libs/objectParse';
 import { getAccessToken } from '../../../utils/busEvents';
 import {
   clearEmpties,
@@ -16,12 +16,12 @@ import {
 } from '../../../utils/helpers';
 import {
   ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, FRAME_REVEAL,
-  gatewayConfigParseKeys, PUREJS_TYPES,
+  connectionConfigParseKeys, PUREJS_TYPES,
 } from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
 import {
-  IRevealRecord, ISkyflowIdRecord, IGatewayConfig, MessageType, Context,
+  IRevealRecord, ISkyflowIdRecord, IConnectionConfig, MessageType, Context,
 } from '../../../utils/common';
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
@@ -87,33 +87,33 @@ class PureJsFrameController {
               callback({ error: rejectedResult });
             },
           );
-        } else if (data.type === PUREJS_TYPES.INVOKE_GATEWAY) {
-          const config = data.config as IGatewayConfig;
+        } else if (data.type === PUREJS_TYPES.INVOKE_CONNECTION) {
+          const config = data.config as IConnectionConfig;
 
           const promiseList = [] as any;
-          gatewayConfigParseKeys.forEach((key) => {
+          connectionConfigParseKeys.forEach((key) => {
             if (config[key]) {
-              promiseList.push(constructInvokeGatewayRequest(config[key]));
+              promiseList.push(constructInvokeConnectionRequest(config[key]));
             }
           });
 
           Promise.all(promiseList).then(() => {
-            const filledUrl = fillUrlWithPathAndQueryParams(config.gatewayURL,
+            const filledUrl = fillUrlWithPathAndQueryParams(config.connectionURL,
               config.pathParams, config.queryParams);
-            config.gatewayURL = filledUrl;
-            this.sendInvokeGateWayRequest(config).then((resultResponse) => {
-              printLog(logs.infoLogs.SEND_INVOKE_GATEWAY_RESOLVED, MessageType.LOG,
+            config.connectionURL = filledUrl;
+            this.sendInvokeConnectionRequest(config).then((resultResponse) => {
+              printLog(logs.infoLogs.SEND_INVOKE_CONNECTION_RESOLVED, MessageType.LOG,
                 this.#context.logLevel);
 
               callback(resultResponse);
             }).catch((rejectedResponse) => {
-              printLog(logs.errorLogs.SEND_INVOKE_GATEWAY_REJECTED, MessageType.ERROR,
+              printLog(logs.errorLogs.SEND_INVOKE_CONNECTION_REJECTED, MessageType.ERROR,
                 this.#context.logLevel);
 
               callback({ error: rejectedResponse });
             });
           }).catch((error) => {
-            printLog(logs.errorLogs.SEND_INVOKE_GATEWAY_REJECTED, MessageType.ERROR,
+            printLog(logs.errorLogs.SEND_INVOKE_CONNECTION_REJECTED, MessageType.ERROR,
               this.#context.logLevel);
 
             callback({ error });
@@ -144,7 +144,7 @@ class PureJsFrameController {
           PUREJS_TYPES.GET_BY_SKYFLOWID),
         MessageType.LOG, this.#context.logLevel);
         printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-          PUREJS_TYPES.INVOKE_GATEWAY),
+          PUREJS_TYPES.INVOKE_CONNECTION),
         MessageType.LOG, this.#context.logLevel);
       });
     // printLog(logs.infoLogs.EMIT_PURE_JS_CONTROLLER, MessageType.LOG,
@@ -190,11 +190,11 @@ class PureJsFrameController {
     });
   }
 
-  sendInvokeGateWayRequest(config:IGatewayConfig) {
+  sendInvokeConnectionRequest(config:IConnectionConfig) {
     return new Promise((rootResolve, rootReject) => {
       getAccessToken().then((authToken) => {
         const invokeRequest = this.#client.request({
-          url: config.gatewayURL,
+          url: config.connectionURL,
           requestMethod: config.methodName,
           body: config.requestBody,
           headers: { ...config.requestHeader, 'X-Skyflow-Authorization': authToken, 'Content-Type': 'application/json' },
@@ -202,11 +202,11 @@ class PureJsFrameController {
         invokeRequest.then((response) => {
           if (config.responseBody) {
             const flattenResponseBody = flattenObject(config.responseBody);
-            const flattenGatewayResponse = flattenObject(response);
+            const flattenConnectionResponse = flattenObject(response);
             const errorResponse:any[] = [];
             Object.entries(flattenResponseBody).forEach(([key, value]) => {
-              if (Object.prototype.hasOwnProperty.call(flattenGatewayResponse, key)) {
-                const responseValue = flattenGatewayResponse[key];
+              if (Object.prototype.hasOwnProperty.call(flattenConnectionResponse, key)) {
+                const responseValue = flattenConnectionResponse[key];
                 const elementIFrame = window.parent.frames[value as string];
                 if (elementIFrame) {
                   const frameName = value as string;

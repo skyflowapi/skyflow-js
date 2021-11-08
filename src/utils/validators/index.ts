@@ -2,7 +2,12 @@ import { CardType, CARD_TYPE_REGEX } from '../../container/constants';
 import { IRevealElementInput } from '../../container/external/RevealContainer';
 import SkyflowError from '../../libs/SkyflowError';
 import {
-  IInsertRecordInput, IDetokenizeInput, RedactionType, IGetByIdInput, IGatewayConfig, RequestMethod,
+  IInsertRecordInput,
+  IDetokenizeInput,
+  RedactionType,
+  IGetByIdInput,
+  IConnectionConfig,
+  RequestMethod,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 
@@ -162,15 +167,15 @@ export const isValidURL = (url: string) => {
   return true;
 };
 
-export const validateGatewayConfig = (config: IGatewayConfig) => {
-  if (!Object.prototype.hasOwnProperty.call(config, 'gatewayURL')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_GATEWAY_URL);
+export const validateConnectionConfig = (config: IConnectionConfig) => {
+  if (!Object.prototype.hasOwnProperty.call(config, 'connectionURL')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_URL);
   }
-  if (typeof config.gatewayURL !== 'string') {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_GATEWAY_URL_TYPE);
+  if (typeof config.connectionURL !== 'string') {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL_TYPE);
   }
-  if (!isValidURL(config.gatewayURL)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_GATEWAY_URL);
+  if (!isValidURL(config.connectionURL)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL);
   }
 
   if (!Object.prototype.hasOwnProperty.call(config, 'methodName')) {

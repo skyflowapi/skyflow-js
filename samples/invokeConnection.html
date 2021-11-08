@@ -5,8 +5,8 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Invoke Gateway</title>
-  <script src="http://js.skyflow.dev/v1/index.js"></script>
+  <title>Invoke Connection</title>
+  <script src="http://js.skyflow.com/v1/index.js"></script>
 
   <style>
     body div {
@@ -24,7 +24,7 @@
   <div>
     <button id="genrateCvv">Genrate CVV</button>
     <h3>SDK Response :</h3>
-    <pre id="gatewayResponse"></pre>
+    <pre id="connectionResponse"></pre>
   </div>
   <hr />
   <div>
@@ -96,8 +96,8 @@
 
     const revealButton = document.getElementById("genrateCvv");
     revealButton.addEventListener("click", () => {
-      const sdkResponse = skyflow.invokeGateway({
-        gatewayURL:"<GATEWAY_INTEGRATION_URL>",
+      const sdkResponse = skyflow.invokeConnection({
+        connectionURL:"<CONNECTION_INTEGRATION_URL>",
         methodName: Skyflow.RequestMethod.POST,
         requestHeader: {
           "Authorization": "",
@@ -121,11 +121,11 @@
       sdkResponse
         .then(
           (result) => {
-            document.getElementById("gatewayResponse").innerHTML =
+            document.getElementById("connectionResponse").innerHTML =
               "<h4>Promise Resolved </h4><br>" + JSON.stringify(result, null, 2);
           },
           (result) => {
-            document.getElementById("gatewayResponse").innerHTML =
+            document.getElementById("connectionResponse").innerHTML =
               "<h4>Promise Rejected </h4><br>" + JSON.stringify(result, null, 2);
           }
         )
@@ -160,8 +160,8 @@
 
     const payButton = document.getElementById("payMerchant");
     payButton.addEventListener("click", () => {
-      const sdkResponse = skyflow.invokeGateway({
-        gatewayURL:"<GATEWAY_INTEGRATION_URL>",
+      const sdkResponse = skyflow.invokeConnection({
+        connectionURL:"<CONNECTION_INTEGRATION_URL>",
         methodName: Skyflow.RequestMethod.POST,
         requestHeader: {
           "Authorization": "",
