@@ -19,7 +19,7 @@ import logs from './utils/logs';
 import SKYFLOW_ERROR_CODE from './utils/constants';
 import {
   IRevealResponseType,
-  IGatewayConfig,
+  IConnectionConfig,
   RequestMethod,
   IInsertRecordInput,
   IDetokenizeInput,
@@ -176,11 +176,11 @@ class Skyflow {
     return this.#pureJsController.getById(getByIdInput);
   }
 
-  invokeGateway(config: IGatewayConfig) {
-    printLog(logs.infoLogs.INVOKE_GATEWAY_TRIGGERED,
+  invokeConnection(config: IConnectionConfig) {
+    printLog(logs.infoLogs.INVOKE_CONNECTION_TRIGGERED,
       MessageType.LOG, this.#logLevel);
 
-    return this.#pureJsController.invokeGateway(config);
+    return this.#pureJsController.invokeConnection(config);
   }
 
   static get ContainerType() {

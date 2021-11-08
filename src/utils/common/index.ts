@@ -76,8 +76,8 @@ export interface Context{
   env:Env
 }
 
-export interface IGatewayConfig {
-  gatewayURL: string;
+export interface IConnectionConfig {
+  connectionURL: string;
   methodName: RequestMethod;
   pathParams?: any;
   queryParams?: any;

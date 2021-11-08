@@ -340,8 +340,8 @@ describe('Retrieving data using skyflowId', () => {
   });
 });
 
-const invokeGatewayReq = {
-  gatewayURL: 'http://gatewayurl.com',
+const invokeConnectionReq = {
+  connectionURL: 'http://connectionurl.com',
   methodName: 'POST',
   pathParams: {
     cardNumber: '4111111111111111',
@@ -356,7 +356,7 @@ const invokeGatewayReq = {
   },
 };
 
-const invokeGatewayRes = {
+const invokeConnectionRes = {
   receivedTimestamp: '2019-05-29 21:49:56.625',
   processingTimeinMs: 116,
   resource: {
@@ -364,7 +364,7 @@ const invokeGatewayRes = {
   },
 };
 
-describe('Invoking gateway', () => {
+describe('Invoking Connection', () => {
   let emitSpy;
   let targetSpy;
   let windowSpy;
@@ -390,8 +390,8 @@ describe('Invoking gateway', () => {
     }));
   });
 
-  test('Invoke gateway success', (done) => {
-    const clientReq = jest.fn(() => Promise.resolve(invokeGatewayRes));
+  test('Invoke Connection success', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(invokeConnectionRes));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
 
     PureJsFrameController.init();
@@ -403,8 +403,8 @@ describe('Invoking gateway', () => {
 
     const onCb = on.mock.calls[0][1];
     const data = {
-      type: PUREJS_TYPES.INVOKE_GATEWAY,
-      config: invokeGatewayReq,
+      type: PUREJS_TYPES.INVOKE_CONNECTION,
+      config: invokeConnectionReq,
     };
     const cb2 = jest.fn();
     onCb(data, cb2);

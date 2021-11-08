@@ -356,7 +356,6 @@ class Element {
     this.#elements = getElements(this.#group);
   };
 
-  // Gateway
   iframeName(): string {
     return this.#iframe.name;
   }

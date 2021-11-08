@@ -143,7 +143,7 @@ class RevealFrame {
         sub,
       );
 
-    // for gateway
+    // for connection
     bus.target(window.location.origin).on(
       ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT,
       (data, callback) => {

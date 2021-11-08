@@ -613,8 +613,8 @@ describe('skyflow getById', () => {
   });
 });
 
-const invokeGatewayReq = {
-  gatewayURL: 'https://gatewayurl.com',
+const invokeConnectionReq = {
+  connectionURL: 'https://connectionurl.com',
   methodName: 'POST',
   pathParams: {
     cardNumber: '4111111111111111',
@@ -629,12 +629,12 @@ const invokeGatewayReq = {
   },
 };
 
-const invokeGatewayRes = {
+const invokeConnectionRes = {
   receivedTimestamp: '2019-05-29 21:49:56.625',
   processingTimeinMs: 116,
 };
 
-describe('skyflow invoke gateway', () => {
+describe('skyflow invoke connection', () => {
   let emitSpy;
   let targetSpy;
   let skyflow;
@@ -663,19 +663,19 @@ describe('skyflow invoke gateway', () => {
     jest.resetAllMocks();
   });
 
-  test('invoke gateway success', (done) => {
+  test('invoke connection success', (done) => {
         const frameReayEvent = on.mock.calls
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
     try {
-      const res = skyflow.invokeGateway(invokeGatewayReq);
+      const res = skyflow.invokeConnection(invokeConnectionReq);
 
       const emitEvent = emitSpy.mock.calls
         .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
       const emitCb = emitEvent[0][2];
-      emitCb(invokeGatewayRes);
+      emitCb(invokeConnectionRes);
 
       let data;
       res.then((res) => data = res);
@@ -689,9 +689,9 @@ describe('skyflow invoke gateway', () => {
     } catch (err) {
     }
   });
-  test('invoke gateway success else', (done) => {
+  test('invoke connection success else', (done) => {
     try {
-      const res = skyflow.invokeGateway(invokeGatewayReq);
+      const res = skyflow.invokeConnection(invokeConnectionReq);
       const frameReayEvent = on.mock.calls
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
     const frameReadyCb = frameReayEvent[1][1];
@@ -699,7 +699,7 @@ describe('skyflow invoke gateway', () => {
       const emitEvent = emitSpy.mock.calls
         .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
       const emitCb = emitEvent[0][2];
-      emitCb(invokeGatewayRes);
+      emitCb(invokeConnectionRes);
 
       let data;
       res.then((res) => data = res);
@@ -713,9 +713,9 @@ describe('skyflow invoke gateway', () => {
     } catch (err) {
     }
   });
-  test('invoke gateway invalidInput -1 ',(done)=>{
+  test('invoke connection invalidInput -1 ',(done)=>{
     try {
-      const res = skyflow.invokeGateway({gatewayURL:"invalid_url"});
+      const res = skyflow.invokeConnection({connectionURL:"invalid_url"});
       res.catch((err)=>{
         expect(err).toBeDefined();
         done();
@@ -724,14 +724,14 @@ describe('skyflow invoke gateway', () => {
   
     }
   });
-  test('invoke gateway invalidInput -2 ',(done)=>{
+  test('invoke connection invalidInput -2 ',(done)=>{
     const frameReayEvent = on.mock.calls
     .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
   const frameReadyCb = frameReayEvent[0][1];
   const cb2 = jest.fn();
   frameReadyCb({}, cb2);
   try {
-    const res = skyflow.invokeGateway({gatewayURL:"invalid_url"});
+    const res = skyflow.invokeConnection({connectionURL:"invalid_url"});
     res.catch((err)=>{
       expect(err).toBeDefined();
       done();

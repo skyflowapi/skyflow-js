@@ -8,7 +8,7 @@ Skyflow’s Javascript SDK can be used to securely collect, tokenize, and reveal
 - [**Initializing Skyflow.js**](#Initializing-Skyflowjs)
 - [**Securely collecting data client-side**](#Securely-collecting-data-client-side)
 - [**Securely revealing data client-side**](#Securely-revealing-data-client-side)
-- [**Securely invoking gateway client-side**](#Securely-invoking-gateway-client-side)
+- [**Securely invoking Connections client-side**](#Securely-invoking-Connections-client-side)
 
 ---
 
@@ -213,7 +213,7 @@ var collectElement =  {
 ```
 The `table` and `column` fields indicate which table and column in the vault the Element corresponds to. **Note**: 
 -  Use dot delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`)
--  `table` and `column` are optional only if the element is being used in invokeGateway()
+-  `table` and `column` are optional only if the element is being used in invokeConnection()
 
 The `inputStyles` field accepts a style object which consists of CSS properties that should be applied to the form element in the following states:
 - `base`: all other variants inherit from these styles
@@ -655,7 +655,7 @@ var revealElement = {
 }
 ```
 `Note`: 
-- `token` is optional only if it is being used in invokeGateway()
+- `token` is optional only if it is being used in invokeConnection()
 
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data but only a single variant is available i.e. base. 
 
@@ -792,12 +792,12 @@ The response below shows that some tokens assigned to the reveal elements get re
 }
 ```
 
-# Securely invoking gateway client-side
-Using Skyflow gateway, end-user applications can integrate checkout/card issuance flow without any of their apps/systems touching the PCI compliant fields like cvv, card number. To invoke gateway, use the `invokeGateway(gatewayConfig)` method of the Skyflow client.
+# Securely invoking Connections client-side
+Using Skyflow Connections, end-user applications can integrate checkout/card issuance flow without any of their apps/systems touching the PCI compliant fields like cvv, card number. To invoke Connections, use the `invokeConnection(connectionConfig)` method of the Skyflow client.
 
 ```javascript
-const gatewayConfig = {
-  gatewayURL: string, // gateway url recevied when creating a skyflow gateway integration
+const connectionConfig = {
+  connectionURL: string, // connection url recevied when creating a skyflow Connection integration
   methodName: Skyflow.RequestMethod,
   pathParams: any,	// optional
   queryParams: any,	// optional
@@ -806,7 +806,7 @@ const gatewayConfig = {
   responseBody: any	// optional
 }
 
-const response =  skyflowClient.invokeGateway(gatewayConfig);
+const response =  skyflowClient.invokeConnection(connectionConfig);
 ```
 `methodName` supports the following methods:
 
@@ -816,14 +816,14 @@ const response =  skyflowClient.invokeGateway(gatewayConfig);
 - PATCH
 - DELETE
 
-**pathParams, queryParams, requestHeader, requestBody** are the JSON objects that will be sent through the gateway integration url.
+**pathParams, queryParams, requestHeader, requestBody** are the JSON objects that will be sent through the Connection integration url.
 
 The values in the above parameters can contain collect elements, reveal elements or actual values. When elements are provided inplace of values, they get replaced with the value entered in the collect elements or value present in the reveal elements
 
 **responseBody**:  
 It is a JSON object that specifies where to render the response in the UI. The values in the responseBody can contain collect elements or reveal elements. 
 
-Sample use-cases on using invokeGateway():
+Sample use-cases on using invokeConnection():
 
 ###  Sample use-case 1:
 
@@ -852,8 +852,8 @@ const cvvElement = collectContainer.create({
 cvvElement.mount("#cvv")
 
 // step 4
-const gatewayConfig = { 
-  gatewayURL: "https://area51.gateway.skyflow.com/v1/gateway/inboundRoutes/abc-1213/v2/pay”,
+const connectionConfig = { 
+  connectionURL: <connection_url>,
   methodName: Skyflow.RequestMethod.POST,
   requestBody: {
    card_number: cardNumberElement, //it can be skyflow element(collect or reveal) or actual value
@@ -861,7 +861,7 @@ const gatewayConfig = {
   }
 }
 
-const response =  skyflowClient.invokeGateway(gatewayConfig);
+const response =  skyflowClient.invokeConnection(connectionConfig);
 ```
 
 Sample Response:
@@ -875,7 +875,7 @@ In the above example,  CVV is being collected from the user input at the time of
 
 `Note:`  
 - card_number can be either container element or plain text value (tokens or actual value)
-- `table` and `column` names are not required for creating collect element, if it is used for invokeGateway method, since they will not be stored in the vault
+- `table` and `column` names are not required for creating collect element, if it is used for invokeConnection method, since they will not be stored in the vault
 
  ### Sample use-case 2:
  
@@ -904,8 +904,8 @@ const expiryDateElement = collectContainer.create({
 expiryDateElement.mount("#expirationDate")
 
 //step 4
-const gatewayConfig = { 
-  gatewayURL: "https://area51.gateway.skyflow.com/v1/gateway/inboundRoutes/abc-1213/cards/{card_number}/cvv2generation",
+const connectionConfig = { 
+  connectionURL: <connection_url>,
   methodName: Skyflow.RequestMethod.POST,
   pathParams: {
      card_number: "0905-8672-0773-0628"	//it can be skyflow element(collect/reveal) or token or actual value
@@ -915,13 +915,13 @@ const gatewayConfig = {
  },
  responseBody: {
      resource: {
-         cvv2: cvvElement   // pass the element where the cvv response from the gateway will be mounted
+         cvv2: cvvElement   // pass the element where the cvv response from the Connection will be mounted
        }
      }  
    }
 }
 
-const response = skyflowClient.invokeGateway(gatewayConfig);
+const response = skyflowClient.invokeConnection(connectionConfig);
 ```
 
 Sample Response:
@@ -933,5 +933,5 @@ Sample Response:
 ```
 
 `Note`:
-- `token` is optional for creating reveal element, if it is used for invokeGateway
-- responseBody contains collect or reveal elements to render the response from the gateway on UI 
+- `token` is optional for creating reveal element, if it is used for invokeConnection
+- responseBody contains collect or reveal elements to render the response from the Connection on UI 

@@ -5,15 +5,15 @@ import iframer, {
   setAttributes,
   setStyles,
 } from '../../iframe-libs/iframer';
-import { gatewayConfigParser } from '../../libs/objectParse';
+import { connectionConfigParser } from '../../libs/objectParse';
 import properties from '../../properties';
 import {
-  validateGatewayConfig, validateInsertRecords, validateDetokenizeInput, validateGetByIdInput,
+  validateConnectionConfig, validateInsertRecords, validateDetokenizeInput, validateGetByIdInput,
 } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
-  gatewayConfigParseKeys,
+  connectionConfigParseKeys,
   PUREJS_FRAME_CONTROLLER,
   PUREJS_TYPES,
 } from '../constants';
@@ -23,7 +23,7 @@ import {
 } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import {
-  IDetokenizeInput, IGetByIdInput, IGatewayConfig, Context, MessageType,
+  IDetokenizeInput, IGetByIdInput, IConnectionConfig, Context, MessageType,
 } from '../../utils/common';
 
 class PureJsController {
@@ -246,28 +246,28 @@ class PureJsController {
     });
   }
 
-  invokeGateway(config: IGatewayConfig) {
+  invokeConnection(config: IConnectionConfig) {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
-          printLog(logs.infoLogs.VALIDATE_GATEWAY_CONFIG, MessageType.LOG,
+          printLog(logs.infoLogs.VALIDATE_CONNECTION_CONFIG, MessageType.LOG,
             this.#context.logLevel);
 
-          validateGatewayConfig(config);
-          gatewayConfigParseKeys.forEach((configKey) => {
+          validateConnectionConfig(config);
+          connectionConfigParseKeys.forEach((configKey) => {
             if (config[configKey]) {
-              gatewayConfigParser(config[configKey], configKey);
+              connectionConfigParser(config[configKey], configKey);
             }
           });
           if (config.responseBody) {
-            gatewayConfigParser(config.responseBody, 'responseBody');
+            connectionConfigParser(config.responseBody, 'responseBody');
           }
 
           bus
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
               {
-                type: PUREJS_TYPES.INVOKE_GATEWAY,
+                type: PUREJS_TYPES.INVOKE_CONNECTION,
                 config,
               },
               (response: any) => {
@@ -276,7 +276,7 @@ class PureJsController {
               },
             );
           printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-            PUREJS_TYPES.INVOKE_GATEWAY),
+            PUREJS_TYPES.INVOKE_CONNECTION),
           MessageType.LOG, this.#context.logLevel);
         } catch (error) {
           printLog(error.message, MessageType.ERROR, this.#context.logLevel);
@@ -287,16 +287,16 @@ class PureJsController {
     }
     return new Promise((resolve, reject) => {
       try {
-        printLog(logs.infoLogs.VALIDATE_GATEWAY_CONFIG, MessageType.LOG,
+        printLog(logs.infoLogs.VALIDATE_CONNECTION_CONFIG, MessageType.LOG,
           this.#context.logLevel);
 
-        validateGatewayConfig(config);
-        gatewayConfigParseKeys.forEach((configKey) => {
+        validateConnectionConfig(config);
+        connectionConfigParseKeys.forEach((configKey) => {
           if (config[configKey]) {
-            gatewayConfigParser(config[configKey], configKey);
+            connectionConfigParser(config[configKey], configKey);
           }
           if (config.responseBody) {
-            gatewayConfigParser(config.responseBody, 'responseBody');
+            connectionConfigParser(config.responseBody, 'responseBody');
           }
         });
         bus
@@ -305,7 +305,7 @@ class PureJsController {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
               {
-                type: PUREJS_TYPES.INVOKE_GATEWAY,
+                type: PUREJS_TYPES.INVOKE_CONNECTION,
                 config,
               },
               (response: any) => {
@@ -315,7 +315,7 @@ class PureJsController {
             );
           });
         printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-          PUREJS_TYPES.INVOKE_GATEWAY),
+          PUREJS_TYPES.INVOKE_CONNECTION),
         MessageType.LOG, this.#context.logLevel);
       } catch (error) {
         printLog(error.message, MessageType.ERROR, this.#context.logLevel);

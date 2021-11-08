@@ -70,7 +70,6 @@ class RevealElement {
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
   }
 
-  // Gateway
   iframeName(): string {
     return this.#iframe.name;
   }

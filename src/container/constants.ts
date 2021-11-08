@@ -20,7 +20,7 @@ export const PUREJS_TYPES = {
   INSERT: 'INSERT',
   DETOKENIZE: 'DETOKENIZE',
   GET_BY_SKYFLOWID: 'GET_BY_SKYFLOWID',
-  INVOKE_GATEWAY: 'INVOKE_GATEWAY',
+  INVOKE_CONNECTION: 'INVOKE_CONNECTION',
 };
 
 export const ELEMENT_EVENTS_TO_CLIENT = {
@@ -408,7 +408,7 @@ export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
   },
 };
 
-export const gatewayConfigParseKeys = ['pathParams', 'queryParams', 'requestBody'];
+export const connectionConfigParseKeys = ['pathParams', 'queryParams', 'requestBody'];
 
 export enum CardType {
   VISA = 'VISA',

@@ -12,7 +12,7 @@ const logs = {
     VALIDATE_RECORDS: 'Validating insert records.',
     VALIDATE_DETOKENIZE_INPUT: 'Validating detokenize input.',
     VALIDATE_GET_BY_ID_INPUT: 'Validating getByID input.',
-    VALIDATE_GATEWAY_CONFIG: 'Validating gateway config.',
+    VALIDATE_CONNECTION_CONFIG: 'Validating connection config.',
     VALIDATE_COLLECT_RECORDS: 'Validating collect element input.',
     VALIDATE_REVEAL_RECORDS: 'Validating reveal element input.',
 
@@ -38,7 +38,7 @@ const logs = {
     INSERT_TRIGGERED: 'Insert method triggered.',
     DETOKENIZE_TRIGGERED: 'Detokenize method triggered.',
     GET_BY_ID_TRIGGERED: 'Get by ID triggered.',
-    INVOKE_GATEWAY_TRIGGERED: 'Invoke gateway triggered.',
+    INVOKE_CONNECTION_TRIGGERED: 'Invoke connection triggered.',
 
     EMIT_PURE_JS_REQUEST: 'Emitted %s1 request.',
     CAPTURE_PURE_JS_REQUEST: 'Captured %s1 event.',
@@ -52,7 +52,7 @@ const logs = {
 
     GET_BY_SKYFLOWID_RESOLVED: 'GetById request is resolved.',
 
-    SEND_INVOKE_GATEWAY_RESOLVED: 'Invoke gateway request resolved.',
+    SEND_INVOKE_CONNECTION_RESOLVED: 'Invoke connection request resolved.',
 
     EMIT_EVENT: '%s1 event emitted.',
     CAPTURE_EVENT: 'Captured event %s1.',
@@ -86,7 +86,7 @@ const logs = {
     FETCH_RECORDS_REJECTED: 'Detokenize request is rejected.',
     INSERT_RECORDS_REJECTED: 'Insert request is rejected.',
     GET_BY_SKYFLOWID_REJECTED: 'GetById request is rejected.',
-    SEND_INVOKE_GATEWAY_REJECTED: 'Invoke gateway request rejected.',
+    SEND_INVOKE_CONNECTION_REJECTED: 'Invoke connection request rejected.',
 
     FAILED_REVEAL: 'Failed to reveal data',
 
@@ -126,9 +126,9 @@ const logs = {
             'Provided element selector is not valid or not found.',
     CANNOT_CHANGE_ELEMENT: "Element can't be changed.",
 
-    MISSING_GATEWAY_URL: 'gateway URL Key is Missing.',
-    INVALID_GATEWAY_URL_TYPE: 'Invalid gateway URL type.',
-    INVALID_GATEWAY_URL: 'Invalid gateway URL.',
+    MISSING_CONNECTION_URL: 'Connection URL Key is Missing.',
+    INVALID_CONNECTION_URL_TYPE: 'Invalid Connection URL type.',
+    INVALID_CONNECTION_URL: 'Invalid Connection URL.',
 
     MISSING_METHODNAME_KEY: 'methodName Key is Missing.',
     INVALID_METHODNAME_VALUE: 'Invalid methodName value.',
