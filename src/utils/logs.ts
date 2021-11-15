@@ -56,6 +56,10 @@ const logs = {
 
     EMIT_EVENT: '%s1 event emitted.',
     CAPTURE_EVENT: 'Captured event %s1.',
+    EMIT_COLLECT_ELEMENT_FRAME_READY: 'Emitting collect element %s1 FRAME_READY event',
+    CREATING_COLLECT_ELEMENT: 'Creating collect element %s1 iframe body',
+    COLLECT_ELEMET_START: '%s1, Collect Element start',
+    REVEAL_ELEMENT_START: '%s1, Reveal Element start',
   },
   errorLogs: {
     CLIENT_CONNECTION: 'client connection not established.',

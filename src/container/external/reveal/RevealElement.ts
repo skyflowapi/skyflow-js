@@ -37,6 +37,7 @@ class RevealElement {
       `${FRAME_REVEAL}:${btoa(record.token || uuid())}`,
       { metaData },
       this.#containerId,
+      this.#context.logLevel
     );
     printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, `${record.token || ''}reveal`), MessageType.LOG, this.#context.logLevel);
   }

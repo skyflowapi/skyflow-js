@@ -14,8 +14,8 @@ export default class IFrame {
 
   container?: Element;
 
-  constructor(name, metadata, containerId) {
-    this.name = `${name}:${containerId}`;
+  constructor(name, metadata, containerId, logLevel) {
+    this.name = `${name}:${containerId}:${logLevel}`;
     this.metadata = metadata;
     this.iframe = iframer({ name: this.name });
   }
