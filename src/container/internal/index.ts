@@ -22,6 +22,7 @@ import getCssClassesFromJss from '../../libs/jss-styles';
 import { parameterizedString } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
+import { LogLevel } from '../../utils/common';
 
 export class FrameController {
   controller?: FrameController;
@@ -34,9 +35,9 @@ export class FrameController {
 
   private clientDomain: string;
 
-  constructor(controllerId: string) {
+  constructor(controllerId: string, logLevel: LogLevel) {
     this.clientDomain = document.referrer.split('/').slice(0, 3).join('/');
-    this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain);
+    this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain, logLevel);
     this.controllerId = controllerId;
     bus
       // .target(this.clientDomain)
@@ -66,8 +67,8 @@ export class FrameController {
       );
   }
 
-  static init(uuid: string) {
-    return new FrameController(uuid);
+  static init(uuid: string, logLevel) {
+    return new FrameController(uuid, LogLevel[logLevel]);
   }
 }
 

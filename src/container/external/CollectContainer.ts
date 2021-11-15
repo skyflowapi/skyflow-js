@@ -61,7 +61,7 @@ class CollectContainer {
     this.#metaData = metaData;
     this.#context = context;
     const iframe = iframer({
-      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}`,
+      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}`,
     });
     setAttributes(iframe, {
       src: getIframeSrc(),

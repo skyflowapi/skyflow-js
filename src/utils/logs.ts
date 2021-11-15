@@ -56,7 +56,11 @@ const logs = {
 
     EMIT_EVENT: '%s1 event emitted.',
     CAPTURE_EVENT: 'Captured event %s1.',
+    LISTEN_COLLECT_FRAME_READY: 'Listening to collect FRAME_READY event',
     EMIT_COLLECT_ELEMENT_FRAME_READY: 'Emitting collect element %s1 FRAME_READY event',
+    EXECUTE_COLLECT_ELEMENT_FRAME_READY_CB: 'Executing collect element, %s1 FRAME_READY callback',
+    CLIENT_METADATA_NOT_SET: 'Client metadata not set',
+    COLLECT_ELEMENT_INIT_CALL: 'calling Collect element init',
     CREATING_COLLECT_ELEMENT: 'Creating collect element %s1 iframe body',
     COLLECT_ELEMET_START: '%s1, Collect Element start',
     REVEAL_ELEMENT_START: '%s1, Reveal Element start',

@@ -31,7 +31,7 @@ if (typeof window.console === 'undefined') {
     const names = root.name.split(':');
     if (names[0] === COLLECT_FRAME_CONTROLLER && names[1] !== undefined) {
       root.Skyflow = FrameController;
-      FrameController.init(names[1]);
+      FrameController.init(names[1], names[2]);
     } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] !== undefined) {
       RevealFrameController.init(names[1]);
     } else if (names[0] === PUREJS_FRAME_CONTROLLER && names[1] === undefined) {
