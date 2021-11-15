@@ -96,6 +96,7 @@ class Element {
       this.#group.elementName,
       metaData,
       this.containerId,
+      this.#context.logLevel,
     );
 
     this.#registerIFrameBusListener();
