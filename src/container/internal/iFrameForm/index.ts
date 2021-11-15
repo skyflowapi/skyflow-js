@@ -24,12 +24,14 @@ import {
   printLog,
   parameterizedString,
   EnvOptions,
+  getElementName,
 } from '../../../utils/logsHelper';
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import {
   Context,
+  LogLevel,
   MessageType,
 } from '../../../utils/common';
 
@@ -365,9 +367,18 @@ export class IFrameForm {
 
   private context!:Context;
 
-  constructor(controllerId: string, clientDomain: string) {
+  private logLevel: LogLevel;
+
+  constructor(controllerId: string, clientDomain: string, logLevel: LogLevel) {
     this.controllerId = controllerId;
     this.clientDomain = clientDomain;
+    this.logLevel = logLevel;
+
+    printLog(
+      logs.infoLogs.LISTEN_COLLECT_FRAME_READY,
+      MessageType.LOG,
+      logLevel,
+    );
     bus
       .target(window.location.origin)
       .on(
@@ -381,8 +392,21 @@ export class IFrameForm {
             return;
           }
           const frameGlobalName: string = <string>data.name;
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EXECUTE_COLLECT_ELEMENT_FRAME_READY_CB,
+              getElementName(frameGlobalName),
+            ),
+            MessageType.LOG,
+            logLevel,
+          );
           if (this.clientMetaData) this.initializeFrame(window.parent, frameGlobalName);
           else {
+            printLog(
+              logs.infoLogs.CLIENT_METADATA_NOT_SET,
+              MessageType.LOG,
+              logLevel,
+            );
             this.callbacks.push(() => {
               this.initializeFrame(window.parent, frameGlobalName);
             });
@@ -427,6 +451,11 @@ export class IFrameForm {
   setClientMetadata(clientMetaData: any) {
     this.clientMetaData = clientMetaData;
     this.callbacks.forEach((func) => {
+      printLog(
+        'In setClientMetadata, executing callbacks',
+        MessageType.LOG,
+        this.logLevel,
+      );
       func();
     });
     this.callbacks = [];
@@ -552,6 +581,11 @@ export class IFrameForm {
     if (!frameInstance) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.FRAME_NOT_FOUND, [`${frameGlobalName}`], true);
     } else if (frameInstance?.Skyflow?.init) {
+      printLog(
+        logs.infoLogs.LISTEN_COLLECT_FRAME_READY,
+        MessageType.LOG,
+        this.logLevel,
+      );
       frameInstance.Skyflow.init(
         this.getOrCreateIFrameFormElement,
         this.clientMetaData,
