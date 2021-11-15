@@ -42,11 +42,10 @@ export default class FrameElements {
   // called on iframe loaded im html file
   static start = () => {
     const names = window.name.split(':');
-    const logLevel = LogLevel[names[names.length-1]];
+    const logLevel = LogLevel[names[names.length - 1]];
     printLog(parameterizedString(logs.infoLogs.EMIT_COLLECT_ELEMENT_FRAME_READY,
       getElementName(window.name)), MessageType.LOG,
-      logLevel
-    );
+    logLevel);
     bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + names[3],
       { name: window.name },
@@ -62,11 +61,10 @@ export default class FrameElements {
   // called by IFrameForm
   static init = (getOrCreateIFrameFormElement: Function, metaData) => {
     const names = window.name.split(':');
-    const logLevel = LogLevel[names[names.length-1]];
+    const logLevel = LogLevel[names[names.length - 1]];
     printLog(parameterizedString(logs.infoLogs.CREATING_COLLECT_ELEMENT,
       getElementName(window.name)), MessageType.LOG,
-      logLevel
-    );
+    logLevel);
     FrameElements.frameElements = new FrameElements(
       getOrCreateIFrameFormElement,
       metaData,
