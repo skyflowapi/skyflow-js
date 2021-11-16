@@ -374,11 +374,22 @@ export class IFrameForm {
     this.clientDomain = clientDomain;
     this.logLevel = logLevel;
 
+    printLog(
+      logs.infoLogs.IFRAMEFORM_CONSTRUCTOR_FRAME_READY_LISTNER,
+      MessageType.LOG,
+      logLevel,
+    );
+
     bus
       .target(window.location.origin)
       .on(
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.controllerId,
         (data:any) => {
+          printLog(
+            logs.infoLogs.ENTERED_COLLECT_FRAME_READY_CB,
+            MessageType.LOG,
+            logLevel,
+          );
           if (!data.name) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.REQUIRED_PARAMS_NOT_PROVIDED, [], true);
           }
@@ -408,6 +419,12 @@ export class IFrameForm {
           }
         },
       );
+
+    printLog(
+      logs.infoLogs.IFRAMEFORM_CONSTRUCTOR_TOKENIZATION_LISTNER,
+      MessageType.LOG,
+      logLevel,
+    );
 
     bus
       .target(this.clientDomain)
@@ -577,7 +594,7 @@ export class IFrameForm {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.FRAME_NOT_FOUND, [`${frameGlobalName}`], true);
     } else if (frameInstance?.Skyflow?.init) {
       printLog(
-        logs.infoLogs.LISTEN_COLLECT_FRAME_READY,
+        logs.infoLogs.EXECUTE_COLLECT_ELEMENT_INIT,
         MessageType.LOG,
         this.logLevel,
       );
