@@ -105,6 +105,8 @@ class CollectContainer {
               name: input.column,
               ...(input.altText ? { value: input.altText } : {}),
               ...input,
+              required: false,
+              enableIcon: true,
               ...options,
             },
           ],
