@@ -374,11 +374,6 @@ export class IFrameForm {
     this.clientDomain = clientDomain;
     this.logLevel = logLevel;
 
-    printLog(
-      logs.infoLogs.LISTEN_COLLECT_FRAME_READY,
-      MessageType.LOG,
-      logLevel,
-    );
     bus
       .target(window.location.origin)
       .on(

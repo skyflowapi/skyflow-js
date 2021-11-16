@@ -64,6 +64,8 @@ const logs = {
     CREATING_COLLECT_ELEMENT: 'Creating collect element %s1 iframe body',
     COLLECT_ELEMET_START: '%s1, Collect Element start',
     REVEAL_ELEMENT_START: '%s1, Reveal Element start',
+    EMIT_COLLECT_FRAME_CONTROLLER_EVENT: 'Emit collect FrameController FRAME_READY event',
+    EXECUTE_COLLECT_CONTROLLER_READY_CB: 'Executing collect FrameController FRAME_READY callback, set client metadata..',
   },
   errorLogs: {
     CLIENT_CONNECTION: 'client connection not established.',
