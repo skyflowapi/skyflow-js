@@ -19,10 +19,10 @@ import {
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iFrameForm';
 import getCssClassesFromJss from '../../libs/jss-styles';
-import { parameterizedString } from '../../utils/logsHelper';
+import { parameterizedString, printLog } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
-import { LogLevel } from '../../utils/common';
+import { LogLevel, MessageType } from '../../utils/common';
 
 export class FrameController {
   controller?: FrameController;
@@ -39,6 +39,11 @@ export class FrameController {
     this.clientDomain = document.referrer.split('/').slice(0, 3).join('/');
     this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain, logLevel);
     this.controllerId = controllerId;
+    printLog(
+      logs.infoLogs.EMIT_COLLECT_FRAME_CONTROLLER_EVENT,
+      MessageType.LOG,
+      logLevel,
+    );
     bus
       // .target(this.clientDomain)
       .emit(
@@ -58,6 +63,11 @@ export class FrameController {
               },
             },
           };
+          printLog(
+            logs.infoLogs.EXECUTE_COLLECT_CONTROLLER_READY_CB,
+            MessageType.LOG,
+            logLevel,
+          );
           const { clientJSON } = clientMetaData;
           this.#iFrameForm.setClientMetadata(clientMetaData);
           this.#iFrameForm.setClient(Client.fromJSON(clientJSON));
