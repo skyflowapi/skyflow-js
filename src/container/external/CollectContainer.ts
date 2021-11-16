@@ -95,7 +95,7 @@ class CollectContainer {
     document.body.append(iframe);
   }
 
-  create = (input: CollectElementInput, options: any = { required: false }) => {
+  create = (input: CollectElementInput, options: any = { required: false, enableIcon: true }) => {
     const elementGroup = {
       rows: [
         {
