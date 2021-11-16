@@ -303,6 +303,12 @@ export const INPUT_WITH_ICON_STYLES = {
   'text-indent': '36px',
 };
 
+export const INPUT_WITH_ICON_DEFAULT_STYLES = {
+  'background-repeat': 'no-repeat',
+  'text-indent': '42px',
+  padding: '4px',
+};
+
 export const ERROR_TEXT_STYLES = {
   color: '#f44336',
   padding: '2px',

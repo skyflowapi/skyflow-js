@@ -95,7 +95,10 @@ class CollectContainer {
     document.body.append(iframe);
   }
 
-  create = (input: CollectElementInput, options: any = { required: false, enableIcon: true }) => {
+  create = (input: CollectElementInput, options: any = {
+    required: false,
+    enableCardIcon: true,
+  }) => {
     const elementGroup = {
       rows: [
         {
@@ -106,7 +109,7 @@ class CollectContainer {
               ...(input.altText ? { value: input.altText } : {}),
               ...input,
               required: false,
-              enableIcon: true,
+              enableCardIcon: true,
               ...options,
             },
           ],

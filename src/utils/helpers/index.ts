@@ -39,7 +39,8 @@ export function clearEmpties(o) {
 
 export function formatFrameNameToId(name: string) {
   const arr = name.split(':');
-  if (arr.length > 1) {
+  if (arr.length > 2) {
+    arr.pop();
     arr.pop();
     return arr.join(':');
   }

@@ -63,7 +63,7 @@ describe("Utils/Bus Events",()=>{
     });
 
     test("getCollectElementValue fn valid Element",(done)=>{
-        const response = getCollectElementValue("ele_key","element:frame:id");
+        const response = getCollectElementValue("ele_key","element:frame:id:ERROR");
         const emitEventName = emitSpy.mock.calls[0][0];
         const emittedData = emitSpy.mock.calls[0][1];
         const emitCb = emitSpy.mock.calls[0][2];
@@ -81,7 +81,7 @@ describe("Utils/Bus Events",()=>{
     });
 
     test("getCollectElementValue fn Invalid Element",(done)=>{
-        const response = getCollectElementValue("ele_key","element:frame:id");
+        const response = getCollectElementValue("ele_key","element:frame:id:ERROR");
         const emitEventName = emitSpy.mock.calls[0][0];
         const emittedData = emitSpy.mock.calls[0][1];
         const emitCb = emitSpy.mock.calls[0][2];

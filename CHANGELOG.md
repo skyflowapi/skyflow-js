@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.6.0] - 2021-11-16
+
+### Added
+- `enableCardIcon` option to configure Card Icon visibility
+- `INPUT_FIELD` Element type for custom UI elements
+- `unmount` method to reset collect element to initial state
+
+### Changed
+- New VISA Card Icon with updated Logo
+
 ## [1.5.0] - 2021-11-10
 
 ### Changed
