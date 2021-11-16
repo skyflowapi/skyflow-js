@@ -16,6 +16,7 @@ import {
   CARD_ENCODED_ICONS,
   INPUT_WITH_ICON_STYLES,
   ElementType,
+  INPUT_WITH_ICON_DEFAULT_STYLES,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iFrameForm';
 import getCssClassesFromJss from '../../libs/jss-styles';
@@ -158,7 +159,8 @@ export class FrameElement {
       ) {
         (<HTMLInputElement> this.domInput).checked = this.options.value === state.value;
       }
-      if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
+      if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
+        && this.options.enableCardIcon) {
         const cardType = detectCardType(state.value);
         if (this.domInput) {
           this.domInput.style.backgroundImage = CARD_ENCODED_ICONS[cardType] || 'none';
@@ -356,7 +358,7 @@ export class FrameElement {
         ...INPUT_STYLES,
         ...options.inputStyles.base,
       };
-      if (options.elementType === ElementType.CARD_NUMBER) {
+      if (options.elementType === ElementType.CARD_NUMBER && this.options.enableCardIcon) {
         options.inputStyles.base = {
           ...INPUT_WITH_ICON_STYLES,
           ...options.inputStyles.base,
@@ -364,6 +366,8 @@ export class FrameElement {
       }
 
       this.injectInputStyles(options.inputStyles);
+    } else if (options.elementType === ElementType.CARD_NUMBER && this.options.enableCardIcon) {
+      this.injectInputStyles({ base: { ...INPUT_WITH_ICON_DEFAULT_STYLES } });
     }
     if (Object.prototype.hasOwnProperty.call(options, 'label')) {
       if (options?.labelStyles) {

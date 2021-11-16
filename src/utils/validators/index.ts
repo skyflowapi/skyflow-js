@@ -154,7 +154,7 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
 };
 
 export const isValidURL = (url: string) => {
-  if (url.substring(0, 5).toLowerCase() !== 'https') {
+  if (!url || url.substring(0, 5).toLowerCase() !== 'https') {
     return false;
   }
   try {

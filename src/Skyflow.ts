@@ -114,6 +114,7 @@ class Skyflow {
     if (
       !config
       || !config.vaultID
+      || !config.vaultURL
       || !isValidURL(config.vaultURL)
       || !config.getBearerToken
     ) {

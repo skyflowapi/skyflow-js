@@ -69,12 +69,16 @@ class Client {
       });
       const contentType = headerMap['content-type'];
       if (httpRequest.status < 200 || httpRequest.status >= 400) {
-        if (contentType.includes('application/json')) {
+        if (contentType && contentType.includes('application/json')) {
+          let description = JSON.parse(httpRequest.response);
+          if (description?.error?.message) {
+            description = description?.error?.message;
+          }
           reject(new SkyflowError({
             code: httpRequest.status,
-            description: JSON.parse(httpRequest.response)?.error?.message,
+            description,
           }, [], true));
-        } else if (contentType.includes('text/plain')) {
+        } else if (contentType && contentType.includes('text/plain')) {
           reject(new SkyflowError({
             code: httpRequest.status,
             description: httpRequest.response,
@@ -86,7 +90,7 @@ class Client {
           }, [], true));
         }
       }
-      if (contentType.includes('application/json')) {
+      if (contentType && contentType.includes('application/json')) {
         resolve(JSON.parse(httpRequest.response));
       }
       resolve(httpRequest.response);

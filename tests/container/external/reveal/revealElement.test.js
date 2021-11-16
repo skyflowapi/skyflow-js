@@ -78,7 +78,7 @@ describe("Reveal Element Class", () => {
     
 
     expect(document.querySelector("iframe")).toBeTruthy();
-    const testIframeName = `${FRAME_REVEAL}:${btoa(testRecord.token || mockUuid)}:${containerId}`;
+    const testIframeName = `${FRAME_REVEAL}:${btoa(testRecord.token || mockUuid)}:${containerId}:ERROR`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     
     const eventListenerName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY;

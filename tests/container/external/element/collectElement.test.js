@@ -150,7 +150,7 @@ describe('collect element', () => {
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: elementName+':containerId',
+      name: elementName+':containerId'+':ERROR',
     }, cb2);
     expect(element.isMounted()).toBe(true);
 

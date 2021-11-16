@@ -65,6 +65,7 @@ export enum ElementType {
   EXPIRATION_DATE = 'EXPIRATION_DATE',
   CARD_NUMBER = 'CARD_NUMBER',
   CARDHOLDER_NAME = 'CARDHOLDER_NAME',
+  INPUT_FIELD = 'INPUT_FIELD',
 }
 
 export const ELEMENTS = {
@@ -257,6 +258,12 @@ export const ELEMENTS = {
     sensitive: true,
     regex: /^$|^[0-9]{3,4}$/,
   },
+  [ElementType.INPUT_FIELD]: {
+    name: 'INPUT_FIELD',
+    attributes: {
+      type: 'text',
+    },
+  },
 };
 
 export const IFRAME_DEFAULT_STYLES = {
@@ -294,6 +301,12 @@ export const INPUT_WITH_ICON_STYLES = {
   'background-position': '7px 7px',
   'background-repeat': 'no-repeat',
   'text-indent': '36px',
+};
+
+export const INPUT_WITH_ICON_DEFAULT_STYLES = {
+  'background-repeat': 'no-repeat',
+  'text-indent': '42px',
+  padding: '4px',
 };
 
 export const ERROR_TEXT_STYLES = {

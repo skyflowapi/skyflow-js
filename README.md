@@ -272,11 +272,14 @@ errorTextStyles: {
 }
 ```
 
-Finally, the `type` field takes a Skyflow ElementType. Each type applies the appropriate regex and validations to the form element. There are currently 4 types:
+Finally, the `type` field takes a Skyflow ElementType. Each type applies the appropriate regex and validations to the form element. There are currently 5 types:
 - `CARDHOLDER_NAME`
 - `CARD_NUMBER`
 - `EXPIRATION_DATE`
 - `CVV`
+- `INPUT_FIELD`
+
+The `INPUT_FIELD` type is a custom UI element without any built-in validations.
 
 Once the Element object has been defined, add it to the container using the `create(element, options)` method as shown below. The `element` param takes a Skyflow Element object as defined above and the `options` parameter takes a dictionary of optional parameters as described below: 
 
@@ -294,7 +297,8 @@ var collectElement =  {
 }
 
 var options = {
-  required: false  //indicates whether the field is marked as required. Defaults to 'false'
+  required: false,  //indicates whether the field is marked as required. Defaults to 'false'
+  enableCardIcon: true // indicates whether card icon should be enabled (only for CARD_NUMBER type Element)
 }
 
 const element = container.create(collectElement, options)
@@ -322,7 +326,10 @@ Now, when the `mount(domElement)` method of the Element is called, the Element w
 ```javascript
 element.mount("#cardNumber")
 ```
-
+you can use the `unmount` method to reset any collect element to it's initial state.
+```javascript
+element.unmount();
+```
 
 ### Step 4: Collect data from Elements
 
