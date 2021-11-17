@@ -122,7 +122,7 @@ describe('test iframeForm collect method', () => {
     });
 
     test('initialize iframeform and submit collect with invalid input', (done) => {
-        const form = new IFrameForm("controllerId", "");
+        const form = new IFrameForm("controllerId", "", "ERROR");
         form.setClient(clientObj)
         form.setClientMetadata(metaData)
         form.setContext(context)
@@ -134,7 +134,7 @@ describe('test iframeForm collect method', () => {
 
         frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
 
-        expect(()=>{frameReadyCb({name:"invalid frame"})}).toThrow(SkyflowError)
+        expect(()=>{frameReadyCb({name:"element:type:aW52YWxpZA=="})}).toThrow(SkyflowError)
         const skyflowInit = jest.fn();
         let windowSpy = jest.spyOn(global, 'window', 'get');
         windowSpy.mockImplementation(() => ({
@@ -199,7 +199,7 @@ describe('test iframeForm collect method', () => {
     })
 
     test('collect submit without client initializatiob', () => {
-        const form = new IFrameForm("controllerId", "");
+        const form = new IFrameForm("controllerId", "", "ERROR");
         form.setContext(context)
         const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST+'controllerId');
         const tokenizationCb = tokenizationEvent[0][1];
@@ -210,7 +210,7 @@ describe('test iframeForm collect method', () => {
     })
 
     test('insert records with tokens as true', (done) => {
-        const form = new IFrameForm("controllerId", "");
+        const form = new IFrameForm("controllerId", "", "ERROR");
         form.setClient(clientObj)
         form.setClientMetadata(metaData)
         form.setContext(context)
