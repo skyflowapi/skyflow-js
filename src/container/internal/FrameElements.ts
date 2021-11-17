@@ -30,11 +30,13 @@ export default class FrameElements {
 
   #metaData: any;
 
-  constructor(getOrCreateIFrameFormElement, metaData: any) {
+  constructor(getOrCreateIFrameFormElement, metaData: any, logLevel: LogLevel) {
     this.#name = window.name;
     this.#metaData = metaData;
     this.getOrCreateIFrameFormElement = getOrCreateIFrameFormElement;
+    printLog(logs.infoLogs.INSIDE_FRAME_ELEMENTS_CONSTRUCOTR, MessageType.LOG, logLevel);
     if (FrameElements.group) {
+      printLog(logs.infoLogs.SETUP_IN_CONSTRUCTOR, MessageType.LOG, logLevel);
       this.setup(); // start the process
     }
   }
@@ -50,8 +52,12 @@ export default class FrameElements {
       ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + names[3],
       { name: window.name },
       (group: any) => {
+        printLog(parameterizedString(logs.infoLogs.COLLECT_FRAME_READY_CB,
+          getElementName(window.name)), MessageType.LOG,
+        logLevel);
         FrameElements.group = group;
         if (FrameElements.frameElements) {
+          printLog(logs.infoLogs.SETUP_IN_START, MessageType.LOG, logLevel);
           FrameElements.frameElements.setup(); // start the process
         }
       },
@@ -62,16 +68,22 @@ export default class FrameElements {
   static init = (getOrCreateIFrameFormElement: Function, metaData) => {
     const names = window.name.split(':');
     const logLevel = LogLevel[names[names.length - 1]];
-    printLog(parameterizedString(logs.infoLogs.CREATING_COLLECT_ELEMENT,
+    printLog(parameterizedString(logs.infoLogs.INSIDE__COLLECT_ELEMENT_INIT,
       getElementName(window.name)), MessageType.LOG,
     logLevel);
     FrameElements.frameElements = new FrameElements(
       getOrCreateIFrameFormElement,
       metaData,
+      logLevel,
     );
   };
 
   setup = () => {
+    const names = window.name.split(':');
+    const logLevel = LogLevel[names[names.length - 1]];
+    printLog(parameterizedString(logs.infoLogs.CREATING_COLLECT_ELEMENT_FORM,
+      getElementName(window.name)), MessageType.LOG,
+    logLevel);
     this.#domForm = document.createElement('form');
     this.#domForm.action = '#';
     this.#domForm.onsubmit = (event) => {
