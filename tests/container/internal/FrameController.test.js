@@ -61,7 +61,7 @@ describe('test frame controller', () => {
   });
 
   test('FrameController constructor', () => {
-    const controller = FrameController.init('uuid');
+    const controller = FrameController.init('uuid', LogLevel.ERROR);
     const frameReadyCb = emitSpy.mock.calls[0][2];
     frameReadyCb({
       context,

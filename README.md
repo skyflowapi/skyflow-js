@@ -652,7 +652,7 @@ const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
 Then define a Skyflow Element to reveal data as shown below. 
 
 ```javascript
-var revealElement = {
+const revealElement = {
   token: "string",                    //optional, token of the data being revealed 
   inputStyles: {},                    //optional styles to be applied to the element
   labelStyles: {},                    //optional, styles to be applied to the label of the reveal element
@@ -700,7 +700,7 @@ errorTextStyles: {
 Once you've defined a Skyflow Element, you can use the `create(element)` method of the container to create the Element as shown below: 
 
 ```javascript
-const element = container.create(revealElement, options={})
+const element = container.create(revealElement)
 ```
 
 ### Step 3: Mount Elements to the DOM
