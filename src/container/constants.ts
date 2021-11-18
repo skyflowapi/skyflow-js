@@ -66,6 +66,7 @@ export enum ElementType {
   CARD_NUMBER = 'CARD_NUMBER',
   CARDHOLDER_NAME = 'CARDHOLDER_NAME',
   INPUT_FIELD = 'INPUT_FIELD',
+  PIN = 'PIN',
 }
 
 export const ELEMENTS = {
@@ -260,9 +261,20 @@ export const ELEMENTS = {
   },
   [ElementType.INPUT_FIELD]: {
     name: 'INPUT_FIELD',
+    sensitive: true,
     attributes: {
       type: 'text',
     },
+  },
+  [ElementType.PIN]: {
+    name: 'PIN',
+    attributes: {
+      type: 'text',
+      maxLength: 12,
+      minLength: 4,
+    },
+    sensitive: true,
+    regex: /^$|^[0-9]{4,12}$/,
   },
 };
 
