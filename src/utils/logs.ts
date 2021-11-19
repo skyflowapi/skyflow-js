@@ -153,7 +153,7 @@ const logs = {
     INVALID_IFRAME: 'Expecting a valid Iframe.',
     INVALID_FIELD: 'Invalid Field.',
     FRAME_NOT_FOUND: '%s1 frame not found:',
-    COMPLETE_AND_VALID_INPUTS: '%s1 Provide complete and valid inputs.',
+    COMPLETE_AND_VALID_INPUTS: 'Provide complete and valid inputs for %s1',
     REQUIRED_PARAMS_NOT_PROVIDED: 'Required params are not provided.',
     INVALID_EVENT_TYPE: 'Provide a valid event type.',
     INVALID_EVENT_LISTENER: 'Provide valid event listener.',
