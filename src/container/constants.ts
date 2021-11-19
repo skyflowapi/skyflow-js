@@ -248,7 +248,7 @@ export const ELEMENTS = {
     },
     sensitive: true,
     // mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
-    regex: /^(0[1-9]|1[0-2])\/?([0-9]{4})$/,
+    regex: /^(0[1-9]|1[0-2])\/([0-9]{4})$/,
   },
   [ElementType.CVV]: {
     name: 'cvv',

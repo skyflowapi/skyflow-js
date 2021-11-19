@@ -489,13 +489,21 @@ export class IFrameForm {
     if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const responseObject: any = {};
     const formElements = Object.keys(this.iFrameFormElements);
+
+    let errorMessage = '';
+    for (let i = 0; i < formElements.length; i += 1) {
+      const { state } = this.iFrameFormElements[formElements[i]];
+      if (!state.isValid || !state.isComplete) {
+        errorMessage += `${state.name} `;
+      }
+    }
+    if (errorMessage.length > 0) {
+      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
+    }
+
     for (let i = 0; i < formElements.length; i += 1) {
       const { state } = this.iFrameFormElements[formElements[i]];
       const { tableName } = this.iFrameFormElements[formElements[i]];
-      if (!state.isValid || !state.isComplete) {
-        return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${[state.name]}`], true));
-      }
-
       if (
         this.iFrameFormElements[formElements[i]].fieldType
         === ELEMENTS.checkbox.name
