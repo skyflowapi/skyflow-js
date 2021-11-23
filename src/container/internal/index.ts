@@ -20,7 +20,7 @@ import {
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iFrameForm';
 import getCssClassesFromJss from '../../libs/jss-styles';
-import { parameterizedString, printLog } from '../../utils/logsHelper';
+import { printLog } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
