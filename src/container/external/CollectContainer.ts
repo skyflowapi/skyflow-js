@@ -5,7 +5,7 @@ import iframer, {
   setStyles,
 } from '../../iframe-libs/iframer';
 import deepClone from '../../libs/deepClone';
-import { validateElementOptions } from '../../libs/element-options';
+import { formatValidations, validateElementOptions } from '../../libs/element-options';
 import SkyflowError from '../../libs/SkyflowError';
 import uuid from '../../libs/uuid';
 import properties from '../../properties';
@@ -27,10 +27,11 @@ import SKYFLOW_ERROR_CODE from '../../utils/constants';
 import {
   Context,
   IInsertRecordInput,
+  IValidationRule,
   MessageType,
 } from '../../utils/common';
 
-interface CollectElementInput {
+export interface CollectElementInput {
   table?: string;
   column?: string;
   inputStyles?: object;
@@ -40,6 +41,7 @@ interface CollectElementInput {
   placeholder?: string;
   type: ElementType;
   altText?: string;
+  validations?: IValidationRule[]
 }
 
 interface ICollectOptions {
@@ -99,6 +101,7 @@ class CollectContainer {
     required: false,
     enableCardIcon: true,
   }) => {
+    const validations = formatValidations(input);
     const elementGroup = {
       rows: [
         {
@@ -111,6 +114,7 @@ class CollectContainer {
               required: false,
               enableCardIcon: true,
               ...options,
+              validations,
             },
           ],
         },

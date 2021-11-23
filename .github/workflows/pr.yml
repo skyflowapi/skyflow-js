@@ -20,8 +20,8 @@ jobs:
       - name: Check code quality
         uses: stefanoeb/eslint-action@1.0.2
 
-      # - name: Check code quality
-      #   run: eslint . --ext .js, .ts
+      - name: Run tests
+        run: npm run test
       
       - name: Browser Build
         run: npm run build-browser-sdk

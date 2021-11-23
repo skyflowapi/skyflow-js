@@ -20,7 +20,7 @@ import {
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iFrameForm';
 import getCssClassesFromJss from '../../libs/jss-styles';
-import { parameterizedString, printLog } from '../../utils/logsHelper';
+import { printLog } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
@@ -145,10 +145,7 @@ export class FrameElement {
       if ((state.isEmpty || state.isValid) && this.domError) {
         this.domError.innerText = '';
       } else if (!state.isEmpty && !state.isValid && this.domError) {
-        this.domError.innerText = this.options.label
-          ? `${parameterizedString(logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
-            this.options.label)}`
-          : logs.errorLogs.INVALID_COLLECT_VALUE;
+        this.domError.innerText = state.error;
       }
       this.updateStyleClasses(state);
     });
@@ -416,7 +413,7 @@ export class FrameElement {
     $(document).ready(() => {
       const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
 
-      this.iFrameFormElement.setValidation();
+      this.iFrameFormElement.setValidation(this.options.validations);
       this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
       this.iFrameFormElement.setMask(this.options.mask);
 

@@ -25,21 +25,23 @@ export const EnvOptions = {
 };
 
 export const printLog = (message: string, messageType:MessageType, logLevel:LogLevel) => {
-  const {
-    showDebugLogs, showInfoLogs, showWarnLogs, showErrorLogs,
-  } = LogLevelOptions[logLevel];
-  if (messageType === MessageType.LOG && showDebugLogs) {
-    // eslint-disable-next-line no-console
-    console.log(message);
-  } else if (messageType === MessageType.LOG && showInfoLogs) {
-    // eslint-disable-next-line no-console
-    console.log(message);
-  } else if (messageType === MessageType.WARN && showWarnLogs) {
-    // eslint-disable-next-line no-console
-    console.warn(message);
-  } else if (messageType === MessageType.ERROR && showErrorLogs) {
-    // eslint-disable-next-line no-console
-    console.error(message);
+  if (logLevel && LogLevelOptions[logLevel]) {
+    const {
+      showDebugLogs, showInfoLogs, showWarnLogs, showErrorLogs,
+    } = LogLevelOptions[logLevel];
+    if (messageType === MessageType.LOG && showDebugLogs) {
+      // eslint-disable-next-line no-console
+      console.log(message);
+    } else if (messageType === MessageType.LOG && showInfoLogs) {
+      // eslint-disable-next-line no-console
+      console.log(message);
+    } else if (messageType === MessageType.WARN && showWarnLogs) {
+      // eslint-disable-next-line no-console
+      console.warn(message);
+    } else if (messageType === MessageType.ERROR && showErrorLogs) {
+      // eslint-disable-next-line no-console
+      console.error(message);
+    }
   }
 };
 
@@ -53,4 +55,4 @@ export const parameterizedString = (...args: any[]) => {
   });
 };
 
-export const getElementName = (name:string) => atob(name.split(':')[2]);
+export const getElementName = (name:string = '') => atob(name.split(':')[2]);

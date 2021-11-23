@@ -52,6 +52,43 @@ const SKYFLOW_ERROR_CODE = {
   TRANSACTION_ERROR: { code: 400, description: logs.errorLogs.TRANSACTION_ERROR },
   COMPLETE_AND_VALID_INPUTS: { code: 400, description: logs.errorLogs.COMPLETE_AND_VALID_INPUTS },
   RESPONSE_BODY_KEY_MISSING: { code: 404, description: logs.errorLogs.RESPONSE_BODY_KEY_MISSING },
+  INVALID_VALIDATIONS_TYPE: { code: 400, description: logs.errorLogs.INVALID_VALIDATIONS_TYPE },
+  MISSING_VALIDATION_RULE_TYPE: {
+    code: 400,
+    description: logs.errorLogs.MISSING_VALIDATION_RULE_TYPE,
+  },
+  INVALID_VALIDATION_RULE_TYPE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_VALIDATION_RULE_TYPE,
+  },
+  MISSING_VALIDATION_RULE_PARAMS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_VALIDATION_RULE_PARAMS,
+  },
+  INVALID_VALIDATION_RULE_PARAMS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_VALIDATION_RULE_PARAMS,
+  },
+  MISSING_REGEX_IN_PATTERN_RULE: {
+    code: 400,
+    description: logs.errorLogs.MISSING_REGEX_IN_PATTERN_RULE,
+  },
+  MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE: {
+    code: 400,
+    description: logs.errorLogs.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE,
+  },
+  MISSING_ELEMENT_IN_ELEMENT_MATCH_RULE: {
+    code: 400,
+    description: logs.errorLogs.MISSING_ELEMENT_IN_ELEMENT_MATCH_RULE,
+  },
+  INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE,
+  },
+  ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE: {
+    code: 400,
+    description: logs.errorLogs.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;

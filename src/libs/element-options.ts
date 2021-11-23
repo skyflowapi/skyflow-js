@@ -1,4 +1,7 @@
 import { ELEMENTS, INPUT_STYLES } from '../container/constants';
+import { CollectElementInput } from '../container/external/CollectContainer';
+import Element from '../container/external/element';
+import { IValidationRule, ValidationRuleType } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
 import SkyflowError from './SkyflowError';
@@ -13,23 +16,43 @@ export function validateElementOptions(
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_TYPE, [], true);
   }
 
-  // if (!oldOptions.table) {
-  //   throw new Error("Provide a valid table name");
-  // }
-
-  // if (!oldOptions.column) {
-  //   throw new Error("Provide a valid element name");
-  // }
+  if (Object.prototype.hasOwnProperty.call(oldOptions, 'validations')) {
+    if (!Array.isArray(oldOptions.validations)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATIONS_TYPE, [], true);
+    } else {
+      oldOptions.validations.forEach((validationRule: IValidationRule, index) => {
+        if (!Object.prototype.hasOwnProperty.call(validationRule, 'type')) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_TYPE, [`${index}`], true);
+        }
+        if (!Object.values(ValidationRuleType).includes(validationRule.type)) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_TYPE, [`${index}`], true);
+        }
+        if (!Object.prototype.hasOwnProperty.call(validationRule, 'params')) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_PARAMS, [`${index}`], true);
+        }
+        if (
+          typeof validationRule.params !== 'object'
+          || Array.isArray(validationRule.params)
+          || validationRule.params === null) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_PARAMS, [`${index}`], true);
+        }
+        if (validationRule.type === ValidationRuleType.REGEX_MATCH_RULE) {
+          if (!Object.prototype.hasOwnProperty.call(validationRule.params, 'regex')) {
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_PATTERN_RULE, [`${index}`], true);
+          }
+        } else if (validationRule.type === ValidationRuleType.LENGTH_MATCH_RULE) {
+          if (!Object.prototype.hasOwnProperty.call(validationRule.params, 'min')
+          && !Object.prototype.hasOwnProperty.call(validationRule.params, 'max')) {
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE, [`${index}`], true);
+          }
+        }
+      });
+    }
+  }
 
   if (Object.prototype.hasOwnProperty.call(newOptions, 'name') && newOptions.name !== oldOptions.name) {
     throw new Error("Name attribute can't be updated");
   }
-
-  if (
-    oldOptions.sensitive === true
-    && Object.prototype.hasOwnProperty.call(newOptions, 'sensitive')
-    && newOptions.sensitive !== oldOptions.sensitive
-  ) throw new Error("Sensitive attribute can't be updated");
 
   newOptions = { ...oldOptions, ...newOptions };
 
@@ -169,4 +192,34 @@ export const getValueAndItsUnit = (
     return [string, defaultUnit];
   }
   return [string.slice(0, index), string.slice(index)];
+};
+
+export const formatValidations = (input: CollectElementInput) => {
+  const validations = input.validations;
+  if (validations && Array.isArray(validations) && validations.length > 0) {
+    validations.forEach((validationRule: IValidationRule, index:number) => {
+      if (validationRule && validationRule.type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {
+        if (validationRule.params && !Object.prototype.hasOwnProperty.call(validationRule.params, 'element')) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
+        }
+        if (validationRule.params
+          && (validationRule.params.element == null
+            || !(validationRule.params.element instanceof Element))) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
+        }
+        if (validationRule.params
+          && validationRule.params.element
+          && (validationRule.params.element instanceof Element)) {
+          // if (!validationRule.params.element.isMounted()) {
+          //   throw new SkyflowError(
+          //     SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE, [`${index}`], true,
+          //   );
+          // }
+          validationRule.params.element = validationRule.params.element.iframeName();
+        }
+      }
+    });
+  }
+
+  return validations;
 };

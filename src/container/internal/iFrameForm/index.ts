@@ -7,10 +7,12 @@ import {
   ELEMENTS,
   COLLECT_FRAME_CONTROLLER,
   ElementType,
+  FRAME_ELEMENT,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
 import {
+  validateCardNumberLengthCheck,
   validateCreditCardNumber,
   validateExpiryDate,
 } from '../../../utils/validators';
@@ -31,9 +33,12 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import {
   Context,
+  IValidationRule,
   LogLevel,
   MessageType,
+  ValidationRuleType,
 } from '../../../utils/common';
+import { formatFrameNameToId } from '../../../utils/helpers';
 
 const set = require('set-value');
 
@@ -61,6 +66,10 @@ export class IFrameFormElement extends EventEmitter {
   metaData;
 
   private regex?: RegExp;
+
+  validations?: IValidationRule[];
+
+  errorText?: string;
 
   replacePattern?: [RegExp, string];
 
@@ -108,18 +117,18 @@ export class IFrameFormElement extends EventEmitter {
       this._emit(ELEMENT_EVENTS_TO_CLIENT.BLUR, {
         ...this.getStatus(),
         value: this.state.value,
+        error: this.errorText,
       });
     }
   };
 
   changeFocus = (focus: boolean) => {
     this.state.isFocused = focus;
-
-    this.sendChangeStatus();
-
-    if (this.mask) {
-      this.setValue(this.state.value, true);
-    }
+    // this.sendChangeStatus();
+    this.setValue(this.state.value, true);
+    // if (this.mask) {
+    //   this.setValue(this.state.value, true);
+    // }
   };
 
   setReplacePattern(pattern: string[]) {
@@ -147,9 +156,12 @@ export class IFrameFormElement extends EventEmitter {
     this.mask = newMask;
   }
 
-  setValidation() {
+  setValidation(validations: IValidationRule[] | undefined) {
     if (ELEMENTS[this.fieldType].regex) {
       this.regex = ELEMENTS[this.fieldType].regex;
+    }
+    if (validations) {
+      this.validations = validations;
     }
   }
 
@@ -225,19 +237,81 @@ export class IFrameFormElement extends EventEmitter {
   });
 
   validator(value: string) {
+    let resp = true;
     if (this.fieldType === ElementType.CARD_NUMBER) {
-      if (!validateCreditCardNumber(value)) {
-        return false;
+      if (this.regex) {
+        resp = this.regex.test(value)
+        && validateCreditCardNumber(value)
+        && validateCardNumberLengthCheck(value);
       }
     } else if (this.fieldType === ElementType.EXPIRATION_DATE) {
       if (this.regex) {
-        return this.regex.test(value) && validateExpiryDate(value);
+        resp = this.regex.test(value) && validateExpiryDate(value);
       }
-      return validateExpiryDate(value);
+    } else {
+      // eslint-disable-next-line no-lonely-if
+      if (this.regex) {
+        resp = this.regex.test(value);
+      }
+    }
+    if (!resp) {
+      this.errorText = logs.errorLogs.INVALID_COLLECT_VALUE;
+      return resp;
     }
 
-    if (this.regex) {
-      return this.regex.test(value);
+    resp = this.validateCustomValidations(value);
+    if (resp) {
+      this.errorText = '';
+    }
+    return resp;
+  }
+
+  validateCustomValidations(value: string) {
+    let resp = true;
+    if (this.validations && this.validations.length) {
+      for (let i = 0; i < this.validations.length; i += 1) {
+        switch (this.validations[i].type) {
+          case ValidationRuleType.REGEX_MATCH_RULE:
+            if (this.validations[i].params.regex) {
+              resp = this.validations[i].params.regex.test(value);
+            }
+            break;
+          case ValidationRuleType.LENGTH_MATCH_RULE:
+            if (this.validations[i].params.min && value.length < this.validations[i].params.min) {
+              resp = false;
+            }
+            if (this.validations[i].params.max && value.length > this.validations[i].params.max) {
+              resp = false;
+            }
+            break;
+          case ValidationRuleType.ELEMENT_VALUE_MATCH_RULE: {
+            const elementName = this.validations[i].params.element;
+            const elementIFrame = window.parent.frames[elementName];
+            let elementValue;
+            if (elementIFrame) {
+              if (elementName.startsWith(`${FRAME_ELEMENT}:`)) {
+                const elementId = formatFrameNameToId(elementName);
+                const collectInputElement = elementIFrame
+                  .document.getElementById(elementId) as HTMLInputElement;
+                if (collectInputElement) {
+                  elementValue = collectInputElement.value;
+                }
+              }
+              if (elementValue !== value) {
+                resp = false;
+              }
+            }
+            break; }
+          default:
+            this.errorText = logs.errorLogs.INVALID_VALIDATION_RULE_TYPE;
+            resp = false;
+        }
+
+        if (!resp) {
+          this.errorText = this.validations[i].params.error || logs.errorLogs.VALIDATION_FAILED;
+          return resp;
+        }
+      }
     }
     return true;
   }
@@ -494,7 +568,7 @@ export class IFrameForm {
     for (let i = 0; i < formElements.length; i += 1) {
       const { state } = this.iFrameFormElements[formElements[i]];
       if (!state.isValid || !state.isComplete) {
-        errorMessage += `${state.name} `;
+        errorMessage += `${state.name}:${this.iFrameFormElements[formElements[i]].errorText} `;
       }
     }
     if (errorMessage.length > 0) {

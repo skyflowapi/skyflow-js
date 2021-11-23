@@ -1,4 +1,4 @@
-import { CardType, CARD_TYPE_REGEX } from '../../container/constants';
+import { CardType, CARD_TYPE_REGEX, DEFAULT_CARD_LENGTH_RANGE } from '../../container/constants';
 import { IRevealElementInput } from '../../container/external/RevealContainer';
 import SkyflowError from '../../libs/SkyflowError';
 import {
@@ -184,4 +184,12 @@ export const validateConnectionConfig = (config: IConnectionConfig) => {
   if (!Object.values(RequestMethod).includes(config.methodName)) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_METHODNAME_VALUE);
   }
+};
+
+export const validateCardNumberLengthCheck = (cardNumber:string):boolean => {
+  const cardType:CardType = detectCardType(cardNumber);
+  const cardLength = cardNumber.replace(/[\s-]/g, '').length;
+  const validLengths:number[] = CARD_TYPE_REGEX[cardType]?.cardLengthRange
+                                || DEFAULT_CARD_LENGTH_RANGE;
+  return validLengths.includes(cardLength);
 };
