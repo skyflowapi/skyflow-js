@@ -38,6 +38,12 @@ export enum MessageType{
   ERROR = 'ERROR',
 }
 
+export enum ValidationRuleType {
+  REGEX_MATCH_RULE = 'REGEX_MATCH_RULE',
+  LENGTH_MATCH_RULE = 'LENGTH_MATCH_RULE',
+  ELEMENT_VALUE_MATCH_RULE = 'ELEMENT_VALUE_MATCH_RULE',
+}
+
 export interface IInsertRecordInput {
   records: IInsertRecord[];
 }
@@ -84,4 +90,9 @@ export interface IConnectionConfig {
   requestBody?: any;
   requestHeader?: any;
   responseBody?: any;
+}
+
+export interface IValidationRule {
+  type: ValidationRuleType;
+  params: any;
 }

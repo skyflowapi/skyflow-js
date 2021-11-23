@@ -5,7 +5,7 @@ import {
 import CollectContainer from '../../../src/container/external/CollectContainer';
 import * as iframerUtils from '../../../src/iframe-libs/iframer';
 import SkyflowError from '../../../src/libs/SkyflowError';
-import { LogLevel,Env } from '../../../src/utils/common';
+import { LogLevel,Env, ValidationRuleType } from '../../../src/utils/common';
 import logs from '../../../src/utils/logs';
 
 const bus = require('framebus');
@@ -125,6 +125,41 @@ describe('Collect container', () => {
       expect(err).toBeDefined();
     }
   });
+
+  it('Invalid validation params, missing element', () => {
+    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    try {
+      const cvv = container.create({
+        ...cvvElement,
+        column: undefined,
+        validations: [{
+          type: ValidationRuleType.ELEMENT_MATCH_RULE,
+          params: {}
+        }]
+      });
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+
+  it('Invalid validation params, invalid collect element', () => {
+    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    try {
+      const cvv = container.create({
+        ...cvvElement,
+        column: undefined,
+        validations: [{
+          type: ValidationRuleType.ELEMENT_MATCH_RULE,
+          params: {
+            element: ''
+          }
+        }]
+      });
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+
 
   it('create valid Element', () => {
     const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });

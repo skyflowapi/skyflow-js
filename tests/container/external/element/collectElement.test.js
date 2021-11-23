@@ -1,9 +1,9 @@
 import bus from 'framebus';
 import Element from '../../../../src/container/external/element';
 import SkyflowError from '../../../../src/libs/SkyflowError';
-import { LogLevel, Env } from '../../../../src/utils/common';
-// import Bus from './../../../../src/libs/Bus';
+import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../../../src/container/constants';
+import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 
 const elementName = 'element:CVV:cGlpX2ZpZWxkcy5wcmltYXJ5X2NhcmQuY3Z2';
 
@@ -150,7 +150,7 @@ describe('collect element', () => {
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: elementName+':containerId'+':ERROR',
+      name: `${elementName}:containerId` + ':ERROR',
     }, cb2);
     expect(element.isMounted()).toBe(true);
 
@@ -174,5 +174,273 @@ describe('collect element', () => {
 
     const options = element.getOptions();
     expect(options.name).toBe(input.column);
+  });
+});
+
+const row = {
+  elementName,
+  elementType: 'CVV',
+  name: input.column,
+  labelStyles,
+  errorTextStyles,
+  ...input,
+};
+
+describe('collect element validations', () => {
+  it('Invalid ElementType', () => {
+    const invalidElementType = [
+      {
+        elements: [
+          {
+            ...row,
+            elementType: 'inValidElementType',
+          },
+        ],
+      },
+    ];
+
+    const createElement = () => {
+      const element = new Element({
+        elementName,
+        rows: invalidElementType,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    };
+
+    expect(createElement).toThrow(
+      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_TYPE, [], true),
+    );
+  });
+
+  it('Invalid validations type', () => {
+    const invalidValidations = [
+      {
+        elements: [
+          {
+            ...row,
+            validations: '',
+          },
+        ],
+      },
+    ];
+
+    const createElement = () => {
+      const element = new Element({
+        elementName,
+        rows: invalidValidations,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    };
+
+    expect(createElement).toThrow(
+      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATIONS_TYPE, [], true),
+    );
+  });
+
+  it('Empty validations rule', () => {
+    const invalidValidationRule = [
+      {
+        elements: [
+          {
+            ...row,
+            validations: [{}],
+          },
+        ],
+      },
+    ];
+
+    const createElement = () => {
+      const element = new Element({
+        elementName,
+        rows: invalidValidationRule,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    };
+
+    expect(createElement).toThrow(
+      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_TYPE, [0], true),
+    );
+  });
+
+  it('Invalid validations RuleType', () => {
+    const invalidValidationRule = [
+      {
+        elements: [
+          {
+            ...row,
+            validations: [{
+              type: 'Invalid Rule',
+            }],
+          },
+        ],
+      },
+    ];
+
+    const createElement = () => {
+      const element = new Element({
+        elementName,
+        rows: invalidValidationRule,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    };
+
+    expect(createElement).toThrow(
+      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_TYPE, [0], true),
+    );
+  });
+
+  it('Missing params in validations Rule', () => {
+    const invalidValidationRule = [
+      {
+        elements: [
+          {
+            ...row,
+            validations: [{
+              type: ValidationRuleType.LENGTH_MATCH_RULE,
+            }],
+          },
+        ],
+      },
+    ];
+
+    const createElement = () => {
+      const element = new Element({
+        elementName,
+        rows: invalidValidationRule,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    };
+
+    expect(createElement).toThrow(
+      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_PARAMS, [0], true),
+    );
+  });
+
+  it('Invalid params in validations Rule', () => {
+    const invalidValidationRule = [
+      {
+        elements: [
+          {
+            ...row,
+            validations: [{
+              type: ValidationRuleType.LENGTH_MATCH_RULE,
+              params: '',
+            }],
+          },
+        ],
+      },
+    ];
+
+    const createElement = () => {
+      const element = new Element({
+        elementName,
+        rows: invalidValidationRule,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    };
+
+    expect(createElement).toThrow(
+      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_PARAMS, [0], true),
+    );
+  });
+
+  it('Missing regex in REGEX_RULE', () => {
+    const invalidParams = [
+      {
+        elements: [
+          {
+            ...row,
+            validations: [{
+              type: ValidationRuleType.REGEX_MATCH_RULE,
+              params: {
+                error: 'Regex match failed',
+              },
+            }],
+          },
+        ],
+      },
+    ];
+
+    const createElement = () => {
+      const element = new Element({
+        elementName,
+        rows: invalidParams,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    };
+
+    expect(createElement).toThrow(
+      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_PATTERN_RULE, [0], true),
+    );
+  });
+
+  it('Missing min,max in LENGTH_MATCH_RULE', () => {
+    const invalidParams = [
+      {
+        elements: [
+          {
+            ...row,
+            validations: [{
+              type: ValidationRuleType.LENGTH_MATCH_RULE,
+              params: {
+                error: 'length match failed',
+              },
+            }],
+          },
+        ],
+      },
+    ];
+
+    const createElement = () => {
+      const element = new Element({
+        elementName,
+        rows: invalidParams,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    };
+
+    expect(createElement).toThrow(
+      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE, [0], true),
+    );
   });
 });

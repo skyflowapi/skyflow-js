@@ -1,9 +1,10 @@
 import bus from 'framebus';
 import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME } from '../../../../src/container/constants';
-import { Env, LogLevel } from '../../../../src/utils/common';
+import { Env, LogLevel, ValidationRuleType } from '../../../../src/utils/common';
 import { IFrameForm, IFrameFormElement } from './../../../../src/container/internal/iFrameForm'
 import * as busEvents from '../../../../src/utils/busEvents';
 import SkyflowError from '../../../../src/libs/SkyflowError';
+import logs from '../../../../src/utils/logs';
 
 const tableCol = btoa('table.col')
 const collect_element = `element:CVV:${tableCol}`;
@@ -48,16 +49,47 @@ describe('test iframeFormelement', () => {
 
     test('test validations', ()=> {
         const element = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
+        element.setValidation()
         let invalid = element.validator('411')
         let valid = element.validator('4111111111111111')
         expect(invalid).toBe(false)
         expect(valid).toBe(true)
 
         const element2 = new IFrameFormElement(`element:EXPIRATION_DATE:${tableCol}`, {}, context)
+        element2.setValidation()
         invalid = element2.validator('12')
         valid = element2.validator('12/2222')
         expect(invalid).toBe(false)
         expect(valid).toBe(true)
+    })
+
+    test('test custom validations', ()=> {
+
+        const lengthRule = {
+            type: ValidationRuleType.LENGTH_MATCH_RULE,
+            params: {
+               min: 5,
+               max: 8,
+               error: "Invalid length",
+            }
+        }
+
+        const regexRule = {
+            type: ValidationRuleType.REGEX_RULE,
+            params: {
+               regex: /[1-4]+/
+            }
+        }
+
+        const element = new IFrameFormElement(`element:PIN:${tableCol}`, {}, context)
+        element.setValidation([lengthRule, regexRule]);
+        let isValid = element.validator('1234')
+        expect(isValid).toBe(false)
+        expect(element.errorText).toBe("Invalid length")
+
+        isValid = element.validator('99999')
+        expect(isValid).toBe(false)
+        expect(element.errorText).toBe(logs.errorLogs.VALIDATION_FAILED)
     })
 
 })
@@ -165,7 +197,7 @@ describe('test iframeForm collect method', () => {
         tokenizationCb(data, cb2)
 
         setTimeout(() => {
-            expect(cb2.mock.calls[0][0].error.message).toBe('Provide complete and valid inputs for col ')
+            expect(cb2.mock.calls[0][0].error.message).toBeDefined()
         },1000)
 
         element.setValue('123')

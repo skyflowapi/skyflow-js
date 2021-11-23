@@ -162,6 +162,17 @@ const logs = {
     CONNECTION_ERROR: 'Error while initializing the connection.',
     ERROR_OCCURED: 'Error occurred.',
     RESPONSE_BODY_KEY_MISSING: '%s1 is missing in the response.',
+    INVALID_VALIDATIONS_TYPE: 'Invalid validations type.',
+    MISSING_VALIDATION_RULE_TYPE: 'Type is missing in validationRule at index %s1',
+    INVALID_VALIDATION_RULE_TYPE: 'Invalid ValidationRuleType at index %s1',
+    MISSING_VALIDATION_RULE_PARAMS: 'Params are missing in validationRule at index %s1',
+    INVALID_VALIDATION_RULE_PARAMS: 'Invalid ValidationRule params at index %s1',
+    MISSING_REGEX_IN_PATTERN_RULE: 'Missing regex in ValidationRule params at index %s1',
+    MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE: 'Either min or max is required in ValidationRule params at index %s1',
+    MISSING_ELEMENT_IN_ELEMENT_MATCH_RULE: 'Missing element in ValidationRule params at index %s1',
+    INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE: 'Invalid collect element in ValidationRule params at index %s1',
+    ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE: 'collect element is not mounted in ValidationRule params at index %s1',
+    VALIDATION_FAILED: 'Validation failed',
   },
 };
 

@@ -29,6 +29,7 @@ import {
   Env,
   LogLevel,
   MessageType,
+  ValidationRuleType,
 } from './utils/common';
 
 export enum ContainerType {
@@ -210,6 +211,10 @@ class Skyflow {
 
   static get Env() {
     return Env;
+  }
+
+  static get ValidationRuleType() {
+    return ValidationRuleType;
   }
 }
 export default Skyflow;

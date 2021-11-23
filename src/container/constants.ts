@@ -447,17 +447,19 @@ export enum CardType {
   HIPERCARD = 'HIPERCARD',
   DEFAULT = 'DEFAULT',
 }
+
 export const CARD_TYPE_REGEX = {
-  [CardType.VISA]: { regex: /^4\d*/, maxCardLength: 19 },
-  [CardType.MASTERCARD]: { regex: /^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[0-1]|2720)\d*/, maxCardLength: 16 },
-  [CardType.AMEX]: { regex: /^3[47]\d*/, maxCardLength: 15 },
-  [CardType.DINERS_CLUB]: { regex: /^(36|38|30[0-5])\d*/, maxCardLength: 16 },
-  [CardType.DISCOVER]: { regex: /^(6011|65|64[4-9]|622)\d*/, maxCardLength: 16 },
-  [CardType.JCB]: { regex: /^35\d*/, maxCardLength: 19 },
-  [CardType.HIPERCARD]: { regex: /^606282\d*/, maxCardLength: 19 },
-  [CardType.UNIONPAY]: { regex: /^62\d*/, maxCardLength: 19 },
-  [CardType.MAESTRO]: { regex: /^(5018|5020|5038|5043|5[6-9]|6020|6304|6703|6759|676[1-3])\d*/, maxCardLength: 19 },
+  [CardType.VISA]: { regex: /^4\d*/, maxCardLength: 19, cardLengthRange: [13, 16] },
+  [CardType.MASTERCARD]: { regex: /^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[0-1]|2720)\d*/, maxCardLength: 16, cardLengthRange: [16] },
+  [CardType.AMEX]: { regex: /^3[47]\d*/, maxCardLength: 15, cardLengthRange: [15] },
+  [CardType.DINERS_CLUB]: { regex: /^(36|38|30[0-5])\d*/, maxCardLength: 16, cardLengthRange: [14, 15, 16, 17, 18, 19] },
+  [CardType.DISCOVER]: { regex: /^(6011|65|64[4-9]|622)\d*/, maxCardLength: 16, cardLengthRange: [16, 17, 18, 19] },
+  [CardType.JCB]: { regex: /^35\d*/, maxCardLength: 19, cardLengthRange: [16, 17, 18, 19] },
+  [CardType.HIPERCARD]: { regex: /^606282\d*/, maxCardLength: 19, cardLengthRange: [14, 15, 16, 17, 18, 19] },
+  [CardType.UNIONPAY]: { regex: /^62\d*/, maxCardLength: 19, cardLengthRange: [16, 17, 18, 19] },
+  [CardType.MAESTRO]: { regex: /^(5018|5020|5038|5043|5[6-9]|6020|6304|6703|6759|676[1-3])\d*/, maxCardLength: 19, cardLengthRange: [12, 13, 14, 15, 16, 17, 18, 19] },
 };
+export const DEFAULT_CARD_LENGTH_RANGE = [12, 13, 14, 15, 16, 17, 18, 19];
 
 export const CARD_ENCODED_ICONS = {
   [CardType.DEFAULT]: `url(${defaultCardIcon})`,
