@@ -374,7 +374,7 @@ describe('collect element validations', () => {
     );
   });
 
-  it('Missing regex in REGEX_RULE', () => {
+  it('Missing regex in REGEX_MATCH_RULE', () => {
     const invalidParams = [
       {
         elements: [

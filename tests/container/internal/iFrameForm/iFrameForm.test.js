@@ -75,7 +75,7 @@ describe('test iframeFormelement', () => {
         }
 
         const regexRule = {
-            type: ValidationRuleType.REGEX_RULE,
+            type: ValidationRuleType.REGEX_MATCH_RULE,
             params: {
                regex: /[1-4]+/
             }

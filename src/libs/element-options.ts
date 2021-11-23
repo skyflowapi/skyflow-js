@@ -36,7 +36,7 @@ export function validateElementOptions(
           || validationRule.params === null) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_PARAMS, [`${index}`], true);
         }
-        if (validationRule.type === ValidationRuleType.REGEX_RULE) {
+        if (validationRule.type === ValidationRuleType.REGEX_MATCH_RULE) {
           if (!Object.prototype.hasOwnProperty.call(validationRule.params, 'regex')) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_PATTERN_RULE, [`${index}`], true);
           }
@@ -45,9 +45,6 @@ export function validateElementOptions(
           && !Object.prototype.hasOwnProperty.call(validationRule.params, 'max')) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE, [`${index}`], true);
           }
-        } else if (validationRule.type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {
-          // console.log(validationRule.params.element instanceof Element);
-          // validationRule.params.element = validationRule.params.element.iframeName();
         }
       });
     }
