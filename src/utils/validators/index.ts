@@ -167,6 +167,18 @@ export const isValidURL = (url: string) => {
   return true;
 };
 
+export const isValidRegExp = (input) => {
+  let isValid = true;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const reg = new RegExp(input);
+  } catch (err) {
+    isValid = false;
+  }
+
+  return isValid;
+};
+
 export const validateConnectionConfig = (config: IConnectionConfig) => {
   if (!Object.prototype.hasOwnProperty.call(config, 'connectionURL')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_URL);

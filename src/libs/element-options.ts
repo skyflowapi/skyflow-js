@@ -4,6 +4,7 @@ import Element from '../container/external/element';
 import { IValidationRule, ValidationRuleType } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
+import { isValidRegExp } from '../utils/validators';
 import SkyflowError from './SkyflowError';
 import { buildStylesFromClassesAndStyles } from './styles';
 
@@ -38,7 +39,7 @@ export function validateElementOptions(
         }
         if (validationRule.type === ValidationRuleType.REGEX_MATCH_RULE) {
           if (!Object.prototype.hasOwnProperty.call(validationRule.params, 'regex')) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_PATTERN_RULE, [`${index}`], true);
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_REGEX_MATCH_RULE, [`${index}`], true);
           }
         } else if (validationRule.type === ValidationRuleType.LENGTH_MATCH_RULE) {
           if (!Object.prototype.hasOwnProperty.call(validationRule.params, 'min')
@@ -216,6 +217,17 @@ export const formatValidations = (input: CollectElementInput) => {
           //   );
           // }
           validationRule.params.element = validationRule.params.element.iframeName();
+        }
+      } else if (validationRule && validationRule.type === ValidationRuleType.REGEX_MATCH_RULE) {
+        if (validationRule.params
+          && validationRule.params.regex
+          && !isValidRegExp(validationRule.params.regex)) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REGEX_IN_REGEX_MATCH_RULE, [`${index}`], true);
+        }
+        if (validationRule.params
+          && validationRule.params.regex
+          && isValidRegExp(validationRule.params.regex)) {
+          validationRule.params.regex = validationRule.params.regex.toString();
         }
       }
     });

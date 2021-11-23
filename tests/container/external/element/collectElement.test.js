@@ -405,7 +405,7 @@ describe('collect element validations', () => {
     };
 
     expect(createElement).toThrow(
-      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_PATTERN_RULE, [0], true),
+      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_REGEX_MATCH_RULE, [0], true),
     );
   });
 

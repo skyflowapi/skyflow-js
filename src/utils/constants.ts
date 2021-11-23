@@ -69,9 +69,13 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_VALIDATION_RULE_PARAMS,
   },
-  MISSING_REGEX_IN_PATTERN_RULE: {
+  MISSING_REGEX_IN_REGEX_MATCH_RULE: {
     code: 400,
-    description: logs.errorLogs.MISSING_REGEX_IN_PATTERN_RULE,
+    description: logs.errorLogs.MISSING_REGEX_IN_REGEX_MATCH_RULE,
+  },
+  INVALID_REGEX_IN_REGEX_MATCH_RULE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_REGEX_IN_REGEX_MATCH_RULE,
   },
   MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE: {
     code: 400,
