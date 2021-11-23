@@ -41,6 +41,7 @@ import {
 import { formatFrameNameToId } from '../../../utils/helpers';
 
 const set = require('set-value');
+const RegexParser = require('regex-parser');
 
 export class IFrameFormElement extends EventEmitter {
   // All external Events and state events will be handled here
@@ -273,7 +274,8 @@ export class IFrameFormElement extends EventEmitter {
         switch (this.validations[i].type) {
           case ValidationRuleType.REGEX_MATCH_RULE:
             if (this.validations[i].params.regex) {
-              resp = this.validations[i].params.regex.test(value);
+              const tempRegex = RegexParser(this.validations[i].params.regex);
+              resp = tempRegex.test(value);
             }
             break;
           case ValidationRuleType.LENGTH_MATCH_RULE:
