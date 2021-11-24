@@ -170,6 +170,7 @@ export default class FrameElements {
         // create element by passing iframeformelement and options and mount by default returns
         const iFrameFormElement = this.getOrCreateIFrameFormElement(
           element.elementName,
+          element.label,
         );
         elements[element.elementName] = new FrameElement(
           iFrameFormElement,

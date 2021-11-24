@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.7.0] - 2021-11-24
+### Added
+- `validations` option in `CollectElementInput` that takes an array of validation rules
+- `REGEX_MATCH_RULE`, `LENGTH_MATCH_RULE` & `ELEMENT_MATCH_RULE` Validation rules types
+- `PIN` Element type
+
+### Fixed
+- Card Number validation
+
+
 ## [1.6.0] - 2021-11-16
 
 ### Added

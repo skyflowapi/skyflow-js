@@ -78,7 +78,9 @@ export class IFrameFormElement extends EventEmitter {
 
   context: Context;
 
-  constructor(name: string, metaData, context: Context) {
+  label?:string;
+
+  constructor(name: string, label:string, metaData, context: Context) {
     super();
     const frameValues = name.split(':');
     const fieldType = frameValues[1];
@@ -93,6 +95,7 @@ export class IFrameFormElement extends EventEmitter {
 
     this.tableName = tableName;
     this.fieldName = fieldName;
+    this.label = label;
 
     this.sensitive = ELEMENTS[this.fieldType].sensitive;
 
@@ -256,7 +259,10 @@ export class IFrameFormElement extends EventEmitter {
       }
     }
     if (!resp) {
-      this.errorText = logs.errorLogs.INVALID_COLLECT_VALUE;
+      this.errorText = this.label
+        ? `${parameterizedString(logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
+          this.label)}`
+        : logs.errorLogs.INVALID_COLLECT_VALUE;
       return resp;
     }
 
@@ -288,7 +294,12 @@ export class IFrameFormElement extends EventEmitter {
             break;
           case ValidationRuleType.ELEMENT_VALUE_MATCH_RULE: {
             const elementName = this.validations[i].params.element;
-            const elementIFrame = window.parent.frames[elementName];
+            let elementIFrame;
+            try {
+              elementIFrame = window.parent.frames[elementName];
+            } catch (err) {
+              throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE, [`${i}`], true);
+            }
             let elementValue;
             if (elementIFrame) {
               if (elementName.startsWith(`${FRAME_ELEMENT}:`)) {
@@ -553,9 +564,9 @@ export class IFrameForm {
     this.context = context;
   }
 
-  private getOrCreateIFrameFormElement = (frameName) => {
+  private getOrCreateIFrameFormElement = (frameName, label) => {
     this.iFrameFormElements[frameName] = this.iFrameFormElements[frameName]
-      || new IFrameFormElement(frameName, {
+      || new IFrameFormElement(frameName, label, {
         ...this.clientMetaData,
       }, this.context);
     return this.iFrameFormElements[frameName];

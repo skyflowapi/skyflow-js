@@ -230,7 +230,7 @@ export const ELEMENTS = {
       type: 'text',
     },
     sensitive: true,
-    regex: /^([a-zA-Z0-9\\ \\,\\.\\-\\']{2,})$/,
+    regex: /^([a-zA-Z\\ \\,\\.\\-\\']{2,})$/,
   },
   [ElementType.CARD_NUMBER]: {
     name: 'CARD_NUMBER',
