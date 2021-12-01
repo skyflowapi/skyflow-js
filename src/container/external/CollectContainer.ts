@@ -30,6 +30,7 @@ import {
   IValidationRule,
   MessageType,
 } from '../../utils/common';
+import { validateAdditionalFieldsInCollect, validateCollectElementInput } from '../../utils/validators';
 
 export interface CollectElementInput {
   table?: string;
@@ -101,6 +102,7 @@ class CollectContainer {
     required: false,
     enableCardIcon: true,
   }) => {
+    validateCollectElementInput(input);
     const validations = formatValidations(input);
     const elementGroup = {
       rows: [
@@ -139,7 +141,7 @@ class CollectContainer {
         options.replacePattern = options.replacePattern || ELEMENTS[elementType].replacePattern;
         options.mask = options.mask || ELEMENTS[elementType].mask;
 
-        options.elementName = `${options.table}.${options.name}`;
+        options.elementName = `${options.table}.${options.name}:${btoa(uuid())}`;
         options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
           options.elementName,
         )}` : `${options.elementType}:${btoa(uuid())}`;
@@ -240,17 +242,21 @@ class CollectContainer {
         if (!element.isMounted()) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
         }
-        if (!element.isValidElement()) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_OR_COLUMN, [], true);
-        }
+        element.isValidElement();
       });
+      if (options && options.tokens && typeof options.tokens !== 'boolean') {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
+      }
+      if (options?.additionalFields) {
+        validateAdditionalFieldsInCollect(options.additionalFields);
+      }
       bus
       // .target(properties.IFRAME_SECURE_ORGIN)
         .emit(
           ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
           {
             ...options,
-            tokens: options.tokens !== undefined ? options.tokens : true,
+            tokens: options?.tokens !== undefined ? options.tokens : true,
           },
           (data: any) => {
             if (!data || data?.error) {

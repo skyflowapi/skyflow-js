@@ -31,16 +31,16 @@ export const printLog = (message: string, messageType:MessageType, logLevel:LogL
     } = LogLevelOptions[logLevel];
     if (messageType === MessageType.LOG && showDebugLogs) {
       // eslint-disable-next-line no-console
-      console.log(message);
+      console.log(`debug: [Skyflow] ${message}`);
     } else if (messageType === MessageType.LOG && showInfoLogs) {
       // eslint-disable-next-line no-console
-      console.log(message);
+      console.log(`info: [Skyflow] ${message}`);
     } else if (messageType === MessageType.WARN && showWarnLogs) {
       // eslint-disable-next-line no-console
-      console.warn(message);
+      console.warn(`warn: [Skyflow] ${message}`);
     } else if (messageType === MessageType.ERROR && showErrorLogs) {
       // eslint-disable-next-line no-console
-      console.error(message);
+      console.warn(`error: [Skyflow] ${message}`);
     }
   }
 };
@@ -55,4 +55,10 @@ export const parameterizedString = (...args: any[]) => {
   });
 };
 
-export const getElementName = (name:string = '') => atob(name.split(':')[2]);
+export const getElementName = (name:string = '') => {
+  let tempName = atob(name.split(':')[2]);
+  if (tempName.indexOf(':') !== -1) {
+    tempName = tempName.substring(0, tempName.indexOf(':'));
+  }
+  return tempName;
+};

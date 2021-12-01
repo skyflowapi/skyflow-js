@@ -126,7 +126,10 @@ class PureJsController {
           printLog(logs.infoLogs.VALIDATE_RECORDS, MessageType.LOG,
             this.#context.logLevel);
 
-          validateInsertRecords(records);
+          validateInsertRecords(records, options);
+          if (options) {
+            options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
+          }
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)
             .emit(
@@ -155,7 +158,10 @@ class PureJsController {
         printLog(logs.infoLogs.VALIDATE_RECORDS, MessageType.LOG,
           this.#context.logLevel);
 
-        validateInsertRecords(records);
+        validateInsertRecords(records, options);
+        if (options) {
+          options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
+        }
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {

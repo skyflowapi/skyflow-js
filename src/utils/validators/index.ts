@@ -1,6 +1,8 @@
 import { CardType, CARD_TYPE_REGEX, DEFAULT_CARD_LENGTH_RANGE } from '../../container/constants';
+import { CollectElementInput } from '../../container/external/CollectContainer';
 import { IRevealElementInput } from '../../container/external/RevealContainer';
 import SkyflowError from '../../libs/SkyflowError';
+import { ISkyflow } from '../../Skyflow';
 import {
   IInsertRecordInput,
   IDetokenizeInput,
@@ -49,40 +51,95 @@ export const validateExpiryDate = (date: string) => {
   return expiryDate > today;
 };
 
-export const validateInsertRecords = (recordObj: IInsertRecordInput) => {
-  if (!('records' in recordObj)) {
+export const validateInsertRecords = (recordObj: IInsertRecordInput, options: any) => {
+  if (!(recordObj && Object.prototype.hasOwnProperty.call(recordObj, 'records'))) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND, [], true);
   }
   const { records } = recordObj;
-  if (records.length === 0) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS, [], true);
+  if (!(records && Array.isArray(records))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_INSERT, [], true);
   }
-  records.forEach((record, index) => {
-    if (!('table' in record && 'fields' in record)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE_AND_FIELDS, [`${index}`], true);
+  if (records.length === 0) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_IN_INSERT, [], true);
+  }
+  records.forEach((record:any, index: number) => {
+    if (!(record && Object.prototype.hasOwnProperty.call(record, 'table'))) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_INSERT, [`${index}`], true);
     }
-    if (record.table === '') {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE, [`${index}`], true);
+    if (!record.table) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_INSERT, [`${index}`], true);
+    }
+    if (!(typeof record.table === 'string' || record.table instanceof String)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_INSERT, [`${index}`], true);
+    }
+    if (!Object.prototype.hasOwnProperty.call(record, 'fields')) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_FIELDS_IN_INSERT, [`${index}`], true);
+    }
+    if (!record.fields) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_FIELDS_IN_INSERT, [`${index}`], true);
+    }
+    if (!(typeof record.fields === 'object' && !Array.isArray(record.fields))) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELDS_IN_INSERT, [`${index}`], true);
+    }
+  });
+
+  if (options && options.tokens && typeof options.tokens !== 'boolean') {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_INSERT, [], true);
+  }
+};
+
+export const validateAdditionalFieldsInCollect = (recordObj: IInsertRecordInput) => {
+  if (!(recordObj && Object.prototype.hasOwnProperty.call(recordObj, 'records'))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_IN_ADDITIONAL_FIELDS, [], true);
+  }
+  const { records } = recordObj;
+  if (!(records && Array.isArray(records))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_ADDITIONAL_FIELDS, [], true);
+  }
+  if (records.length === 0) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_IN_ADDITIONAL_FIELDS, [], true);
+  }
+  records.forEach((record: any, index: number) => {
+    if (!(record && Object.prototype.hasOwnProperty.call(record, 'table'))) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+    }
+    if (!record.table) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+    }
+    if (!(typeof record.table === 'string' || record.table instanceof String)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+    }
+    if (!Object.prototype.hasOwnProperty.call(record, 'fields')) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_FIELDS_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+    }
+    if (!record.fields) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_FIELDS_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+    }
+    if (!(typeof record.fields === 'object' && !Array.isArray(record.fields))) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELDS_IN_ADDITIONAL_FIELDS, [`${index}`], true);
     }
   });
 };
 
 export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
-  if (!Object.prototype.hasOwnProperty.call(detokenizeInput, 'records')) throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_RECORDS);
-
+  if (!(detokenizeInput && Object.prototype.hasOwnProperty.call(detokenizeInput, 'records'))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_DETOKENIZE);
+  }
   const { records } = detokenizeInput;
-  if (records.length === 0) throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS);
-  records.forEach((record) => {
-    if (Object.keys(record).length === 0) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS);
+  if (!(records && Array.isArray(records))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_DETOKENIZE, [], true);
+  }
+  if (records.length === 0) throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_DETOKENIZE);
+  records.forEach((record: any, index) => {
+    if (!(record && Object.prototype.hasOwnProperty.call(record, 'token'))) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TOKEN_IN_DETOKENIZE, [`${index}`], true);
     }
-
-    const recordToken = record.token;
-    if (!recordToken) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TOKEN);
+    if (!record.token) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TOKEN_IN_DETOKENIZE, [`${index}`], true);
     }
-    if (recordToken === '' || typeof recordToken !== 'string') { throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID); }
-
+    if (!(typeof record.token === 'string' || record.token instanceof String)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_IN_DETOKENIZE, [`${index}`], true);
+    }
     // const recordRedaction = record.redaction;
     // if (!recordRedaction) {
     //   throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
@@ -94,50 +151,65 @@ export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
 };
 
 export const validateGetByIdInput = (getByIdInput: IGetByIdInput) => {
-  if (!Object.prototype.hasOwnProperty.call(getByIdInput, 'records')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_RECORDS);
+  if (!(getByIdInput && Object.prototype.hasOwnProperty.call(getByIdInput, 'records'))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_GETBYID);
   }
   const { records } = getByIdInput;
-  if (records.length === 0) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS);
+  if (!(records && Array.isArray(records))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_GETBYID, [], true);
   }
-
-  records.forEach((record) => {
-    if (Object.keys(record).length === 0) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS);
+  if (records.length === 0) throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_GETBYID);
+  records.forEach((record: any, index: number) => {
+    if (!(record && Object.prototype.hasOwnProperty.call(record, 'ids'))) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_IDS_IN_GETBYID, [`${index}`], true);
     }
-
-    const recordIds = record.ids;
-    if (!recordIds) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_IDS);
+    if (!(record.ids && Array.isArray(record.ids))) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_IDS_IN_GETBYID, [`${index}`], true);
     }
-    if (recordIds.length === 0) throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORD_IDS);
-    recordIds.forEach((skyflowId) => {
-      if (typeof skyflowId !== 'string') throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORD_ID_TYPE);
+    if (record.ids.length === 0) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_IDS_IN_GETBYID, [`${index}`], true);
+    }
+    record.ids.forEach((skyflowId) => {
+      if (!skyflowId) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOWID_IN_GETBYID, [`${index}`], true);
+      }
+      if (!(typeof skyflowId === 'string' || skyflowId instanceof String)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_TYPE_IN_GETBYID, [`${index}`], true);
+      }
     });
-
-    const recordRedaction = record.redaction;
-    if (!recordRedaction) throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
-    if (!Object.values(RedactionType).includes(recordRedaction)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
+    if (!Object.prototype.hasOwnProperty.call(record, 'table')) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_GETBYID, [`${index}`], true);
     }
-
-    const recordTable = record.table;
-    if (!Object.prototype.hasOwnProperty.call(record, 'table')) { throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TABLE); }
-
-    if (recordTable === '' || typeof recordTable !== 'string') { throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORD_TABLE_VALUE); }
+    if (!record.table) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_GETBYID, [`${index}`], true);
+    }
+    if (!(typeof record.table === 'string' || record.table instanceof String)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_GETBYID, [`${index}`], true);
+    }
+    if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION_IN_GETBYID, [`${index}`], true);
+    }
+    if (!record.redaction) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_REDACTION_TYPE_IN_GETBYID, [`${index}`], true);
+    }
+    if (!Object.values(RedactionType).includes(record.redaction)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_GETBYID);
+    }
   });
 };
 
 export const validateRevealElementRecords = (records: IRevealElementInput[]) => {
-  if (records.length === 0) throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS);
-  records.forEach((record) => {
-    if (!Object.prototype.hasOwnProperty.call(record, 'token')) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TOKEN_KEY);
+  if (records.length === 0) throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_REVEAL);
+  records.forEach((record: any) => {
+    if (!(record && Object.prototype.hasOwnProperty.call(record, 'token'))) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TOKEN_KEY_REVEAL);
     }
-    const recordToken = record.token;
-    if (!recordToken || typeof recordToken !== 'string') { throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID); }
-
+    if (!record.token) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TOKEN_ID_REVEAL);
+    }
+    if (!(typeof record.token === 'string' || record.token instanceof String)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID_REVEAL);
+    }
     // if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
     //   throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
     // }
@@ -147,9 +219,13 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
     //   throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
     // }
 
-    if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') { throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORD_LABEL); }
+    if (Object.prototype.hasOwnProperty.call(record, 'label') && record.label && !(typeof record.label === 'string' || record.label instanceof String)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_LABEL_REVEAL);
+    }
 
-    if (Object.prototype.hasOwnProperty.call(record, 'altText') && typeof record.altText !== 'string') throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORD_ALT_TEXT);
+    if (Object.prototype.hasOwnProperty.call(record, 'altText') && record.altText && !(typeof record.altText === 'string' || record.altText instanceof String)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_REVEAL);
+    }
   });
 };
 
@@ -180,8 +256,14 @@ export const isValidRegExp = (input) => {
 };
 
 export const validateConnectionConfig = (config: IConnectionConfig) => {
+  if (!config) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_CONFIG);
+  }
   if (!Object.prototype.hasOwnProperty.call(config, 'connectionURL')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_URL);
+  }
+  if (!config.connectionURL) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONNECTION_URL);
   }
   if (typeof config.connectionURL !== 'string') {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL_TYPE);
@@ -204,4 +286,34 @@ export const validateCardNumberLengthCheck = (cardNumber:string):boolean => {
   const validLengths:number[] = CARD_TYPE_REGEX[cardType]?.cardLengthRange
                                 || DEFAULT_CARD_LENGTH_RANGE;
   return validLengths.includes(cardLength);
+};
+
+export const validateInitConfig = (initConfig: ISkyflow) => {
+  if (!Object.prototype.hasOwnProperty.call(initConfig, 'vaultID')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.VAULTID_IS_REQUIRED, [], true);
+  }
+  if (!initConfig.vaultID) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_VAULTID_IN_INIT, [], true);
+  }
+  if (!Object.prototype.hasOwnProperty.call(initConfig, 'vaultURL')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.VAULTURL_IS_REQUIRED, [], true);
+  }
+  if (!initConfig.vaultURL) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT, [], true);
+  }
+  if (initConfig.vaultURL && !isValidURL(initConfig.vaultURL)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VAULTURL_IN_INIT, [], true);
+  }
+  if (!Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED, [], true);
+  }
+};
+
+export const validateCollectElementInput = (input: CollectElementInput) => {
+  if (!Object.prototype.hasOwnProperty.call(input, 'type')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_TYPE, [], true);
+  }
+  if (!input.type) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_TYPE, [], true);
+  }
 };

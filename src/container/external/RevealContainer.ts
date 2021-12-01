@@ -167,9 +167,9 @@ class RevealContainer {
           this.#context.logLevel);
         validateRevealElementRecords(this.#revealRecords);
         const elementMountTimeOut = setTimeout(() => {
-          printLog(logs.errorLogs.ELEMENT_NOT_MOUNTED, MessageType.ERROR,
+          printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL, MessageType.ERROR,
             this.#context.logLevel);
-          reject('Elements Not Mounted');
+          reject(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL);
         }, 30000);
         this.#eventEmmiter.on(
           ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,

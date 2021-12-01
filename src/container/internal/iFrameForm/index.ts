@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import bus from 'framebus';
+import get from 'lodash/get';
 import Client from '../../../client';
 import {
   ELEMENT_EVENTS_TO_CLIENT,
@@ -17,6 +18,7 @@ import {
   validateExpiryDate,
 } from '../../../utils/validators';
 import {
+  checkForElementMatchRule,
   constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
@@ -84,7 +86,10 @@ export class IFrameFormElement extends EventEmitter {
     super();
     const frameValues = name.split(':');
     const fieldType = frameValues[1];
-    const field = atob(frameValues[2]);
+    const tempfield = atob(frameValues[2]);
+
+    const removeAfter = tempfield.indexOf(':');
+    const field = removeAfter === -1 ? tempfield : tempfield.substring(0, removeAfter);
     // set frame name as frame type of the string besides : is number
     const [tableName, fieldName] = [
       field.substr(0, field.indexOf('.')),
@@ -589,8 +594,7 @@ export class IFrameForm {
     }
 
     for (let i = 0; i < formElements.length; i += 1) {
-      const { state } = this.iFrameFormElements[formElements[i]];
-      const { tableName } = this.iFrameFormElements[formElements[i]];
+      const { state, tableName, validations } = this.iFrameFormElements[formElements[i]];
       if (
         this.iFrameFormElements[formElements[i]].fieldType
         === ELEMENTS.checkbox.name
@@ -603,6 +607,11 @@ export class IFrameForm {
           responseObject[state.name] = state.value;
         }
       } else if (responseObject[tableName]) {
+        if (get(responseObject[tableName], state.name)
+        && !(validations && checkForElementMatchRule(validations))) {
+          return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
+            [state.name, tableName], true));
+        }
         set(
           responseObject[tableName],
           state.name,
@@ -637,7 +646,7 @@ export class IFrameForm {
               records: finalRequest,
             },
             requestMethod: 'POST',
-            url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+            url: `vault/v1/vaults/${client.config.vaultID}`,
             headers: {
               Authorization: `Bearer ${authToken}`,
               'Content-Type': 'application/json',

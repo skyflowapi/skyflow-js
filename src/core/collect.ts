@@ -1,15 +1,16 @@
 import _ from 'lodash';
 import SkyflowError from '../libs/SkyflowError';
-import { IInsertRecordInput, IInsertRecord } from '../utils/common';
+import {
+  IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
+} from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
-import { validateInsertRecords } from '../utils/validators';
 
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
   options: Record<string, any> = { tokens: true },
 ) => {
   const requestBody: any = [];
-  if (options.tokens) {
+  if (options?.tokens || options === null) {
     records.records.forEach((record, index) => {
       requestBody.push({
         method: 'POST',
@@ -92,8 +93,6 @@ export const constructElementsInsertReq = (req, options) => {
   let tables = Object.keys(req);
   const additionalFields = options?.additionalFields;
   if (additionalFields) {
-    validateInsertRecords(additionalFields);
-
     // merge additionalFields in req
     additionalFields.records.forEach((record) => {
       if (tables.includes(record.table)) {
@@ -109,7 +108,6 @@ export const constructElementsInsertReq = (req, options) => {
   const records: IInsertRecord[] = [];
 
   tables = Object.keys(req);
-
   tables.forEach((table) => {
     records.push({
       table,
@@ -117,4 +115,13 @@ export const constructElementsInsertReq = (req, options) => {
     });
   });
   return { records };
+};
+
+export const checkForElementMatchRule = (validations: IValidationRule[]) => {
+  for (let i = 0; i < validations.length; i += 1) {
+    if (validations[i].type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {
+      return true;
+    }
+  }
+  return false;
 };

@@ -28,7 +28,11 @@ export default class IFrame {
         if (!this.container) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
         }
-      } else this.container = domElement;
+      } else if (domElement instanceof HTMLElement) {
+        this.container = domElement;
+      } else {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
+      }
     } catch (e) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
     }

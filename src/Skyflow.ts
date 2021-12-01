@@ -8,7 +8,7 @@ import Client from './client';
 import CollectContainer from './container/external/CollectContainer';
 import RevealContainer from './container/external/RevealContainer';
 import {
-  isValidURL,
+  validateInitConfig,
 } from './utils/validators';
 import properties from './properties';
 import isTokenValid from './utils/jwtUtils';
@@ -112,15 +112,7 @@ class Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
     printLog(logs.infoLogs.INITIALIZE_CLIENT, MessageType.LOG,
       logLevel);
-    if (
-      !config
-      || !config.vaultID
-      || !config.vaultURL
-      || !isValidURL(config.vaultURL)
-      || !config.getBearerToken
-    ) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CREDENTIALS, [], true);
-    }
+    validateInitConfig(config);
     const tempConfig = config;
     tempConfig.vaultURL = config.vaultURL.slice(-1) === '/'
       ? config.vaultURL.slice(0, -1)
@@ -153,6 +145,9 @@ class Skyflow {
         return revealContainer;
       }
       default:
+        if (!type) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONTAINER_TYPE, [], true);
+        }
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTAINER_TYPE, [], true);
     }
   }

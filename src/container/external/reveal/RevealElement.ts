@@ -14,6 +14,8 @@ import {
 } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
 import { Context, MessageType } from '../../../utils/common';
+import SkyflowError from '../../../libs/SkyflowError';
+import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 
 class RevealElement {
   #iframe: IFrame;
@@ -43,6 +45,9 @@ class RevealElement {
   }
 
   mount(domElementSelector) {
+    if (!domElementSelector) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
+    }
     this.#iframe.mount(domElementSelector);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {

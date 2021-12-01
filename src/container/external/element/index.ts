@@ -109,6 +109,9 @@ class Element {
   }
 
   mount = (domElement) => {
+    if (!domElement) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
+    }
     this.#iframe.mount(domElement);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
@@ -265,17 +268,22 @@ class Element {
   // listening to element events and error messages on iframe
   // todo: off methods
   on(eventName: string, handler) {
-    if (Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
-      this.#eventEmitter.on(eventName, (data) => {
-        if (data.value === undefined) {
-          data.value = '';
-        }
-        delete data.isComplete;
-        handler(data);
-      });
-    } else {
+    if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER, [], true);
     }
+    if (!handler) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_HANDLER_IN_EVENT_LISTENER, [], true);
+    }
+    if (typeof handler !== 'function') {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER, [], true);
+    }
+    this.#eventEmitter.on(eventName, (data) => {
+      if (data.value === undefined) {
+        data.value = '';
+      }
+      delete data.isComplete;
+      handler(data);
+    });
   }
 
   #onDestroy = (callback) => {
@@ -375,7 +383,24 @@ class Element {
 
   isValidElement():boolean {
     for (let i = 0; i < this.#elements.length; i += 1) {
-      if (!(this.#elements[i].table && this.#elements[i].column)) { return false; }
+      if (!Object.prototype.hasOwnProperty.call(this.#elements[i], 'table')) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_COLLECT, [], true);
+      }
+      if (!this.#elements[i].table) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_COLLECT, [], true);
+      }
+      if (!(typeof this.#elements[i].table === 'string' || this.#elements[i].table instanceof String)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_COLLECT, [], true);
+      }
+      if (!Object.prototype.hasOwnProperty.call(this.#elements[i], 'column')) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_COLUMN_IN_COLLECT, [], true);
+      }
+      if (!this.#elements[i].column) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_COLUMN_IN_COLLECT, [], true);
+      }
+      if (!(typeof this.#elements[i].column === 'string' || this.#elements[i].column instanceof String)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_COLLECT, [], true);
+      }
     }
     return true;
   }
