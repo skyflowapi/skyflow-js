@@ -14,6 +14,7 @@ import { getElementName, parameterizedString, printLog } from '../../utils/logsH
 import logs from '../../utils/logs';
 import { LogLevel, MessageType } from '../../utils/common';
 
+const CLASS_NAME = 'FrameElements';
 export default class FrameElements {
   // private frameElements?: Record<string, FrameElement> = [];
   private static group?: any;
@@ -34,9 +35,11 @@ export default class FrameElements {
     this.#name = window.name;
     this.#metaData = metaData;
     this.getOrCreateIFrameFormElement = getOrCreateIFrameFormElement;
-    printLog(logs.infoLogs.INSIDE_FRAME_ELEMENTS_CONSTRUCOTR, MessageType.LOG, logLevel);
+    printLog(parameterizedString(logs.infoLogs.INSIDE_FRAME_ELEMENTS_CONSTRUCOTR, CLASS_NAME),
+      MessageType.LOG, logLevel);
     if (FrameElements.group) {
-      printLog(logs.infoLogs.SETUP_IN_CONSTRUCTOR, MessageType.LOG, logLevel);
+      printLog(parameterizedString(logs.infoLogs.SETUP_IN_CONSTRUCTOR, CLASS_NAME),
+        MessageType.LOG, logLevel);
       this.setup(); // start the process
     }
   }
@@ -46,18 +49,19 @@ export default class FrameElements {
     const names = window.name.split(':');
     const logLevel = LogLevel[names[names.length - 1]];
     printLog(parameterizedString(logs.infoLogs.EMIT_COLLECT_ELEMENT_FRAME_READY,
-      getElementName(window.name)), MessageType.LOG,
+      CLASS_NAME, getElementName(window.name)), MessageType.LOG,
     logLevel);
     bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + names[3],
       { name: window.name },
       (group: any) => {
         printLog(parameterizedString(logs.infoLogs.COLLECT_FRAME_READY_CB,
-          getElementName(window.name)), MessageType.LOG,
+          CLASS_NAME, getElementName(window.name)), MessageType.LOG,
         logLevel);
         FrameElements.group = group;
         if (FrameElements.frameElements) {
-          printLog(logs.infoLogs.SETUP_IN_START, MessageType.LOG, logLevel);
+          printLog(parameterizedString(logs.infoLogs.SETUP_IN_START, CLASS_NAME),
+            MessageType.LOG, logLevel);
           FrameElements.frameElements.setup(); // start the process
         }
       },
@@ -69,7 +73,7 @@ export default class FrameElements {
     const names = window.name.split(':');
     const logLevel = LogLevel[names[names.length - 1]];
     printLog(parameterizedString(logs.infoLogs.INSIDE__COLLECT_ELEMENT_INIT,
-      getElementName(window.name)), MessageType.LOG,
+      CLASS_NAME, getElementName(window.name)), MessageType.LOG,
     logLevel);
     FrameElements.frameElements = new FrameElements(
       getOrCreateIFrameFormElement,
@@ -82,7 +86,7 @@ export default class FrameElements {
     const names = window.name.split(':');
     const logLevel = LogLevel[names[names.length - 1]];
     printLog(parameterizedString(logs.infoLogs.CREATING_COLLECT_ELEMENT_FORM,
-      getElementName(window.name)), MessageType.LOG,
+      CLASS_NAME, getElementName(window.name)), MessageType.LOG,
     logLevel);
     this.#domForm = document.createElement('form');
     this.#domForm.action = '#';

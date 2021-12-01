@@ -37,16 +37,7 @@
     <pre id="merchantResponse"></pre>
   </div>
   <script>
-    const styles = {
-      inputStyles: {
-        base: {
-          border: "1px solid #eae8ee",
-          padding: "10px 16px",
-          "border-radius": "4px",
-        }
-      }
-    }
-
+  try{
     const skyflow = Skyflow.init({
       vaultID: "<VAULT_ID>",
       vaultURL: "<VAULT_URL>",
@@ -76,6 +67,15 @@
       },
     });
 
+    const styles = {
+      inputStyles: {
+        base: {
+          border: "1px solid #eae8ee",
+          padding: "10px 16px",
+          "border-radius": "4px",
+        }
+      }
+    }
 
     //card issuance use-case
     const revealContainer = skyflow.container("REVEAL");
@@ -229,6 +229,9 @@
           console.log(err);
         });
     });
+  }catch(err){
+      console.log(err);
+  }
   </script>
 </body>
 

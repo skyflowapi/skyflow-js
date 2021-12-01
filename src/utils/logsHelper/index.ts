@@ -24,6 +24,8 @@ export const EnvOptions = {
   },
 };
 
+const SDK_OWNER = '[Skyflow]';
+
 export const printLog = (message: string, messageType:MessageType, logLevel:LogLevel) => {
   if (logLevel && LogLevelOptions[logLevel]) {
     const {
@@ -31,16 +33,16 @@ export const printLog = (message: string, messageType:MessageType, logLevel:LogL
     } = LogLevelOptions[logLevel];
     if (messageType === MessageType.LOG && showDebugLogs) {
       // eslint-disable-next-line no-console
-      console.log(`debug: [Skyflow] ${message}`);
+      console.log(`${LogLevel.DEBUG}: ${SDK_OWNER} ${message}`);
     } else if (messageType === MessageType.LOG && showInfoLogs) {
       // eslint-disable-next-line no-console
-      console.log(`info: [Skyflow] ${message}`);
+      console.log(`${LogLevel.INFO}: ${SDK_OWNER} ${message}`);
     } else if (messageType === MessageType.WARN && showWarnLogs) {
       // eslint-disable-next-line no-console
-      console.warn(`warn: [Skyflow] ${message}`);
+      console.warn(`${LogLevel.WARN}: ${SDK_OWNER} ${message}`);
     } else if (messageType === MessageType.ERROR && showErrorLogs) {
       // eslint-disable-next-line no-console
-      console.warn(`error: [Skyflow] ${message}`);
+      console.error(`${LogLevel.ERROR}: ${SDK_OWNER} ${message}`);
     }
   }
 };

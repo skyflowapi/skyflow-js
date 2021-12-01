@@ -82,6 +82,7 @@
       </div>
     </div>
     <script>
+  try{
       const revealView = document.getElementById("revealView");
       revealView.style.visibility = "hidden";
 
@@ -200,6 +201,9 @@
             });
         });
       }
+    }catch(err){
+      console.log(err);
+    }
     </script>
   </body>
 </html>

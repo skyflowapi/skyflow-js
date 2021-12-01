@@ -16,18 +16,19 @@ describe('Validation card number and Expiry Date', () => {
   });
 
   test('validate expiry date', () => {
-    const expiryDate = '12/2071';
-    expect(validateExpiryDate(expiryDate)).toBe(true);
+    const currentDate = new Date();
+    const expiryDate = `${currentDate.getMonth()}/${currentDate.getFullYear()+1}`;
+    expect(validateExpiryDate(expiryDate,"MM/YYYY")).toBe(true);
   });
 
   test('validate expiry date', () => {
     const expiryDate = '17/2021';
-    expect(validateExpiryDate(expiryDate)).toBe(false);
+    expect(validateExpiryDate(expiryDate,"MM/YYYY")).toBe(false);
   });
 
   test('validate expiry date', () => {
     const expiryDate = '12/2019';
-    expect(validateExpiryDate(expiryDate)).toBe(false);
+    expect(validateExpiryDate(expiryDate,"MM/YYYY")).toBe(false);
   });
 });
 describe('Detect Card Type',()=>{

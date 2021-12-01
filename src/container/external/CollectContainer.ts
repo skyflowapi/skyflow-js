@@ -5,7 +5,7 @@ import iframer, {
   setStyles,
 } from '../../iframe-libs/iframer';
 import deepClone from '../../libs/deepClone';
-import { formatValidations, validateElementOptions } from '../../libs/element-options';
+import { formatOptions, formatValidations, validateElementOptions } from '../../libs/element-options';
 import SkyflowError from '../../libs/SkyflowError';
 import uuid from '../../libs/uuid';
 import properties from '../../properties';
@@ -16,6 +16,7 @@ import {
   ELEMENTS,
   FRAME_ELEMENT,
   ElementType,
+  DEFAULT_EXPIRATION_DATE_FORMAT,
 } from '../constants';
 import Element from './element';
 import {
@@ -49,7 +50,7 @@ interface ICollectOptions {
   tokens?: boolean;
   additionalFields?: IInsertRecordInput;
 }
-
+const CLASS_NAME = 'CollectContainer';
 class CollectContainer {
   #containerId: string;
 
@@ -70,7 +71,8 @@ class CollectContainer {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-    printLog(logs.infoLogs.CREATE_COLLECT_CONTAINER, MessageType.LOG,
+    printLog(parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
+      MessageType.LOG,
       this.#context.logLevel);
 
     const sub = (data, callback) => {
@@ -101,9 +103,11 @@ class CollectContainer {
   create = (input: CollectElementInput, options: any = {
     required: false,
     enableCardIcon: true,
+    format: DEFAULT_EXPIRATION_DATE_FORMAT,
   }) => {
     validateCollectElementInput(input);
     const validations = formatValidations(input);
+    const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
     const elementGroup = {
       rows: [
         {
@@ -113,9 +117,10 @@ class CollectContainer {
               name: input.column,
               ...(input.altText ? { value: input.altText } : {}),
               ...input,
-              required: false,
-              enableCardIcon: true,
-              ...options,
+              // required: false,
+              // enableCardIcon: true,
+              // format: DEFAULT_EXPIRATION_DATE_FORMAT,
+              ...formattedOptions,
               validations,
             },
           ],
@@ -263,14 +268,16 @@ class CollectContainer {
               printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
               reject(data?.error);
             } else {
-              printLog(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, MessageType.LOG,
+              printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                MessageType.LOG,
                 this.#context.logLevel);
+
               resolve(data);
             }
           },
         );
       printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-        ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+        CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
       MessageType.LOG, this.#context.logLevel);
     } catch (err) {
       printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);

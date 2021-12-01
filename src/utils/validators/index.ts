@@ -1,4 +1,6 @@
-import { CardType, CARD_TYPE_REGEX, DEFAULT_CARD_LENGTH_RANGE } from '../../container/constants';
+import {
+  ALLOWED_EXPIRY_DATE_FORMATS, CardType, CARD_TYPE_REGEX, DEFAULT_CARD_LENGTH_RANGE,
+} from '../../container/constants';
 import { CollectElementInput } from '../../container/external/CollectContainer';
 import { IRevealElementInput } from '../../container/external/RevealContainer';
 import SkyflowError from '../../libs/SkyflowError';
@@ -43,12 +45,31 @@ export const detectCardType = (cardNumber: string) => {
   return detectedType;
 };
 
-export const validateExpiryDate = (date: string) => {
-  const [month, year] = date.includes('/') ? date.split('/') : date.split('-');
+const getYearAndMonthBasedOnFormat = (cardDate, format:string) => {
+  const [part1, part2] = cardDate.split('/');
+  switch (format) {
+    case 'MM/YY': return { month: part1, year: 2000 + Number(part2) };
+    case 'YY/MM': return { month: part2, year: 2000 + Number(part1) };
+    case 'YYYY/MM': return { month: part2, year: part1 };
+    // MM/YYYY
+    default: return { month: part1, year: part2 };
+  }
+};
+
+export const validateExpiryDate = (date: string, format:string) => {
+  if (!date.includes('/')) return false;
+  const { month, year } = getYearAndMonthBasedOnFormat(date, format);
   const expiryDate = new Date(`${year}-${month}-01`);
   const today = new Date();
 
   return expiryDate > today;
+};
+
+export const isValidExpiryDateFormat = (format:string):boolean => {
+  if (format) {
+    return ALLOWED_EXPIRY_DATE_FORMATS.includes(format);
+  }
+  return false;
 };
 
 export const validateInsertRecords = (recordObj: IInsertRecordInput, options: any) => {

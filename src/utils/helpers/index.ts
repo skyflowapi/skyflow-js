@@ -65,3 +65,7 @@ export function fillUrlWithPathAndQueryParams(url:string,
   }
   return filledUrl;
 }
+
+export function removeSpaces(inputString:string) {
+  return inputString.trim().replace(/[\s]/g, '');
+}

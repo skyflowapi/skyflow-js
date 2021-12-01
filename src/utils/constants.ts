@@ -256,6 +256,14 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.EMPTY_ELEMENT_IN_MOUNT,
   },
+  INVALID_EXPIRATION_DATE_FORMAT: {
+    code: 400,
+    description: logs.errorLogs.INVALID_EXPIRATION_DATE_FORMAT,
+  },
+  REVEAL_ELEMENT_ERROR_STATE: {
+    code: 400,
+    description: logs.errorLogs.REVEAL_ELEMENT_ERROR_STATE,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;
