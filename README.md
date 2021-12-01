@@ -127,6 +127,7 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 -  [**Using Skyflow Elements to collect data**](#using-skyflow-elements-to-collect-data)
 -  [**Using validations on Collect Elements**](#validations)
 -  [**Event Listener on Collect Elements**](#event-listener-on-collect-elements)
+-  [**UI Error for Collect Eements**](#ui-error-for-collect-elements)
 ## Inserting data into the vault
 
 To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes a dictionary of optional parameters for the insertion. See below: 
@@ -213,7 +214,9 @@ const collectElement =  {
    validations:[]               // optional array of validation rules
 }
 ```
-The `table` and `column` fields indicate which table and column in the vault the Element corresponds to. **Note**: 
+The `table` and `column` fields indicate which table and column in the vault the Element corresponds to. 
+
+**Note**: 
 -  Use dot delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`)
 -  `table` and `column` are optional only if the element is being used in invokeConnection()
 
@@ -284,7 +287,31 @@ Finally, the `type` field takes a Skyflow ElementType. Each type applies the app
 
 The `INPUT_FIELD` type is a custom UI element without any built-in validations.  See the section on [validations](#validations) for more information on validations.
 
-Once the Element object has been defined, add it to the container using the `create(element, options)` method as shown below. The `element` param takes a Skyflow Element object as defined above and the `options` parameter takes a dictionary of optional parameters as described below: 
+Along with CollectElement we can define other options which takes a dictionary of optional parameters as described below:
+
+```javascript
+const options = {
+  required: false,  //optional, indicates whether the field is marked as required. Defaults to 'false'
+  enableCardIcon: true // optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
+  format: String //optinal, format for the element (only applicable currently for EXPIRATION_DATE ElementType)
+}
+```
+
+`required` parameter indicates whether the field is marked as required or not. If not provided, it defaults to false
+
+`enableCardIcon` paramenter indicates whether the icon is visible for the CARD_NUMBER element, defaults to true
+
+`format` parameter takes string value and indicates the format pattern applicable to the element type. It is currently applicable to EXPIRATION_DATE element type only, the values that are accepted are
+
+- `mm/yy`
+- `mm/yyyy`
+- `yy/mm`
+- `yyyy/mm`
+
+`NOTE` : If not specified or invalid value is passed to the format for EXPIRATION_DATE element, then it defaults to mm/yy format.
+
+
+Once the Element object and options has been defined, add it to the container using the `create(element, options)` method as shown below. The `element` param takes a Skyflow Element object and options as defined above:
 
 ```javascript
 const collectElement =  {
@@ -301,8 +328,9 @@ const collectElement =  {
 }
 
 const options = {
-  required: false,  //indicates whether the field is marked as required. Defaults to 'false'
-  enableCardIcon: true // indicates whether card icon should be enabled (only for CARD_NUMBER type Element)
+  required: false,  //optional, indicates whether the field is marked as required. Defaults to 'false'
+  enableCardIcon: true // optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
+  format: String //optinal, format for the element (only applicable currently for EXPIRATION_DATE ElementType)
 }
 
 const element = container.create(collectElement, options)
@@ -591,7 +619,7 @@ values of SkyflowElements will be returned in elementstate object only when `env
 
 ##### Sample code snippet for using listeners
 ```javascript
-//create skyflow client with loglevel:"DEBUG"
+//create skyflow client
 const skyflowClient = Skyflow.init({
    vaultID: <VAULT_ID>,          
    vaultURL: <VAULT_URL>,
@@ -641,12 +669,41 @@ cardNumber.on(Skyflow.EventName.CHANGE,(state) => {
 }
 ```
 
+### UI Error for Collect Elements
+
+Helps to display custom error messages on the Skyflow Elements through the methods `setError` and `resetError` on the elements.
+
+`setError(error : String)` method is used to set the error text for the element, when this method is trigerred, all the current errors present on the element will be overridden with the custom error message passed. This error will be displayed on the element until `resetError()` is trigerred on the same element.
+
+`resetError()` method is used to clear the custom error message that is set using `setError`.
+
+##### Sample code snippet for setError and resetError
+
+```javascript
+
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
+
+const cardNumber = container.create({
+    table: "pii_fields",
+    column: "primary_card.card_number",
+    type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+//Set custom error
+cardNumber.setError("custom error");
+
+//reset custom error
+cardNumber.resetError();
+
+```
+
 ---
 
 
 # Securely revealing data client-side
 -  [**Retrieving data from the vault**](#retrieving-data-from-the-vault)
 -  [**Using Skyflow Elements to reveal data**](#using-skyflow-elements-to-reveal-data)
+-  [**UI Error for Reveal Elements**](#ui-error-for-reveal-elements)
 
 ## Retrieving data from the vault
 
@@ -780,7 +837,7 @@ const revealElement = {
   inputStyles: {},                    //optional styles to be applied to the element
   labelStyles: {},                    //optional, styles to be applied to the label of the reveal element
   errorTextStyles: {},                //optional styles that will be applied to the errorText of the reveal element
-  label: "string",                     //label for the form element
+  label: "string",                    //optional, label for the form element
   altText: "string"                   //optional, string that is shown before reveal, will show token if altText is not provided
 }
 ```
@@ -920,6 +977,31 @@ The response below shows that some tokens assigned to the reveal elements get re
    }   
   ]
 }
+```
+
+### UI Error for Reveal Elements
+Helps to display custom error messages on the Skyflow Elements through the methods `setError` and `resetError` on the elements.
+
+`setError(error : String)` method is used to set the error text for the element, when this method is trigerred, all the current errors present on the element will be overridden with the custom error message passed. This error will be displayed on the element until `resetError()` is trigerred on the same element.
+
+`resetError()` method is used to clear the custom error message that is set using `setError`.
+
+##### Sample code snippet for setError and resetError
+
+```javascript
+
+const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
+
+const cardNumber = container.create({
+   token: "89024714-6a26-4256-b9d4-55ad69aa4047",
+});
+
+//Set custom error
+cardNumber.setError("custom error");
+
+//reset custom error
+cardNumber.resetError();
+
 ```
 
 # Securely invoking Connections client-side
