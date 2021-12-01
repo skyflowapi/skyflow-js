@@ -469,7 +469,7 @@ Every Collect Element except of type `INPUT_FIELD` has a set of default validati
 - `CARD_NUMBER`: Card number validation with checkSum algorithm(Luhn algorithm), available card lengths for defined card types
 - `CARD_HOLDER_NAME`: Name should be 2 or more symbols, valid characters should match pattern -  `^([a-zA-Z\\ \\,\\.\\-\\']{2,})$`
 - `CVV`: Card CVV can have 3-4 digits
-- `EXPIRATION_DATE`: Any date starting from current month. By default valid expiration date should be in short year format - `MM/YYYY`
+- `EXPIRATION_DATE`: Any date starting from current month. By default valid expiration date should be in short year format - `MM/YY`
 - `PIN`: Can have 4-12 digits
 
 #### 2. Custom Validations:

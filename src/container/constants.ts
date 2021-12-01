@@ -53,6 +53,8 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
   GET_BEARER_TOKEN: 'GET_BEARER_TOKEN',
   GET_COLLECT_ELEMENT: 'GET_COLLECT_ELEMENT',
   GET_REVEAL_ELEMENT: 'GET_REVEAL_ELEMENT',
+  COLLECT_ELEMENT_SET_ERROR: 'COLLECT_ELEMENT_SET_ERROR',
+  REVEAL_ELEMENT_SET_ERROR: 'REVEAL_ELEMENT_SET_ERROR',
 };
 
 export const ELEMENT_EVENTS_TO_CONTAINER = {
@@ -68,6 +70,32 @@ export enum ElementType {
   INPUT_FIELD = 'INPUT_FIELD',
   PIN = 'PIN',
 }
+
+export enum CardType {
+  VISA = 'VISA',
+  MASTERCARD = 'MASTERCARD',
+  AMEX = 'AMEX',
+  DINERS_CLUB = 'DINERS_CLUB',
+  DISCOVER = 'DISCOVER',
+  JCB = 'JCB',
+  MAESTRO = 'MAESTRO',
+  UNIONPAY = 'UNIONPAY',
+  HIPERCARD = 'HIPERCARD',
+  DEFAULT = 'DEFAULT',
+}
+
+export const CARD_NUMBER_MASK = {
+  [CardType.AMEX]: ['XXXX XXXXXX XXXXX', { X: '[0-9]' }],
+  [CardType.VISA]: ['XXXX XXXX XXXX XXXX', { X: '[0-9]' }],
+  [CardType.MASTERCARD]: ['XXXX XXXX XXXX XXXX', { X: '[0-9]' }],
+  [CardType.DISCOVER]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
+  [CardType.DINERS_CLUB]: ['XXXX XXXXXX XXXXXX', { X: '[0-9]' }],
+  [CardType.JCB]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
+  [CardType.MAESTRO]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
+  [CardType.UNIONPAY]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
+  [CardType.HIPERCARD]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
+  [CardType.DEFAULT]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
+};
 
 export const ELEMENTS = {
   text: {
@@ -238,20 +266,20 @@ export const ELEMENTS = {
       type: 'text',
     },
     sensitive: true,
-    // mask: ["XXXX  XXXX XXXX XXXX", { X: "[0-9]" }],
+    mask: CARD_NUMBER_MASK[CardType.DEFAULT],
     regex: /$|^[\s]*?([0-9]{2,6}[ -]?){3,5}[\s]*/,
   },
   [ElementType.EXPIRATION_DATE]: {
-    name: 'expirationDate',
+    name: 'EXPIRATION_DATE',
     attributes: {
       type: 'text',
     },
     sensitive: true,
     // mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
-    regex: /^(0[1-9]|1[0-2])\/([0-9]{4})$/,
+    // regex: /^(0[1-9]|1[0-2])\/([0-9]{4})$/,
   },
   [ElementType.CVV]: {
-    name: 'cvv',
+    name: 'CVV',
     attributes: {
       type: 'text',
       maxLength: 4,
@@ -435,19 +463,6 @@ export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
 
 export const connectionConfigParseKeys = ['pathParams', 'queryParams', 'requestBody'];
 
-export enum CardType {
-  VISA = 'VISA',
-  MASTERCARD = 'MASTERCARD',
-  AMEX = 'AMEX',
-  DINERS_CLUB = 'DINERS_CLUB',
-  DISCOVER = 'DISCOVER',
-  JCB = 'JCB',
-  MAESTRO = 'MAESTRO',
-  UNIONPAY = 'UNIONPAY',
-  HIPERCARD = 'HIPERCARD',
-  DEFAULT = 'DEFAULT',
-}
-
 export const CARD_TYPE_REGEX = {
   [CardType.VISA]: { regex: /^4\d*/, maxCardLength: 19, cardLengthRange: [13, 16] },
   [CardType.MASTERCARD]: { regex: /^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[0-1]|2720)\d*/, maxCardLength: 16, cardLengthRange: [16] },
@@ -473,3 +488,12 @@ export const CARD_ENCODED_ICONS = {
   [CardType.UNIONPAY]: `url(${unionPayIcon})`,
   [CardType.VISA]: `url(${visaCardIcon})`,
 };
+
+export const EXPIRY_DATE_MASK = {
+  'MM/YYYY': ['XY/YYYY', { X: '[0-1]', Y: '[0-9]' }],
+  'MM/YY': ['XY/YY', { X: '[0-1]', Y: '[0-9]' }],
+  'YYYY/MM': ['YYYY/XY', { X: '[0-1]', Y: '[0-9]' }],
+  'YY/MM': ['YY/XY', { X: '[0-1]', Y: '[0-9]' }],
+};
+export const DEFAULT_EXPIRATION_DATE_FORMAT = 'MM/YY';
+export const ALLOWED_EXPIRY_DATE_FORMATS = [DEFAULT_EXPIRATION_DATE_FORMAT, 'YYYY/MM', 'YY/MM', 'MM/YYYY'];

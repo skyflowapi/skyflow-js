@@ -40,6 +40,7 @@ if (typeof window.console === 'undefined') {
       printLog(
         parameterizedString(
           logs.infoLogs.COLLECT_ELEMET_START,
+          'index-internal',
           getElementName(root.name),
         ),
         MessageType.LOG,
@@ -51,6 +52,7 @@ if (typeof window.console === 'undefined') {
       printLog(
         parameterizedString(
           logs.infoLogs.REVEAL_ELEMENT_START,
+          'index-internal',
           atob(names[1]),
         ),
         MessageType.LOG,

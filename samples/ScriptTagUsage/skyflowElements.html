@@ -4,9 +4,8 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Collect Element Listeners</title>
+    <title>Skyflow Elements</title>
     <script src="https://js.skyflow.com/v1/index.js"></script>
-
     <style>
       body {
         display: flex;
@@ -36,9 +35,23 @@
         <pre id="collectResponse"></pre>
       </div>
     </div>
+    <!-- Reveal Part-->
+    <div id="revealView" class="reveal-view">
+      <h3>Reveal Elements</h3>
+      <div id="revealCardNumber" class="empty-div"></div>
+      <div id="revealCvv" class="empty-div"></div>
+      <div id="revealExpiryDate" class="empty-div"></div>
+      <div id="revealCardholderName" class="empty-div"></div>
+      <div>
+        <button id="revealPCIData">Reveal PCI Data</button>
+      </div>
+    </div>
 
     <!-- Javascript -->
     <script>
+    try{
+      const revealView = document.getElementById("revealView");
+      revealView.style.visibility = "hidden";
       const skyflow = Skyflow.init({
         vaultID: "<VAULT_ID>",
         vaultURL: "<VAULT_URL>",
@@ -58,10 +71,7 @@
           });
         },
         options:{
-          logLevel:Skyflow.LogLevel.ERROR,
-        // actual value of element can only be accessed inside the handler 
-        // when the env is set to DEV.
-        // make sure the env is set to PROD when using skyflow-js in production
+          logLevel:Skyflow.LogLevel.DEBUG,
           env:Skyflow.Env.DEV,
         }
       });
@@ -144,27 +154,10 @@
       expiryDateElement.mount("#collectExpiryDate");
       cardHolderNameElement.mount("#collectCardholderName");
 
-      // add listeners to Collect Elements
-
-      // add READY EVENT Listener 
-      cardNumberElement.on(Skyflow.EventName.READY,(readyState)=>{
-        console.log("Ready Event Triggered",readyState);
-      });
-
-      // add CHANGE EVENT Listener
-      cvvElement.on(Skyflow.EventName.CHANGE,(changeState)=>{
-        console.log("CHANGE Event Triggered",changeState);
-      });
-
-      // add FOCUS EVENT Listener
-      expiryDateElement.on(Skyflow.EventName.FOCUS,(focusState)=>{
-        console.log("FOCUS Event Triggered",focusState);
-      });
-
-      // add BLUR EVENT Listener
-      cardHolderNameElement.on(Skyflow.EventName.BLUR,(blurState)=>{
-        console.log("BLUR Event Triggered",blurState);
-      });
+      // add event listener to collect element
+      cardHolderNameElement.on(Skyflow.EventName.CHANGE,(state)=>{
+        console.log(state);
+      })
 
       // collect all elements data
       const collectButton = document.getElementById("collectPCIData");
@@ -175,12 +168,82 @@
             .then((response) => {
               document.getElementById("collectResponse").innerHTML =
                 JSON.stringify(response, null, 2);
+
+              revealView.style.visibility = "visible";
+
+              const revealStyleOptions = {
+                inputStyles: {
+                  base: {
+                    border: "1px solid #eae8ee",
+                    padding: "10px 16px",
+                    borderRadius: "4px",
+                    color: "#1d1d1d",
+                    marginTop: "4px",
+                  },
+                },
+                labelStyles: {
+                  base: {
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                  },
+                },
+                errorTextStyles: {
+                  base: {
+                    color: "#f44336",
+                  },
+                },
+              };
+
+              // create Reveal Elements With Tokens
+              const fieldsTokenData = response.records[0].fields;
+              const revealContainer = skyflow.container(
+                Skyflow.ContainerType.REVEAL
+              );
+              const revealCardNumberElement = revealContainer.create({
+                token: fieldsTokenData.primary_card.card_number,
+                label: "Card Number",
+                ...revealStyleOptions,
+              });
+              revealCardNumberElement.mount("#revealCardNumber");
+
+              const revealCardCvvElement = revealContainer.create({
+                token: fieldsTokenData.primary_card.cvv,
+                label: "CVV",
+                ...revealStyleOptions,
+                altText: "###",
+              });
+              revealCardCvvElement.mount("#revealCvv");
+
+              const revealCardExpiryElement = revealContainer.create({
+                token: fieldsTokenData.expiry_date,
+                label: "Card Expiry Date",
+                ...revealStyleOptions,
+              });
+              revealCardExpiryElement.mount("#revealExpiryDate");
+
+              const revealCardholderNameElement = revealContainer.create({
+                token: fieldsTokenData.first_name,
+                label: "Card Holder Name",
+                ...revealStyleOptions,
+              });
+              revealCardholderNameElement.mount("#revealCardholderName");
+
+              const revealButton = document.getElementById("revealPCIData");
+
+              if (revealButton) {
+                revealButton.addEventListener("click", () => {
+                  revealContainer.reveal();
+                });
+              }
             })
             .catch((err) => {
               console.log(err);
             });
         });
       }
+    }catch(err){
+      console.log(err);
+    }
     </script>
   </body>
 </html>

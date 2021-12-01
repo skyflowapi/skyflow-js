@@ -14,6 +14,7 @@ import {
 import logs from '../../../utils/logs';
 import { Context, MessageType } from '../../../utils/common';
 
+const CLASS_NAME = 'RevealFrame';
 class RevealFrame {
   static revealFrame: RevealFrame;
 
@@ -107,7 +108,7 @@ class RevealFrame {
         this.#revealedValue = responseValue;
         this.#dataElememt.innerText = responseValue;
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
-          this.#record.token), MessageType.LOG, this.#context.logLevel);
+          CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
         bus
           .target(window.location.origin)
           .off(
@@ -115,24 +116,7 @@ class RevealFrame {
             sub,
           );
       } else {
-        this.#errorElement.innerText = REVEAL_ELEMENT_ERROR_TEXT;
-        if (
-          Object.prototype.hasOwnProperty.call(this.#record, 'errorTextStyles')
-          && Object.prototype.hasOwnProperty.call(this.#record.errorTextStyles, STYLE_TYPE.BASE)
-        ) {
-          this.#errorTextStyles = this.#record.errorTextStyles;
-          this.#errorTextStyles[STYLE_TYPE.BASE] = {
-            ...REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES[STYLE_TYPE.BASE],
-            ...this.#errorTextStyles[STYLE_TYPE.BASE],
-          };
-          getCssClassesFromJss(this.#errorTextStyles, 'error');
-        } else {
-          getCssClassesFromJss(
-            REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
-            'error',
-          );
-        }
-        this.#elementContainer.appendChild(this.#errorElement);
+        this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
       }
     };
 
@@ -142,6 +126,12 @@ class RevealFrame {
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
         sub,
       );
+
+    bus.on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, (data) => {
+      if (this.#name === data.name) {
+        if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
+      }
+    });
 
     // for connection
     bus.target(window.location.origin).on(
@@ -154,6 +144,27 @@ class RevealFrame {
         }
       },
     );
+  }
+
+  private setRevealError(errorText:string) {
+    this.#errorElement.innerText = errorText;
+    if (
+      Object.prototype.hasOwnProperty.call(this.#record, 'errorTextStyles')
+      && Object.prototype.hasOwnProperty.call(this.#record.errorTextStyles, STYLE_TYPE.BASE)
+    ) {
+      this.#errorTextStyles = this.#record.errorTextStyles;
+      this.#errorTextStyles[STYLE_TYPE.BASE] = {
+        ...REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES[STYLE_TYPE.BASE],
+        ...this.#errorTextStyles[STYLE_TYPE.BASE],
+      };
+      getCssClassesFromJss(this.#errorTextStyles, 'error');
+    } else {
+      getCssClassesFromJss(
+        REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
+        'error',
+      );
+    }
+    this.#elementContainer.appendChild(this.#errorElement);
   }
 }
 

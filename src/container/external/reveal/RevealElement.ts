@@ -17,6 +17,8 @@ import { Context, MessageType } from '../../../utils/common';
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 
+const CLASS_NAME = 'RevealElement';
+
 class RevealElement {
   #iframe: IFrame;
 
@@ -27,6 +29,8 @@ class RevealElement {
   #containerId: string;
 
   #isMounted:boolean = false;
+
+  #isClientSetError:boolean = false;
 
   #context: Context;
 
@@ -41,7 +45,7 @@ class RevealElement {
       this.#containerId,
       this.#context.logLevel,
     );
-    printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, `${record.token || ''}reveal`), MessageType.LOG, this.#context.logLevel);
+    printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, CLASS_NAME, `${record.token || ''} reveal `), MessageType.LOG, this.#context.logLevel);
   }
 
   mount(domElementSelector) {
@@ -87,6 +91,27 @@ class RevealElement {
   hasToken():boolean {
     if (this.#recordData.token) return true;
     return false;
+  }
+
+  isClientSetError():boolean {
+    return this.#isClientSetError;
+  }
+
+  setError(clientErrorText:string) {
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
+      name: this.#iframe.name,
+      isTriggerError: true,
+      clientErrorText,
+    });
+    this.#isClientSetError = true;
+  }
+
+  resetError() {
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
+      name: this.#iframe.name,
+      isTriggerError: false,
+    });
+    this.#isClientSetError = false;
   }
 }
 

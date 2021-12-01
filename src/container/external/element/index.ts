@@ -19,7 +19,9 @@ import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { Context, MessageType } from '../../../utils/common';
+import { formatFrameNameToId } from '../../../utils/helpers';
 
+const CLASS_NAME = 'Element';
 class Element {
   elementType: string;
 
@@ -104,7 +106,7 @@ class Element {
     this.#onDestroy(destroyCallback);
     this.#onUpdate(updateCallback);
     printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT,
-      getElementName(this.#iframe.name)), MessageType.LOG,
+      CLASS_NAME, getElementName(this.#iframe.name)), MessageType.LOG,
     this.#context.logLevel);
   }
 
@@ -126,7 +128,7 @@ class Element {
           sub,
         );
         this.#mounted = true;
-        printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, getElementName(this.#iframe.name))} `, MessageType.LOG,
+        printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, CLASS_NAME, getElementName(this.#iframe.name))} `, MessageType.LOG,
           this.#context.logLevel);
         this.#updateCallbacks.forEach((func) => func());
         this.#updateCallbacks = [];
@@ -403,6 +405,23 @@ class Element {
       }
     }
     return true;
+  }
+
+  setError(clientErrorText:string) {
+    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
+      {
+        name: formatFrameNameToId(this.#iframe.name),
+        isTriggerError: true,
+        clientErrorText,
+      });
+  }
+
+  resetError() {
+    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
+      {
+        name: formatFrameNameToId(this.#iframe.name),
+        isTriggerError: false,
+      });
   }
 }
 
