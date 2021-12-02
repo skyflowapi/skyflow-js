@@ -6,5 +6,5 @@ $ npm install
 ```
 run the sample 
 ```
-npm start
+$ npm start
 ```

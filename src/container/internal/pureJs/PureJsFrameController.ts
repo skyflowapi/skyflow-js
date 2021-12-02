@@ -182,8 +182,8 @@ class PureJsFrameController {
             rootResolve(
               constructInsertRecordResponse(
                 response,
-                options.tokens,
-                records.records,
+                options?.tokens,
+                records?.records,
               ),
             );
           })

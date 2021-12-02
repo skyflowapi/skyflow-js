@@ -689,7 +689,7 @@ export class IFrameForm {
               records: finalRequest,
             },
             requestMethod: 'POST',
-            url: `vault/v1/vaults/${client.config.vaultID}`,
+            url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
             headers: {
               Authorization: `Bearer ${authToken}`,
               'Content-Type': 'application/json',

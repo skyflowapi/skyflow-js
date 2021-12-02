@@ -136,6 +136,10 @@ class PureJsController {
           validateInsertRecords(records, options);
           if (options) {
             options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
+          } else {
+            options = {
+              tokens: true,
+            };
           }
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)

@@ -171,7 +171,7 @@ const logs = {
     INVALID_IFRAME: 'Error occured while creating an iframe',
     INVALID_FIELD: 'Invalid Field.',
     FRAME_NOT_FOUND: 'Interface: collect element - %s1 frame not found:',
-    COMPLETE_AND_VALID_INPUTS: 'nterface: collect container - Provide complete and valid inputs for %s1',
+    COMPLETE_AND_VALID_INPUTS: 'Interface: collect container - Provide complete and valid inputs for %s1',
     REQUIRED_PARAMS_NOT_PROVIDED: 'Interface: collect element - Required params are not provided.',
     INVALID_EVENT_TYPE: 'Interface: collect element - Provide a valid event type.',
     INVALID_EVENT_LISTENER: 'Interface: "on" on CollectElement - Provide valid event listener.',

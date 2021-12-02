@@ -208,7 +208,7 @@ const SKYFLOW_ERROR_CODE = {
   },
   UNKNOWN_ERROR: { code: 400, description: logs.errorLogs.UNKNOWN_ERROR },
   CONNECTION_ERROR: { code: 400, description: logs.errorLogs.CONNECTION_ERROR },
-  NETWORK_ERROR: { code: 400, description: logs.errorLogs.NETWORK_ERROR },
+  NETWORK_ERROR: { code: 500, description: logs.errorLogs.NETWORK_ERROR },
   COMPLETE_AND_VALID_INPUTS: { code: 400, description: logs.errorLogs.COMPLETE_AND_VALID_INPUTS },
   RESPONSE_BODY_KEY_MISSING: { code: 404, description: logs.errorLogs.RESPONSE_BODY_KEY_MISSING },
   INVALID_VALIDATIONS_TYPE: { code: 400, description: logs.errorLogs.INVALID_VALIDATIONS_TYPE },
