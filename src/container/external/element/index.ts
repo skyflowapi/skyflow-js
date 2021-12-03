@@ -138,16 +138,7 @@ class Element {
   };
 
   unmount = () => {
-    if (this.#isSingleElementAPI) {
-      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
-        name: this.#iframe.name,
-        options: {
-          ...this.#elements[0],
-          ...(this.#elements[0].altText ? { value: this.#elements[0].altText } : { value: '' }),
-        },
-        isSingleElementAPI: true,
-      });
-    }
+    this.#iframe.unmount();
   };
 
   update = (group) => {
