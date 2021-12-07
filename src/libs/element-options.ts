@@ -251,7 +251,7 @@ export const formatOptions = (elementType, options, logLevel) => {
   if (elementType === ELEMENTS.EXPIRATION_DATE.name) {
     const isvalidFormat = isValidExpiryDateFormat(formattedOptions.format);
     if (!isvalidFormat) {
-      printLog(parameterizedString(logs.errorLogs.INVALID_EXPIRATION_DATE_FORMAT,
+      printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
         ALLOWED_EXPIRY_DATE_FORMATS.toString()), MessageType.WARN, logLevel);
     }
     formattedOptions = {

@@ -103,7 +103,7 @@ class RevealContainer {
         (data) => {
           this.#mountedRecords.push(data as any);
 
-          this.#isElementsMounted = this.#mountedRecords.length === this.#revealRecords.length;
+          this.#isElementsMounted = this.#mountedRecords.length === this.#revealElements.length;
 
           if (this.#isRevealCalled && this.#isElementsMounted) {
             // eslint-disable-next-line no-underscore-dangle
@@ -120,7 +120,7 @@ class RevealContainer {
   }
 
   create(record: IRevealElementInput) {
-    this.#revealRecords.push(record);
+    // this.#revealRecords.push(record);
     const revealElement = new RevealElement(record, this.#metaData,
       this.#containerId, this.#context);
     this.#revealElements.push(revealElement);
@@ -135,13 +135,13 @@ class RevealContainer {
           printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
             MessageType.LOG,
             this.#context.logLevel);
-
-          validateRevealElementRecords(this.#revealRecords);
           this.#revealElements.forEach((currentElement) => {
             if (currentElement.isClientSetError()) {
               throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
             }
+            this.#revealRecords.push(currentElement.getRecordData());
           });
+          validateRevealElementRecords(this.#revealRecords);
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)
             .emit(
@@ -180,7 +180,6 @@ class RevealContainer {
         printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
           MessageType.LOG,
           this.#context.logLevel);
-        validateRevealElementRecords(this.#revealRecords);
         const elementMountTimeOut = setTimeout(() => {
           printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL, MessageType.ERROR,
             this.#context.logLevel);
@@ -191,7 +190,9 @@ class RevealContainer {
             clearTimeout(elementMountTimeOut);
             throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
           }
+          this.#revealRecords.push(currentElement.getRecordData());
         });
+        validateRevealElementRecords(this.#revealRecords);
         this.#eventEmmiter.on(
           ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
           () => {

@@ -436,10 +436,6 @@ export class FrameElement {
       this.injectInputStyles(errorStyles, 'error');
     }
 
-    // if (this.domError && options.clientErrorText) {
-    //   this.domError.innerText = options.clientErrorText;
-    // }
-
     if (this.domLabel) this.domLabel.textContent = this.options.label;
 
     $(document).ready(() => {

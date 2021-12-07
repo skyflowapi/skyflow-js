@@ -6,6 +6,7 @@ import {
   REVEAL_ELEMENT_LABEL_DEFAULT_STYLES,
   REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
   REVEAL_ELEMENT_DIV_STYLE,
+  REVEAL_ELEMENT_OPTIONS_TYPES,
 } from '../../constants';
 import getCssClassesFromJss from '../../../libs/jss-styles';
 import {
@@ -89,10 +90,7 @@ class RevealFrame {
         getCssClassesFromJss(REVEAL_ELEMENT_LABEL_DEFAULT_STYLES, 'label');
       }
     }
-
-    if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) this.#dataElememt.innerText = this.#record.altText;
-    else if (Object.prototype.hasOwnProperty.call(this.#record, 'token')) this.#dataElememt.innerText = this.#record.token;
-
+    this.updateDataView();
     if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
       this.#inputStyles = this.#record.inputStyles;
       getCssClassesFromJss(this.#inputStyles, 'content');
@@ -109,15 +107,16 @@ class RevealFrame {
         this.#dataElememt.innerText = responseValue;
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
           CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
-        bus
-          .target(window.location.origin)
-          .off(
-            ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
-            sub,
-          );
+        // bus
+        //   .target(window.location.origin)
+        //   .off(
+        //     ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
+        //     sub,
+        //   );
       } else {
         this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
       }
+      this.updateDataView();
     };
 
     bus
@@ -132,6 +131,7 @@ class RevealFrame {
         if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
       }
     });
+    this.updateRevealElementOptions();
 
     // for connection
     bus.target(window.location.origin).on(
@@ -165,6 +165,41 @@ class RevealFrame {
       );
     }
     this.#elementContainer.appendChild(this.#errorElement);
+  }
+
+  private updateRevealElementOptions() {
+    bus.target(document.referrer.split('/').slice(0, 3).join('/')).on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, (data) => {
+      if (data.name === this.#name) {
+        if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT) {
+          if (data.updatedValue) {
+            this.#record = {
+              ...this.#record,
+              altText: data.updatedValue,
+            };
+          } else {
+            delete this.#record.altText;
+          }
+
+          this.updateDataView();
+        } else if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN) {
+          this.#record = {
+            ...this.#record,
+            token: data.updatedValue,
+          };
+          this.updateDataView();
+        }
+      }
+    });
+  }
+
+  private updateDataView() {
+    if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
+      this.#dataElememt.innerText = this.#record.altText;
+    } else if (this.#revealedValue) {
+      this.#dataElememt.innerText = this.#revealedValue;
+    } else if (Object.prototype.hasOwnProperty.call(this.#record, 'token')) {
+      this.#dataElememt.innerText = this.#record.token;
+    }
   }
 }
 

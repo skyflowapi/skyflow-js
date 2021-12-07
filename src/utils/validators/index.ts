@@ -12,8 +12,11 @@ import {
   IGetByIdInput,
   IConnectionConfig,
   RequestMethod,
+  MessageType,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
+import logs from '../logs';
+import { printLog } from '../logsHelper';
 
 export const validateCreditCardNumber = (cardNumber: string) => {
   const value = cardNumber.replace(/[\s-]/g, '');
@@ -240,11 +243,11 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
     //   throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
     // }
 
-    if (Object.prototype.hasOwnProperty.call(record, 'label') && record.label && !(typeof record.label === 'string' || record.label instanceof String)) {
+    if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_LABEL_REVEAL);
     }
 
-    if (Object.prototype.hasOwnProperty.call(record, 'altText') && record.altText && !(typeof record.altText === 'string' || record.altText instanceof String)) {
+    if (Object.prototype.hasOwnProperty.call(record, 'altText') && typeof record.altText !== 'string') {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_REVEAL);
     }
   });
@@ -330,11 +333,14 @@ export const validateInitConfig = (initConfig: ISkyflow) => {
   }
 };
 
-export const validateCollectElementInput = (input: CollectElementInput) => {
+export const validateCollectElementInput = (input: CollectElementInput, logLevel) => {
   if (!Object.prototype.hasOwnProperty.call(input, 'type')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_TYPE, [], true);
   }
   if (!input.type) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_TYPE, [], true);
+  }
+  if (Object.prototype.hasOwnProperty.call(input, 'altText')) {
+    printLog(logs.warnLogs.COLLECT_ALT_TEXT_DEPERECATED, MessageType.WARN, logLevel);
   }
 };

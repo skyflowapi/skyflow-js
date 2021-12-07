@@ -18,7 +18,7 @@ import {
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
-import { Context, MessageType } from '../../../utils/common';
+import { Context, Env, MessageType } from '../../../utils/common';
 import { formatFrameNameToId } from '../../../utils/helpers';
 
 const CLASS_NAME = 'Element';
@@ -89,7 +89,7 @@ class Element {
         isComplete: false,
         isValid: false,
         isFocused: false,
-        value: this.#doesReturnValue ? element.altText : undefined,
+        value: this.#doesReturnValue ? '' : undefined,
         elementType: element.elementType,
         name: element.elementName,
       });
@@ -413,6 +413,44 @@ class Element {
         name: formatFrameNameToId(this.#iframe.name),
         isTriggerError: false,
       });
+  }
+
+  setValue(elementValue:string) {
+    if (this.#context.env === Env.PROD) {
+      printLog(parameterizedString(logs.warnLogs.UNABLE_TO_SET_VALUE_IN_PROD_ENV,
+        this.#elements[0].elementType),
+      MessageType.WARN, this.#context.logLevel);
+      return;
+    }
+    if (this.#isSingleElementAPI) {
+      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+        name: this.#iframe.name,
+        options: {
+          ...this.#elements[0],
+          value: elementValue,
+        },
+        isSingleElementAPI: true,
+      });
+    }
+  }
+
+  clearValue() {
+    if (this.#context.env === Env.PROD) {
+      printLog(parameterizedString(logs.warnLogs.UNABLE_TO_CLEAR_VALUE_IN_PROD_ENV,
+        this.#elements[0].elementType),
+      MessageType.WARN, this.#context.logLevel);
+      return;
+    }
+    if (this.#isSingleElementAPI) {
+      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+        name: this.#iframe.name,
+        options: {
+          ...this.#elements[0],
+          value: '',
+        },
+        isSingleElementAPI: true,
+      });
+    }
   }
 }
 

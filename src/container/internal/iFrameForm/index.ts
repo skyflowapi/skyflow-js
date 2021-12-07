@@ -141,7 +141,7 @@ export class IFrameFormElement extends EventEmitter {
   changeFocus = (focus: boolean) => {
     this.state.isFocused = focus;
     // this.sendChangeStatus();
-    this.setValue(this.state.value, true);
+    // this.setValue(this.state.value, true);
     // if (this.mask) {
     //   this.setValue(this.state.value, true);
     // }

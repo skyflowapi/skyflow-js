@@ -105,7 +105,7 @@ class CollectContainer {
     enableCardIcon: true,
     format: DEFAULT_EXPIRATION_DATE_FORMAT,
   }) => {
-    validateCollectElementInput(input);
+    validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
     const elementGroup = {
@@ -115,11 +115,7 @@ class CollectContainer {
             {
               elementType: input.type,
               name: input.column,
-              ...(input.altText ? { value: input.altText } : {}),
               ...input,
-              // required: false,
-              // enableCardIcon: true,
-              // format: DEFAULT_EXPIRATION_DATE_FORMAT,
               ...formattedOptions,
               validations,
             },

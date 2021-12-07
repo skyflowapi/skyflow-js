@@ -195,8 +195,13 @@ const logs = {
     ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE: 'Interface: collect element - collect element is not mounted in ValidationRule params at index %s1 in validations array',
     EMPTY_ELEMENT_IN_MOUNT: 'Interface: mount element with type %s1 - Mount cannot be empty.',
     VALIDATION_FAILED: 'Validation failed',
-    INVALID_EXPIRATION_DATE_FORMAT: 'ExpiryDate format must be in one of %s1 ,the format is set to default MM/YY',
     REVEAL_ELEMENT_ERROR_STATE: 'unable to reveal, since one or more element(s) have setError',
+  },
+  warnLogs: {
+    INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1 ,the format is set to default MM/YY',
+    UNABLE_TO_SET_VALUE_IN_PROD_ENV: '%s1 setValue() cannot invoked while in PROD env. It is Not Recommeded',
+    UNABLE_TO_CLEAR_VALUE_IN_PROD_ENV: '%s1 clearValue() cannot invoked while in PROD env. It is Not Recommeded',
+    COLLECT_ALT_TEXT_DEPERECATED: 'altText is DEPERECATED, passing altText will not have any effect',
   },
 };
 

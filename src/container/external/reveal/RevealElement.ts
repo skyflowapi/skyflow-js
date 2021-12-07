@@ -5,6 +5,7 @@ import {
   ELEMENT_EVENTS_TO_CONTAINER,
   ELEMENT_EVENTS_TO_IFRAME,
   FRAME_REVEAL,
+  REVEAL_ELEMENT_OPTIONS_TYPES,
 } from '../../constants';
 import IFrame from '../element/IFrame';
 import { IRevealElementInput } from '../RevealContainer';
@@ -40,7 +41,7 @@ class RevealElement {
     this.#containerId = containerId;
     this.#context = context;
     this.#iframe = new IFrame(
-      `${FRAME_REVEAL}:${btoa(record.token || uuid())}`,
+      `${FRAME_REVEAL}:${btoa(uuid())}`,
       { metaData },
       this.#containerId,
       this.#context.logLevel,
@@ -97,6 +98,10 @@ class RevealElement {
     return this.#isClientSetError;
   }
 
+  getRecordData() {
+    return this.#recordData;
+  }
+
   setError(clientErrorText:string) {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
       name: this.#iframe.name,
@@ -112,6 +117,34 @@ class RevealElement {
       isTriggerError: false,
     });
     this.#isClientSetError = false;
+  }
+
+  setAltText(altText:string) {
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
+      name: this.#iframe.name,
+      updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
+      updatedValue: altText,
+    });
+  }
+
+  clearAltText() {
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
+      name: this.#iframe.name,
+      updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
+      updatedValue: null,
+    });
+  }
+
+  setToken(token:string) {
+    this.#recordData = {
+      ...this.#recordData,
+      token,
+    };
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
+      name: this.#iframe.name,
+      updateType: REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN,
+      updatedValue: token,
+    });
   }
 }
 
