@@ -249,14 +249,16 @@ export const formatOptions = (elementType, options, logLevel) => {
     ...options,
   };
   if (elementType === ELEMENTS.EXPIRATION_DATE.name) {
-    const isvalidFormat = isValidExpiryDateFormat(formattedOptions.format);
+    const isvalidFormat = formattedOptions.format
+    && isValidExpiryDateFormat(formattedOptions.format.toUpperCase());
     if (!isvalidFormat) {
       printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
         ALLOWED_EXPIRY_DATE_FORMATS.toString()), MessageType.WARN, logLevel);
     }
     formattedOptions = {
       ...formattedOptions,
-      format: isvalidFormat ? formattedOptions.format : DEFAULT_EXPIRATION_DATE_FORMAT,
+      format: isvalidFormat ? formattedOptions.format.toUpperCase()
+        : DEFAULT_EXPIRATION_DATE_FORMAT,
     };
   }
 
