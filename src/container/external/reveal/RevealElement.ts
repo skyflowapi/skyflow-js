@@ -146,6 +146,10 @@ class RevealElement {
       updatedValue: token,
     });
   }
+
+  unmount() {
+    this.#iframe.unmount();
+  }
 }
 
 export default RevealElement;

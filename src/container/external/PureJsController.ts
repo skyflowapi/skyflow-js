@@ -8,7 +8,9 @@ import iframer, {
 import { connectionConfigParser } from '../../libs/objectParse';
 import properties from '../../properties';
 import {
-  validateConnectionConfig, validateInsertRecords, validateDetokenizeInput, validateGetByIdInput,
+  validateConnectionConfig, validateInsertRecords,
+  validateDetokenizeInput, validateGetByIdInput,
+  validateInitConfig,
 } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
@@ -67,6 +69,7 @@ class PureJsController {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
+          validateInitConfig(this.#client.config);
           printLog(parameterizedString(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, CLASS_NAME),
             MessageType.LOG,
             this.#context.logLevel);
@@ -96,6 +99,7 @@ class PureJsController {
     }
     return new Promise((resolve, reject) => {
       try {
+        validateInitConfig(this.#client.config);
         printLog(parameterizedString(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, CLASS_NAME),
           MessageType.LOG,
           this.#context.logLevel);
@@ -129,6 +133,7 @@ class PureJsController {
   insert(records, options): Promise<any> {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
+        validateInitConfig(this.#client.config);
         try {
           printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
             this.#context.logLevel);
@@ -167,6 +172,7 @@ class PureJsController {
     }
     return new Promise((resolve, reject) => {
       try {
+        validateInitConfig(this.#client.config);
         printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
           this.#context.logLevel);
 
@@ -204,6 +210,7 @@ class PureJsController {
   getById(getByIdInput: IGetByIdInput) {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
+        validateInitConfig(this.#client.config);
         try {
           printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT, CLASS_NAME),
             MessageType.LOG,
@@ -236,6 +243,7 @@ class PureJsController {
     }
     return new Promise((resolve, reject) => {
       try {
+        validateInitConfig(this.#client.config);
         printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT,
           CLASS_NAME), MessageType.LOG,
         this.#context.logLevel);

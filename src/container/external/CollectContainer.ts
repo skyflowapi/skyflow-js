@@ -31,7 +31,7 @@ import {
   IValidationRule,
   MessageType,
 } from '../../utils/common';
-import { validateAdditionalFieldsInCollect, validateCollectElementInput } from '../../utils/validators';
+import { validateAdditionalFieldsInCollect, validateCollectElementInput, validateInitConfig } from '../../utils/validators';
 
 export interface CollectElementInput {
   table?: string;
@@ -238,6 +238,7 @@ class CollectContainer {
 
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
+      validateInitConfig(this.#metaData.clientJSON.config);
       const collectElements = Object.values(this.#elements);
       collectElements.forEach((element) => {
         if (!element.isMounted()) {

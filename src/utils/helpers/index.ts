@@ -69,3 +69,8 @@ export function fillUrlWithPathAndQueryParams(url:string,
 export function removeSpaces(inputString:string) {
   return inputString.trim().replace(/[\s]/g, '');
 }
+
+export function formatVaultURL(vaultURL) {
+  if (typeof vaultURL !== 'string') return vaultURL;
+  return (vaultURL?.slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL;
+}

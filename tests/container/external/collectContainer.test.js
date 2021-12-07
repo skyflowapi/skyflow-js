@@ -23,8 +23,8 @@ jest.mock('../../../src/libs/uuid',()=>({
 const metaData = {
   uuid: '123',
   config: {
-    vaultId: 'vault123',
-    vaultUrl: 'sb.vault.dev',
+    vaultID: 'vault123',
+    vaultURL: 'https://sb.vault.dev',
     getBearerToken,
   },
   metaData: {
@@ -32,6 +32,8 @@ const metaData = {
   },
   clientJSON: {
     config: {
+      vaultID: 'vault123',
+      vaultURL: 'https://sb.vault.dev',
       getBearerToken,
     },
   },
