@@ -14,7 +14,7 @@ import RevealElement from './reveal/RevealElement';
 import uuid from '../../libs/uuid';
 import EventEmitter from '../../event-emitter';
 import properties from '../../properties';
-import { validateRevealElementRecords } from '../../utils/validators';
+import { validateInitConfig, validateRevealElementRecords } from '../../utils/validators';
 import {
   printLog,
   parameterizedString,
@@ -132,6 +132,7 @@ class RevealContainer {
     if (this.#isElementsMounted) {
       return new Promise((resolve, reject) => {
         try {
+          validateInitConfig(this.#metaData.clientJSON.config);
           printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
             MessageType.LOG,
             this.#context.logLevel);
@@ -177,6 +178,7 @@ class RevealContainer {
     }
     return new Promise((resolve, reject) => {
       try {
+        validateInitConfig(this.#metaData.clientJSON.config);
         printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
           MessageType.LOG,
           this.#context.logLevel);

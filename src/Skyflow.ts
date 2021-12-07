@@ -7,9 +7,6 @@ import {
 import Client from './client';
 import CollectContainer from './container/external/CollectContainer';
 import RevealContainer from './container/external/RevealContainer';
-import {
-  validateInitConfig,
-} from './utils/validators';
 import properties from './properties';
 import isTokenValid from './utils/jwtUtils';
 import PureJsController from './container/external/PureJsController';
@@ -31,14 +28,15 @@ import {
   MessageType,
   ValidationRuleType,
 } from './utils/common';
+import { formatVaultURL } from './utils/helpers';
 
 export enum ContainerType {
   COLLECT = 'COLLECT',
   REVEAL = 'REVEAL',
 }
 export interface ISkyflow {
-  vaultID: string;
-  vaultURL: string;
+  vaultID?: string;
+  vaultURL?: string;
   getBearerToken: () => Promise<string>;
   options?: Record<string, any>;
 }
@@ -118,11 +116,9 @@ class Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
     printLog(parameterizedString(logs.infoLogs.INITIALIZE_CLIENT, CLASS_NAME), MessageType.LOG,
       logLevel);
-    validateInitConfig(config);
+
     const tempConfig = config;
-    tempConfig.vaultURL = config.vaultURL.slice(-1) === '/'
-      ? config.vaultURL.slice(0, -1)
-      : config.vaultURL;
+    tempConfig.vaultURL = formatVaultURL(config.vaultURL);
     const skyflow = new Skyflow(tempConfig);
     printLog(parameterizedString(logs.infoLogs.CLIENT_INITIALIZED, CLASS_NAME),
       MessageType.LOG, logLevel);
@@ -177,7 +173,7 @@ class Skyflow {
   }
 
   getById(getByIdInput: IGetByIdInput) {
-    printLog((logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
+    printLog(parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#pureJsController.getById(getByIdInput);
   }

@@ -22,11 +22,13 @@ const getBearerToken = jest.fn();
 const metaData = {
   uuid: "123",
   config: {
-    vaultId: "vault123",
-    vaultUrl: "sb.vault.dev",
+    vaultID: "vault123",
+    vaultURL: "https://sb.vault.dev",
     getAccessToken: getBearerToken,
   },
   metaData: {
+    vaultID: "vault123",
+    vaultURL: "https://sb.vault.dev",
     clientDomain: "http://abc.com",
   },
 };

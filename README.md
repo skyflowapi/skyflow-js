@@ -128,6 +128,7 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 -  [**Using validations on Collect Elements**](#validations)
 -  [**Event Listener on Collect Elements**](#event-listener-on-collect-elements)
 -  [**UI Error for Collect Eements**](#ui-error-for-collect-elements)
+- [**Set and Clear value for Collect Elements (DEV ENV ONLY)**](#set-and-clear-value-for-collect-elements-dev-env-only)
 ## Inserting data into the vault
 
 To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes a dictionary of optional parameters for the insertion. See below: 
@@ -210,7 +211,7 @@ const collectElement =  {
    errorTextStyles:{},          //optional styles that will be applied to the errorText of the collect element
    label: "string",             //optional label for the form element
    placeholder: "string",       //optional placeholder for the form element
-   altText: "string"            //optional string that acts as an initial value for the collect element
+   altText: "string"            //(DEPRECATED) string that acts as an initial value for the collect element
    validations:[]               // optional array of validation rules
 }
 ```
@@ -303,12 +304,12 @@ const options = {
 
 `format` parameter takes string value and indicates the format pattern applicable to the element type. It is currently applicable to EXPIRATION_DATE element type only, the values that are accepted are
 
-- `mm/yy`
-- `mm/yyyy`
-- `yy/mm`
-- `yyyy/mm`
+- `MM/YY`
+- `MM/YYYY`
+- `YY/MM`
+- `YYYY/MM`
 
-`NOTE` : If not specified or invalid value is passed to the format for EXPIRATION_DATE element, then it defaults to mm/yy format.
+`NOTE` : If not specified or invalid value is passed to the format for EXPIRATION_DATE element, then it defaults to MM/YY format.
 
 
 Once the Element object and options has been defined, add it to the container using the `create(element, options)` method as shown below. The `element` param takes a Skyflow Element object and options as defined above:
@@ -323,7 +324,7 @@ const collectElement =  {
    errorTextStyles:{},          //optional styles that will be applied to the errorText of the collect element
    label: "string",             //optional label for the form element
    placeholder: "string",       //optional placeholder for the form element
-   altText: "string"            //optional string that acts as an initial value for the collect element
+   altText: "string"            //(DEPRECATED) string that acts as an initial value for the collect element
    validations:[]               // optional array of validation rules
 }
 
@@ -673,7 +674,7 @@ cardNumber.on(Skyflow.EventName.CHANGE,(state) => {
 
 Helps to display custom error messages on the Skyflow Elements through the methods `setError` and `resetError` on the elements.
 
-`setError(error : String)` method is used to set the error text for the element, when this method is trigerred, all the current errors present on the element will be overridden with the custom error message passed. This error will be displayed on the element until `resetError()` is trigerred on the same element.
+`setError(error: string)` method is used to set the error text for the element, when this method is trigerred, all the current errors present on the element will be overridden with the custom error message passed. This error will be displayed on the element until `resetError()` is trigerred on the same element.
 
 `resetError()` method is used to clear the custom error message that is set using `setError`.
 
@@ -697,6 +698,33 @@ cardNumber.resetError();
 
 ```
 
+### Set and Clear value for Collect Elements (DEV ENV ONLY)
+
+`setValue(value: string)` method is used to set the value of the element. This method will override any previous value present in the element.
+
+`clearValue()` method is used to reset the value of the element.
+
+`Note:` This methods are only available in DEV env for testing/developmental purposes and MUST NOT be used in PROD env.
+
+##### Sample code snippet for setValue and clearValue
+
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
+
+const cardNumber = container.create({
+    table: "pii_fields",
+    column: "primary_card.card_number",
+    type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+// Set a value programatically
+cardNumber.setValue("4111111111111111");
+
+// Clear the value
+cardNumber.clearValue();
+
+```
+
 ---
 
 
@@ -704,6 +732,8 @@ cardNumber.resetError();
 -  [**Retrieving data from the vault**](#retrieving-data-from-the-vault)
 -  [**Using Skyflow Elements to reveal data**](#using-skyflow-elements-to-reveal-data)
 -  [**UI Error for Reveal Elements**](#ui-error-for-reveal-elements)
+-  [**Set token for Reveal Elements**](#set-token-for-reveal-elements)
+- [**Set and clear altText for Reveal Elements**](#set-and-clear-alttext-for-reveal-elements)
 
 ## Retrieving data from the vault
 
@@ -982,7 +1012,7 @@ The response below shows that some tokens assigned to the reveal elements get re
 ### UI Error for Reveal Elements
 Helps to display custom error messages on the Skyflow Elements through the methods `setError` and `resetError` on the elements.
 
-`setError(error : String)` method is used to set the error text for the element, when this method is trigerred, all the current errors present on the element will be overridden with the custom error message passed. This error will be displayed on the element until `resetError()` is trigerred on the same element.
+`setError(error: string)` method is used to set the error text for the element, when this method is trigerred, all the current errors present on the element will be overridden with the custom error message passed. This error will be displayed on the element until `resetError()` is trigerred on the same element.
 
 `resetError()` method is used to clear the custom error message that is set using `setError`.
 
@@ -1003,7 +1033,41 @@ cardNumber.setError("custom error");
 cardNumber.resetError();
 
 ```
+### Set token for Reveal Elements
 
+The `setToken(value: string)` method can be used to set the token of the Reveal Element. If no altText is set, the set token will be displayed on the UI as well. If altText is set, then there will be no change in the UI but the token of the element will be internally updated.
+
+##### Sample code snippet for setToken
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
+
+const cardNumber = container.create({
+   altText:"Card Number",
+});
+
+// set token 
+cardNumber.setToken("89024714-6a26-4256-b9d4-55ad69aa4047");
+
+```
+### Set and Clear altText for Reveal Elements
+The `setAltText(value: string)` method can be used to set the altText of the Reveal Element. This will cause the altText to be displayed in the UI regardless of whether the token or value is currently being displayed.
+
+`clearAltText()` method can be used to clear the altText, this will cause the element to display the token or actual value of the element. If the element has no token, the element will be empty.
+##### Sample code snippet for setAltText and clearAltText
+
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
+
+const cardNumber = container.create({
+   token:"89024714-6a26-4256-b9d4-55ad69aa4047",
+});
+
+// set altText
+cardNumber.setAltText("Card Number");
+
+//clear altText
+cardNumber.clearAltText(); 
+```
 # Securely invoking Connections client-side
 Using Skyflow Connections, end-user applications can integrate checkout/card issuance flow without any of their apps/systems touching the PCI compliant fields like cvv, card number. To invoke Connections, use the `invokeConnection(connectionConfig)` method of the Skyflow client.
 
@@ -1044,8 +1108,6 @@ Merchant acceptance - customers should be able to complete payment checkout with
 ```javascript
 // step 1
 const skyflowClient = skyflow.init({
-	 vaultID: <vault_Id>, 
-	 vaultURL: <vault_url>, 
 	 getBearerToken: <helperFunc>
 });
 
@@ -1095,8 +1157,6 @@ In the above example,  CVV is being collected from the user input at the time of
 ```javascript
 // step 1
 const skyflowClient = skyflow.init({
-	 vaultID: <vault_Id>, 
-	 vaultURL: <vault_url>, 
 	 getBearerToken: <helperFunc>
 });
 
