@@ -26,6 +26,7 @@ import {
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 
+const CLASS_NAME = 'PureJsFrameController';
 class PureJsFrameController {
   #clientDomain: string;
 
@@ -38,14 +39,15 @@ class PureJsFrameController {
     bus
       .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
-        printLog(parameterizedString(logs.infoLogs.CAPTURE_PURE_JS_REQUEST, data.type),
+        printLog(parameterizedString(logs.infoLogs.CAPTURE_PURE_JS_REQUEST, CLASS_NAME, data.type),
           MessageType.LOG, this.#context.logLevel);
 
         if (data.type === PUREJS_TYPES.DETOKENIZE) {
           fetchRecordsByTokenId(data.records as IRevealRecord[], this.#client)
             .then(
               (resolvedResult) => {
-                printLog(logs.infoLogs.FETCH_RECORDS_RESOLVED, MessageType.LOG,
+                printLog(parameterizedString(logs.infoLogs.FETCH_RECORDS_RESOLVED, CLASS_NAME),
+                  MessageType.LOG,
                   this.#context.logLevel);
                 callback(resolvedResult);
               },
@@ -59,7 +61,8 @@ class PureJsFrameController {
         } else if (data.type === PUREJS_TYPES.INSERT) {
           this.insertData(data.records, data.options)
             .then((result) => {
-              printLog(logs.infoLogs.INSERT_RECORDS_RESOLVED, MessageType.LOG,
+              printLog(parameterizedString(logs.infoLogs.INSERT_RECORDS_RESOLVED, CLASS_NAME),
+                MessageType.LOG,
                 this.#context.logLevel);
 
               callback(result);
@@ -75,7 +78,8 @@ class PureJsFrameController {
             this.#client,
           ).then(
             (resolvedResult) => {
-              printLog(logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED, MessageType.LOG,
+              printLog(parameterizedString(logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED, CLASS_NAME),
+                MessageType.LOG,
                 this.#context.logLevel);
 
               callback(resolvedResult);
@@ -102,8 +106,10 @@ class PureJsFrameController {
               config.pathParams, config.queryParams);
             config.connectionURL = filledUrl;
             this.sendInvokeConnectionRequest(config).then((resultResponse) => {
-              printLog(logs.infoLogs.SEND_INVOKE_CONNECTION_RESOLVED, MessageType.LOG,
-                this.#context.logLevel);
+              printLog(parameterizedString(logs.infoLogs.SEND_INVOKE_CONNECTION_RESOLVED,
+                CLASS_NAME),
+              MessageType.LOG,
+              this.#context.logLevel);
 
               callback(resultResponse);
             }).catch((rejectedResponse) => {
@@ -135,16 +141,16 @@ class PureJsFrameController {
         this.#client = Client.fromJSON(data.client) as any;
 
         printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-          PUREJS_TYPES.INSERT),
+          CLASS_NAME, PUREJS_TYPES.INSERT),
         MessageType.LOG, this.#context.logLevel);
         printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-          PUREJS_TYPES.DETOKENIZE),
+          CLASS_NAME, PUREJS_TYPES.DETOKENIZE),
         MessageType.LOG, this.#context.logLevel);
         printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-          PUREJS_TYPES.GET_BY_SKYFLOWID),
+          CLASS_NAME, PUREJS_TYPES.GET_BY_SKYFLOWID),
         MessageType.LOG, this.#context.logLevel);
         printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-          PUREJS_TYPES.INVOKE_CONNECTION),
+          CLASS_NAME, PUREJS_TYPES.INVOKE_CONNECTION),
         MessageType.LOG, this.#context.logLevel);
       });
     // printLog(logs.infoLogs.EMIT_PURE_JS_CONTROLLER, MessageType.LOG,
@@ -176,8 +182,8 @@ class PureJsFrameController {
             rootResolve(
               constructInsertRecordResponse(
                 response,
-                options.tokens,
-                records.records,
+                options?.tokens,
+                records?.records,
               ),
             );
           })

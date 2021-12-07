@@ -32,6 +32,7 @@
 
     <!-- Javascript -->
     <script>
+    try{
       const skyflow = Skyflow.init({
         vaultID: "<VAULT_ID>",
         vaultURL: "<VAULT_URL>",
@@ -163,7 +164,9 @@
       userNameElement.mount("#collectUserName");
       passwordElement.mount("#collectPassword");
       confirmPasswordElement.mount("#collectConfirmPassword");
-      
+    }catch(err){
+        console.log(err);
+      }
     </script>
   </body>
 </html>

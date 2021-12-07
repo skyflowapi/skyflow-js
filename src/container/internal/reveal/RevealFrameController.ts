@@ -14,6 +14,7 @@ import { parameterizedString, printLog } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
 import { Context, IRevealRecord, MessageType } from '../../../utils/common';
 
+const CLASS_NAME = 'RevealFrameController';
 class RevealFrameController {
   #client!: Client;
 
@@ -57,7 +58,7 @@ class RevealFrameController {
       );
     const sub = (data, callback) => {
       printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-        ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
+        CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
       MessageType.LOG, this.#context.logLevel);
 
       this.revealData(data.records as any).then(

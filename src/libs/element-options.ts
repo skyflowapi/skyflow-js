@@ -1,10 +1,15 @@
-import { ELEMENTS, INPUT_STYLES } from '../container/constants';
+import {
+  ALLOWED_EXPIRY_DATE_FORMATS, DEFAULT_EXPIRATION_DATE_FORMAT, ELEMENTS, INPUT_STYLES,
+} from '../container/constants';
 import { CollectElementInput } from '../container/external/CollectContainer';
 import Element from '../container/external/element';
-import { IValidationRule, ValidationRuleType } from '../utils/common';
+import {
+  IValidationRule, MessageType, ValidationRuleType,
+} from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
-import { isValidRegExp } from '../utils/validators';
+import { parameterizedString, printLog } from '../utils/logsHelper';
+import { isValidExpiryDateFormat, isValidRegExp } from '../utils/validators';
 import SkyflowError from './SkyflowError';
 import { buildStylesFromClassesAndStyles } from './styles';
 
@@ -234,4 +239,26 @@ export const formatValidations = (input: CollectElementInput) => {
   }
 
   return validations;
+};
+
+export const formatOptions = (elementType, options, logLevel) => {
+  let formattedOptions = {
+    required: false,
+    enableCardIcon: true,
+    format: DEFAULT_EXPIRATION_DATE_FORMAT,
+    ...options,
+  };
+  if (elementType === ELEMENTS.EXPIRATION_DATE.name) {
+    const isvalidFormat = isValidExpiryDateFormat(formattedOptions.format);
+    if (!isvalidFormat) {
+      printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
+        ALLOWED_EXPIRY_DATE_FORMATS.toString()), MessageType.WARN, logLevel);
+    }
+    formattedOptions = {
+      ...formattedOptions,
+      format: isvalidFormat ? formattedOptions.format : DEFAULT_EXPIRATION_DATE_FORMAT,
+    };
+  }
+
+  return formattedOptions;
 };

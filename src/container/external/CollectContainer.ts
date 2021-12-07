@@ -5,7 +5,7 @@ import iframer, {
   setStyles,
 } from '../../iframe-libs/iframer';
 import deepClone from '../../libs/deepClone';
-import { formatValidations, validateElementOptions } from '../../libs/element-options';
+import { formatOptions, formatValidations, validateElementOptions } from '../../libs/element-options';
 import SkyflowError from '../../libs/SkyflowError';
 import uuid from '../../libs/uuid';
 import properties from '../../properties';
@@ -16,6 +16,7 @@ import {
   ELEMENTS,
   FRAME_ELEMENT,
   ElementType,
+  DEFAULT_EXPIRATION_DATE_FORMAT,
 } from '../constants';
 import Element from './element';
 import {
@@ -30,6 +31,7 @@ import {
   IValidationRule,
   MessageType,
 } from '../../utils/common';
+import { validateAdditionalFieldsInCollect, validateCollectElementInput } from '../../utils/validators';
 
 export interface CollectElementInput {
   table?: string;
@@ -48,7 +50,7 @@ interface ICollectOptions {
   tokens?: boolean;
   additionalFields?: IInsertRecordInput;
 }
-
+const CLASS_NAME = 'CollectContainer';
 class CollectContainer {
   #containerId: string;
 
@@ -69,7 +71,8 @@ class CollectContainer {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-    printLog(logs.infoLogs.CREATE_COLLECT_CONTAINER, MessageType.LOG,
+    printLog(parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
+      MessageType.LOG,
       this.#context.logLevel);
 
     const sub = (data, callback) => {
@@ -100,8 +103,11 @@ class CollectContainer {
   create = (input: CollectElementInput, options: any = {
     required: false,
     enableCardIcon: true,
+    format: DEFAULT_EXPIRATION_DATE_FORMAT,
   }) => {
+    validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input);
+    const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
     const elementGroup = {
       rows: [
         {
@@ -109,11 +115,8 @@ class CollectContainer {
             {
               elementType: input.type,
               name: input.column,
-              ...(input.altText ? { value: input.altText } : {}),
               ...input,
-              required: false,
-              enableCardIcon: true,
-              ...options,
+              ...formattedOptions,
               validations,
             },
           ],
@@ -139,7 +142,7 @@ class CollectContainer {
         options.replacePattern = options.replacePattern || ELEMENTS[elementType].replacePattern;
         options.mask = options.mask || ELEMENTS[elementType].mask;
 
-        options.elementName = `${options.table}.${options.name}`;
+        options.elementName = `${options.table}.${options.name}:${btoa(uuid())}`;
         options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
           options.elementName,
         )}` : `${options.elementType}:${btoa(uuid())}`;
@@ -240,31 +243,37 @@ class CollectContainer {
         if (!element.isMounted()) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
         }
-        if (!element.isValidElement()) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_OR_COLUMN, [], true);
-        }
+        element.isValidElement();
       });
+      if (options && options.tokens && typeof options.tokens !== 'boolean') {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
+      }
+      if (options?.additionalFields) {
+        validateAdditionalFieldsInCollect(options.additionalFields);
+      }
       bus
       // .target(properties.IFRAME_SECURE_ORGIN)
         .emit(
           ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
           {
             ...options,
-            tokens: options.tokens !== undefined ? options.tokens : true,
+            tokens: options?.tokens !== undefined ? options.tokens : true,
           },
           (data: any) => {
             if (!data || data?.error) {
               printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
               reject(data?.error);
             } else {
-              printLog(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, MessageType.LOG,
+              printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                MessageType.LOG,
                 this.#context.logLevel);
+
               resolve(data);
             }
           },
         );
       printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-        ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+        CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
       MessageType.LOG, this.#context.logLevel);
     } catch (err) {
       printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);

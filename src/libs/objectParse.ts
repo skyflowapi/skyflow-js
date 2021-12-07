@@ -1,10 +1,11 @@
 import RevealElement from '../container/external/reveal/RevealElement';
 import Element from '../container/external/element';
 import { FRAME_ELEMENT, FRAME_REVEAL } from '../container/constants';
-import { flattenObject } from '../utils/helpers';
+import { flattenObject, formatFrameNameToId } from '../utils/helpers';
 import { getCollectElementValue, getRevealElementValue } from '../utils/busEvents';
 import SkyflowError from './SkyflowError';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
+import { getElementName } from '../utils/logsHelper';
 
 const set = require('set-value');
 
@@ -12,7 +13,8 @@ export function connectionConfigParser(data, configKey) {
   Object.entries(data).forEach(([key, value]) => {
     if (value instanceof RevealElement) {
       if (!value.isMounted()) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED_INVOKE_CONNECTION,
+          [getElementName(formatFrameNameToId(value.iframeName()))]);
       }
       data[key] = value.iframeName();
       if (configKey !== 'responseBody') {
@@ -22,7 +24,8 @@ export function connectionConfigParser(data, configKey) {
       }
     } else if (value instanceof Element) {
       if (!value.isMounted()) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED_INVOKE_CONNECTION,
+          [getElementName(formatFrameNameToId(value.iframeName()))]);
       }
       data[key] = value.iframeName();
     } else if (value instanceof Object) {

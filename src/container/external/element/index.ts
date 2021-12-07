@@ -18,8 +18,10 @@ import {
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
-import { Context, MessageType } from '../../../utils/common';
+import { Context, Env, MessageType } from '../../../utils/common';
+import { formatFrameNameToId } from '../../../utils/helpers';
 
+const CLASS_NAME = 'Element';
 class Element {
   elementType: string;
 
@@ -87,7 +89,7 @@ class Element {
         isComplete: false,
         isValid: false,
         isFocused: false,
-        value: this.#doesReturnValue ? element.altText : undefined,
+        value: this.#doesReturnValue ? '' : undefined,
         elementType: element.elementType,
         name: element.elementName,
       });
@@ -104,11 +106,14 @@ class Element {
     this.#onDestroy(destroyCallback);
     this.#onUpdate(updateCallback);
     printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT,
-      getElementName(this.#iframe.name)), MessageType.LOG,
+      CLASS_NAME, getElementName(this.#iframe.name)), MessageType.LOG,
     this.#context.logLevel);
   }
 
   mount = (domElement) => {
+    if (!domElement) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
+    }
     this.#iframe.mount(domElement);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
@@ -123,7 +128,7 @@ class Element {
           sub,
         );
         this.#mounted = true;
-        printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, getElementName(this.#iframe.name))} `, MessageType.LOG,
+        printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, CLASS_NAME, getElementName(this.#iframe.name))} `, MessageType.LOG,
           this.#context.logLevel);
         this.#updateCallbacks.forEach((func) => func());
         this.#updateCallbacks = [];
@@ -133,16 +138,7 @@ class Element {
   };
 
   unmount = () => {
-    if (this.#isSingleElementAPI) {
-      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
-        name: this.#iframe.name,
-        options: {
-          ...this.#elements[0],
-          ...(this.#elements[0].altText ? { value: this.#elements[0].altText } : { value: '' }),
-        },
-        isSingleElementAPI: true,
-      });
-    }
+    this.#iframe.unmount();
   };
 
   update = (group) => {
@@ -265,17 +261,22 @@ class Element {
   // listening to element events and error messages on iframe
   // todo: off methods
   on(eventName: string, handler) {
-    if (Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
-      this.#eventEmitter.on(eventName, (data) => {
-        if (data.value === undefined) {
-          data.value = '';
-        }
-        delete data.isComplete;
-        handler(data);
-      });
-    } else {
+    if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER, [], true);
     }
+    if (!handler) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_HANDLER_IN_EVENT_LISTENER, [], true);
+    }
+    if (typeof handler !== 'function') {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER, [], true);
+    }
+    this.#eventEmitter.on(eventName, (data) => {
+      if (data.value === undefined) {
+        data.value = '';
+      }
+      delete data.isComplete;
+      handler(data);
+    });
   }
 
   #onDestroy = (callback) => {
@@ -375,9 +376,81 @@ class Element {
 
   isValidElement():boolean {
     for (let i = 0; i < this.#elements.length; i += 1) {
-      if (!(this.#elements[i].table && this.#elements[i].column)) { return false; }
+      if (!Object.prototype.hasOwnProperty.call(this.#elements[i], 'table')) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_COLLECT, [], true);
+      }
+      if (!this.#elements[i].table) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_COLLECT, [], true);
+      }
+      if (!(typeof this.#elements[i].table === 'string' || this.#elements[i].table instanceof String)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_COLLECT, [], true);
+      }
+      if (!Object.prototype.hasOwnProperty.call(this.#elements[i], 'column')) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_COLUMN_IN_COLLECT, [], true);
+      }
+      if (!this.#elements[i].column) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_COLUMN_IN_COLLECT, [], true);
+      }
+      if (!(typeof this.#elements[i].column === 'string' || this.#elements[i].column instanceof String)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_COLLECT, [], true);
+      }
     }
     return true;
+  }
+
+  setError(clientErrorText:string) {
+    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
+      {
+        name: formatFrameNameToId(this.#iframe.name),
+        isTriggerError: true,
+        clientErrorText,
+      });
+  }
+
+  resetError() {
+    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
+      {
+        name: formatFrameNameToId(this.#iframe.name),
+        isTriggerError: false,
+      });
+  }
+
+  setValue(elementValue:string) {
+    if (this.#context.env === Env.PROD) {
+      printLog(parameterizedString(logs.warnLogs.UNABLE_TO_SET_VALUE_IN_PROD_ENV,
+        this.#elements[0].elementType),
+      MessageType.WARN, this.#context.logLevel);
+      return;
+    }
+    if (this.#isSingleElementAPI) {
+      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+        name: this.#iframe.name,
+        options: {
+          ...this.#elements[0],
+          value: elementValue,
+        },
+        isSingleElementAPI: true,
+      });
+    }
+  }
+
+  clearValue() {
+    if (this.#context.env === Env.PROD) {
+      printLog(parameterizedString(logs.warnLogs.UNABLE_TO_CLEAR_VALUE_IN_PROD_ENV,
+        this.#elements[0].elementType),
+      MessageType.WARN, this.#context.logLevel);
+      return;
+    }
+    if (this.#isSingleElementAPI) {
+      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+        name: this.#iframe.name,
+        options: {
+          ...this.#elements[0],
+          value: '',
+        },
+        isSingleElementAPI: true,
+      });
+    }
   }
 }
 

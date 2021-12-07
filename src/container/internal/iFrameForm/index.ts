@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import bus from 'framebus';
+import get from 'lodash/get';
 import Client from '../../../client';
 import {
   ELEMENT_EVENTS_TO_CLIENT,
@@ -8,6 +9,7 @@ import {
   COLLECT_FRAME_CONTROLLER,
   ElementType,
   FRAME_ELEMENT,
+  DEFAULT_EXPIRATION_DATE_FORMAT,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -17,6 +19,7 @@ import {
   validateExpiryDate,
 } from '../../../utils/validators';
 import {
+  checkForElementMatchRule,
   constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
@@ -38,7 +41,7 @@ import {
   MessageType,
   ValidationRuleType,
 } from '../../../utils/common';
-import { formatFrameNameToId } from '../../../utils/helpers';
+import { formatFrameNameToId, removeSpaces } from '../../../utils/helpers';
 
 const set = require('set-value');
 const RegexParser = require('regex-parser');
@@ -80,11 +83,20 @@ export class IFrameFormElement extends EventEmitter {
 
   label?:string;
 
+  doesClientHasError:boolean = false;
+
+  clientErrorText:string | undefined = undefined;
+
+  expirationDateFormat:string = DEFAULT_EXPIRATION_DATE_FORMAT;
+
   constructor(name: string, label:string, metaData, context: Context) {
     super();
     const frameValues = name.split(':');
     const fieldType = frameValues[1];
-    const field = atob(frameValues[2]);
+    const tempfield = atob(frameValues[2]);
+
+    const removeAfter = tempfield.indexOf(':');
+    const field = removeAfter === -1 ? tempfield : tempfield.substring(0, removeAfter);
     // set frame name as frame type of the string besides : is number
     const [tableName, fieldName] = [
       field.substr(0, field.indexOf('.')),
@@ -121,7 +133,7 @@ export class IFrameFormElement extends EventEmitter {
       this._emit(ELEMENT_EVENTS_TO_CLIENT.BLUR, {
         ...this.getStatus(),
         value: this.state.value,
-        error: this.errorText,
+        error: this.clientErrorText || this.errorText,
       });
     }
   };
@@ -129,7 +141,7 @@ export class IFrameFormElement extends EventEmitter {
   changeFocus = (focus: boolean) => {
     this.state.isFocused = focus;
     // this.sendChangeStatus();
-    this.setValue(this.state.value, true);
+    // this.setValue(this.state.value, true);
     // if (this.mask) {
     //   this.setValue(this.state.value, true);
     // }
@@ -169,6 +181,10 @@ export class IFrameFormElement extends EventEmitter {
     }
   }
 
+  setExpirationDateFormat(format:string) {
+    this.expirationDateFormat = format;
+  }
+
   setSensitive(sensitive: boolean = this.sensitive) {
     if (this.sensitive === false && sensitive === true) {
       this.sensitive = sensitive;
@@ -205,7 +221,7 @@ export class IFrameFormElement extends EventEmitter {
       this.state.isEmpty = true;
     }
 
-    if (valid && this.validator(this.state.value)) {
+    if (valid && !this.doesClientHasError && this.validator(this.state.value)) {
       this.state.isValid = true;
       this.state.isComplete = true;
     } else {
@@ -227,14 +243,18 @@ export class IFrameFormElement extends EventEmitter {
     return this.state.value;
   };
 
-  getUnformattedValue = () => this.state.value
-  // if (!this.mask) return this.state.value;
-  // return unMask(this.state.value, this.mask);
-  ;
+  getUnformattedValue = () => {
+    if (!this.mask) return this.state.value;
+    if (this.fieldType === ELEMENTS.CARD_NUMBER.name) {
+      return removeSpaces(this.state.value as string);
+    }
+    // return unMask(this.state.value, this.mask);;
+    return this.state.value;
+  };
 
   getStatus = () => ({
     isFocused: this.state.isFocused,
-    isValid: this.state.isValid,
+    isValid: this.state.isValid && !this.doesClientHasError,
     isEmpty: this.state.isEmpty,
     isComplete: this.state.isComplete,
     value: EnvOptions[this.context?.env]?.doesReturnValue ? this.state.value : undefined,
@@ -249,9 +269,7 @@ export class IFrameFormElement extends EventEmitter {
         && validateCardNumberLengthCheck(value);
       }
     } else if (this.fieldType === ElementType.EXPIRATION_DATE) {
-      if (this.regex) {
-        resp = this.regex.test(value) && validateExpiryDate(value);
-      }
+      resp = validateExpiryDate(value, this.expirationDateFormat);
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex) {
@@ -270,7 +288,7 @@ export class IFrameFormElement extends EventEmitter {
     if (resp) {
       this.errorText = '';
     }
-    return resp;
+    return resp && !this.doesClientHasError;
   }
 
   validateCustomValidations(value: string) {
@@ -368,6 +386,18 @@ export class IFrameFormElement extends EventEmitter {
         }
       });
 
+    bus.target(this.metaData.clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR, (data) => {
+        if (data.name === this.iFrameName) {
+          this.doesClientHasError = data.isTriggerError as boolean;
+          this.clientErrorText = data.isTriggerError ? data.clientErrorText as string : undefined;
+          this._emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR, {
+            ...data,
+            state: { ...this.getStatus(), error: this.errorText },
+          });
+        }
+      });
+
     // for radio buttons
     if (this.fieldType === ELEMENTS.radio.name) {
       bus
@@ -390,7 +420,7 @@ export class IFrameFormElement extends EventEmitter {
     bus.target(window.location.origin).on(ELEMENT_EVENTS_TO_IFRAME.GET_COLLECT_ELEMENT,
       (data, callback) => {
         if (data.name === this.iFrameName) {
-          callback({ ...this.getStatus(), value: this.state.value });
+          callback({ ...this.getStatus(), value: this.getUnformattedValue() });
         }
       });
   };
@@ -434,6 +464,7 @@ export class IFrameFormElement extends EventEmitter {
   }
 }
 
+const CLASS_NAME = 'IFrameForm';
 // create separate IFrameFormElement for each radio button
 // and separate or SET_VALUE event b/w radio buttons.
 // while hitting tokenize it checks whether there are more
@@ -462,7 +493,10 @@ export class IFrameForm {
     this.logLevel = logLevel;
 
     printLog(
-      logs.infoLogs.IFRAMEFORM_CONSTRUCTOR_FRAME_READY_LISTNER,
+      parameterizedString(
+        logs.infoLogs.IFRAMEFORM_CONSTRUCTOR_FRAME_READY_LISTNER,
+        CLASS_NAME,
+      ),
       MessageType.LOG,
       logLevel,
     );
@@ -473,7 +507,10 @@ export class IFrameForm {
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.controllerId,
         (data:any) => {
           printLog(
-            logs.infoLogs.ENTERED_COLLECT_FRAME_READY_CB,
+            parameterizedString(
+              logs.infoLogs.ENTERED_COLLECT_FRAME_READY_CB,
+              CLASS_NAME,
+            ),
             MessageType.LOG,
             logLevel,
           );
@@ -488,6 +525,7 @@ export class IFrameForm {
           printLog(
             parameterizedString(
               logs.infoLogs.EXECUTE_COLLECT_ELEMENT_FRAME_READY_CB,
+              CLASS_NAME,
               getElementName(frameGlobalName),
             ),
             MessageType.LOG,
@@ -496,7 +534,10 @@ export class IFrameForm {
           if (this.clientMetaData) this.initializeFrame(window.parent, frameGlobalName);
           else {
             printLog(
-              logs.infoLogs.CLIENT_METADATA_NOT_SET,
+              parameterizedString(
+                logs.infoLogs.CLIENT_METADATA_NOT_SET,
+                CLASS_NAME,
+              ),
               MessageType.LOG,
               logLevel,
             );
@@ -508,7 +549,10 @@ export class IFrameForm {
       );
 
     printLog(
-      logs.infoLogs.IFRAMEFORM_CONSTRUCTOR_TOKENIZATION_LISTNER,
+      parameterizedString(
+        logs.infoLogs.IFRAMEFORM_CONSTRUCTOR_TOKENIZATION_LISTNER,
+        CLASS_NAME,
+      ),
       MessageType.LOG,
       logLevel,
     );
@@ -519,7 +563,7 @@ export class IFrameForm {
         ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.controllerId,
         (data, callback) => {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-            ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
           MessageType.LOG, this.context.logLevel);
           // todo: Do we need to reset the data!?
           this.tokenize(data)
@@ -579,9 +623,13 @@ export class IFrameForm {
 
     let errorMessage = '';
     for (let i = 0; i < formElements.length; i += 1) {
-      const { state } = this.iFrameFormElements[formElements[i]];
+      const {
+        state, doesClientHasError, clientErrorText, errorText,
+      } = this.iFrameFormElements[formElements[i]];
       if (!state.isValid || !state.isComplete) {
-        errorMessage += `${state.name}:${this.iFrameFormElements[formElements[i]].errorText} `;
+        if (doesClientHasError) {
+          errorMessage += `${state.name}:${clientErrorText}`;
+        } else { errorMessage += `${state.name}:${errorText} `; }
       }
     }
     if (errorMessage.length > 0) {
@@ -589,8 +637,7 @@ export class IFrameForm {
     }
 
     for (let i = 0; i < formElements.length; i += 1) {
-      const { state } = this.iFrameFormElements[formElements[i]];
-      const { tableName } = this.iFrameFormElements[formElements[i]];
+      const { state, tableName, validations } = this.iFrameFormElements[formElements[i]];
       if (
         this.iFrameFormElements[formElements[i]].fieldType
         === ELEMENTS.checkbox.name
@@ -603,6 +650,11 @@ export class IFrameForm {
           responseObject[state.name] = state.value;
         }
       } else if (responseObject[tableName]) {
+        if (get(responseObject[tableName], state.name)
+        && !(validations && checkForElementMatchRule(validations))) {
+          return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
+            [state.name, tableName], true));
+        }
         set(
           responseObject[tableName],
           state.name,
@@ -689,7 +741,10 @@ export class IFrameForm {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.FRAME_NOT_FOUND, [`${frameGlobalName}`], true);
     } else if (frameInstance?.Skyflow?.init) {
       printLog(
-        logs.infoLogs.EXECUTE_COLLECT_ELEMENT_INIT,
+        parameterizedString(
+          logs.infoLogs.EXECUTE_COLLECT_ELEMENT_INIT,
+          CLASS_NAME,
+        ),
         MessageType.LOG,
         this.logLevel,
       );

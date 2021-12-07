@@ -1,6 +1,18 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [1.8.0] - 2021-12-01
+
+### Added
+- `setError(error : String)` method to set custom UI error to be displayed on the collect and reveal Elements
+- `resetError()` method is used to clear the custom UI error message set through setError 
+- `format` parameter in `collectElementOptions` to support different type of date formats for `EXPIRATION_DATE` element
+
+### Changed
+
+- Changed messages in the logs and errors.
+
 ## [1.7.0] - 2021-11-24
 ### Added
 - `validations` option in `CollectElementInput` that takes an array of validation rules

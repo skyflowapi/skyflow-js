@@ -8,12 +8,12 @@ import Client from './client';
 import CollectContainer from './container/external/CollectContainer';
 import RevealContainer from './container/external/RevealContainer';
 import {
-  isValidURL,
+  validateInitConfig,
 } from './utils/validators';
 import properties from './properties';
 import isTokenValid from './utils/jwtUtils';
 import PureJsController from './container/external/PureJsController';
-import { printLog } from './utils/logsHelper';
+import { parameterizedString, printLog } from './utils/logsHelper';
 import SkyflowError from './libs/SkyflowError';
 import logs from './utils/logs';
 import SKYFLOW_ERROR_CODE from './utils/constants';
@@ -42,7 +42,7 @@ export interface ISkyflow {
   getBearerToken: () => Promise<string>;
   options?: Record<string, any>;
 }
-
+const CLASS_NAME = 'Skyflow';
 class Skyflow {
   #client: Client;
 
@@ -78,7 +78,8 @@ class Skyflow {
     bus
       .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, (data, callback) => {
-        printLog(logs.infoLogs.CAPTURED_BEARER_TOKEN_EVENT, MessageType.LOG,
+        printLog(parameterizedString(logs.infoLogs.CAPTURED_BEARER_TOKEN_EVENT, CLASS_NAME),
+          MessageType.LOG,
           this.#logLevel);
         if (
           this.#client.config.getBearerToken
@@ -87,7 +88,8 @@ class Skyflow {
           this.#client.config
             .getBearerToken()
             .then((bearerToken) => {
-              printLog(logs.infoLogs.BEARER_TOKEN_RESOLVED, MessageType.LOG,
+              printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+                MessageType.LOG,
                 this.#logLevel);
               this.#bearerToken = bearerToken;
               callback({ authToken: this.#bearerToken });
@@ -98,35 +100,32 @@ class Skyflow {
               callback({ error: err });
             });
         } else {
-          printLog(logs.infoLogs.REUSE_BEARER_TOKEN, MessageType.LOG,
+          printLog(parameterizedString(logs.infoLogs.REUSE_BEARER_TOKEN, CLASS_NAME),
+            MessageType.LOG,
             this.#logLevel);
           callback({ authToken: this.#bearerToken });
         }
       });
-    printLog(logs.infoLogs.BEARER_TOKEN_LISTENER, MessageType.LOG,
+    printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_LISTENER, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
-    printLog(this.#env, MessageType.LOG, this.#logLevel);
+    printLog(parameterizedString(logs.infoLogs.CURRENT_ENV, CLASS_NAME, this.#env),
+      MessageType.LOG, this.#logLevel);
+    printLog(parameterizedString(logs.infoLogs.CURRENT_ENV, CLASS_NAME, this.#logLevel),
+      MessageType.LOG, this.#logLevel);
   }
 
   static init(config: ISkyflow): Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
-    printLog(logs.infoLogs.INITIALIZE_CLIENT, MessageType.LOG,
+    printLog(parameterizedString(logs.infoLogs.INITIALIZE_CLIENT, CLASS_NAME), MessageType.LOG,
       logLevel);
-    if (
-      !config
-      || !config.vaultID
-      || !config.vaultURL
-      || !isValidURL(config.vaultURL)
-      || !config.getBearerToken
-    ) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CREDENTIALS, [], true);
-    }
+    validateInitConfig(config);
     const tempConfig = config;
     tempConfig.vaultURL = config.vaultURL.slice(-1) === '/'
       ? config.vaultURL.slice(0, -1)
       : config.vaultURL;
     const skyflow = new Skyflow(tempConfig);
-    printLog(logs.infoLogs.CLIENT_INITIALIZED, MessageType.LOG, logLevel);
+    printLog(parameterizedString(logs.infoLogs.CLIENT_INITIALIZED, CLASS_NAME),
+      MessageType.LOG, logLevel);
     return skyflow;
   }
 
@@ -138,7 +137,8 @@ class Skyflow {
           clientJSON: this.#client.toJSON(),
         },
         { logLevel: this.#logLevel, env: this.#env });
-        printLog(logs.infoLogs.COLLECT_CONTAINER_CREATED, MessageType.LOG,
+        printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
+          MessageType.LOG,
           this.#logLevel);
         return collectContainer;
       }
@@ -148,11 +148,15 @@ class Skyflow {
           clientJSON: this.#client.toJSON(),
         },
         { logLevel: this.#logLevel });
-        printLog(logs.infoLogs.REVEAL_CONTAINER_CREATED, MessageType.LOG,
+        printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
+          MessageType.LOG,
           this.#logLevel);
         return revealContainer;
       }
       default:
+        if (!type) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONTAINER_TYPE, [], true);
+        }
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTAINER_TYPE, [], true);
     }
   }
@@ -161,25 +165,25 @@ class Skyflow {
     records: IInsertRecordInput,
     options: Record<string, any> = { tokens: true },
   ) {
-    printLog(logs.infoLogs.INSERT_TRIGGERED, MessageType.LOG,
+    printLog(parameterizedString(logs.infoLogs.INSERT_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
     return this.#pureJsController.insert(records, options);
   }
 
   detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
-    printLog(logs.infoLogs.DETOKENIZE_TRIGGERED,
+    printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#pureJsController.detokenize(detokenizeInput);
   }
 
   getById(getByIdInput: IGetByIdInput) {
-    printLog(logs.infoLogs.GET_BY_ID_TRIGGERED,
+    printLog((logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#pureJsController.getById(getByIdInput);
   }
 
   invokeConnection(config: IConnectionConfig) {
-    printLog(logs.infoLogs.INVOKE_CONNECTION_TRIGGERED,
+    printLog(parameterizedString(logs.infoLogs.INVOKE_CONNECTION_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
 
     return this.#pureJsController.invokeConnection(config);

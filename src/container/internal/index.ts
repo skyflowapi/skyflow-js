@@ -17,10 +17,12 @@ import {
   INPUT_WITH_ICON_STYLES,
   ElementType,
   INPUT_WITH_ICON_DEFAULT_STYLES,
+  CARD_NUMBER_MASK,
+  EXPIRY_DATE_MASK,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iFrameForm';
 import getCssClassesFromJss from '../../libs/jss-styles';
-import { printLog } from '../../utils/logsHelper';
+import { parameterizedString, printLog } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
@@ -36,12 +38,17 @@ export class FrameController {
 
   private clientDomain: string;
 
+  private CLASS_NAME = 'FrameController';
+
   constructor(controllerId: string, logLevel: LogLevel) {
     this.clientDomain = document.referrer.split('/').slice(0, 3).join('/');
     this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain, logLevel);
     this.controllerId = controllerId;
     printLog(
-      logs.infoLogs.EMIT_COLLECT_FRAME_CONTROLLER_EVENT,
+      parameterizedString(
+        logs.infoLogs.EMIT_COLLECT_FRAME_CONTROLLER_EVENT,
+        this.CLASS_NAME,
+      ),
       MessageType.LOG,
       logLevel,
     );
@@ -65,7 +72,10 @@ export class FrameController {
             },
           };
           printLog(
-            logs.infoLogs.EXECUTE_COLLECT_CONTROLLER_READY_CB,
+            parameterizedString(
+              logs.infoLogs.EXECUTE_COLLECT_CONTROLLER_READY_CB,
+              this.CLASS_NAME,
+            ),
             MessageType.LOG,
             logLevel,
           );
@@ -156,18 +166,36 @@ export class FrameElement {
       ) {
         (<HTMLInputElement> this.domInput).checked = this.options.value === state.value;
       }
-      if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
-        && this.options.enableCardIcon) {
+      if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
         const cardType = detectCardType(state.value);
-        if (this.domInput) {
-          this.domInput.style.backgroundImage = CARD_ENCODED_ICONS[cardType] || 'none';
+        if (this.options.enableCardIcon) {
+          // const cardType = detectCardType(state.value);
+          if (this.domInput) {
+            this.domInput.style.backgroundImage = CARD_ENCODED_ICONS[cardType] || 'none';
+          }
         }
+        const cardNumberMask = CARD_NUMBER_MASK[cardType];
+        this.iFrameFormElement.setMask(cardNumberMask as string[]);
+        this.applyMask();
       }
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
       if (data.options) {
         this.updateOptions(data.options);
       }
+    });
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR, (data) => {
+      if (this.domError && data.isTriggerError && data.clientErrorText) {
+        this.domError.innerText = data.clientErrorText;
+      } else if (this.domError && (!data.isTriggerError)) {
+        this.domError.innerText = data.state.error || '';
+        if ((data.state.isEmpty || data.state.isValid) && this.domError) {
+          this.domError.innerText = '';
+        } else if (!data.state.isEmpty && !data.state.isValid && this.domError) {
+          this.domError.innerText = data.state.error;
+        }
+      }
+      this.updateStyleClasses(data.state);
     });
 
     // this.setupInputField();
@@ -415,25 +443,20 @@ export class FrameElement {
 
       this.iFrameFormElement.setValidation(this.options.validations);
       this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
-      this.iFrameFormElement.setMask(this.options.mask);
+      if (options.elementType === ElementType.EXPIRATION_DATE) {
+        this.iFrameFormElement.setExpirationDateFormat(options.format);
+        this.iFrameFormElement.setMask(EXPIRY_DATE_MASK[options.format] as string[]);
+      } else {
+        this.iFrameFormElement.setMask(this.options.mask);
+      }
 
-      const { mask } = this.iFrameFormElement;
+      // const { mask } = this.iFrameFormElement;
       $(id).off('input');
       (<any>$).jMaskGlobals.translation = {};
       (<any>$).jMaskGlobals.clearIfNotMatch = true;
 
       $(id).unmask();
-
-      if (mask) {
-        const translation = {};
-        Object.keys(mask[2]).forEach((key) => {
-          translation[key] = { pattern: mask[2][key] };
-        });
-
-        $(id).mask(mask[0], {
-          translation,
-        });
-      }
+      this.applyMask();
 
       if (this.domInput) {
         const { replacePattern } = this.iFrameFormElement;
@@ -455,5 +478,20 @@ export class FrameElement {
           && options.value !== this.iFrameFormElement.getValue(),
       );
     });
+  }
+
+  private applyMask() {
+    const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
+    const { mask } = this.iFrameFormElement;
+    if (mask) {
+      const translation = {};
+      Object.keys(mask[2]).forEach((key) => {
+        translation[key] = { pattern: mask[2][key] };
+      });
+
+      $(id).mask(mask[0], {
+        translation,
+      });
+    }
   }
 }

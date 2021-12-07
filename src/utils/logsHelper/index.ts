@@ -24,6 +24,8 @@ export const EnvOptions = {
   },
 };
 
+const SDK_OWNER = '[Skyflow]';
+
 export const printLog = (message: string, messageType:MessageType, logLevel:LogLevel) => {
   if (logLevel && LogLevelOptions[logLevel]) {
     const {
@@ -31,16 +33,16 @@ export const printLog = (message: string, messageType:MessageType, logLevel:LogL
     } = LogLevelOptions[logLevel];
     if (messageType === MessageType.LOG && showDebugLogs) {
       // eslint-disable-next-line no-console
-      console.log(message);
+      console.log(`${LogLevel.DEBUG}: ${SDK_OWNER} ${message}`);
     } else if (messageType === MessageType.LOG && showInfoLogs) {
       // eslint-disable-next-line no-console
-      console.log(message);
+      console.log(`${LogLevel.INFO}: ${SDK_OWNER} ${message}`);
     } else if (messageType === MessageType.WARN && showWarnLogs) {
       // eslint-disable-next-line no-console
-      console.warn(message);
+      console.warn(`${LogLevel.WARN}: ${SDK_OWNER} ${message}`);
     } else if (messageType === MessageType.ERROR && showErrorLogs) {
       // eslint-disable-next-line no-console
-      console.error(message);
+      console.error(`${LogLevel.ERROR}: ${SDK_OWNER} ${message}`);
     }
   }
 };
@@ -55,4 +57,10 @@ export const parameterizedString = (...args: any[]) => {
   });
 };
 
-export const getElementName = (name:string = '') => atob(name.split(':')[2]);
+export const getElementName = (name:string = '') => {
+  let tempName = atob(name.split(':')[2]);
+  if (tempName.indexOf(':') !== -1) {
+    tempName = tempName.substring(0, tempName.indexOf(':'));
+  }
+  return tempName;
+};
