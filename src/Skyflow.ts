@@ -7,9 +7,6 @@ import {
 import Client from './client';
 import CollectContainer from './container/external/CollectContainer';
 import RevealContainer from './container/external/RevealContainer';
-import {
-  validateInitConfig,
-} from './utils/validators';
 import properties from './properties';
 import isTokenValid from './utils/jwtUtils';
 import PureJsController from './container/external/PureJsController';
