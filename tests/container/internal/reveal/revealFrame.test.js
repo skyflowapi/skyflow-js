@@ -83,9 +83,9 @@ describe("Reveal Frame Class",()=>{
 
     // connection
     const emitterCb = jest.fn();
-    const onCbName = on.mock.calls[1][0];
+    const onCbName = on.mock.calls[2][0];
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
-    const onCb = on.mock.calls[1][1];
+    const onCb = on.mock.calls[2][1];
     onCb({name:""},emitterCb);
     expect(emitterCb).toBeCalledWith(data.record.token);
   });
@@ -125,9 +125,9 @@ describe("Reveal Frame Class",()=>{
 
     // connection
     const emitterCb = jest.fn();
-    const onCbName = on.mock.calls[1][0];
+    const onCbName = on.mock.calls[2][0];
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
-    const onCb = on.mock.calls[1][1];
+    const onCb = on.mock.calls[2][1];
     onCb({name:""},emitterCb); 
     expect(emitterCb).toBeCalledWith("card_value");
   });
@@ -171,9 +171,9 @@ describe("Reveal Frame Class",()=>{
 
     // connection
     const emitterCb = jest.fn();
-    const onCbName = on.mock.calls[1][0];
+    const onCbName = on.mock.calls[2][0];
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
-    const onCb = on.mock.calls[1][1];
+    const onCb = on.mock.calls[2][1];
     onCb({name:""},emitterCb); 
     expect(emitterCb).toBeCalledWith(data.record.token);
   });
