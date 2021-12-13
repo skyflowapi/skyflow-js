@@ -116,7 +116,7 @@ class RevealFrame {
       } else {
         this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
       }
-      this.updateDataView();
+      // this.updateDataView();
     };
 
     bus
