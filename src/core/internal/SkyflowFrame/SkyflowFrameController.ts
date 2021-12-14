@@ -131,12 +131,8 @@ class SkyflowFrameController {
       // .target(this.#clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, {}, (data: any) => {
         this.#context = data.context;
-        const deserializedBearerToken = new Function(
-          `return ${data.bearerToken}`,
-        )();
         data.client.config = {
           ...data.client.config,
-          getBearerToken: deserializedBearerToken,
         };
         this.#client = Client.fromJSON(data.client) as any;
 

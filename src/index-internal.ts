@@ -6,7 +6,7 @@ import {
   COLLECT_FRAME_CONTROLLER,
   FRAME_ELEMENT,
   FRAME_REVEAL,
-  PUREJS_FRAME_CONTROLLER,
+  SKYFLOW_FRAME_CONTROLLER,
   REVEAL_FRAME_CONTROLLER,
 } from './core/constants';
 import RevealFrameController from './core/internal/reveal/RevealFrameController';
@@ -34,7 +34,7 @@ if (typeof window.console === 'undefined') {
       FrameController.init(names[1], names[2]);
     } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] !== undefined) {
       RevealFrameController.init(names[1]);
-    } else if (names[0] === PUREJS_FRAME_CONTROLLER && names[1] === undefined) {
+    } else if (names[0] === SKYFLOW_FRAME_CONTROLLER && names[1] === undefined) {
       SkyflowFrameController.init();
     } else if (names[0] === FRAME_ELEMENT) {
       printLog(

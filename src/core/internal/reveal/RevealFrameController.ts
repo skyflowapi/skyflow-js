@@ -38,21 +38,8 @@ class RevealFrameController {
         },
         (clientMetaData: any) => {
           this.#context = clientMetaData.clientJSON.context;
-          const tempData = {
-            ...clientMetaData,
-            clientJSON: {
-              ...clientMetaData.clientJSON,
-              config: {
-                ...clientMetaData.clientJSON.config,
-                // eslint-disable-next-line @typescript-eslint/no-implied-eval
-                getBearerToken: new Function(
-                  `return ${clientMetaData.clientJSON.config.getBearerToken}`,
-                )(),
-              },
-            },
-          };
-          const clientJSON = tempData.clientJSON;
-          this.#clientMetadata = tempData;
+          const clientJSON = clientMetaData.clientJSON;
+          this.#clientMetadata = clientMetaData;
           this.#client = Client.fromJSON(clientJSON);
         },
       );

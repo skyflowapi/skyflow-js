@@ -71,8 +71,6 @@ class CollectContainer extends Container {
             ...metaData.clientJSON,
             config: {
               ...metaData.clientJSON.config,
-              getBearerToken:
-                metaData.clientJSON.config.getBearerToken.toString(),
             },
           },
           context,

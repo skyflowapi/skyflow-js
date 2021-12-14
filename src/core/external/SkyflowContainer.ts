@@ -16,7 +16,7 @@ import {
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
   connectionConfigParseKeys,
-  PUREJS_FRAME_CONTROLLER,
+  SKYFLOW_FRAME_CONTROLLER,
   PUREJS_TYPES,
 } from '../constants';
 import {
@@ -40,7 +40,7 @@ class SkyflowContainer {
     this.#client = client;
     this.#context = context;
     const iframe = iframer({
-      name: `${PUREJS_FRAME_CONTROLLER}`,
+      name: `${SKYFLOW_FRAME_CONTROLLER}`,
     });
     setAttributes(iframe, {
       src: getIframeSrc(),
@@ -55,7 +55,6 @@ class SkyflowContainer {
           this.#context.logLevel);
         callback({
           client: this.#client,
-          bearerToken: this.#client.config.getBearerToken.toString(),
           context,
         });
         this.#isControllerFrameReady = true;

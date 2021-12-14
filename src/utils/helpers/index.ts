@@ -72,5 +72,5 @@ export function removeSpaces(inputString:string) {
 
 export function formatVaultURL(vaultURL) {
   if (typeof vaultURL !== 'string') return vaultURL;
-  return (vaultURL?.slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL;
+  return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
 }

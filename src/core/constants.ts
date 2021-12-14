@@ -11,7 +11,7 @@ import visaCardIcon from '../../assets/visa.svg';
 
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';
-export const PUREJS_FRAME_CONTROLLER = 'purejs_controller';
+export const SKYFLOW_FRAME_CONTROLLER = 'skyflow_controller';
 export const FRAME_REVEAL = 'reveal';
 
 export const FRAME_ELEMENT = 'element';
