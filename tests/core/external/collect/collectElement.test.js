@@ -1,10 +1,10 @@
 import bus from 'framebus';
-import Element from '../../../../src/core/external/collect/CollectElement';
+import CollectElement from '../../../../src/core/external/collect/CollectElement';
 import SkyflowError from '../../../../src/libs/SkyflowError';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../../../src/core/constants';
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
-
+import {checkForElementMatchRule} from "../../../../src/core-utils/collect";
 const elementName = 'element:CVV:cGlpX2ZpZWxkcy5wcmltYXJ5X2NhcmQuY3Z2';
 
 const input = {
@@ -62,7 +62,7 @@ describe('collect element', () => {
   it('constructor', async () => {
     const onSpy = jest.spyOn(bus, 'on');
 
-    const element = new Element({
+    const element = new CollectElement({
       elementName,
       rows,
     },
@@ -112,7 +112,7 @@ describe('collect element', () => {
   });
 
   it('mount, invalid dom element', () => {
-    const element = new Element({
+    const element = new CollectElement({
       elementName,
       rows,
     },
@@ -126,10 +126,30 @@ describe('collect element', () => {
     expect(() => { element.mount('#123'); }).toThrow(SkyflowError);
   });
 
+  it("collect element, not a single element",()=>{
+    try{
+      const element = new CollectElement({
+        elementName,
+        rows,
+      },
+      {},
+      'containerId',
+      false,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    }catch(err){
+      console.log(err);
+      expect(err).toBeDefined();
+    }
+    
+
+  });
+
   it('mount, valid dom element', () => {
     const onSpy = jest.spyOn(bus, 'on');
 
-    const element = new Element({
+    const element = new CollectElement({
       elementName,
       rows,
     },
@@ -159,7 +179,7 @@ describe('collect element', () => {
   });
 
   it('get options', async () => {
-    const element = new Element(
+    const element = new CollectElement(
       {
         elementName,
         rows,
@@ -200,7 +220,7 @@ describe('collect element validations', () => {
     ];
 
     const createElement = () => {
-      const element = new Element({
+      const element = new CollectElement({
         elementName,
         rows: invalidElementType,
       },
@@ -230,7 +250,7 @@ describe('collect element validations', () => {
     ];
 
     const createElement = () => {
-      const element = new Element({
+      const element = new CollectElement({
         elementName,
         rows: invalidValidations,
       },
@@ -260,7 +280,7 @@ describe('collect element validations', () => {
     ];
 
     const createElement = () => {
-      const element = new Element({
+      const element = new CollectElement({
         elementName,
         rows: invalidValidationRule,
       },
@@ -292,7 +312,7 @@ describe('collect element validations', () => {
     ];
 
     const createElement = () => {
-      const element = new Element({
+      const element = new CollectElement({
         elementName,
         rows: invalidValidationRule,
       },
@@ -324,7 +344,7 @@ describe('collect element validations', () => {
     ];
 
     const createElement = () => {
-      const element = new Element({
+      const element = new CollectElement({
         elementName,
         rows: invalidValidationRule,
       },
@@ -357,7 +377,7 @@ describe('collect element validations', () => {
     ];
 
     const createElement = () => {
-      const element = new Element({
+      const element = new CollectElement({
         elementName,
         rows: invalidValidationRule,
       },
@@ -392,7 +412,7 @@ describe('collect element validations', () => {
     ];
 
     const createElement = () => {
-      const element = new Element({
+      const element = new CollectElement({
         elementName,
         rows: invalidParams,
       },
@@ -427,7 +447,7 @@ describe('collect element validations', () => {
     ];
 
     const createElement = () => {
-      const element = new Element({
+      const element = new CollectElement({
         elementName,
         rows: invalidParams,
       },
@@ -442,5 +462,67 @@ describe('collect element validations', () => {
     expect(createElement).toThrow(
       new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE, [0], true),
     );
+  });
+});
+
+describe('collect element methods',()=>{
+  const onSpy = jest.spyOn(bus, 'on');
+  const testCollectElementProd = new CollectElement({
+    elementName,
+    rows,
+  },
+  {},
+  'containerId',
+  true,
+  destroyCallback,
+  updateCallback,
+  { logLevel: LogLevel.ERROR, env: Env.PROD });
+
+  const testCollectElementDev = new CollectElement({
+    elementName,
+    rows,
+  },
+  {},
+  'containerId',
+  true,
+  destroyCallback,
+  updateCallback,
+  { logLevel: LogLevel.ERROR, env: Env.DEV });
+  
+
+  it("setError method",()=>{
+    testCollectElementProd.setError("ErrorText");
+  });
+  it("resetError method",()=>{
+    testCollectElementProd.resetError();
+  });
+  it("setValue method prod env",()=>{
+      testCollectElementProd.setValue("testValue");
+      
+  });
+  it("setValue method dev env",()=>{
+    testCollectElementDev.setValue("testValue");
+  });
+  it("clearValue method prod env",()=>{
+      testCollectElementProd.clearValue();
+  });
+  it("clearValue method dev env",()=>{
+    testCollectElementDev.clearValue();
+  });
+
+  it("unmount method",()=>{
+    testCollectElementDev.unmount();
+  });
+
+  it("checkForElement Match Rule",()=>{
+    const testValidationsWithElementRule = [{
+      type:ValidationRuleType.ELEMENT_VALUE_MATCH_RULE
+    }];
+    const testValidationsWithoutElementRule = [{
+      type:ValidationRuleType.LENGTH_MATCH_RULE
+    }];
+    expect(checkForElementMatchRule(testValidationsWithElementRule)).toBe(true);
+    expect(checkForElementMatchRule(testValidationsWithoutElementRule)).toBe(false);
+    
   });
 });

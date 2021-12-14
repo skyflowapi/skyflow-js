@@ -106,3 +106,57 @@ describe("Reveal Element Class", () => {
     expect(testRevealElement.hasToken()).toBe(false);
   });
 });
+describe("Reveal Element Methods",()=>{
+  const containerId = mockUuid;
+  const testRevealElement = new RevealElement(
+    {
+      token:"1244",
+    },
+    metaData,
+    containerId,
+    { logLevel: LogLevel.ERROR,env:Env.PROD }
+  );
+  it("mount with invalid div",()=>{
+    try{
+      testRevealElement.mount(null);
+    }catch(err){
+      expect(err).toBeDefined();
+    }
+    
+      
+  });
+  it("unmount method",()=>{
+      testRevealElement.unmount();
+  });
+  it("check for isSetError False",()=>{
+    expect(testRevealElement.isClientSetError()).toBe(false);
+  });
+  it("setError method",()=>{
+    testRevealElement.setError("errorText");
+  });
+  it("check for isSetError True",()=>{
+    expect(testRevealElement.isClientSetError()).toBe(true);
+  });
+  it("resetError method",()=>{
+    testRevealElement.resetError();
+  });
+  it("setAltText method",()=>{
+    testRevealElement.setAltText("altText");
+  });
+  it("clearAltText method",()=>{
+    testRevealElement.clearAltText();
+  });
+  it("getRecord Data",()=>{
+    const testRecordData = testRevealElement.getRecordData();
+    expect(testRecordData).toStrictEqual({token:"1244",})
+  });
+  it("setToken method",()=>{
+    testRevealElement.setToken("testToken");
+  });
+  it("getRecord Data",()=>{
+    const testRecordData = testRevealElement.getRecordData();
+    expect(testRecordData).toStrictEqual({token:"testToken"})
+  });
+
+
+});

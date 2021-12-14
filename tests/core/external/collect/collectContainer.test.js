@@ -4,6 +4,7 @@ import {
 } from '../../../../src/core/constants';
 import CollectContainer from '../../../../src/core/external/collect/CollectContainer';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
+import Skyflow from '../../../../src/Skyflow';
 import { LogLevel,Env, ValidationRuleType } from '../../../../src/utils/common';
 import logs from '../../../../src/utils/logs';
 const bus = require('framebus');
@@ -159,6 +160,41 @@ describe('Collect container', () => {
       expect(err).toBeDefined();
     }
   });
+  it('Invalid validation params, invalid collect element', () => {
+    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    try {
+      const cvv = container.create({
+        ...cvvElement,
+        column: undefined,
+        validations: [{
+          type: ValidationRuleType.REGEX_MATCH_RULE,
+          params: {
+            // not passing regex
+          }
+        }]
+      });
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('valid validation params, regex match rule', () => {
+    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    try {
+      const cvv = container.create({
+        ...cvvElement,
+        column: undefined,
+        validations: [{
+          type: ValidationRuleType.REGEX_MATCH_RULE,
+          params: {
+           // pass valid regex
+           regex:/^5*/
+          }
+        }]
+      });
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
 
 
   it('create valid Element', () => {
@@ -179,5 +215,40 @@ describe('Collect container', () => {
     const collectCb = emitSpy.mock.calls[0][2];
     collectCb(collectResponse)
     collectCb({error: 'Error occured'})
+  });
+
+  it("container create options",()=>{
+    let container = new CollectContainer({}, metaData,  { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let expiryDate =  container.create({
+      table: 'pii_fields',
+      column: 'primary_card.cvv',
+      styles: {
+        base: {
+          color: '#1d1d1d',
+        },
+      },
+      placeholder: 'cvv',
+      label: 'cvv',
+      type: Skyflow.ElementType.EXPIRATION_DATE,
+    },{
+      format:"MM/YY"
+    });
+  });
+  it("container create options 2",()=>{
+    let container = new CollectContainer({}, metaData,  { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let expiryDate =  container.create({
+      table: 'pii_fields',
+      column: 'primary_card.cvv',
+      styles: {
+        base: {
+          color: '#1d1d1d',
+        },
+      },
+      placeholder: 'cvv',
+      label: 'cvv',
+      type: Skyflow.ElementType.EXPIRATION_DATE,
+    },{
+      format:"SS/YYY"
+    });
   });
 });
