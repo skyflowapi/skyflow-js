@@ -1,5 +1,5 @@
 import bus from 'framebus';
-import { ELEMENT_EVENTS_TO_IFRAME } from '../../container/constants';
+import { ELEMENT_EVENTS_TO_IFRAME } from '../../core/constants';
 import { formatFrameNameToId } from '../helpers';
 import logs from '../logs';
 

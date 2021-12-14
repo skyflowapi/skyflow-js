@@ -1,6 +1,6 @@
 import {
   IFRAME_DEFAULT_STYLES,
-} from '../container/constants';
+} from '../core/constants';
 import properties from '../properties';
 
 export const iframeDefaultAttributes = {

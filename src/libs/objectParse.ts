@@ -1,11 +1,11 @@
-import RevealElement from '../container/external/reveal/RevealElement';
-import Element from '../container/external/element';
-import { FRAME_ELEMENT, FRAME_REVEAL } from '../container/constants';
+import CollectElement from '../core/external/collect/CollectElement';
+import { FRAME_ELEMENT, FRAME_REVEAL } from '../core/constants';
 import { flattenObject, formatFrameNameToId } from '../utils/helpers';
 import { getCollectElementValue, getRevealElementValue } from '../utils/busEvents';
 import SkyflowError from './SkyflowError';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { getElementName } from '../utils/logsHelper';
+import RevealElement from '../core/external/reveal/RevealElement';
 
 const set = require('set-value');
 
@@ -22,7 +22,7 @@ export function connectionConfigParser(data, configKey) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENT_MUST_HAVE_TOKEN);
         }
       }
-    } else if (value instanceof Element) {
+    } else if (value instanceof CollectElement) {
       if (!value.isMounted()) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED_INVOKE_CONNECTION,
           [getElementName(formatFrameNameToId(value.iframeName()))]);
