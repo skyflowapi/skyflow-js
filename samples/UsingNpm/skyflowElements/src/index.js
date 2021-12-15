@@ -23,8 +23,8 @@ try{
          });
        },
        options:{
-         logLevel:Skyflow.LogLevel.DEBUG,
-         env:Skyflow.Env.DEV,
+         logLevel:Skyflow.LogLevel.ERROR,
+         env:Skyflow.Env.PROD,
        }
      });
 
@@ -84,7 +84,7 @@ try{
 
      const expiryDateElement = collectContainer.create({
        table: "pii_fields",
-       column: "expiry_date",
+       column: "primary_card.expiry_date",
        ...collectStylesOptions,
        label: "Expiry Date",
        placeholder: "MM/YYYY",
@@ -105,11 +105,6 @@ try{
      cvvElement.mount("#collectCvv");
      expiryDateElement.mount("#collectExpiryDate");
      cardHolderNameElement.mount("#collectCardholderName");
-
-     // add event listener to collect element
-     cardHolderNameElement.on(Skyflow.EventName.CHANGE,(state)=>{
-       console.log(state);
-     })
 
      // collect all elements data
      const collectButton = document.getElementById("collectPCIData");
@@ -167,8 +162,8 @@ try{
              revealCardCvvElement.mount("#revealCvv");
 
              const revealCardExpiryElement = revealContainer.create({
-               token: fieldsTokenData.expiry_date,
-               label: "Card Expiry Date",
+              token: fieldsTokenData.primary_card.expiry_date,
+              label: "Card Expiry Date",
                ...revealStyleOptions,
              });
              revealCardExpiryElement.mount("#revealExpiryDate");
@@ -184,7 +179,11 @@ try{
 
              if (revealButton) {
                revealButton.addEventListener("click", () => {
-                 revealContainer.reveal();
+                revealContainer.reveal().then((res)=>{
+                  console.log(res);
+                }).catch((err)=>{
+                  console.log(err);
+                });
                });
              }
            })

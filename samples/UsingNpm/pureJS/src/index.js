@@ -41,9 +41,10 @@ try{
                 primary_card: {
                   cvv: cardCvvData,
                   card_number: cardNumberData,
+                  expiry_date: cardExpiryData,
                 },
                 first_name: cardholderNameData,
-                expiry_date: cardExpiryData,
+                
               },
               table: "pii_fields",
             },
@@ -59,15 +60,23 @@ try{
 
               const fieldsTokenData = res.records[0].fields;
 
-              // fill tokens
-              document.getElementById("card_number").innerText =
-                fieldsTokenData.primary_card.card_number;
-              document.getElementById("cvv").innerText =
-                fieldsTokenData.primary_card.cvv;
-              document.getElementById("expiry_date").innerText =
-                fieldsTokenData.expiry_date;
-              document.getElementById("first_name").innerText =
-                fieldsTokenData.first_name;
+                // fill tokens
+                const revealCardNumberElement = document.getElementById("card_number");
+                revealCardNumberElement.innerText = fieldsTokenData.primary_card.card_number;
+                revealCardNumberElement.setAttribute("id",fieldsTokenData.primary_card.card_number);
+                
+                const revealCardCvvElement = document.getElementById("cvv");
+                revealCardCvvElement.innerText = fieldsTokenData.primary_card.cvv;
+                revealCardCvvElement.setAttribute("id",fieldsTokenData.primary_card.cvv);
+
+                const revealExpiryDateElement = document.getElementById("expiry_date");
+                revealExpiryDateElement.innerText =  fieldsTokenData.primary_card.expiry_date;
+                revealExpiryDateElement.setAttribute("id",fieldsTokenData.primary_card.expiry_date);
+
+                const revealFirstNameElement = document.getElementById("first_name");
+                revealFirstNameElement.innerText = fieldsTokenData.first_name;
+                revealFirstNameElement.setAttribute("id",fieldsTokenData.first_name);
+
 
               const revealButton = document.getElementById("revealButton");
               if (revealButton) {
@@ -79,11 +88,9 @@ try{
                       },
                       {
                         token: fieldsTokenData.primary_card.cvv
-                        
                       },
                       {
                         token: fieldsTokenData.expiry_date
-                        
                       },
                       {
                         token: fieldsTokenData.first_name
@@ -95,9 +102,9 @@ try{
                       document.getElementById("revealResponse").innerHTML =
                         JSON.stringify(res, null, 2);
                       res.records.map((record) => {
-                        const recordKey = Object.keys(record)[1];
+                        const recordKey = record["token"];
                         const ele = document.getElementById(recordKey);
-                        ele.innerText = record[recordKey];
+                        ele.innerText = record["value"];
                       });
                     })
                     .catch((err) => {
