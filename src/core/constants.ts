@@ -480,7 +480,7 @@ export const CARD_TYPE_REGEX = {
   [CardType.UNIONPAY]: { regex: /^62\d*/, maxCardLength: 19, cardLengthRange: [16, 17, 18, 19] },
   [CardType.MAESTRO]: { regex: /^(5018|5020|5038|5043|5[6-9]|6020|6304|6703|6759|676[1-3])\d*/, maxCardLength: 19, cardLengthRange: [12, 13, 14, 15, 16, 17, 18, 19] },
 };
-export const DEFAULT_CARD_LENGTH_RANGE = [12, 13, 14, 15, 16, 17, 18, 19];
+export const DEFAULT_CARD_LENGTH_RANGE = [0, 12, 13, 14, 15, 16, 17, 18, 19];
 
 export const CARD_ENCODED_ICONS = {
   [CardType.DEFAULT]: `url(${defaultCardIcon})`,

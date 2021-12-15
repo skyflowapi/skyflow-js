@@ -60,6 +60,7 @@ const getYearAndMonthBasedOnFormat = (cardDate, format:string) => {
 };
 
 export const validateExpiryDate = (date: string, format:string) => {
+  if (date.trim().length === 0) return true;
   if (!date.includes('/')) return false;
   const { month, year } = getYearAndMonthBasedOnFormat(date, format);
   const expiryDate = new Date(`${year}-${month}-01`);
