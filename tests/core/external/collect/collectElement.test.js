@@ -525,4 +525,30 @@ describe('collect element methods',()=>{
     expect(checkForElementMatchRule(testValidationsWithoutElementRule)).toBe(false);
     
   });
+  it("invalid on listener - 1",()=>{
+    try{
+      testCollectElementDev.on("invalid_listener",(state)=>{
+        console.log(state);
+    })
+    }catch(err){
+      expect(err).toBeDefined();
+    }
+   
+  });
+  it("invalid on listener - 2",()=>{
+    try{
+      testCollectElementDev.on("CHANGE",null)
+    }catch(err){
+      expect(err).toBeDefined();
+    }
+  });
+  it("invalid on listener - 3",()=>{
+    try{
+      testCollectElementDev.on("CHANGE",(state)=>{
+        console.log(state);
+    })
+    }catch(err){
+     console.log(err);
+    }
+  });
 });
