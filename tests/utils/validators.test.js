@@ -1,4 +1,4 @@
-import { CardType } from '../../src/container/constants';
+import { CardType } from '../../src/core/constants';
 import {
   detectCardType,
   validateCreditCardNumber,

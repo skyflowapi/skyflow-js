@@ -3,13 +3,13 @@ import uuid from './libs/uuid';
 import {
   ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
-} from './container/constants';
+} from './core/constants';
 import Client from './client';
-import CollectContainer from './container/external/CollectContainer';
-import RevealContainer from './container/external/RevealContainer';
+import RevealContainer from './core/external/reveal/RevealContainer';
+import CollectContainer from './core/external/collect/CollectContainer';
 import properties from './properties';
 import isTokenValid from './utils/jwtUtils';
-import PureJsController from './container/external/PureJsController';
+import SkyflowContainer from './core/external/SkyflowContainer';
 import { parameterizedString, printLog } from './utils/logsHelper';
 import SkyflowError from './libs/SkyflowError';
 import logs from './utils/logs';
@@ -51,7 +51,7 @@ class Skyflow {
     clientDomain: window.location.origin,
   };
 
-  #pureJsController: PureJsController;
+  #skyflowContainer: SkyflowContainer;
 
   #bearerToken: string = '';
 
@@ -70,7 +70,7 @@ class Skyflow {
     );
     this.#logLevel = config?.options?.logLevel || LogLevel.ERROR;
     this.#env = config?.options?.env || Env.PROD;
-    this.#pureJsController = new PureJsController(this.#client,
+    this.#skyflowContainer = new SkyflowContainer(this.#client,
       { logLevel: this.#logLevel, env: this.#env });
 
     bus
@@ -163,26 +163,26 @@ class Skyflow {
   ) {
     printLog(parameterizedString(logs.infoLogs.INSERT_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
-    return this.#pureJsController.insert(records, options);
+    return this.#skyflowContainer.insert(records, options);
   }
 
   detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
     printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
-    return this.#pureJsController.detokenize(detokenizeInput);
+    return this.#skyflowContainer.detokenize(detokenizeInput);
   }
 
   getById(getByIdInput: IGetByIdInput) {
     printLog(parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
-    return this.#pureJsController.getById(getByIdInput);
+    return this.#skyflowContainer.getById(getByIdInput);
   }
 
   invokeConnection(config: IConnectionConfig) {
     printLog(parameterizedString(logs.infoLogs.INVOKE_CONNECTION_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
 
-    return this.#pureJsController.invokeConnection(config);
+    return this.#skyflowContainer.invokeConnection(config);
   }
 
   static get ContainerType() {

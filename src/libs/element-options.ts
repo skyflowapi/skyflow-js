@@ -1,8 +1,8 @@
 import {
   ALLOWED_EXPIRY_DATE_FORMATS, DEFAULT_EXPIRATION_DATE_FORMAT, ELEMENTS, INPUT_STYLES,
-} from '../container/constants';
-import { CollectElementInput } from '../container/external/CollectContainer';
-import Element from '../container/external/element';
+} from '../core/constants';
+import { CollectElementInput } from '../core/external/collect/CollectContainer';
+import CollectElement from '../core/external/collect/CollectElement';
 import {
   IValidationRule, MessageType, ValidationRuleType,
 } from '../utils/common';
@@ -210,12 +210,12 @@ export const formatValidations = (input: CollectElementInput) => {
         }
         if (validationRule.params
           && (validationRule.params.element == null
-            || !(validationRule.params.element instanceof Element))) {
+            || !(validationRule.params.element instanceof CollectElement))) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
         }
         if (validationRule.params
           && validationRule.params.element
-          && (validationRule.params.element instanceof Element)) {
+          && (validationRule.params.element instanceof CollectElement)) {
           // if (!validationRule.params.element.isMounted()) {
           //   throw new SkyflowError(
           //     SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE, [`${index}`], true,

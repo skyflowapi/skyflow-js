@@ -1,4 +1,4 @@
-import { STYLE_TYPE } from '../container/constants';
+import { STYLE_TYPE } from '../core/constants';
 import { getValueAndItsUnit } from './element-options';
 
 export function buildStylesFromClassesAndStyles(classes, styles) {

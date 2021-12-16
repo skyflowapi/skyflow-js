@@ -84,7 +84,7 @@ const logs = {
     EMPTY_VAULTID_IN_INIT: 'Interface: init - Invalid client credentials. vaultID cannot be empty.',
     VAULTURL_IS_REQUIRED: 'Interface: init - Invalid client credentials. vaultURL is required.',
     EMPTY_VAULTURL_IN_INIT: 'Interface: init - Invalid client credentials. vaultURL cannot be empty.',
-    INVALID_VAULTURL_IN_INIT: 'Interface: init - Invalid client credentials. Expecting "https://XYZ" for vaultURL',
+    INVALID_VAULTURL_IN_INIT: 'Interface: init - Invalid client credentials. Expecting https://XYZ for vaultURL',
     GET_BEARER_TOKEN_IS_REQUIRED: 'Interface: init - Invalid client credentials. getBearerToken is required.',
     EMPTY_CONTAINER_TYPE: 'Interface: client {containerType} container - Invalid container type. Container object cannot be empty.',
     INVALID_CONTAINER_TYPE: 'Interface: client  {containerType}  container - Invalid container type. Invalid container object.',

@@ -1,9 +1,9 @@
 import bus from 'framebus';
 import Skyflow, { ContainerType } from '../src/Skyflow';
-import CollectContainer from '../src/container/external/CollectContainer';
-import RevealContainer from '../src/container/external/RevealContainer';
+import CollectContainer from '../src/core/external/collect/CollectContainer';
+import RevealContainer from '../src/core/external/reveal/RevealContainer';
 import * as iframerUtils from '../src/iframe-libs/iframer';
-import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '../src/container/constants';
+import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '../src/core/constants';
 import { Env, EventName, LogLevel, RedactionType, RequestMethod } from '../src/utils/common';
 jest.mock('../src/utils/jwtUtils',()=>({
   __esModule: true,

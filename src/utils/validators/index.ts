@@ -1,8 +1,8 @@
 import {
   ALLOWED_EXPIRY_DATE_FORMATS, CardType, CARD_TYPE_REGEX, DEFAULT_CARD_LENGTH_RANGE,
-} from '../../container/constants';
-import { CollectElementInput } from '../../container/external/CollectContainer';
-import { IRevealElementInput } from '../../container/external/RevealContainer';
+} from '../../core/constants';
+import { CollectElementInput } from '../../core/external/collect/CollectContainer';
+import { IRevealElementInput } from '../../core/external/reveal/RevealContainer';
 import SkyflowError from '../../libs/SkyflowError';
 import { ISkyflow } from '../../Skyflow';
 import {
@@ -60,6 +60,7 @@ const getYearAndMonthBasedOnFormat = (cardDate, format:string) => {
 };
 
 export const validateExpiryDate = (date: string, format:string) => {
+  if (date.trim().length === 0) return true;
   if (!date.includes('/')) return false;
   const { month, year } = getYearAndMonthBasedOnFormat(date, format);
   const expiryDate = new Date(`${year}-${month}-01`);

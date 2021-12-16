@@ -1,16 +1,16 @@
 import 'core-js/stable';
-import { FrameController } from './container/internal';
-import FrameElements from './container/internal/FrameElements';
-import RevealFrame from './container/internal/reveal/RevealFrame';
+import { FrameController } from './core/internal';
+import FrameElements from './core/internal/FrameElements';
+import RevealFrame from './core/internal/reveal/RevealFrame';
 import {
   COLLECT_FRAME_CONTROLLER,
   FRAME_ELEMENT,
   FRAME_REVEAL,
-  PUREJS_FRAME_CONTROLLER,
+  SKYFLOW_FRAME_CONTROLLER,
   REVEAL_FRAME_CONTROLLER,
-} from './container/constants';
-import RevealFrameController from './container/internal/reveal/RevealFrameController';
-import PureJsFrameController from './container/internal/pureJs/PureJsFrameController';
+} from './core/constants';
+import RevealFrameController from './core/internal/reveal/RevealFrameController';
+import SkyflowFrameController from './core/internal/SkyflowFrame/SkyflowFrameController';
 import logs from './utils/logs';
 import { MessageType, LogLevel } from './utils/common';
 import {
@@ -34,8 +34,8 @@ if (typeof window.console === 'undefined') {
       FrameController.init(names[1], names[2]);
     } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] !== undefined) {
       RevealFrameController.init(names[1]);
-    } else if (names[0] === PUREJS_FRAME_CONTROLLER && names[1] === undefined) {
-      PureJsFrameController.init();
+    } else if (names[0] === SKYFLOW_FRAME_CONTROLLER && names[1] === undefined) {
+      SkyflowFrameController.init();
     } else if (names[0] === FRAME_ELEMENT) {
       printLog(
         parameterizedString(
