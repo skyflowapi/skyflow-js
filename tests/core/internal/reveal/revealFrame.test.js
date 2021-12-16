@@ -1,6 +1,6 @@
 import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/RevealFrame";
-import { ELEMENT_EVENTS_TO_IFRAME } from "../../../../src/core/constants";
+import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from "../../../../src/core/constants";
 import { Env, LogLevel } from "../../../../src/utils/common";
 
 const testRecord = {
@@ -82,9 +82,9 @@ describe("Reveal Frame Class",()=>{
 
     // connection
     const emitterCb = jest.fn();
-    const onCbName = on.mock.calls[2][0];
+    const onCbName = on.mock.calls[3][0];
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
-    const onCb = on.mock.calls[2][1];
+    const onCb = on.mock.calls[3][1];
     onCb({name:""},emitterCb);
     expect(emitterCb).toBeCalledWith(data.record.token);
   });
@@ -124,9 +124,9 @@ describe("Reveal Frame Class",()=>{
 
     // connection
     const emitterCb = jest.fn();
-    const onCbName = on.mock.calls[2][0];
+    const onCbName = on.mock.calls[3][0];
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
-    const onCb = on.mock.calls[2][1];
+    const onCb = on.mock.calls[3][1];
     onCb({name:""},emitterCb); 
     expect(emitterCb).toBeCalledWith("card_value");
   });
@@ -170,10 +170,247 @@ describe("Reveal Frame Class",()=>{
 
     // connection
     const emitterCb = jest.fn();
-    const onCbName = on.mock.calls[2][0];
+    const onCbName = on.mock.calls[3][0];
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
-    const onCb = on.mock.calls[2][1];
+    const onCb = on.mock.calls[3][1];
     onCb({name:""},emitterCb); 
     expect(emitterCb).toBeCalledWith(data.record.token);
   });
+
+  test("reveal set error",()=>{
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        token:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        },
+        errorTextStyles:{
+          base:{
+            color:"red"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    console.log(on.mock.calls[0][0]);
+    console.log(on.mock.calls[1][0]);
+    console.log(on.mock.calls[2][0]); 
+    console.log(on.mock.calls[3][0]);
+
+    const onSetErrorName = on.mock.calls[1][0];
+    // undefined since with jest window.name will be emptyString("") 
+    expect(onSetErrorName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR);
+    const onSetErrorCb = on.mock.calls[1][1];
+    onSetErrorCb({
+      name:"",
+      isTriggerError: true,
+      clientErrorText:"errorText",
+    });
+    
+  });
+
+  test("reveal reset error",()=>{
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        token:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        },
+        errorTextStyles:{
+          base:{
+            color:"red"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    console.log(on.mock.calls[0][0]);
+    console.log(on.mock.calls[1][0]);
+    console.log(on.mock.calls[2][0]); 
+    console.log(on.mock.calls[3][0]);
+    // reveal response ready
+    const onRevealResponseName = on.mock.calls[1][0];
+    // undefined since with jest window.name will be emptyString("") 
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR);
+    const onRevealResponseCb = on.mock.calls[1][1];
+    onRevealResponseCb({
+      name: "",
+      isTriggerError: false,
+    });
+    
+  });
+  test("reveal set token",()=>{
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        token:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        },
+        errorTextStyles:{
+          base:{
+            color:"red"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    console.log(on.mock.calls[0][0]);
+    console.log(on.mock.calls[1][0]);
+    console.log(on.mock.calls[2][0]); 
+    console.log(on.mock.calls[3][0]);
+
+    const onRevealResponseName = on.mock.calls[2][0];
+    // undefined since with jest window.name will be emptyString("") 
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS);
+    const onRevealResponseCb = on.mock.calls[2][1];
+    onRevealResponseCb({
+      name: "",
+      updateType:REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN,
+      updatedValue:"121-43sfsdaf31-3sa1a321"
+    });
+    
+  });
+  test("reveal set altText",()=>{
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        token:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        },
+        errorTextStyles:{
+          base:{
+            color:"red"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    console.log(on.mock.calls[0][0]);
+    console.log(on.mock.calls[1][0]);
+    console.log(on.mock.calls[2][0]); 
+    console.log(on.mock.calls[3][0]);
+
+    const onRevealResponseName = on.mock.calls[2][0];
+    // undefined since with jest window.name will be emptyString("") 
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS);
+    const onRevealResponseCb = on.mock.calls[2][1];
+    onRevealResponseCb({
+      name: "",
+      updateType:REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
+      updatedValue:"test_altText"
+    });
+    
+  });
+  test("reveal clearAltText",()=>{
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        token:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        },
+        errorTextStyles:{
+          base:{
+            color:"red"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    console.log(on.mock.calls[0][0]);
+    console.log(on.mock.calls[1][0]);
+    console.log(on.mock.calls[2][0]); 
+    console.log(on.mock.calls[3][0]);
+
+    const onRevealResponseName = on.mock.calls[2][0];
+    // undefined since with jest window.name will be emptyString("") 
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS);
+    const onRevealResponseCb = on.mock.calls[2][1];
+    onRevealResponseCb({
+      name: "",
+      updateType:REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
+      updatedValue:null
+    });
+    
+  });
+
 });

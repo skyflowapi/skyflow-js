@@ -126,7 +126,7 @@ class RevealFrame {
         sub,
       );
 
-    bus.on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, (data) => {
+    bus.target(document.referrer.split('/').slice(0, 3).join('/')).on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, (data) => {
       if (this.#name === data.name) {
         if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
       }

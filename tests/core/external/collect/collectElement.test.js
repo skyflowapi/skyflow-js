@@ -463,6 +463,41 @@ describe('collect element validations', () => {
       new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE, [0], true),
     );
   });
+  it('Missing element in LENGTH_MATCH_RULE', () => {
+    const invalidParams = [
+      {
+        elements: [
+          {
+            ...row,
+            validations: [{
+              type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
+              params: {
+                error: 'length match failed',
+              },
+            }],
+          },
+        ],
+      },
+    ];
+
+    try{
+      const element = new CollectElement({
+        elementName,
+        rows: invalidParams,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      console.log(element);
+    }catch(err){
+      console.log(err);
+      expect(err).toBeUndefined();
+    }
+    
+  });
 });
 
 describe('collect element methods',()=>{
