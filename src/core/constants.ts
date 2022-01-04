@@ -8,6 +8,7 @@ import maestroIcon from '../../assets/maestro.svg';
 import maseterCardIcon from '../../assets/mastercard.svg';
 import unionPayIcon from '../../assets/unionpay.svg';
 import visaCardIcon from '../../assets/visa.svg';
+import SKYFLOW_ERROR_CODE from '../utils/constants';
 
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';
@@ -21,6 +22,7 @@ export const PUREJS_TYPES = {
   DETOKENIZE: 'DETOKENIZE',
   GET_BY_SKYFLOWID: 'GET_BY_SKYFLOWID',
   INVOKE_CONNECTION: 'INVOKE_CONNECTION',
+  INVOKE_SOAP_CONNECTION: 'INVOKE_SOAP_CONNECTION',
 };
 
 export const ELEMENT_EVENTS_TO_CLIENT = {
@@ -503,3 +505,8 @@ export const EXPIRY_DATE_MASK = {
 };
 export const DEFAULT_EXPIRATION_DATE_FORMAT = 'MM/YY';
 export const ALLOWED_EXPIRY_DATE_FORMATS = [DEFAULT_EXPIRATION_DATE_FORMAT, 'YYYY/MM', 'YY/MM', 'MM/YYYY'];
+
+export const soapReqXmlErrors = [SKYFLOW_ERROR_CODE.INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML,
+  SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_SOAP_REQUEST_XML];
+export const soapResXmlErrors = [SKYFLOW_ERROR_CODE.INVALID_ELEMENT_ID_IN_SOAP_RESPONSE_XML,
+  SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_SOAP_RESPONSE_XML];

@@ -1,3 +1,6 @@
+import SkyflowElement from '../../core/external/common/SkyflowElement';
+import SkyflowError from '../../libs/SkyflowError';
+
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
 export function deletePropertyPath(obj, path) {
@@ -73,4 +76,37 @@ export function removeSpaces(inputString:string) {
 export function formatVaultURL(vaultURL) {
   if (typeof vaultURL !== 'string') return vaultURL;
   return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
+}
+
+export function replaceIdInXml(xml: string, elementLookup: any, errors: any) {
+  const elementids : any = [];
+  const result = xml.replace(/<skyflow>([\s\S]*?)<\/skyflow>/gi, (match, key) => {
+    const id = key.trim();
+    elementids.push(id);
+    const element: SkyflowElement = elementLookup[id];
+    return `<skyflow>${element?.iframeName()}</skyflow>`;
+  });
+  for (let i = 0; i < elementids.length; i += 1) {
+    if (!Object.prototype.hasOwnProperty.call(elementLookup, elementids[i])) {
+      throw new SkyflowError(errors[0], [`${elementids[i]}`], true);
+    }
+    if (!elementLookup[elementids[i]].isMounted()) {
+      throw new SkyflowError(errors[1], [`${elementids[i]}`], true);
+    }
+  }
+  return result;
+}
+
+export function getIframeNamesInSoapRequest(requestXml: string) {
+  const elementNames = requestXml.match(/<skyflow>([\s\S]*?)<\/skyflow>/gi);
+  return elementNames?.map((element) => element.replace('<skyflow>', '').replace('</skyflow>', ''));
+}
+
+export function replaceIframeNameWithValues(requestXml: string, elementValuesLookup) {
+  const result = requestXml.replace(/<skyflow>([\s\S]*?)<\/skyflow>/gi, (match, key) => {
+    const name = key.trim();
+    return elementValuesLookup[name];
+  });
+
+  return result;
 }

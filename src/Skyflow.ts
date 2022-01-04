@@ -27,6 +27,7 @@ import {
   LogLevel,
   MessageType,
   ValidationRuleType,
+  ISoapConnectionConfig,
 } from './utils/common';
 import { formatVaultURL } from './utils/helpers';
 
@@ -61,6 +62,8 @@ class Skyflow {
 
   #env:Env;
 
+  #skyflowElements: any;
+
   constructor(config: ISkyflow) {
     this.#client = new Client(
       {
@@ -70,6 +73,7 @@ class Skyflow {
     );
     this.#logLevel = config?.options?.logLevel || LogLevel.ERROR;
     this.#env = config?.options?.env || Env.PROD;
+    this.#skyflowElements = {};
     this.#skyflowContainer = new SkyflowContainer(this.#client,
       { logLevel: this.#logLevel, env: this.#env });
 
@@ -132,6 +136,7 @@ class Skyflow {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
         },
+        this.#skyflowElements,
         { logLevel: this.#logLevel, env: this.#env });
         printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
@@ -143,6 +148,7 @@ class Skyflow {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
         },
+        this.#skyflowElements,
         { logLevel: this.#logLevel });
         printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
@@ -183,6 +189,13 @@ class Skyflow {
       MessageType.LOG, this.#logLevel);
 
     return this.#skyflowContainer.invokeConnection(config);
+  }
+
+  invokeSoapConnection(config: ISoapConnectionConfig) {
+    printLog(parameterizedString(logs.infoLogs.INVOKE_SOAP_CONNECTION_TRIGGERED, CLASS_NAME),
+      MessageType.LOG, this.#logLevel);
+
+    return this.#skyflowContainer.invokeSoapConnection(config, this.#skyflowElements);
   }
 
   static get ContainerType() {

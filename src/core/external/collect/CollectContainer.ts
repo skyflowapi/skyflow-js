@@ -47,10 +47,13 @@ class CollectContainer extends Container {
 
   #context:Context;
 
-  constructor(options, metaData, context) {
+  #skyflowElements:any;
+
+  constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
     this.#metaData = metaData;
+    this.#skyflowElements = skyflowElements;
     this.#context = context;
     const iframe = iframer({
       name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}`,
@@ -167,7 +170,9 @@ class CollectContainer extends Container {
         element.update(tempElements);
       }
     } else {
+      const elementId = uuid();
       element = new CollectElement(
+        elementId,
         tempElements,
         this.#metaData,
         this.#containerId,
@@ -177,6 +182,7 @@ class CollectContainer extends Container {
         this.#context,
       );
       this.#elements[tempElements.elementName] = element;
+      this.#skyflowElements[elementId] = element;
     }
 
     if (!isSingleElementAPI) {

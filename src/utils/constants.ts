@@ -260,6 +260,70 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.REVEAL_ELEMENT_ERROR_STATE,
   },
+  MISSING_SOAP_CONNECTION_CONFIG: {
+    code: 400,
+    description: logs.errorLogs.MISSING_SOAP_CONNECTION_CONFIG,
+  },
+  MISSING_SOAP_CONNECTION_URL: {
+    code: 400,
+    description: logs.errorLogs.MISSING_SOAP_CONNECTION_URL,
+  },
+  EMPTY_SOAP_CONNECTION_URL: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_SOAP_CONNECTION_URL,
+  },
+  INVALID_SOAP_CONNECTION_URL_TYPE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_SOAP_CONNECTION_URL_TYPE,
+  },
+  INVALID_SOAP_CONNECTION_URL: {
+    code: 400,
+    description: logs.errorLogs.INVALID_SOAP_CONNECTION_URL,
+  },
+  INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML: {
+    code: 400,
+    description: logs.errorLogs.INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML,
+  },
+  ELEMENT_NOT_MOUNTED_IN_SOAP_REQUEST_XML: {
+    code: 400,
+    description: logs.errorLogs.ELEMENT_NOT_MOUNTED_IN_SOAP_REQUEST_XML,
+  },
+  ELEMENT_NOT_MOUNTED_IN_SOAP_RESPONSE_XML: {
+    code: 400,
+    description: logs.errorLogs.ELEMENT_NOT_MOUNTED_IN_SOAP_RESPONSE_XML,
+  },
+  INVALID_ELEMENT_ID_IN_SOAP_RESPONSE_XML: {
+    code: 400,
+    description: logs.errorLogs.INVALID_ELEMENT_ID_IN_SOAP_RESPONSE_XML,
+  },
+  MISSING_SOAP_REQUEST_XML: {
+    code: 400,
+    description: logs.errorLogs.MISSING_SOAP_REQUEST_XML,
+  },
+  EMPTY_SOAP_REQUEST_XML: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_SOAP_REQUEST_XML,
+  },
+  INVALID_SOAP_REQUEST_XML_TYPE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_SOAP_REQUEST_XML_TYPE,
+  },
+  INVALID_SOAP_RESPONSE_XML_TYPE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_SOAP_RESPONSE_XML_TYPE,
+  },
+  INVALID_SOAP_REQUEST_XML: {
+    code: 400,
+    description: logs.errorLogs.INVALID_SOAP_REQUEST_XML,
+  },
+  INVALID_SOAP_RESPONSE_XML: {
+    code: 400,
+    description: logs.errorLogs.INVALID_SOAP_RESPONSE_XML,
+  },
+  INVALID_HTTP_HEADERS_TYPE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_HTTP_HEADERS_TYPE,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;

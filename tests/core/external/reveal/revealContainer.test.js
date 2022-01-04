@@ -68,7 +68,7 @@ describe("Reveal Container Class", () => {
       },
     },
   };
-  const testRevealContainer = new RevealContainer(testMetaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+  const testRevealContainer = new RevealContainer(testMetaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
   test("constructor", () => {
     expect(testRevealContainer).toBeInstanceOf(RevealContainer);
     expect(document.querySelector("iframe")).toBeTruthy();
@@ -101,7 +101,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("on reveal frame ready call back",()=>{
-    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     const data = {
       name:REVEAL_FRAME_CONTROLLER,
     };
@@ -118,7 +118,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("on container mounted call back",()=>{
-    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     testRevealContainer.create({
       token: "1815-6223-1073-1425",
     });
@@ -140,7 +140,7 @@ describe("Reveal Container Class", () => {
     emitCb({error:{code:404,description:"Not Found"}});
   });
   test("on container mounted call back 2",()=>{
-    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     testRevealContainer.create({
       token: "1815-6223-1073-1425",
     });
@@ -159,7 +159,7 @@ describe("Reveal Container Class", () => {
     onCb(data);
   });
   test("on container mounted call back 3",()=>{
-    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     testRevealContainer.create({
       token: "1815-6223-1073-1425",
     });
@@ -181,7 +181,7 @@ describe("Reveal Container Class", () => {
     emitCb({"success":[{token:"1815-6223-1073-1425"}]});
   });
   test("on container mounted call back 4",()=>{
-    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     testRevealContainer.create({
       token: "",
     });
@@ -203,7 +203,7 @@ describe("Reveal Container Class", () => {
     // emitCb({"success":[{token:"1815-6223-1073-1425"}]});
   });
   test("on container mounted call back 5",()=>{
-    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     testRevealContainer.create({
       token: "",
     });
@@ -237,7 +237,7 @@ describe("Reveal Container Class", () => {
   //   });
   // });
   test("on container mounted else call back",()=>{
-    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     testRevealContainer.create({
       token: "1815-6223-1073-1425",
     });
@@ -260,7 +260,7 @@ describe("Reveal Container Class", () => {
     emitCb({error:{code:404,description:"Not Found"}});
   });
   test("on container mounted else call back ",()=>{
-    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     testRevealContainer.create({
       token: "1815-6223-1073-1425",
     });

@@ -96,3 +96,10 @@ export interface IValidationRule {
   type: ValidationRuleType;
   params: any;
 }
+
+export interface ISoapConnectionConfig {
+  connectionURL: string;
+  httpHeaders?: any;
+  requestXML: any;
+  responseXML?: any;
+}

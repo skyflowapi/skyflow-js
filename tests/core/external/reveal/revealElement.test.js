@@ -3,6 +3,7 @@ import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL } from "../../../../src/core/con
 import RevealElement from "../../../../src/core/external/reveal/RevealElement";
 import bus from "framebus";
 const mockUuid = '1234'; 
+const elementId = 'id';
 jest.mock('../../../../src/libs/uuid',()=>({
   __esModule: true,
   default:jest.fn(()=>(mockUuid)),
@@ -58,6 +59,7 @@ describe("Reveal Element Class", () => {
       testRecord,
       metaData,
       containerId,
+      elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     expect(testRevealElement).toBeInstanceOf(RevealElement);
@@ -67,6 +69,7 @@ describe("Reveal Element Class", () => {
       testRecord,
       metaData,
       containerId,
+      elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     const testEmptyDiv = document.createElement("div");
@@ -101,6 +104,7 @@ describe("Reveal Element Class", () => {
       {},
       metaData,
       containerId,
+      elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     expect(testRevealElement.hasToken()).toBe(false);
@@ -114,6 +118,7 @@ describe("Reveal Element Methods",()=>{
     },
     metaData,
     containerId,
+    elementId,
     { logLevel: LogLevel.ERROR,env:Env.PROD }
   );
   it("mount with invalid div",()=>{

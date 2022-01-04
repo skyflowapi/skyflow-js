@@ -17,7 +17,7 @@ describe('Validation card number and Expiry Date', () => {
 
   test('validate expiry date', () => {
     const currentDate = new Date();
-    const expiryDate = `${currentDate.getMonth()}/${currentDate.getFullYear()+1}`;
+    const expiryDate = `01/${currentDate.getFullYear()+1}`;
     expect(validateExpiryDate(expiryDate,"MM/YYYY")).toBe(true);
   });
 
