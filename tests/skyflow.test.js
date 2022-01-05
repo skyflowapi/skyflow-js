@@ -5,6 +5,10 @@ import RevealContainer from '../src/core/external/reveal/RevealContainer';
 import * as iframerUtils from '../src/iframe-libs/iframer';
 import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '../src/core/constants';
 import { Env, EventName, LogLevel, RedactionType, RequestMethod } from '../src/utils/common';
+import SKYFLOW_ERROR_CODE from "../src/utils/constants";
+import logs from "../src/utils/logs";
+import { parameterizedString } from '../src/utils/logsHelper';
+
 jest.mock('../src/utils/jwtUtils',()=>({
   __esModule: true,
   default:jest.fn(()=>true),
@@ -861,4 +865,310 @@ describe("Get BearerToken Listener",()=>{
         done();
       },1000);
   });
+});
+
+describe("Invoke SOAP Connection",()=>{
+  let emitSpy;
+  let targetSpy;
+  let skyflow;
+  const on = jest.fn();
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+
+    skyflow = Skyflow.init({
+      vaultID: 'vault123',
+      vaultURL: 'https://vaulturl.com',
+      getBearerToken: jest.fn(),
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+  });
+
+  const invokeSoapReq = {
+    connectionURL:"https://soapconnection.com",
+    httpHeaders:{
+      soapAction: '<soap_action>'
+    },
+    requestXML:`<soapenv:Envelope>
+    <soapenv:Header>
+        <ClientID>1234</ClientID>
+    </soapenv:Header>
+    <soapenv:Body>
+    	<GenerateCVV>
+               <CardNumber>
+                  1321
+               </CardNumber>
+               <ExpiryDate>
+                 123
+               </ExpiryDate>
+        </GenerateCVV>
+    </soapenv:Body>
+</soapenv:Envelope>`,
+}
+const invokeSoapResponse = `<soapenv:Envelope>
+<soapenv:Header/>
+<soapenv:Body>
+<GenerateCVV>
+<ReceivedTimestamp>2019-05-29 21:49:56.625</ReceivedTimestamp>
+    </GenerateCVV>
+</soapenv:Body>
+</soapenv:Envelope>`;
+const invokeSoapErrorResponse = `
+  <error>
+    <code>500</code>
+    <description>Internal Server Response</description>
+  <error>
+`
+  test('soap invoke connection success', (done) => {
+    const frameReayEvent = on.mock.calls
+  .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+  const frameReadyCb = frameReayEvent[0][1];
+  const cb2 = jest.fn();
+  frameReadyCb({}, cb2);
+  
+  const res = skyflow.invokeSoapConnection(invokeSoapReq);
+  setTimeout(()=>{
+    const emitEvent = emitSpy.mock.calls
+  .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+  const emitCb = emitEvent[0][2];
+  emitCb(invokeSoapResponse);
+
+  res.then((soapResponse)=>{
+    expect(soapResponse).toEqual(invokeSoapResponse);
+    done();
+  }).catch((err)=>{
+    done();
+    expect(err).toBeNull();
+  })
+  },1000);
+  
+});
+test('soap invoke connection success with response', (done) => {
+  const frameReayEvent = on.mock.calls
+.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+const frameReadyCb = frameReayEvent[0][1];
+const cb2 = jest.fn();
+frameReadyCb({}, cb2);
+
+const res = skyflow.invokeSoapConnection({...invokeSoapReq,responseXML:"<response></response>"});
+setTimeout(()=>{
+  const emitEvent = emitSpy.mock.calls
+.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+const emitCb = emitEvent[0][2];
+emitCb(invokeSoapResponse);
+
+res.then((soapResponse)=>{
+  expect(soapResponse).toEqual(invokeSoapResponse);
+  done();
+}).catch((err)=>{
+  done();
+  expect(err).toBeNull();
+})
+},1000);
+
+});
+
+  test('soap invoke connection error', (done) => {
+    const frameReayEvent = on.mock.calls
+  .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+  const frameReadyCb = frameReayEvent[0][1];
+  const cb2 = jest.fn();
+  frameReadyCb({}, cb2);
+  const res = skyflow.invokeSoapConnection(invokeSoapReq);
+
+  const emitEvent = emitSpy.mock.calls
+  .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+  const emitCb = emitEvent[0][2];
+  emitCb({error:invokeSoapErrorResponse});
+
+  res.then((soapResponse)=>{
+  expect(soapResponse).toBeNull();
+  done();
+  }).catch((errorResponse)=>{
+    expect(errorResponse).toEqual(invokeSoapErrorResponse);
+    done();
+  })
+
+  });
+  test('sop invoke connection invalid element id',(done)=>{
+    const frameReayEvent = on.mock.calls
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+
+    const res = skyflow.invokeSoapConnection({
+        "connectionURL":"https://soapconnection.com",
+        httpHeaders:{
+          soapAction: '<soap_action>'
+        },
+        requestXML:`<soapenv:Envelope>
+        <soapenv:Header>
+            <ClientID>1234</ClientID>
+        </soapenv:Header>
+        <soapenv:Body>
+          <GenerateCVV>
+                   <CardNumber>
+                      <Skyflow>123</Skyflow>
+                   </CardNumber>
+                   <ExpiryDate>
+                    <Skyflow>345</Skyflow>
+                   </ExpiryDate>
+            </GenerateCVV>
+        </soapenv:Body>
+    </soapenv:Envelope>`
+    });
+  
+    res.then((soapResponse)=>{
+    expect(soapResponse).toBeNull();
+    done();
+    }).catch((err)=>{
+      expect(err?.error.description).toEqual(parameterizedString(logs.errorLogs.INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML,123));
+      done();
+    })
+  });
+  test('soap invoke connection invalid input', (done) => {
+    const frameReayEvent = on.mock.calls
+  .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+  const frameReadyCb = frameReayEvent[0][1];
+  const cb2 = jest.fn();
+  frameReadyCb({}, cb2);
+  const res = skyflow.invokeSoapConnection({});
+
+  res.then((soapResponse)=>{
+  expect(soapResponse).toBeNull();
+  done();
+  }).catch((err)=>{
+    expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_URL.description);
+    done();
+  })
+
+  });
+
+  test('soap invoke connection success else', (done) => {
+
+  const res = skyflow.invokeSoapConnection(invokeSoapReq);
+
+  const frameReayEvent = on.mock.calls
+  .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+  const frameReadyCb = frameReayEvent[1][1];
+  const cb2 = jest.fn();
+  frameReadyCb({}, cb2);
+
+  const emitEvent = emitSpy.mock.calls
+  .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+  const emitCb = emitEvent[0][2];
+  emitCb(invokeSoapResponse);
+
+  res.then((soapResponse)=>{
+    expect(soapResponse).toEqual(invokeSoapResponse);
+    done();
+  }).catch((err)=>{
+    done();
+    expect(err).toBeNull();
+  })
+
+  });
+  test('soap invoke connection error else ', (done) => {
+  
+  const res = skyflow.invokeSoapConnection(invokeSoapReq);
+
+  const frameReayEvent = on.mock.calls
+  .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+  const frameReadyCb = frameReayEvent[1][1];
+  const cb2 = jest.fn();
+  frameReadyCb({}, cb2);
+
+  const emitEvent = emitSpy.mock.calls
+  .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+  const emitCb = emitEvent[0][2];
+  emitCb({error:invokeSoapErrorResponse});
+
+  res.then((soapResponse)=>{
+  expect(soapResponse).toBeNull();
+  done();
+  }).catch((errorResponse)=>{
+    expect(errorResponse).toEqual(invokeSoapErrorResponse);
+    done();
+  })
+
+  });
+  test('soap invoke connection invalid input else', (done) => {
+  
+    const res = skyflow.invokeSoapConnection({});
+    res.then((soapResponse)=>{
+    expect(soapResponse).toBeNull();
+    done();
+    }).catch((err)=>{
+      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_URL.description);
+      done();
+    })
+  
+  });
+
+  test('soap invoke connection invalid element id else', (done) => {
+  
+    const res = skyflow.invokeSoapConnection({
+      "connectionURL":"https://soapconnection.com",
+      httpHeaders:{
+        soapAction: '<soap_action>'
+      },
+      requestXML:`<soapenv:Envelope>
+      <soapenv:Header>
+          <ClientID>1234</ClientID>
+      </soapenv:Header>
+      <soapenv:Body>
+        <GenerateCVV>
+                 <CardNumber>
+                    <Skyflow>123</Skyflow>
+                 </CardNumber>
+                 <ExpiryDate>
+                  <Skyflow>345</Skyflow>
+                 </ExpiryDate>
+          </GenerateCVV>
+      </soapenv:Body>
+  </soapenv:Envelope>`
+  });
+    res.then((soapResponse)=>{
+    expect(soapResponse).toBeNull();
+    done();
+    }).catch((err)=>{
+      expect(err?.error.description).toEqual(parameterizedString(logs.errorLogs.INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML,123));
+      done();
+    })
+  
+  });
+  test('soap invoke connection success else with response xml', (done) => {
+
+    const res = skyflow.invokeSoapConnection({...invokeSoapReq,responseXML:"<response></response>"});
+  
+    const frameReayEvent = on.mock.calls
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    const frameReadyCb = frameReayEvent[1][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+  
+    const emitEvent = emitSpy.mock.calls
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+    const emitCb = emitEvent[0][2];
+    emitCb(invokeSoapResponse);
+  
+    res.then((soapResponse)=>{
+      expect(soapResponse).toEqual(invokeSoapResponse);
+      done();
+    }).catch((err)=>{
+      done();
+      expect(err).toBeNull();
+    })
+  
+    });
+  
+
 });
