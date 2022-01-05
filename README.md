@@ -1287,27 +1287,27 @@ const requestXML = `<soapenv:Envelope>
 
 const responseXML = `<soapenv:Envelope>
 	<soapenv:Header>
-		<HeaderList>
-			<HeaderItem>
-				<Name>NodeId</Name>
-				<Value>
-					<Skyflow>${revealNodeId}</Skyflow>
-				</Value>
-			</HeaderItem>
-			<HeaderItem>
-				<Name>ProgramId</Name>
-				<Value>
-					<Skyflow>${revealProgramId}</Skyflow>
-				</Value>
-			</HeaderItem>
+	    <HeaderList>
+		<HeaderItem>
+		    <Name>NodeId</Name>
+		    <Value>
+			<Skyflow>${revealNodeId}</Skyflow>
+		    </Value>
+		</HeaderItem>
+		<HeaderItem>
+		    <Name>ProgramId</Name>
+	            <Value>
+			<Skyflow>${revealProgramId}</Skyflow>
+		    </Value>
+		</HeaderItem>
 		</HeaderList>
 	</soapenv:Header>
 	<soapenv:Body>
-		<GenerateCVV>
-			<CVV>
-				<Skyflow>${cvvElementID}</Skyflow>
-			</CVV>
-		</GenerateCVV>
+	    <GenerateCVV>
+		<CVV>
+		    <Skyflow>${cvvElementID}</Skyflow>
+		</CVV>
+	    </GenerateCVV>
 	</soapenv:Body>
 </soapenv:Envelope>`
 
