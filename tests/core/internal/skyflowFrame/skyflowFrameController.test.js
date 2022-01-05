@@ -2,8 +2,12 @@ import bus from 'framebus';
 import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../../../src/core/constants';
 import clientModule from '../../../../src/client';
 import * as busEvents from '../../../../src/utils/busEvents';
-import { LogLevel, Env} from "../../../../src/utils/common";
-import SkyflowFrameController from "../../../../src/core/internal/SkyflowFrame/SkyflowFrameController"
+import { LogLevel, Env } from '../../../../src/utils/common';
+import SkyflowFrameController from '../../../../src/core/internal/SkyflowFrame/SkyflowFrameController';
+
+jest.mock('easy-soap-request')
+const soapRequest = require('easy-soap-request');
+
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();
 
@@ -18,8 +22,8 @@ const clientData = {
     config: { ...skyflowConfig },
     metadata: {},
   },
-  context: { logLevel: LogLevel.ERROR,env:Env.PROD }
-}
+  context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+};
 
 const records = {
   records: [
@@ -416,6 +420,108 @@ describe('Invoking Connection', () => {
     }, 1000);
   });
 });
+
+const invokeSoapConnectionReq = {
+  connectionURL: 'https://connectionurls.com',
+  httpHeaders: {
+    soapAction: 'http://example.com.',
+  },
+  requestXML: `<soapenv:Envelope>
+  <soapenv:Header>
+      <ClientID>1234</ClientID>
+  </soapenv:Header>
+  <soapenv:Body>
+    <GenerateCVV>
+        <CardNumber>
+        <Skyflow>cvv:123</Skyflow>
+        </CardNumber>
+      </GenerateCVV>
+  </soapenv:Body>
+  </soapenv:Envelope>`,
+  responseXML: `<soapenv:Envelope>
+  <soapenv:Header/>
+  <soapenv:Body>
+  <GenerateCVV>
+     <CVV>123</CVV>
+  </GenerateCVV>
+  </soapenv:Body>
+  </soapenv:Envelope>`
+};
+
+const invokeSoapConnectionRes = `<soapenv:Envelope>
+<soapenv:Header/>
+<soapenv:Body>
+<GenerateCVV>
+<ReceivedTimestamp>2019-05-29 21:49:56.625</ReceivedTimestamp>
+   <CVV>123</CVV>
+</GenerateCVV>
+</soapenv:Body>
+</soapenv:Envelope>`;
+
+describe('Invoking SOAP Connection', () => {
+  let emitSpy;
+  let targetSpy;
+  let windowSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+  });
+
+  test('Invoke Connection success', (done) => {
+
+    soapRequest.mockImplementation(() => Promise.resolve({response: {body: invokeSoapConnectionRes}}));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.INVOKE_SOAP_CONNECTION,
+      config: invokeSoapConnectionReq,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].includes('<CVV>')).toBeFalsy();
+      expect(cb2.mock.calls[0][0].includes('<ReceivedTimestamp>')).toBeTruthy();
+      done();
+    }, 1000);
+  });
+
+  test('Invoke Connection error', (done) => {
+
+    soapRequest.mockImplementation(() => Promise.reject('Invalid request'));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.INVOKE_SOAP_CONNECTION,
+      config: invokeSoapConnectionReq,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].error).toBeDefined();
+      done();
+    }, 1000);
+  });
+});
+
 
 describe('Failed to fetch accessToken', () => {
   let emitSpy;
