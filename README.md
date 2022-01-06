@@ -1289,25 +1289,25 @@ const responseXML = `<soapenv:Envelope>
 	<soapenv:Header>
 	  <HeaderList>
       <HeaderItem>
-          <Name>NodeId</Name>
-          <Value>
-            <Skyflow>${revealNodeId}</Skyflow>
-          </Value>
+        <Name>NodeId</Name>
+        <Value>
+          <Skyflow>${revealNodeId}</Skyflow>
+        </Value>
       </HeaderItem>
       <HeaderItem>
-          <Name>ProgramId</Name>
-          <Value>
-            <Skyflow>${revealProgramId}</Skyflow>
-          </Value>
+        <Name>ProgramId</Name>
+        <Value>
+          <Skyflow>${revealProgramId}</Skyflow>
+        </Value>
       </HeaderItem>
 		</HeaderList>
 	</soapenv:Header>
 	<soapenv:Body>
-	    <GenerateCVV>
+	  <GenerateCVV>
       <CVV>
-          <Skyflow>${cvvElementID}</Skyflow>
+        <Skyflow>${cvvElementID}</Skyflow>
       </CVV>
-	    </GenerateCVV>
+	  </GenerateCVV>
 	</soapenv:Body>
 </soapenv:Envelope>`
 

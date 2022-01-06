@@ -3,8 +3,10 @@ import SkyflowError from '../../src/libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../src/utils/constants';
 import {
   detectCardType,
+  isValidRegExp,
   validateCreditCardNumber,
   validateExpiryDate,
+  validateConnectionConfig,
   validateSoapConnectionConfig
 } from '../../src/utils/validators/index';
 
@@ -70,89 +72,150 @@ describe('Detect Card Type',()=>{
   });
 });
 
+describe("validate regex",()=>{
+  test("invalid regex",()=>{
+    const str = "(?("
+    expect(isValidRegExp(str)).toBeFalsy()
+  })
+})
+
+describe("validate invoke connection",()=>{
+  const config = {
+    connectionURL: "https://abc.com",
+    methodName: "POST"
+  }
+  test("empty config object",()=>{
+    try{
+      validateConnectionConfig()
+    }catch(err){
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_CONFIG.description);
+    }
+  });
+
+  test("missing connectionURL in config",()=>{
+    try{
+      validateConnectionConfig({})
+    }catch(err){
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_URL.description);
+    }
+  });
+
+  test("empty connectionURL in config",()=>{
+    try{
+      validateConnectionConfig({connectionURL: null})
+    }catch(err){
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_CONNECTION_URL.description);
+    }
+  });
+
+  test("invalid connectionURL type in config",()=>{
+    try{
+      validateConnectionConfig({connectionURL: {}})
+    }catch(err){
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL_TYPE.description);
+    }
+  });
+
+  test("missing methodName in config",()=>{
+    try{
+      validateConnectionConfig({connectionURL: "https://test.com"})
+    }catch(err){
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_METHODNAME_KEY.description);
+    }
+  });
+
+  test("invalid methodName in config",()=>{
+    try{
+      validateConnectionConfig({...config, methodName: 'invalid'})
+    }catch(err){
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_METHODNAME_VALUE.description);
+    }
+  });
+})
+
 describe("validate soap connection",()=>{
   test("empty config",()=>{
     try{
       validateSoapConnectionConfig(null)
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_CONFIG.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_CONFIG.description);
     }
   });
   test("no connection url",()=>{
     try{
       validateSoapConnectionConfig({});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_URL.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_URL.description);
     }
   });
   test("empty connection url",()=>{
     try{
       validateSoapConnectionConfig({connectionURL:""});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_SOAP_CONNECTION_URL.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_SOAP_CONNECTION_URL.description);
     }
   });
   test("not a string type connection url",()=>{
     try{
       validateSoapConnectionConfig({connectionURL:1234});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL_TYPE.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL_TYPE.description);
     }
   });
   test("invalid connection url",()=>{
     try{
-      validateSoapConnectionConfig({connectionURL:"not_a_url"});
+      validateSoapConnectionConfig({connectionURL:"https://:@#"});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL.description);
     }
   });
   test("no request xml",()=>{
     try{
       validateSoapConnectionConfig({connectionURL:"https://validurl.com"});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SOAP_REQUEST_XML.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SOAP_REQUEST_XML.description);
     }
   });
   test("empty request xml",()=>{
     try{
       validateSoapConnectionConfig({connectionURL:"https://validurl.com",requestXML:null});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_SOAP_REQUEST_XML.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_SOAP_REQUEST_XML.description);
     }
   });
   test("not string type request xml",()=>{
     try{
       validateSoapConnectionConfig({connectionURL:"https://validurl.com",requestXML:true});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML_TYPE.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML_TYPE.description);
     }
   });
   test("invalid request xml",()=>{
     try{
       validateSoapConnectionConfig({connectionURL:"https://validurl.com",requestXML:"not_xml_structure"});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML.description);
     }
   });
   test("invalid response xml type",()=>{
     try{
       validateSoapConnectionConfig({connectionURL:"https://validurl.com",requestXML:"<valid></valid>",responseXML:122});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML_TYPE.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML_TYPE.description);
     }
   });
   test("invalid response xml",()=>{
     try{
       validateSoapConnectionConfig({connectionURL:"https://validurl.com",requestXML:"<valid></valid>",responseXML:"not_xml_structure"});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML.description);
     }
   });
   test("invalid httpheaders object",()=>{
     try{
       validateSoapConnectionConfig({connectionURL:"https://validurl.com",requestXML:"<valid></valid>",responseXML:"<valid></valid>",httpHeaders:true});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.INVALID_HTTP_HEADERS_TYPE.description);
+      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_HTTP_HEADERS_TYPE.description);
     }
   });
 });

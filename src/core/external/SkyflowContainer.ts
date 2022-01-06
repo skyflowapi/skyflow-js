@@ -315,7 +315,7 @@ class SkyflowContainer {
             CLASS_NAME, PUREJS_TYPES.INVOKE_SOAP_CONNECTION),
           MessageType.LOG, this.#context.logLevel);
         } catch (err) {
-          reject(err);
+          reject(err?.error || err);
         }
       });
     }
@@ -356,8 +356,8 @@ class SkyflowContainer {
         printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
           CLASS_NAME, PUREJS_TYPES.INVOKE_SOAP_CONNECTION),
         MessageType.LOG, this.#context.logLevel);
-      } catch (error) {
-        reject(error);
+      } catch (err) {
+        reject(err?.error || err);
       }
     });
   }
@@ -398,7 +398,7 @@ class SkyflowContainer {
         } catch (error) {
           printLog(error.message, MessageType.ERROR, this.#context.logLevel);
 
-          reject(error);
+          reject(error?.error || error);
         }
       });
     }
@@ -438,7 +438,7 @@ class SkyflowContainer {
       } catch (error) {
         printLog(error.message, MessageType.ERROR, this.#context.logLevel);
 
-        reject(error);
+        reject(error?.error || error);
       }
     });
   }

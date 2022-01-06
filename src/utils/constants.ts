@@ -292,6 +292,10 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.ELEMENT_NOT_MOUNTED_IN_SOAP_RESPONSE_XML,
   },
+  DUPLICATE_ELEMENT_IN_SOAP_RESPONSE_XML: {
+    code: 400,
+    description: logs.errorLogs.DUPLICATE_ELEMENT_IN_SOAP_RESPONSE_XML,
+  },
   INVALID_ELEMENT_ID_IN_SOAP_RESPONSE_XML: {
     code: 400,
     description: logs.errorLogs.INVALID_ELEMENT_ID_IN_SOAP_RESPONSE_XML,
@@ -323,6 +327,14 @@ const SKYFLOW_ERROR_CODE = {
   INVALID_HTTP_HEADERS_TYPE: {
     code: 400,
     description: logs.errorLogs.INVALID_HTTP_HEADERS_TYPE,
+  },
+  INVALID_PATH_IN_RES_XML: {
+    code: 400,
+    description: logs.errorLogs.INVALID_PATH_IN_RES_XML,
+  },
+  INVALID_PATH_IN_ARRAY_RES_XML: {
+    code: 400,
+    description: logs.errorLogs.INVALID_PATH_IN_ARRAY_RES_XML,
   },
 };
 

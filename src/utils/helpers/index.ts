@@ -78,6 +78,10 @@ export function formatVaultURL(vaultURL) {
   return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
 }
 
+export function checkIfDuplicateExists(arr) {
+  return new Set(arr).size !== arr.length;
+}
+
 export function replaceIdInXml(xml: string, elementLookup: any, errors: any) {
   const elementids : any = [];
   const result = xml.replace(/<skyflow>([\s\S]*?)<\/skyflow>/gi, (match, key) => {
@@ -86,6 +90,9 @@ export function replaceIdInXml(xml: string, elementLookup: any, errors: any) {
     const element: SkyflowElement = elementLookup[id];
     return `<skyflow>${element?.iframeName()}</skyflow>`;
   });
+  if (errors.length > 2 && checkIfDuplicateExists(elementids)) {
+    throw new SkyflowError(errors[2], [], true);
+  }
   for (let i = 0; i < elementids.length; i += 1) {
     if (!Object.prototype.hasOwnProperty.call(elementLookup, elementids[i])) {
       throw new SkyflowError(errors[0], [`${elementids[i]}`], true);

@@ -285,26 +285,26 @@ export const isValidRegExp = (input) => {
 
 export const validateConnectionConfig = (config: IConnectionConfig) => {
   if (!config) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_CONFIG);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_CONFIG, [], true);
   }
   if (!Object.prototype.hasOwnProperty.call(config, 'connectionURL')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_URL);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_URL, [], true);
   }
   if (!config.connectionURL) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONNECTION_URL);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONNECTION_URL, [], true);
   }
   if (typeof config.connectionURL !== 'string') {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL_TYPE);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL_TYPE, [], true);
   }
   if (!isValidURL(config.connectionURL)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL, [], true);
   }
 
   if (!Object.prototype.hasOwnProperty.call(config, 'methodName')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_METHODNAME_KEY);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_METHODNAME_KEY, [], true);
   }
   if (!Object.values(RequestMethod).includes(config.methodName)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_METHODNAME_VALUE);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_METHODNAME_VALUE, [], true);
   }
 };
 
@@ -361,39 +361,39 @@ export const isValidXml = (xml: string) => {
 
 export const validateSoapConnectionConfig = (config: ISoapConnectionConfig) => {
   if (!config) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_CONFIG);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_CONFIG, [], true);
   }
   if (!Object.prototype.hasOwnProperty.call(config, 'connectionURL')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_URL);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_URL, [], true);
   }
   if (!config.connectionURL) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_SOAP_CONNECTION_URL);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_SOAP_CONNECTION_URL, [], true);
   }
   if (typeof config.connectionURL !== 'string') {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL_TYPE);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL_TYPE, [], true);
   }
   if (!isValidURL(config.connectionURL)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL, [], true);
   }
   if (!Object.prototype.hasOwnProperty.call(config, 'requestXML')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SOAP_REQUEST_XML);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SOAP_REQUEST_XML, [], true);
   }
   if (!config.requestXML) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_SOAP_REQUEST_XML);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_SOAP_REQUEST_XML, [], true);
   }
   if (!(typeof config.requestXML === 'string')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML_TYPE);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML_TYPE, [], true);
   }
   if (!isValidXml(config.requestXML)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML, [], true);
   }
   if (config.responseXML && !(typeof config.responseXML === 'string')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML_TYPE);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML_TYPE, [], true);
   }
   if (config.responseXML && !isValidXml(config.responseXML)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML, [], true);
   }
   if (config.httpHeaders && !(typeof config.httpHeaders === 'object' && !Array.isArray(config.httpHeaders))) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_HTTP_HEADERS_TYPE);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_HTTP_HEADERS_TYPE, [], true);
   }
 };

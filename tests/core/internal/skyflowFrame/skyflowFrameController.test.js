@@ -540,7 +540,75 @@ describe('Invoking SOAP Connection', () => {
     }, 1000);
   });
 
-  test('Invoke Connection error', (done) => {
+  test('Invoke Connection, invalid path in  responseXML', (done) => {
+
+    soapRequest.mockImplementation(() => Promise.resolve({response: {body: invokeSoapConnectionRes}}));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.INVOKE_SOAP_CONNECTION,
+      config: {
+        ...invokeSoapConnectionReq,
+        responseXML: '<a>123</a>'
+      },
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].error).toBeDefined();
+      done();
+    }, 1000);
+  });
+
+  test('Invoke Connection, invalid identifiers for arrays, in  responseXML', (done) => {
+
+    soapRequest.mockImplementation(() => Promise.resolve({response: {body: invokeSoapConnectionRes}}));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.INVOKE_SOAP_CONNECTION,
+      config: {
+        ...invokeSoapConnectionReq,
+        responseXML: `<soapenv:Envelope>
+        <soapenv:Header>
+          <HeaderList>
+            <HeaderItem>
+              <Name>invalidIdentifier</Name>
+              <Value>
+                <Skyflow>node:123</Skyflow>
+              </Value>
+            </HeaderItem>
+          </HeaderList>
+        </soapenv:Header>
+        </soapenv:Envelope>`
+      },
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      console.log(cb2.mock.calls[0][0].error)
+      expect(cb2.mock.calls[0][0].error).toBeDefined();
+      done();
+    }, 1000);
+  });
+
+  test('Invoke Connection, error from api', (done) => {
 
     soapRequest.mockImplementation(() => Promise.reject('Invalid request'));
 
