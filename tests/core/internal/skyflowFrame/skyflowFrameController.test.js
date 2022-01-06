@@ -439,17 +439,61 @@ const invokeSoapConnectionReq = {
   </soapenv:Body>
   </soapenv:Envelope>`,
   responseXML: `<soapenv:Envelope>
-  <soapenv:Header/>
+  <soapenv:Header>
+    <HeaderList>
+      <HeaderItem>
+        <Name>NodeId</Name>
+        <Value>
+          <Skyflow>node:123</Skyflow>
+        </Value>
+      </HeaderItem>
+    </HeaderList>
+    <HeaderList2>
+      <HeaderItem>
+        <Name>NodeId</Name>
+        <Value>
+          <Skyflow>node:123</Skyflow>
+        </Value>
+      </HeaderItem>
+      <HeaderItem>
+        <Name>ProgramId</Name>
+        <Value>
+          <Skyflow>program:123</Skyflow>
+        </Value>
+      </HeaderItem>
+    </HeaderList2>
+  </soapenv:Header>
   <soapenv:Body>
-  <GenerateCVV>
-     <CVV>123</CVV>
-  </GenerateCVV>
-  </soapenv:Body>
+    <GenerateCVV>
+      <CVV>element:cvvId:123</CVV>
+    </GenerateCVV>
+    </soapenv:Body>
   </soapenv:Envelope>`
 };
 
 const invokeSoapConnectionRes = `<soapenv:Envelope>
-<soapenv:Header/>
+<soapenv:Header>
+  <HeaderList>
+    <HeaderItem>
+      <Name>NodeId</Name>
+      <Value>node123</Value>
+    </HeaderItem>
+    <HeaderItem>
+      <Name>ProgramId</Name>
+      <Value>program123</Value>
+    </HeaderItem>
+  </HeaderList>
+  <HeaderList2>
+    <HeaderItem>
+      <Name>NodeId</Name>
+      <Value>node123</Value>
+    </HeaderItem>
+    <HeaderItem>
+      <Name>ProgramId</Name>
+      <Value>program123</Value>
+    </HeaderItem>
+  </HeaderList2>
+</soapenv:Header>
 <soapenv:Body>
 <GenerateCVV>
 <ReceivedTimestamp>2019-05-29 21:49:56.625</ReceivedTimestamp>

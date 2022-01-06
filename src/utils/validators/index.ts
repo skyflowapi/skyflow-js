@@ -373,7 +373,7 @@ export const validateSoapConnectionConfig = (config: ISoapConnectionConfig) => {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL_TYPE);
   }
   if (!isValidURL(config.connectionURL)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL);
   }
   if (!Object.prototype.hasOwnProperty.call(config, 'requestXML')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SOAP_REQUEST_XML);

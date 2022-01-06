@@ -103,7 +103,7 @@ describe("validate soap connection",()=>{
     try{
       validateSoapConnectionConfig({connectionURL:"not_a_url"});
     }catch(err){
-      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL.description);
+      expect(err?.errors[0].description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SOAP_CONNECTION_URL.description);
     }
   });
   test("no request xml",()=>{

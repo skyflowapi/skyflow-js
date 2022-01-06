@@ -1270,43 +1270,43 @@ const cvvElementID = cvvElement.getID()
 // step 5
 const requestXML = `<soapenv:Envelope>
     <soapenv:Header>
-        <ClientID>1234</ClientID>
+      <ClientID>1234</ClientID>
     </soapenv:Header>
     <soapenv:Body>
-    	<GenerateCVV>
-               <CardNumber>
-                  <Skyflow>${cardNumberID}</Skyflow>
-               </CardNumber>
-               <ExpiryDate>
-                  <Skyflow>${expiryDateID}</Skyflow>
-               </ExpiryDate>
-        </GenerateCVV>
+      <GenerateCVV>
+        <CardNumber>
+          <Skyflow>${cardNumberID}</Skyflow>
+        </CardNumber>
+        <ExpiryDate>
+          <Skyflow>${expiryDateID}</Skyflow>
+        </ExpiryDate>
+      </GenerateCVV>
     </soapenv:Body>
 </soapenv:Envelope>`
 
 
 const responseXML = `<soapenv:Envelope>
 	<soapenv:Header>
-	    <HeaderList>
-		<HeaderItem>
-		    <Name>NodeId</Name>
-		    <Value>
-			<Skyflow>${revealNodeId}</Skyflow>
-		    </Value>
-		</HeaderItem>
-		<HeaderItem>
-		    <Name>ProgramId</Name>
-	            <Value>
-			<Skyflow>${revealProgramId}</Skyflow>
-		    </Value>
-		</HeaderItem>
+	  <HeaderList>
+      <HeaderItem>
+          <Name>NodeId</Name>
+          <Value>
+            <Skyflow>${revealNodeId}</Skyflow>
+          </Value>
+      </HeaderItem>
+      <HeaderItem>
+          <Name>ProgramId</Name>
+          <Value>
+            <Skyflow>${revealProgramId}</Skyflow>
+          </Value>
+      </HeaderItem>
 		</HeaderList>
 	</soapenv:Header>
 	<soapenv:Body>
 	    <GenerateCVV>
-		<CVV>
-		    <Skyflow>${cvvElementID}</Skyflow>
-		</CVV>
+      <CVV>
+          <Skyflow>${cvvElementID}</Skyflow>
+      </CVV>
 	    </GenerateCVV>
 	</soapenv:Body>
 </soapenv:Envelope>`
@@ -1330,11 +1330,20 @@ Sample Response on success:
 
 ```xml
 <soapenv:Envelope>
-    <soapenv:Header/>
+    <soapenv:Header>
+      <HeaderList>
+        <HeaderItem>
+            <Name>NodeId</Name>
+        </HeaderItem>
+        <HeaderItem>
+            <Name>ProgramId</Name>
+        </HeaderItem>
+      </HeaderList>
+    </soapenv:Header>
     <soapenv:Body>
-	<GenerateCVV>
-		<ReceivedTimestamp>2019-05-29 21:49:56.625</ReceivedTimestamp>
-      	</GenerateCVV>
+      <GenerateCVV>
+        <ReceivedTimestamp>2019-05-29 21:49:56.625</ReceivedTimestamp>
+      </GenerateCVV>
     </soapenv:Body>
 </soapenv:Envelope>
 ```

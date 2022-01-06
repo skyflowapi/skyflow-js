@@ -98,7 +98,7 @@ export function extractSkyflowTagsFromResponseBody(responseBody: any,
   skyflowTags: any,
   connectionResponse: any) {
   Object.entries<any>(responseBody).forEach(([key, value]) => {
-    if (key === 'skyflow') {
+    if (key.match(/skyflow/i)) {
       if (skyflowTags.fields) {
         skyflowTags.fields.push({
           key: path,
@@ -154,7 +154,7 @@ function arraySearchHelper(response, path, identifiers) {
 
     let matched = true;
     for (let j = 0; j < identifiers.length; j += 1) {
-      if (_.get(responseArrayItem, identifiers[j].key)._text !== identifiers[j].value) {
+      if (_.get(responseArrayItem, identifiers[j].key)?._text !== identifiers[j].value) {
         matched = false;
         break;
       }
