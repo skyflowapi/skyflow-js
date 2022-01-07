@@ -82,7 +82,7 @@ describe('Collect container', () => {
   });
 
   it('contructor', async () => {
-    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     await new Promise((r) => setTimeout(r, 2000));
 
     const frameReadyCb = on.mock.calls[0][1];
@@ -95,7 +95,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid element type', () => {
-    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     try {
       const cvv = container.create({ ...cvvElement, type: 'abc' });
     } catch (err) {
@@ -104,7 +104,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid table', () => {
-    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -116,7 +116,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid column', () => {
-    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -128,7 +128,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid validation params, missing element', () => {
-    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -144,7 +144,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid validation params, invalid collect element', () => {
-    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -161,7 +161,7 @@ describe('Collect container', () => {
     }
   });
   it('Invalid validation params, invalid collect element', () => {
-    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -178,7 +178,7 @@ describe('Collect container', () => {
     }
   });
   it('valid validation params, regex match rule', () => {
-    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -198,7 +198,7 @@ describe('Collect container', () => {
 
 
   it('create valid Element', () => {
-    const container = new CollectContainer({}, metaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     let cvv;
     try {
       cvv = container.create(cvvElement);
@@ -210,7 +210,7 @@ describe('Collect container', () => {
   });
 
   it("container collect", () => {
-    let container = new CollectContainer({}, metaData,  { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let container = new CollectContainer({}, metaData,  {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     container.collect();
     const collectCb = emitSpy.mock.calls[0][2];
     collectCb(collectResponse)
@@ -218,7 +218,7 @@ describe('Collect container', () => {
   });
 
   it("container create options",()=>{
-    let container = new CollectContainer({}, metaData,  { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     let expiryDate =  container.create({
       table: 'pii_fields',
       column: 'primary_card.cvv',
@@ -235,7 +235,7 @@ describe('Collect container', () => {
     });
   });
   it("container create options 2",()=>{
-    let container = new CollectContainer({}, metaData,  { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     let expiryDate =  container.create({
       table: 'pii_fields',
       column: 'primary_card.cvv',

@@ -44,9 +44,12 @@ class RevealContainer extends Container {
 
   #context: Context;
 
-  constructor(metaData, context) {
+  #skyflowElements: any;
+
+  constructor(metaData, skyflowElements, context) {
     super();
     this.#metaData = metaData;
+    this.#skyflowElements = skyflowElements;
     this.#containerId = uuid();
     this.#eventEmmiter = new EventEmitter();
     this.#context = context;
@@ -111,9 +114,11 @@ class RevealContainer extends Container {
 
   create(record: IRevealElementInput) {
     // this.#revealRecords.push(record);
+    const elementId = uuid();
     const revealElement = new RevealElement(record, this.#metaData,
-      this.#containerId, this.#context);
+      this.#containerId, elementId, this.#context);
     this.#revealElements.push(revealElement);
+    this.#skyflowElements[elementId] = revealElement;
     return revealElement;
   }
 

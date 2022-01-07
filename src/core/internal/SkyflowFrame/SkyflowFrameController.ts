@@ -8,7 +8,12 @@ import {
   fetchRecordsBySkyflowID,
   fetchRecordsByTokenId,
 } from '../../../core-utils/reveal';
-import { constructInvokeConnectionRequest } from '../../../libs/objectParse';
+import {
+  constructInvokeConnectionRequest,
+  constructSoapConnectionRequestXml,
+  extractSkyflowTagsFromResponseBody,
+  soapResponseBodyParser,
+} from '../../../libs/objectParse';
 import { getAccessToken } from '../../../utils/busEvents';
 import {
   clearEmpties,
@@ -21,10 +26,13 @@ import {
 import { printLog, parameterizedString } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
 import {
-  IRevealRecord, ISkyflowIdRecord, IConnectionConfig, MessageType, Context,
+  IRevealRecord, ISkyflowIdRecord, IConnectionConfig, MessageType, Context, ISoapConnectionConfig,
 } from '../../../utils/common';
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
+
+const soapRequest = require('easy-soap-request');
+const xmljs = require('xml-js');
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -124,6 +132,23 @@ class SkyflowFrameController {
 
             callback({ error });
           });
+        } else if (data.type === PUREJS_TYPES.INVOKE_SOAP_CONNECTION) {
+          const config = data.config as ISoapConnectionConfig;
+
+          constructSoapConnectionRequestXml(config.requestXML).then((xml) => {
+            this.invokeSoapConnectionRequest({
+              ...config,
+              requestXML: xml,
+            }).then((response) => {
+              printLog(parameterizedString(logs.infoLogs.SEND_SOAP_INVOKE_CONNECTION_RESOLVED,
+                CLASS_NAME), MessageType.LOG, this.#context.logLevel);
+              callback(response);
+            }).catch((error) => {
+              printLog(logs.errorLogs.SEND_INVOKE_SOAP_CONNECTION_REJECTED, MessageType.ERROR,
+                this.#context.logLevel);
+              callback({ error });
+            });
+          });
         }
       });
 
@@ -136,18 +161,10 @@ class SkyflowFrameController {
         };
         this.#client = Client.fromJSON(data.client) as any;
 
-        printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-          CLASS_NAME, PUREJS_TYPES.INSERT),
-        MessageType.LOG, this.#context.logLevel);
-        printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-          CLASS_NAME, PUREJS_TYPES.DETOKENIZE),
-        MessageType.LOG, this.#context.logLevel);
-        printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-          CLASS_NAME, PUREJS_TYPES.GET_BY_SKYFLOWID),
-        MessageType.LOG, this.#context.logLevel);
-        printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-          CLASS_NAME, PUREJS_TYPES.INVOKE_CONNECTION),
-        MessageType.LOG, this.#context.logLevel);
+        Object.keys(PUREJS_TYPES).forEach((key) => {
+          printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+            CLASS_NAME, PUREJS_TYPES[key]), MessageType.LOG, this.#context.logLevel);
+        });
       });
     // printLog(logs.infoLogs.EMIT_PURE_JS_CONTROLLER, MessageType.LOG,
     //   this.#context.logLevel);
@@ -241,6 +258,49 @@ class SkyflowFrameController {
           rootResolve(response);
         }).catch((err) => {
           rootReject({ errors: [err] });
+        });
+      }).catch((err) => {
+        rootReject(err);
+      });
+    });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  invokeSoapConnectionRequest(config: ISoapConnectionConfig) {
+    return new Promise((rootResolve, rootReject) => {
+      getAccessToken().then((authToken) => {
+        soapRequest({
+          url: config.connectionURL,
+          headers: {
+            ...config.httpHeaders,
+            'Content-Type': 'text/xml;charset=UTF-8',
+            'X-Skyflow-Authorization': authToken,
+          },
+          xml: config.requestXML,
+          timeout: 30000,
+        }).then(({ response }) => {
+          let finalResponse = response.body;
+          if (config.responseXML) {
+            const skyflowTags = {};
+            const options = { compact: true, ignoreComment: true, spaces: 4 };
+            const responseBodyJson = xmljs.xml2js(config.responseXML, options);
+            const connectionRespJson = xmljs.xml2js(finalResponse, options);
+
+            extractSkyflowTagsFromResponseBody(responseBodyJson, '', skyflowTags, connectionRespJson);
+            soapResponseBodyParser(skyflowTags, connectionRespJson);
+            finalResponse = xmljs.js2xml(connectionRespJson, options);
+          }
+          rootResolve(finalResponse);
+        }).catch((err) => {
+          // if (!err.code && !err.message)
+          if (typeof err === 'string') {
+            rootReject({
+              code: 500,
+              description: 'Internal Server Error',
+              xml: err,
+            });
+          }
+          rootReject(err);
         });
       }).catch((err) => {
         rootReject(err);

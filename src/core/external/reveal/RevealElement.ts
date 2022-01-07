@@ -30,8 +30,12 @@ class RevealElement extends SkyflowElement {
 
   #context: Context;
 
-  constructor(record: IRevealElementInput, metaData: any, containerId: string, context: Context) {
+  #elementId: string;
+
+  constructor(record: IRevealElementInput,
+    metaData: any, containerId: string, elementId: string, context: Context) {
     super();
+    this.#elementId = elementId;
     this.#metaData = metaData;
     this.#recordData = record;
     this.#containerId = containerId;
@@ -43,6 +47,10 @@ class RevealElement extends SkyflowElement {
       this.#context.logLevel,
     );
     printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, CLASS_NAME, `${record.token || ''} reveal `), MessageType.LOG, this.#context.logLevel);
+  }
+
+  getID() {
+    return this.#elementId;
   }
 
   mount(domElementSelector) {

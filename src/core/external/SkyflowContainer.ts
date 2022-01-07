@@ -11,6 +11,7 @@ import {
   validateConnectionConfig, validateInsertRecords,
   validateDetokenizeInput, validateGetByIdInput,
   validateInitConfig,
+  validateSoapConnectionConfig,
 } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
@@ -18,6 +19,8 @@ import {
   connectionConfigParseKeys,
   SKYFLOW_FRAME_CONTROLLER,
   PUREJS_TYPES,
+  soapReqXmlErrors,
+  soapResXmlErrors,
 } from '../constants';
 import {
   printLog,
@@ -25,8 +28,9 @@ import {
 } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import {
-  IDetokenizeInput, IGetByIdInput, IConnectionConfig, Context, MessageType,
+  IDetokenizeInput, IGetByIdInput, IConnectionConfig, Context, MessageType, ISoapConnectionConfig,
 } from '../../utils/common';
+import { replaceIdInXml } from '../../utils/helpers';
 
 const CLASS_NAME = 'SkyflowContainer';
 class SkyflowContainer {
@@ -270,6 +274,90 @@ class SkyflowContainer {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
         reject(e);
+      }
+    });
+  }
+
+  invokeSoapConnection(config: ISoapConnectionConfig, skyflowElements: any) {
+    if (this.#isControllerFrameReady) {
+      return new Promise((resolve, reject) => {
+        try {
+          printLog(parameterizedString(logs.infoLogs.VALIDATE_SOAP_CONNECTION_CONFIG, CLASS_NAME),
+            MessageType.LOG,
+            this.#context.logLevel);
+          validateSoapConnectionConfig(config);
+
+          const reqXml = replaceIdInXml(config.requestXML, skyflowElements, soapReqXmlErrors);
+          let resXml = '';
+          if (config.responseXML) {
+            resXml = replaceIdInXml(config.responseXML, skyflowElements, soapResXmlErrors);
+          }
+          bus
+            .emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              {
+                type: PUREJS_TYPES.INVOKE_SOAP_CONNECTION,
+                config: {
+                  ...config,
+                  requestXML: reqXml,
+                  ...(config.responseXML ? { responseXML: resXml } : {}),
+                },
+              },
+              (response: any) => {
+                if (response.error) {
+                  reject(response.error);
+                } else {
+                  resolve(response);
+                }
+              },
+            );
+          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
+            CLASS_NAME, PUREJS_TYPES.INVOKE_SOAP_CONNECTION),
+          MessageType.LOG, this.#context.logLevel);
+        } catch (err) {
+          reject(err?.error || err);
+        }
+      });
+    }
+    return new Promise((resolve, reject) => {
+      try {
+        printLog(parameterizedString(logs.infoLogs.VALIDATE_SOAP_CONNECTION_CONFIG, CLASS_NAME),
+          MessageType.LOG,
+          this.#context.logLevel);
+        validateSoapConnectionConfig(config);
+
+        const reqXml = replaceIdInXml(config.requestXML, skyflowElements, soapReqXmlErrors);
+        let resXml = '';
+        if (config.responseXML) {
+          resXml = replaceIdInXml(config.responseXML, skyflowElements, soapResXmlErrors);
+        }
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+            bus.emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              {
+                type: PUREJS_TYPES.INVOKE_SOAP_CONNECTION,
+                config: {
+                  ...config,
+                  requestXML: reqXml,
+                  ...(config.responseXML ? { responseXML: resXml } : {}),
+                },
+              },
+              (response: any) => {
+                if (response.error) {
+                  reject(response.error);
+                } else {
+                  resolve(response);
+                }
+              },
+            );
+          });
+        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
+          CLASS_NAME, PUREJS_TYPES.INVOKE_SOAP_CONNECTION),
+        MessageType.LOG, this.#context.logLevel);
+      } catch (err) {
+        reject(err?.error || err);
       }
     });
   }

@@ -26,6 +26,8 @@ const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
   elementType: string;
 
+  #elementId: string;
+
   containerId: string;
 
   #isSingleElementAPI: boolean = false;
@@ -61,6 +63,7 @@ class CollectElement extends SkyflowElement {
   #doesReturnValue:boolean;
 
   constructor(
+    elementId: string,
     elementGroup: any,
     metaData: any,
     containerId: string,
@@ -70,7 +73,9 @@ class CollectElement extends SkyflowElement {
     context: Context,
   ) {
     super();
+
     this.containerId = containerId;
+    this.#elementId = elementId;
     this.#context = context;
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
@@ -111,6 +116,8 @@ class CollectElement extends SkyflowElement {
       CLASS_NAME, getElementName(this.#iframe.name)), MessageType.LOG,
     this.#context.logLevel);
   }
+
+  getID = () => this.#elementId;
 
   mount = (domElement) => {
     if (!domElement) {
