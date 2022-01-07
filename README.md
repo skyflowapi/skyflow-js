@@ -1233,6 +1233,7 @@ The values in the **requestXML** can contain collect element IDs or reveal eleme
 **responseXML** accepts the entire XML request as a string. It specifies where to render the response in the UI. The values in the responseXML can contain collect element IDs or reveal element IDs. The actual values corresponding to these IDs will be stripped out from the actual response, which is then forwarded from the SDK to the client application.
 
 `Note:` If the user needs to use Skyflow Elements in place of values in the requestXML or responseXML, they will pass in an additional tag **Skyflow** containing the ID of the particular element.
+
 Please ensure that the paths configured in the responseXML are present in the actual response. In case of a misconfigured path, the response from the server will be discarded and an error will be thrown.
 
 ```javascript
@@ -1288,21 +1289,20 @@ const requestXML = `<soapenv:Envelope>
 
 const responseXML = `<soapenv:Envelope>
     <soapenv:Header>
-      <soapenv:Header>
-        <HeaderList>
-          <HeaderItem>
-            <Name>NodeId</Name>
-            <Value>
-              <Skyflow>${revealNodeId}</Skyflow>
-            </Value>
-          </HeaderItem>
-          <HeaderItem>
-            <Name>ProgramId</Name>
-            <Value>
-              <Skyflow>${revealProgramId}</Skyflow>
-            </Value>
-          </HeaderItem>
-        </HeaderList>
+      <HeaderList>
+        <HeaderItem>
+          <Name>NodeId</Name>
+          <Value>
+            <Skyflow>${revealNodeId}</Skyflow>
+          </Value>
+        </HeaderItem>
+        <HeaderItem>
+          <Name>ProgramId</Name>
+          <Value>
+            <Skyflow>${revealProgramId}</Skyflow>
+          </Value>
+        </HeaderItem>
+      </HeaderList>
       <ClientID>1234</ClientID>
     </soapenv:Header>
     <soapenv:Body>
