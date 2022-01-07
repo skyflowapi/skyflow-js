@@ -398,7 +398,7 @@ class SkyflowContainer {
         } catch (error) {
           printLog(error.message, MessageType.ERROR, this.#context.logLevel);
 
-          reject(error?.error || error);
+          reject(error);
         }
       });
     }
@@ -438,7 +438,7 @@ class SkyflowContainer {
       } catch (error) {
         printLog(error.message, MessageType.ERROR, this.#context.logLevel);
 
-        reject(error?.error || error);
+        reject(error);
       }
     });
   }

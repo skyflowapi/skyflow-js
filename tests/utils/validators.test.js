@@ -88,7 +88,7 @@ describe("validate invoke connection",()=>{
     try{
       validateConnectionConfig()
     }catch(err){
-      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_CONFIG.description);
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_CONFIG.description);
     }
   });
 
@@ -96,7 +96,7 @@ describe("validate invoke connection",()=>{
     try{
       validateConnectionConfig({})
     }catch(err){
-      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_URL.description);
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_URL.description);
     }
   });
 
@@ -104,7 +104,7 @@ describe("validate invoke connection",()=>{
     try{
       validateConnectionConfig({connectionURL: null})
     }catch(err){
-      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_CONNECTION_URL.description);
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_CONNECTION_URL.description);
     }
   });
 
@@ -112,7 +112,7 @@ describe("validate invoke connection",()=>{
     try{
       validateConnectionConfig({connectionURL: {}})
     }catch(err){
-      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL_TYPE.description);
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL_TYPE.description);
     }
   });
 
@@ -120,7 +120,7 @@ describe("validate invoke connection",()=>{
     try{
       validateConnectionConfig({connectionURL: "https://test.com"})
     }catch(err){
-      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_METHODNAME_KEY.description);
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_METHODNAME_KEY.description);
     }
   });
 
@@ -128,7 +128,7 @@ describe("validate invoke connection",()=>{
     try{
       validateConnectionConfig({...config, methodName: 'invalid'})
     }catch(err){
-      expect(err?.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_METHODNAME_VALUE.description);
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_METHODNAME_VALUE.description);
     }
   });
 })

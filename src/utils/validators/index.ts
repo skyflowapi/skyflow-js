@@ -285,26 +285,26 @@ export const isValidRegExp = (input) => {
 
 export const validateConnectionConfig = (config: IConnectionConfig) => {
   if (!config) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_CONFIG, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_CONFIG);
   }
   if (!Object.prototype.hasOwnProperty.call(config, 'connectionURL')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_URL, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_URL);
   }
   if (!config.connectionURL) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONNECTION_URL, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONNECTION_URL);
   }
   if (typeof config.connectionURL !== 'string') {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL_TYPE, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL_TYPE);
   }
   if (!isValidURL(config.connectionURL)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONNECTION_URL);
   }
 
   if (!Object.prototype.hasOwnProperty.call(config, 'methodName')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_METHODNAME_KEY, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_METHODNAME_KEY);
   }
   if (!Object.values(RequestMethod).includes(config.methodName)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_METHODNAME_VALUE, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_METHODNAME_VALUE);
   }
 };
 
