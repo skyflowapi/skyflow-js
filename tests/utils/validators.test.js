@@ -9,7 +9,6 @@ import {
   validateConnectionConfig,
   validateSoapConnectionConfig,
   isValidExpiryDateFormat,
-  validateConnectionConfig,
   validateSoapConnectionConfig,
   validateInsertRecords,
   validateAdditionalFieldsInCollect,
