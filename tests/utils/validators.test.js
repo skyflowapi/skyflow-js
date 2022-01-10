@@ -7,7 +7,6 @@ import {
   validateCreditCardNumber,
   validateExpiryDate,
   validateConnectionConfig,
-  validateSoapConnectionConfig,
   isValidExpiryDateFormat,
   validateSoapConnectionConfig,
   validateInsertRecords,
