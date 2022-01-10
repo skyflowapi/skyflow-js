@@ -19,13 +19,6 @@ import {
   getElementName,
 } from './utils/logsHelper';
 
-if (typeof window.console === 'undefined') {
-  (<any>window).console = <any>{
-    error: () => {},
-    log: () => {},
-  };
-}
-
 (function init(root: any) {
   try {
     const names = root.name.split(':');
