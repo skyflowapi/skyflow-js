@@ -58,19 +58,7 @@ export class FrameController {
         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
         { name: COLLECT_FRAME_CONTROLLER + controllerId },
         (data: any) => {
-          const { context, ...metaData } = data;
-          const clientMetaData = {
-            ...metaData,
-            clientJSON: {
-              ...metaData.clientJSON,
-              config: {
-                ...metaData.clientJSON.config,
-                getBearerToken: new Function(
-                  `return ${metaData.clientJSON.config.getBearerToken}`,
-                )(),
-              },
-            },
-          };
+          const { context, ...clientMetaData } = data;
           printLog(
             parameterizedString(
               logs.infoLogs.EXECUTE_COLLECT_CONTROLLER_READY_CB,
