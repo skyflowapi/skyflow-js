@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## [1.9.0] - 2022-01-11
+
+### Added
+- `Soap protocol` support for connections
+
 ## [1.8.0] - 2021-12-07
 
 ### Added
