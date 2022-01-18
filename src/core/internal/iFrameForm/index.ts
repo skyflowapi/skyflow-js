@@ -227,6 +227,12 @@ export class IFrameFormElement extends EventEmitter {
     } else {
       this.state.isValid = false;
       this.state.isComplete = false;
+      if (!this.errorText) {
+        this.errorText = this.label
+          ? `${parameterizedString(logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
+            this.label)}`
+          : logs.errorLogs.INVALID_COLLECT_VALUE;
+      }
     }
 
     this.sendChangeStatus(true);

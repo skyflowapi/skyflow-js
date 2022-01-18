@@ -140,10 +140,11 @@ export class FrameElement {
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
       this.focusChange(false);
-      if ((state.isEmpty || state.isValid) && this.domError) {
-        this.domError.innerText = '';
-      } else if (!state.isEmpty && !state.isValid && this.domError) {
+      if (state.error && this.domError) {
         this.domError.innerText = state.error;
+      }
+      if (!state.error && this.domError) {
+        this.domError.innerText = '';
       }
       this.updateStyleClasses(state);
     });

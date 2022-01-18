@@ -350,12 +350,9 @@ export const validateCollectElementInput = (input: CollectElementInput, logLevel
 };
 
 export const isValidXml = (xml: string) => {
-  try {
-    const options = { compact: true, ignoreComment: true, spaces: 4 };
-    xmljs.xml2js(xml, options);
-  } catch (err) {
-    return false;
-  }
+  const options = { compact: true, ignoreComment: true, spaces: 4 };
+  xmljs.xml2js(xml, options);
+
   return true;
 };
 
@@ -384,14 +381,22 @@ export const validateSoapConnectionConfig = (config: ISoapConnectionConfig) => {
   if (!(typeof config.requestXML === 'string')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML_TYPE, [], true);
   }
-  if (!isValidXml(config.requestXML)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML, [], true);
+  if (config.requestXML) {
+    try {
+      isValidXml(config.requestXML);
+    } catch (err) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_REQUEST_XML, [err?.message], true);
+    }
   }
   if (config.responseXML && !(typeof config.responseXML === 'string')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML_TYPE, [], true);
   }
-  if (config.responseXML && !isValidXml(config.responseXML)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML, [], true);
+  if (config.responseXML) {
+    try {
+      isValidXml(config.responseXML);
+    } catch (err) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SOAP_RESPONSE_XML, [err?.message], true);
+    }
   }
   if (config.httpHeaders && !(typeof config.httpHeaders === 'object' && !Array.isArray(config.httpHeaders))) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_HTTP_HEADERS_TYPE, [], true);
