@@ -1226,6 +1226,8 @@ const response =  skyflowClient.invokeSoapConnection(connectionConfig);
 
 **httpHeaders** is the JSON object containing key-value pairs that are sent as request headers.
 
+`Note:` "X-Skyflow-Authorization" key is added in headers by SDK internally. If user specifies it again, it overrides.
+
 **requestXML** accepts the entire XML request as a string.
 
 The values in the **requestXML** can contain collect element IDs or reveal element IDs or actual values. When the IDs are provided in place of values, they get replaced with the value entered in the collect elements or value present in the reveal elements.

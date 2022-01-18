@@ -216,7 +216,7 @@ class SkyflowFrameController {
           url: config.connectionURL,
           requestMethod: config.methodName,
           body: config.requestBody,
-          headers: { ...config.requestHeader, 'X-Skyflow-Authorization': authToken, 'Content-Type': 'application/json' },
+          headers: { 'X-Skyflow-Authorization': authToken, 'Content-Type': 'application/json', ...config.requestHeader },
         });
         invokeRequest.then((response) => {
           if (config.responseBody) {
@@ -272,9 +272,9 @@ class SkyflowFrameController {
         soapRequest({
           url: config.connectionURL,
           headers: {
-            ...config.httpHeaders,
             'Content-Type': 'text/xml;charset=UTF-8',
             'X-Skyflow-Authorization': authToken,
+            ...config.httpHeaders,
           },
           xml: config.requestXML,
           timeout: 30000,
