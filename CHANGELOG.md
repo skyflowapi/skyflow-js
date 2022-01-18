@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 
 
+## [1.9.1] - 2022-01-11
+
+### Fixed
+- Fixes in `invokeSoapConnection` method
+
 ## [1.9.0] - 2022-01-11
 
 ### Added
