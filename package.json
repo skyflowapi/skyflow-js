@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "easy-soap-request": "^4.5.0",
+    "easy-soap-request": "^4.6.0",
     "framebus": "^4.0.0",
     "inject-stylesheet": "^2.0.0",
     "jquery": "^3.5.1",
@@ -79,7 +79,7 @@
     "webpack": "^5.51.1",
     "webpack-bundle-analyzer": "^4.4.2",
     "webpack-cli": "^4.8.0",
-    "webpack-dev-server": "^4.2.1",
+    "webpack-dev-server": "^4.7.3",
     "webpack-manifest-plugin": "^4.0.2",
     "webpack-merge": "^5.8.0"
   }
