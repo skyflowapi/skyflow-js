@@ -1271,7 +1271,7 @@ expiryMonthElement.mount("#expirationMonth")
 const expiryYearElement = revealContainer.create({
     token: "<expiry_year_token>"
 }, {
-  formatRegex: /^..$/ // regex to extract last 2 characters
+  formatRegex: /^..$/ // only last 2 characters are sent for invoking connection
 })
 expiryYearElement.mount("#expirationYear")
 
@@ -1382,8 +1382,10 @@ Sample Response on failure:
 }
 ```
 
-`Note`: In responseXML we provide the tags that needs to be rendered in UI and stripped out from the actual response. 
-1. For uniquely identifiable tag, we can give the elementID within a skyflow tag directly corresponding to the actual value.
-Please refer to the CVV tag in the above example. Here, we wish to strip the actual value present within the CVV tag.
-2. For arrays, since we have multiple tags with the same name, we will need to provide identifiers to uniquely identify the required tag.
-Please refer to HeaderItem tag. Here, we have provided NodeId within the Name tag which acts as an identifier and we wish to strip the actual value present in the Value tag.
+`Note`: 
+- In responseXML we provide the tags that needs to be rendered in UI and stripped out from the actual response. 
+    1. For uniquely identifiable tag, we can give the elementID within a skyflow tag directly corresponding to the actual value.
+    Please refer to the CVV tag in the above example. Here, we wish to strip the actual value present within the CVV tag.
+    2. For arrays, since we have multiple tags with the same name, we will need to provide identifiers to uniquely identify the required tag.
+    Please refer to HeaderItem tag. Here, we have provided NodeId within the Name tag which acts as an identifier and we wish to strip the actual value present in the Value tag.
+- In responseXML, if revealElement with formatRegex option is present, then value is revealed in the UI according to the match found with respect to the given formatRegex
