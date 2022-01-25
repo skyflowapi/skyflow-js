@@ -57,6 +57,7 @@ describe("Reveal Element Class", () => {
   test("constructor", () => {
     const testRevealElement = new RevealElement(
       testRecord,
+      undefined,
       metaData,
       containerId,
       elementId,
@@ -67,6 +68,7 @@ describe("Reveal Element Class", () => {
   test("Mount Method", () => {
     const testRevealElement = new RevealElement(
       testRecord,
+      undefined,
       metaData,
       containerId,
       elementId,
@@ -102,6 +104,7 @@ describe("Reveal Element Class", () => {
   test("has token should return false, without token",()=>{
     const testRevealElement = new RevealElement(
       {},
+      undefined,
       metaData,
       containerId,
       elementId,
@@ -116,6 +119,7 @@ describe("Reveal Element Methods",()=>{
     {
       token:"1244",
     },
+    undefined,
     metaData,
     containerId,
     elementId,
