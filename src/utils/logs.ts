@@ -180,7 +180,7 @@ const logs = {
     MISSING_HANDLER_IN_EVENT_LISTENER: 'Interface: "on" on CollectElement - Second argument is missing. handler cannot be empty.',
     INVALID_HANDLER_IN_EVENT_LISTENER: 'Interface: "on" on CollectElement - Invalid handler. handler should be of type function.',
     UNKNOWN_ERROR: 'Unknown Error.',
-    NETWORK_ERROR: 'A network error occurred. This could be a CORS issue or a dropped internet connection. It is not possible for us to know.',
+    NETWORK_ERROR: 'A network error occurred. This could be a CORS issue or a dropped internet connection. It is not possible for us to know. Please reach out to skyflow if you see this error',
     CONNECTION_ERROR: 'Error while initializing the connection.',
     ERROR_OCCURED: 'Error occurred.',
     RESPONSE_BODY_KEY_MISSING: 'Interface: invokeConnection - %s1 is missing in the response.',
@@ -217,6 +217,8 @@ const logs = {
     INVALID_SOAP_RESPONSE_XML: 'Interface: invokeSoapConnection - Invalid responseXML, %s1',
     INVALID_PATH_IN_RES_XML: 'Interface: invokeSoapConnection - Invalid path in responseXML. %s1 is not found in response',
     INVALID_PATH_IN_ARRAY_RES_XML: 'Interface: invokeSoapConnection - Invalid responseXML. Identifiers for path %s1 do not uniquely identify an element in response',
+    NO_MATCH_FOUND_FOR_FORMAT_REGEX: 'Interface: invokeSoapConnection - Invalid formatRegex. No matches found for the given regex %s1',
+    INVALID_FORMAT_REGEX: 'Interface: reveal element - Invalid formatRegex %s1',
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',

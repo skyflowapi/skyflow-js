@@ -30,7 +30,7 @@ import logs from '../../utils/logs';
 import {
   IDetokenizeInput, IGetByIdInput, IConnectionConfig, Context, MessageType, ISoapConnectionConfig,
 } from '../../utils/common';
-import { replaceIdInXml } from '../../utils/helpers';
+import { replaceIdInResponseXml, replaceIdInXml } from '../../utils/helpers';
 
 const CLASS_NAME = 'SkyflowContainer';
 class SkyflowContainer {
@@ -285,12 +285,12 @@ class SkyflowContainer {
           printLog(parameterizedString(logs.infoLogs.VALIDATE_SOAP_CONNECTION_CONFIG, CLASS_NAME),
             MessageType.LOG,
             this.#context.logLevel);
-          validateSoapConnectionConfig(config);
+          validateSoapConnectionConfig(config, this.#client.config);
 
           const reqXml = replaceIdInXml(config.requestXML, skyflowElements, soapReqXmlErrors);
           let resXml = '';
           if (config.responseXML) {
-            resXml = replaceIdInXml(config.responseXML, skyflowElements, soapResXmlErrors);
+            resXml = replaceIdInResponseXml(config.responseXML, skyflowElements, soapResXmlErrors);
           }
           bus
             .emit(
@@ -324,12 +324,12 @@ class SkyflowContainer {
         printLog(parameterizedString(logs.infoLogs.VALIDATE_SOAP_CONNECTION_CONFIG, CLASS_NAME),
           MessageType.LOG,
           this.#context.logLevel);
-        validateSoapConnectionConfig(config);
+        validateSoapConnectionConfig(config, this.#client.config);
 
         const reqXml = replaceIdInXml(config.requestXML, skyflowElements, soapReqXmlErrors);
         let resXml = '';
         if (config.responseXML) {
-          resXml = replaceIdInXml(config.responseXML, skyflowElements, soapResXmlErrors);
+          resXml = replaceIdInResponseXml(config.responseXML, skyflowElements, soapResXmlErrors);
         }
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
@@ -370,7 +370,7 @@ class SkyflowContainer {
             MessageType.LOG,
             this.#context.logLevel);
 
-          validateConnectionConfig(config);
+          validateConnectionConfig(config, this.#client.config);
           connectionConfigParseKeys.forEach((configKey) => {
             if (config[configKey]) {
               connectionConfigParser(config[configKey], configKey);
@@ -408,7 +408,7 @@ class SkyflowContainer {
           MessageType.LOG,
           this.#context.logLevel);
 
-        validateConnectionConfig(config);
+        validateConnectionConfig(config, this.#client.config);
         connectionConfigParseKeys.forEach((configKey) => {
           if (config[configKey]) {
             connectionConfigParser(config[configKey], configKey);

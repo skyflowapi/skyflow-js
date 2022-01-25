@@ -1,6 +1,7 @@
 import bus from 'framebus';
 import Client from '../../../client';
 import {
+  applyFormatRegex,
   fetchRecordsByTokenId,
   formatRecordsForClient,
   formatRecordsForIframe,
@@ -74,7 +75,8 @@ class RevealFrameController {
     return new Promise((resolve, reject) => {
       fetchRecordsByTokenId(revealRecords, this.#client).then(
         (resolvedResult) => {
-          const formattedResult = formatRecordsForIframe(resolvedResult);
+          let formattedResult = formatRecordsForIframe(resolvedResult);
+          formattedResult = applyFormatRegex(formattedResult, revealRecords);
           bus
             .target(properties.IFRAME_SECURE_SITE)
             .emit(
@@ -82,10 +84,15 @@ class RevealFrameController {
                 + this.#containerId,
               formattedResult,
             );
-          resolve(formatRecordsForClient(resolvedResult));
+          const finalResponse = formatRecordsForClient(resolvedResult, formattedResult);
+          if (finalResponse.errors) {
+            reject(finalResponse);
+          }
+          resolve(finalResponse);
         },
         (rejectedResult) => {
-          const formattedResult = formatRecordsForIframe(rejectedResult);
+          let formattedResult = formatRecordsForIframe(rejectedResult);
+          formattedResult = applyFormatRegex(formattedResult, revealRecords);
           bus
             .target(properties.IFRAME_SECURE_SITE)
             .emit(
@@ -93,7 +100,7 @@ class RevealFrameController {
                 + this.#containerId,
               formattedResult,
             );
-          reject(formatRecordsForClient(rejectedResult));
+          reject(formatRecordsForClient(rejectedResult, formattedResult));
         },
       );
     });

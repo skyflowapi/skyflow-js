@@ -1,7 +1,11 @@
 import bus from 'framebus';
-import { ELEMENT_EVENTS_TO_IFRAME } from '../../core/constants';
+import { applyFormatRegex, fetchRecordsByTokenId, formatRecordsForIframe } from '../../core-utils/reveal';
+import { ELEMENT_EVENTS_TO_IFRAME, INVALID_FORMAT_REGEX_OPTION } from '../../core/constants';
+import SkyflowError from '../../libs/SkyflowError';
+import SKYFLOW_ERROR_CODE from '../constants';
 import { formatFrameNameToId } from '../helpers';
 import logs from '../logs';
+import { validateInitConfigInConnections } from '../validators';
 
 export function getCollectElementValue(key, elementIframename) {
   return new Promise((resolve, reject) => {
@@ -20,12 +24,41 @@ export function getCollectElementValue(key, elementIframename) {
   });
 }
 
-export function getRevealElementValue(key, revealFrameName) {
-  return new Promise((resolve) => {
+export function getRevealElementValue(key, revealFrameName, client) {
+  return new Promise((resolve, reject) => {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT,
       { name: revealFrameName },
-      (revealElementValue) => {
-        resolve({ key, value: revealElementValue });
+      (revealElement: any) => {
+        if (revealElement.value) {
+          resolve({ key, value: revealElement.value });
+        } else {
+          try {
+            validateInitConfigInConnections(client.config);
+            const detokenizeRecords = fetchRecordsByTokenId([{ token: revealElement.token }],
+              client);
+            detokenizeRecords.then(
+              (resolvedResult) => {
+                let formattedResult = formatRecordsForIframe(resolvedResult);
+                formattedResult = applyFormatRegex(formattedResult,
+                  [{ token: revealElement.token, formatRegex: revealElement.formatRegex }]);
+                if (formattedResult[revealElement.token] === INVALID_FORMAT_REGEX_OPTION) {
+                  reject(new SkyflowError(SKYFLOW_ERROR_CODE.NO_MATCH_FOUND_FOR_FORMAT_REGEX,
+                    [revealElement.formatRegex], true));
+                }
+                resolve({ key, value: formattedResult[revealElement.token] });
+              },
+              (rejectedResult) => {
+                reject({
+                  code: 500,
+                  description: 'Detokenization failed',
+                  errors: rejectedResult.errors,
+                });
+              },
+            );
+          } catch (err) {
+            reject(err);
+          }
+        }
       });
   });
 }

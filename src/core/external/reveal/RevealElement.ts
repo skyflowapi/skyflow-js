@@ -11,7 +11,7 @@ import {
 } from '../../constants';
 import IFrame from '../common/IFrame';
 import SkyflowElement from '../common/SkyflowElement';
-import { IRevealElementInput } from './RevealContainer';
+import { IRevealElementInput, IRevealElementOptions } from './RevealContainer';
 
 const CLASS_NAME = 'RevealElement';
 
@@ -33,11 +33,16 @@ class RevealElement extends SkyflowElement {
   #elementId: string;
 
   constructor(record: IRevealElementInput,
+    options: IRevealElementOptions = {},
     metaData: any, containerId: string, elementId: string, context: Context) {
     super();
     this.#elementId = elementId;
     this.#metaData = metaData;
-    this.#recordData = record;
+    this.#recordData = {
+      ...record,
+      ...options,
+      ...(options.formatRegex ? { formatRegex: options.formatRegex?.toString() } : {}),
+    };
     this.#containerId = containerId;
     this.#context = context;
     this.#iframe = new IFrame(
@@ -104,6 +109,10 @@ class RevealElement extends SkyflowElement {
 
   getRecordData() {
     return this.#recordData;
+  }
+
+  getFormatRegex() {
+    return this.#recordData.formatRegex?.toString();
   }
 
   setError(clientErrorText:string) {

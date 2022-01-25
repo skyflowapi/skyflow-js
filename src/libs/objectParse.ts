@@ -1,7 +1,9 @@
 /* eslint-disable no-underscore-dangle */
 import _ from 'lodash';
 import CollectElement from '../core/external/collect/CollectElement';
-import { FRAME_ELEMENT, FRAME_REVEAL, PATH_NOT_FOUND_IN_RES_XML } from '../core/constants';
+import {
+  FORMAT_REGEX, FRAME_ELEMENT, FRAME_REVEAL, PATH_NOT_FOUND_IN_RES_XML,
+} from '../core/constants';
 import {
   flattenObject, formatFrameNameToId, getIframeNamesInSoapRequest, replaceIframeNameWithValues,
 } from '../utils/helpers';
@@ -10,8 +12,10 @@ import SkyflowError from './SkyflowError';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { getElementName } from '../utils/logsHelper';
 import RevealElement from '../core/external/reveal/RevealElement';
+import Client from '../client';
 
 const set = require('set-value');
+const RegexParser = require('regex-parser');
 
 export function connectionConfigParser(data, configKey) {
   Object.entries(data).forEach(([key, value]) => {
@@ -20,7 +24,11 @@ export function connectionConfigParser(data, configKey) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED_INVOKE_CONNECTION,
           [getElementName(formatFrameNameToId(value.iframeName()))]);
       }
-      data[key] = value.iframeName();
+      if (configKey === 'responseBody' && value.getFormatRegex()) {
+        data[key] = value.iframeName() + FORMAT_REGEX + value.getFormatRegex();
+      } else {
+        data[key] = value.iframeName();
+      }
       if (configKey !== 'responseBody') {
         if (!value.hasToken()) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENT_MUST_HAVE_TOKEN);
@@ -38,7 +46,7 @@ export function connectionConfigParser(data, configKey) {
   });
 }
 
-export function constructInvokeConnectionRequest(data) {
+export function constructInvokeConnectionRequest(data:any, client: Client) {
   const flattenData = flattenObject(data);
   const collectElements = {};
   const revealElements = {};
@@ -62,7 +70,7 @@ export function constructInvokeConnectionRequest(data) {
     promiseList.push(getCollectElementValue(key, value));
   });
   Object.entries(revealElements).forEach(([key, value]) => {
-    promiseList.push(getRevealElementValue(key, value));
+    promiseList.push(getRevealElementValue(key, value, client));
   });
 
   return Promise.all(promiseList).then((res) => {
@@ -75,14 +83,14 @@ export function constructInvokeConnectionRequest(data) {
   });
 }
 
-export function constructSoapConnectionRequestXml(requestXml: string) {
+export function constructSoapConnectionRequestXml(requestXml: string, client: Client) {
   const promiseList : any = [];
   const names = getIframeNamesInSoapRequest(requestXml);
   names?.forEach((iframeName) => {
     if (iframeName.startsWith(`${FRAME_ELEMENT}:`)) {
       promiseList.push(getCollectElementValue(iframeName, iframeName));
     } else if (iframeName.startsWith(`${FRAME_REVEAL}:`)) {
-      promiseList.push(getRevealElementValue(iframeName, iframeName));
+      promiseList.push(getRevealElementValue(iframeName, iframeName, client));
     }
   });
 
@@ -172,6 +180,27 @@ function arraySearchHelper(response, path, identifiers) {
 }
 
 function renderOnUI(iframeName: string, iframeValue: string) {
+  let tempName = iframeName;
+  let tempValue = iframeValue?.trim();
+
+  if (iframeName.startsWith(`${FRAME_REVEAL}:`) && iframeName.includes(FORMAT_REGEX)) {
+    const index = iframeName.indexOf(FORMAT_REGEX);
+    tempName = iframeName.substring(0, index);
+
+    const regexStr = iframeName.substring(index);
+    const regex = regexStr.replace(FORMAT_REGEX, '');
+    const tempRegex = RegexParser(regex);
+    const matchResults = tempValue.match(tempRegex);
+    if (matchResults && matchResults?.length > 0) {
+      tempValue = matchResults[0];
+    } else {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_MATCH_FOUND_FOR_FORMAT_REGEX, [regex], true);
+    }
+  }
+
+  iframeName = tempName;
+  iframeValue = tempValue;
+
   const elementIFrame = window.parent.frames[iframeName as string];
   if (elementIFrame) {
     if (iframeName.startsWith(`${FRAME_ELEMENT}:`)) {
