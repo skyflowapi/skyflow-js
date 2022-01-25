@@ -21,7 +21,7 @@ import {
 } from '../../../utils/helpers';
 import {
   ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, FRAME_REVEAL,
-  connectionConfigParseKeys, PUREJS_TYPES,
+  connectionConfigParseKeys, PUREJS_TYPES, FORMAT_REGEX,
 } from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
@@ -33,6 +33,7 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 
 const soapRequest = require('easy-soap-request');
 const xmljs = require('xml-js');
+const RegexParser = require('regex-parser');
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -105,7 +106,7 @@ class SkyflowFrameController {
           const promiseList = [] as any;
           connectionConfigParseKeys.forEach((key) => {
             if (config[key]) {
-              promiseList.push(constructInvokeConnectionRequest(config[key]));
+              promiseList.push(constructInvokeConnectionRequest(config[key], this.#client));
             }
           });
 
@@ -135,7 +136,7 @@ class SkyflowFrameController {
         } else if (data.type === PUREJS_TYPES.INVOKE_SOAP_CONNECTION) {
           const config = data.config as ISoapConnectionConfig;
 
-          constructSoapConnectionRequestXml(config.requestXML).then((xml) => {
+          constructSoapConnectionRequestXml(config.requestXML, this.#client).then((xml) => {
             this.invokeSoapConnectionRequest({
               ...config,
               requestXML: xml,
@@ -148,6 +149,10 @@ class SkyflowFrameController {
                 this.#context.logLevel);
               callback({ error });
             });
+          }).catch((error) => {
+            printLog(logs.errorLogs.SEND_INVOKE_SOAP_CONNECTION_REJECTED, MessageType.ERROR,
+              this.#context.logLevel);
+            callback({ error });
           });
         }
       });
@@ -223,9 +228,32 @@ class SkyflowFrameController {
             const flattenResponseBody = flattenObject(config.responseBody);
             const flattenConnectionResponse = flattenObject(response);
             const errorResponse:any[] = [];
-            Object.entries(flattenResponseBody).forEach(([key, value]) => {
+            Object.entries<any>(flattenResponseBody).forEach(([key, value]) => {
               if (Object.prototype.hasOwnProperty.call(flattenConnectionResponse, key)) {
-                const responseValue = flattenConnectionResponse[key];
+                let tempName = value;
+                let tempResponseValue = flattenConnectionResponse[key];
+
+                if (value.startsWith(`${FRAME_REVEAL}:`) && value.includes(FORMAT_REGEX)) {
+                  const index = value.indexOf(FORMAT_REGEX);
+                  tempName = value.substring(0, index);
+
+                  const regexStr = value.substring(index);
+                  const regex = regexStr.replace(FORMAT_REGEX, '');
+                  const tempRegex = RegexParser(regex);
+                  const matchResults = tempResponseValue.match(tempRegex);
+                  if (matchResults && matchResults?.length > 0) {
+                    tempResponseValue = matchResults[0];
+                  } else {
+                    errorResponse.push(
+                      new SkyflowError(SKYFLOW_ERROR_CODE.NO_MATCH_FOUND_FOR_FORMAT_REGEX,
+                        [key], true),
+                    );
+                  }
+                }
+
+                value = tempName;
+                const responseValue = tempResponseValue;
+
                 const elementIFrame = window.parent.frames[value as string];
                 if (elementIFrame) {
                   const frameName = value as string;
@@ -299,6 +327,8 @@ class SkyflowFrameController {
               description: 'Internal Server Error',
               xml: err,
             });
+          } else if (err.message === 'Network Error') {
+            rootReject(new SkyflowError(SKYFLOW_ERROR_CODE.NETWORK_ERROR, [], true));
           }
           rootReject(err);
         });

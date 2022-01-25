@@ -1022,6 +1022,7 @@ describe('Invoke SOAP Connection', () => {
       expect(soapResponse).toBeNull();
       done();
     }).catch((err) => {
+      console.log(err)
       expect(err?.description).toEqual(logs.errorLogs.DUPLICATE_ELEMENT_IN_SOAP_RESPONSE_XML);
       done();
     });

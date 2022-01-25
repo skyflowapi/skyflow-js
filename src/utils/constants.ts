@@ -336,6 +336,14 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_PATH_IN_ARRAY_RES_XML,
   },
+  NO_MATCH_FOUND_FOR_FORMAT_REGEX: {
+    code: 400,
+    description: logs.errorLogs.NO_MATCH_FOUND_FOR_FORMAT_REGEX,
+  },
+  INVALID_FORMAT_REGEX: {
+    code: 400,
+    description: logs.errorLogs.INVALID_FORMAT_REGEX,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;

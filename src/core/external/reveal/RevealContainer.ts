@@ -8,7 +8,7 @@ import { Context, MessageType, RedactionType } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logsHelper';
-import { validateInitConfig, validateRevealElementRecords } from '../../../utils/validators';
+import { validateInitConfig, validateRevealElementRecords, validateRevealOptions } from '../../../utils/validators';
 import {
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
 } from '../../constants';
@@ -24,6 +24,11 @@ export interface IRevealElementInput {
   altText?: string;
   errorTextStyles?: object;
 }
+
+export interface IRevealElementOptions {
+  formatRegex?: string | object;
+}
+
 const CLASS_NAME = 'RevealContainer';
 class RevealContainer extends Container {
   #revealRecords: IRevealElementInput[] = [];
@@ -112,10 +117,13 @@ class RevealContainer extends Container {
       );
   }
 
-  create(record: IRevealElementInput) {
+  create(record: IRevealElementInput, options?: IRevealElementOptions) {
     // this.#revealRecords.push(record);
+    if (options) {
+      validateRevealOptions(options);
+    }
     const elementId = uuid();
-    const revealElement = new RevealElement(record, this.#metaData,
+    const revealElement = new RevealElement(record, options, this.#metaData,
       this.#containerId, elementId, this.#context);
     this.#revealElements.push(revealElement);
     this.#skyflowElements[elementId] = revealElement;

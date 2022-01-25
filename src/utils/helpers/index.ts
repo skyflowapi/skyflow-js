@@ -1,3 +1,4 @@
+import { FORMAT_REGEX, FRAME_REVEAL } from '../../core/constants';
 import SkyflowElement from '../../core/external/common/SkyflowElement';
 import SkyflowError from '../../libs/SkyflowError';
 
@@ -89,6 +90,37 @@ export function replaceIdInXml(xml: string, elementLookup: any, errors: any) {
     elementids.push(id);
     const element: SkyflowElement = elementLookup[id];
     return `<skyflow>${element?.iframeName()}</skyflow>`;
+  });
+  if (errors.length > 2 && checkIfDuplicateExists(elementids)) {
+    throw new SkyflowError(errors[2], [], true);
+  }
+  for (let i = 0; i < elementids.length; i += 1) {
+    if (!Object.prototype.hasOwnProperty.call(elementLookup, elementids[i])) {
+      throw new SkyflowError(errors[0], [`${elementids[i]}`], true);
+    }
+    if (!elementLookup[elementids[i]].isMounted()) {
+      throw new SkyflowError(errors[1], [`${elementids[i]}`], true);
+    }
+  }
+  return result;
+}
+
+export function replaceIdInResponseXml(xml: string, elementLookup: any, errors: any) {
+  const elementids : any = [];
+  const result = xml.replace(/<skyflow>([\s\S]*?)<\/skyflow>/gi, (match, key) => {
+    const id = key.trim();
+    elementids.push(id);
+    const element: SkyflowElement = elementLookup[id];
+    let tempName = element?.iframeName();
+    if (tempName?.startsWith(`${FRAME_REVEAL}:`)) {
+      // @ts-ignore
+      const regex = element?.getFormatRegex();
+      if (regex) {
+        tempName = tempName + FORMAT_REGEX + regex;
+      }
+    }
+
+    return `<skyflow>${tempName}</skyflow>`;
   });
   if (errors.length > 2 && checkIfDuplicateExists(elementids)) {
     throw new SkyflowError(errors[2], [], true);

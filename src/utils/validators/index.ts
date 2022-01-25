@@ -2,7 +2,7 @@ import {
   ALLOWED_EXPIRY_DATE_FORMATS, CardType, CARD_TYPE_REGEX, DEFAULT_CARD_LENGTH_RANGE,
 } from '../../core/constants';
 import { CollectElementInput } from '../../core/external/collect/CollectContainer';
-import { IRevealElementInput } from '../../core/external/reveal/RevealContainer';
+import { IRevealElementInput, IRevealElementOptions } from '../../core/external/reveal/RevealContainer';
 import SkyflowError from '../../libs/SkyflowError';
 import { ISkyflow } from '../../Skyflow';
 import {
@@ -283,7 +283,16 @@ export const isValidRegExp = (input) => {
   return isValid;
 };
 
-export const validateConnectionConfig = (config: IConnectionConfig) => {
+export const validateRevealOptions = (options: IRevealElementOptions) => {
+  if (Object.prototype.hasOwnProperty.call(options, 'formatRegex') && !isValidRegExp(options.formatRegex)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FORMAT_REGEX, [options.formatRegex], true);
+  }
+};
+
+export const validateConnectionConfig = (config: IConnectionConfig, initConfig: ISkyflow) => {
+  if (!Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED);
+  }
   if (!config) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_CONFIG);
   }
@@ -337,6 +346,24 @@ export const validateInitConfig = (initConfig: ISkyflow) => {
   }
 };
 
+export const validateInitConfigInConnections = (initConfig: ISkyflow) => {
+  if (!Object.prototype.hasOwnProperty.call(initConfig, 'vaultID')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.VAULTID_IS_REQUIRED, [], true);
+  }
+  if (!initConfig.vaultID) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_VAULTID_IN_INIT, [], true);
+  }
+  if (!Object.prototype.hasOwnProperty.call(initConfig, 'vaultURL')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.VAULTURL_IS_REQUIRED, [], true);
+  }
+  if (!initConfig.vaultURL) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT, [], true);
+  }
+  if (initConfig.vaultURL && !isValidURL(initConfig.vaultURL)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VAULTURL_IN_INIT, [], true);
+  }
+};
+
 export const validateCollectElementInput = (input: CollectElementInput, logLevel) => {
   if (!Object.prototype.hasOwnProperty.call(input, 'type')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_TYPE, [], true);
@@ -356,7 +383,13 @@ export const isValidXml = (xml: string) => {
   return true;
 };
 
-export const validateSoapConnectionConfig = (config: ISoapConnectionConfig) => {
+export const validateSoapConnectionConfig = (
+  config: ISoapConnectionConfig,
+  initConfig: ISkyflow,
+) => {
+  if (!Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED, [], true);
+  }
   if (!config) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SOAP_CONNECTION_CONFIG, [], true);
   }

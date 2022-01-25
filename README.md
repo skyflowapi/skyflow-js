@@ -871,9 +871,15 @@ const revealElement = {
   label: "string",                    //optional, label for the form element
   altText: "string"                   //optional, string that is shown before reveal, will show token if altText is not provided
 }
+
+const revealElementOptions = {
+  formatRegex: RegExp                 //optional, regex to specify the format on the value that has been revealed
+}
 ```
 `Note`: 
 - `token` is optional only if it is being used in invokeConnection()
+- If revealElement has a formatRegex option and on invoking container.reveal() method, it will first reveal the token and then apply the formatRegex match, and then render it in UI
+- If there are multiple matches found with the given formatRegex option, then always the first match is applied to the revealed value
 
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data but only a single variant is available i.e. base. 
 
@@ -911,7 +917,7 @@ errorTextStyles: {
 Once you've defined a Skyflow Element, you can use the `create(element)` method of the container to create the Element as shown below: 
 
 ```javascript
-const element = container.create(revealElement)
+const element = container.create(revealElement, revealElementOptions)
 ```
 
 ### Step 3: Mount Elements to the DOM
@@ -1242,6 +1248,8 @@ Please ensure that the paths configured in the responseXML are present in the ac
 
 // step 1
 const skyflowClient = skyflow.init({
+   vaultID: '<vault_ID>',   // optional, required only when a revealElement has formatRegex option set
+   vaultURL: '<vault_URL>', // optional, required only when a revealElement has formatRegex option set
 	 getBearerToken: '<helperFunc>'
 });
 
@@ -1256,10 +1264,18 @@ const cardNumberElement = collectContainer.create({
 })
 cardNumberElement.mount("#cardNumber")
 
-const expiryDateElement = collectContainer.create({
-    type: skyflow.ElementType.EXPIRATION_DATE
+const expiryMonthElement = revealContainer.create({
+    token: "<expiry_month_token>"
 })
-expiryDateElement.mount("#expirationDate")
+expiryMonthElement.mount("#expirationMonth")
+
+const expiryYearElement = revealContainer.create({
+    token: "<expiry_year_token>"
+}, {
+  formatRegex: /^..$/ // only last 2 characters are sent for invoking connection
+})
+expiryYearElement.mount("#expirationYear")
+
 
 const cvvElement = revealContainer.create({
     altText: "###",
@@ -1268,7 +1284,8 @@ cvvElement.mount("#cvv")
 
 //step 4
 const cardNumberID = cardNumberElement.getID()  // to get element ID
-const expiryDateID = expiryDateElement.getID()
+const expiryMonthID = expiryDateElement.getID()
+const expiryYearID = expiryYearElement.getID()
 const cvvElementID = cvvElement.getID()
 
 // step 5
@@ -1281,9 +1298,12 @@ const requestXML = `<soapenv:Envelope>
         <CardNumber>
           <Skyflow>${cardNumberID}</Skyflow>
         </CardNumber>
-        <ExpiryDate>
-          <Skyflow>${expiryDateID}</Skyflow>
-        </ExpiryDate>
+        <ExpiryMonth>
+          <Skyflow>${expiryMonthID}</Skyflow>
+        </ExpiryMonth>
+        <ExpiryYear>
+          <Skyflow>${expiryYearID}</Skyflow>
+        </ExpiryYear>
       </GenerateCVV>
     </soapenv:Body>
 </soapenv:Envelope>`
@@ -1363,8 +1383,11 @@ Sample Response on failure:
 }
 ```
 
-`Note`: In responseXML we provide the tags that needs to be rendered in UI and stripped out from the actual response. 
-1. For uniquely identifiable tag, we can give the elementID within a skyflow tag directly corresponding to the actual value.
-Please refer to the CVV tag in the above example. Here, we wish to strip the actual value present within the CVV tag.
-2. For arrays, since we have multiple tags with the same name, we will need to provide identifiers to uniquely identify the required tag.
-Please refer to HeaderItem tag. Here, we have provided NodeId within the Name tag which acts as an identifier and we wish to strip the actual value present in the Value tag.
+`Note`: 
+- In responseXML we provide the tags that needs to be rendered in UI and stripped out from the actual response. 
+    1. For uniquely identifiable tag, we can give the elementID within a skyflow tag directly corresponding to the actual value.
+    Please refer to the CVV tag in the above example. Here, we wish to strip the actual value present within the CVV tag.
+    2. For arrays, since we have multiple tags with the same name, we will need to provide identifiers to uniquely identify the required tag.
+    Please refer to HeaderItem tag. Here, we have provided NodeId within the Name tag which acts as an identifier and we wish to strip the actual value present in the Value tag.
+- In requestXML, if revealElement has a formatRegex option, it will first reveal the token and then apply the formatRegex match, and then sent it to invokeConnections/invokeSoapConnections
+- In responseXML, if revealElement has a formatRegex option, then value is revealed in the UI according to the match found with respect to the given formatRegex

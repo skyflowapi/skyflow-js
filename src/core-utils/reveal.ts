@@ -4,6 +4,9 @@ import SkyflowError from '../libs/SkyflowError';
 import {
   ISkyflowIdRecord, IRevealRecord, IRevealResponseType,
 } from '../utils/common';
+import { INVALID_FORMAT_REGEX_OPTION } from '../core/constants';
+
+const RegexParser = require('regex-parser');
 
 interface IApiSuccessResponse {
   records: [
@@ -133,12 +136,51 @@ export const formatRecordsForIframe = (response: IRevealResponseType) => {
   return result;
 };
 
-export const formatRecordsForClient = (response: IRevealResponseType) => {
+export const applyFormatRegex = (formattedResult: object, revealRecords: any) => {
+  const finalResult = { ...formattedResult };
+  revealRecords.forEach((record: any) => {
+    if (record.formatRegex) {
+      const tempRegex = RegexParser(record.formatRegex);
+      const matchResults = formattedResult[record.token]?.match(tempRegex);
+      if (matchResults && matchResults.length > 0) {
+        finalResult[record.token] = matchResults[0];
+      } else {
+        finalResult[record.token] = INVALID_FORMAT_REGEX_OPTION;
+      }
+    }
+  });
+
+  return finalResult;
+};
+
+export const formatRecordsForClient = (response: IRevealResponseType, formattedResults: any) => {
+  const successRecords: any[] = [];
+  const errorRecords: any = [];
   if (response.records) {
-    const successRecords = response.records.map((record) => ({
-      token: record.token,
-    }));
-    if (response.errors) return { success: successRecords, errors: response.errors };
+    response.records.forEach((record) => {
+      if (formattedResults[record.token] === INVALID_FORMAT_REGEX_OPTION) {
+        errorRecords.push({
+          token: record.token,
+          error: {
+            code: 400,
+            description: INVALID_FORMAT_REGEX_OPTION,
+          },
+        });
+      } else {
+        successRecords.push({
+          token: record.token,
+        });
+      }
+    });
+    if (response.errors) {
+      return {
+        success: successRecords,
+        errors: [...response.errors, ...errorRecords],
+      };
+    }
+    if (errorRecords.length > 0) {
+      return { success: successRecords, errors: errorRecords };
+    }
     return { success: successRecords };
   }
   return { errors: response.errors };

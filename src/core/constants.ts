@@ -513,3 +513,7 @@ export const soapResXmlErrors = [SKYFLOW_ERROR_CODE.INVALID_ELEMENT_ID_IN_SOAP_R
   SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT_IN_SOAP_RESPONSE_XML];
 
 export const PATH_NOT_FOUND_IN_RES_XML = 'skyflow: Path not found';
+
+export const FORMAT_REGEX = ':FORMAT_REGEX:';
+
+export const INVALID_FORMAT_REGEX_OPTION = 'Invalid formatRegex';
