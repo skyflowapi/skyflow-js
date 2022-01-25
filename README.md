@@ -1266,14 +1266,14 @@ cardNumberElement.mount("#cardNumber")
 const expiryMonthElement = revealContainer.create({
     token: "<expiry_month_token>"
 })
-expiryDateElement.mount("#expirationMonth")
+expiryMonthElement.mount("#expirationMonth")
 
 const expiryYearElement = revealContainer.create({
     token: "<expiry_year_token>"
 }, {
   formatRegex: /^..$/ // regex to extract last 2 characters
 })
-expiryDateElement.mount("#expirationYear")
+expiryYearElement.mount("#expirationYear")
 
 
 const cvvElement = revealContainer.create({
