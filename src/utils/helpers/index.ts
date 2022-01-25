@@ -112,7 +112,7 @@ export function replaceIdInResponseXml(xml: string, elementLookup: any, errors: 
     elementids.push(id);
     const element: SkyflowElement = elementLookup[id];
     let tempName = element?.iframeName();
-    if (tempName.startsWith(`${FRAME_REVEAL}:`)) {
+    if (tempName?.startsWith(`${FRAME_REVEAL}:`)) {
       // @ts-ignore
       const regex = element?.getFormatRegex();
       if (regex) {

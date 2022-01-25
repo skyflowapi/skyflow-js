@@ -76,13 +76,13 @@ describe('Reveal PureJs- get() Method Input', () => {
 describe("formatRecordsForClient fn test",()=>{
   test("only success records",()=>{
     const testInput = {"records":[{"token":"7402-2242-2342-232","value":"231"}] }
-    const fnResponse = formatRecordsForClient(testInput);
+    const fnResponse = formatRecordsForClient(testInput, {"7402-2242-2342-232": "231"});
     expect(fnResponse.success.length).toBe(1);
     expect(fnResponse.errors).toBeUndefined();
   });
   test("both success and error records",()=>{
     const testInput = {"records":[{"token":"7402-2242-2342-232","value":"231"}],"errors":[{"token":"3232-6434-3253-4221"}]};
-    const fnResponse = formatRecordsForClient(testInput);
+    const fnResponse = formatRecordsForClient(testInput,{"7402-2242-2342-232": "231"});
     expect(fnResponse.errors.length).toBe(1);
     expect(fnResponse.success.length).toBe(1);
   });

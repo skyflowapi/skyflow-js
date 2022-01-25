@@ -86,7 +86,7 @@ describe("Reveal Frame Class",()=>{
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
     const onCb = on.mock.calls[3][1];
     onCb({name:""},emitterCb);
-    expect(emitterCb).toBeCalledWith(data.record.token);
+    expect(emitterCb).toBeCalledWith({value: data.record.token});
   });
 
   test("init callback after reveal with response value",()=>{
@@ -128,7 +128,7 @@ describe("Reveal Frame Class",()=>{
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
     const onCb = on.mock.calls[3][1];
     onCb({name:""},emitterCb); 
-    expect(emitterCb).toBeCalledWith("card_value");
+    expect(emitterCb).toBeCalledWith({value: "card_value"});
   });
   test("init callback after reveal without value",()=>{
     const testFrame = RevealFrame.init();
@@ -174,7 +174,7 @@ describe("Reveal Frame Class",()=>{
     expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
     const onCb = on.mock.calls[3][1];
     onCb({name:""},emitterCb); 
-    expect(emitterCb).toBeCalledWith(data.record.token);
+    expect(emitterCb).toBeCalledWith({value: data.record.token});
   });
 
   test("reveal set error",()=>{

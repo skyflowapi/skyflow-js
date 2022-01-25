@@ -291,7 +291,7 @@ export const validateRevealOptions = (options: IRevealElementOptions) => {
 
 export const validateConnectionConfig = (config: IConnectionConfig, initConfig: ISkyflow) => {
   if (!Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED);
   }
   if (!config) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONNECTION_CONFIG);
