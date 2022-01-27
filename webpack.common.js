@@ -1,4 +1,4 @@
-const path = require('path');
+const webpack = require('webpack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
 
@@ -17,5 +17,14 @@ module.exports = {
     ],
   },
 
-  plugins: [new ForkTsCheckerWebpackPlugin(), new NodePolyfillPlugin()],
+  plugins: [
+    new ForkTsCheckerWebpackPlugin(), 
+    new NodePolyfillPlugin(),
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify({
+        IFRAME_SECURE_SITE: process.env.IFRAME_SECURE_SITE,
+        IFRAME_SECURE_ORGIN: process.env.IFRAME_SECURE_ORGIN,
+      }),
+    }),
+   ],
 };

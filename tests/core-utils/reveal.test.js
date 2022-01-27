@@ -2,6 +2,13 @@ import Skyflow from '../../src/Skyflow';
 import {formatRecordsForClient,formatRecordsForIframe} from "../../src/core-utils/reveal";
 const testTokenId = '1677f7bd-c087-4645-b7da-80a6fd1a81a4';
 const testInvalidTokenId = '80a6fd1a81a4-b7da-c087-4645';
+
+const mGetRandomValues = jest.fn().mockReturnValue(new Uint32Array(10));
+Object.defineProperty(window, 'crypto', {
+  value: { getRandomValues: mGetRandomValues },
+});
+
+
 const skyflow = Skyflow.init({
   vaultID: 'vault_id',
   vaultURL: 'https://vault.test.com',

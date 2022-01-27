@@ -1,6 +1,5 @@
 const { merge } = require('webpack-merge');
 const path = require('path');
-const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const terserWebpackPlugin = require('terser-webpack-plugin');
@@ -34,9 +33,6 @@ module.exports = () => merge(common, {
       dry: false,
     }),
     new WebpackManifestPlugin(),
-    new webpack.DefinePlugin({
-      'process.env': JSON.stringify(process.env),
-    }),
     new CompressionPlugin(),
   ],
 });
