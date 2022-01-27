@@ -13,6 +13,10 @@ jest.mock('../src/utils/jwtUtils', () => ({
   __esModule: true,
   default: jest.fn(() => true),
 }));
+jest.mock('../src/libs/uuid', () => ({
+  __esModule: true,
+  default: jest.fn(() => 'b5cbf425-6578-4d40-be88-82a748c36c60'),
+}));
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 
 describe('Skyflow initialization', () => {
