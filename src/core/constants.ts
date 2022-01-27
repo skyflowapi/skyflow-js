@@ -106,14 +106,6 @@ export const CARD_NUMBER_MASK = {
 };
 
 export const ELEMENTS = {
-  text: {
-    name: 'text',
-    attributes: {
-      type: 'text',
-    },
-    sensitive: false,
-    // mask: ["XXX-XX-XXXX", { X: "[0-9]" }]
-  },
   textarea: {
     name: 'textarea',
     attributes: {
@@ -135,130 +127,12 @@ export const ELEMENTS = {
     },
     sensitive: false,
   },
-  password: {
-    name: 'password',
-    attributes: {
-      type: 'password',
-    },
-    sensitive: false,
-  },
-  number: {
-    name: 'number',
-    attributes: {
-      type: 'number',
-    },
-    sensitive: false,
-  },
   dropdown: {
     name: 'dropdown',
     attributes: {
       type: 'select',
     },
     sensitive: false,
-  },
-  firstName: {
-    name: 'firstName',
-    attributes: {
-      type: 'text',
-    },
-    sensitive: false,
-    replacePattern: ["/[^a-zA-Z'-\\s]/g"],
-    regex: /^([A-Z][a-z]+([ ]?[a-z]?['-]?[A-Z][a-z]+)*)$/,
-  },
-  lastName: {
-    name: 'lastName',
-    attributes: {
-      type: 'text',
-    },
-    sensitive: false,
-    replacePattern: ["/[^a-zA-Z'-\\s]/g"],
-    regex: /^([A-Z][a-z]+([ ]?[a-z]?['-]?[A-Z][a-z]+)*)$/,
-  },
-  email: {
-    name: 'email',
-    attributes: {
-      type: 'email',
-    },
-    sensitive: false,
-    regex:
-      /^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)$/i,
-  },
-  dob: {
-    name: 'dob',
-    attributes: {
-      type: 'date',
-      pattern: '\\d{2}/\\d{2}/\\d{4}',
-    },
-    sensitive: false,
-    regex:
-      /^(((0[1-9]|[12][0-9]|3[01])[- /.](0[13578]|1[02])|(0[1-9]|[12][0-9]|30)[- /.](0[469]|11)|(0[1-9]|1\d|2[0-8])[- /.]02)[- /.]\d{4}|29[- /.]02[- /.](\d{2}(0[48]|[2468][048]|[13579][26])|([02468][048]|[1359][26])00))$/,
-  },
-  mobileNumber: {
-    name: 'mobileNumber',
-    attributes: {
-      type: 'text',
-    },
-    replacePattern: ['/[^0-9()+-\\s]/g'],
-    sensitive: false,
-    regex:
-      /^((\+?( |-|\.)?\d{1,2}( |-|\.)?)?(\(?\d{3}\)?|\d{3})( |-|\.)?(\d{3}( |-|\.)?\d{4}))$/,
-  },
-  ssn: {
-    name: 'ssn',
-    attributes: {
-      type: 'text',
-    },
-    sensitive: true,
-    replacePattern: ['/[^0-9-]/g'],
-    regex: /^(([0-9]{9})|([0-9]{3}-[0-9]{2}-[0-9]{4})|([0-9]{2}-[0-9]{7}))$/,
-  },
-  address: {
-    name: 'address',
-    attributes: {
-      type: 'text',
-    },
-    sensitive: false,
-    regex: /^[#.0-9a-zA-Z\s,-]+$/,
-  },
-  street: {
-    name: 'street',
-    attributes: {
-      type: 'text',
-    },
-    sensitive: false,
-  },
-  zipCode: {
-    name: 'zipCode',
-    attributes: {
-      type: 'text',
-    },
-    sensitive: false,
-    replacePattern: ['/[^0-9-\\s]/g'],
-    regex: /^[0-9]{4,}$/,
-  },
-  city: {
-    name: 'city',
-    attributes: {
-      type: 'text',
-    },
-    sensitive: false,
-    regex: /^[A-Za-z]+(\s[A-Za-z]+)?$/,
-  },
-  state: {
-    name: 'state',
-    attributes: {
-      type: 'text',
-    },
-    sensitive: false,
-    regex: /^[A-Za-z]+(\s[A-Za-z]+)?$/,
-  },
-  income: {
-    name: 'income',
-    attributes: {
-      type: 'number',
-    },
-    sensitive: false,
-    regex: /^[0-9]+$/,
   },
   [ElementType.CARDHOLDER_NAME]: {
     name: 'cardHolderName',

@@ -1,7 +1,6 @@
 const path = require('path');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
-const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyser = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
@@ -49,9 +48,6 @@ module.exports = () => merge(common, {
   },
   plugins: [
     new BundleAnalyser({ analyzerPort: 8881 }),
-    new webpack.DefinePlugin({
-      'process.env': JSON.stringify(process.env),
-    }),
     new HtmlWebpackPlugin({
       template: 'assets/index.html',
       chunks: ['skyflow'],
