@@ -390,4 +390,4 @@ export const PATH_NOT_FOUND_IN_RES_XML = 'skyflow: Path not found';
 
 export const FORMAT_REGEX = ':FORMAT_REGEX:';
 
-export const INVALID_FORMAT_REGEX_OPTION = 'Invalid formatRegex';
+export const REPLACE_TEXT = ':REPLACE_TEXT:';

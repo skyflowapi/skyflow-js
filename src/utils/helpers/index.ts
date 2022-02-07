@@ -1,4 +1,4 @@
-import { FORMAT_REGEX, FRAME_REVEAL } from '../../core/constants';
+import { FORMAT_REGEX, FRAME_REVEAL, REPLACE_TEXT } from '../../core/constants';
 import SkyflowElement from '../../core/external/common/SkyflowElement';
 import SkyflowError from '../../libs/SkyflowError';
 
@@ -114,8 +114,12 @@ export function replaceIdInResponseXml(xml: string, elementLookup: any, errors: 
     let tempName = element?.iframeName();
     if (tempName?.startsWith(`${FRAME_REVEAL}:`)) {
       // @ts-ignore
-      const regex = element?.getFormatRegex();
-      if (regex) {
+      const recordData = element?.getRecordData();
+      const regex = recordData?.formatRegex;
+      const replaceText = recordData?.replaceText;
+      if (regex && replaceText) {
+        tempName = tempName + FORMAT_REGEX + regex + REPLACE_TEXT + replaceText;
+      } else if (regex) {
         tempName = tempName + FORMAT_REGEX + regex;
       }
     }

@@ -2,9 +2,10 @@ import Client from '../client';
 import { getAccessToken } from '../utils/busEvents';
 import SkyflowError from '../libs/SkyflowError';
 import {
-  ISkyflowIdRecord, IRevealRecord, IRevealResponseType,
+  ISkyflowIdRecord, IRevealRecord, IRevealResponseType, MessageType, LogLevel,
 } from '../utils/common';
-import { INVALID_FORMAT_REGEX_OPTION } from '../core/constants';
+import logs from '../utils/logs';
+import { printLog, parameterizedString } from '../utils/logsHelper';
 
 const RegexParser = require('regex-parser');
 
@@ -139,13 +140,18 @@ export const formatRecordsForIframe = (response: IRevealResponseType) => {
 export const applyFormatRegex = (formattedResult: object, revealRecords: any) => {
   const finalResult = { ...formattedResult };
   revealRecords.forEach((record: any) => {
-    if (record.formatRegex) {
+    if (record.formatRegex && record.replaceText) {
+      const tempRegex = RegexParser(record.formatRegex);
+      finalResult[record.token] = formattedResult[record.token]?.replace(tempRegex,
+        record.replaceText);
+    } else if (record.formatRegex) {
       const tempRegex = RegexParser(record.formatRegex);
       const matchResults = formattedResult[record.token]?.match(tempRegex);
       if (matchResults && matchResults.length > 0) {
         finalResult[record.token] = matchResults[0];
       } else {
-        finalResult[record.token] = INVALID_FORMAT_REGEX_OPTION;
+        printLog(parameterizedString(logs.warnLogs.NO_MATCH_FOUND_FOR_FORMAT_REGEX,
+          record.formatRegex), MessageType.WARN, LogLevel.WARN);
       }
     }
   });
@@ -153,34 +159,12 @@ export const applyFormatRegex = (formattedResult: object, revealRecords: any) =>
   return finalResult;
 };
 
-export const formatRecordsForClient = (response: IRevealResponseType, formattedResults: any) => {
-  const successRecords: any[] = [];
-  const errorRecords: any = [];
+export const formatRecordsForClient = (response: IRevealResponseType) => {
   if (response.records) {
-    response.records.forEach((record) => {
-      if (formattedResults[record.token] === INVALID_FORMAT_REGEX_OPTION) {
-        errorRecords.push({
-          token: record.token,
-          error: {
-            code: 400,
-            description: INVALID_FORMAT_REGEX_OPTION,
-          },
-        });
-      } else {
-        successRecords.push({
-          token: record.token,
-        });
-      }
-    });
-    if (response.errors) {
-      return {
-        success: successRecords,
-        errors: [...response.errors, ...errorRecords],
-      };
-    }
-    if (errorRecords.length > 0) {
-      return { success: successRecords, errors: errorRecords };
-    }
+    const successRecords = response.records.map((record) => ({
+      token: record.token,
+    }));
+    if (response.errors) return { success: successRecords, errors: response.errors };
     return { success: successRecords };
   }
   return { errors: response.errors };

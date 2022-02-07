@@ -944,13 +944,17 @@ describe('Invoke SOAP Connection', () => {
     }, 1000);
   });
   test('soap invoke connection success with response', (done) => {
+    const container = skyflow.container('REVEAL')
+    const element = container.create({
+      token: '123'
+    })
     const frameReayEvent = on.mock.calls
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
 
-    const res = skyflow.invokeSoapConnection({ ...invokeSoapReq, responseXML: '<response></response>' });
+    const res = skyflow.invokeSoapConnection({ ...invokeSoapReq, responseXML: `<response></response>` });
     setTimeout(() => {
       const emitEvent = emitSpy.mock.calls
         .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);

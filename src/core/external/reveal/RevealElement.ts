@@ -111,10 +111,6 @@ class RevealElement extends SkyflowElement {
     return this.#recordData;
   }
 
-  getFormatRegex() {
-    return this.#recordData.formatRegex?.toString();
-  }
-
   setError(clientErrorText:string) {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
       name: this.#iframe.name,

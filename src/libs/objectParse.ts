@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import CollectElement from '../core/external/collect/CollectElement';
 import {
-  FORMAT_REGEX, FRAME_ELEMENT, FRAME_REVEAL, PATH_NOT_FOUND_IN_RES_XML,
+  FORMAT_REGEX, FRAME_ELEMENT, FRAME_REVEAL, PATH_NOT_FOUND_IN_RES_XML, REPLACE_TEXT,
 } from '../core/constants';
 import {
   flattenObject, formatFrameNameToId, getIframeNamesInSoapRequest, replaceIframeNameWithValues,
@@ -10,9 +10,11 @@ import {
 import { getCollectElementValue, getRevealElementValue } from '../utils/busEvents';
 import SkyflowError from './SkyflowError';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
-import { getElementName } from '../utils/logsHelper';
+import { getElementName, parameterizedString, printLog } from '../utils/logsHelper';
 import RevealElement from '../core/external/reveal/RevealElement';
 import Client from '../client';
+import { LogLevel, MessageType } from '../utils/common';
+import logs from '../utils/logs';
 
 const set = require('set-value');
 const RegexParser = require('regex-parser');
@@ -24,8 +26,11 @@ export function connectionConfigParser(data, configKey) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED_INVOKE_CONNECTION,
           [getElementName(formatFrameNameToId(value.iframeName()))]);
       }
-      if (configKey === 'responseBody' && value.getFormatRegex()) {
-        data[key] = value.iframeName() + FORMAT_REGEX + value.getFormatRegex();
+      if (configKey === 'responseBody' && value.getRecordData().formatRegex && value.getRecordData().replaceText) {
+        data[key] = value.iframeName() + FORMAT_REGEX + value.getRecordData().formatRegex
+        + REPLACE_TEXT + value.getRecordData().replaceText;
+      } else if (configKey === 'responseBody' && value.getRecordData().formatRegex) {
+        data[key] = value.iframeName() + FORMAT_REGEX + value.getRecordData().formatRegex;
       } else {
         data[key] = value.iframeName();
       }
@@ -183,7 +188,18 @@ function renderOnUI(iframeName: string, iframeValue: string) {
   let tempName = iframeName;
   let tempValue = iframeValue?.trim();
 
-  if (iframeName.startsWith(`${FRAME_REVEAL}:`) && iframeName.includes(FORMAT_REGEX)) {
+  if (iframeName.startsWith(`${FRAME_REVEAL}:`) && iframeName.includes(FORMAT_REGEX) && iframeName.includes(REPLACE_TEXT)) {
+    const index = iframeName.indexOf(FORMAT_REGEX);
+    tempName = iframeName.substring(0, index);
+
+    const regexStr = iframeName.substring(index).replace(FORMAT_REGEX, '');
+    const regex = regexStr.substring(0, regexStr.indexOf(REPLACE_TEXT));
+    const tempRegex = RegexParser(regex);
+
+    const replaceTextStr = regexStr.substring(regexStr.indexOf(REPLACE_TEXT));
+    const replaceText = replaceTextStr.replace(REPLACE_TEXT, '');
+    tempValue = tempValue.replace(tempRegex, replaceText);
+  } else if (iframeName.startsWith(`${FRAME_REVEAL}:`) && iframeName.includes(FORMAT_REGEX)) {
     const index = iframeName.indexOf(FORMAT_REGEX);
     tempName = iframeName.substring(0, index);
 
@@ -194,7 +210,8 @@ function renderOnUI(iframeName: string, iframeValue: string) {
     if (matchResults && matchResults?.length > 0) {
       tempValue = matchResults[0];
     } else {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_MATCH_FOUND_FOR_FORMAT_REGEX, [regex], true);
+      printLog(parameterizedString(logs.warnLogs.NO_MATCH_FOUND_FOR_FORMAT_REGEX, regex),
+        MessageType.WARN, LogLevel.WARN);
     }
   }
 

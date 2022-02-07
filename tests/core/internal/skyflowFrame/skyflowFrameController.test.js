@@ -444,7 +444,7 @@ const invokeSoapConnectionReq = {
       <HeaderItem>
         <Name>NodeId</Name>
         <Value>
-          <Skyflow>node:123</Skyflow>
+          <Skyflow>reveal:node:123:FORMAT_REGEX:/^(.+)$/:REPLACE_TEXT:"0$1"</Skyflow>
         </Value>
       </HeaderItem>
     </HeaderList>
@@ -458,7 +458,7 @@ const invokeSoapConnectionReq = {
       <HeaderItem>
         <Name>ProgramId</Name>
         <Value>
-          <Skyflow>program:123</Skyflow>
+          <Skyflow>reveal:program:123:FORMAT_REGEX:/..$/</Skyflow>
         </Value>
       </HeaderItem>
     </HeaderList2>

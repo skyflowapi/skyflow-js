@@ -287,10 +287,14 @@ export const validateRevealOptions = (options: IRevealElementOptions) => {
   if (Object.prototype.hasOwnProperty.call(options, 'formatRegex') && !isValidRegExp(options.formatRegex)) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FORMAT_REGEX, [options.formatRegex], true);
   }
+  if (Object.prototype.hasOwnProperty.call(options, 'replaceText') && typeof options.replaceText !== 'string') {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REPLACE_TEXT_TYPE,
+      [options.replaceText], true);
+  }
 };
 
 export const validateConnectionConfig = (config: IConnectionConfig, initConfig: ISkyflow) => {
-  if (!Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken')) {
+  if (!(initConfig && Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken'))) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED);
   }
   if (!config) {
@@ -387,7 +391,7 @@ export const validateSoapConnectionConfig = (
   config: ISoapConnectionConfig,
   initConfig: ISkyflow,
 ) => {
-  if (!Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken')) {
+  if (!(initConfig && Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken'))) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED, [], true);
   }
   if (!config) {
