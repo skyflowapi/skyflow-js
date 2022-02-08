@@ -2,11 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.11.0] - 2022-01-25
+
+### Added
+- `replaceText` option for `RevealElement`
 
 ## [1.10.0] - 2022-01-25
 
 ### Added
 - `formatRegex` option for `RevealElement`
+
 ## [1.9.1] - 2022-01-11
 
 ### Fixed
