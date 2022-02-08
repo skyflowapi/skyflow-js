@@ -84,11 +84,7 @@ class RevealFrameController {
                 + this.#containerId,
               formattedResult,
             );
-          const finalResponse = formatRecordsForClient(resolvedResult, formattedResult);
-          if (finalResponse.errors) {
-            reject(finalResponse);
-          }
-          resolve(finalResponse);
+          resolve(formatRecordsForClient(resolvedResult));
         },
         (rejectedResult) => {
           let formattedResult = formatRecordsForIframe(rejectedResult);
@@ -100,7 +96,7 @@ class RevealFrameController {
                 + this.#containerId,
               formattedResult,
             );
-          reject(formatRecordsForClient(rejectedResult, formattedResult));
+          reject(formatRecordsForClient(rejectedResult));
         },
       );
     });

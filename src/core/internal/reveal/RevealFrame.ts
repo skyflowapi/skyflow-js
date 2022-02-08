@@ -7,7 +7,6 @@ import {
   REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
   REVEAL_ELEMENT_DIV_STYLE,
   REVEAL_ELEMENT_OPTIONS_TYPES,
-  INVALID_FORMAT_REGEX_OPTION,
 } from '../../constants';
 import getCssClassesFromJss from '../../../libs/jss-styles';
 import {
@@ -104,14 +103,11 @@ class RevealFrame {
     const sub = (data) => {
       if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
         const responseValue = data[this.#record.token] as string;
-        if (responseValue === INVALID_FORMAT_REGEX_OPTION) {
-          this.setRevealError(INVALID_FORMAT_REGEX_OPTION);
-        } else {
-          this.#revealedValue = responseValue;
-          this.#dataElememt.innerText = responseValue;
-          printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
-            CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
-        }
+        this.#revealedValue = responseValue;
+        this.#dataElememt.innerText = responseValue;
+        printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
+          CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
+
         // bus
         //   .target(window.location.origin)
         //   .off(
@@ -154,6 +150,7 @@ class RevealFrame {
           } else {
             callback({
               formatRegex: this.#record.formatRegex,
+              replaceText: this.#record.replaceText,
               token: this.#record.token,
             });
           }

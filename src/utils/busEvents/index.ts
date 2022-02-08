@@ -1,8 +1,6 @@
 import bus from 'framebus';
 import { applyFormatRegex, fetchRecordsByTokenId, formatRecordsForIframe } from '../../core-utils/reveal';
-import { ELEMENT_EVENTS_TO_IFRAME, INVALID_FORMAT_REGEX_OPTION } from '../../core/constants';
-import SkyflowError from '../../libs/SkyflowError';
-import SKYFLOW_ERROR_CODE from '../constants';
+import { ELEMENT_EVENTS_TO_IFRAME } from '../../core/constants';
 import { formatFrameNameToId } from '../helpers';
 import logs from '../logs';
 import { validateInitConfigInConnections } from '../validators';
@@ -39,12 +37,7 @@ export function getRevealElementValue(key, revealFrameName, client) {
             detokenizeRecords.then(
               (resolvedResult) => {
                 let formattedResult = formatRecordsForIframe(resolvedResult);
-                formattedResult = applyFormatRegex(formattedResult,
-                  [{ token: revealElement.token, formatRegex: revealElement.formatRegex }]);
-                if (formattedResult[revealElement.token] === INVALID_FORMAT_REGEX_OPTION) {
-                  reject(new SkyflowError(SKYFLOW_ERROR_CODE.NO_MATCH_FOUND_FOR_FORMAT_REGEX,
-                    [revealElement.formatRegex], true));
-                }
+                formattedResult = applyFormatRegex(formattedResult, [{ ...revealElement }]);
                 resolve({ key, value: formattedResult[revealElement.token] });
               },
               (rejectedResult) => {

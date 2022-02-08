@@ -27,6 +27,7 @@ export interface IRevealElementInput {
 
 export interface IRevealElementOptions {
   formatRegex?: string | object;
+  replaceText?: string;
 }
 
 const CLASS_NAME = 'RevealContainer';

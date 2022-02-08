@@ -217,14 +217,15 @@ const logs = {
     INVALID_SOAP_RESPONSE_XML: 'Interface: invokeSoapConnection - Invalid responseXML, %s1',
     INVALID_PATH_IN_RES_XML: 'Interface: invokeSoapConnection - Invalid path in responseXML. %s1 is not found in response',
     INVALID_PATH_IN_ARRAY_RES_XML: 'Interface: invokeSoapConnection - Invalid responseXML. Identifiers for path %s1 do not uniquely identify an element in response',
-    NO_MATCH_FOUND_FOR_FORMAT_REGEX: 'Interface: invokeSoapConnection - Invalid formatRegex. No matches found for the given regex %s1',
     INVALID_FORMAT_REGEX: 'Interface: reveal element - Invalid formatRegex %s1',
+    INVALID_REPLACE_TEXT_TYPE: 'Interface: reveal element - Invalid replaceText %s1. replaceText of type string is required',
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',
     UNABLE_TO_SET_VALUE_IN_PROD_ENV: '%s1 setValue() cannot invoked while in PROD env. It is Not Recommeded',
     UNABLE_TO_CLEAR_VALUE_IN_PROD_ENV: '%s1 clearValue() cannot invoked while in PROD env. It is Not Recommeded',
     COLLECT_ALT_TEXT_DEPERECATED: 'altText is DEPERECATED, passing altText will not have any effect',
+    NO_MATCH_FOUND_FOR_FORMAT_REGEX: 'No matches found for the given formatRegex %s1',
   },
 };
 

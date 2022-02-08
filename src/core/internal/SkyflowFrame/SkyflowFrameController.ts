@@ -21,12 +21,17 @@ import {
 } from '../../../utils/helpers';
 import {
   ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, FRAME_REVEAL,
-  connectionConfigParseKeys, PUREJS_TYPES, FORMAT_REGEX,
+  connectionConfigParseKeys, PUREJS_TYPES, FORMAT_REGEX, REPLACE_TEXT,
 } from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
 import {
-  IRevealRecord, ISkyflowIdRecord, IConnectionConfig, MessageType, Context, ISoapConnectionConfig,
+  IRevealRecord,
+  ISkyflowIdRecord,
+  IConnectionConfig,
+  MessageType, Context,
+  ISoapConnectionConfig,
+  LogLevel,
 } from '../../../utils/common';
 import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
@@ -233,7 +238,18 @@ class SkyflowFrameController {
                 let tempName = value;
                 let tempResponseValue = flattenConnectionResponse[key];
 
-                if (value.startsWith(`${FRAME_REVEAL}:`) && value.includes(FORMAT_REGEX)) {
+                if (value.startsWith(`${FRAME_REVEAL}:`) && value.includes(FORMAT_REGEX) && value.includes(REPLACE_TEXT)) {
+                  const index = value.indexOf(FORMAT_REGEX);
+                  tempName = value.substring(0, index);
+
+                  const regexStr = value.substring(index).replace(FORMAT_REGEX, '');
+                  const regex = regexStr.substring(0, regexStr.indexOf(REPLACE_TEXT));
+                  const tempRegex = RegexParser(regex);
+
+                  const replaceTextStr = regexStr.substring(regexStr.indexOf(REPLACE_TEXT));
+                  const replaceText = replaceTextStr.replace(REPLACE_TEXT, '');
+                  tempResponseValue = tempResponseValue.replace(tempRegex, replaceText);
+                } else if (value.startsWith(`${FRAME_REVEAL}:`) && value.includes(FORMAT_REGEX)) {
                   const index = value.indexOf(FORMAT_REGEX);
                   tempName = value.substring(0, index);
 
@@ -244,10 +260,8 @@ class SkyflowFrameController {
                   if (matchResults && matchResults?.length > 0) {
                     tempResponseValue = matchResults[0];
                   } else {
-                    errorResponse.push(
-                      new SkyflowError(SKYFLOW_ERROR_CODE.NO_MATCH_FOUND_FOR_FORMAT_REGEX,
-                        [key], true),
-                    );
+                    printLog(parameterizedString(logs.warnLogs.NO_MATCH_FOUND_FOR_FORMAT_REGEX,
+                      regex), MessageType.WARN, LogLevel.WARN);
                   }
                 }
 
@@ -320,7 +334,6 @@ class SkyflowFrameController {
           }
           rootResolve(finalResponse);
         }).catch((err) => {
-          // if (!err.code && !err.message)
           if (typeof err === 'string') {
             rootReject({
               code: 500,
