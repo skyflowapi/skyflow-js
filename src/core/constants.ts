@@ -138,6 +138,7 @@ export const ELEMENTS = {
     name: 'cardHolderName',
     attributes: {
       type: 'text',
+      autocomplete: 'cc-name',
     },
     sensitive: true,
     regex: /^([a-zA-Z\\ \\,\\.\\-\\']{2,})$/,
@@ -146,6 +147,7 @@ export const ELEMENTS = {
     name: 'CARD_NUMBER',
     attributes: {
       type: 'text',
+      autocomplete: 'cc-number',
     },
     sensitive: true,
     mask: CARD_NUMBER_MASK[CardType.DEFAULT],
@@ -155,6 +157,7 @@ export const ELEMENTS = {
     name: 'EXPIRATION_DATE',
     attributes: {
       type: 'text',
+      autocomplete: 'cc-exp',
     },
     sensitive: true,
     // mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
