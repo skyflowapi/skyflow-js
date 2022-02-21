@@ -95,6 +95,7 @@ export const fetchRecordsByTokenId = (
             },
             (cause: any) => {
               const errorData = formatForPureJsFailure(cause, tokenRecord.token);
+              printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
               apiResponse.push(errorData);
             },
           )
@@ -209,6 +210,7 @@ export const fetchRecordsBySkyflowID = async (
                   ids: skyflowIdRecord.ids,
                 };
               }
+              printLog(rejectedResult.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
               reject(errorResponse);
             },
           )

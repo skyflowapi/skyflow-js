@@ -51,7 +51,7 @@ export const constructInsertRecordResponse = (
             const skyflowId = responseBody.responses[index - 1].records[0].skyflow_id;
             delete res.fields['*'];
             return {
-              table: records[index - 1].table,
+              table: records[Math.floor(index / 2)].table,
               fields: {
                 skyflow_id: skyflowId,
                 ...res.fields,

@@ -19,6 +19,7 @@ import {
   INPUT_WITH_ICON_DEFAULT_STYLES,
   CARD_NUMBER_MASK,
   EXPIRY_DATE_MASK,
+  INPUT_ICON_STYLES,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iFrameForm';
 import getCssClassesFromJss from '../../libs/jss-styles';
@@ -95,6 +96,10 @@ export class FrameElement {
 
   private domError?: HTMLSpanElement;
 
+  private domImg?: HTMLImageElement;
+
+  private inputParent?: HTMLDivElement;
+
   constructor(
     iFrameFormElement: IFrameFormElement,
     options: any,
@@ -123,9 +128,21 @@ export class FrameElement {
     } else {
       type = 'input';
     }
-    const inputElement = document.createElement(type);
 
+    this.inputParent = document.createElement('div');
+    this.inputParent.style.position = 'relative';
+
+    const inputElement = document.createElement(type);
     this.domInput = inputElement;
+    this.inputParent.append(inputElement);
+
+    if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
+      && this.options.enableCardIcon) {
+      this.domImg = document.createElement('img');
+      this.domImg.src = CARD_ENCODED_ICONS.DEFAULT;
+      this.domImg.setAttribute('style', INPUT_ICON_STYLES);
+      this.inputParent.append(this.domImg);
+    }
 
     // events and todo: onclick, onescape ...???
     inputElement.onfocus = (event) => {
@@ -158,9 +175,8 @@ export class FrameElement {
       if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
         const cardType = detectCardType(state.value);
         if (this.options.enableCardIcon) {
-          // const cardType = detectCardType(state.value);
-          if (this.domInput) {
-            this.domInput.style.backgroundImage = CARD_ENCODED_ICONS[cardType] || 'none';
+          if (this.domImg) {
+            this.domImg.src = CARD_ENCODED_ICONS[cardType] || 'none';
           }
         }
         const cardNumberMask = CARD_NUMBER_MASK[cardType];
@@ -277,7 +293,7 @@ export class FrameElement {
     this.htmlDivElement = newDiv;
     if (Object.prototype.hasOwnProperty.call(this.options, 'label')) this.htmlDivElement.append(this.domLabel || '');
 
-    this.htmlDivElement.append(this.domInput || '', this.domError || '');
+    this.htmlDivElement.append(this.inputParent || '', this.domError || '');
   };
 
   setValue = (value) => {

@@ -234,6 +234,8 @@ export const INPUT_WITH_ICON_DEFAULT_STYLES = {
   padding: '4px',
 };
 
+export const INPUT_ICON_STYLES = 'position: absolute; left:8px; top:calc(50% - 10px)';
+
 export const ERROR_TEXT_STYLES = {
   color: '#f44336',
   padding: '2px',
@@ -362,16 +364,16 @@ export const CARD_TYPE_REGEX = {
 export const DEFAULT_CARD_LENGTH_RANGE = [0, 12, 13, 14, 15, 16, 17, 18, 19];
 
 export const CARD_ENCODED_ICONS = {
-  [CardType.DEFAULT]: `url(${defaultCardIcon})`,
-  [CardType.AMEX]: `url(${amexIcon})`,
-  [CardType.DINERS_CLUB]: `url(${dinnersClubIcon})`,
-  [CardType.DISCOVER]: `url(${discoverIcon})`,
-  [CardType.HIPERCARD]: `url(${hipperCardIcon})`,
-  [CardType.JCB]: `url(${jcbIcon})`,
-  [CardType.MAESTRO]: `url(${maestroIcon})`,
-  [CardType.MASTERCARD]: `url(${maseterCardIcon})`,
-  [CardType.UNIONPAY]: `url(${unionPayIcon})`,
-  [CardType.VISA]: `url(${visaCardIcon})`,
+  [CardType.DEFAULT]: defaultCardIcon,
+  [CardType.AMEX]: amexIcon,
+  [CardType.DINERS_CLUB]: dinnersClubIcon,
+  [CardType.DISCOVER]: discoverIcon,
+  [CardType.HIPERCARD]: hipperCardIcon,
+  [CardType.JCB]: jcbIcon,
+  [CardType.MAESTRO]: maestroIcon,
+  [CardType.MASTERCARD]: maseterCardIcon,
+  [CardType.UNIONPAY]: unionPayIcon,
+  [CardType.VISA]: visaCardIcon,
 };
 
 export const EXPIRY_DATE_MASK = {
