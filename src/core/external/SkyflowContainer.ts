@@ -159,8 +159,10 @@ class SkyflowContainer {
                 options,
               },
               (insertedData: any) => {
-                if (insertedData.error) reject(insertedData.error);
-                else resolve(insertedData);
+                if (insertedData.error) {
+                  printLog(`${JSON.stringify(insertedData.error)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(insertedData.error);
+                } else resolve(insertedData);
               },
             );
           printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
@@ -194,8 +196,10 @@ class SkyflowContainer {
                 options,
               },
               (insertedData: any) => {
-                if (insertedData.error) reject(insertedData.error);
-                else resolve(insertedData);
+                if (insertedData.error) {
+                  printLog(`${JSON.stringify(insertedData.error)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(insertedData.error);
+                } else resolve(insertedData);
               },
             );
           });
@@ -204,7 +208,6 @@ class SkyflowContainer {
         MessageType.LOG, this.#context.logLevel);
       } catch (e) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
-
         reject(e);
       }
     });
