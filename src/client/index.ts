@@ -69,6 +69,8 @@ class Client {
       });
       const contentType = headerMap['content-type'];
       const requestId = headerMap['x-request-id'];
+      console.log('requestId: ', requestId);
+      console.log(headersList);
       if (httpRequest.status < 200 || httpRequest.status >= 400) {
         if (contentType && contentType.includes('application/json')) {
           let description = JSON.parse(httpRequest.response);
