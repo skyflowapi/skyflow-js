@@ -1,7 +1,11 @@
 # skyflow-js
-Skyflow’s Javascript SDK can be used to securely collect, tokenize, and reveal sensitive data in the browser without exposing your front-end infrastructure to sensitive data. 
+Skyflow’s Javascript SDK can be used to securely collect, tokenize, and reveal sensitive data in the browser without exposing your front-end infrastructure to sensitive data.
 
 ---
+
+[![CI](https://img.shields.io/static/v1?label=CI&message=passing&color=green?style=plastic&logo=github)](https://github.com/skyflowapi/skyflow-js/actions)
+[![GitHub release](https://img.shields.io/github/v/release/skyflowapi/skyflow-js.svg)](https://www.npmjs.com/package/skyflow-js)
+[![License](https://img.shields.io/github/license/skyflowapi/skyflow-android)](https://github.com/skyflowapi/skyflow-js/blob/master/LICENSE)
 
 # Table of Contents
 - [**Including Skyflow.js**](#Including-Skyflowjs) 

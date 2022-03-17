@@ -12,6 +12,7 @@
     "dist/sdkNodeBuild",
     "types"
   ],
+  "license": "MIT",
   "keywords": [
     "client",
     "sdk",
