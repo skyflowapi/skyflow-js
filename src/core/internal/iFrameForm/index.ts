@@ -688,8 +688,8 @@ export class IFrameForm {
 
     const { client } = this;
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
-      const skyflowId = client.toJSON()?.metaData?.uuid || '';
-      getAccessToken(skyflowId).then((authToken) => {
+      const clientId = client.toJSON()?.metaData?.uuid || '';
+      getAccessToken(clientId).then((authToken) => {
         client
           .request({
             body: {

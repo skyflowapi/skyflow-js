@@ -16,7 +16,7 @@ describe("Utils/Bus Events",()=>{
     });
 
     test("GetAccessToken Fn valid token,",(done)=>{
-        const response = getAccessToken();
+        const response = getAccessToken('');
         const emitEventName = emitSpy.mock.calls[0][0];
         const emitCb = emitSpy.mock.calls[0][2];
         expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
@@ -30,7 +30,7 @@ describe("Utils/Bus Events",()=>{
         });
     });
     test("GetAccessToken Fn Invalid token",(done)=>{
-        const response = getAccessToken();
+        const response = getAccessToken('');
         const emitEventName = emitSpy.mock.calls[0][0];
         const emitCb = emitSpy.mock.calls[0][2];
         expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);

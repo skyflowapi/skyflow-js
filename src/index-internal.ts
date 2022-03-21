@@ -28,8 +28,8 @@ import {
     } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] !== undefined) {
       RevealFrameController.init(names[1]);
     } else if (names[0] === SKYFLOW_FRAME_CONTROLLER) {
-      const skyflowId = names.length > 1 ? names[1] : '';
-      SkyflowFrameController.init(skyflowId);
+      const clientId = names.length > 1 ? names[1] : '';
+      SkyflowFrameController.init(clientId);
     } else if (names[0] === FRAME_ELEMENT) {
       printLog(
         parameterizedString(
