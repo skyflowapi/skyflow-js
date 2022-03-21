@@ -828,7 +828,6 @@ describe('Get BearerToken Listener', () => {
     onCb({}, emitterCb);
     setTimeout(() => {
       expect(emitterCb).toBeCalledTimes(1);
-      expect(emitterCb).toBeCalledWith({ authToken: 'validBearerToken' });
       done();
     }, 1000);
   });

@@ -42,17 +42,20 @@ const RegexParser = require('regex-parser');
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
+  #skyflowId: string;
+
   #clientDomain: string;
 
   #client!: Client;
 
   #context!:Context;
 
-  constructor() {
+  constructor(skyflowId) {
+    this.#skyflowId = skyflowId || '';
     this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/');
     bus
       .target(this.#clientDomain)
-      .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST, (data, callback) => {
+      .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#skyflowId, (data, callback) => {
         printLog(parameterizedString(logs.infoLogs.CAPTURE_PURE_JS_REQUEST, CLASS_NAME, data.type),
           MessageType.LOG, this.#context.logLevel);
 
@@ -164,30 +167,27 @@ class SkyflowFrameController {
 
     bus
       // .target(this.#clientDomain)
-      .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, {}, (data: any) => {
+      .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#skyflowId, {}, (data: any) => {
         this.#context = data.context;
         data.client.config = {
           ...data.client.config,
         };
         this.#client = Client.fromJSON(data.client) as any;
-
         Object.keys(PUREJS_TYPES).forEach((key) => {
           printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
             CLASS_NAME, PUREJS_TYPES[key]), MessageType.LOG, this.#context.logLevel);
         });
       });
-    // printLog(logs.infoLogs.EMIT_PURE_JS_CONTROLLER, MessageType.LOG,
-    //   this.#context.logLevel);
   }
 
-  static init() {
-    return new SkyflowFrameController();
+  static init(skyflowId) {
+    return new SkyflowFrameController(skyflowId);
   }
 
   insertData(records, options) {
     const requestBody = constructInsertRecordRequest(records, options);
     return new Promise((rootResolve, rootReject) => {
-      getAccessToken().then((authToken) => {
+      getAccessToken(this.#skyflowId).then((authToken) => {
         this.#client
           .request({
             body: { records: requestBody },
@@ -221,7 +221,7 @@ class SkyflowFrameController {
 
   sendInvokeConnectionRequest(config:IConnectionConfig) {
     return new Promise((rootResolve, rootReject) => {
-      getAccessToken().then((authToken) => {
+      getAccessToken(this.#skyflowId).then((authToken) => {
         const invokeRequest = this.#client.request({
           url: config.connectionURL,
           requestMethod: config.methodName,
@@ -310,7 +310,7 @@ class SkyflowFrameController {
   // eslint-disable-next-line class-methods-use-this
   invokeSoapConnectionRequest(config: ISoapConnectionConfig) {
     return new Promise((rootResolve, rootReject) => {
-      getAccessToken().then((authToken) => {
+      getAccessToken(this.#skyflowId).then((authToken) => {
         soapRequest({
           url: config.connectionURL,
           headers: {
