@@ -136,7 +136,13 @@ export const insertResponse = {
 
 const clientObj = {
     config: {},
-    request: jest.fn(() => Promise.resolve(insertResponse))
+    request: jest.fn(() => Promise.resolve(insertResponse)),
+    toJSON: jest.fn(() => ({
+        config: {},
+        metaData: {
+            uuid: ''
+        }
+    }))
 }
 
 describe('test iframeForm collect method', () => {

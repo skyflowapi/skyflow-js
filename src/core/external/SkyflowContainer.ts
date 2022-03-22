@@ -34,6 +34,8 @@ import { replaceIdInResponseXml, replaceIdInXml } from '../../utils/helpers';
 
 const CLASS_NAME = 'SkyflowContainer';
 class SkyflowContainer {
+  #containerId: string;
+
   #client: Client;
 
   #isControllerFrameReady: boolean = false;
@@ -42,9 +44,10 @@ class SkyflowContainer {
 
   constructor(client, context) {
     this.#client = client;
+    this.#containerId = this.#client.toJSON()?.metaData?.uuid || '';
     this.#context = context;
     const iframe = iframer({
-      name: `${SKYFLOW_FRAME_CONTROLLER}`,
+      name: `${SKYFLOW_FRAME_CONTROLLER}:${this.#containerId}`,
     });
     setAttributes(iframe, {
       src: getIframeSrc(),
@@ -53,7 +56,7 @@ class SkyflowContainer {
     document.body.append(iframe);
     bus
       .target(properties.IFRAME_SECURE_ORGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, (data, callback) => {
+      .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, (data, callback) => {
         printLog(parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
           MessageType.LOG,
           this.#context.logLevel);
@@ -81,7 +84,7 @@ class SkyflowContainer {
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
                 type: PUREJS_TYPES.DETOKENIZE,
                 records: detokenizeInput.records,
@@ -110,9 +113,9 @@ class SkyflowContainer {
         validateDetokenizeInput(detokenizeInput);
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus.emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
                 type: PUREJS_TYPES.DETOKENIZE,
                 records: detokenizeInput.records,
@@ -152,7 +155,7 @@ class SkyflowContainer {
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
                 type: PUREJS_TYPES.INSERT,
                 records,
@@ -187,9 +190,9 @@ class SkyflowContainer {
         }
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus.emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
                 type: PUREJS_TYPES.INSERT,
                 records,
@@ -227,7 +230,7 @@ class SkyflowContainer {
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
                 type: PUREJS_TYPES.GET_BY_SKYFLOWID,
                 records: getByIdInput.records,
@@ -257,9 +260,9 @@ class SkyflowContainer {
         validateGetByIdInput(getByIdInput);
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus.emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
                 type: PUREJS_TYPES.GET_BY_SKYFLOWID,
                 records: getByIdInput.records,
@@ -297,7 +300,7 @@ class SkyflowContainer {
           }
           bus
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
                 type: PUREJS_TYPES.INVOKE_SOAP_CONNECTION,
                 config: {
@@ -336,9 +339,9 @@ class SkyflowContainer {
         }
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus.emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
                 type: PUREJS_TYPES.INVOKE_SOAP_CONNECTION,
                 config: {
@@ -385,7 +388,7 @@ class SkyflowContainer {
 
           bus
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
                 type: PUREJS_TYPES.INVOKE_CONNECTION,
                 config,
@@ -422,9 +425,9 @@ class SkyflowContainer {
         });
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY, () => {
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus.emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST,
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
                 type: PUREJS_TYPES.INVOKE_CONNECTION,
                 config,

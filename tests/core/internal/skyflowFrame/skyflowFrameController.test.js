@@ -204,6 +204,13 @@ const detokenizeErrorResponse = {
   },
 };
 
+const toJson = jest.fn(() => ({
+  config: {},
+  metaData: {
+      uuid: ''
+  }
+}))
+
 describe('Retrieving data using skyflow tokens', () => {
   let emitSpy;
   let targetSpy;
@@ -217,7 +224,7 @@ describe('Retrieving data using skyflow tokens', () => {
 
   test('detokenize success', (done) => {
     const clientReq = jest.fn(() => Promise.resolve(detokenizeResponse));
-    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
     SkyflowFrameController.init();
 
@@ -242,7 +249,7 @@ describe('Retrieving data using skyflow tokens', () => {
 
   test('detokenize error', (done) => {
     const clientReq = jest.fn(() => Promise.reject(detokenizeErrorResponse));
-    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
     SkyflowFrameController.init();
 
@@ -295,7 +302,7 @@ describe('Retrieving data using skyflowId', () => {
 
   test('getById success', (done) => {
     const clientReq = jest.fn(() => Promise.resolve(getByIdRes));
-    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
     SkyflowFrameController.init();
 
@@ -320,7 +327,7 @@ describe('Retrieving data using skyflowId', () => {
 
   test('getById error', (done) => {
     const clientReq = jest.fn(() => Promise.reject(errorResponse));
-    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
     SkyflowFrameController.init();
 

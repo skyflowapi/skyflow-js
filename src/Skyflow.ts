@@ -79,7 +79,7 @@ class Skyflow {
 
     bus
       .target(properties.IFRAME_SECURE_ORGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, (data, callback) => {
+      .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + this.#uuid, (data, callback) => {
         printLog(parameterizedString(logs.infoLogs.CAPTURED_BEARER_TOKEN_EVENT, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);
@@ -90,11 +90,16 @@ class Skyflow {
           this.#client.config
             .getBearerToken()
             .then((bearerToken) => {
-              printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
-                MessageType.LOG,
-                this.#logLevel);
-              this.#bearerToken = bearerToken;
-              callback({ authToken: this.#bearerToken });
+              if (isTokenValid(bearerToken)) {
+                printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+                  MessageType.LOG,
+                  this.#logLevel);
+                this.#bearerToken = bearerToken;
+                callback({ authToken: this.#bearerToken });
+              } else {
+                printLog(logs.errorLogs.INVALID_BEARER_TOKEN, MessageType.ERROR, this.#logLevel);
+                callback({ error: logs.errorLogs.INVALID_BEARER_TOKEN });
+              }
             })
             .catch((err) => {
               printLog(logs.errorLogs.BEARER_TOKEN_REJECTED, MessageType.ERROR,

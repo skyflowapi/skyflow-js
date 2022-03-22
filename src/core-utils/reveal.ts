@@ -83,7 +83,8 @@ export const fetchRecordsByTokenId = (
   tokenIdRecords: IRevealRecord[],
   client: Client,
 ): Promise<IRevealResponseType> => new Promise((rootResolve, rootReject) => {
-  getAccessToken().then((authToken) => {
+  const clientId = client.toJSON()?.metaData?.uuid || '';
+  getAccessToken(clientId).then((authToken) => {
     const vaultResponseSet: Promise<any>[] = tokenIdRecords.map(
       (tokenRecord) => new Promise((resolve) => {
         const apiResponse: any = [];
@@ -177,7 +178,8 @@ export const fetchRecordsBySkyflowID = async (
   client: Client,
 ) => new Promise((rootResolve, rootReject) => {
   let vaultResponseSet: Promise<any>[];
-  getAccessToken().then((authToken) => {
+  const clientId = client.toJSON()?.metaData?.uuid || '';
+  getAccessToken(clientId).then((authToken) => {
     vaultResponseSet = skyflowIdRecords.map(
       (skyflowIdRecord) => new Promise((resolve, reject) => {
         getSkyflowIdRecordsFromVault(skyflowIdRecord, client, authToken as string)
