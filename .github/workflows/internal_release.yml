@@ -9,7 +9,7 @@ on:
       - "package-lock.json"
       - "*.md"
     branches:
-      - master
+      - release/*
 
       
 jobs:
