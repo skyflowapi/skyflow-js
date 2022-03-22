@@ -2,11 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.12.1] - 2022-03-22
+
+Fixed
+- Fixes in multiple skyflow clients creation
+
 ## [1.12.0] - 2022-02-24
 
 Added
 - `requestId` in error logs and error responses
 - add autocomplete for collect elements
+
 ## [1.11.0] - 2022-02-08
 
 ### Added
