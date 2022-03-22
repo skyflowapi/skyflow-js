@@ -56,9 +56,9 @@ export function getRevealElementValue(key, revealFrameName, client) {
   });
 }
 
-export function getAccessToken() {
+export function getAccessToken(clientId) {
   return new Promise((resolve, reject) => {
-    bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, {},
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + clientId, {},
       (data:any) => {
         if (data?.error) {
           reject(data.error);

@@ -191,7 +191,7 @@ describe('skyflow insert', () => {
 
   test('insert success', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -199,7 +199,7 @@ describe('skyflow insert', () => {
       const res = skyflow.insert(records);
 
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb(insertResponse);
 
@@ -217,7 +217,7 @@ describe('skyflow insert', () => {
 
   test('insert error', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -225,7 +225,7 @@ describe('skyflow insert', () => {
       const res = skyflow.insert(records);
 
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb({ error: { message: "resource doesn't exist", code: 404 } });
 
@@ -244,11 +244,11 @@ describe('skyflow insert', () => {
       const res = skyflow.insert(records);
 
       const frameReayEvent = on.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
       const frameReadyCb = frameReayEvent[1][1];
       frameReadyCb();
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb(insertResponse);
 
@@ -265,7 +265,7 @@ describe('skyflow insert', () => {
   });
   test('insert invalid input', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -336,7 +336,7 @@ describe('skyflow detokenize', () => {
 
   test('detokenize success', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -344,7 +344,7 @@ describe('skyflow detokenize', () => {
       const res = skyflow.detokenize(detokenizeInput);
 
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb(detokenizeRes);
 
@@ -362,7 +362,7 @@ describe('skyflow detokenize', () => {
 
   test('detokenize error', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -370,7 +370,7 @@ describe('skyflow detokenize', () => {
       const res = skyflow.detokenize(detokenizeInput);
 
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb({ error: { message: "token doesn't exist", code: 404 } });
 
@@ -390,12 +390,12 @@ describe('skyflow detokenize', () => {
       const res = skyflow.detokenize(detokenizeInput);
 
       const frameReayEvent = on.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
       const frameReadyCb = frameReayEvent[0][1];
       const frameReadyCb2 = frameReayEvent[1][1];
       frameReadyCb2();
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb(detokenizeRes);
       res.then((result) => {
@@ -411,12 +411,12 @@ describe('skyflow detokenize', () => {
       const res = skyflow.detokenize(detokenizeInput);
 
       const frameReayEvent = on.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
       const frameReadyCb = frameReayEvent[0][1];
       const frameReadyCb2 = frameReayEvent[1][1];
       frameReadyCb2();
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb({ error: { message: "token doesn't exist", code: 404 } });
       res.catch((err) => {
@@ -437,7 +437,7 @@ describe('skyflow detokenize', () => {
   });
   test('detokenize invalid input 2', () => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -500,7 +500,7 @@ describe('skyflow getById', () => {
 
   test('getById success', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -508,7 +508,7 @@ describe('skyflow getById', () => {
       const res = skyflow.getById(getByIdInput);
 
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb(getByIdRes);
 
@@ -527,12 +527,12 @@ describe('skyflow getById', () => {
     try {
       const res = skyflow.getById(getByIdInput);
       const frameReayEvent = on.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
       const frameReadyCb2 = frameReayEvent[1][1];
       frameReadyCb2();
 
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb(getByIdRes);
 
@@ -550,7 +550,7 @@ describe('skyflow getById', () => {
 
   test('getById error', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -558,7 +558,7 @@ describe('skyflow getById', () => {
       const res = skyflow.getById(getByIdInput);
 
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb({ error: { message: "id doesn't exist", code: 404 } });
 
@@ -574,7 +574,7 @@ describe('skyflow getById', () => {
   });
   test('getById invalid input-1', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -586,7 +586,7 @@ describe('skyflow getById', () => {
   });
   test('getById invalid input-2', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -598,7 +598,7 @@ describe('skyflow getById', () => {
   });
   test('getById invalid input-3', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -669,7 +669,7 @@ describe('skyflow invoke connection', () => {
 
   test('invoke connection success', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -677,7 +677,7 @@ describe('skyflow invoke connection', () => {
       const res = skyflow.invokeConnection(invokeConnectionReq);
 
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb(invokeConnectionRes);
 
@@ -697,11 +697,11 @@ describe('skyflow invoke connection', () => {
     try {
       const res = skyflow.invokeConnection(invokeConnectionReq);
       const frameReayEvent = on.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
       const frameReadyCb = frameReayEvent[1][1];
       frameReadyCb();
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb(invokeConnectionRes);
 
@@ -730,7 +730,7 @@ describe('skyflow invoke connection', () => {
   });
   test('invoke connection invalidInput -2 ', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -819,16 +819,15 @@ describe('Get BearerToken Listener', () => {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, {}, emitterCb);
 
     const onCbEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN));
     expect(onCbEvent).toBeDefined();
 
     const onCbName = onCbEvent[0][0];
-    expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
+    expect(onCbName.includes(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN)).toBeTruthy();
     const onCb = onCbEvent[0][1];
     onCb({}, emitterCb);
     setTimeout(() => {
       expect(emitterCb).toBeCalledTimes(1);
-      expect(emitterCb).toBeCalledWith({ authToken: 'validBearerToken' });
       done();
     }, 1000);
   });
@@ -846,11 +845,11 @@ describe('Get BearerToken Listener', () => {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, {}, emitterCb);
 
     const onCbEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN));
     expect(onCbEvent).toBeDefined();
 
     const onCbName = onCbEvent[0][0];
-    expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
+    expect(onCbName.includes(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN)).toBeTruthy();
     const onCb = onCbEvent[0][1];
     onCb({}, emitterCb);
     setTimeout(() => {
@@ -922,7 +921,7 @@ describe('Invoke SOAP Connection', () => {
 `;
   test('soap invoke connection success', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -930,7 +929,7 @@ describe('Invoke SOAP Connection', () => {
     const res = skyflow.invokeSoapConnection(invokeSoapReq);
     setTimeout(() => {
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb(invokeSoapResponse);
 
@@ -949,7 +948,7 @@ describe('Invoke SOAP Connection', () => {
       token: '123'
     })
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -957,7 +956,7 @@ describe('Invoke SOAP Connection', () => {
     const res = skyflow.invokeSoapConnection({ ...invokeSoapReq, responseXML: `<response></response>` });
     setTimeout(() => {
       const emitEvent = emitSpy.mock.calls
-        .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb(invokeSoapResponse);
 
@@ -973,14 +972,14 @@ describe('Invoke SOAP Connection', () => {
 
   test('soap invoke connection error', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
     const res = skyflow.invokeSoapConnection(invokeSoapReq);
 
     const emitEvent = emitSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
     const emitCb = emitEvent[0][2];
     emitCb({ error: invokeSoapErrorResponse });
 
@@ -995,7 +994,7 @@ describe('Invoke SOAP Connection', () => {
 
   test('soap invoke connection, duplicate elements in responseXML', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -1038,7 +1037,7 @@ describe('Invoke SOAP Connection', () => {
 
   test('soap invoke connection invalid element id', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -1075,7 +1074,7 @@ describe('Invoke SOAP Connection', () => {
   });
   test('soap invoke connection invalid connection url', (done) => {
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -1094,13 +1093,13 @@ describe('Invoke SOAP Connection', () => {
     const res = skyflow.invokeSoapConnection(invokeSoapReq);
 
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[1][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
 
     const emitEvent = emitSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
     const emitCb = emitEvent[0][2];
     emitCb(invokeSoapResponse);
 
@@ -1116,13 +1115,13 @@ describe('Invoke SOAP Connection', () => {
     const res = skyflow.invokeSoapConnection(invokeSoapReq);
 
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[1][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
 
     const emitEvent = emitSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
     const emitCb = emitEvent[0][2];
     emitCb({ error: invokeSoapErrorResponse });
 
@@ -1179,13 +1178,13 @@ describe('Invoke SOAP Connection', () => {
     const res = skyflow.invokeSoapConnection({ ...invokeSoapReq, responseXML: '<response></response>' });
 
     const frameReayEvent = on.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
     const frameReadyCb = frameReayEvent[1][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
 
     const emitEvent = emitSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST);
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
     const emitCb = emitEvent[0][2];
     emitCb(invokeSoapResponse);
 

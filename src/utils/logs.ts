@@ -80,6 +80,7 @@ const logs = {
   },
   errorLogs: {
     CLIENT_CONNECTION: 'Interface: collect container - client connection not established. client info has not reached iframes',
+    INVALID_BEARER_TOKEN: 'Interface: init - Invalid token is generated from getBearerToken callback',
     BEARER_TOKEN_REJECTED: 'Interface: init - GetBearerToken promise got rejected.',
     VAULTID_IS_REQUIRED: 'Interface: init - Invalid client credentials. vaultID is required.',
     EMPTY_VAULTID_IN_INIT: 'Interface: init - Invalid client credentials. vaultID cannot be empty.',
