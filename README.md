@@ -741,7 +741,7 @@ cardNumber.clearValue();
 For non-PCI use-cases, retrieving data from the vault and revealing it in the browser can be done either using the SkyflowID's or tokens as described below
 
 - ### Using Skyflow tokens
-    For retrieving using tokens, use the `detokenize(records)` method. The records parameter takes a JSON object that contains `records` to be fetched as shown below.
+    In order to retrieve data from your vault using tokens that you have previously generated for that data, you can use the `detokenize(records)` method. The records parameter takes a JSON object that contains `records` to be fetched as shown below.
 
 ```javascript
 const records = {
@@ -779,7 +779,7 @@ The sample response:
 ```
 
 - ### Using Skyflow ID's
-    For retrieving using SkyflowID's, use the `getById(records)` method.The records parameter takes a JSON object that contains `records` to be fetched as shown below.
+    In order to retrieve data from your vault using SkyflowIDs, use the `getById(records)` method.The records parameter takes a JSON object that contains `records` to be fetched as shown below.
 
 ```javascript
 {
