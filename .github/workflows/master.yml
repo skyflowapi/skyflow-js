@@ -1,0 +1,28 @@
+name: master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  ci-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.17.6
+      - name: install modules
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+      
+      - name: Codecov
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          token: ${{ secrets.CODECOV_REPO_UPLOAD_TOKEN }}
+          files: coverage/lcov.info
+          name: codecov-core-ui
+          verbose: true
