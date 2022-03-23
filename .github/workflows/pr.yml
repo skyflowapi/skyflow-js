@@ -24,6 +24,14 @@ jobs:
       - name: Run tests
         run: npm run test
       
+      - name: Codecov
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          token: ${{ secrets.CODECOV_REPO_UPLOAD_TOKEN }}
+          files: coverage/lcov.info
+          name: codecov-core-ui
+          verbose: true
+      
       - name: Browser Build
         run: npm run build-browser-sdk
         env:
