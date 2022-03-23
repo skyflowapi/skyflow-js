@@ -29,7 +29,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_REPO_UPLOAD_TOKEN }}
           files: coverage/lcov.info
-          name: codecov-core-ui
+          name: codecov-skyflow-js
           verbose: true
       
       - name: Browser Build
