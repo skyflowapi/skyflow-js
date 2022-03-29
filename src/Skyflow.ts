@@ -77,42 +77,48 @@ class Skyflow {
     this.#skyflowContainer = new SkyflowContainer(this.#client,
       { logLevel: this.#logLevel, env: this.#env });
 
-    bus
-      .target(properties.IFRAME_SECURE_ORGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + this.#uuid, (data, callback) => {
-        printLog(parameterizedString(logs.infoLogs.CAPTURED_BEARER_TOKEN_EVENT, CLASS_NAME),
+    const cb = (data, callback) => {
+      printLog(parameterizedString(logs.infoLogs.CAPTURED_BEARER_TOKEN_EVENT, CLASS_NAME),
+        MessageType.LOG,
+        this.#logLevel);
+      if (
+        this.#client.config.getBearerToken
+        && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
+      ) {
+        this.#client.config
+          .getBearerToken()
+          .then((bearerToken) => {
+            if (isTokenValid(bearerToken)) {
+              printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+                MessageType.LOG,
+                this.#logLevel);
+              this.#bearerToken = bearerToken;
+              callback({ authToken: this.#bearerToken });
+            } else {
+              printLog(logs.errorLogs.INVALID_BEARER_TOKEN, MessageType.ERROR, this.#logLevel);
+              callback({ error: logs.errorLogs.INVALID_BEARER_TOKEN });
+            }
+          })
+          .catch((err) => {
+            printLog(logs.errorLogs.BEARER_TOKEN_REJECTED, MessageType.ERROR,
+              this.#logLevel);
+            callback({ error: err });
+          });
+      } else {
+        printLog(parameterizedString(logs.infoLogs.REUSE_BEARER_TOKEN, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);
-        if (
-          this.#client.config.getBearerToken
-          && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
-        ) {
-          this.#client.config
-            .getBearerToken()
-            .then((bearerToken) => {
-              if (isTokenValid(bearerToken)) {
-                printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
-                  MessageType.LOG,
-                  this.#logLevel);
-                this.#bearerToken = bearerToken;
-                callback({ authToken: this.#bearerToken });
-              } else {
-                printLog(logs.errorLogs.INVALID_BEARER_TOKEN, MessageType.ERROR, this.#logLevel);
-                callback({ error: logs.errorLogs.INVALID_BEARER_TOKEN });
-              }
-            })
-            .catch((err) => {
-              printLog(logs.errorLogs.BEARER_TOKEN_REJECTED, MessageType.ERROR,
-                this.#logLevel);
-              callback({ error: err });
-            });
-        } else {
-          printLog(parameterizedString(logs.infoLogs.REUSE_BEARER_TOKEN, CLASS_NAME),
-            MessageType.LOG,
-            this.#logLevel);
-          callback({ authToken: this.#bearerToken });
-        }
-      });
+        callback({ authToken: this.#bearerToken });
+      }
+    };
+
+    bus
+      .target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, cb);
+
+    bus
+      .target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + this.#uuid, cb);
     printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_LISTENER, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
     printLog(parameterizedString(logs.infoLogs.CURRENT_ENV, CLASS_NAME, this.#env),
