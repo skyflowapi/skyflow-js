@@ -65,5 +65,13 @@ export function getAccessToken(clientId) {
         }
         resolve(data.authToken);
       });
+
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, {},
+      (data:any) => {
+        if (data?.error) {
+          reject(data.error);
+        }
+        resolve(data.authToken);
+      });
   });
 }
