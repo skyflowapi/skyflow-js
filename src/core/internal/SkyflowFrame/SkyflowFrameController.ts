@@ -17,7 +17,11 @@ import {
 import { getAccessToken } from '../../../utils/busEvents';
 import {
   clearEmpties,
-  deletePropertyPath, fillUrlWithPathAndQueryParams, flattenObject, formatFrameNameToId,
+  deletePropertyPath,
+  fillUrlWithPathAndQueryParams,
+  flattenObject,
+  formatFrameNameToId,
+  lowercaseKeys,
 } from '../../../utils/helpers';
 import {
   ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, FRAME_REVEAL,
@@ -226,7 +230,7 @@ class SkyflowFrameController {
           url: config.connectionURL,
           requestMethod: config.methodName,
           body: config.requestBody,
-          headers: { 'X-Skyflow-Authorization': authToken, 'Content-Type': 'application/json', ...config.requestHeader },
+          headers: { 'x-skyflow-authorization': authToken, 'content-type': 'application/json', ...lowercaseKeys(config.requestHeader) },
         });
         invokeRequest.then((response) => {
           if (config.responseBody) {
@@ -314,9 +318,9 @@ class SkyflowFrameController {
         soapRequest({
           url: config.connectionURL,
           headers: {
-            'Content-Type': 'text/xml;charset=UTF-8',
-            'X-Skyflow-Authorization': authToken,
-            ...config.httpHeaders,
+            'content-type': 'text/xml;charset=UTF-8',
+            'x-skyflow-authorization': authToken,
+            ...lowercaseKeys(config.httpHeaders),
           },
           xml: config.requestXML,
           timeout: 30000,
