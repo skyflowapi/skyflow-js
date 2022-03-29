@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.12.2] - 2022-03-29
+
+### Changed
+- Added validation to token from TokenProvider
+
+### Fixed 
+-  Request headers not getting overriden due to case sensitivity
+
 ## [1.12.1] - 2022-03-22
 
 Fixed
