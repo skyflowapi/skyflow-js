@@ -153,3 +153,12 @@ export function replaceIframeNameWithValues(requestXml: string, elementValuesLoo
 
   return result;
 }
+
+export function lowercaseKeys(obj: {
+  [key: string]: any
+}): any {
+  return Object.keys(obj).reduce((acc, key) => {
+    acc[key.toLowerCase()] = obj[key];
+    return acc;
+  }, {});
+}

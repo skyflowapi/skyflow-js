@@ -161,7 +161,7 @@ skyflowClient.insert(records, options={})
 
  
 
-An example of an insert call: 
+An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/purejs.html) of an insert call: 
 ```javascript
 skyflowClient.insert({
   "records": [
@@ -398,7 +398,7 @@ container.collect(options={})
 
 ### End to end example of collecting data with Skyflow Elements
 
-**Sample Code:**
+**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/skyflowElements.html)**
 
 ```javascript
 //Step 1
@@ -517,7 +517,7 @@ const elementValueMatchRule = {
 }
 ```
 
-The Sample code snippet for using custom validations:
+The Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/CustomValidations.html) for using custom validations:
 
 ```javascript
 /*
@@ -623,7 +623,7 @@ state : {
 `Note:`
 values of SkyflowElements will be returned in elementstate object only when `env` is  `DEV`,  else it is empty string i.e, ''
 
-##### Sample code snippet for using listeners
+##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/CollectElementListeners.html) for using listeners
 ```javascript
 //create skyflow client
 const skyflowClient = Skyflow.init({
@@ -758,7 +758,7 @@ const records = {
 
 skyflow.detokenize(records)
 ```
-An example of a detokenize call: 
+An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/purejs.html) of a detokenize call: 
 
 ```javascript
 skyflow.detokenize({
@@ -940,6 +940,7 @@ container.reveal()
 
 ### End to end example of all steps
 
+**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/skyflowElements.html)**
 ```javascript
 //Step 1
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
@@ -1107,7 +1108,7 @@ It is a JSON object that specifies where to render the response in the UI. The v
 
 Sample use-cases on using invokeConnection():
 
-###  Sample use-case 1:
+###  [Sample use-case 1](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/invokeConnection.html):
 
 Merchant acceptance - customers should be able to complete payment checkout without cvv touching their application. This means that the merchant should be able to receive a CVV and process a payment without exposing their front-end to any PCI data
 
@@ -1157,7 +1158,7 @@ In the above example,  CVV is being collected from the user input at the time of
 - card_number can be either container element or plain text value (tokens or actual value)
 - `table` and `column` names are not required for creating collect element, if it is used for invokeConnection method, since they will not be stored in the vault
 
- ### Sample use-case 2:
+ ### [Sample use-case 2](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/invokeConnection.html):
  
  Card issuance -  customers want to issue cards from card issuer service and should generate the CVV dynamically without increasing their PCI scope.
 ```javascript
@@ -1242,6 +1243,8 @@ The values in the **requestXML** can contain collect element IDs or reveal eleme
 `Note:` If the user needs to use Skyflow Elements in place of values in the requestXML or responseXML, they will pass in an additional tag **Skyflow** containing the ID of the particular element.
 
 Please ensure that the paths configured in the responseXML are present in the actual response. In case of a misconfigured path, the response from the server will be discarded and an error will be thrown.
+
+**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/InvokeSoapConnection.html)**
 
 ```javascript
 
