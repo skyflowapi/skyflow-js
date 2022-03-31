@@ -27,6 +27,7 @@ describe("Client Class",()=>{
                 requestMethod:"GET",
                 url:"https://example-test.com",
                 headers:{
+                    "content-type": "application/json",
                     "Auth":"eyde.ed.ewe"
                 },
                 body:{
