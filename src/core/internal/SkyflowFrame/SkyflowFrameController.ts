@@ -22,10 +22,11 @@ import {
   flattenObject,
   formatFrameNameToId,
   lowercaseKeys,
+  updateRequestBodyInConnection,
 } from '../../../utils/helpers';
 import {
   ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, FRAME_REVEAL,
-  connectionConfigParseKeys, PUREJS_TYPES, FORMAT_REGEX, REPLACE_TEXT,
+  connectionConfigParseKeys, PUREJS_TYPES, FORMAT_REGEX, REPLACE_TEXT, ContentType,
 } from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
@@ -126,7 +127,8 @@ class SkyflowFrameController {
             const filledUrl = fillUrlWithPathAndQueryParams(config.connectionURL,
               config.pathParams, config.queryParams);
             config.connectionURL = filledUrl;
-            this.sendInvokeConnectionRequest(config).then((resultResponse) => {
+            const tempConfig = updateRequestBodyInConnection(config);
+            this.sendInvokeConnectionRequest(tempConfig).then((resultResponse) => {
               printLog(parameterizedString(logs.infoLogs.SEND_INVOKE_CONNECTION_RESOLVED,
                 CLASS_NAME),
               MessageType.LOG,
@@ -230,7 +232,7 @@ class SkyflowFrameController {
           url: config.connectionURL,
           requestMethod: config.methodName,
           body: config.requestBody,
-          headers: { 'x-skyflow-authorization': authToken, 'content-type': 'application/json', ...lowercaseKeys(config.requestHeader) },
+          headers: { 'x-skyflow-authorization': authToken, 'content-type': ContentType.APPLICATIONORJSON, ...lowercaseKeys(config.requestHeader) },
         });
         invokeRequest.then((response) => {
           if (config.responseBody) {

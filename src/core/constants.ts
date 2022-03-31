@@ -396,3 +396,11 @@ export const PATH_NOT_FOUND_IN_RES_XML = 'skyflow: Path not found';
 export const FORMAT_REGEX = ':FORMAT_REGEX:';
 
 export const REPLACE_TEXT = ':REPLACE_TEXT:';
+
+export enum ContentType {
+  APPLICATIONORJSON = 'application/json',
+  TEXTORPLAIN = 'text/plain',
+  TEXTORXML = 'text/xml',
+  FORMURLENCODED = 'application/x-www-form-urlencoded',
+  FORMDATA = 'multipart/form-data',
+}
