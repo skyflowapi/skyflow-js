@@ -1,10 +1,11 @@
+import { ContentType } from '../core/constants';
 import SkyflowError from '../libs/SkyflowError';
 import { ISkyflow } from '../Skyflow';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
 
 export interface IClientRequest {
-  body?: Record<string, any>;
+  body?: any;
   headers?: Record<string, string>;
   requestMethod:
   | 'GET'
@@ -55,7 +56,11 @@ class Client {
       });
     }
 
-    httpRequest.send(JSON.stringify({ ...request.body }));
+    if (request.headers?.['content-type'].includes(ContentType.FORMURLENCODED)) {
+      httpRequest.send(request.body);
+    } else {
+      httpRequest.send(JSON.stringify({ ...request.body }));
+    }
 
     httpRequest.onload = () => {
       const responseHeaders = httpRequest.getAllResponseHeaders();
