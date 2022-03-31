@@ -175,7 +175,7 @@ export function updateRequestBodyInConnection(config: IConnectionConfig) {
   let tempConfig = { ...config };
   if (config && config.requestHeader && config.requestBody) {
     const headerKeys = lowercaseKeys(config.requestHeader);
-    if (headerKeys['content-type'] === ContentType.FORMURLENCODED) {
+    if (headerKeys['content-type'].includes(ContentType.FORMURLENCODED)) {
       tempConfig = {
         ...tempConfig,
         requestBody: qs.stringify(config.requestBody),
