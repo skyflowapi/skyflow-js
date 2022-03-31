@@ -75,7 +75,7 @@ class Client {
       const contentType = headerMap['content-type'];
       const requestId = headerMap['x-request-id'];
       if (httpRequest.status < 200 || httpRequest.status >= 400) {
-        if (contentType && contentType.includes(ContentType.APPLICATIONORJSON)) {
+        if (contentType && contentType.includes('application/json')) {
           let description = JSON.parse(httpRequest.response);
           if (description?.error?.message) {
             description = requestId ? `${description?.error?.message} - requestId: ${requestId}` : description?.error?.message;
@@ -84,7 +84,7 @@ class Client {
             code: httpRequest.status,
             description,
           }, [], true));
-        } else if (contentType && contentType.includes(ContentType.TEXTORPLAIN)) {
+        } else if (contentType && contentType.includes('text/plain')) {
           reject(new SkyflowError({
             code: httpRequest.status,
             description: requestId ? `${httpRequest.response} - requestId: ${requestId}` : httpRequest.response,
@@ -96,7 +96,7 @@ class Client {
           }, [], true));
         }
       }
-      if (contentType && contentType.includes(ContentType.APPLICATIONORJSON)) {
+      if (contentType && contentType.includes('application/json')) {
         resolve(JSON.parse(httpRequest.response));
       }
       resolve(httpRequest.response);
