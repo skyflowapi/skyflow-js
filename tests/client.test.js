@@ -43,6 +43,37 @@ describe("Client Class",()=>{
             console.log(err);
         }
     });
+    test("Client Request Method with url-formencoded content-type",()=>{
+        try{
+            const xhrMock = {
+                open: jest.fn(),
+                send: jest.fn(),
+                setRequestHeader: jest.fn(),
+                onload: jest.fn(),
+                readyState: 4,
+                status: 200,
+                response: JSON.stringify({'message':'Hello World!'}),
+                getAllResponseHeaders:jest.fn().mockImplementation(()=>("content-type: application/json"))
+              };
+            
+            jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
+            const testClient = new Client({},{});
+            const resp = testClient.request({
+                requestMethod:"GET",
+                url:"https://example-test.com",
+                headers:{
+                    "content-type": "application/x-www-form-urlencoded" 
+                },
+                body:{
+                    "key":"value"
+                }
+            });
+            expect(xhrMock.setRequestHeader).toBeCalledWith("content-type","application/x-www-form-urlencoded");
+            xhrMock.onload();
+        }catch(err){
+            console.log(err);
+        }
+    });
     test("Client Request Method with error 1",()=>{
         try{
             const xhrMock = {
