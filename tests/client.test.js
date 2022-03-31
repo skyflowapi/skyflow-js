@@ -54,7 +54,8 @@ describe("Client Class",()=>{
                 readyState: 4,
                 status: 200,
                 response: JSON.stringify({'message':'Hello World!'}),
-                getAllResponseHeaders:jest.fn().mockImplementation(()=>("content-type: application/json"))
+                getAllResponseHeaders:jest.fn().mockImplementation(()=>(`content-type: application/json 
+                x-request-id: req_123`))
               };
             
             jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
@@ -85,7 +86,8 @@ describe("Client Class",()=>{
                 readyState: 4,
                 status: 401,
                 response: JSON.stringify({'message':'Hello World!'}),
-                getAllResponseHeaders:jest.fn().mockImplementation(()=>("content-type: text/plain"))
+                getAllResponseHeaders:jest.fn().mockImplementation(()=>(`content-type: text/plain
+                x-request-id: req_123`))
               };
             
             jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
