@@ -1,10 +1,11 @@
+import { ContentType } from '../core/constants';
 import SkyflowError from '../libs/SkyflowError';
 import { ISkyflow } from '../Skyflow';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
 
 export interface IClientRequest {
-  body?: Record<string, any>;
+  body?: any;
   headers?: Record<string, string>;
   requestMethod:
   | 'GET'
@@ -55,7 +56,11 @@ class Client {
       });
     }
 
-    httpRequest.send(JSON.stringify({ ...request.body }));
+    if (request.headers?.['content-type'].includes(ContentType.FORMURLENCODED)) {
+      httpRequest.send(request.body);
+    } else {
+      httpRequest.send(JSON.stringify({ ...request.body }));
+    }
 
     httpRequest.onload = () => {
       const responseHeaders = httpRequest.getAllResponseHeaders();
@@ -70,7 +75,7 @@ class Client {
       const contentType = headerMap['content-type'];
       const requestId = headerMap['x-request-id'];
       if (httpRequest.status < 200 || httpRequest.status >= 400) {
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType && contentType.includes(ContentType.APPLICATIONORJSON)) {
           let description = JSON.parse(httpRequest.response);
           if (description?.error?.message) {
             description = requestId ? `${description?.error?.message} - requestId: ${requestId}` : description?.error?.message;
@@ -79,7 +84,7 @@ class Client {
             code: httpRequest.status,
             description,
           }, [], true));
-        } else if (contentType && contentType.includes('text/plain')) {
+        } else if (contentType && contentType.includes(ContentType.TEXTORPLAIN)) {
           reject(new SkyflowError({
             code: httpRequest.status,
             description: requestId ? `${httpRequest.response} - requestId: ${requestId}` : httpRequest.response,
@@ -91,7 +96,7 @@ class Client {
           }, [], true));
         }
       }
-      if (contentType && contentType.includes('application/json')) {
+      if (contentType && contentType.includes(ContentType.APPLICATIONORJSON)) {
         resolve(JSON.parse(httpRequest.response));
       }
       resolve(httpRequest.response);
