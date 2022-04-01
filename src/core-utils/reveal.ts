@@ -49,8 +49,8 @@ const getSkyflowIdRecordsFromVault = (
     requestMethod: 'GET',
     url: vaultEndPointurl,
     headers: {
-      Authorization: `Bearer ${authToken}`,
-      'Content-Type': 'application/json',
+      authorization: `Bearer ${authToken}`,
+      'content-type': 'application/json',
     },
   });
 };
@@ -65,8 +65,8 @@ const getTokenRecordsFromVault = (
     requestMethod: 'POST',
     url: vaultEndPointurl,
     headers: {
-      Authorization: `Bearer ${authToken}`,
-      'Content-Type': 'application/json',
+      authorization: `Bearer ${authToken}`,
+      'content-type': 'application/json',
     },
     body:
       {
