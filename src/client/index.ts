@@ -56,7 +56,7 @@ class Client {
       });
     }
 
-    if (request.headers?.['content-type'].includes(ContentType.FORMURLENCODED)) {
+    if (request.headers?.['content-type']?.includes(ContentType.FORMURLENCODED)) {
       httpRequest.send(request.body);
     } else {
       httpRequest.send(JSON.stringify({ ...request.body }));

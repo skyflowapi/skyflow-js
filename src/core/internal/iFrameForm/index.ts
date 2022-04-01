@@ -698,8 +698,8 @@ export class IFrameForm {
             requestMethod: 'POST',
             url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
             headers: {
-              Authorization: `Bearer ${authToken}`,
-              'Content-Type': 'application/json',
+              authorization: `Bearer ${authToken}`,
+              'content-type': 'application/json',
             },
           })
           .then((response: any) => {
