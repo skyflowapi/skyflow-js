@@ -171,6 +171,29 @@ export function lowercaseKeys(obj: {
   return {};
 }
 
+function objectToFormData(obj: any, form?: FormData, namespace?: string) {
+  const fd = form || new FormData();
+  let formKey: string;
+
+  Object.keys(obj).forEach((property) => {
+    if (Object.prototype.hasOwnProperty.call(obj, property)) {
+      if (namespace) {
+        formKey = `${namespace}[${property}]`;
+      } else {
+        formKey = property;
+      }
+
+      if (typeof obj[property] === 'object') {
+        objectToFormData(obj[property], fd, property);
+      } else {
+        fd.append(formKey, obj[property]);
+      }
+    }
+  });
+
+  return fd;
+}
+
 export function updateRequestBodyInConnection(config: IConnectionConfig) {
   let tempConfig = { ...config };
   if (config && config.requestHeader && config.requestBody) {
@@ -179,6 +202,12 @@ export function updateRequestBodyInConnection(config: IConnectionConfig) {
       tempConfig = {
         ...tempConfig,
         requestBody: qs.stringify(config.requestBody),
+      };
+    } else if (headerKeys['content-type'].includes(ContentType.FORMDATA)) {
+      const body = objectToFormData(config.requestBody);
+      tempConfig = {
+        ...tempConfig,
+        requestBody: body,
       };
     }
   }
