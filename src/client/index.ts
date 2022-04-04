@@ -52,11 +52,14 @@ class Client {
     if (request.headers) {
       const { headers } = request;
       Object.keys(request.headers).forEach((key) => {
-        httpRequest.setRequestHeader(key, headers[key]);
+        if (!(key === 'content-type' && headers[key] && headers[key].includes(ContentType.FORMDATA))) {
+          httpRequest.setRequestHeader(key, headers[key]);
+        }
       });
     }
 
-    if (request.headers?.['content-type']?.includes(ContentType.FORMURLENCODED)) {
+    if (request.headers?.['content-type']?.includes(ContentType.FORMURLENCODED)
+    || request.headers?.['content-type']?.includes(ContentType.FORMDATA)) {
       httpRequest.send(request.body);
     } else {
       httpRequest.send(JSON.stringify({ ...request.body }));
