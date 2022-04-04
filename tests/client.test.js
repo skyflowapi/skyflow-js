@@ -77,7 +77,7 @@ describe("Client Class",()=>{
         }
     });
 
-    test("Client Request Method with form-data content-type",()=>{
+    test.only("Client Request Method with form-data content-type",()=>{
         try{
             const xhrMock = {
                 open: jest.fn(),
@@ -97,20 +97,21 @@ describe("Client Class",()=>{
                 requestMethod:"GET",
                 url:"https://example-test.com",
                 headers:{
+                    "Auth":"eyde.ed.ewe",
                     "content-type": "multipart/form-data" 
                 },
                 body:{
                     "key":"value"
                 }
             });
-            expect(xhrMock.setRequestHeader).toBeCalledWith("content-type","multipart/form-data");
             xhrMock.onload();
+            expect(xhrMock.setRequestHeader).toBeCalledWith("Auth","eyde.ed.ewe");
         }catch(err){
             console.log(err);
         }
     });
     
-    test.only("Client Request Method with error 1",()=>{
+    test("Client Request Method with error 1",()=>{
         try{
             const xhrMock = {
                 open: jest.fn(),
