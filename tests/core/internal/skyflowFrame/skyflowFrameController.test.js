@@ -375,6 +375,31 @@ const invokeConnectionRes = {
   },
 };
 
+const invokeConFormEncodedReq = {
+  connectionURL: 'http://connectionurl.com',
+  methodName: 'POST',
+  requestHeader: {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  },
+  requestBody: {
+    type: "card"
+  }
+}
+
+const invokeConFormDataReq = {
+  connectionURL: 'http://connectionurl.com',
+  methodName: 'POST',
+  requestHeader: {
+    'Content-Type': 'multipart/form-data'
+  },
+  requestBody: {
+    type: "card",
+    metadata: {
+      name: "John"
+    }
+  }
+}
+
 describe('Invoking Connection', () => {
   let emitSpy;
   let targetSpy;
@@ -423,6 +448,56 @@ describe('Invoking Connection', () => {
     setTimeout(() => {
       expect(cb2.mock.calls[0][0].error).toBeUndefined();
       expect(!('resource' in cb2.mock.calls[0][0])).toBeTruthy();
+      done();
+    }, 1000);
+  });
+
+  test('Invoke Connection success with form-urlencoded', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(invokeConnectionRes));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.INVOKE_CONNECTION,
+      config: invokeConFormEncodedReq,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].error).toBeUndefined();
+      done();
+    }, 1000);
+  });
+
+  test('Invoke Connection success with form-data', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(invokeConnectionRes));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.INVOKE_CONNECTION,
+      config: invokeConFormDataReq,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].error).toBeUndefined();
       done();
     }, 1000);
   });

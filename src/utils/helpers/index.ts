@@ -1,6 +1,11 @@
-import { FORMAT_REGEX, FRAME_REVEAL, REPLACE_TEXT } from '../../core/constants';
+import {
+  ContentType, FORMAT_REGEX, FRAME_REVEAL, REPLACE_TEXT,
+} from '../../core/constants';
 import SkyflowElement from '../../core/external/common/SkyflowElement';
 import SkyflowError from '../../libs/SkyflowError';
+import { IConnectionConfig } from '../common';
+
+const qs = require('qs');
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
@@ -164,4 +169,47 @@ export function lowercaseKeys(obj: {
     }, {});
   }
   return {};
+}
+
+function objectToFormData(obj: any, form?: FormData, namespace?: string) {
+  const fd = form || new FormData();
+  let formKey: string;
+
+  Object.keys(obj).forEach((property) => {
+    if (Object.prototype.hasOwnProperty.call(obj, property)) {
+      if (namespace) {
+        formKey = `${namespace}[${property}]`;
+      } else {
+        formKey = property;
+      }
+
+      if (typeof obj[property] === 'object') {
+        objectToFormData(obj[property], fd, property);
+      } else {
+        fd.append(formKey, obj[property]);
+      }
+    }
+  });
+
+  return fd;
+}
+
+export function updateRequestBodyInConnection(config: IConnectionConfig) {
+  let tempConfig = { ...config };
+  if (config && config.requestHeader && config.requestBody) {
+    const headerKeys = lowercaseKeys(config.requestHeader);
+    if (headerKeys['content-type'].includes(ContentType.FORMURLENCODED)) {
+      tempConfig = {
+        ...tempConfig,
+        requestBody: qs.stringify(config.requestBody),
+      };
+    } else if (headerKeys['content-type'].includes(ContentType.FORMDATA)) {
+      const body = objectToFormData(config.requestBody);
+      tempConfig = {
+        ...tempConfig,
+        requestBody: body,
+      };
+    }
+  }
+  return tempConfig;
 }

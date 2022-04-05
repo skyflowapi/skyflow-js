@@ -2,7 +2,7 @@
   "name": "skyflow-js",
   "preferGlobal": true,
   "analyze": false,
-  "version": "1.12.2",
+  "version": "1.12.2-dev.ea6ae28",
   "author": "Skyflow",
   "description": "Skyflow JavaScript SDK",
   "homepage": "https://github.com/skyflowapi/skyflow-js",
@@ -44,6 +44,7 @@
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "node-polyfill-webpack-plugin": "^1.1.4",
+    "qs": "^6.10.3",
     "regex-parser": "^2.2.11",
     "set-value": "^4.0.1",
     "xml-js": "^1.6.11"
