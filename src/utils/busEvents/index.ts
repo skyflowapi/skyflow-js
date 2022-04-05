@@ -1,6 +1,6 @@
 import bus from 'framebus';
 import { applyFormatRegex, fetchRecordsByTokenId, formatRecordsForIframe } from '../../core-utils/reveal';
-import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, FRAME_REVEAL } from '../../core/constants';
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT } from '../../core/constants';
 import properties from '../../properties';
 import { formatFrameNameToId } from '../helpers';
 import logs from '../logs';
