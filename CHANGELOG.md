@@ -2,10 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.13.0] - 2022-04-05
+
+### Added
+- - support for application/x-www-form-urlencoded and multipart/form-data content-type's in connections
+
 ## [1.12.2] - 2022-03-29
 
 ### Changed
-- Added validation to token from TokenProvider
+- Added validation of JWT token format from TokenProvider
 
 ### Fixed 
 -  Request headers not getting overriden due to case sensitivity
