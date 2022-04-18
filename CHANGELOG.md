@@ -2,10 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.14.0] - 2022-04-19
+
+### Added
+- `EXPIRATION_YEAR` element type
+- `EXPIRATION_MONTH` element type
+
 ## [1.13.0] - 2022-04-05
 
 ### Added
-- - support for application/x-www-form-urlencoded and multipart/form-data content-type's in connections
+- support for application/x-www-form-urlencoded and multipart/form-data content-type's in connections
 
 ## [1.12.2] - 2022-03-29
 

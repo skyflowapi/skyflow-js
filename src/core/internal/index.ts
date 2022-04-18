@@ -20,6 +20,7 @@ import {
   CARD_NUMBER_MASK,
   EXPIRY_DATE_MASK,
   INPUT_ICON_STYLES,
+  EXPIRY_YEAR_MASK,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iFrameForm';
 import getCssClassesFromJss from '../../libs/jss-styles';
@@ -182,6 +183,11 @@ export class FrameElement {
         const cardNumberMask = CARD_NUMBER_MASK[cardType];
         this.iFrameFormElement.setMask(cardNumberMask as string[]);
         this.applyMask();
+      } else if (this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name
+        || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
+        if (this.domInput) {
+          this.domInput.value = state.value || '';
+        }
       }
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
@@ -449,8 +455,11 @@ export class FrameElement {
       this.iFrameFormElement.setValidation(this.options.validations);
       this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
       if (options.elementType === ElementType.EXPIRATION_DATE) {
-        this.iFrameFormElement.setExpirationDateFormat(options.format);
+        this.iFrameFormElement.setFormat(options.format);
         this.iFrameFormElement.setMask(EXPIRY_DATE_MASK[options.format] as string[]);
+      } else if (options.elementType === ElementType.EXPIRATION_YEAR) {
+        this.iFrameFormElement.setFormat(options.format);
+        this.iFrameFormElement.setMask(EXPIRY_YEAR_MASK[options.format] as string[]);
       } else {
         this.iFrameFormElement.setMask(this.options.mask);
       }

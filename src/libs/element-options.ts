@@ -1,5 +1,10 @@
 import {
-  ALLOWED_EXPIRY_DATE_FORMATS, DEFAULT_EXPIRATION_DATE_FORMAT, ELEMENTS, INPUT_STYLES,
+  ALLOWED_EXPIRY_DATE_FORMATS,
+  ALLOWED_EXPIRY_YEAR_FORMATS,
+  DEFAULT_EXPIRATION_DATE_FORMAT,
+  DEFAULT_EXPIRATION_YEAR_FORMAT,
+  ELEMENTS,
+  INPUT_STYLES,
 } from '../core/constants';
 import { CollectElementInput } from '../core/external/collect/CollectContainer';
 import CollectElement from '../core/external/collect/CollectElement';
@@ -9,7 +14,7 @@ import {
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
 import { parameterizedString, printLog } from '../utils/logsHelper';
-import { isValidExpiryDateFormat, isValidRegExp } from '../utils/validators';
+import { isValidExpiryDateFormat, isValidExpiryYearFormat, isValidRegExp } from '../utils/validators';
 import SkyflowError from './SkyflowError';
 import { buildStylesFromClassesAndStyles } from './styles';
 
@@ -244,21 +249,39 @@ export const formatValidations = (input: CollectElementInput) => {
 export const formatOptions = (elementType, options, logLevel) => {
   let formattedOptions = {
     required: false,
-    enableCardIcon: true,
-    format: DEFAULT_EXPIRATION_DATE_FORMAT,
     ...options,
   };
-  if (elementType === ELEMENTS.EXPIRATION_DATE.name) {
-    const isvalidFormat = formattedOptions.format
-    && isValidExpiryDateFormat(formattedOptions.format.toUpperCase());
-    if (!isvalidFormat) {
-      printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
-        ALLOWED_EXPIRY_DATE_FORMATS.toString()), MessageType.WARN, logLevel);
+  if (elementType === ELEMENTS.CARD_NUMBER.name) {
+    if (!Object.prototype.hasOwnProperty.call(formattedOptions, 'enableCardIcon')) {
+      formattedOptions = { ...options, enableCardIcon: true };
+    }
+  } else if (elementType === ELEMENTS.EXPIRATION_DATE.name) {
+    let isvalidFormat = false;
+    if (formattedOptions.format) {
+      isvalidFormat = isValidExpiryDateFormat(formattedOptions.format.toUpperCase());
+      if (!isvalidFormat) {
+        printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
+          ALLOWED_EXPIRY_DATE_FORMATS.toString()), MessageType.WARN, logLevel);
+      }
     }
     formattedOptions = {
       ...formattedOptions,
       format: isvalidFormat ? formattedOptions.format.toUpperCase()
         : DEFAULT_EXPIRATION_DATE_FORMAT,
+    };
+  } else if (elementType === ELEMENTS.EXPIRATION_YEAR.name) {
+    let isvalidFormat = false;
+    if (formattedOptions.format) {
+      isvalidFormat = isValidExpiryYearFormat(formattedOptions.format.toUpperCase());
+      if (!isvalidFormat) {
+        printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_YEAR_FORMAT,
+          ALLOWED_EXPIRY_YEAR_FORMATS.toString()), MessageType.WARN, logLevel);
+      }
+    }
+    formattedOptions = {
+      ...formattedOptions,
+      format: isvalidFormat ? formattedOptions.format.toUpperCase()
+        : DEFAULT_EXPIRATION_YEAR_FORMAT,
     };
   }
 

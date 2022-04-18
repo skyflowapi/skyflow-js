@@ -223,6 +223,7 @@ const logs = {
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',
+    INVALID_EXPIRATION_YEAR_FORMAT: 'EXPIRATION_YEAR format must be in one of %s1, the format is set to default YY',
     UNABLE_TO_SET_VALUE_IN_PROD_ENV: '%s1 setValue() cannot invoked while in PROD env. It is Not Recommeded',
     UNABLE_TO_CLEAR_VALUE_IN_PROD_ENV: '%s1 clearValue() cannot invoked while in PROD env. It is Not Recommeded',
     COLLECT_ALT_TEXT_DEPERECATED: 'altText is DEPERECATED, passing altText will not have any effect',

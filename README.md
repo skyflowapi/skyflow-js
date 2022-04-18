@@ -285,6 +285,8 @@ Finally, the `type` field takes a Skyflow ElementType. Each type applies the app
 - `CARDHOLDER_NAME`
 - `CARD_NUMBER`
 - `EXPIRATION_DATE`
+- `EXPIRATION_MONTH`
+- `EXPIRATION_YEAR`
 - `CVV`
 - `INPUT_FIELD`
 - `PIN`
@@ -305,15 +307,19 @@ const options = {
 
 `enableCardIcon` paramenter indicates whether the icon is visible for the CARD_NUMBER element, defaults to true
 
-`format` parameter takes string value and indicates the format pattern applicable to the element type. It is currently applicable to EXPIRATION_DATE element type only, the values that are accepted are
+`format` parameter takes string value and indicates the format pattern applicable to the element type, It's currently only applicable to `EXPIRATION_DATE` and `EXPIRATION_YEAR` element types.
 
-- `MM/YY`
-- `MM/YYYY`
-- `YY/MM`
-- `YYYY/MM`
+The values that are accepted for `EXPIRATION_DATE` are
+  - `MM/YY` (default)
+  - `MM/YYYY`
+  - `YY/MM`
+  - `YYYY/MM`
 
-`NOTE` : If not specified or invalid value is passed to the format for EXPIRATION_DATE element, then it defaults to MM/YY format.
+The values that are accepted for `EXPIRATION_YEAR` are
+  - `YY` (default)
+  - `YYYY`
 
+`NOTE`: If not specified or invalid value is passed to the `format` then it takes default value.
 
 Once the Element object and options has been defined, add it to the container using the `create(element, options)` method as shown below. The `element` param takes a Skyflow Element object and options as defined above:
 

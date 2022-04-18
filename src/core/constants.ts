@@ -77,6 +77,8 @@ export enum ElementType {
   CARDHOLDER_NAME = 'CARDHOLDER_NAME',
   INPUT_FIELD = 'INPUT_FIELD',
   PIN = 'PIN',
+  EXPIRATION_MONTH = 'EXPIRATION_MONTH',
+  EXPIRATION_YEAR = 'EXPIRATION_YEAR',
 }
 
 export enum CardType {
@@ -162,6 +164,25 @@ export const ELEMENTS = {
     sensitive: true,
     // mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
     // regex: /^(0[1-9]|1[0-2])\/([0-9]{4})$/,
+  },
+  [ElementType.EXPIRATION_MONTH]: {
+    name: 'EXPIRATION_MONTH',
+    attributes: {
+      maxLength: 2,
+      type: 'text',
+      autocomplete: 'cc-exp-month',
+    },
+    sensitive: true,
+    mask: ['XX', { X: '[0-9]' }],
+  },
+  [ElementType.EXPIRATION_YEAR]: {
+    name: 'EXPIRATION_YEAR',
+    attributes: {
+      maxLength: 4,
+      type: 'text',
+      autocomplete: 'cc-exp-year',
+    },
+    sensitive: true,
   },
   [ElementType.CVV]: {
     name: 'CVV',
@@ -377,13 +398,20 @@ export const CARD_ENCODED_ICONS = {
 };
 
 export const EXPIRY_DATE_MASK = {
-  'MM/YYYY': ['XY/YYYY', { X: '[0-1]', Y: '[0-9]' }],
-  'MM/YY': ['XY/YY', { X: '[0-1]', Y: '[0-9]' }],
-  'YYYY/MM': ['YYYY/XY', { X: '[0-1]', Y: '[0-9]' }],
-  'YY/MM': ['YY/XY', { X: '[0-1]', Y: '[0-9]' }],
+  'MM/YYYY': ['YY/YYYY', { Y: '[0-9]' }],
+  'MM/YY': ['YY/YY', { Y: '[0-9]' }],
+  'YYYY/MM': ['YYYY/YY', { Y: '[0-9]' }],
+  'YY/MM': ['YY/YY', { Y: '[0-9]' }],
+};
+export const EXPIRY_YEAR_MASK = {
+  YYYY: ['YYYY', { Y: '[0-9]' }],
+  YY: ['YY', { Y: '[0-9]' }],
 };
 export const DEFAULT_EXPIRATION_DATE_FORMAT = 'MM/YY';
 export const ALLOWED_EXPIRY_DATE_FORMATS = [DEFAULT_EXPIRATION_DATE_FORMAT, 'YYYY/MM', 'YY/MM', 'MM/YYYY'];
+
+export const DEFAULT_EXPIRATION_YEAR_FORMAT = 'YY';
+export const ALLOWED_EXPIRY_YEAR_FORMATS = [DEFAULT_EXPIRATION_YEAR_FORMAT, 'YYYY'];
 
 export const soapReqXmlErrors = [SKYFLOW_ERROR_CODE.INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML,
   SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_SOAP_REQUEST_XML];
