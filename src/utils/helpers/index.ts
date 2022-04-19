@@ -198,12 +198,12 @@ export function updateRequestBodyInConnection(config: IConnectionConfig) {
   let tempConfig = { ...config };
   if (config && config.requestHeader && config.requestBody) {
     const headerKeys = lowercaseKeys(config.requestHeader);
-    if (headerKeys['content-type'].includes(ContentType.FORMURLENCODED)) {
+    if (headerKeys['content-type'] && headerKeys['content-type'].includes(ContentType.FORMURLENCODED)) {
       tempConfig = {
         ...tempConfig,
         requestBody: qs.stringify(config.requestBody),
       };
-    } else if (headerKeys['content-type'].includes(ContentType.FORMDATA)) {
+    } else if (headerKeys['content-type'] && headerKeys['content-type'].includes(ContentType.FORMDATA)) {
       const body = objectToFormData(config.requestBody);
       tempConfig = {
         ...tempConfig,

@@ -43,6 +43,7 @@ import {
   ValidationRuleType,
 } from '../../../utils/common';
 import { formatFrameNameToId, removeSpaces } from '../../../utils/helpers';
+import properties from '../../../properties';
 
 const set = require('set-value');
 const RegexParser = require('regex-parser');
@@ -421,6 +422,18 @@ export class IFrameFormElement extends EventEmitter {
             this._emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
               options: data.options,
             });
+          }
+        }
+      });
+
+    // for connection
+    bus
+      .target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data:any) => {
+        if (data.name === this.iFrameName) {
+          if (data.options.value !== undefined) {
+            // for setting value
+            this.setValue(<string | undefined>data.options.value);
           }
         }
       });
