@@ -1,8 +1,9 @@
-import { getAccessToken,getRevealElementValue,getCollectElementValue } from "../../src/utils/busEvents";
+import { getAccessToken,getRevealElementValue,getCollectElementValue, updateElementState } from "../../src/utils/busEvents";
 import bus from 'framebus';
 import { ELEMENT_EVENTS_TO_IFRAME } from "../../src/core/constants";
 import logs from "../../src/utils/logs";
 const on = jest.fn();
+const emit = jest.fn()
 describe("Utils/Bus Events",()=>{
     let emitSpy;
     let targetSpy;
@@ -12,6 +13,7 @@ describe("Utils/Bus Events",()=>{
       targetSpy = jest.spyOn(bus, 'target');
       targetSpy.mockReturnValue({
         on,
+        emit
       });
     });
 
@@ -96,6 +98,9 @@ describe("Utils/Bus Events",()=>{
             done();
         });
     });
-    
 
+    test.only("update Element State after invoke connection", () => {
+        updateElementState('element:CVV', '123')
+        expect(targetSpy.mock.calls[0][0]).toBeDefined()
+    })
 });

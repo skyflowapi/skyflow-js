@@ -16,7 +16,8 @@ import {
   validateInitConfigInConnections,
   validateCollectElementInput,
   validateRevealOptions,
-  validateRevealElementRecords
+  validateRevealElementRecords,
+  isValidExpiryYearFormat
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logsHelper';
 
@@ -664,3 +665,10 @@ describe("validate soap connection",()=>{
     }
   });
 });
+
+
+describe("validate expiration year formats",()=>{
+  test("isValidExpiryYearFormat", () => {
+    expect(isValidExpiryYearFormat()).toBeFalsy()
+  })
+})

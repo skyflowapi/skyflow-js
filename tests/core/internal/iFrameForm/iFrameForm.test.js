@@ -20,6 +20,19 @@ const metaData = {
 
 describe('test iframeFormelement', () => {
 
+    let emitSpy;
+    let targetSpy;
+    let on = jest.fn()
+
+    beforeEach(() => {
+        jest.clearAllMocks()
+        emitSpy = jest.spyOn(bus, 'emit');
+        targetSpy = jest.spyOn(bus, 'target');
+        targetSpy.mockReturnValue({
+            on,
+        });          
+    });
+
     test('iframeFormelement constructor', () => {
         const element = new IFrameFormElement(collect_element, {}, context)
         expect(element.state.isFocused).toBe(false)
@@ -44,6 +57,14 @@ describe('test iframeFormelement', () => {
 
         element.destroy()
         expect(element.state.value).toBe('')
+
+        const emitCb = on.mock.calls[2][1]
+        emitCb({
+            name: collect_element,
+            options: {
+                value: '123'
+            }
+        })
 
     })
 
