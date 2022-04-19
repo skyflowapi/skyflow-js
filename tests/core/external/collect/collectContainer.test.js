@@ -51,6 +51,25 @@ const cvvElement = {
   type: 'CVV',
 };
 
+const cardNumberElement = {
+  table: 'pii_fields',
+  column: 'primary_card.card_number',
+  type: 'CARD_NUMBER',
+};
+
+const ExpirationDateElement = {
+  table: 'pii_fields',
+  column: 'primary_card.expiry',
+  type: 'EXPIRATION_DATE',
+};
+
+const ExpirationYearElement = {
+  table: 'pii_fields',
+  column: 'primary_card.expiry',
+  type: 'EXPIRATION_YEAR',
+};
+
+
 const on = jest.fn();
 
 const collectResponse = {
@@ -207,6 +226,66 @@ describe('Collect container', () => {
     expect(cvv.elementType).toBe('CVV');
 
     expect(container.collect).rejects.toEqual(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED));
+  });
+
+  it('test default options for card_number', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let card_number;
+    try {
+      card_number = container.create(cardNumberElement);
+    } catch (err) {}
+
+    const options = card_number.getOptions()
+    expect(options.enableCardIcon).toBe(true);
+
+  });
+
+  it('test invalid option for EXPIRATION_DATE', () => {
+    
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let expiryElement;
+    try {
+      expiryElement = container.create(ExpirationDateElement, {format: 'invalid'});
+    } catch (err) {}
+
+    const options = expiryElement.getOptions()
+    expect(options.format).toBe("MM/YY");
+  });
+
+  it('test valid option for EXPIRATION_DATE', () => {
+    const validFormat = 'YYYY/MM'
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let expiryElement;
+    try {
+      expiryElement = container.create(ExpirationDateElement, {format: validFormat});
+    } catch (err) {}
+
+    const options = expiryElement.getOptions()
+    expect(options.format).toBe(validFormat);
+  });
+
+  it('test invalid option for EXPIRATION_YEAR', () => {
+    
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let expiryElement;
+    try {
+      expiryElement = container.create(ExpirationYearElement, {format: 'invalid'});
+    } catch (err) {}
+
+    const options = expiryElement.getOptions()
+    expect(options.format).toBe("YY");
+  });
+
+  it('test valid option for EXPIRATION_YEAR', () => {
+    const validFormat = 'YYYY'
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let expiryElement;
+    try {
+      expiryElement = container.create(ExpirationYearElement, {format: validFormat});
+    } catch (err) {}
+
+    const options = expiryElement.getOptions()
+    expect(options.format).toBe(validFormat);
   });
 
   it("container collect", () => {

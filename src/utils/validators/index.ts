@@ -1,5 +1,8 @@
 import {
-  ALLOWED_EXPIRY_DATE_FORMATS, CardType, CARD_TYPE_REGEX, DEFAULT_CARD_LENGTH_RANGE,
+  ALLOWED_EXPIRY_DATE_FORMATS,
+  ALLOWED_EXPIRY_YEAR_FORMATS,
+  CardType, CARD_TYPE_REGEX,
+  DEFAULT_CARD_LENGTH_RANGE,
 } from '../../core/constants';
 import { CollectElementInput } from '../../core/external/collect/CollectContainer';
 import { IRevealElementInput, IRevealElementOptions } from '../../core/external/reveal/RevealContainer';
@@ -69,12 +72,43 @@ export const validateExpiryDate = (date: string, format:string) => {
   const expiryDate = new Date(`${year}-${month}-01`);
   const today = new Date();
 
-  return expiryDate > today;
+  const maxDate = new Date();
+  maxDate.setFullYear(today.getFullYear() + 50);
+
+  return expiryDate > today && expiryDate <= maxDate;
+};
+
+export const validateExpiryYear = (year: string, format:string) => {
+  if (year.trim().length === 0) return true;
+  let expiryYear = Number(year);
+  if (format === 'YY') {
+    expiryYear = 2000 + Number(year);
+  }
+  const currentYear = new Date().getFullYear();
+  const maxYear = currentYear + 50;
+
+  return expiryYear >= currentYear && expiryYear <= maxYear;
+};
+
+export const validateExpiryMonth = (month: string) => {
+  if (month.trim().length === 0) return true;
+  const tempMonth = Number(month);
+  if (tempMonth > 0 && tempMonth <= 12) {
+    return true;
+  }
+  return false;
 };
 
 export const isValidExpiryDateFormat = (format:string):boolean => {
   if (format) {
     return ALLOWED_EXPIRY_DATE_FORMATS.includes(format);
+  }
+  return false;
+};
+
+export const isValidExpiryYearFormat = (format:string):boolean => {
+  if (format) {
+    return ALLOWED_EXPIRY_YEAR_FORMATS.includes(format);
   }
   return false;
 };
