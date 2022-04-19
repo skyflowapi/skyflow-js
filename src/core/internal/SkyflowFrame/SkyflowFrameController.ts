@@ -14,7 +14,7 @@ import {
   extractSkyflowTagsFromResponseBody,
   soapResponseBodyParser,
 } from '../../../libs/objectParse';
-import { getAccessToken } from '../../../utils/busEvents';
+import { getAccessToken, updateElementState } from '../../../utils/busEvents';
 import {
   clearEmpties,
   deletePropertyPath,
@@ -279,6 +279,7 @@ class SkyflowFrameController {
                   const frameName = value as string;
                   if (frameName.startsWith(`${FRAME_ELEMENT}:`)) {
                     const elementId = formatFrameNameToId(frameName);
+                    updateElementState(elementId, responseValue);
                     const collectInputElement = elementIFrame
                       .document.getElementById(elementId) as HTMLInputElement;
                     if (collectInputElement) {

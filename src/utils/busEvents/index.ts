@@ -1,6 +1,7 @@
 import bus from 'framebus';
 import { applyFormatRegex, fetchRecordsByTokenId, formatRecordsForIframe } from '../../core-utils/reveal';
-import { ELEMENT_EVENTS_TO_IFRAME } from '../../core/constants';
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT } from '../../core/constants';
+import properties from '../../properties';
 import { formatFrameNameToId } from '../helpers';
 import logs from '../logs';
 import { validateInitConfigInConnections } from '../validators';
@@ -74,4 +75,16 @@ export function getAccessToken(clientId) {
         resolve(data.authToken);
       });
   });
+}
+
+export function updateElementState(frameName: string, value: any) {
+  if (frameName.startsWith(`${FRAME_ELEMENT}:`)) {
+    bus.target(properties.IFRAME_SECURE_ORGIN).emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+      name: frameName,
+      options: {
+        value,
+      },
+      isSingleElementAPI: true,
+    });
+  }
 }

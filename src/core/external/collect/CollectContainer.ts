@@ -15,7 +15,7 @@ import { validateCollectElementInput, validateInitConfig, validateAdditionalFiel
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  DEFAULT_EXPIRATION_DATE_FORMAT, ELEMENTS, FRAME_ELEMENT,
+  ELEMENTS, FRAME_ELEMENT,
 } from '../../constants';
 import Container from '../common/Container';
 import CollectElement from './CollectElement';
@@ -91,8 +91,6 @@ class CollectContainer extends Container {
 
   create = (input: CollectElementInput, options: any = {
     required: false,
-    enableCardIcon: true,
-    format: DEFAULT_EXPIRATION_DATE_FORMAT,
   }) => {
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input);

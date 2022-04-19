@@ -20,6 +20,19 @@ const metaData = {
 
 describe('test iframeFormelement', () => {
 
+    let emitSpy;
+    let targetSpy;
+    let on = jest.fn()
+
+    beforeEach(() => {
+        jest.clearAllMocks()
+        emitSpy = jest.spyOn(bus, 'emit');
+        targetSpy = jest.spyOn(bus, 'target');
+        targetSpy.mockReturnValue({
+            on,
+        });          
+    });
+
     test('iframeFormelement constructor', () => {
         const element = new IFrameFormElement(collect_element, {}, context)
         expect(element.state.isFocused).toBe(false)
@@ -45,20 +58,84 @@ describe('test iframeFormelement', () => {
         element.destroy()
         expect(element.state.value).toBe('')
 
+        const emitCb = on.mock.calls[2][1]
+        emitCb({
+            name: collect_element,
+            options: {
+                value: '123'
+            }
+        })
+
     })
 
-    test('test validations', ()=> {
+    test('test setValue for expiration_month', () => {
+        const element = new IFrameFormElement(`element:EXPIRATION_MONTH:${tableCol}`, {}, context)
+        element.setValue('2')
+        expect(element.state.value).toBe('02')
+
+        element.setValue('1')
+        expect(element.state.value).toBe('1')
+    })
+
+    test('test setValue for expiration_date', () => {
+        const element = new IFrameFormElement(`element:EXPIRATION_DATE:${tableCol}`, {}, context)
+        element.setFormat('MM/YY')
+        element.setValue('2')
+        expect(element.state.value).toBe('02')
+
+        element.setValue('1')
+        expect(element.state.value).toBe('1')
+
+        element.setFormat('YYYY/MM')
+        element.setValue('2070/2')
+        expect(element.state.value).toBe('2070/02')
+
+        element.setValue('2070/1')
+        expect(element.state.value).toBe('2070/1')
+
+        element.setFormat('YY/MM')
+        element.setValue('70/2')
+        expect(element.state.value).toBe('70/02')
+
+        element.setValue('70/1')
+        expect(element.state.value).toBe('70/1')
+
+    })
+
+    test('test card_number validations', ()=> {
         const element = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
         element.setValidation()
-        let invalid = element.validator('411')
-        let valid = element.validator('4111111111111111')
+        const invalid = element.validator('411')
+        const valid = element.validator('4111111111111111')
         expect(invalid).toBe(false)
         expect(valid).toBe(true)
+    })
 
+    test('expiration_date validations', () => {
         const element2 = new IFrameFormElement(`element:EXPIRATION_DATE:${tableCol}`, {}, context)
         element2.setValidation()
-        invalid = element2.validator('12')
-        valid = element2.validator('12/2222')
+        element2.setFormat('MM/YYYY')
+        const invalid = element2.validator('12')
+        const valid = element2.validator('12/2070')
+        expect(invalid).toBe(false)
+        expect(valid).toBe(true)
+    })
+
+    test('expiration_month validations', () => {
+        const element2 = new IFrameFormElement(`element:EXPIRATION_MONTH:${tableCol}`, {}, context)
+        element2.setValidation()
+        const invalid = element2.validator('14')
+        const valid = element2.validator('12')
+        expect(invalid).toBe(false)
+        expect(valid).toBe(true)
+    })
+
+    test('expiration_year validations', () => {
+        const element2 = new IFrameFormElement(`element:EXPIRATION_YEAR:${tableCol}`, {}, context)
+        element2.setValidation()
+        element2.setFormat('YY')
+        const invalid = element2.validator('14')
+        const valid = element2.validator('52')
         expect(invalid).toBe(false)
         expect(valid).toBe(true)
     })

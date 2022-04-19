@@ -9,7 +9,6 @@ import {
   COLLECT_FRAME_CONTROLLER,
   ElementType,
   FRAME_ELEMENT,
-  DEFAULT_EXPIRATION_DATE_FORMAT,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -17,6 +16,8 @@ import {
   validateCardNumberLengthCheck,
   validateCreditCardNumber,
   validateExpiryDate,
+  validateExpiryMonth,
+  validateExpiryYear,
 } from '../../../utils/validators';
 import {
   checkForElementMatchRule,
@@ -42,6 +43,7 @@ import {
   ValidationRuleType,
 } from '../../../utils/common';
 import { formatFrameNameToId, removeSpaces } from '../../../utils/helpers';
+import properties from '../../../properties';
 
 const set = require('set-value');
 const RegexParser = require('regex-parser');
@@ -87,7 +89,7 @@ export class IFrameFormElement extends EventEmitter {
 
   clientErrorText:string | undefined = undefined;
 
-  expirationDateFormat:string = DEFAULT_EXPIRATION_DATE_FORMAT;
+  format:string = '';
 
   constructor(name: string, label:string, metaData, context: Context) {
     super();
@@ -181,8 +183,8 @@ export class IFrameFormElement extends EventEmitter {
     }
   }
 
-  setExpirationDateFormat(format:string) {
-    this.expirationDateFormat = format;
+  setFormat(format:string) {
+    this.format = format;
   }
 
   setSensitive(sensitive: boolean = this.sensitive) {
@@ -201,6 +203,34 @@ export class IFrameFormElement extends EventEmitter {
         this.state.value = '';
       } else {
         this.state.value = value;
+      }
+    } else if (this.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
+      if (value.length === 1 && Number(value) >= 2) {
+        this.state.value = `0${value}`;
+      } else {
+        this.state.value = value;
+      }
+    } else if (this.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
+      if (this.format.startsWith('MM')) {
+        if (value.length === 1 && Number(value) >= 2) {
+          this.state.value = `0${value}`;
+        } else {
+          this.state.value = value;
+        }
+      } else if (this.format.startsWith('YYYY')) {
+        const lastChar = (value.length > 0 && value.charAt(value.length - 1)) || '';
+        if (value.length === 6 && Number(lastChar) >= 2) {
+          this.state.value = `${value.substring(0, 5)}0${lastChar}`;
+        } else {
+          this.state.value = value;
+        }
+      } else if (this.format.startsWith('YY')) {
+        const lastChar = (value.length > 0 && value.charAt(value.length - 1)) || '';
+        if (value.length === 4 && Number(lastChar) >= 2) {
+          this.state.value = `${value.substring(0, 3)}0${lastChar}`;
+        } else {
+          this.state.value = value;
+        }
       }
     } else {
       this.state.value = value;
@@ -221,7 +251,7 @@ export class IFrameFormElement extends EventEmitter {
       this.state.isEmpty = true;
     }
 
-    if (valid && !this.doesClientHasError && this.validator(this.state.value)) {
+    if (valid && !this.doesClientHasError && this.validator(this.state.value || '')) {
       this.state.isValid = true;
       this.state.isComplete = true;
     } else {
@@ -275,7 +305,11 @@ export class IFrameFormElement extends EventEmitter {
         && validateCardNumberLengthCheck(value);
       }
     } else if (this.fieldType === ElementType.EXPIRATION_DATE) {
-      resp = validateExpiryDate(value, this.expirationDateFormat);
+      resp = validateExpiryDate(value, this.format);
+    } else if (this.fieldType === ElementType.EXPIRATION_MONTH) {
+      resp = validateExpiryMonth(value);
+    } else if (this.fieldType === ElementType.EXPIRATION_YEAR) {
+      resp = validateExpiryYear(value, this.format);
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex) {
@@ -388,6 +422,18 @@ export class IFrameFormElement extends EventEmitter {
             this._emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
               options: data.options,
             });
+          }
+        }
+      });
+
+    // for connection
+    bus
+      .target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data:any) => {
+        if (data.name === this.iFrameName) {
+          if (data.options.value !== undefined) {
+            // for setting value
+            this.setValue(<string | undefined>data.options.value);
           }
         }
       });

@@ -49,6 +49,14 @@ const errorTextStyles = {
   },
 };
 
+const state = {
+  value: '12',
+  isFocused: false,
+  isValid: true,
+  isEmpty: true,
+  isComplete: false,
+};
+
 describe('test frame controller', () => {
   let emitSpy;
   // let onSpy;
@@ -96,13 +104,7 @@ describe('test frame controller', () => {
     const blurCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
 
-    const state = {
-      value: '123',
-      isFocused: false,
-      isValid: true,
-      isEmpty: true,
-      isComplete: false,
-    };
+    
     blurCb[0][1](state);
 
     blurCb[0][1]({
@@ -129,4 +131,48 @@ describe('test frame controller', () => {
 
     element.setupInputField();
   });
+
+  test('expiration_month FrameElement', () => {
+
+    const month_element = `element:EXPIRATION_MONTH:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(month_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+  })
+
+  test('expiration_date FrameElement', () => {
+
+    const date_element = `element:EXPIRATION_DATE:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(date_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+  })
 });
