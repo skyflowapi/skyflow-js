@@ -8,6 +8,7 @@ import maestroIcon from '../../assets/maestro.svg';
 import maseterCardIcon from '../../assets/mastercard.svg';
 import unionPayIcon from '../../assets/unionpay.svg';
 import visaCardIcon from '../../assets/visa.svg';
+import unknownIcon from '../../assets/unkown.svg';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
@@ -92,6 +93,7 @@ export enum CardType {
   UNIONPAY = 'UNIONPAY',
   HIPERCARD = 'HIPERCARD',
   DEFAULT = 'DEFAULT',
+  UNKNOWN = 'UNKNOWN'
 }
 
 export const CARD_NUMBER_MASK = {
@@ -105,6 +107,7 @@ export const CARD_NUMBER_MASK = {
   [CardType.UNIONPAY]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
   [CardType.HIPERCARD]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
   [CardType.DEFAULT]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
+  [CardType.UNKNOWN]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
 };
 
 export const ELEMENTS = {
@@ -395,6 +398,7 @@ export const CARD_ENCODED_ICONS = {
   [CardType.MASTERCARD]: maseterCardIcon,
   [CardType.UNIONPAY]: unionPayIcon,
   [CardType.VISA]: visaCardIcon,
+  [CardType.UNKNOWN]: unknownIcon
 };
 
 export const EXPIRY_DATE_MASK = {

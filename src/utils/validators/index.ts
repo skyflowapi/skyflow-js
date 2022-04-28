@@ -45,13 +45,16 @@ export const validateCreditCardNumber = (cardNumber: string) => {
 
 export const detectCardType = (cardNumber: string) => {
   const value = cardNumber.replace(/[\s-]/g, '');
-  let detectedType = CardType.DEFAULT;
+  let detectedType = CardType.UNKNOWN;
   Object.entries(CARD_TYPE_REGEX).forEach(([key, type]) => {
-    if (type.regex.test(value)) {
+    if(value === ''){
+      detectedType = CardType.DEFAULT
+    }
+    else if (type.regex.test(value)) {
       detectedType = key as CardType;
     }
   });
-  return detectedType;
+    return detectedType;
 };
 
 const getYearAndMonthBasedOnFormat = (cardDate, format:string) => {
