@@ -228,6 +228,7 @@ const logs = {
     UNABLE_TO_CLEAR_VALUE_IN_PROD_ENV: '%s1 clearValue() cannot invoked while in PROD env. It is Not Recommeded',
     COLLECT_ALT_TEXT_DEPERECATED: 'altText is DEPERECATED, passing altText will not have any effect',
     NO_MATCH_FOUND_FOR_FORMAT_REGEX: 'No matches found for the given formatRegex %s1',
+    DEPRECATE_INVOKE_CONNECTION: 'This method is deprecated and support for it will be removed soon. Please use any of the server-side SDK to invoke a connection',
   },
 };
 
