@@ -2,7 +2,7 @@
   "name": "skyflow-js",
   "preferGlobal": true,
   "analyze": false,
-  "version": "1.14.0-dev.288342a",
+  "version": "1.14.0-dev.ec73df5",
   "author": "Skyflow",
   "description": "Skyflow JavaScript SDK",
   "homepage": "https://github.com/skyflowapi/skyflow-js",
@@ -86,4 +86,3 @@
     "webpack-merge": "^5.8.0"
   }
 }
-
