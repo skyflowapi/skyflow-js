@@ -191,7 +191,14 @@ class Skyflow {
     return this.#skyflowContainer.getById(getByIdInput);
   }
 
+  /**
+ * 1. Invoke Connection method
+ *
+ * @deprecated [#1]
+
+ */
   invokeConnection(config: IConnectionConfig) {
+    printLog(logs.warnLogs.DEPRECATE_INVOKE_CONNECTION, MessageType.WARN, this.#logLevel);
     printLog(parameterizedString(logs.infoLogs.INVOKE_CONNECTION_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
 
