@@ -75,7 +75,7 @@ describe('Detect Card Type',()=>{
     expect(detectCardType("")).toBe(CardType.DEFAULT);
   });
   test("Default type for invalid String",()=>{
-    expect(detectCardType("not_a_card_number")).toBe(CardType.DEFAULT);
+    expect(detectCardType("not_a_card_number")).toBe(CardType.UNKNOWN);
   });
   test("Detects Visa Card Type",()=>{
     expect(detectCardType("4111")).toBe(CardType.VISA);
@@ -103,6 +103,9 @@ describe('Detect Card Type',()=>{
   });
   test("Detects Union Pay Card Type",()=>{
     expect(detectCardType("6221260062379699")).toBe(CardType.UNIONPAY);
+  });
+  test("Detects Unknown Pay Card Type",()=>{
+    expect(detectCardType("5066991111111118")).toBe(CardType.UNKNOWN);
   });
 });
 
