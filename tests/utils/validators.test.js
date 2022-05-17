@@ -75,7 +75,7 @@ describe('Detect Card Type',()=>{
     expect(detectCardType("")).toBe(CardType.DEFAULT);
   });
   test("Default type for invalid String",()=>{
-    expect(detectCardType("not_a_card_number")).toBe(CardType.UNKNOWN);
+    expect(detectCardType("not_a_card_number")).toBe(CardType.DEFAULT);
   });
   test("Detects Visa Card Type",()=>{
     expect(detectCardType("4111")).toBe(CardType.VISA);
@@ -105,7 +105,10 @@ describe('Detect Card Type',()=>{
     expect(detectCardType("6221260062379699")).toBe(CardType.UNIONPAY);
   });
   test("Detects Unknown Pay Card Type",()=>{
-    expect(detectCardType("5066991111111118")).toBe(CardType.UNKNOWN);
+    expect(detectCardType("5066991111111118")).toBe(CardType.DEFAULT);
+  });
+  test("Detects Unknown Pay Card Type",()=>{
+    expect(detectCardType("5067215824168408")).toBe(CardType.DEFAULT);
   });
 });
 
@@ -418,6 +421,14 @@ describe('validate skyflow init in connections', () => {
       validateInitConfigInConnections({vaultID: '123'})
     }catch(err){
       expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.VAULTURL_IS_REQUIRED.description)
+    }
+  })
+
+  test('empty vaultURL', () => {
+    try{
+      validateInitConfigInConnections({vaultID: '123',vaultURL: null})
+    }catch(err){
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT.description)
     }
   })
 

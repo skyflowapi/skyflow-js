@@ -8,7 +8,6 @@ import maestroIcon from '../../assets/maestro.svg';
 import maseterCardIcon from '../../assets/mastercard.svg';
 import unionPayIcon from '../../assets/unionpay.svg';
 import visaCardIcon from '../../assets/visa.svg';
-import unknownIcon from '../../assets/unkown.svg';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
@@ -258,7 +257,7 @@ export const INPUT_WITH_ICON_DEFAULT_STYLES = {
   padding: '4px',
 };
 
-export const INPUT_ICON_STYLES = 'position: absolute; left:8px; top:calc(50% - 10px)';
+export const INPUT_ICON_STYLES = 'position: absolute; left:8px; top:calc(50% - 12px)';
 
 export const ERROR_TEXT_STYLES = {
   color: '#f44336',
@@ -398,7 +397,6 @@ export const CARD_ENCODED_ICONS = {
   [CardType.MASTERCARD]: maseterCardIcon,
   [CardType.UNIONPAY]: unionPayIcon,
   [CardType.VISA]: visaCardIcon,
-  [CardType.UNKNOWN]: unknownIcon,
 };
 
 export const EXPIRY_DATE_MASK = {
