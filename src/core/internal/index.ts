@@ -157,6 +157,11 @@ export class FrameElement {
       this.focusChange(true);
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
+        if (state.value.length === 1 && Number(state.value) < 10) {
+          this.iFrameFormElement.setValue(`0${state.value}`);
+        }
+      }
       this.focusChange(false);
       if (state.error && this.domError) {
         this.domError.innerText = state.error;

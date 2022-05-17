@@ -205,11 +205,7 @@ export class IFrameFormElement extends EventEmitter {
         this.state.value = value;
       }
     } else if (this.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
-      if (value.length === 1 && Number(value) >= 2) {
-        this.state.value = `0${value}`;
-      } else {
-        this.state.value = value;
-      }
+      this.state.value = value;
     } else if (this.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
       if (this.format.startsWith('MM')) {
         if (value.length === 1 && Number(value) >= 2) {
