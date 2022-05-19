@@ -73,8 +73,8 @@ describe('test iframeFormelement', () => {
         element.setValue('2')
         expect(element.state.value).toBe('02')
 
-        element.setValue('1')
-        expect(element.state.value).toBe('1')
+        element.setValue('12')
+        expect(element.state.value).toBe('12')
     })
 
     test('test setValue for expiration_date', () => {

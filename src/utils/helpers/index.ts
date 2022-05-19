@@ -213,3 +213,10 @@ export function updateRequestBodyInConnection(config: IConnectionConfig) {
   }
   return tempConfig;
 }
+
+export const appendZeroToOne = (value) => {
+  if (value.length === 1 && Number(value) === 1) {
+    return `0${value}`;
+  }
+  return value;
+};
