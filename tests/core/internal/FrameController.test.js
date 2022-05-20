@@ -1,10 +1,21 @@
 import bus from 'framebus';
 import 'jquery-mask-plugin/dist/jquery.mask.min';
-import { IFrameFormElement } from '../../../src/core/internal/iFrameForm';
-import { FrameController, FrameElement } from '../../../src/core/internal/index';
-import { Env, LogLevel } from '../../../src/utils/common';
+import {
+  IFrameFormElement
+} from '../../../src/core/internal/iFrameForm';
+import {
+  FrameController,
+  FrameElement
+} from '../../../src/core/internal/index';
+import {
+  Env,
+  LogLevel
+} from '../../../src/utils/common';
 import EventEmitter from '../../../src/event-emitter';
-import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../../src/core/constants';
+import {
+  ELEMENT_EVENTS_TO_CLIENT,
+  ELEMENT_EVENTS_TO_IFRAME
+} from '../../../src/core/constants';
 
 jest.mock('../../../src/event-emitter');
 
@@ -50,7 +61,7 @@ const errorTextStyles = {
 };
 
 const state = {
-  value: '12',
+  value: '1',
   isFocused: false,
   isValid: true,
   isEmpty: true,
@@ -65,7 +76,9 @@ describe('test frame controller', () => {
     emitSpy = jest.spyOn(bus, 'emit');
     // onSpy = jest.spyOn(bus, 'on');
 
-    Object.defineProperty(document, 'referrer', { value: '' });
+    Object.defineProperty(document, 'referrer', {
+      value: ''
+    });
   });
 
   test('FrameController constructor', () => {
@@ -104,7 +117,7 @@ describe('test frame controller', () => {
     const blurCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
 
-    
+
     blurCb[0][1](state);
 
     blurCb[0][1]({
@@ -152,6 +165,19 @@ describe('test frame controller', () => {
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
 
     changeCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: false,
+    });
+
   })
 
   test('expiration_date FrameElement', () => {
