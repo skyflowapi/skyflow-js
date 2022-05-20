@@ -28,6 +28,7 @@ import { parameterizedString, printLog } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
+import { appendZeroToOne } from '../../utils/helpers';
 
 export class FrameController {
   controller?: FrameController;
@@ -157,6 +158,9 @@ export class FrameElement {
       this.focusChange(true);
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
+        this.iFrameFormElement.setValue(appendZeroToOne(state.value));
+      }
       this.focusChange(false);
       if (state.error && this.domError) {
         this.domError.innerText = state.error;
