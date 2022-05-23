@@ -161,10 +161,16 @@ describe('test frame controller', () => {
     const inst = EventEmitter.mock.instances[0];
     const onSpy = inst.on.mock.calls;
 
+    formElement.setValue("2")
+
     const changeCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
 
     changeCb[0][1](state);
+
+    expect(formElement.getValue()).toBe('02')
+
+    formElement.setValue("1")
 
     const blurCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
@@ -172,11 +178,8 @@ describe('test frame controller', () => {
 
     blurCb[0][1](state);
 
-    blurCb[0][1]({
-      ...state,
-      isValid: false,
-      isEmpty: false,
-    });
+    expect(formElement.getValue()).toBe('01')
+
 
   })
 
