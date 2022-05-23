@@ -17,7 +17,8 @@ import {
   validateCollectElementInput,
   validateRevealOptions,
   validateRevealElementRecords,
-  isValidExpiryYearFormat
+  isValidExpiryYearFormat,
+  validateCardNumberLengthCheck
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logsHelper';
 
@@ -684,5 +685,12 @@ describe("validate soap connection",()=>{
 describe("validate expiration year formats",()=>{
   test("isValidExpiryYearFormat", () => {
     expect(isValidExpiryYearFormat()).toBeFalsy()
+  })
+})
+
+describe("validate card number length check",()=>{
+  test("isValidCardNumber", () => {
+    expect(validateCardNumberLengthCheck('5105105105105100')).toBeTruthy();
+    expect(validateCardNumberLengthCheck('510510')).toBeFalsy();
   })
 })

@@ -1,6 +1,6 @@
 import { FORMAT_REGEX, soapResXmlErrors } from '../../src/core/constants';
 import SKYFLOW_ERROR_CODE from '../../src/utils/constants';
-import { replaceIdInResponseXml } from '../../src/utils/helpers/index';
+import { replaceIdInResponseXml , appendZeroToOne } from '../../src/utils/helpers/index';
 import { parameterizedString } from '../../src/utils/logsHelper';
 const xml = '<response><Skyflow>123</Skyflow></response><response2><Skyflow>456</Skyflow></response2>'
 
@@ -43,6 +43,12 @@ describe('replace Id In ResponseXml',() => {
           } catch(err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_SOAP_RESPONSE_XML.description, 123))
           }
+    })
+
+    test('append zero for number one on blur event', () => {
+        expect(appendZeroToOne('1')).toBe('01')
+        expect(appendZeroToOne('2')).toBe('2')
+        expect(appendZeroToOne('11')).toBe('11')
     })
 
 })
