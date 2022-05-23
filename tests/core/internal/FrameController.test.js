@@ -158,7 +158,7 @@ describe('test frame controller', () => {
       errorTextStyles,
     }, div);
 
-    const inst = EventEmitter.mock.instances[0];
+    const inst = EventEmitter.mock.instances[1];
     const onSpy = inst.on.mock.calls;
 
     formElement.setValue("2")
