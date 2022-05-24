@@ -17,7 +17,8 @@ import {
   validateCollectElementInput,
   validateRevealOptions,
   validateRevealElementRecords,
-  isValidExpiryYearFormat
+  isValidExpiryYearFormat,
+  validateCardNumberLengthCheck
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logsHelper';
 
@@ -75,7 +76,7 @@ describe('Detect Card Type',()=>{
     expect(detectCardType("")).toBe(CardType.DEFAULT);
   });
   test("Default type for invalid String",()=>{
-    expect(detectCardType("not_a_card_number")).toBe(CardType.UNKNOWN);
+    expect(detectCardType("not_a_card_number")).toBe(CardType.DEFAULT);
   });
   test("Detects Visa Card Type",()=>{
     expect(detectCardType("4111")).toBe(CardType.VISA);
@@ -105,7 +106,10 @@ describe('Detect Card Type',()=>{
     expect(detectCardType("6221260062379699")).toBe(CardType.UNIONPAY);
   });
   test("Detects Unknown Pay Card Type",()=>{
-    expect(detectCardType("5066991111111118")).toBe(CardType.UNKNOWN);
+    expect(detectCardType("5066991111111118")).toBe(CardType.DEFAULT);
+  });
+  test("Detects Unknown Pay Card Type",()=>{
+    expect(detectCardType("5067215824168408")).toBe(CardType.DEFAULT);
   });
 });
 
@@ -421,6 +425,14 @@ describe('validate skyflow init in connections', () => {
     }
   })
 
+  test('empty vaultURL', () => {
+    try{
+      validateInitConfigInConnections({vaultID: '123',vaultURL: null})
+    }catch(err){
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT.description)
+    }
+  })
+
   test('invalid vaultURL', () => {
     try{
       validateInitConfigInConnections({vaultID: '123', vaultURL: 'url'})
@@ -673,5 +685,12 @@ describe("validate soap connection",()=>{
 describe("validate expiration year formats",()=>{
   test("isValidExpiryYearFormat", () => {
     expect(isValidExpiryYearFormat()).toBeFalsy()
+  })
+})
+
+describe("validate card number length check",()=>{
+  test("isValidCardNumber", () => {
+    expect(validateCardNumberLengthCheck('5105105105105100')).toBeTruthy();
+    expect(validateCardNumberLengthCheck('510510')).toBeFalsy();
   })
 })
