@@ -56,6 +56,8 @@ describe('replace Id In ResponseXml',() => {
 describe('bin data for card number element type on CHANGE event',()=>{
     test("in PROD return bin data only for card number element",()=>{
         expect(getReturnValue("4111 1111 1111 1111",ElementType.CARD_NUMBER,false)).toBe("4111 1111 XXXXXXXXX")
+        expect(getReturnValue("4111 1111 ",ElementType.CARD_NUMBER,false)).toBe("4111 1111 ")
+        
         expect(getReturnValue("123",ElementType.CVV,false)).toBe(undefined)
         expect(getReturnValue("name",ElementType.CARDHOLDER_NAME,false)).toBe(undefined)
         expect(getReturnValue("02",ElementType.EXPIRATION_MONTH,false)).toBe(undefined)
