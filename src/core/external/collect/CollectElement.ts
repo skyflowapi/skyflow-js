@@ -19,7 +19,7 @@ import SkyflowError from '../../../libs/SkyflowError';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { Context, Env, MessageType } from '../../../utils/common';
-import { formatFrameNameToId } from '../../../utils/helpers';
+import { formatFrameNameToId, getReturnValue } from '../../../utils/helpers';
 import SkyflowElement from '../common/SkyflowElement';
 
 const CLASS_NAME = 'Element';
@@ -225,7 +225,8 @@ class CollectElement extends SkyflowElement {
         this.#state.isFocused = elementState.isFocused;
         this.#state.value = {};
         const key = this.#elements[index].elementName;
-        const value = this.#doesReturnValue ? elementState.value : undefined;
+        const value = getReturnValue(elementState.value, elementState.elementType,
+          this.#doesReturnValue);
         if (this.#isSingleElementAPI) {
           this.#state.value = value;
         } else this.#state.value[key] = value;
