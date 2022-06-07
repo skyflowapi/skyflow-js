@@ -1,5 +1,5 @@
 import {
-  ContentType, FORMAT_REGEX, FRAME_REVEAL, REPLACE_TEXT,
+  ContentType, ElementType, FORMAT_REGEX, FRAME_REVEAL, REPLACE_TEXT,
 } from '../../core/constants';
 import SkyflowElement from '../../core/external/common/SkyflowElement';
 import SkyflowError from '../../libs/SkyflowError';
@@ -219,4 +219,19 @@ export const appendZeroToOne = (value) => {
     return `0${value}`;
   }
   return value;
+};
+
+export const getReturnValue = (value: string, element: string, doesReturnValue: boolean) => {
+  if (doesReturnValue) {
+    return value;
+  } if (element === ElementType.CARD_NUMBER
+    && !doesReturnValue) {
+    const threshold = 10;
+    if (value.length >= threshold) {
+      return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
+    }
+    return value;
+  }
+
+  return undefined;
 };

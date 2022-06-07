@@ -42,7 +42,7 @@ import {
   MessageType,
   ValidationRuleType,
 } from '../../../utils/common';
-import { formatFrameNameToId, removeSpaces } from '../../../utils/helpers';
+import { formatFrameNameToId, getReturnValue, removeSpaces } from '../../../utils/helpers';
 import properties from '../../../properties';
 
 const set = require('set-value');
@@ -293,7 +293,10 @@ export class IFrameFormElement extends EventEmitter {
     isValid: this.state.isValid && !this.doesClientHasError,
     isEmpty: this.state.isEmpty,
     isComplete: this.state.isComplete,
-    value: EnvOptions[this.context?.env]?.doesReturnValue ? this.state.value : undefined,
+    // Card Number should return 8 digit bin data
+    value: this.state.value
+      && getReturnValue(this.state.value, this.fieldType,
+        EnvOptions[this.context?.env]?.doesReturnValue),
   });
 
   validator(value: string) {
