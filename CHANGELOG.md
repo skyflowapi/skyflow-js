@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.16.0] - 2022-06-07
+
+### Changed
+- Return BIN value for Card Number Collect Elements in PROD env
+
 ## [1.15.0] - 2022-05-24
 
 
