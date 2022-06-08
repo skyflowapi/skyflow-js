@@ -224,7 +224,7 @@ export const appendZeroToOne = (value) => {
 };
 
 export const getReturnValue = (value: string, element: string, doesReturnValue: boolean) => {
-  value = value.replace(/\s/g, '');
+  value = value && value.replace(/\s/g, '');
   if (doesReturnValue) {
     return value;
   } if (element === ElementType.CARD_NUMBER
