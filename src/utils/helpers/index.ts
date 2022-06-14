@@ -1,9 +1,11 @@
 import {
+  CardType,
   ContentType, ElementType, FORMAT_REGEX, FRAME_REVEAL, REPLACE_TEXT,
 } from '../../core/constants';
 import SkyflowElement from '../../core/external/common/SkyflowElement';
 import SkyflowError from '../../libs/SkyflowError';
 import { IConnectionConfig } from '../common';
+import { detectCardType } from '../validators';
 
 const qs = require('qs');
 
@@ -222,12 +224,14 @@ export const appendZeroToOne = (value) => {
 };
 
 export const getReturnValue = (value: string, element: string, doesReturnValue: boolean) => {
+  value = value && value.replace(/\s/g, '');
   if (doesReturnValue) {
     return value;
   } if (element === ElementType.CARD_NUMBER
     && !doesReturnValue) {
-    const threshold = 10;
-    if (value.length >= threshold) {
+    const cardType = detectCardType(value);
+    const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
+    if (value.length > threshold) {
       return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
     }
     return value;

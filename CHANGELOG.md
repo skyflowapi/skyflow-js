@@ -2,10 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.17.0] - 2022-06-14
+
+### Changed
+- Return 6 digit BIN value for AMEX Card Number Collect Element
 ## [1.16.0] - 2022-06-07
 
 ### Changed
-- Return BIN value for Card Number Collect Elements in PROD env
+- Return 8 digit BIN value for Card Number Collect Elements 
 
 ## [1.15.0] - 2022-05-24
 
