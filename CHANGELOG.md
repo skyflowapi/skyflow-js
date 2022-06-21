@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.17.0] - 2022-06-14
+## [1.17.0] - 2022-06-21
+
+### Changed
+- Updated AMEX card icon
+## [1.16.1] - 2022-06-14
 
 ### Changed
 - Return 6 digit BIN value for AMEX Card Number Collect Element
