@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import bus from 'framebus';
 import RevealFrameController from '../../../../src/core/internal/reveal/RevealFrameController';
 import clientModule from '../../../../src/client';

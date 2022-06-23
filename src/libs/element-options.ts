@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import {
   ALLOWED_EXPIRY_DATE_FORMATS,
   ALLOWED_EXPIRY_YEAR_FORMATS,

@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import {
   IFRAME_DEFAULT_STYLES,
 } from '../core/constants';

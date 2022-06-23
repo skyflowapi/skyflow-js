@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 export enum RedactionType {
   DEFAULT = 'DEFAULT',
   PLAIN_TEXT = 'PLAIN_TEXT',

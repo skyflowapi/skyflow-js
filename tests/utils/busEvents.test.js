@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import { getAccessToken,getRevealElementValue,getCollectElementValue, updateElementState } from "../../src/utils/busEvents";
 import bus from 'framebus';
 import { ELEMENT_EVENTS_TO_IFRAME } from "../../src/core/constants";

@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import bus from 'framebus';
 import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME } from '../../../../src/core/constants';
 import { Env, LogLevel, ValidationRuleType } from '../../../../src/utils/common';

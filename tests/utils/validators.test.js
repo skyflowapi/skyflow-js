@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import { CardType } from '../../src/core/constants';
 import SKYFLOW_ERROR_CODE from '../../src/utils/constants';
 import {

@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import { ContentType } from '../core/constants';
 import SkyflowError from '../libs/SkyflowError';
 import { ISkyflow } from '../Skyflow';
