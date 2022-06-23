@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import defaultCardIcon from '../../assets/default.svg';
 import amexIcon from '../../assets/amex.svg';
 import dinnersClubIcon from '../../assets/diners-club.svg';

@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 const logs = {
   infoLogs: {
     INITIALIZE_CLIENT: '%s1 - Initializing skyflow client.',

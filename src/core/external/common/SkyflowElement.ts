@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 abstract class SkyflowElement {
   abstract mount(domElementSelector);
 

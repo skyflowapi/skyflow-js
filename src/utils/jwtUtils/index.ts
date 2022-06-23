@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import jwt_decode, { JwtPayload } from 'jwt-decode';
 
 const isString = (x) => Object.prototype.toString.call(x) === '[object String]';

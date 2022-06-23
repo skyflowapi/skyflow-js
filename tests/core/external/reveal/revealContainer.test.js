@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import RevealContainer from "../../../../src/core/external/reveal/RevealContainer";
 import { ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER } from "../../../../src/core/constants";
 import bus from "framebus";

@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import bus from 'framebus';
 import 'jquery-mask-plugin/dist/jquery.mask.min';
 import {

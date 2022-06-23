@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 // todo: implement bus to save event id/functions and on kill remove those events(turn off)
 
 import bus from 'framebus';

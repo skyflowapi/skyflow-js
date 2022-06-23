@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import bus from 'framebus';
 import { applyFormatRegex, fetchRecordsByTokenId, formatRecordsForIframe } from '../../core-utils/reveal';
 import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT } from '../../core/constants';

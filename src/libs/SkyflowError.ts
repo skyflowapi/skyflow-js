@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import { parameterizedString } from '../utils/logsHelper';
 
 export interface ISkyflowError{

@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import {
   CardType,
   ContentType, ElementType, FORMAT_REGEX, FRAME_REVEAL, REPLACE_TEXT,

@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import EventEmitter from '../../src/event-emitter/index';
 
 describe('Event emitter test', () => {
