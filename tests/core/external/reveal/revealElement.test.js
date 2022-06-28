@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import { LogLevel,Env } from "../../../../src/utils/common";
 import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL } from "../../../../src/core/constants";
 import RevealElement from "../../../../src/core/external/reveal/RevealElement";

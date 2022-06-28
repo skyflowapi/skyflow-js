@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import IFrame from '../../../../src/core/external/common/IFrame';
 
 describe('Mount and Unmount Iframe', () => {

@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import bus from 'framebus';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deepClone';

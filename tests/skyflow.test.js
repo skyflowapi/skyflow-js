@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import bus from 'framebus';
 import Skyflow, { ContainerType } from '../src/Skyflow';
 import CollectContainer from '../src/core/external/collect/CollectContainer';

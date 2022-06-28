@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 /* eslint-disable no-underscore-dangle */
 import _ from 'lodash';
 import CollectElement from '../core/external/collect/CollectElement';

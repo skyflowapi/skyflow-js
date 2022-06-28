@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/RevealFrame";
 import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from "../../../../src/core/constants";

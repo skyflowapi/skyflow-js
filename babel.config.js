@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 module.exports = function (api) {
   api.cache(false);
   const presets = [

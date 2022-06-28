@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import logs from './logs';
 
 const SKYFLOW_ERROR_CODE = {

@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 class EventEmitter {
   events: Record<string, { priority: boolean; callback: Function }[]>;
 

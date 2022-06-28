@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import bus from 'framebus';
 import CollectElement from '../../../../src/core/external/collect/CollectElement';
 import SkyflowError from '../../../../src/libs/SkyflowError';

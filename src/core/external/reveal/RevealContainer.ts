@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import bus from 'framebus';
 import EventEmitter from '../../../event-emitter';
 import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe-libs/iframer';

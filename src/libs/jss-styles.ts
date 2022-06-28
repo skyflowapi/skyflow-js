@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import jss from 'jss';
 import preset from 'jss-preset-default';
 

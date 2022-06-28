@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import {
   COLLECT_FRAME_CONTROLLER,
   ELEMENT_EVENTS_TO_IFRAME,

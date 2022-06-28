@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import _ from 'lodash';
 import SkyflowError from '../libs/SkyflowError';
 import {

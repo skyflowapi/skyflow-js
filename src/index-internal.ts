@@ -1,3 +1,6 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
 import 'core-js/stable';
 import { FrameController } from './core/internal';
 import FrameElements from './core/internal/FrameElements';
