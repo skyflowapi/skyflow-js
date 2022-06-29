@@ -3,7 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import {
   CardType,
-  ContentType, ElementType, FORMAT_REGEX, FRAME_REVEAL, REPLACE_TEXT,
+  ContentType, COPY_UTILS, ElementType, FORMAT_REGEX, FRAME_REVEAL, REPLACE_TEXT,
 } from '../../core/constants';
 import SkyflowElement from '../../core/external/common/SkyflowElement';
 import SkyflowError from '../../libs/SkyflowError';
@@ -241,4 +241,23 @@ export const getReturnValue = (value: string, element: string, doesReturnValue: 
   }
 
   return undefined;
+};
+
+export const copyToClipboard = (text:string) => {
+  navigator.clipboard
+    .writeText(text);
+};
+
+export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
+  copyToClipboard(textToCopy);
+  if (domCopy) {
+    domCopy.src = COPY_UTILS.successIcon;
+    domCopy.title = COPY_UTILS.copied;
+    setTimeout(() => {
+      if (domCopy) {
+        domCopy.src = COPY_UTILS.copyIcon;
+        domCopy.title = COPY_UTILS.toCopy;
+      }
+    }, 1500);
+  }
 };

@@ -10,6 +10,8 @@ import {
   REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
   REVEAL_ELEMENT_DIV_STYLE,
   REVEAL_ELEMENT_OPTIONS_TYPES,
+  COPY_UTILS,
+  REVEAL_COPY_ICON_STYLES,
 } from '../../constants';
 import getCssClassesFromJss from '../../../libs/jss-styles';
 import {
@@ -17,6 +19,7 @@ import {
 } from '../../../utils/logsHelper';
 import logs from '../../../utils/logs';
 import { Context, MessageType } from '../../../utils/common';
+import { handleCopyIconClick } from '../../../utils/helpers';
 
 const CLASS_NAME = 'RevealFrame';
 class RevealFrame {
@@ -42,9 +45,13 @@ class RevealFrame {
 
   #errorTextStyles!: object;
 
-  #revealedValue!:string;
+  #revealedValue!: string;
 
-  #context:Context;
+  #context: Context;
+
+  private domCopy?: HTMLImageElement;
+
+  private isRevealCalled?: boolean;
 
   static init() {
     bus
@@ -63,6 +70,7 @@ class RevealFrame {
     this.#containerId = this.#name.split(':')[2];
     this.#record = record;
     this.#context = context;
+    this.isRevealCalled = false;
 
     this.#elementContainer = document.createElement('div');
     this.#elementContainer.className = 'SkyflowElement-div-container';
@@ -77,6 +85,22 @@ class RevealFrame {
 
     this.#errorElement = document.createElement('span');
     this.#errorElement.className = `SkyflowElement-error-${STYLE_TYPE.BASE}`;
+
+    if (this.#record.enableCopy) {
+      this.domCopy = document.createElement('img');
+      this.domCopy.src = COPY_UTILS.copyIcon;
+      this.domCopy.title = COPY_UTILS.toCopy;
+      this.domCopy.setAttribute('style', REVEAL_COPY_ICON_STYLES);
+      this.#elementContainer.append(this.domCopy);
+
+      this.domCopy.onclick = () => {
+        if (this.isRevealCalled) {
+          handleCopyIconClick(this.#revealedValue, this.domCopy);
+        } else {
+          handleCopyIconClick(this.#record.token, this.domCopy);
+        }
+      };
+    }
 
     if (Object.prototype.hasOwnProperty.call(this.#record, 'label')) {
       this.#labelElement.innerText = this.#record.label;
@@ -107,6 +131,7 @@ class RevealFrame {
       if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
         const responseValue = data[this.#record.token] as string;
         this.#revealedValue = responseValue;
+        this.isRevealCalled = true;
         this.#dataElememt.innerText = responseValue;
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
           CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
@@ -162,7 +187,7 @@ class RevealFrame {
     );
   }
 
-  private setRevealError(errorText:string) {
+  private setRevealError(errorText: string) {
     this.#errorElement.innerText = errorText;
     if (
       Object.prototype.hasOwnProperty.call(this.#record, 'errorTextStyles')

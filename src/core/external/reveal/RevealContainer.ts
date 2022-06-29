@@ -31,6 +31,7 @@ export interface IRevealElementInput {
 export interface IRevealElementOptions {
   formatRegex?: string | object;
   replaceText?: string;
+  enableCopy?: boolean;
 }
 
 const CLASS_NAME = 'RevealContainer';
