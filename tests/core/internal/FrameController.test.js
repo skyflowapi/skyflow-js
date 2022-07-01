@@ -207,4 +207,26 @@ describe('test frame controller', () => {
 
     changeCb[0][1](state);
   })
+  test.only('copy feature in FrameElements', () => {
+
+    const date_element = `element:EXPIRATION_DATE:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(date_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      enableCopy:true
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+  })
 });

@@ -3,7 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/RevealFrame";
-import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from "../../../../src/core/constants";
+import { COPY_UTILS, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from "../../../../src/core/constants";
 import { Env, LogLevel } from "../../../../src/utils/common";
 
 const testRecord = {
@@ -409,5 +409,37 @@ describe("Reveal Frame Class",()=>{
     });
     
   });
+  test("copy icon in reveal elements",()=>{
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        token:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        },
+        errorTextStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        enableCopy: true
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+  })
 
 });
