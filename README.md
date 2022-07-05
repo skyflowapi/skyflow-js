@@ -190,7 +190,7 @@ The sample response:
 
 ## Using Skyflow Elements to collect data
 
-**Skyflow Elements** provide developers with pre-built form elements to securely collect sensitive data client-side. These elements are hosted by Skyflow and injected into your web page as iframes. This reduces your PCI compliance scope by not exposing your front-end application to sensitive data. Follow the steps below to securely collect data with Skyflow Elements on your web page. 
+**Skyflow Elements** provide developers with pre-built form elements to securely collect sensitive data client-side. These elements are hosted by Skyflow and injected into your web page as iFrames. This reduces your PCI compliance scope by not exposing your front-end application to sensitive data. Follow the steps below to securely collect data with Skyflow Elements on your web page. 
 
 ### Step 1: Create a container
 
@@ -281,7 +281,7 @@ errorTextStyles: {
 }
 ```
 
-Finally, the `type` field takes a Skyflow ElementType. Each type applies the appropriate regex and validations to the form element. There are currently 5 types:
+Finally, the `type` field takes a Skyflow ElementType. Each type applies the appropriate regex and validations to the form element. There are currently 8 types:
 - `CARDHOLDER_NAME`
 - `CARD_NUMBER`
 - `EXPIRATION_DATE`
@@ -298,16 +298,19 @@ Along with CollectElement we can define other options which takes a dictionary o
 ```javascript
 const options = {
   required: false,  //optional, indicates whether the field is marked as required. Defaults to 'false'
-  enableCardIcon: true // optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
-  format: String //optinal, format for the element (only applicable currently for EXPIRATION_DATE ElementType)
+  enableCardIcon: true, // optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
+  format: String, //optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType),
+  enableCopy: false // optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false')
 }
 ```
 
 `required` parameter indicates whether the field is marked as required or not. If not provided, it defaults to false
 
-`enableCardIcon` paramenter indicates whether the icon is visible for the CARD_NUMBER element, defaults to true
+`enableCardIcon` parameter indicates whether the icon is visible for the CARD_NUMBER element, defaults to true
 
 `format` parameter takes string value and indicates the format pattern applicable to the element type, It's currently only applicable to `EXPIRATION_DATE` and `EXPIRATION_YEAR` element types.
+
+`enableCopy` parameter indicates whether the copy icon is visible in collect and reveal elements.
 
 The values that are accepted for `EXPIRATION_DATE` are
   - `MM/YY` (default)
@@ -339,8 +342,9 @@ const collectElement =  {
 
 const options = {
   required: false,  //optional, indicates whether the field is marked as required. Defaults to 'false'
-  enableCardIcon: true // optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
-  format: String //optinal, format for the element (only applicable currently for EXPIRATION_DATE ElementType)
+  enableCardIcon: true, // optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
+  format: String, //optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType)
+  enableCopy: false // optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false')
 }
 
 const element = container.create(collectElement, options)
