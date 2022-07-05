@@ -24,6 +24,8 @@ import {
   EXPIRY_DATE_MASK,
   INPUT_ICON_STYLES,
   EXPIRY_YEAR_MASK,
+  COLLECT_COPY_ICON_STYLES,
+  COPY_UTILS,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iFrameForm';
 import getCssClassesFromJss from '../../libs/jss-styles';
@@ -31,7 +33,7 @@ import { parameterizedString, printLog } from '../../utils/logsHelper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
-import { appendZeroToOne } from '../../utils/helpers';
+import { appendZeroToOne, handleCopyIconClick } from '../../utils/helpers';
 
 export class FrameController {
   controller?: FrameController;
@@ -105,6 +107,12 @@ export class FrameElement {
 
   private inputParent?: HTMLDivElement;
 
+  private domCopy?: HTMLImageElement;
+
+  private copyText?: string;
+
+  private hasError?: boolean;
+
   constructor(
     iFrameFormElement: IFrameFormElement,
     options: any,
@@ -113,7 +121,7 @@ export class FrameElement {
     this.iFrameFormElement = iFrameFormElement;
     this.options = options;
     this.htmlDivElement = htmlDivElement;
-
+    this.hasError = false;
     this.mount();
   }
 
@@ -149,6 +157,19 @@ export class FrameElement {
       this.inputParent.append(this.domImg);
     }
 
+    if (this.options?.enableCopy) {
+      this.domCopy = document.createElement('img');
+      this.domCopy.src = COPY_UTILS.copyIcon;
+      this.domCopy.title = COPY_UTILS.toCopy;
+      this.domCopy.setAttribute('style', COLLECT_COPY_ICON_STYLES);
+      this.inputParent.append(this.domCopy);
+
+      this.domCopy.onclick = () => {
+        if (!this.hasError && this.copyText) {
+          handleCopyIconClick(this.copyText, this.domCopy);
+        }
+      };
+    }
     // events and todo: onclick, onescape ...???
     inputElement.onfocus = (event) => {
       this.onFocusChange(event, true);
@@ -166,10 +187,12 @@ export class FrameElement {
       }
       this.focusChange(false);
       if (state.error && this.domError) {
+        this.hasError = true;
         this.domError.innerText = state.error;
       }
       if (!state.error && this.domError) {
         this.domError.innerText = '';
+        this.hasError = false;
       }
       this.updateStyleClasses(state);
     });
@@ -179,6 +202,9 @@ export class FrameElement {
         && this.iFrameFormElement.fieldType === ELEMENTS.radio.name
       ) {
         (<HTMLInputElement> this.domInput).checked = this.options.value === state.value;
+      }
+      if (this.options.enableCopy) {
+        this.copyText = state.value;
       }
       if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
         const cardType = detectCardType(state.value);

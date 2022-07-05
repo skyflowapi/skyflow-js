@@ -267,6 +267,30 @@ describe('Collect container', () => {
     expect(options.format).toBe(validFormat);
   });
 
+  it('test enableCopy option is enabled for elements', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let expiryElement;
+    try {
+      expiryElement = container.create(ExpirationDateElement, {enableCopy: true});
+    } catch (err) {}
+
+    const options = expiryElement.getOptions()
+    expect(options.enableCopy).toBe(true);
+
+  });
+
+  it('test enableCopy option is disabled for elements', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let expiryElement;
+    try {
+      expiryElement = container.create(ExpirationDateElement, {enableCopy: false});
+    } catch (err) {}
+
+    const options = expiryElement.getOptions()
+    expect(options.enableCopy).toBe(false);
+
+  });
+
   it('test invalid option for EXPIRATION_YEAR', () => {
     
     const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
