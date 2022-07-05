@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.18.0] - 2022-07-05
+
+### Added
+- Copy icon in collect and reveal elements
+
 ## [1.17.1] - 2022-06-28
 
 ### Added
