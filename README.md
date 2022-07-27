@@ -480,7 +480,9 @@ Skyflow-JS provides two types of validations on Collect Elements
 
 #### 1. Default Validations:
 Every Collect Element except of type `INPUT_FIELD` has a set of default validations listed below:
-- `CARD_NUMBER`: Card number validation with checkSum algorithm(Luhn algorithm), available card lengths for defined card types
+- `CARD_NUMBER`: Card number validation with checkSum algorithm(Luhn algorithm).
+Available card lengths for defined card types are [12, 13, 14, 15, 16, 17, 18, 19]. 
+A valid 16 digit card number will be in the format - `XXXX XXXX XXXX XXXX`
 - `CARD_HOLDER_NAME`: Name should be 2 or more symbols, valid characters should match pattern -  `^([a-zA-Z\\ \\,\\.\\-\\']{2,})$`
 - `CVV`: Card CVV can have 3-4 digits
 - `EXPIRATION_DATE`: Any date starting from current month. By default valid expiration date should be in short year format - `MM/YY`
