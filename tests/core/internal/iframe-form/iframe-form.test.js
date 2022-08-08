@@ -4,9 +4,9 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME } from '../../../../src/core/constants';
 import { Env, LogLevel, ValidationRuleType } from '../../../../src/utils/common';
-import { IFrameForm, IFrameFormElement } from './../../../../src/core/internal/iFrameForm'
-import * as busEvents from '../../../../src/utils/busEvents';
-import SkyflowError from '../../../../src/libs/SkyflowError';
+import { IFrameForm, IFrameFormElement } from '../../../../src/core/internal/iframe-form'
+import * as busEvents from '../../../../src/utils/bus-events';
+import SkyflowError from '../../../../src/libs/skyflow-error';
 import logs from '../../../../src/utils/logs';
 
 const tableCol = btoa('table.col')

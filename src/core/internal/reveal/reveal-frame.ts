@@ -16,7 +16,7 @@ import {
 import getCssClassesFromJss from '../../../libs/jss-styles';
 import {
   printLog, parameterizedString,
-} from '../../../utils/logsHelper';
+} from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import { Context, MessageType } from '../../../utils/common';
 import { handleCopyIconClick } from '../../../utils/helpers';

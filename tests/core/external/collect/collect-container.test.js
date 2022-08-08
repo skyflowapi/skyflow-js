@@ -5,9 +5,9 @@ import {
   COLLECT_FRAME_CONTROLLER,
   ELEMENT_EVENTS_TO_IFRAME,
 } from '../../../../src/core/constants';
-import CollectContainer from '../../../../src/core/external/collect/CollectContainer';
+import CollectContainer from '../../../../src/core/external/collect/collect-container';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
-import Skyflow from '../../../../src/Skyflow';
+import Skyflow from '../../../../src/skyflow';
 import { LogLevel,Env, ValidationRuleType } from '../../../../src/utils/common';
 import logs from '../../../../src/utils/logs';
 const bus = require('framebus');

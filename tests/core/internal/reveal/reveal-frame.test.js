@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from "framebus";
-import RevealFrame from "../../../../src/core/internal/reveal/RevealFrame";
+import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
 import { COPY_UTILS, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from "../../../../src/core/constants";
 import { Env, LogLevel } from "../../../../src/utils/common";
 

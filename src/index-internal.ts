@@ -3,8 +3,8 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import 'core-js/stable';
 import { FrameController } from './core/internal';
-import FrameElements from './core/internal/FrameElements';
-import RevealFrame from './core/internal/reveal/RevealFrame';
+import FrameElements from './core/internal/frame-elements';
+import RevealFrame from './core/internal/reveal/reveal-frame';
 import {
   COLLECT_FRAME_CONTROLLER,
   FRAME_ELEMENT,
@@ -12,15 +12,15 @@ import {
   SKYFLOW_FRAME_CONTROLLER,
   REVEAL_FRAME_CONTROLLER,
 } from './core/constants';
-import RevealFrameController from './core/internal/reveal/RevealFrameController';
-import SkyflowFrameController from './core/internal/SkyflowFrame/SkyflowFrameController';
+import RevealFrameController from './core/internal/reveal/reveal-frame-controller';
+import SkyflowFrameController from './core/internal/skyflow-frame/skyflow-frame-controller';
 import logs from './utils/logs';
 import { MessageType, LogLevel } from './utils/common';
 import {
   printLog,
   parameterizedString,
   getElementName,
-} from './utils/logsHelper';
+} from './utils/logs-helper';
 
 (function init(root: any) {
   try {

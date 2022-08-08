@@ -8,13 +8,13 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
 } from './core/constants';
 import Client from './client';
-import RevealContainer from './core/external/reveal/RevealContainer';
-import CollectContainer from './core/external/collect/CollectContainer';
+import RevealContainer from './core/external/reveal/reveal-container';
+import CollectContainer from './core/external/collect/collect-container';
 import properties from './properties';
-import isTokenValid from './utils/jwtUtils';
-import SkyflowContainer from './core/external/SkyflowContainer';
-import { parameterizedString, printLog } from './utils/logsHelper';
-import SkyflowError from './libs/SkyflowError';
+import isTokenValid from './utils/jwt-utils';
+import SkyflowContainer from './core/external/skyflow-container';
+import { parameterizedString, printLog } from './utils/logs-helper';
+import SkyflowError from './libs/skyflow-error';
 import logs from './utils/logs';
 import SKYFLOW_ERROR_CODE from './utils/constants';
 import {

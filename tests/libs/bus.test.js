@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import Bus from '../../src/libs/Bus';
+import Bus from '../../src/libs/bus';
 
 describe('bus test', () => {
   const busObj = new Bus();

@@ -5,7 +5,7 @@ import bus from 'framebus';
 import 'jquery-mask-plugin/dist/jquery.mask.min';
 import {
   IFrameFormElement
-} from '../../../src/core/internal/iFrameForm';
+} from '../../../src/core/internal/iframe-form';
 import {
   FrameController,
   FrameElement
@@ -207,7 +207,7 @@ describe('test frame controller', () => {
 
     changeCb[0][1](state);
   })
-  test.only('copy feature in FrameElements', () => {
+  test('copy feature in FrameElements', () => {
 
     const date_element = `element:EXPIRATION_DATE:${tableCol}`;
     const div = document.createElement('div');

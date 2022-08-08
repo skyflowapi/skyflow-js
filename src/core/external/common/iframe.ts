@@ -5,7 +5,7 @@ import iframer, {
   setAttributes,
   getIframeSrc,
 } from '../../../iframe-libs/iframer';
-import SkyflowError from '../../../libs/SkyflowError';
+import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 
 export default class IFrame {

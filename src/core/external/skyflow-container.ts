@@ -8,7 +8,7 @@ import iframer, {
   setAttributes,
   setStyles,
 } from '../../iframe-libs/iframer';
-import { connectionConfigParser } from '../../libs/objectParse';
+import { connectionConfigParser } from '../../libs/object-parse';
 import properties from '../../properties';
 import {
   validateConnectionConfig, validateInsertRecords,
@@ -28,7 +28,7 @@ import {
 import {
   printLog,
   parameterizedString,
-} from '../../utils/logsHelper';
+} from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import {
   IDetokenizeInput, IGetByIdInput, IConnectionConfig, Context, MessageType, ISoapConnectionConfig,

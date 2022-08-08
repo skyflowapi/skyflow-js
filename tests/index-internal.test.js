@@ -2,10 +2,10 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import { FrameController } from './../src/core/internal';
-import FrameElements from './../src/core/internal/FrameElements';
-import RevealFrame from './../src/core/internal/reveal/RevealFrame';
-import RevealFrameController from './../src/core/internal/reveal/RevealFrameController';
-import SkyflowFrameController from './../src/core/internal/SkyflowFrame/SkyflowFrameController';
+import FrameElements from './../src/core/internal/frame-elements';
+import RevealFrame from './../src/core/internal/reveal/reveal-frame';
+import RevealFrameController from './../src/core/internal/reveal/reveal-frame-controller';
+import SkyflowFrameController from './../src/core/internal/skyflow-frame/skyflow-frame-controller';
 import {
     COLLECT_FRAME_CONTROLLER,
     FRAME_ELEMENT,
@@ -57,7 +57,7 @@ describe('test index-internal', () => {
     }));
 
     const mock = jest.fn();
-    jest.mock('./../src/core/internal/reveal/RevealFrameController', () => ({
+    jest.mock('./../src/core/internal/reveal/reveal-frame-controller', () => ({
       init: mock,
     }));
 
@@ -76,7 +76,7 @@ describe('test index-internal', () => {
     }));
 
     const mock = jest.fn();
-    jest.mock('./../src/core/internal/SkyflowFrame/SkyflowFrameController', () => ({
+    jest.mock('./../src/core/internal/skyflow-frame/skyflow-frame-controller', () => ({
       init: mock,
     }));
 
@@ -95,7 +95,7 @@ describe('test index-internal', () => {
       }));
 
       const mock = jest.fn()
-      jest.mock( './../src/core/internal/FrameElements', () => {
+      jest.mock( './../src/core/internal/frame-elements', () => {
           return {
               start: mock
           }
@@ -117,7 +117,7 @@ describe('test index-internal', () => {
     }));
 
     const mock = jest.fn();
-    jest.mock('./../src/core/internal/reveal/RevealFrame', () => ({
+    jest.mock('./../src/core/internal/reveal/reveal-frame', () => ({
       init: mock,
     }));
 

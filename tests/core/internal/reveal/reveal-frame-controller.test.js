@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import RevealFrameController from '../../../../src/core/internal/reveal/RevealFrameController';
+import RevealFrameController from '../../../../src/core/internal//reveal/reveal-frame-controller';
 import clientModule from '../../../../src/client';
 import { ELEMENT_EVENTS_TO_IFRAME } from '../../../../src/core/constants';
 import { Env, LogLevel } from '../../../../src/utils/common';

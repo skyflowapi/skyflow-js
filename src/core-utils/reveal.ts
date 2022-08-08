@@ -2,13 +2,13 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import Client from '../client';
-import { getAccessToken } from '../utils/busEvents';
-import SkyflowError from '../libs/SkyflowError';
+import { getAccessToken } from '../utils/bus-events';
+import SkyflowError from '../libs/skyflow-error';
 import {
   ISkyflowIdRecord, IRevealRecord, IRevealResponseType, MessageType, LogLevel,
 } from '../utils/common';
 import logs from '../utils/logs';
-import { printLog, parameterizedString } from '../utils/logsHelper';
+import { printLog, parameterizedString } from '../utils/logs-helper';
 
 const RegexParser = require('regex-parser');
 

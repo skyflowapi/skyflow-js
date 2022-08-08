@@ -23,7 +23,7 @@ import {
   isValidExpiryYearFormat,
   validateCardNumberLengthCheck
 } from '../../src/utils/validators/index';
-import { parameterizedString } from '../../src/utils/logsHelper';
+import { parameterizedString } from '../../src/utils/logs-helper';
 
 
 describe('Validation card number and Expiry Date', () => {

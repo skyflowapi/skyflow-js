@@ -2,19 +2,19 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import SkyflowError from '../../../libs/SkyflowError';
+import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
 import { Context, MessageType } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
-import { printLog, parameterizedString } from '../../../utils/logsHelper';
+import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import {
   FRAME_REVEAL, ELEMENT_EVENTS_TO_IFRAME, ELEMENT_EVENTS_TO_CONTAINER, REVEAL_ELEMENT_OPTIONS_TYPES,
 } from '../../constants';
-import IFrame from '../common/IFrame';
-import SkyflowElement from '../common/SkyflowElement';
-import { IRevealElementInput, IRevealElementOptions } from './RevealContainer';
+import IFrame from '../common/iframe';
+import SkyflowElement from '../common/skyflow-element';
+import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 
 const CLASS_NAME = 'RevealElement';
 

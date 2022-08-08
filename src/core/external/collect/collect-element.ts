@@ -8,22 +8,22 @@ import {
   ELEMENTS,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
-import Bus from '../../../libs/Bus';
-import deepClone from '../../../libs/deepClone';
+import Bus from '../../../libs/bus';
+import deepClone from '../../../libs/deep-clone';
 import {
   getElements,
   validateAndSetupGroupOptions,
 } from '../../../libs/element-options';
-import IFrame from '../common/IFrame';
+import IFrame from '../common/iframe';
 import {
   printLog, getElementName, parameterizedString, EnvOptions,
-} from '../../../utils/logsHelper';
-import SkyflowError from '../../../libs/SkyflowError';
+} from '../../../utils/logs-helper';
+import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { Context, Env, MessageType } from '../../../utils/common';
 import { formatFrameNameToId, getReturnValue } from '../../../utils/helpers';
-import SkyflowElement from '../common/SkyflowElement';
+import SkyflowElement from '../common/skyflow-element';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {

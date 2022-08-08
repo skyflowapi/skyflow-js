@@ -13,7 +13,7 @@ import {
   validateAndSetupGroupOptions,
 } from '../../libs/element-options';
 import { getFlexGridStyles } from '../../libs/styles';
-import { getElementName, parameterizedString, printLog } from '../../utils/logsHelper';
+import { getElementName, parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { LogLevel, MessageType } from '../../utils/common';
 

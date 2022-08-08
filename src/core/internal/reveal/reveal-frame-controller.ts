@@ -14,7 +14,7 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
   REVEAL_FRAME_CONTROLLER,
 } from '../../constants';
-import { parameterizedString, printLog } from '../../../utils/logsHelper';
+import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import { Context, IRevealRecord, MessageType } from '../../../utils/common';
 

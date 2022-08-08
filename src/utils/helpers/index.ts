@@ -5,8 +5,8 @@ import {
   CardType,
   ContentType, COPY_UTILS, ElementType, FORMAT_REGEX, FRAME_REVEAL, REPLACE_TEXT,
 } from '../../core/constants';
-import SkyflowElement from '../../core/external/common/SkyflowElement';
-import SkyflowError from '../../libs/SkyflowError';
+import SkyflowElement from '../../core/external/common/skyflow-element';
+import SkyflowError from '../../libs/skyflow-error';
 import { IConnectionConfig } from '../common';
 import { detectCardType } from '../validators';
 

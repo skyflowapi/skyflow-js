@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { parameterizedString } from '../utils/logsHelper';
+import { parameterizedString } from '../utils/logs-helper';
 
 export interface ISkyflowError{
   code:string | number,
