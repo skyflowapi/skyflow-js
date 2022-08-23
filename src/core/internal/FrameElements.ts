@@ -178,6 +178,7 @@ export default class FrameElements {
         const iFrameFormElement = this.getOrCreateIFrameFormElement(
           element.elementName,
           element.label,
+          element.skyflowID,
         );
         elements[element.elementName] = new FrameElement(
           iFrameFormElement,

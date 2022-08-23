@@ -347,6 +347,10 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_REPLACE_TEXT_TYPE,
   },
+  INVALID_FILE_TYPE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_FILE_TYPE,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;

@@ -73,6 +73,8 @@ export const constructInsertRecordResponse = (
   };
 };
 
+export const constructUploadResponse = (response) => response;
+
 const keyify = (obj, prefix = '') => Object.keys(obj).reduce((res: any, el) => {
   if (Array.isArray(obj[el])) {
     return [...res, prefix + el];
