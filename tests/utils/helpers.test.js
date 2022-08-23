@@ -8,7 +8,8 @@ import {
   appendZeroToOne,
   getReturnValue,
   copyToClipboard,
-  handleCopyIconClick
+  handleCopyIconClick,
+  fileValidation
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -149,5 +150,52 @@ describe('test copy feature', () => {
 
     expect(img.title).toEqual(COPY_UTILS.toCopy)
 
+  })
+})
+
+describe('test file validation', () => {
+  test('invalid file type', () => {
+    const zipFile = {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.zip",
+      size: 48848,
+      type: "application/zip",
+      webkitRelativePath: ""
+    }
+    const debFile = {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.deb",
+      size: 48848,
+      type: "application/vnd.debian.binary-package",
+      webkitRelativePath: ""
+    }
+    expect(fileValidation(zipFile)).toBe(false);
+    expect(fileValidation(debFile)).toBe(false);
+
+  })
+
+  test('valid file type', () => {
+    const file = {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.jpg",
+      size: 48848,
+      type: "image/jpeg",
+      webkitRelativePath: ""
+    }
+    expect(fileValidation(file)).toBe(true);
+  })
+  test('invalid file size', () => {
+    const file = {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.pdf",
+      size: 74570648,
+      type: "application/pdf",
+      webkitRelativePath: ""
+    }
+    expect(fileValidation(file)).toBe(false);
   })
 })

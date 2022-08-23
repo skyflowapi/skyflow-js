@@ -34,6 +34,7 @@ export interface CollectElementInput {
   type: ElementType;
   altText?: string;
   validations?: IValidationRule[]
+  skyflowID?: string;
 }
 
 interface ICollectOptions {
@@ -146,6 +147,7 @@ class CollectContainer extends Container {
 
         options.elementName = `${FRAME_ELEMENT}:${options.elementName}`;
         options.label = element.label;
+        options.skyflowID = element.skyflowID;
 
         elements.push(options);
       });
@@ -268,6 +270,45 @@ class CollectContainer extends Container {
         );
       printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
         CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+      MessageType.LOG, this.#context.logLevel);
+    } catch (err) {
+      printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+      reject(err);
+    }
+  });
+
+  uploadFiles = (options) => new Promise((resolve, reject) => {
+    try {
+      validateInitConfig(this.#metaData.clientJSON.config);
+      const fileElements = Object.values(this.#elements);
+      fileElements.forEach((element) => {
+        if (!element.isMounted()) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
+        }
+        element.isValidElement();
+      });
+      bus
+      // .target(properties.IFRAME_SECURE_ORGIN)
+        .emit(
+          ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#containerId,
+          {
+            ...options,
+          },
+          (data: any) => {
+            if (!data || data?.error) {
+              printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+              reject(data?.error);
+            } else {
+              printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                MessageType.LOG,
+                this.#context.logLevel);
+
+              resolve(data);
+            }
+          },
+        );
+      printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
+        CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
       MessageType.LOG, this.#context.logLevel);
     } catch (err) {
       printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);

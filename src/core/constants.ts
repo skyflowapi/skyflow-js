@@ -63,6 +63,7 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
   COLLECT_ELEMENT_SET_ERROR: 'COLLECT_ELEMENT_SET_ERROR',
   REVEAL_ELEMENT_SET_ERROR: 'REVEAL_ELEMENT_SET_ERROR',
   REVEAL_ELEMENT_UPDATE_OPTIONS: 'REVEAL_ELEMENT_UPDATE_OPTIONS',
+  FILE_UPLOAD: 'FILE_UPLOAD',
 };
 
 export const REVEAL_ELEMENT_OPTIONS_TYPES = {
@@ -84,6 +85,7 @@ export enum ElementType {
   PIN = 'PIN',
   EXPIRATION_MONTH = 'EXPIRATION_MONTH',
   EXPIRATION_YEAR = 'EXPIRATION_YEAR',
+  FILE_INPUT = 'FILE_INPUT',
 }
 
 export enum CardType {
@@ -216,6 +218,13 @@ export const ELEMENTS = {
     },
     sensitive: true,
     regex: /^$|^[0-9]{4,12}$/,
+  },
+  [ElementType.FILE_INPUT]: {
+    name: 'FILE_INPUT',
+    sensitive: true,
+    attributes: {
+      type: 'file',
+    },
   },
 };
 
@@ -378,18 +387,58 @@ export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
   },
 };
 
-export const connectionConfigParseKeys = ['pathParams', 'queryParams', 'requestBody'];
+export const connectionConfigParseKeys = [
+  'pathParams',
+  'queryParams',
+  'requestBody',
+];
 
 export const CARD_TYPE_REGEX = {
-  [CardType.VISA]: { regex: /^4\d*/, maxCardLength: 19, cardLengthRange: [13, 16] },
-  [CardType.MASTERCARD]: { regex: /^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[0-1]|2720)\d*/, maxCardLength: 16, cardLengthRange: [16] },
-  [CardType.AMEX]: { regex: /^3[47]\d*/, maxCardLength: 15, cardLengthRange: [15] },
-  [CardType.DINERS_CLUB]: { regex: /^(36|38|30[0-5])\d*/, maxCardLength: 16, cardLengthRange: [14, 15, 16, 17, 18, 19] },
-  [CardType.DISCOVER]: { regex: /^(6011|65|64[4-9]|622)\d*/, maxCardLength: 16, cardLengthRange: [16, 17, 18, 19] },
-  [CardType.JCB]: { regex: /^35\d*/, maxCardLength: 19, cardLengthRange: [16, 17, 18, 19] },
-  [CardType.HIPERCARD]: { regex: /^606282\d*/, maxCardLength: 19, cardLengthRange: [14, 15, 16, 17, 18, 19] },
-  [CardType.UNIONPAY]: { regex: /^62\d*/, maxCardLength: 19, cardLengthRange: [16, 17, 18, 19] },
-  [CardType.MAESTRO]: { regex: /^(5018|5020|5038|5043|5[6-9]|6020|6304|6703|6759|676[1-3])\d*/, maxCardLength: 19, cardLengthRange: [12, 13, 14, 15, 16, 17, 18, 19] },
+  [CardType.VISA]: {
+    regex: /^4\d*/,
+    maxCardLength: 19,
+    cardLengthRange: [13, 16],
+  },
+  [CardType.MASTERCARD]: {
+    regex: /^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[0-1]|2720)\d*/,
+    maxCardLength: 16,
+    cardLengthRange: [16],
+  },
+  [CardType.AMEX]: {
+    regex: /^3[47]\d*/,
+    maxCardLength: 15,
+    cardLengthRange: [15],
+  },
+  [CardType.DINERS_CLUB]: {
+    regex: /^(36|38|30[0-5])\d*/,
+    maxCardLength: 16,
+    cardLengthRange: [14, 15, 16, 17, 18, 19],
+  },
+  [CardType.DISCOVER]: {
+    regex: /^(6011|65|64[4-9]|622)\d*/,
+    maxCardLength: 16,
+    cardLengthRange: [16, 17, 18, 19],
+  },
+  [CardType.JCB]: {
+    regex: /^35\d*/,
+    maxCardLength: 19,
+    cardLengthRange: [16, 17, 18, 19],
+  },
+  [CardType.HIPERCARD]: {
+    regex: /^606282\d*/,
+    maxCardLength: 19,
+    cardLengthRange: [14, 15, 16, 17, 18, 19],
+  },
+  [CardType.UNIONPAY]: {
+    regex: /^62\d*/,
+    maxCardLength: 19,
+    cardLengthRange: [16, 17, 18, 19],
+  },
+  [CardType.MAESTRO]: {
+    regex: /^(5018|5020|5038|5043|5[6-9]|6020|6304|6703|6759|676[1-3])\d*/,
+    maxCardLength: 19,
+    cardLengthRange: [12, 13, 14, 15, 16, 17, 18, 19],
+  },
 };
 export const DEFAULT_CARD_LENGTH_RANGE = [0, 12, 13, 14, 15, 16, 17, 18, 19];
 
@@ -424,16 +473,28 @@ export const EXPIRY_YEAR_MASK = {
   YY: ['YY', { Y: '[0-9]' }],
 };
 export const DEFAULT_EXPIRATION_DATE_FORMAT = 'MM/YY';
-export const ALLOWED_EXPIRY_DATE_FORMATS = [DEFAULT_EXPIRATION_DATE_FORMAT, 'YYYY/MM', 'YY/MM', 'MM/YYYY'];
+export const ALLOWED_EXPIRY_DATE_FORMATS = [
+  DEFAULT_EXPIRATION_DATE_FORMAT,
+  'YYYY/MM',
+  'YY/MM',
+  'MM/YYYY',
+];
 
 export const DEFAULT_EXPIRATION_YEAR_FORMAT = 'YY';
-export const ALLOWED_EXPIRY_YEAR_FORMATS = [DEFAULT_EXPIRATION_YEAR_FORMAT, 'YYYY'];
+export const ALLOWED_EXPIRY_YEAR_FORMATS = [
+  DEFAULT_EXPIRATION_YEAR_FORMAT,
+  'YYYY',
+];
 
-export const soapReqXmlErrors = [SKYFLOW_ERROR_CODE.INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML,
-  SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_SOAP_REQUEST_XML];
-export const soapResXmlErrors = [SKYFLOW_ERROR_CODE.INVALID_ELEMENT_ID_IN_SOAP_RESPONSE_XML,
+export const soapReqXmlErrors = [
+  SKYFLOW_ERROR_CODE.INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML,
+  SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_SOAP_REQUEST_XML,
+];
+export const soapResXmlErrors = [
+  SKYFLOW_ERROR_CODE.INVALID_ELEMENT_ID_IN_SOAP_RESPONSE_XML,
   SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_SOAP_RESPONSE_XML,
-  SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT_IN_SOAP_RESPONSE_XML];
+  SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT_IN_SOAP_RESPONSE_XML,
+];
 
 export const PATH_NOT_FOUND_IN_RES_XML = 'skyflow: Path not found';
 

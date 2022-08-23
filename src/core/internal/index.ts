@@ -99,7 +99,7 @@ export class FrameElement {
 
   private domLabel?: HTMLLabelElement;
 
-  private domInput?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+  private domInput?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLFormElement;
 
   private domError?: HTMLSpanElement;
 
@@ -185,6 +185,10 @@ export class FrameElement {
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
         this.iFrameFormElement.setValue(appendZeroToOne(state.value));
       }
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
+        this.focusChange(false);
+      }
+
       this.focusChange(false);
       if (state.error && this.domError) {
         this.hasError = true;
@@ -203,10 +207,11 @@ export class FrameElement {
       ) {
         (<HTMLInputElement> this.domInput).checked = this.options.value === state.value;
       }
+
       if (this.options.enableCopy) {
         this.copyText = state.value;
       }
-      if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
+      if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name && state.value) {
         const cardType = detectCardType(state.value);
         if (this.options.enableCardIcon) {
           if (this.domImg) {
@@ -348,8 +353,14 @@ export class FrameElement {
   };
 
   onInputChange = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    this.iFrameFormElement.setValue(target.value, target.checkValidity());
+    if (this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
+      const target = event.target as HTMLFormElement;
+      this.iFrameFormElement.setValue(target.files[0], target.checkValidity());
+      this.focusChange(true);
+    } else {
+      const target = event.target as HTMLInputElement;
+      this.iFrameFormElement.setValue(target.value, target.checkValidity());
+    }
   };
 
   focusChange = (focus: boolean) => {
