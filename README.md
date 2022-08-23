@@ -132,7 +132,7 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 -  [**Event Listener on Collect Elements**](#event-listener-on-collect-elements)
 -  [**UI Error for Collect Eements**](#ui-error-for-collect-elements)
 - [**Set and Clear value for Collect Elements (DEV ENV ONLY)**](#set-and-clear-value-for-collect-elements-dev-env-only)
-- [**Using Skyflow File Element to upload a file**](#using-skyflow-file-element-to-upload-file)
+- [**Using Skyflow File Element to upload a file**](#using-skyflow-file-element-to-upload-a-file)
 ## Inserting data into the vault
 
 To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes a dictionary of optional parameters for the insertion. See below: 
