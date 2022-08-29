@@ -226,20 +226,23 @@ export const appendZeroToOne = (value) => {
   return value;
 };
 
-export const getReturnValue = (value: string, element: string, doesReturnValue: boolean) => {
-  value = value && value.replace(/\s/g, '');
-  if (doesReturnValue) {
-    return value;
-  } if (element === ElementType.CARD_NUMBER
-    && !doesReturnValue) {
-    const cardType = detectCardType(value);
-    const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
-    if (value.length > threshold) {
-      return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
+export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {
+  if (typeof value === 'string') {
+    value = value && value.replace(/\s/g, '');
+    if (doesReturnValue) {
+      return value;
+    } if (element === ElementType.CARD_NUMBER
+      && !doesReturnValue) {
+      const cardType = detectCardType(value);
+      const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
+      if (value.length > threshold) {
+        return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
+      }
+      return value;
     }
+  } else {
     return value;
   }
-
   return undefined;
 };
 
@@ -260,4 +263,12 @@ export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
       }
     }, 1500);
   }
+};
+
+const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-package', 'application/vnd.microsoft.portable-executable', 'application/vnd.rar'];
+// Check file type and file size in KB
+export const fileValidation = (value) => {
+  if (value === undefined) return true;
+  if (DANGEROUS_FILE_TYPE.includes(value.type) || value.size > 3200000) return false;
+  return true;
 };

@@ -359,7 +359,7 @@ export const validateConnectionConfig = (config: IConnectionConfig, initConfig: 
   }
 };
 
-export const validateCardNumberLengthCheck = (cardNumber:string):boolean => {
+export const validateCardNumberLengthCheck = (cardNumber:string = ''):boolean => {
   const cardType:CardType = detectCardType(cardNumber);
   const cardLength = cardNumber.replace(/[\s-]/g, '').length;
   const validLengths:number[] = CARD_TYPE_REGEX[cardType]?.cardLengthRange

@@ -72,6 +72,13 @@ const ExpirationYearElement = {
   type: 'EXPIRATION_YEAR',
 };
 
+const FileElement = {
+  table: 'pii_fields',
+  column: 'primary_card.file',
+  type: 'FILE_INPUT',
+  skyflowID: "abc-def"
+};
+
 
 const on = jest.fn();
 
@@ -356,5 +363,29 @@ describe('Collect container', () => {
     },{
       format:"SS/YYY"
     });
+  });
+
+  it('create valid file Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let file;
+    try {
+      file = container.create(FileElement);
+    } catch (err) {}
+
+    expect(file.elementType).toBe('FILE_INPUT');
+
+    expect(container.collect).rejects.toEqual(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED));
+  });
+
+  it('skyflowID undefined for file Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    try {
+      const file = container.create({
+        ...cvvFileElementElement,
+        skyflowID: undefined,
+      });
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
   });
 });
