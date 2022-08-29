@@ -1091,41 +1091,41 @@ cardNumber.clearAltText();
 
 ## Using Skyflow File Element to upload a file
 
-Like other kinds of data, you can upload binary files in your vault using Skyflow File Element. Follow the steps below to securely upload a file.
+You can upload binary files to a vault using the Skyflow File Element. Use the following steps to securely upload a file.
 ### Step 1: Create a container
 
-First create a container for the form elements using the `container(Skyflow.ContainerType)` method of the Skyflow client as show below:
+Create a container for the form elements using the container(Skyflow.ContainerType) method of the Skyflow client:
 
 ```javascript
 const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
 ```
 
-### Step 2: Create a file Element
+### Step 2: Create a File Element
 
-A Skyflow collect Element is defined as shown below: 
+Skyflow Collect Elements are defined as follows: 
 
 ```javascript
 const collectElement =  {
    table: "string",             //the table this data belongs to
    column: "string",            //the column into which this data should be inserted
    skyflowID: "string",         // the skyflow_id of the record
-   type: Skyflow.ElementType,   //Skyflow.ElementType enum
+   type: Skyflow.ElementType.FILE_INPUT,   //Skyflow.ElementType enum
    inputStyles: {},             //optional styles that should be applied to the form element
    labelStyles: {},             //optional styles that will be applied to the label of the collect element
    errorTextStyles:{},          //optional styles that will be applied to the errorText of the collect element
 }
 ```
-The `table` and `column` fields indicate which table and column in the vault the Element corresponds to. 
+The `table` and `column` fields indicate which table and column the Element corresponds to. 
 
-`skyflowID` indicates the records in which the file will be uploaded.
+`skyflowID` indicates the record that stores the file.
 
-**Note**: 
+**Notes**: 
 - `skyflowID` is required while creating File element
--  Use dot delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`)
+- Use period-delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`).
 
- ## Step 3: Mount Elements to the DOM
+ ## Step 3: Mount elements to the DOM
 
-To specify where the Elements will be rendered on your page, create placeholder `<div>` elements with unique `id` tags. For instance, the form below has 4 empty divs with unique ids as placeholders for 4 Skyflow Elements. 
+To specify where to render Elements on your page, create placeholder `<div>` elements with unique `id` tags. For instance, the form below has an empty div with a unique id as a placeholder for a Skyflow Element. 
 
 ```html
 <form>
@@ -1135,31 +1135,32 @@ To specify where the Elements will be rendered on your page, create placeholder 
 </form>
 ```
 
-Now, when the `mount(domElement)` method of the Element is called, the Element will be inserted in the specified div. For instance, the call below will insert the Element into the div with the id "#cardNumber".  
+Now, when the `mount(domElement)` method of the Element is called, the Element is inserted in the specified div. For instance, the call below inserts the Element into the div with the id "#file".  
 
 ```javascript
 element.mount("#file")
 ```
-you can use the `unmount` method to reset any collect element to it's initial state.
+Use the `unmount` method to reset a Collect Element to its initial state.
+
 ```javascript
 element.unmount();
 ```
-## Step 4: Collect data from Elements
+## Step 4: Collect data from elements
 
 When the file is ready to be uploaded, call the `uploadFiles()` method on the container object.
 
 ```javascript
 container.uploadFiles()
 ```
+### File upload limitations:
 
-## Below are few limitations with regards to file upload
 - Only non-executable file are allowed to be uploaded.
 - Files must have a maximum size of 32 MB
 - File columns can't enable tokenization, redaction, or arrays.
 - Re-uploading a file overwrites previously uploaded data.
 - Partial uploads or resuming a previous upload isn't supported.
 
-## End to end example of uploading a file with Skyflow File Element
+### End-to-end file upload
 
 ```javascript
 //Step 1
@@ -1206,7 +1207,7 @@ container.uploadFiles()
     ]
 }
 ```
-###  **Skyflow File Element can be used with other Skyflow Collect Elements as well. Below is an end to end example to demonstrate this.**
+#### File upload with additional elements
 
 ```javascript
 // Create collect Container
@@ -1274,7 +1275,7 @@ container.collect(options={})
 container.uploadFiles()
 
 ```
-**Sample Response for collect:**
+**Sample Response for collect():**
 ```javascript
 {
   "records": [
@@ -1287,7 +1288,7 @@ container.uploadFiles()
   ]
 }
 ```
-**Sample Response for file upload :**
+**Sample Response for file uploadFiles() :**
 ```javascript
 {
     "fileUploadResponse": [
