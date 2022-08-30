@@ -27,6 +27,7 @@ import {
   constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
+  constructUploadResponse,
 } from '../../../core-utils/collect';
 import { getAccessToken } from '../../../utils/busEvents';
 import {
@@ -45,7 +46,9 @@ import {
   MessageType,
   ValidationRuleType,
 } from '../../../utils/common';
-import { formatFrameNameToId, getReturnValue, removeSpaces } from '../../../utils/helpers';
+import {
+  fileValidation, formatFrameNameToId, getReturnValue, removeSpaces,
+} from '../../../utils/helpers';
 import properties from '../../../properties';
 
 const set = require('set-value');
@@ -54,7 +57,7 @@ const RegexParser = require('regex-parser');
 export class IFrameFormElement extends EventEmitter {
   // All external Events and state events will be handled here
   state = {
-    value: <undefined | string>undefined,
+    value: <any | string | undefined>undefined,
     isFocused: false,
     isValid: false,
     isEmpty: true,
@@ -94,9 +97,12 @@ export class IFrameFormElement extends EventEmitter {
 
   format:string = '';
 
-  constructor(name: string, label:string, metaData, context: Context) {
+  skyflowID?:string;
+
+  constructor(name: string, label:string, metaData, context: Context, skyflowID?:string) {
     super();
     const frameValues = name.split(':');
+
     const fieldType = frameValues[1];
     const tempfield = atob(frameValues[2]);
 
@@ -113,6 +119,7 @@ export class IFrameFormElement extends EventEmitter {
     this.tableName = tableName;
     this.fieldName = fieldName;
     this.label = label;
+    this.skyflowID = skyflowID;
 
     this.sensitive = ELEMENTS[this.fieldType].sensitive;
 
@@ -120,6 +127,7 @@ export class IFrameFormElement extends EventEmitter {
 
     this.metaData = metaData;
     this.context = context;
+
     this.collectBusEvents();
   }
 
@@ -199,7 +207,7 @@ export class IFrameFormElement extends EventEmitter {
   }
 
   // todo: send error message of the field
-  setValue = (value: string = '', valid: boolean = true) => {
+  setValue = (value: any, valid: boolean = true) => {
     if (this.fieldType === ELEMENTS.checkbox.name) {
       // toggle for checkbox
       if (this.state.value === value) {
@@ -207,13 +215,13 @@ export class IFrameFormElement extends EventEmitter {
       } else {
         this.state.value = value;
       }
-    } else if (this.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
+    } else if (this.fieldType === ELEMENTS.EXPIRATION_MONTH.name && value) {
       if (value.length === 1 && Number(value) >= 2) {
         this.state.value = `0${value}`;
       } else {
         this.state.value = value;
       }
-    } else if (this.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
+    } else if (this.fieldType === ELEMENTS.EXPIRATION_DATE.name && value) {
       if (this.format.startsWith('MM')) {
         if (value.length === 1 && Number(value) >= 2) {
           this.state.value = `0${value}`;
@@ -254,7 +262,7 @@ export class IFrameFormElement extends EventEmitter {
       this.state.isEmpty = true;
     }
 
-    if (valid && !this.doesClientHasError && this.validator(this.state.value || '')) {
+    if (valid && !this.doesClientHasError && this.validator(this.state.value)) {
       this.state.isValid = true;
       this.state.isComplete = true;
     } else {
@@ -284,7 +292,7 @@ export class IFrameFormElement extends EventEmitter {
 
   getUnformattedValue = () => {
     if (!this.mask) return this.state.value;
-    if (this.fieldType === ELEMENTS.CARD_NUMBER.name) {
+    if (this.fieldType === ELEMENTS.CARD_NUMBER.name && this.state.value) {
       return removeSpaces(this.state.value as string);
     }
     // return unMask(this.state.value, this.mask);;
@@ -298,24 +306,26 @@ export class IFrameFormElement extends EventEmitter {
     isComplete: this.state.isComplete,
     // Card Number should return 8 digit bin data
     value: this.state.value
-      && getReturnValue(this.state.value, this.fieldType,
-        EnvOptions[this.context?.env]?.doesReturnValue),
+    && getReturnValue(this.state.value, this.fieldType,
+      EnvOptions[this.context?.env]?.doesReturnValue),
   });
 
-  validator(value: string) {
+  validator(value: any) {
     let resp = true;
-    if (this.fieldType === ElementType.CARD_NUMBER) {
+    if (this.fieldType === ElementType.CARD_NUMBER && value) {
       if (this.regex) {
         resp = this.regex.test(value)
         && validateCreditCardNumber(value)
         && validateCardNumberLengthCheck(value);
       }
-    } else if (this.fieldType === ElementType.EXPIRATION_DATE) {
+    } else if (this.fieldType === ElementType.EXPIRATION_DATE && value) {
       resp = validateExpiryDate(value, this.format);
-    } else if (this.fieldType === ElementType.EXPIRATION_MONTH) {
+    } else if (this.fieldType === ElementType.EXPIRATION_MONTH && value) {
       resp = validateExpiryMonth(value);
-    } else if (this.fieldType === ElementType.EXPIRATION_YEAR) {
+    } else if (this.fieldType === ElementType.EXPIRATION_YEAR && value) {
       resp = validateExpiryYear(value, this.format);
+    } else if (this.fieldType === ElementType.FILE_INPUT) {
+      resp = fileValidation(value);
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex) {
@@ -634,6 +644,24 @@ export class IFrameForm {
         },
       );
 
+    bus
+      .target(this.clientDomain)
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.controllerId,
+        (data, callback) => {
+          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
+          MessageType.LOG, this.context.logLevel);
+          this.paralleUploadFiles()
+            .then((response) => {
+              callback(response);
+            })
+            .catch((error) => {
+              callback({ error });
+            });
+        },
+      );
+
     bus.on(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME, (data, callback) => {
       Object.keys(this.iFrameFormElements).forEach((iFrameFormElement) => {
         if (iFrameFormElement === data.name) {
@@ -666,19 +694,114 @@ export class IFrameForm {
     this.context = context;
   }
 
-  private getOrCreateIFrameFormElement = (frameName, label) => {
+  private getOrCreateIFrameFormElement = (frameName, label, skyflowID) => {
     this.iFrameFormElements[frameName] = this.iFrameFormElements[frameName]
       || new IFrameFormElement(frameName, label, {
         ...this.clientMetaData,
-      }, this.context);
+      }, this.context, skyflowID);
     return this.iFrameFormElements[frameName];
+  };
+
+  paralleUploadFiles = () => new Promise((rootResolve, rootReject) => {
+    const formElements = Object.keys(this.iFrameFormElements);
+
+    Promise.allSettled(
+      formElements.map(async (element) => {
+        let res;
+        if (
+          this.iFrameFormElements[element].fieldType
+            === ELEMENTS.FILE_INPUT.name
+        ) {
+          res = await this.uploadFiles(this.iFrameFormElements[element]);
+        }
+        return res;
+      }),
+
+    ).then((resultSet) => {
+      const fileUploadResponse: Record<string, any>[] = [];
+      const errorResponse: Record<string, any>[] = [];
+      resultSet.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          if (result.value !== undefined) {
+            if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
+              errorResponse.push(result.value);
+            } else {
+              fileUploadResponse.push(result.value);
+            }
+          }
+        } else if (result.status === 'rejected') {
+          errorResponse.push(result.reason);
+        }
+      });
+      if (errorResponse.length === 0) {
+        rootResolve({ fileUploadResponse });
+      } else if (fileUploadResponse.length === 0) rootReject({ errorResponse });
+      else rootReject({ fileUploadResponse, errorResponse });
+    });
+  });
+
+  uploadFiles = (fileElement) => {
+    if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
+    const fileUploadObject: any = {};
+
+    const {
+      state, tableName, skyflowID,
+    } = fileElement;
+
+    const validatedFileState = fileValidation(state.value);
+
+    if (!validatedFileState) {
+      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true));
+    }
+    fileUploadObject[state.name] = state.value;
+
+    const formData = new FormData();
+
+    const column = Object.keys(fileUploadObject)[0];
+
+    const value:Blob = Object.values(fileUploadObject)[0] as Blob;
+
+    formData.append(column, value);
+
+    const { client } = this;
+    const sendRequest = () => new Promise((rootResolve, rootReject) => {
+      const clientId = client.toJSON()?.metaData?.uuid || '';
+      getAccessToken(clientId).then((authToken) => {
+        client
+          .request({
+            body: formData,
+            requestMethod: 'POST',
+            url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${tableName}/${skyflowID}/files`,
+            headers: {
+              authorization: `Bearer ${authToken}`,
+              'content-type': 'multipart/form-data',
+            },
+          })
+          .then((response: any) => {
+            rootResolve(constructUploadResponse(response));
+          })
+          .catch((error) => {
+            rootReject(error);
+          });
+      }).catch((err) => {
+        rootReject(err);
+      });
+    });
+
+    return new Promise((resolve, reject) => {
+      sendRequest()
+        .then((res) => resolve(res))
+        .catch((err) => {
+          reject(err);
+        });
+    });
   };
 
   tokenize = (options) => {
     if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const responseObject: any = {};
-    const formElements = Object.keys(this.iFrameFormElements);
 
+    const formElements = Object.keys(this.iFrameFormElements);
     let errorMessage = '';
     for (let i = 0; i < formElements.length; i += 1) {
       const {
@@ -698,33 +821,38 @@ export class IFrameForm {
       const { state, tableName, validations } = this.iFrameFormElements[formElements[i]];
       if (
         this.iFrameFormElements[formElements[i]].fieldType
-        === ELEMENTS.checkbox.name
+        !== ELEMENTS.FILE_INPUT.name
       ) {
-        if (responseObject[state.name]) {
-          responseObject[state.name] = `${responseObject[state.name]},${
-            state.value
-          }`;
+        if (
+          this.iFrameFormElements[formElements[i]].fieldType
+          === ELEMENTS.checkbox.name
+        ) {
+          if (responseObject[state.name]) {
+            responseObject[state.name] = `${responseObject[state.name]},${
+              state.value
+            }`;
+          } else {
+            responseObject[state.name] = state.value;
+          }
+        } else if (responseObject[tableName]) {
+          if (get(responseObject[tableName], state.name)
+          && !(validations && checkForElementMatchRule(validations))) {
+            return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
+              [state.name, tableName], true));
+          }
+          set(
+            responseObject[tableName],
+            state.name,
+            this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+          );
         } else {
-          responseObject[state.name] = state.value;
+          responseObject[tableName] = {};
+          set(
+            responseObject[tableName],
+            state.name,
+            this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+          );
         }
-      } else if (responseObject[tableName]) {
-        if (get(responseObject[tableName], state.name)
-        && !(validations && checkForElementMatchRule(validations))) {
-          return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
-            [state.name, tableName], true));
-        }
-        set(
-          responseObject[tableName],
-          state.name,
-          this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-        );
-      } else {
-        responseObject[tableName] = {};
-        set(
-          responseObject[tableName],
-          state.name,
-          this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-        );
       }
     }
     let finalRecords;

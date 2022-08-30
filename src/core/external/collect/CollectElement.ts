@@ -44,7 +44,7 @@ class CollectElement extends SkyflowElement {
     isComplete: false,
     isValid: false,
     isFocused: false,
-    value: <string | Object | undefined>undefined,
+    value: <string | Object | Blob | undefined>undefined,
   };
 
   #group: any;
@@ -132,6 +132,7 @@ class CollectElement extends SkyflowElement {
         callback(this.#group);
         this.#onGroupEmitRemoveLocalValue();
         const { name, ...elementState } = this.#states[0];
+
         this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY, {
           ...elementState,
         });
@@ -228,8 +229,9 @@ class CollectElement extends SkyflowElement {
         this.#state.isFocused = elementState.isFocused;
         this.#state.value = {};
         const key = this.#elements[index].elementName;
-        const value = getReturnValue(elementState.value, elementState.elementType,
-          this.#doesReturnValue);
+        const value = elementState.value
+          && getReturnValue(elementState.value, elementState.elementType,
+            this.#doesReturnValue);
         if (this.#isSingleElementAPI) {
           this.#state.value = value;
         } else this.#state.value[key] = value;
@@ -351,7 +353,6 @@ class CollectElement extends SkyflowElement {
             else this.#states[index].value = undefined;
 
             this.#updateState();
-
             const emitData = {
               ...this.getState(),
               elementType: this.elementType,

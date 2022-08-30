@@ -223,6 +223,8 @@ const logs = {
     INVALID_PATH_IN_ARRAY_RES_XML: 'Interface: invokeSoapConnection - Invalid responseXML. Identifiers for path %s1 do not uniquely identify an element in response',
     INVALID_FORMAT_REGEX: 'Interface: reveal element - Invalid formatRegex %s1',
     INVALID_REPLACE_TEXT_TYPE: 'Interface: reveal element - Invalid replaceText %s1. replaceText of type string is required',
+    INVALID_FILE_TYPE: 'Interface: collect element - Invalid file type',
+
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',
