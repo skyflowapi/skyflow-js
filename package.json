@@ -4,7 +4,7 @@
   "analyze": false,
   "version": "1.19.0",
   "author": "Skyflow",
-  "description": "Skyflow JavaScript SDK",
+  "description": "Skyflow SDK for the JavaScript programming language.",
   "homepage": "https://github.com/skyflowapi/skyflow-js",
   "main": "./dist/sdkNodeBuild/index.js",
   "types": "./types/index-node.d.ts",
