@@ -327,10 +327,10 @@ export class FrameElement {
       }
     }
 
-    // this.iFrameFormElement.setValue(
-    //   newInputValue,
-    //   this.domInput?.checkValidity(),
-    // );
+    this.iFrameFormElement.setValue(
+      newInputValue,
+      this.domInput?.checkValidity(),
+    );
   }
 
   updateParentDiv = (newDiv: HTMLDivElement) => {
