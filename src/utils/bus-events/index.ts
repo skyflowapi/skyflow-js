@@ -7,7 +7,6 @@ import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT } from '../../core/constants';
 import properties from '../../properties';
 import { formatFrameNameToId } from '../helpers';
 import logs from '../logs';
-import { validateInitConfigInConnections } from '../validators';
 
 export function getCollectElementValue(key, elementIframename) {
   return new Promise((resolve, reject) => {
@@ -35,7 +34,6 @@ export function getRevealElementValue(key, revealFrameName, client) {
           resolve({ key, value: revealElement.value });
         } else {
           try {
-            validateInitConfigInConnections(client.config);
             const detokenizeRecords = fetchRecordsByTokenId([{ token: revealElement.token }],
               client);
             detokenizeRecords.then(

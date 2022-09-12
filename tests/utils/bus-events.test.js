@@ -102,8 +102,4 @@ describe("Utils/Bus Events",()=>{
         });
     });
 
-    test("update Element State after invoke connection", () => {
-        updateElementState('element:CVV', '123')
-        expect(targetSpy.mock.calls[0][0]).toBeDefined()
-    })
 });

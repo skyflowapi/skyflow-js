@@ -19,7 +19,6 @@ import logs from './utils/logs';
 import SKYFLOW_ERROR_CODE from './utils/constants';
 import {
   IRevealResponseType,
-  IConnectionConfig,
   RequestMethod,
   IInsertRecordInput,
   IDetokenizeInput,
@@ -30,7 +29,6 @@ import {
   LogLevel,
   MessageType,
   ValidationRuleType,
-  ISoapConnectionConfig,
 } from './utils/common';
 import { formatVaultURL } from './utils/helpers';
 
@@ -192,27 +190,6 @@ class Skyflow {
     printLog(parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.getById(getByIdInput);
-  }
-
-  /**
- * 1. Invoke Connection method
- *
- * @deprecated [#1]
-
- */
-  invokeConnection(config: IConnectionConfig) {
-    printLog(logs.warnLogs.DEPRECATE_INVOKE_CONNECTION, MessageType.WARN, this.#logLevel);
-    printLog(parameterizedString(logs.infoLogs.INVOKE_CONNECTION_TRIGGERED, CLASS_NAME),
-      MessageType.LOG, this.#logLevel);
-
-    return this.#skyflowContainer.invokeConnection(config);
-  }
-
-  invokeSoapConnection(config: ISoapConnectionConfig) {
-    printLog(parameterizedString(logs.infoLogs.INVOKE_SOAP_CONNECTION_TRIGGERED, CLASS_NAME),
-      MessageType.LOG, this.#logLevel);
-
-    return this.#skyflowContainer.invokeSoapConnection(config, this.#skyflowElements);
   }
 
   static get ContainerType() {
