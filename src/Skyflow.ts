@@ -122,7 +122,7 @@ class Skyflow {
       this.#logLevel);
     printLog(parameterizedString(logs.infoLogs.CURRENT_ENV, CLASS_NAME, this.#env),
       MessageType.LOG, this.#logLevel);
-    printLog(parameterizedString(logs.infoLogs.CURRENT_ENV, CLASS_NAME, this.#logLevel),
+    printLog(parameterizedString(logs.infoLogs.CURRENT_LOG_LEVEL, CLASS_NAME, this.#logLevel),
       MessageType.LOG, this.#logLevel);
   }
 

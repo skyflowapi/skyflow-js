@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.20.0] - 2022-09-13
+
+### Changed
+- Update custom validation samples in JS SDK 
+- Update Log Level log 
+  
+## [1.19.0] - 2022-08-30
+
+### Added
+-  `FILE_INPUT` element type
+
 ## [1.18.0] - 2022-07-05
 
 ### Added

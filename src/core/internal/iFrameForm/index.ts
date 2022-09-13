@@ -347,7 +347,7 @@ export class IFrameFormElement extends EventEmitter {
     return resp && !this.doesClientHasError;
   }
 
-  validateCustomValidations(value: string) {
+  validateCustomValidations(value: string = '') {
     let resp = true;
     if (this.validations && this.validations.length) {
       for (let i = 0; i < this.validations.length; i += 1) {
