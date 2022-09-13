@@ -13,7 +13,6 @@ import unionPayIcon from '../../assets/unionpay.svg';
 import visaCardIcon from '../../assets/visa.svg';
 import copyIcon from '../../assets/copyIcon.svg';
 import successIcon from '../../assets/path.svg';
-import SKYFLOW_ERROR_CODE from '../utils/constants';
 
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';

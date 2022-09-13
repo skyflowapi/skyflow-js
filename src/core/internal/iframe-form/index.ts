@@ -49,7 +49,6 @@ import {
 import {
   fileValidation, formatFrameNameToId, getReturnValue, removeSpaces,
 } from '../../../utils/helpers';
-import properties from '../../../properties';
 
 const set = require('set-value');
 const RegexParser = require('regex-parser');

@@ -8,7 +8,7 @@ import {
   DEFAULT_CARD_LENGTH_RANGE,
 } from '../../core/constants';
 import { CollectElementInput } from '../../core/external/collect/collect-container';
-import { IRevealElementInput, IRevealElementOptions } from '../../core/external/reveal/reveal-container';
+import { IRevealElementInput } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
 import { ISkyflow } from '../../skyflow';
 import {
