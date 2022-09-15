@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import isTokenValid from "../../src/utils/jwtUtils";
+import isTokenValid from "../../src/utils/jwt-utils";
 jest.mock('jwt-decode', () => () => ({exp: 123}))
 
 describe('Validation token', () => {

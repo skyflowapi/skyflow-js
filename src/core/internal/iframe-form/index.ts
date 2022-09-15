@@ -29,14 +29,14 @@ import {
   constructInsertRecordResponse,
   constructUploadResponse,
 } from '../../../core-utils/collect';
-import { getAccessToken } from '../../../utils/busEvents';
+import { getAccessToken } from '../../../utils/bus-events';
 import {
   printLog,
   parameterizedString,
   EnvOptions,
   getElementName,
-} from '../../../utils/logsHelper';
-import SkyflowError from '../../../libs/SkyflowError';
+} from '../../../utils/logs-helper';
+import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import {

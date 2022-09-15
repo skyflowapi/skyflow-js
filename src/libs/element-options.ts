@@ -9,16 +9,16 @@ import {
   ELEMENTS,
   INPUT_STYLES,
 } from '../core/constants';
-import { CollectElementInput } from '../core/external/collect/CollectContainer';
-import CollectElement from '../core/external/collect/CollectElement';
+import { CollectElementInput } from '../core/external/collect/collect-container';
+import CollectElement from '../core/external/collect/collect-element';
 import {
   IValidationRule, MessageType, ValidationRuleType,
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
-import { parameterizedString, printLog } from '../utils/logsHelper';
+import { parameterizedString, printLog } from '../utils/logs-helper';
 import { isValidExpiryDateFormat, isValidExpiryYearFormat, isValidRegExp } from '../utils/validators';
-import SkyflowError from './SkyflowError';
+import SkyflowError from './skyflow-error';
 import { buildStylesFromClassesAndStyles } from './styles';
 
 export function validateElementOptions(

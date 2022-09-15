@@ -2,11 +2,11 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import FrameElements from './../../../src/core/internal/FrameElements';
+import FrameElements from './../../../src/core/internal/frame-elements';
 import {
     FRAME_ELEMENT,
     ELEMENT_EVENTS_TO_IFRAME
-} from './../../../src/core/constants';
+} from '../../../src/core/constants';
 
 const stylesOptions = {
     inputStyles: {

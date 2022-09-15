@@ -4,19 +4,19 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import EventEmitter from '../../../event-emitter';
 import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe-libs/iframer';
-import SkyflowError from '../../../libs/SkyflowError';
+import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
 import { Context, MessageType, RedactionType } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
-import { parameterizedString, printLog } from '../../../utils/logsHelper';
+import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateRevealElementRecords, validateRevealOptions } from '../../../utils/validators';
 import {
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
 } from '../../constants';
-import Container from '../common/Container';
-import RevealElement from './RevealElement';
+import Container from '../common/container';
+import RevealElement from './reveal-element';
 
 export interface IRevealElementInput {
   token?: string;

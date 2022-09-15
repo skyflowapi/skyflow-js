@@ -13,7 +13,7 @@ import {
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
-} from '../../src/utils/logsHelper';
+} from '../../src/utils/logs-helper';
 const xml = '<response><Skyflow>123</Skyflow></response><response2><Skyflow>456</Skyflow></response2>'
 import {
   detectCardType

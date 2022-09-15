@@ -13,10 +13,10 @@ skyflow-js sdk can be included in 2 ways:
     
 2. Please follow these below steps to run samples using npm
 
-    - Go to the respective folder. For example, to run skyflowElements
+    - Go to the respective folder. For example, to run skyflow-elements
 
         ```
-        $ cd ./UsingNpm/skyflowElements
+        $ cd ./using-npm/skyflow-elements
         ```
         
     - install the dependencies

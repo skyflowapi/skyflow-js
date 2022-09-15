@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import Skyflow from '../../src/Skyflow';
+import Skyflow from '../../src/skyflow';
 import {formatRecordsForClient,formatRecordsForIframe} from "../../src/core-utils/reveal";
 const testTokenId = '1677f7bd-c087-4645-b7da-80a6fd1a81a4';
 const testInvalidTokenId = '80a6fd1a81a4-b7da-c087-4645';

@@ -16,8 +16,8 @@ import {
   constructSoapConnectionRequestXml,
   extractSkyflowTagsFromResponseBody,
   soapResponseBodyParser,
-} from '../../../libs/objectParse';
-import { getAccessToken, updateElementState } from '../../../utils/busEvents';
+} from '../../../libs/object-parse';
+import { getAccessToken, updateElementState } from '../../../utils/bus-events';
 import {
   clearEmpties,
   deletePropertyPath,
@@ -31,7 +31,7 @@ import {
   ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, FRAME_REVEAL,
   connectionConfigParseKeys, PUREJS_TYPES, FORMAT_REGEX, REPLACE_TEXT, ContentType,
 } from '../../constants';
-import { printLog, parameterizedString } from '../../../utils/logsHelper';
+import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
   IRevealRecord,
@@ -41,7 +41,7 @@ import {
   ISoapConnectionConfig,
   LogLevel,
 } from '../../../utils/common';
-import SkyflowError from '../../../libs/SkyflowError';
+import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 
 const soapRequest = require('easy-soap-request');

@@ -7,10 +7,10 @@ import {
   CardType, CARD_TYPE_REGEX,
   DEFAULT_CARD_LENGTH_RANGE,
 } from '../../core/constants';
-import { CollectElementInput } from '../../core/external/collect/CollectContainer';
-import { IRevealElementInput, IRevealElementOptions } from '../../core/external/reveal/RevealContainer';
-import SkyflowError from '../../libs/SkyflowError';
-import { ISkyflow } from '../../Skyflow';
+import { CollectElementInput } from '../../core/external/collect/collect-container';
+import { IRevealElementInput, IRevealElementOptions } from '../../core/external/reveal/reveal-container';
+import SkyflowError from '../../libs/skyflow-error';
+import { ISkyflow } from '../../skyflow';
 import {
   IInsertRecordInput,
   IDetokenizeInput,
@@ -23,7 +23,7 @@ import {
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 import logs from '../logs';
-import { printLog } from '../logsHelper';
+import { printLog } from '../logs-helper';
 
 const xmljs = require('xml-js');
 

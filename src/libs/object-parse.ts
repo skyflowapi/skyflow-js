@@ -3,18 +3,18 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 /* eslint-disable no-underscore-dangle */
 import _ from 'lodash';
-import CollectElement from '../core/external/collect/CollectElement';
+import CollectElement from '../core/external/collect/collect-element';
 import {
   FORMAT_REGEX, FRAME_ELEMENT, FRAME_REVEAL, PATH_NOT_FOUND_IN_RES_XML, REPLACE_TEXT,
 } from '../core/constants';
 import {
   flattenObject, formatFrameNameToId, getIframeNamesInSoapRequest, replaceIframeNameWithValues,
 } from '../utils/helpers';
-import { getCollectElementValue, getRevealElementValue } from '../utils/busEvents';
-import SkyflowError from './SkyflowError';
+import { getCollectElementValue, getRevealElementValue } from '../utils/bus-events';
+import SkyflowError from './skyflow-error';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
-import { getElementName, parameterizedString, printLog } from '../utils/logsHelper';
-import RevealElement from '../core/external/reveal/RevealElement';
+import { getElementName, parameterizedString, printLog } from '../utils/logs-helper';
+import RevealElement from '../core/external/reveal/reveal-element';
 import Client from '../client';
 import { LogLevel, MessageType } from '../utils/common';
 import logs from '../utils/logs';

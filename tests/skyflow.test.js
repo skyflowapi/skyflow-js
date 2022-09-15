@@ -2,17 +2,17 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import Skyflow, { ContainerType } from '../src/Skyflow';
-import CollectContainer from '../src/core/external/collect/CollectContainer';
-import RevealContainer from '../src/core/external/reveal/RevealContainer';
+import Skyflow, { ContainerType } from '../src/skyflow';
+import CollectContainer from '../src/core/external/collect/collect-container';
+import RevealContainer from '../src/core/external/reveal/reveal-container';
 import * as iframerUtils from '../src/iframe-libs/iframer';
 import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '../src/core/constants';
 import { Env, EventName, LogLevel, RedactionType, RequestMethod } from '../src/utils/common';
 import SKYFLOW_ERROR_CODE from "../src/utils/constants";
 import logs from "../src/utils/logs";
-import { parameterizedString } from '../src/utils/logsHelper';
+import { parameterizedString } from '../src/utils/logs-helper';
 
-jest.mock('../src/utils/jwtUtils', () => ({
+jest.mock('../src/utils/jwt-utils', () => ({
   __esModule: true,
   default: jest.fn(() => true),
 }));

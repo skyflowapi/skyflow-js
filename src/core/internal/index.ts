@@ -27,9 +27,9 @@ import {
   COLLECT_COPY_ICON_STYLES,
   COPY_UTILS,
 } from '../constants';
-import { IFrameForm, IFrameFormElement } from './iFrameForm';
+import { IFrameForm, IFrameFormElement } from './iframe-form';
 import getCssClassesFromJss from '../../libs/jss-styles';
-import { parameterizedString, printLog } from '../../utils/logsHelper';
+import { parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';

@@ -4,9 +4,9 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../../../src/core/constants';
 import clientModule from '../../../../src/client';
-import * as busEvents from '../../../../src/utils/busEvents';
+import * as busEvents from '../../../../src/utils/bus-events';
 import { LogLevel, Env } from '../../../../src/utils/common';
-import SkyflowFrameController from '../../../../src/core/internal/SkyflowFrame/SkyflowFrameController';
+import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
 
 jest.mock('easy-soap-request')
 const soapRequest = require('easy-soap-request');

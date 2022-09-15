@@ -3,9 +3,9 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
-import deepClone from '../../../libs/deepClone';
+import deepClone from '../../../libs/deep-clone';
 import { formatValidations, formatOptions, validateElementOptions } from '../../../libs/element-options';
-import SkyflowError from '../../../libs/SkyflowError';
+import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
 import {
@@ -13,15 +13,15 @@ import {
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
-import { printLog, parameterizedString } from '../../../utils/logsHelper';
+import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import { validateCollectElementInput, validateInitConfig, validateAdditionalFieldsInCollect } from '../../../utils/validators';
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS, FRAME_ELEMENT,
 } from '../../constants';
-import Container from '../common/Container';
-import CollectElement from './CollectElement';
+import Container from '../common/container';
+import CollectElement from './collect-element';
 
 export interface CollectElementInput {
   table?: string;
