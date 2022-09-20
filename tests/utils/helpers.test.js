@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { CardType, ElementType, FORMAT_REGEX, soapResXmlErrors,COPY_UTILS } from '../../src/core/constants';
+import { CardType, ElementType,COPY_UTILS } from '../../src/core/constants';
 import SKYFLOW_ERROR_CODE from '../../src/utils/constants';
 import {
   replaceIdInResponseXml,

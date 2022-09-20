@@ -354,55 +354,6 @@ describe('Retrieving data using skyflowId', () => {
   });
 });
 
-const invokeConnectionReq = {
-  connectionURL: 'http://connectionurl.com',
-  methodName: 'POST',
-  pathParams: {
-    cardNumber: '4111111111111111',
-  },
-  queryParams: {
-    expiryDate: '12/2024',
-  },
-  responseBody: {
-    resource: {
-      cvv: 'cvvId:123',
-    },
-  },
-};
-
-const invokeConnectionRes = {
-  receivedTimestamp: '2019-05-29 21:49:56.625',
-  processingTimeinMs: 116,
-  resource: {
-    cvv: '123',
-  },
-};
-
-const invokeConFormEncodedReq = {
-  connectionURL: 'http://connectionurl.com',
-  methodName: 'POST',
-  requestHeader: {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  },
-  requestBody: {
-    type: "card"
-  }
-}
-
-const invokeConFormDataReq = {
-  connectionURL: 'http://connectionurl.com',
-  methodName: 'POST',
-  requestHeader: {
-    'Content-Type': 'multipart/form-data'
-  },
-  requestBody: {
-    type: "card",
-    metadata: {
-      name: "John"
-    }
-  }
-}
-
 
 describe('Failed to fetch accessToken', () => {
   let emitSpy;
