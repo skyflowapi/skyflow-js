@@ -223,7 +223,6 @@ The `table` and `column` fields indicate which table and column in the vault the
 
 **Note**: 
 -  Use dot delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`)
--  `table` and `column` are optional only if the element is being used in invokeConnection()
 
 The `inputStyles` field accepts a style object which consists of CSS properties that should be applied to the form element in the following states:
 - `base`: all other variants inherit from these styles
@@ -890,8 +889,6 @@ const revealElement = {
 }
 
 ```
-`Note`: 
-- `token` is optional only if it is being used in invokeConnection()
 
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data but only a single variant is available i.e. base. 
 

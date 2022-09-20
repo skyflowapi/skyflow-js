@@ -170,7 +170,6 @@ const SKYFLOW_ERROR_CODE = {
     description: logs.errorLogs.EMPTY_REDACTION_TYPE_IN_GETBYID,
   },
   EMPTY_TOKEN_ID_REVEAL: { code: 400, description: logs.errorLogs.EMPTY_TOKEN_ID_REVEAL },
-  ELEMENT_MUST_HAVE_TOKEN: { code: 400, description: logs.errorLogs.ELEMENT_MUST_HAVE_TOKEN },
   DUPLICATE_ELEMENT: { code: 400, description: logs.errorLogs.DUPLICATE_ELEMENT },
   DUPLICATE_ELEMENT_ADDITIONAL_FIELDS: {
     code: 400,
@@ -180,20 +179,6 @@ const SKYFLOW_ERROR_CODE = {
   EMPTY_ELEMENT_TYPE: { code: 400, description: logs.errorLogs.EMPTY_ELEMENT_TYPE },
   INVALID_ELEMENT_TYPE: { code: 400, description: logs.errorLogs.INVALID_ELEMENT_TYPE },
   INVALID_ELEMENT_SELECTOR: { code: 400, description: logs.errorLogs.INVALID_ELEMENT_SELECTOR },
-  MISSING_CONNECTION_CONFIG: { code: 400, description: logs.errorLogs.MISSING_CONNECTION_CONFIG },
-  EMPTY_CONNECTION_URL: { code: 400, description: logs.errorLogs.EMPTY_CONNECTION_URL },
-  MISSING_CONNECTION_URL: { code: 400, description: logs.errorLogs.MISSING_CONNECTION_URL },
-  INVALID_CONNECTION_URL_TYPE: {
-    code: 400,
-    description: logs.errorLogs.INVALID_CONNECTION_URL_TYPE,
-  },
-  ELEMENTS_NOT_MOUNTED_INVOKE_CONNECTION: {
-    code: 400,
-    description: logs.errorLogs.ELEMENTS_NOT_MOUNTED_INVOKE_CONNECTION,
-  },
-  INVALID_CONNECTION_URL: { code: 400, description: logs.errorLogs.INVALID_CONNECTION_URL },
-  MISSING_METHODNAME_KEY: { code: 400, description: logs.errorLogs.MISSING_METHODNAME_KEY },
-  INVALID_METHODNAME_VALUE: { code: 400, description: logs.errorLogs.INVALID_METHODNAME_VALUE },
   FRAME_NOT_FOUND: { code: 400, description: logs.errorLogs.FRAME_NOT_FOUND },
   REQUIRED_PARAMS_NOT_PROVIDED: {
     code: 400,
@@ -213,7 +198,6 @@ const SKYFLOW_ERROR_CODE = {
   CONNECTION_ERROR: { code: 400, description: logs.errorLogs.CONNECTION_ERROR },
   NETWORK_ERROR: { code: 500, description: logs.errorLogs.NETWORK_ERROR },
   COMPLETE_AND_VALID_INPUTS: { code: 400, description: logs.errorLogs.COMPLETE_AND_VALID_INPUTS },
-  RESPONSE_BODY_KEY_MISSING: { code: 404, description: logs.errorLogs.RESPONSE_BODY_KEY_MISSING },
   INVALID_VALIDATIONS_TYPE: { code: 400, description: logs.errorLogs.INVALID_VALIDATIONS_TYPE },
   MISSING_VALIDATION_RULE_TYPE: {
     code: 400,
@@ -262,90 +246,6 @@ const SKYFLOW_ERROR_CODE = {
   REVEAL_ELEMENT_ERROR_STATE: {
     code: 400,
     description: logs.errorLogs.REVEAL_ELEMENT_ERROR_STATE,
-  },
-  MISSING_SOAP_CONNECTION_CONFIG: {
-    code: 400,
-    description: logs.errorLogs.MISSING_SOAP_CONNECTION_CONFIG,
-  },
-  MISSING_SOAP_CONNECTION_URL: {
-    code: 400,
-    description: logs.errorLogs.MISSING_SOAP_CONNECTION_URL,
-  },
-  EMPTY_SOAP_CONNECTION_URL: {
-    code: 400,
-    description: logs.errorLogs.EMPTY_SOAP_CONNECTION_URL,
-  },
-  INVALID_SOAP_CONNECTION_URL_TYPE: {
-    code: 400,
-    description: logs.errorLogs.INVALID_SOAP_CONNECTION_URL_TYPE,
-  },
-  INVALID_SOAP_CONNECTION_URL: {
-    code: 400,
-    description: logs.errorLogs.INVALID_SOAP_CONNECTION_URL,
-  },
-  INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML: {
-    code: 400,
-    description: logs.errorLogs.INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML,
-  },
-  ELEMENT_NOT_MOUNTED_IN_SOAP_REQUEST_XML: {
-    code: 400,
-    description: logs.errorLogs.ELEMENT_NOT_MOUNTED_IN_SOAP_REQUEST_XML,
-  },
-  ELEMENT_NOT_MOUNTED_IN_SOAP_RESPONSE_XML: {
-    code: 400,
-    description: logs.errorLogs.ELEMENT_NOT_MOUNTED_IN_SOAP_RESPONSE_XML,
-  },
-  DUPLICATE_ELEMENT_IN_SOAP_RESPONSE_XML: {
-    code: 400,
-    description: logs.errorLogs.DUPLICATE_ELEMENT_IN_SOAP_RESPONSE_XML,
-  },
-  INVALID_ELEMENT_ID_IN_SOAP_RESPONSE_XML: {
-    code: 400,
-    description: logs.errorLogs.INVALID_ELEMENT_ID_IN_SOAP_RESPONSE_XML,
-  },
-  MISSING_SOAP_REQUEST_XML: {
-    code: 400,
-    description: logs.errorLogs.MISSING_SOAP_REQUEST_XML,
-  },
-  EMPTY_SOAP_REQUEST_XML: {
-    code: 400,
-    description: logs.errorLogs.EMPTY_SOAP_REQUEST_XML,
-  },
-  INVALID_SOAP_REQUEST_XML_TYPE: {
-    code: 400,
-    description: logs.errorLogs.INVALID_SOAP_REQUEST_XML_TYPE,
-  },
-  INVALID_SOAP_RESPONSE_XML_TYPE: {
-    code: 400,
-    description: logs.errorLogs.INVALID_SOAP_RESPONSE_XML_TYPE,
-  },
-  INVALID_SOAP_REQUEST_XML: {
-    code: 400,
-    description: logs.errorLogs.INVALID_SOAP_REQUEST_XML,
-  },
-  INVALID_SOAP_RESPONSE_XML: {
-    code: 400,
-    description: logs.errorLogs.INVALID_SOAP_RESPONSE_XML,
-  },
-  INVALID_HTTP_HEADERS_TYPE: {
-    code: 400,
-    description: logs.errorLogs.INVALID_HTTP_HEADERS_TYPE,
-  },
-  INVALID_PATH_IN_RES_XML: {
-    code: 400,
-    description: logs.errorLogs.INVALID_PATH_IN_RES_XML,
-  },
-  INVALID_PATH_IN_ARRAY_RES_XML: {
-    code: 400,
-    description: logs.errorLogs.INVALID_PATH_IN_ARRAY_RES_XML,
-  },
-  INVALID_FORMAT_REGEX: {
-    code: 400,
-    description: logs.errorLogs.INVALID_FORMAT_REGEX,
-  },
-  INVALID_REPLACE_TEXT_TYPE: {
-    code: 400,
-    description: logs.errorLogs.INVALID_REPLACE_TEXT_TYPE,
   },
   INVALID_FILE_TYPE: {
     code: 400,

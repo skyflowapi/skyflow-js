@@ -49,7 +49,6 @@ import {
 import {
   fileValidation, formatFrameNameToId, getReturnValue, removeSpaces,
 } from '../../../utils/helpers';
-import properties from '../../../properties';
 
 const set = require('set-value');
 const RegexParser = require('regex-parser');
@@ -443,16 +442,16 @@ export class IFrameFormElement extends EventEmitter {
       });
 
     // for connection
-    bus
-      .target(properties.IFRAME_SECURE_ORGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data:any) => {
-        if (data.name === this.iFrameName) {
-          if (data.options.value !== undefined) {
-            // for setting value
-            this.setValue(<string | undefined>data.options.value);
-          }
-        }
-      });
+    // bus
+    //   .target(properties.IFRAME_SECURE_ORGIN)
+    //   .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data:any) => {
+    //     if (data.name === this.iFrameName) {
+    //       if (data.options.value !== undefined) {
+    //         // for setting value
+    //         this.setValue(<string | undefined>data.options.value);
+    //       }
+    //     }
+    //   });
 
     bus.target(this.metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR, (data) => {
@@ -485,12 +484,12 @@ export class IFrameFormElement extends EventEmitter {
     }
 
     // for connection
-    bus.target(window.location.origin).on(ELEMENT_EVENTS_TO_IFRAME.GET_COLLECT_ELEMENT,
-      (data, callback) => {
-        if (data.name === this.iFrameName) {
-          callback({ ...this.getStatus(), value: this.getUnformattedValue() });
-        }
-      });
+    // bus.target(window.location.origin).on(ELEMENT_EVENTS_TO_IFRAME.GET_COLLECT_ELEMENT,
+    //   (data, callback) => {
+    //     if (data.name === this.iFrameName) {
+    //       callback({ ...this.getStatus(), value: this.getUnformattedValue() });
+    //     }
+    //   });
   };
 
   sendChangeStatus = (inputEvent: boolean = false) => {

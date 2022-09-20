@@ -85,24 +85,7 @@ export interface Context{
   env:Env
 }
 
-export interface IConnectionConfig {
-  connectionURL: string;
-  methodName: RequestMethod;
-  pathParams?: any;
-  queryParams?: any;
-  requestBody?: any;
-  requestHeader?: any;
-  responseBody?: any;
-}
-
 export interface IValidationRule {
   type: ValidationRuleType;
   params: any;
-}
-
-export interface ISoapConnectionConfig {
-  connectionURL: string;
-  httpHeaders?: any;
-  requestXML: any;
-  responseXML?: any;
 }
