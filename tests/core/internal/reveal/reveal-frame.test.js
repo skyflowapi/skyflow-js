@@ -83,13 +83,6 @@ describe("Reveal Frame Class",()=>{
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
     emitCb(data);
 
-    // connection
-    const emitterCb = jest.fn();
-    const onCbName = on.mock.calls[3][0];
-    expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
-    const onCb = on.mock.calls[3][1];
-    onCb({name:""},emitterCb);
-    expect(emitterCb).toBeCalledWith({value: data.record.token});
   });
 
   test("init callback after reveal with response value",()=>{
@@ -125,13 +118,6 @@ describe("Reveal Frame Class",()=>{
     const onRevealResponseCb = on.mock.calls[0][1];
     onRevealResponseCb({"1815-6223-1073-1425":"card_value"})
 
-    // connection
-    const emitterCb = jest.fn();
-    const onCbName = on.mock.calls[3][0];
-    expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
-    const onCb = on.mock.calls[3][1];
-    onCb({name:""},emitterCb); 
-    expect(emitterCb).toBeCalledWith({value: "card_value"});
   });
   test("init callback after reveal without value",()=>{
     const testFrame = RevealFrame.init();
@@ -171,13 +157,6 @@ describe("Reveal Frame Class",()=>{
     const onRevealResponseCb = on.mock.calls[0][1];
     onRevealResponseCb({});
 
-    // connection
-    const emitterCb = jest.fn();
-    const onCbName = on.mock.calls[3][0];
-    expect(onCbName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
-    const onCb = on.mock.calls[3][1];
-    onCb({name:""},emitterCb); 
-    expect(emitterCb).toBeCalledWith({value: data.record.token});
   });
 
   test("reveal set error",()=>{
@@ -214,7 +193,6 @@ describe("Reveal Frame Class",()=>{
     console.log(on.mock.calls[0][0]);
     console.log(on.mock.calls[1][0]);
     console.log(on.mock.calls[2][0]); 
-    console.log(on.mock.calls[3][0]);
 
     const onSetErrorName = on.mock.calls[1][0];
     // undefined since with jest window.name will be emptyString("") 
@@ -262,7 +240,6 @@ describe("Reveal Frame Class",()=>{
     console.log(on.mock.calls[0][0]);
     console.log(on.mock.calls[1][0]);
     console.log(on.mock.calls[2][0]); 
-    console.log(on.mock.calls[3][0]);
     // reveal response ready
     const onRevealResponseName = on.mock.calls[1][0];
     // undefined since with jest window.name will be emptyString("") 
@@ -349,7 +326,6 @@ describe("Reveal Frame Class",()=>{
     console.log(on.mock.calls[0][0]);
     console.log(on.mock.calls[1][0]);
     console.log(on.mock.calls[2][0]); 
-    console.log(on.mock.calls[3][0]);
 
     const onRevealResponseName = on.mock.calls[2][0];
     // undefined since with jest window.name will be emptyString("") 
@@ -396,7 +372,6 @@ describe("Reveal Frame Class",()=>{
     console.log(on.mock.calls[0][0]);
     console.log(on.mock.calls[1][0]);
     console.log(on.mock.calls[2][0]); 
-    console.log(on.mock.calls[3][0]);
 
     const onRevealResponseName = on.mock.calls[2][0];
     // undefined since with jest window.name will be emptyString("") 

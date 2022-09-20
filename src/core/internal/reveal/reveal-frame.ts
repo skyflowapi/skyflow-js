@@ -161,30 +161,6 @@ class RevealFrame {
       }
     });
     this.updateRevealElementOptions();
-
-    // for connection
-    bus.target(window.location.origin).on(
-      ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT,
-      (data, callback) => {
-        if (data.name === this.#name) {
-          if (this.#revealedValue) {
-            callback({
-              value: this.#revealedValue,
-            });
-          } else if (!this.#record.formatRegex) {
-            callback({
-              value: this.#record.token,
-            });
-          } else {
-            callback({
-              formatRegex: this.#record.formatRegex,
-              replaceText: this.#record.replaceText,
-              token: this.#record.token,
-            });
-          }
-        }
-      },
-    );
   }
 
   private setRevealError(errorText: string) {

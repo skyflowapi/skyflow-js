@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { getAccessToken,getRevealElementValue,getCollectElementValue, updateElementState } from "../../src/utils/bus-events";
+import { getAccessToken } from "../../src/utils/bus-events";
 import bus from 'framebus';
 import { ELEMENT_EVENTS_TO_IFRAME } from "../../src/core/constants";
 import logs from "../../src/utils/logs";
@@ -49,61 +49,5 @@ describe("Utils/Bus Events",()=>{
         });
     });
     
-    test("getRevealElementValue fn",(done)=>{
-        const response = getRevealElementValue("ele_key","reveal:frame:name");
-        const emitEventName = emitSpy.mock.calls[0][0];
-        const emittedData = emitSpy.mock.calls[0][1];
-        const emitCb = emitSpy.mock.calls[0][2];
-        expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_REVEAL_ELEMENT);
-        expect(emittedData.name).toEqual("reveal:frame:name");
-        emitCb("reveal_value");
-        response.then((data)=>{
-            expect(data.key).toEqual("ele_key");
-            expect(data.value).toEqual("reveal_value");
-            done();
-        }).catch((err)=>{
-            console.log(err);
-            done();
-        });
-    });
 
-    test("getCollectElementValue fn valid Element",(done)=>{
-        const response = getCollectElementValue("ele_key","element:frame:id:ERROR");
-        const emitEventName = emitSpy.mock.calls[0][0];
-        const emittedData = emitSpy.mock.calls[0][1];
-        const emitCb = emitSpy.mock.calls[0][2];
-        expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_COLLECT_ELEMENT);
-        expect(emittedData.name).toEqual("element:frame");
-        emitCb({isValid:true,value:"collect_ele_value"});
-        response.then((data)=>{
-            expect(data.key).toEqual("ele_key");
-            expect(data.value).toEqual("collect_ele_value");
-            done();
-        }).catch((err)=>{
-            console.log(err);
-            done();
-        });
-    });
-
-    test("getCollectElementValue fn Invalid Element",(done)=>{
-        const response = getCollectElementValue("ele_key","element:frame:id:ERROR");
-        const emitEventName = emitSpy.mock.calls[0][0];
-        const emittedData = emitSpy.mock.calls[0][1];
-        const emitCb = emitSpy.mock.calls[0][2];
-        expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_COLLECT_ELEMENT);
-        expect(emittedData.name).toEqual("element:frame");
-        emitCb({isValid:false});
-        response.then((data)=>{
-           expect(data).toBeUndefined();
-            done();
-        }).catch((err)=>{
-            expect(err).toEqual(logs.errorLogs.INVALID_FIELD);
-            done();
-        });
-    });
-
-    test("update Element State after invoke connection", () => {
-        updateElementState('element:CVV', '123')
-        expect(targetSpy.mock.calls[0][0]).toBeDefined()
-    })
 });

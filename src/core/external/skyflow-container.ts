@@ -8,22 +8,17 @@ import iframer, {
   setAttributes,
   setStyles,
 } from '../../iframe-libs/iframer';
-import { connectionConfigParser } from '../../libs/object-parse';
 import properties from '../../properties';
 import {
-  validateConnectionConfig, validateInsertRecords,
+  validateInsertRecords,
   validateDetokenizeInput, validateGetByIdInput,
   validateInitConfig,
-  validateSoapConnectionConfig,
 } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
   ELEMENT_EVENTS_TO_IFRAME,
-  connectionConfigParseKeys,
   SKYFLOW_FRAME_CONTROLLER,
   PUREJS_TYPES,
-  soapReqXmlErrors,
-  soapResXmlErrors,
 } from '../constants';
 import {
   printLog,
@@ -31,9 +26,8 @@ import {
 } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import {
-  IDetokenizeInput, IGetByIdInput, IConnectionConfig, Context, MessageType, ISoapConnectionConfig,
+  IDetokenizeInput, IGetByIdInput, Context, MessageType,
 } from '../../utils/common';
-import { replaceIdInResponseXml, replaceIdInXml } from '../../utils/helpers';
 
 const CLASS_NAME = 'SkyflowContainer';
 class SkyflowContainer {
@@ -283,171 +277,6 @@ class SkyflowContainer {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
         reject(e);
-      }
-    });
-  }
-
-  invokeSoapConnection(config: ISoapConnectionConfig, skyflowElements: any) {
-    if (this.#isControllerFrameReady) {
-      return new Promise((resolve, reject) => {
-        try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_SOAP_CONNECTION_CONFIG, CLASS_NAME),
-            MessageType.LOG,
-            this.#context.logLevel);
-          validateSoapConnectionConfig(config, this.#client.config);
-
-          const reqXml = replaceIdInXml(config.requestXML, skyflowElements, soapReqXmlErrors);
-          let resXml = '';
-          if (config.responseXML) {
-            resXml = replaceIdInResponseXml(config.responseXML, skyflowElements, soapResXmlErrors);
-          }
-          bus
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
-              {
-                type: PUREJS_TYPES.INVOKE_SOAP_CONNECTION,
-                config: {
-                  ...config,
-                  requestXML: reqXml,
-                  ...(config.responseXML ? { responseXML: resXml } : {}),
-                },
-              },
-              (response: any) => {
-                if (response.error) {
-                  reject(response.error);
-                } else {
-                  resolve(response);
-                }
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-            CLASS_NAME, PUREJS_TYPES.INVOKE_SOAP_CONNECTION),
-          MessageType.LOG, this.#context.logLevel);
-        } catch (err) {
-          reject(err?.error || err);
-        }
-      });
-    }
-    return new Promise((resolve, reject) => {
-      try {
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_SOAP_CONNECTION_CONFIG, CLASS_NAME),
-          MessageType.LOG,
-          this.#context.logLevel);
-        validateSoapConnectionConfig(config, this.#client.config);
-
-        const reqXml = replaceIdInXml(config.requestXML, skyflowElements, soapReqXmlErrors);
-        let resXml = '';
-        if (config.responseXML) {
-          resXml = replaceIdInResponseXml(config.responseXML, skyflowElements, soapResXmlErrors);
-        }
-        bus
-          .target(properties.IFRAME_SECURE_ORGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
-            bus.emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
-              {
-                type: PUREJS_TYPES.INVOKE_SOAP_CONNECTION,
-                config: {
-                  ...config,
-                  requestXML: reqXml,
-                  ...(config.responseXML ? { responseXML: resXml } : {}),
-                },
-              },
-              (response: any) => {
-                if (response.error) {
-                  reject(response.error);
-                } else {
-                  resolve(response);
-                }
-              },
-            );
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-          CLASS_NAME, PUREJS_TYPES.INVOKE_SOAP_CONNECTION),
-        MessageType.LOG, this.#context.logLevel);
-      } catch (err) {
-        reject(err?.error || err);
-      }
-    });
-  }
-
-  invokeConnection(config: IConnectionConfig) {
-    if (this.#isControllerFrameReady) {
-      return new Promise((resolve, reject) => {
-        try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_CONNECTION_CONFIG, CLASS_NAME),
-            MessageType.LOG,
-            this.#context.logLevel);
-
-          validateConnectionConfig(config, this.#client.config);
-          connectionConfigParseKeys.forEach((configKey) => {
-            if (config[configKey]) {
-              connectionConfigParser(config[configKey], configKey);
-            }
-          });
-          if (config.responseBody) {
-            connectionConfigParser(config.responseBody, 'responseBody');
-          }
-
-          bus
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
-              {
-                type: PUREJS_TYPES.INVOKE_CONNECTION,
-                config,
-              },
-              (response: any) => {
-                if (response.error) reject(response.error);
-                else resolve(response);
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-            CLASS_NAME, PUREJS_TYPES.INVOKE_CONNECTION),
-          MessageType.LOG, this.#context.logLevel);
-        } catch (error) {
-          printLog(error.message, MessageType.ERROR, this.#context.logLevel);
-
-          reject(error);
-        }
-      });
-    }
-    return new Promise((resolve, reject) => {
-      try {
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_CONNECTION_CONFIG, CLASS_NAME),
-          MessageType.LOG,
-          this.#context.logLevel);
-
-        validateConnectionConfig(config, this.#client.config);
-        connectionConfigParseKeys.forEach((configKey) => {
-          if (config[configKey]) {
-            connectionConfigParser(config[configKey], configKey);
-          }
-          if (config.responseBody) {
-            connectionConfigParser(config.responseBody, 'responseBody');
-          }
-        });
-        bus
-          .target(properties.IFRAME_SECURE_ORGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
-            bus.emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
-              {
-                type: PUREJS_TYPES.INVOKE_CONNECTION,
-                config,
-              },
-              (response: any) => {
-                if (response.error) reject(response.error);
-                else resolve(response);
-              },
-            );
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-          CLASS_NAME, PUREJS_TYPES.INVOKE_CONNECTION),
-        MessageType.LOG, this.#context.logLevel);
-      } catch (error) {
-        printLog(error.message, MessageType.ERROR, this.#context.logLevel);
-
-        reject(error);
       }
     });
   }

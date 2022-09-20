@@ -13,7 +13,6 @@ import unionPayIcon from '../../assets/unionpay.svg';
 import visaCardIcon from '../../assets/visa.svg';
 import copyIcon from '../../assets/copyIcon.svg';
 import successIcon from '../../assets/path.svg';
-import SKYFLOW_ERROR_CODE from '../utils/constants';
 
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';
@@ -26,8 +25,6 @@ export const PUREJS_TYPES = {
   INSERT: 'INSERT',
   DETOKENIZE: 'DETOKENIZE',
   GET_BY_SKYFLOWID: 'GET_BY_SKYFLOWID',
-  INVOKE_CONNECTION: 'INVOKE_CONNECTION',
-  INVOKE_SOAP_CONNECTION: 'INVOKE_SOAP_CONNECTION',
 };
 
 export const ELEMENT_EVENTS_TO_CLIENT = {
@@ -387,12 +384,6 @@ export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
   },
 };
 
-export const connectionConfigParseKeys = [
-  'pathParams',
-  'queryParams',
-  'requestBody',
-];
-
 export const CARD_TYPE_REGEX = {
   [CardType.VISA]: {
     regex: /^4\d*/,
@@ -485,22 +476,6 @@ export const ALLOWED_EXPIRY_YEAR_FORMATS = [
   DEFAULT_EXPIRATION_YEAR_FORMAT,
   'YYYY',
 ];
-
-export const soapReqXmlErrors = [
-  SKYFLOW_ERROR_CODE.INVALID_ELEMENT_ID_IN_SOAP_REQUEST_XML,
-  SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_SOAP_REQUEST_XML,
-];
-export const soapResXmlErrors = [
-  SKYFLOW_ERROR_CODE.INVALID_ELEMENT_ID_IN_SOAP_RESPONSE_XML,
-  SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_SOAP_RESPONSE_XML,
-  SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT_IN_SOAP_RESPONSE_XML,
-];
-
-export const PATH_NOT_FOUND_IN_RES_XML = 'skyflow: Path not found';
-
-export const FORMAT_REGEX = ':FORMAT_REGEX:';
-
-export const REPLACE_TEXT = ':REPLACE_TEXT:';
 
 export enum ContentType {
   APPLICATIONORJSON = 'application/json',
