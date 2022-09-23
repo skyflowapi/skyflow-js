@@ -1,12 +1,11 @@
 # skyflow-js sdk sample templates
-Use this folder to test the functionalities of JAVA-SDK just by adding `VAULT-ID` `VAULT-URL` and `SERVICE-ACCOUNT` details at the required place.
+Use this folder to test the functionalities of JS-SDK just by adding `VAULT-ID` `VAULT-URL` and `SERVICE-ACCOUNT` details at the required place.
 
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/en/) version 10 or above
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) version 6.x.x
 - [express.js](http://expressjs.com/en/starter/hello-world.html)
-
 ## Configure
 - Before you can run the sample app, create a vault.
 - `TOKEN_END_POINT_URL` for generating bearer token.
