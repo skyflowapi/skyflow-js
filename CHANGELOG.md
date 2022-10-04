@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.21.0] - 2022-09-20
+## [1.21.2] - 2022-10-04
+### Fixed
+- Fix regression in `card_number` element
+- Cleanup reveal options
+  
+## [1.21.1] - 2022-09-20
 ### Changed
 - Removed `invokeConnection()`
 - Removed `invokeSoapConnection()`
