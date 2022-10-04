@@ -4,7 +4,6 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import Client from '../../../client';
 import {
-  applyFormatRegex,
   fetchRecordsByTokenId,
   formatRecordsForClient,
   formatRecordsForIframe,
@@ -78,8 +77,7 @@ class RevealFrameController {
     return new Promise((resolve, reject) => {
       fetchRecordsByTokenId(revealRecords, this.#client).then(
         (resolvedResult) => {
-          let formattedResult = formatRecordsForIframe(resolvedResult);
-          formattedResult = applyFormatRegex(formattedResult, revealRecords);
+          const formattedResult = formatRecordsForIframe(resolvedResult);
           bus
             .target(properties.IFRAME_SECURE_SITE)
             .emit(
@@ -90,8 +88,7 @@ class RevealFrameController {
           resolve(formatRecordsForClient(resolvedResult));
         },
         (rejectedResult) => {
-          let formattedResult = formatRecordsForIframe(rejectedResult);
-          formattedResult = applyFormatRegex(formattedResult, revealRecords);
+          const formattedResult = formatRecordsForIframe(rejectedResult);
           bus
             .target(properties.IFRAME_SECURE_SITE)
             .emit(

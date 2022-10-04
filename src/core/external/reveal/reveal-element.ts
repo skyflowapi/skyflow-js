@@ -44,7 +44,6 @@ class RevealElement extends SkyflowElement {
     this.#recordData = {
       ...record,
       ...options,
-      ...(options.formatRegex ? { formatRegex: options.formatRegex?.toString() } : {}),
     };
     this.#containerId = containerId;
     this.#context = context;
