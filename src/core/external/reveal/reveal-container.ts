@@ -29,8 +29,6 @@ export interface IRevealElementInput {
 }
 
 export interface IRevealElementOptions {
-  formatRegex?: string | object;
-  replaceText?: string;
   enableCopy?: boolean;
 }
 

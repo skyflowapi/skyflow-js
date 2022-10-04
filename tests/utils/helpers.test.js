@@ -20,23 +20,6 @@ import {
 } from '../../src/utils/validators/index';
 import successIcon from '../../assets/path.svg'
 
-const element1 = {
-  iframeName: jest.fn(() => ('reveal:123')),
-  getRecordData: jest.fn(() => ({
-    formatRegex: /..$/,
-    replaceText: '$1'
-  })),
-  isMounted: jest.fn(() => (true))
-}
-
-const element2 = {
-  iframeName: jest.fn(() => ('reveal:456')),
-  getRecordData: jest.fn(() => ({
-    formatRegex: /..$/
-  })),
-  isMounted: jest.fn(() => (true))
-}
-
 
 describe('bin data for for all card number except AMEX element type on CHANGE event', () => {
   test("in PROD return bin data only for card number element", () => {
