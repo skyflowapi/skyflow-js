@@ -7,10 +7,7 @@ import SkyflowError from '../libs/skyflow-error';
 import {
   ISkyflowIdRecord, IRevealRecord, IRevealResponseType, MessageType, LogLevel,
 } from '../utils/common';
-import logs from '../utils/logs';
-import { printLog, parameterizedString } from '../utils/logs-helper';
-
-const RegexParser = require('regex-parser');
+import { printLog } from '../utils/logs-helper';
 
 interface IApiSuccessResponse {
   records: [
@@ -140,28 +137,6 @@ export const formatRecordsForIframe = (response: IRevealResponseType) => {
     });
   }
   return result;
-};
-
-export const applyFormatRegex = (formattedResult: object, revealRecords: any) => {
-  const finalResult = { ...formattedResult };
-  revealRecords.forEach((record: any) => {
-    if (record.formatRegex && record.replaceText) {
-      const tempRegex = RegexParser(record.formatRegex);
-      finalResult[record.token] = formattedResult[record.token]?.replace(tempRegex,
-        record.replaceText);
-    } else if (record.formatRegex) {
-      const tempRegex = RegexParser(record.formatRegex);
-      const matchResults = formattedResult[record.token]?.match(tempRegex);
-      if (matchResults && matchResults.length > 0) {
-        finalResult[record.token] = matchResults[0];
-      } else {
-        printLog(parameterizedString(logs.warnLogs.NO_MATCH_FOUND_FOR_FORMAT_REGEX,
-          record.formatRegex), MessageType.WARN, LogLevel.WARN);
-      }
-    }
-  });
-
-  return finalResult;
 };
 
 export const formatRecordsForClient = (response: IRevealResponseType) => {
