@@ -211,7 +211,7 @@ export class FrameElement {
       if (this.options.enableCopy) {
         this.copyText = state.value;
       }
-      if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name && state.value) {
+      if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
         const cardType = detectCardType(state.value);
         if (this.options.enableCardIcon) {
           if (this.domImg) {

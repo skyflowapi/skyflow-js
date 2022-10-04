@@ -41,7 +41,7 @@ export const validateCreditCardNumber = (cardNumber: string) => {
   return sum % 10 === 0;
 };
 
-export const detectCardType = (cardNumber: string) => {
+export const detectCardType = (cardNumber: string = '') => {
   const value = cardNumber.replace(/[\s-]/g, '');
 
   let detectedType = CardType.DEFAULT;
