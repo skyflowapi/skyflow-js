@@ -118,7 +118,7 @@ describe('test frame controller', () => {
     const focusCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
 
-    focusCb[0][1]();
+    focusCb[0][1](state);
 
     const blurCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
@@ -225,6 +225,12 @@ describe('test frame controller', () => {
     expect(formElement.getValue()).toBe('')
     expect(detectCardType(formElement.getValue())).toBe(CardType.DEFAULT)
 
+    const focusCbEvent = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCbEvent[0][1](state);
+
+    expect(formElement.getValue()).toBe('')
   })
 
   test('expiration_date FrameElement', () => {
