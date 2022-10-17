@@ -54,10 +54,22 @@ const cvvElement = {
   type: 'CVV',
 };
 
+const collectStylesOptions = {
+  inputStyles: {
+    cardIcon: {
+      position: "absolute",
+      left: "8px",
+      top: "calc(50% - 10px)",
+    },
+  },
+};
+
 const cardNumberElement = {
   table: 'pii_fields',
   column: 'primary_card.card_number',
   type: 'CARD_NUMBER',
+  ...collectStylesOptions,
+
 };
 
 const ExpirationDateElement = {
@@ -274,6 +286,18 @@ describe('Collect container', () => {
     expect(options.format).toBe(validFormat);
   });
 
+  it('test enableCardIcon option is enabled for elements', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let expiryElement;
+    try {
+      expiryElement = container.create(ExpirationDateElement, {enableCardIcon: true});
+    } catch (err) {}
+
+    const options = expiryElement.getOptions()
+    expect(options.enableCardIcon).toBe(true);
+
+  });
+
   it('test enableCopy option is enabled for elements', () => {
     const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     let expiryElement;
@@ -284,6 +308,17 @@ describe('Collect container', () => {
     const options = expiryElement.getOptions()
     expect(options.enableCopy).toBe(true);
 
+  });
+
+  it('test enableCardIcon option is disabled for elements', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let expiryElement;
+    try {
+      expiryElement = container.create(ExpirationDateElement, {enableCardIcon: false});
+    } catch (err) {}
+
+    const options = expiryElement.getOptions()
+    expect(options.enableCardIcon).toBe(false);
   });
 
   it('test enableCopy option is disabled for elements', () => {

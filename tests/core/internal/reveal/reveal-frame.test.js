@@ -395,6 +395,14 @@ describe("Reveal Frame Class",()=>{
         inputStyles:{
           base:{
             color:"red"
+          },
+          copyIcon: {
+            position: "absolute",
+            right: "8px",
+            top:"calc(50% - 16px)",
+            cursor: "pointer",
+            border: "1px solid red",
+            backgroundColor:"black",
           }
         },
         labelStyles:{

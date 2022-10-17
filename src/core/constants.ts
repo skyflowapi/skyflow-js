@@ -268,9 +268,9 @@ export const INPUT_WITH_ICON_DEFAULT_STYLES = {
   padding: '4px',
 };
 
-export const INPUT_ICON_STYLES = 'position: absolute; left:8px; top:calc(50% - 10px)';
-export const COLLECT_COPY_ICON_STYLES = 'position: absolute; right:8px; top:calc(50% - 10px); cursor:pointer;';
-export const REVEAL_COPY_ICON_STYLES = 'position: absolute; right:8px; top:calc(50% - 16px); cursor:pointer;';
+export const INPUT_ICON_STYLES = 'position: absolute; left:8px; bottom:calc(50% - 12px)';
+export const COLLECT_COPY_ICON_STYLES = 'position: absolute; right:8px; bottom:calc(50% - 12px); cursor:pointer;';
+export const REVEAL_COPY_ICON_STYLES = 'position: absolute; right:8px; top:calc(50% - 12px); cursor:pointer;';
 
 export const ERROR_TEXT_STYLES = {
   color: '#f44336',
