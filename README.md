@@ -230,6 +230,8 @@ The `inputStyles` field accepts a style object which consists of CSS properties 
 - `empty`: applied when the Element has no input
 - `focus`: applied when the Element has focus
 - `invalid`: applied when the Element has invalid input
+- `cardIcon`: applied to the card type icon in `CARD_NUMBER` Element
+- `copyIcon`: applied to copy icon in Elements when `enableCopy` option is true
 
 Styles are specified with [JSS](https://cssinjs.org/?v=v10.7.1). 
 
@@ -250,8 +252,16 @@ inputStyles:{
     invalid: {
       color: "#f44336",
     },
+    cardIcon:{
+      position: "absolute",
+      left:"8px", 
+      bottom:"calc(50% - 12px)"
+    },
+    copyIcon:{
+      position: "absolute",
+      right:"8px",
+    }
   }
-}
 ```
 The states that are available for `labelStyles` are `base` and `focus`.
 
@@ -422,6 +432,11 @@ const element = container.create({
       base: {
         color: "#1d1d1d",
       },
+      cardIcon:{
+        position: "absolute",
+        left:"8px", 
+        bottom:"calc(50% - 12px)"
+    },
   },
   labelStyles: {
       base: {
@@ -890,7 +905,7 @@ const revealElement = {
 
 ```
 
-The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data but only a single variant is available i.e. base. 
+The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant and `copyIcon` style object. 
 
 An example of a inputStyles object:
 
@@ -898,6 +913,11 @@ An example of a inputStyles object:
 inputStyles: {
     base: {
       color: "#1d1d1d"
+    },
+    copyIcon:{
+      position: "absolute",
+      right:"8px",
+      top: "calc(50% - 10px)",
     }
 }
 ```
