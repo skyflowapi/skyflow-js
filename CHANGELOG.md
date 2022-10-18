@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.21.3] - 2022-10-18
+### Added
+- `cardIcon` and `copyIcon` style objects for collect and reveal elements.
+
 ## [1.21.2] - 2022-10-04
 ### Fixed
 - Fix regression in `card_number` element
