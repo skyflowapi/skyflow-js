@@ -24,6 +24,17 @@ const stylesOptions = {
       focus: {},
       invalid: {
         color: "#f44336"
+      },
+      cardIcon: {
+        position: "absolute",
+        left: "8px",
+        top: "calc(50% - 10px)",
+      },
+      copyIcon: {
+        position: "absolute",
+        right: "8px",
+         top:"calc(50% - 10px)",
+        cursor: "pointer",
       }
     },
     labelStyles: {
@@ -39,13 +50,13 @@ const stylesOptions = {
     }
   };
 const element = {
-    elementName: `element:CVV:${btoa('123')}`,
+    elementName: `element:CARD_NUMBER:${btoa('123')}`,
     rows: [{
         elements: [
             {
-                elementType: 'CVV',
+                elementType: 'CARD_NUMBER',
                 table: 'patients',
-                column: 'cvv',
+                column: 'card_number',
                 ...stylesOptions
             }
         ]
@@ -57,7 +68,7 @@ describe('test frame elements', () => {
     beforeEach(() => {
         windowSpy = jest.spyOn(global, 'window', 'get');
         windowSpy.mockImplementation(() => ({
-            name: `${FRAME_ELEMENT}:CVV:${btoa('123')}:ERROR`,
+            name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR`,
         }));
 
         emitSpy = jest.spyOn(bus, 'emit');
@@ -80,7 +91,7 @@ describe('test frame elements', () => {
                     isEmpty: true,
                     isComplete: false,
                 })),
-                fieldType: 'CVV'
+                fieldType: 'CARD_NUMBER'
             }
         })
         const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')

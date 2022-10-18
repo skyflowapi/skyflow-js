@@ -147,6 +147,12 @@ export class IFrameFormElement extends EventEmitter {
         value: this.state.value,
         error: this.clientErrorText || this.errorText,
       });
+    } else {
+      this._emit(ELEMENT_EVENTS_TO_CLIENT.FOCUS, {
+        ...this.getStatus(),
+        value: this.state.value,
+        error: this.clientErrorText || this.errorText,
+      });
     }
   };
 

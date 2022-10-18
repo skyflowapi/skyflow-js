@@ -33,7 +33,7 @@ import { parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
-import { appendZeroToOne, handleCopyIconClick } from '../../utils/helpers';
+import { appendZeroToOne, handleCopyIconClick, styleToString } from '../../utils/helpers';
 
 export class FrameController {
   controller?: FrameController;
@@ -153,7 +153,7 @@ export class FrameElement {
       && this.options.enableCardIcon) {
       this.domImg = document.createElement('img');
       this.domImg.src = CARD_ENCODED_ICONS.DEFAULT;
-      this.domImg.setAttribute('style', INPUT_ICON_STYLES);
+      this.domImg.setAttribute('style', this.options.inputStyles.cardIcon ? styleToString(this.options.inputStyles.cardIcon) : INPUT_ICON_STYLES);
       this.inputParent.append(this.domImg);
     }
 
@@ -161,7 +161,7 @@ export class FrameElement {
       this.domCopy = document.createElement('img');
       this.domCopy.src = COPY_UTILS.copyIcon;
       this.domCopy.title = COPY_UTILS.toCopy;
-      this.domCopy.setAttribute('style', COLLECT_COPY_ICON_STYLES);
+      this.domCopy.setAttribute('style', this.options.inputStyles.copyIcon ? styleToString(this.options.inputStyles.copyIcon) : COLLECT_COPY_ICON_STYLES);
       this.inputParent.append(this.domCopy);
 
       this.domCopy.onclick = () => {
@@ -178,8 +178,9 @@ export class FrameElement {
       this.onFocusChange(event, false);
     };
 
-    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, () => {
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, (state) => {
       this.focusChange(true);
+      this.updateStyleClasses(state);
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
@@ -207,7 +208,6 @@ export class FrameElement {
       ) {
         (<HTMLInputElement> this.domInput).checked = this.options.value === state.value;
       }
-
       if (this.options.enableCopy) {
         this.copyText = state.value;
       }
