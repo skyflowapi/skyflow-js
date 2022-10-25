@@ -232,11 +232,11 @@ export class FrameElement {
         state.isValid = false;
         state.isEmpty = true;
         this.hasError = true;
-        this.domError.innerText = `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-          this.options.label)}`;
+        this.domError.innerText = this.options.label ? `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
+          this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
       } else if (this.options.required && !state.isRequired && this.domError) {
-        this.domError.innerText = `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-          this.options.label)}`;
+        this.domError.innerText = this.options.label ? `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
+          this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
       }
       this.updateStyleClasses(state);
     });

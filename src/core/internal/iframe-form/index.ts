@@ -281,8 +281,8 @@ export class IFrameFormElement extends EventEmitter {
       }
       if (!this.state.isValid && this.state.isEmpty) {
         this.state.isRequired = true;
-        this.errorText = `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-          this.label)}`;
+        this.errorText = this.label ? `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
+          this.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
       }
     }
     this.sendChangeStatus(true);
