@@ -45,6 +45,7 @@ class CollectElement extends SkyflowElement {
     isValid: false,
     isFocused: false,
     value: <string | Object | Blob | undefined>undefined,
+    isRequired: false,
   };
 
   #group: any;
@@ -102,6 +103,7 @@ class CollectElement extends SkyflowElement {
         value: this.#doesReturnValue ? '' : undefined,
         elementType: element.elementType,
         name: element.elementName,
+        isRequired: false,
       });
     });
     this.#iframe = new IFrame(
@@ -227,6 +229,7 @@ class CollectElement extends SkyflowElement {
         this.#state.isComplete = elementState.isComplete;
         this.#state.isValid = elementState.isValid;
         this.#state.isFocused = elementState.isFocused;
+        this.#state.isRequired = elementState.isRequired;
         this.#state.value = {};
         const key = this.#elements[index].elementName;
         const value = elementState.value
@@ -240,6 +243,8 @@ class CollectElement extends SkyflowElement {
         this.#state.isComplete = this.#state.isComplete && elementState.isComplete;
         this.#state.isValid = this.#state.isValid && elementState.isValid;
         this.#state.isFocused = this.#state.isFocused || elementState.isFocused;
+        this.#state.isRequired = this.#state.isRequired || elementState.isRequired;
+
         if (!this.#state.value) this.#state.value = {};
         if (!this.#elements[index].sensitive) this.#state.value[this.#elements[index].elementName] = elementState.value || '';
       }
@@ -252,6 +257,7 @@ class CollectElement extends SkyflowElement {
     isValid: this.#state.isValid,
     isFocused: this.#state.isFocused,
     value: this.#state.value,
+    required: this.#state.isRequired,
   });
 
   getOptions = () => {
@@ -349,6 +355,8 @@ class CollectElement extends SkyflowElement {
             this.#states[index].isValid = data.value.isValid;
             this.#states[index].isComplete = data.value.isComplete;
             this.#states[index].isFocused = data.value.isFocused;
+            this.#states[index].isRequired = data.value.isRequired;
+
             if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
             else this.#states[index].value = undefined;
 

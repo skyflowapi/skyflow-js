@@ -90,6 +90,7 @@ const logs = {
 
     INVALID_COLLECT_VALUE: 'Invalid value',
     INVALID_COLLECT_VALUE_WITH_LABEL: 'Invalid %s1',
+    REQUIRED_COLLECT_VALUE: '%s1 is required',
 
     RECORDS_KEY_NOT_FOUND: 'Interface: client insert - records object is required.',
     INVALID_RECORDS_IN_INSERT: 'Interface: client insert - Invalid records. records object should be an array.',
