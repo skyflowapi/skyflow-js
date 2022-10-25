@@ -1,25 +1,24 @@
-# skyflow-js sdk sample templates
-Use this folder to test the functionalities of JS-SDK just by adding `VAULT-ID` `VAULT-URL` and `SERVICE-ACCOUNT` details at the required place.
+# Js SDK samples
+Test the SDK by adding `VAULT-ID`, `VAULT-URL`, and `SERVICE-ACCOUNT` details in the required places for each sample.
 
 
-### Prerequisites
+## Prerequisites
 - [Node.js](https://nodejs.org/en/) version 10 or above
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) version 6.x.x
 - [express.js](http://expressjs.com/en/starter/hello-world.html)
-## Configure
-- Before you can run the sample app, create a vault.
+## Prepare
 - `TOKEN_END_POINT_URL` for generating bearer token.
 
 ### Create the vault
 1. In a browser, navigate to Skyflow Studio and log in.
 2. Create a vault by clicking **Create Vault** > **Start With a Template** > **PIIData**.
-3. Once the vault is created, click the gear icon and select **Edit Vault** Details.
-4. Note your Vault URL and Vault ID values, then click Cancel. You'll need these later.
+3. Once the vault is created, click the gear icon and select **Edit Vault Details**.
+4. Note your **Vault URL** and **Vault ID** values, then click **Cancel**. You'll need these later.
 
 ### Create a service account
 1. In the side navigation click, **IAM** > **Service Accounts** > **New Service Account**.
-2. For Name, enter **Test-Js-Sdk-Sample**. For Roles, choose the required roles for specific action.
-3. Click **Create**. Your browser downloads a **credentials.json** file. Keep this file secure, as you'll need it in the next steps.
+2. For **Name**, enter "SDK Sample". For Roles, choose **Vault Editor**.
+3. Click **Create**. Your browser downloads a **credentials.json** file. Keep this file secure, as You'll need it for each of the samples.
 
 ### Create TOKEN_END_POINT_URL
 - Create a new directory named `bearer-token-generator`.
@@ -89,127 +88,129 @@ app.listen(port, () => {
 
 ## Using script tag
 
-- `collect-element-listeners.html`
-    - This sample template shows event listeners on skyflow elements.
-    - Configure
-        - Replace **<VAULT_ID>** with your **VAULT ID**.
-        - Replace **<VAULT_URL>** with your **VAULT URL**.
-        - Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
-    - Run the application
+### collect-element-listeners
+This sample template shows event listeners on skyflow elements.
+#### Configure
+1. Replace **<VAULT_ID>** with your **VAULT ID**.
+2. Replace **<VAULT_URL>** with your **VAULT URL**.
+3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
+#### Run the sample
 
-            npx live-server collect-element-listeners.html --port=8000
-    - Open url `http://localhost:8000/` in the browser.
+        npx live-server collect-element-listeners.html --port=8000
 
-- `skyflow-elements.html`
-    - This sample template shows how collect and reveal feature of skyflow elements works using skyflow-js.
-    - Configure
-        - Replace **<VAULT_ID>** with your **VAULT ID**.
-        - Replace **<VAULT_URL>** with your **VAULT URL**.
-        - Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
-    - Run the application
+Open url `http://localhost:8000/` in the browser.
 
-            npx live-server skyflow-elements.html --port=8000
-    - Open url `http://localhost:8000/` in the browser.
+### skyflow-elements
+This sample template shows how collect and reveal feature of skyflow elements works using skyflow-js.
+#### Configure
+1. Replace **<VAULT_ID>** with your **VAULT ID**.
+2. Replace **<VAULT_URL>** with your **VAULT URL**.
+3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
+#### Run the sample
 
-- `custom-validations.html`
-    - This sample template shows custom validation feature provided by skyflow-js.
-    - Configure
-        - Replace **<VAULT_ID>** with your **VAULT ID**.
-        - Replace **<VAULT_URL>** with your **VAULT URL**.
-        - Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
-    - Run the application
+        npx live-server skyflow-elements.html --port=8000
+ 
+Open url `http://localhost:8000/` in the browser.
 
-            npx live-server custom-validations.html --port=8000
-    - Open url `http://localhost:8000/` in the browser.
+### custom-validations
+This sample template shows custom validation feature provided by skyflow-js.
+#### Configure
+1. Replace **<VAULT_ID>** with your **VAULT ID**.
+2. Replace **<VAULT_URL>** with your **VAULT URL**.
+3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
+#### Run the sample
 
-- `pure-js.html`
-    - This sample template shows feature of insert and the response after insertion of the data.
-    - Configure
-        - Replace **<VAULT_ID>** with your **VAULT ID**.
-        - Replace **<VAULT_URL>** with your **VAULT URL**.
-        - Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
-    - Run the application
+        npx live-server custom-validations.html --port=8000
+Open url `http://localhost:8000/` in the browser.
 
-            npx live-server pure-js.html --port=8000
-    - Open url `http://localhost:8000/` in the browser.
+### pure-js
+This sample template shows feature of insert and the response after insertion of the data.
+#### Configure
+1. Replace **<VAULT_ID>** with your **VAULT ID**.
+2. Replace **<VAULT_URL>** with your **VAULT URL**.
+3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
+#### Run the sample
 
-- `skyflow-file-upload.html`
-    - This sample template shows file-upload feature of skyflow-js.
-    - Configure
-        - Replace **<VAULT_ID>** with your **VAULT ID**.
-        - Replace **<VAULT_URL>** with your **VAULT URL**.
-        - Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
-    - Run the application
+        npx live-server pure-js.html --port=8000
+Open url `http://localhost:8000/` in the browser.
 
-            npx live-server skyflow-file-upload.html --port=8000
-    - Open url `http://localhost:8000/` in the browser.
+### skyflow-file-upload.html
+This sample template shows file-upload feature of skyflow-js.
+#### Configure
+1. Replace **<VAULT_ID>** with your **VAULT ID**.
+2. Replace **<VAULT_URL>** with your **VAULT URL**.
+3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
+#### Run the sample
+
+        npx live-server skyflow-file-upload.html --port=8000
+Open url `http://localhost:8000/` in the browser.
 
 
 ## Using npm
-- [`collect-element-listeners`](using-npm/collect-element-listeners/)
-    - This sample template shows event listeners on skyflow elements.
-    - Setup
+### collect-element-listeners
+This sample template shows event listeners on skyflow elements.
+#### Setup
 
-            cd using-npm/collect-element-listeners
-            npm i
-    - Configure
-        - open [`index.js`](using-npm/collect-element-listeners/index.js)
-        - Replace **<VAULT_ID>** with your **VAULT ID**.
-        - Replace **<VAULT_URL>** with your **VAULT URL**.
-        - Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
-    - Run the application
+        cd using-npm/collect-element-listeners
+        npm i
+#### Configure
+1. open [`index.js`](using-npm/collect-element-listeners/index.js)
+2. Replace **<VAULT_ID>** with your **VAULT ID**.
+3. Replace **<VAULT_URL>** with your **VAULT URL**.
+4. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
+#### Run the sample
 
-            cd using-npm/collect-element-listeners/src
-            npx live-server index.html --port=8000
-        Open url `http://localhost:8000/` in the browser.
+        cd using-npm/collect-element-listeners/src
+        npx live-server index.html --port=8000
+Open url `http://localhost:8000/` in the browser.
 
-- [`custom-validations`](using-npm/custom-validations/)
-    - This sample template shows custom validation feature provided by skyflow-js.
-    - Setup
+### custom-validations
+This sample template shows custom validation feature provided by skyflow-js.
+#### Setup
 
-            cd using-npm/custom-validations
-            npm i
-    - Configure
-        - open [`index.js`](using-npm/custom-validations/index.js)
-        - Replace **<VAULT_ID>** with your **VAULT ID**.
-        - Replace **<VAULT_URL>** with your **VAULT URL**.
-        - Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
-    - Run the application
+        cd using-npm/custom-validations
+        npm i
+#### Configure
+1. open [`index.js`](using-npm/collect-element-listeners/index.js)
+2. Replace **<VAULT_ID>** with your **VAULT ID**.
+3. Replace **<VAULT_URL>** with your **VAULT URL**.
+4. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
+#### Run the sample
 
-            cd using-npm/custom-validations/src
-            npx live-server index.html --port=8000
-        Open url `http://localhost:8000/` in the browser.
+        cd using-npm/custom-validations/src
+        npx live-server index.html --port=8000
+Open url `http://localhost:8000/` in the browser.
 
-- [`pure-js`](using-npm/pure-js/)
-    - This sample template shows feature of insert and the response after insertion of the data.
-    - Setup
+### pure-js
+This sample template shows feature of insert and the response after insertion of the data.
+#### Setup
 
-            cd using-npm/pure-js
-            npm i
-    - Configure
-        - open [`index.js`](using-npm/pure-js/index.js)
-        - Replace **<VAULT_ID>** with your **VAULT ID**.
-        - Replace **<VAULT_URL>** with your **VAULT URL**.
-        - Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
-    - Run the application
+        cd using-npm/pure-js
+        npm i
+#### Configure
+1. open [`index.js`](using-npm/collect-element-listeners/index.js)
+2. Replace **<VAULT_ID>** with your **VAULT ID**.
+3. Replace **<VAULT_URL>** with your **VAULT URL**.
+4. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
+#### Run the sample
 
             cd using-npm/pure-js/src
             npx live-server index.html --port=8000
-        Open url `http://localhost:8000/` in the browser.
+Open url `http://localhost:8000/` in the browser.
 
-- [`skyflow-elements`](using-npm/skyflow-elements/)
-    - This sample template shows how collect and reveal feature of skyflow elements works using skyflow-js.
-    - Setup
+### skyflow-elements
+This sample template shows how collect and reveal feature of skyflow elements works using skyflow-js.
+#### Setup
 
             cd using-npm/pure-js
             npm i
-    - Configure
-        - open [`index.js`](using-npm/skyflow-elements/index.js)
-        - Replace **<VAULT_ID>** with your **VAULT ID**.
-        - Replace **<VAULT_URL>** with your **VAULT URL**.
-        - Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
-    - Run the application
+#### Configure
+1. open [`index.js`](using-npm/collect-element-listeners/index.js)
+2. Replace **<VAULT_ID>** with your **VAULT ID**.
+3. Replace **<VAULT_URL>** with your **VAULT URL**.
+4. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
+#### Run the sample
 
             cd using-npm/skyflow-elements/src
             npx live-server index.html --port=8000
-        Open url `http://localhost:8000/` in the browser.
+Open url `http://localhost:8000/` in the browser.
