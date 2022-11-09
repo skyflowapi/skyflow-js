@@ -193,7 +193,8 @@ const data = {
             }
         }]
     },
-    tokens: true
+    tokens: true,
+    upsert: [{ table: '', column: '  ' }]
 }
 
 const fileData = {
