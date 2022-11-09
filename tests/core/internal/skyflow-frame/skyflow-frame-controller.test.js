@@ -44,10 +44,10 @@ const records = {
 
 const options = {
   tokens: true,
-  upsert: {
+  upsert: [{
     table: '',
     column: '',
-  }
+  }]
 };
 
 const insertResponse = {
@@ -149,7 +149,7 @@ describe('Inserting records into the vault', () => {
     const data = {
       type: PUREJS_TYPES.INSERT,
       records,
-      options: { tokens: false, upsert: { table: '', column: '  ' } },
+      options: { tokens: false, upsert: [{ table: '', column: '  ' }] },
     };
     const cb2 = jest.fn();
     onCb(data, cb2);
@@ -378,7 +378,7 @@ describe('Failed to fetch accessToken', () => {
     const insertData = {
       type: PUREJS_TYPES.INSERT,
       records,
-      options: { tokens: false, upsert: { table: '', column: '  ' } },
+      options: { tokens: false, upsert: [{ table: '', column: '  ' }] },
     };
     const insertCb = jest.fn();
     onCb(insertData, insertCb);

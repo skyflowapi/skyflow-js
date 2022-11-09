@@ -8,6 +8,15 @@ import {
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 
+export const getUpsertColumn = (tableName: string, options: Record<string, any>) => {
+  let uniqueColumn = '';
+  options.upsert.forEach((upsertOptions) => {
+    if (tableName === upsertOptions.table) {
+      uniqueColumn = upsertOptions.column;
+    }
+  });
+  return uniqueColumn;
+};
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
   options: Record<string, any> = { tokens: true },
@@ -15,12 +24,14 @@ export const constructInsertRecordRequest = (
   const requestBody: any = [];
   if (options?.tokens || options === null) {
     records.records.forEach((record, index) => {
+      const upsertColumn = getUpsertColumn(record.table, options);
+
       requestBody.push({
         method: 'POST',
         quorum: true,
         tableName: record.table,
         fields: record.fields,
-        upsert: record.table === options.upsert.table ? options.upsert.column : '',
+        upsert: upsertColumn,
       });
       requestBody.push({
         method: 'GET',
@@ -31,12 +42,14 @@ export const constructInsertRecordRequest = (
     });
   } else {
     records.records.forEach((record) => {
+      const elseUpsertColumn = getUpsertColumn(record.table, options);
+
       requestBody.push({
         method: 'POST',
         quorum: true,
         tableName: record.table,
         fields: record.fields,
-        upsert: record.table === options.upsert.table ? options.upsert.column : '',
+        upsert: elseUpsertColumn,
       });
     });
   }

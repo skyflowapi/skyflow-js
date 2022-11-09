@@ -194,7 +194,7 @@ const data = {
         }]
     },
     tokens: true,
-    upsert: { table: '', column: '  ' }
+    upsert: [{ table: '', column: '  ' }]
 }
 
 const fileData = {
