@@ -20,6 +20,7 @@ export const constructInsertRecordRequest = (
         quorum: true,
         tableName: record.table,
         fields: record.fields,
+        upsert: record.table === options.upsert.table ? options.upsert.column : '',
       });
       requestBody.push({
         method: 'GET',
@@ -35,6 +36,7 @@ export const constructInsertRecordRequest = (
         quorum: true,
         tableName: record.table,
         fields: record.fields,
+        upsert: record.table === options.upsert.table ? options.upsert.column : '',
       });
     });
   }
