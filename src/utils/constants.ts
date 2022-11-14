@@ -251,13 +251,35 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_FILE_TYPE,
   },
-  INVALID_TABLE_IN_UPSERT_OPTIONS: {
+  INVALID_TABLE_IN_UPSERT_OPTION: {
     code: 400,
-    description: logs.errorLogs.INVALID_TABLE_IN_UPSERT_OPTIONS,
+    description: logs.errorLogs.INVALID_TABLE_IN_UPSERT_OPTION,
   },
-  INVALID_COLUMN_IN_UPSERT_OPTIONS: {
+  INVALID_COLUMN_IN_UPSERT_OPTION: {
     code: 400,
-    description: logs.errorLogs.INVALID_COLUMN_IN_UPSERT_OPTIONS,
+    description: logs.errorLogs.INVALID_COLUMN_IN_UPSERT_OPTION,
+  },
+
+  INVALID_UPSERT_OPTION_TYPE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_UPSERT_OPTION_TYPE,
+  },
+  EMPTY_UPSERT_OPTIONS_ARRAY: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_UPSERT_OPTIONS_ARRAY,
+  },
+  INVALID_UPSERT_OPTION_OBJECT_TYPE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_UPSERT_OPTION_OBJECT_TYPE,
+  },
+  MISSING_TABLE_IN_UPSERT_OPTION: {
+    code: 400,
+    description: logs.errorLogs.MISSING_TABLE_IN_UPSERT_OPTION,
+  },
+
+  MISSING_COLUMN_IN_UPSERT_OPTION: {
+    code: 400,
+    description: logs.errorLogs.MISSING_COLUMN_IN_UPSERT_OPTION,
   },
 };
 

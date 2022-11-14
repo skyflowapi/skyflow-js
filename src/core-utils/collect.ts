@@ -17,12 +17,6 @@ export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions>
   let uniqueColumn = '';
   if (options) {
     options.forEach((upsertOptions) => {
-      if (!('table' in upsertOptions)) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_UPSERT_OPTIONS, [], true);
-      }
-      if (!('column' in upsertOptions)) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_UPSERT_OPTIONS, [], true);
-      }
       if (tableName === upsertOptions.table) {
         uniqueColumn = upsertOptions.column;
       }
@@ -44,7 +38,7 @@ export const constructInsertRecordRequest = (
         quorum: true,
         tableName: record.table,
         fields: record.fields,
-        upsert: upsertColumn,
+        ...(options?.upsert ? { upsert: upsertColumn } : {}),
       });
       requestBody.push({
         method: 'GET',
@@ -62,7 +56,7 @@ export const constructInsertRecordRequest = (
         quorum: true,
         tableName: record.table,
         fields: record.fields,
-        upsert: elseUpsertColumn,
+        ...(options?.upsert ? { upsert: elseUpsertColumn } : {}),
       });
     });
   }

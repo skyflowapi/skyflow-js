@@ -187,8 +187,20 @@ const logs = {
     VALIDATION_FAILED: 'Validation failed',
     REVEAL_ELEMENT_ERROR_STATE: 'unable to reveal, since one or more element(s) have setError',
     INVALID_FILE_TYPE: 'Interface: collect element - Invalid file type',
-    INVALID_TABLE_IN_UPSERT_OPTIONS: 'Interface: collect element - No table key in upsert options',
-    INVALID_COLUMN_IN_UPSERT_OPTIONS: 'Interface: collect element - No column key in upsert options',
+    INVALID_UPSERT_OPTION_TYPE:
+      'Interface: collect container - Invalid upsert option, should be an array',
+    EMPTY_UPSERT_OPTIONS_ARRAY:
+      'Interface: collect container - upsert option cannot be an empty array, atleast one object of table and column is required.',
+    INVALID_UPSERT_OPTION_OBJECT_TYPE:
+      'Interface: collect container - Invalid upsert object at index %s1, an object of table and column is required.',
+    MISSING_TABLE_IN_UPSERT_OPTION:
+      'Interface: collect container - "table" key is required in upsert options object at index %s1',
+    MISSING_COLUMN_IN_UPSERT_OPTION:
+      'Interface: collect container - "column" key is required in upsert option at index %s1',
+    INVALID_TABLE_IN_UPSERT_OPTION:
+      'Interface: collect container - Invalid table in upsert object at index %s1, table of type non empty string is required',
+    INVALID_COLUMN_IN_UPSERT_OPTION:
+      'Interface: collect container - Invalid table upsert object at index %s1, column of type non empty string is required',
 
   },
   warnLogs: {

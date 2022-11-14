@@ -18,38 +18,6 @@ describe("getUpsertColumn fn test", () => {
         const fnResponse = getUpsertColumn('testTwo', options.upsert);
         expect(fnResponse).toStrictEqual('');
     });
-    test("incorrect table key in upsert options", () => {
-        const incorrectOptions = {
-            upsert: [
-                {
-                    incorrectTable: 'test',
-                    column: 'column'
-                }
-            ]
-        }
-        try {
-            getUpsertColumn('testTwo', incorrectOptions.upsert);
-        }
-        catch (err) {
-            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_UPSERT_OPTIONS.description);
-        }
-    });
-    test("incorrect column key in upsert options", () => {
-        const incorrectOptions = {
-            upsert: [
-                {
-                    table: 'test',
-                    incorrectColumn: 'column'
-                }
-            ]
-        }
-        try {
-            getUpsertColumn('testTwo', incorrectOptions.upsert);
-        }
-        catch (err) {
-            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_UPSERT_OPTIONS.description);
-        }
-    });
     test("upsert options as undefined", () => {
         const fnResponse = getUpsertColumn('test', undefined);
         expect(fnResponse).toStrictEqual('');
