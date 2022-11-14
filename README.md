@@ -135,7 +135,7 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 - [**Using Skyflow File Element to upload a file**](#using-skyflow-file-element-to-upload-a-file)
 ## Inserting data into the vault
 
-To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes a dictionary of optional parameters for the insertion. See below: 
+To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes a object of optional parameters for the insertion. See below: 
 
 ```javascript
 const records = {
@@ -305,7 +305,7 @@ Finally, the `type` field takes a Skyflow ElementType. Each type applies the app
 
 The `INPUT_FIELD` type is a custom UI element without any built-in validations.  See the section on [validations](#validations) for more information on validations.
 
-Along with CollectElement we can define other options which takes a dictionary of optional parameters as described below:
+Along with CollectElement we can define other options which takes a object of optional parameters as described below:
 
 ```javascript
 const options = {
@@ -391,7 +391,7 @@ element.unmount();
 
 ### Step 4: Collect data from Elements
 
-When the form is ready to be submitted, call the `collect(options?)` method on the container object. The `options` parameter takes a dictionary of optional parameters as shown below: 
+When the form is ready to be submitted, call the `collect(options?)` method on the container object. The `options` parameter takes a object of optional parameters as shown below: 
 
 - `tokens`: indicates whether tokens for the collected data should be returned or not. Defaults to 'true'
 - `additionalFields`: Non-PCI elements data to be inserted into the vault which should be in the `records` object format as described in the above [Inserting data into vault](#inserting-data-into-the-vault) section.

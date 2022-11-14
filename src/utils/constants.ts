@@ -251,6 +251,14 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_FILE_TYPE,
   },
+  INVALID_TABLE_IN_UPSERT_OPTIONS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_TABLE_IN_UPSERT_OPTIONS,
+  },
+  INVALID_COLUMN_IN_UPSERT_OPTIONS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_COLUMN_IN_UPSERT_OPTIONS,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;

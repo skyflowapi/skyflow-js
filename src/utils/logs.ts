@@ -187,6 +187,8 @@ const logs = {
     VALIDATION_FAILED: 'Validation failed',
     REVEAL_ELEMENT_ERROR_STATE: 'unable to reveal, since one or more element(s) have setError',
     INVALID_FILE_TYPE: 'Interface: collect element - Invalid file type',
+    INVALID_TABLE_IN_UPSERT_OPTIONS: 'Interface: collect element - No table key in upsert options',
+    INVALID_COLUMN_IN_UPSERT_OPTIONS: 'Interface: collect element - No column key in upsert options',
 
   },
   warnLogs: {

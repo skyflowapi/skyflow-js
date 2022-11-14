@@ -8,13 +8,27 @@ import {
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 
-export const getUpsertColumn = (tableName: string, options: Record<string, any>) => {
+export interface IUpsertOptions{
+  table: string,
+  column:string,
+}
+
+export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions> | undefined) => {
   let uniqueColumn = '';
-  options.upsert.forEach((upsertOptions) => {
-    if (tableName === upsertOptions.table) {
-      uniqueColumn = upsertOptions.column;
-    }
-  });
+  if (options) {
+    options.forEach((upsertOptions) => {
+      if (!('table' in upsertOptions)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_UPSERT_OPTIONS, [], true);
+      }
+      if (!('column' in upsertOptions)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_UPSERT_OPTIONS, [], true);
+      }
+      if (tableName === upsertOptions.table) {
+        uniqueColumn = upsertOptions.column;
+      }
+    });
+  }
+
   return uniqueColumn;
 };
 export const constructInsertRecordRequest = (
@@ -24,8 +38,7 @@ export const constructInsertRecordRequest = (
   const requestBody: any = [];
   if (options?.tokens || options === null) {
     records.records.forEach((record, index) => {
-      const upsertColumn = getUpsertColumn(record.table, options);
-
+      const upsertColumn = getUpsertColumn(record.table, options.upsert);
       requestBody.push({
         method: 'POST',
         quorum: true,
@@ -42,7 +55,7 @@ export const constructInsertRecordRequest = (
     });
   } else {
     records.records.forEach((record) => {
-      const elseUpsertColumn = getUpsertColumn(record.table, options);
+      const elseUpsertColumn = getUpsertColumn(record.table, options.upsert);
 
       requestBody.push({
         method: 'POST',
