@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.22.0] - 2022-11-15
+### Added
+- `upsert` support while collecting data through skyflow elements.
+- `upsert` support for pure js `insert` method.
 ## [1.21.3] - 2022-10-18
 ### Added
 - `cardIcon` and `copyIcon` style objects for collect and reveal elements.
