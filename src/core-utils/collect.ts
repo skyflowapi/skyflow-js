@@ -8,13 +8,21 @@ import {
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 
-export const getUpsertColumn = (tableName: string, options: Record<string, any>) => {
+export interface IUpsertOptions{
+  table: string,
+  column:string,
+}
+
+export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions> | undefined) => {
   let uniqueColumn = '';
-  options.upsert.forEach((upsertOptions) => {
-    if (tableName === upsertOptions.table) {
-      uniqueColumn = upsertOptions.column;
-    }
-  });
+  if (options) {
+    options.forEach((upsertOptions) => {
+      if (tableName === upsertOptions.table) {
+        uniqueColumn = upsertOptions.column;
+      }
+    });
+  }
+
   return uniqueColumn;
 };
 export const constructInsertRecordRequest = (
@@ -24,14 +32,13 @@ export const constructInsertRecordRequest = (
   const requestBody: any = [];
   if (options?.tokens || options === null) {
     records.records.forEach((record, index) => {
-      const upsertColumn = getUpsertColumn(record.table, options);
-
+      const upsertColumn = getUpsertColumn(record.table, options.upsert);
       requestBody.push({
         method: 'POST',
         quorum: true,
         tableName: record.table,
         fields: record.fields,
-        upsert: upsertColumn,
+        ...(options?.upsert ? { upsert: upsertColumn } : {}),
       });
       requestBody.push({
         method: 'GET',
@@ -42,14 +49,14 @@ export const constructInsertRecordRequest = (
     });
   } else {
     records.records.forEach((record) => {
-      const elseUpsertColumn = getUpsertColumn(record.table, options);
+      const elseUpsertColumn = getUpsertColumn(record.table, options.upsert);
 
       requestBody.push({
         method: 'POST',
         quorum: true,
         tableName: record.table,
         fields: record.fields,
-        upsert: elseUpsertColumn,
+        ...(options?.upsert ? { upsert: elseUpsertColumn } : {}),
       });
     });
   }
