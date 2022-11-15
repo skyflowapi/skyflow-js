@@ -166,7 +166,7 @@ skyflowClient.insert(records, options)
 
  
 
-An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/purejs.html) of an insert call: 
+An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/purejs.html) of an insert call: 
 ```javascript
 skyflowClient.insert({
   "records": [
@@ -431,7 +431,7 @@ container.collect(options)
 
 ### End to end example of collecting data with Skyflow Elements
 
-**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/skyflow-elements.html)**
+**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/skyflow-elements.html)**
 
 ```javascript
 //Step 1
@@ -506,7 +506,7 @@ container.collect({
 
 ### End to end example of `upsert` support with Skyflow Elements
 
-**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/upsert-support.html)**
+**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/upsert-support.html)**
 
 ```javascript
 //Step 1
@@ -656,7 +656,7 @@ const elementValueMatchRule = {
 }
 ```
 
-The Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/CustomValidations.html) for using custom validations:
+The Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/CustomValidations.html) for using custom validations:
 
 ```javascript
 /*
@@ -762,7 +762,7 @@ state : {
 `Note:`
 values of SkyflowElements will be returned in elementstate object only when `env` is  `DEV`,  else it is empty string i.e, ''
 
-##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/CollectElementListeners.html) for using listeners
+##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/CollectElementListeners.html) for using listeners
 ```javascript
 //create skyflow client
 const skyflowClient = Skyflow.init({
@@ -897,7 +897,7 @@ const records = {
 
 skyflow.detokenize(records)
 ```
-An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/purejs.html) of a detokenize call: 
+An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/purejs.html) of a detokenize call: 
 
 ```javascript
 skyflow.detokenize({
@@ -1082,7 +1082,7 @@ container.reveal()
 
 ### End to end example of all steps
 
-**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/UsingScriptTag/skyflow-elements.html)**
+**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/skyflow-elements.html)**
 ```javascript
 //Step 1
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
