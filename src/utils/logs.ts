@@ -200,7 +200,7 @@ const logs = {
     INVALID_TABLE_IN_UPSERT_OPTION:
       'Interface: collect container - Invalid table in upsert object at index %s1, table of type non empty string is required',
     INVALID_COLUMN_IN_UPSERT_OPTION:
-      'Interface: collect container - Invalid table upsert object at index %s1, column of type non empty string is required',
+      'Interface: collect container - Invalid column in upsert object at index %s1, column of type non empty string is required',
 
   },
   warnLogs: {
