@@ -2,6 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import { IUpsertOptions } from '../../../core-utils/collect';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
 import { formatValidations, formatOptions, validateElementOptions } from '../../../libs/element-options';
@@ -14,7 +15,10 @@ import {
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
-import { validateCollectElementInput, validateInitConfig, validateAdditionalFieldsInCollect } from '../../../utils/validators';
+import {
+  validateCollectElementInput, validateInitConfig, validateAdditionalFieldsInCollect,
+  validateUpsertOptions,
+} from '../../../utils/validators';
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
@@ -40,6 +44,7 @@ export interface CollectElementInput {
 interface ICollectOptions {
   tokens?: boolean;
   additionalFields?: IInsertRecordInput;
+  upsert?: Array<IUpsertOptions>
 }
 const CLASS_NAME = 'CollectContainer';
 class CollectContainer extends Container {
@@ -246,6 +251,9 @@ class CollectContainer extends Container {
       }
       if (options?.additionalFields) {
         validateAdditionalFieldsInCollect(options.additionalFields);
+      }
+      if (options?.upsert) {
+        validateUpsertOptions(options?.upsert);
       }
       bus
       // .target(properties.IFRAME_SECURE_ORGIN)
