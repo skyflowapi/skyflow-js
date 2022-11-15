@@ -160,7 +160,7 @@ skyflowClient.insert(records, options)
 
  
 
-An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/purejs.html) of an insert call: 
+An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/pure-js.html) of an insert call: 
 ```javascript
 skyflowClient.insert({
   "records": [
@@ -543,7 +543,7 @@ const elementValueMatchRule = {
 }
 ```
 
-The Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/CustomValidations.html) for using custom validations:
+The Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/custom-validations.html) for using custom validations:
 
 ```javascript
 /*
@@ -649,7 +649,7 @@ state : {
 `Note:`
 values of SkyflowElements will be returned in elementstate object only when `env` is  `DEV`,  else it is empty string i.e, ''
 
-##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/CollectElementListeners.html) for using listeners
+##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/collect-element-listeners.html) for using listeners
 ```javascript
 //create skyflow client
 const skyflowClient = Skyflow.init({
@@ -784,7 +784,7 @@ const records = {
 
 skyflow.detokenize(records)
 ```
-An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/purejs.html) of a detokenize call: 
+An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/pure-js.html) of a detokenize call: 
 
 ```javascript
 skyflow.detokenize({
