@@ -135,7 +135,7 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 - [**Using Skyflow File Element to upload a file**](#using-skyflow-file-element-to-upload-a-file)
 ## Inserting data into the vault
 
-To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes a dictionary of optional parameters for the insertion. `insert` method also support upsert operations. See below: 
+To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes an object of optional parameters for the insertion. `insert` method also support upsert operations. See below: 
 
 ```javascript
 const records = {
