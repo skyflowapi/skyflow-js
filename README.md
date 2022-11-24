@@ -135,7 +135,7 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 - [**Using Skyflow File Element to upload a file**](#using-skyflow-file-element-to-upload-a-file)
 ## Inserting data into the vault
 
-To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes a dictionary of optional parameters for the insertion. `insert` method also support upsert operations. See below: 
+To insert data into the vault from the browser, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to be inserted in the below format. The `options` parameter takes a dictionary of optional parameters for the insertion. See below: 
 
 ```javascript
 const records = {
@@ -153,12 +153,6 @@ const records = {
 
 const options = {
   tokens: true,  //indicates whether or not tokens should be returned for the inserted data. Defaults to 'true'  
-  upsert: [ // upsert operations support in the vault
-      {
-        table: "string", // table name
-        column: "value  ", // unique column in the table
-      }
-    ]
 }
 
 skyflowClient.insert(records, options)
@@ -401,7 +395,6 @@ When the form is ready to be submitted, call the `collect(options?)` method on t
 
 - `tokens`: indicates whether tokens for the collected data should be returned or not. Defaults to 'true'
 - `additionalFields`: Non-PCI elements data to be inserted into the vault which should be in the `records` object format as described in the above [Inserting data into vault](#inserting-data-into-the-vault) section.
-- `upsert`: To support upsert operations while collecting the data from skyflow elements, pass the table and column that have been marked as unique in the table.
 
 ```javascript
 const options = {
@@ -418,12 +411,6 @@ const options = {
       //...additional records here
     ]
   }, //optional
-  upsert: [ //optional, upsert operations support in the vault
-    {
-      table: "string", // table name
-      column: "value  ", // unique column in the table
-    }
-  ]
 }
 
 container.collect(options)
@@ -503,106 +490,6 @@ container.collect({
   ]
 }
 ```
-
-### End to end example of `upsert` support with Skyflow Elements
-
-**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/upsert-support.html)**
-
-```javascript
-//Step 1
-const container = skyflowClient.container(Skyflow.ContainerType.COLLECT) 
-
-//Step 2
-const cardNumberElement = container.create({           
-  table: "cards",
-  column: "card_number",
-  inputstyles: {
-      base: {
-        color: "#1d1d1d",
-      },
-      cardIcon:{
-        position: "absolute",
-        left:"8px", 
-        bottom:"calc(50% - 12px)"
-    },
-  },
-  labelStyles: {
-      base: {
-        fontSize: "12px",
-        fontWeight: "bold"
-      }
-  },
-  errorTextStyles: {
-      base: {
-        color: "#f44336"
-      }
-  },
-  placeholder: "Card Number",
-  label: "card_number",
-  type: Skyflow.ElementType.CARD_NUMBER
-})
-
-const cvvElement = container.create({           
-  table: "cards",
-  column: "cvv",
-  inputstyles: {
-      base: {
-        color: "#1d1d1d",
-      },
-      cardIcon:{
-        position: "absolute",
-        left:"8px", 
-        bottom:"calc(50% - 12px)"
-    },
-  },
-  labelStyles: {
-      base: {
-        fontSize: "12px",
-        fontWeight: "bold"
-      }
-  },
-  errorTextStyles: {
-      base: {
-        color: "#f44336"
-      }
-  },
-  placeholder: "CVV",
-  label: "cvv",
-  type: Skyflow.ElementType.CVV
-})
-
-// Step 3
-cardNumberElement.mount("#cardNumber")  //assumes there is a div with id="#cardNumber" in the webpage
-cvvElement.mount("#cvv"); //assumes there is a div with id="#cvv" in the webpage
-
-// Step 4
-
-container.collect({
-  tokens: true,
-  upsert: [
-    {
-      table: "cards", 
-      column: "card_number", 
-    }
-  ]
-})
-```
-
-**Sample Response :**
-```javascript
-{
-  "records": [
-    {
-      "table": "cards",
-      "fields": {
-        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
-        "cvv": "12f670af-6c7d-4837-83fb-30365fbc0b1e"
-      }
-    }
-  ]
-}
-```
-
 ### Validations
 
 Skyflow-JS provides two types of validations on Collect Elements
