@@ -29,6 +29,7 @@ import {
   LogLevel,
   MessageType,
   ValidationRuleType,
+  IInsertOptions,
 } from './utils/common';
 import { formatVaultURL } from './utils/helpers';
 
@@ -173,7 +174,7 @@ class Skyflow {
 
   insert(
     records: IInsertRecordInput,
-    options: Record<string, any> = { tokens: true },
+    options: IInsertOptions,
   ) {
     printLog(parameterizedString(logs.infoLogs.INSERT_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);

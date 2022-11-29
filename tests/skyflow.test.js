@@ -214,6 +214,33 @@ describe('skyflow insert', () => {
     } catch (err) {
     }
   });
+  test('insert success with upsert options', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.insert(records,{upsert:[{
+        table: 'table1', column: 'column' 
+      }]});
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(insertResponse);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
 
   test('insert error', (done) => {
     const frameReayEvent = on.mock.calls
@@ -263,6 +290,34 @@ describe('skyflow insert', () => {
     } catch (err) {
     }
   });
+  test('insert success else with upsert options', (done) => {
+    try {
+      const res = skyflow.insert(records,{
+        tokens: undefined,
+        upsert:[{table: 'table1',column:'column1'}]
+      });
+
+      const frameReayEvent = on.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+      const frameReadyCb = frameReayEvent[1][1];
+      frameReadyCb();
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(insertResponse);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+
   test('insert invalid input', (done) => {
     const frameReayEvent = on.mock.calls
       .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
