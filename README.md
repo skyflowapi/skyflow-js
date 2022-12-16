@@ -34,17 +34,17 @@ npm install skyflow-js
 # Initializing Skyflow.js
 Use the `init()` method to initialize a Skyflow client as shown below. 
 ```javascript
-import Skyflow from "skyflow-js" // If using script tag, this line is not required
+import Skyflow from 'skyflow-js' // If using script tag, this line is not required.
 
 const skyflowClient = Skyflow.init({
-   vaultID: "string",          //Id of the vault that the client should connect to 
-   vaultURL: "string",         //URL of the vault that the client should connect to
-   getBearerToken: helperFunc,  //helper function that retrieves a Skyflow bearer token from your backend
-   options:{
-     logLevel: Skyflow.LogLevel, // optional, if not specified default is ERROR 
-     env: Skyflow.Env          // optional, if not specified default is PROD 
-   }
-})
+  vaultID: 'string',          // Id of the vault that the client should connect to.
+  vaultURL: 'string',         // URL of the vault that the client should connect to.
+  getBearerToken: helperFunc, // Helper function that retrieves a Skyflow bearer token from your backend.
+  options: {
+    logLevel: Skyflow.LogLevel, // Optional, if not specified default is ERROR. 
+    env: Skyflow.Env            // Optional, if not specified default is PROD. 
+  }
+});
 ```
 For the `getBearerToken` parameter, pass in a helper function that retrieves a Skyflow bearer token from your backend. This function will be invoked when the SDK needs to insert or retrieve data from the vault. A sample implementation is shown below: 
 
@@ -52,39 +52,38 @@ For example, if the response of the consumer tokenAPI is in the below format
 
 ```
 {
-   "accessToken": string,
-   "tokenType": string
+  "accessToken": string,
+  "tokenType": string
 }
 
 ```
 then, your getBearerToken Implementation should be as below
 
 ```javascript
-getBearerToken: () => {
+const getBearerToken = () => {
   return new Promise((resolve, reject) => {
     const Http = new XMLHttpRequest();
 
     Http.onreadystatechange = () => {
-      if (Http.readyState == 4) {
-        if (Http.status == 200) {
+      if (Http.readyState === 4) {
+        if (Http.status === 200) {
           const response = JSON.parse(Http.responseText);
           resolve(response.accessToken);
         } else {
-          reject("Error occured");
+          reject('Error occured');
         }
       }
     };
 
-    Http.onerror = (error) => {
-      reject("Error occured");
+    Http.onerror = error => {
+      reject('Error occured');
     };
 
-    const url = "https://api.acmecorp.com/skyflowToken";
-    Http.open("GET", url);
+    const url = 'https://api.acmecorp.com/skyflowToken';
+    Http.open('GET', url);
     Http.send();
-  })
-
-}
+  });
+};
 
 ```
 For `logLevel` parameter, there are 4 accepted values in Skyflow.LogLevel
@@ -139,42 +138,43 @@ To insert data into the vault, use the `insert(records, options?)` method of the
 
 ```javascript
 const records = {
-  "records": [
-  	{
-      table: "string", //table into which record should be inserted
+  records: [
+    {
+      table: 'string', // Table into which record should be inserted.
       fields: {
-        column1: "value", //column names should match vault column names
+        column1: 'value', // Column names should match vault column names.
         //...additional fields here
-      }
-    }
-    //...additional records here
-  ]
-}
+      },
+    },
+    // ...additional records here.
+  ],
+};
 
 const options = {
-  tokens: true,  //indicates whether or not tokens should be returned for the inserted data. Defaults to 'true'  
-  upsert: [ // upsert operations support in the vault
+  tokens: true,  // Indicates whether or not tokens should be returned for the inserted data. Defaults to 'true'  
+  upsert: [ // Upsert operations support in the vault
       {
-        table: "string", // table name
-        column: "value  ", // unique column in the table
+        table: 'string', // Table name
+        column: 'value', // Unique column in the table
       }
     ]
 }
 
-skyflowClient.insert(records, options)
+skyflowClient.insert(records, options);
 ```
 
 An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/pure-js.html) of an insert call: 
 ```javascript
 skyflowClient.insert({
-  "records": [
-  {
-    "table": "cards",
-    "fields": {
-      "cardNumber": "41111111111",
-      "cvv": "123",
-    }
-  }]
+  records: [
+    {
+      table: 'cards',
+      fields: {
+        cardNumber: '41111111111',
+        cvv: '123',
+      },
+    },
+  ],
 });
 ```
 
@@ -210,17 +210,17 @@ const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
 A Skyflow collect Element is defined as shown below: 
 
 ```javascript
-const collectElement =  {
-   table: "string",             //required, the table this data belongs to
-   column: "string",            //required, the column into which this data should be inserted
-   type: Skyflow.ElementType,   //Skyflow.ElementType enum
-   inputStyles: {},             //optional styles that should be applied to the form element
-   labelStyles: {},             //optional styles that will be applied to the label of the collect element
-   errorTextStyles:{},          //optional styles that will be applied to the errorText of the collect element
-   label: "string",             //optional label for the form element
-   placeholder: "string",       //optional placeholder for the form element
-   altText: "string"            //(DEPRECATED) string that acts as an initial value for the collect element
-   validations:[]               // optional array of validation rules
+const collectElement = {
+  table: 'string',             // Required, the table this data belongs to.
+  column: 'string',            // Required, the column into which this data should be inserted.
+  type: Skyflow.ElementType,   // Skyflow.ElementType enum.
+  inputStyles: {},             // Optional, styles that should be applied to the form element.
+  labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
+  errorTextStyles: {},         // Optional, styles that will be applied to the errorText of the collect element.
+  label: 'string',             // Optional, label for the form element.
+  placeholder: 'string',       // Optional, placeholder for the form element.
+  altText: 'string',           // (DEPRECATED) string that acts as an initial value for the collect element.
+  validations: [],             // Optional, array of validation rules.
 }
 ```
 The `table` and `column` fields indicate which table and column in the vault the Element corresponds to. 
@@ -241,31 +241,31 @@ Styles are specified with [JSS](https://cssinjs.org/?v=v10.7.1).
 
 An example of a inputStyles object:
 ```javascript
-inputStyles:{
-    base: {
-      border: "1px solid #eae8ee",
-      padding: "10px 16px",
-      borderRadius: "4px",
-      color: "#1d1d1d",
-    },
-    complete: {
-      color: "#4caf50",
-    },
-    empty: {},
-    focus: {},
-    invalid: {
-      color: "#f44336",
-    },
-    cardIcon:{
-      position: "absolute",
-      left:"8px", 
-      bottom:"calc(50% - 12px)"
-    },
-    copyIcon:{
-      position: "absolute",
-      right:"8px",
-    }
-  }
+inputStyles: {
+  base: {
+    border: '1px solid #eae8ee',
+    padding: '10px 16px',
+    borderRadius: '4px',
+    color: '#1d1d1d',
+  },
+  complete: {
+    color: '#4caf50',
+  },
+  empty: {},
+  focus: {},
+  invalid: {
+    color: '#f44336',
+  },
+  cardIcon: {
+    position: 'absolute',
+    left: '8px',
+    bottom: 'calc(50% - 12px)',
+  },
+  copyIcon: {
+    position: 'absolute',
+    right: '8px',
+  },
+},
 ```
 The states that are available for `labelStyles` are `base` and `focus`.
 
@@ -273,14 +273,14 @@ An example of a labelStyles object:
 
 ```javascript
 labelStyles: {
-    base: {
-      fontSize: "12px",
-      fontWeight: "bold"
-    },
-    focus: {
-      color: "#1d1d1d"
-    }
-}
+  base: {
+    fontSize: '12px',
+    fontWeight: 'bold',
+  },
+  focus: {
+    color: '#1d1d1d',
+  },
+},
 ```
 
 The state that is available for `errorTextStyles` is only the `base` state, it shows up when there is some error in the collect element.
@@ -289,10 +289,10 @@ An example of a errorTextStyles object:
 
 ```javascript
 errorTextStyles: {
-    base: {
-      color: "#f44336"
-    }
-}
+  base: {
+    color: '#f44336',
+  },
+},
 ```
 
 Finally, the `type` field takes a Skyflow ElementType. Each type applies the appropriate regex and validations to the form element. There are currently 8 types:
@@ -313,11 +313,11 @@ Along with CollectElement we can define other options which takes a object of op
 
 ```javascript
 const options = {
-  required: false,  //optional, indicates whether the field is marked as required. Defaults to 'false'
-  enableCardIcon: true, // optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
-  format: String, //optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType),
-  enableCopy: false // optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false')
-}
+  required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
+  enableCardIcon: true, // Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType).
+  format: String,       // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
+  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+};
 ```
 
 `required` parameter indicates whether the field is marked as required or not. If not provided, it defaults to false
@@ -343,27 +343,27 @@ The values that are accepted for `EXPIRATION_YEAR` are
 Once the Element object and options has been defined, add it to the container using the `create(element, options)` method as shown below. The `element` param takes a Skyflow Element object and options as defined above:
 
 ```javascript
-const collectElement =  {
-   table: "string",             //the table this data belongs to
-   column: "string",            //the column into which this data should be inserted
-   type: Skyflow.ElementType,   //Skyflow.ElementType enum
-   inputStyles: {},             //optional styles that should be applied to the form element
-   labelStyles: {},             //optional styles that will be applied to the label of the collect element
-   errorTextStyles:{},          //optional styles that will be applied to the errorText of the collect element
-   label: "string",             //optional label for the form element
-   placeholder: "string",       //optional placeholder for the form element
-   altText: "string"            //(DEPRECATED) string that acts as an initial value for the collect element
-   validations:[]               // optional array of validation rules
+const collectElement = {
+  table: 'string',             // Optional, the table this data belongs to.
+  column: 'string',            // Optional, the column into which this data should be inserted.
+  type: Skyflow.ElementType,   // Skyflow.ElementType enum.
+  inputStyles: {},             // Optional, styles that should be applied to the form element.
+  labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
+  errorTextStyles: {},         // Optional, styles that will be applied to the errorText of the collect element.
+  label: 'string',             // Optional, label for the form element.
+  placeholder: 'string',       // Optional, placeholder for the form element.
+  altText: 'string',           // (DEPRECATED) string that acts as an initial value for the collect element.
+  validations: [],             // Optional, array of validation rules.
 }
 
 const options = {
-  required: false,  //optional, indicates whether the field is marked as required. Defaults to 'false'
-  enableCardIcon: true, // optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
-  format: String, //optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType)
-  enableCopy: false // optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false')
-}
+  required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
+  enableCardIcon: true, // Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType).
+  format: String,       // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
+  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+};
 
-const element = container.create(collectElement, options)
+const element = container.create(collectElement, options);
 ```
 
 ### Step 3: Mount Elements to the DOM
@@ -386,7 +386,7 @@ To specify where the Elements will be rendered on your page, create placeholder 
 Now, when the `mount(domElement)` method of the Element is called, the Element will be inserted in the specified div. For instance, the call below will insert the Element into the div with the id "#cardNumber".  
 
 ```javascript
-element.mount("#cardNumber")
+element.mount('#cardNumber');
 ```
 you can use the `unmount` method to reset any collect element to it's initial state.
 ```javascript
@@ -403,22 +403,22 @@ When the form is ready to be submitted, call the `collect(options?)` method on t
 
 ```javascript
 const options = {
-  tokens: true  //optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'
-  additionalFields: {  
+  tokens: true, // Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'.
+  additionalFields: {
     records: [
       {
-        table: "string", //table into which record should be inserted
+        table: 'string', // Table into which record should be inserted.
         fields: {
-          column1: "value", //column names should match vault column names
-          //...additional fields here
-        }
-      }
-      //...additional records here
-    ]
-  }, //optional
-}
+          column1: 'value', // Column names should match vault column names.
+          // ...additional fields here.
+        },
+      },
+      // ...additional records here.
+    ],
+  }, // Optional
+};
 
-container.collect(options)
+container.collect(options);
 ```
 
 ### End to end example of collecting data with Skyflow Elements
@@ -427,58 +427,59 @@ container.collect(options)
 
 ```javascript
 //Step 1
-const container = skyflowClient.container(Skyflow.ContainerType.COLLECT) 
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 //Step 2
-const element = container.create({           
-  table: "cards",
-  column: "cardNumber",
+const element = container.create({
+  table: 'cards',
+  column: 'cardNumber',
   inputstyles: {
-      base: {
-        color: "#1d1d1d",
-      },
-      cardIcon:{
-        position: "absolute",
-        left:"8px", 
-        bottom:"calc(50% - 12px)"
+    base: {
+      color: '#1d1d1d',
+    },
+    cardIcon: {
+      position: 'absolute',
+      left: '8px',
+      bottom: 'calc(50% - 12px)',
     },
   },
   labelStyles: {
-      base: {
-        fontSize: "12px",
-        fontWeight: "bold"
-      }
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
   },
   errorTextStyles: {
-      base: {
-        color: "#f44336"
-      }
+    base: {
+      color: '#f44336',
+    },
   },
-  placeholder: "Card Number",
-  label: "card_number",
-  type: Skyflow.ElementType.CARD_NUMBER
-})
+  placeholder: 'Card Number',
+  label: 'card_number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
 
 // Step 3
-element.mount("#cardNumber")  //assumes there is a div with id="#cardNumber" in the webpage
+element.mount('#cardNumber'); // Assumes there is a div with id='#cardNumber' in the webpage.
 
 // Step 4
 
 const nonPCIRecords = {
-    "records": [
-      {
-        "table": "cards",
-        "fields": {
-          "gender": "MALE"
-        }
-      }
-    ]
-  }
+  records: [
+    {
+      table: 'cards',
+      fields: {
+        gender: 'MALE',
+      },
+    },
+  ],
+};
 
 container.collect({
   tokens: true,
-  additionalFields: nonPCIRecords
-})
+  additionalFields: nonPCIRecords,
+});
+
 ```
 
 **Sample Response :**
@@ -615,7 +616,7 @@ const regexMatchRule = {
   type: Skyflow.ValidationRuleType.REGEX_MATCH_RULE,
   params: {
     regex: RegExp,
-    error: string // optional, default error is "VALIDATION FAILED"
+    error: string // Optional, default error is 'VALIDATION FAILED'.
   }
 }
 ```
@@ -626,9 +627,9 @@ const regexMatchRule = {
 const lengthMatchRule = {
   type: Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
   params: {
-    min : number, // optional
-    max : number, // optional 
-    error: string // optional, default error is "VALIDATION FAILED"
+    min : number, // Optional.
+    max : number, // Optional.
+    error: string // Optional, default error is 'VALIDATION FAILED'.
   }
 }
 ```
@@ -640,7 +641,7 @@ const elementValueMatchRule = {
   type: Skyflow.ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
   params: {
     element: CollectElement,
-    error: string // optional, default error is "VALIDATION FAILED"
+    error: string // Optional, default error is 'VALIDATION FAILED'.
   }
 }
 ```
@@ -653,65 +654,66 @@ The Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/s
   Adding REGEX_MATCH_RULE , LENGTH_MATCH_RULE to collect element.
 */
 
-// this rule allows 1 or more alphabets
+// This rule allows 1 or more alphabets.
 const alphabetsOnlyRegexRule = {
   type: Skyflow.ValidationRuleType.REGEX_MATCH_RULE,
-  params:{
+  params: {
     regex: /^[A-Za-z]+$/,
-    error: "Only alphabets are allowed"
-  }
-}; 
+    error: 'Only alphabets are allowed',
+  },
+};
 
-// this rule allows input length between 4 and 6 characters
+// This rule allows input length between 4 and 6 characters.
 const lengthRule = {
   type: Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
-  params:{
+  params: {
     min: 4,
     max: 6,
-    error: "Must be between 4 and 6 alphabets"
-  }
-}; 
+    error: 'Must be between 4 and 6 alphabets',
+  },
+};
 
- const cardHolderNameElement = collectContainer.create({
-      table: "pii_fields",
-      column: "first_name",
-      ...collectStylesOptions,
-      label: "Card Holder Name",
-      placeholder: "cardholder name",
-      type: Skyflow.ElementType.INPUT_FIELD,
-      validations: [alphabetsOnlyRegexRule, lengthRule]
-    });
+const cardHolderNameElement = collectContainer.create({
+  table: 'pii_fields',
+  column: 'first_name',
+  ...collectStylesOptions,
+  label: 'Card Holder Name',
+  placeholder: 'cardholder name',
+  type: Skyflow.ElementType.INPUT_FIELD,
+  validations: [alphabetsOnlyRegexRule, lengthRule],
+});
 
 /*
   Reset PIN - A simple example that illustrates custom validations.
   The below code shows an example of ELEMENT_VALUE_MATCH_RULE
 */
 
-// for the PIN element
+// For the PIN element
 const pinElement = collectContainer.create({
-  label: "PIN",
-  placeholder: "****",
+  label: 'PIN',
+  placeholder: '****',
   type: Skyflow.ElementType.PIN,
 });
 
-// this rule allows to match the value with pinElement
-let elementMatchRule = {
+// This rule allows to match the value with pinElement.
+const elementMatchRule = {
   type: Skyflow.ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
-  params:{
+  params: {
     element: pinElement,
-    error: "PIN doesn't match"
-  }
-}
+    error: "PIN doesn't match",
+  },
+};
+
 const confirmPinElement = collectContainer.create({
-  label: "Confirm PIN",
-  placeholder: "****",
+  label: 'Confirm PIN',
+  placeholder: '****',
   type: Skyflow.ElementType.PIN,
-  validations: [elementMatchRule]
+  validations: [elementMatchRule],
 });
 
-// mount elements on screen - errors will be shown if any of the validaitons fail
-pinElement.mount("#collectPIN");
-confirmPinElement.mount("#collectConfirmPIN");
+// Mount elements on screen - errors will be shown if any of the validaitons fail.
+pinElement.mount('#collectPIN');
+confirmPinElement.mount('#collectConfirmPIN');
 
 ```
 ### Event Listener on Collect Elements
@@ -753,54 +755,54 @@ values of SkyflowElements will be returned in elementstate object only when `env
 
 ##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/collect-element-listeners.html) for using listeners
 ```javascript
-//create skyflow client
+// Create Skyflow client.
 const skyflowClient = Skyflow.init({
-   vaultID: <VAULT_ID>,          
-   vaultURL: <VAULT_URL>,
-   getBearerToken: ()=>{},
-   options: { 
-     env: Skyflow.Env.DEV
-   }
-})
+  vaultID: '<VAULT_ID>',
+  vaultURL: '<VAULT_URL>',
+  getBearerToken: () => {},
+  options: {
+    env: Skyflow.Env.DEV,
+  },
+});
 
-const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 const cardNumber = container.create({
-        table: "pii_fields",
-        column: "primary_card.card_number",
-        type: Skyflow.ElementType.CARD_NUMBER,
-      });
-
-cardNumber.mount("#cardNumberContainer");
-
-//subscribing to CHANGE event, which gets triggered when element changes
-cardNumber.on(Skyflow.EventName.CHANGE,(state) => {
-  // Your implementation when Change event occurs
-  console.log(state)
+  table: 'pii_fields',
+  column: 'primary_card.card_number',
+  type: Skyflow.ElementType.CARD_NUMBER,
 });
+
+cardNumber.mount('#cardNumberContainer');
+
+// Subscribing to CHANGE event, which gets triggered when element changes.
+cardNumber.on(Skyflow.EventName.CHANGE, state => {
+  // Your implementation when Change event occurs.
+  console.log(state);
+});
+
 ```
 ##### Sample Element state object when `env` is `DEV`
 
 ```javascript
 {
-   elementType: "CARD_NUMBER"
-   isEmpty: false
-   isFocused: true
-   isValid: false
-   value: "411"
-}
-
+  elementType: 'CARD_NUMBER',
+  isEmpty: false,
+  isFocused: true,
+  isValid: false,
+  value: '411',
+};
 ```
 ##### Sample Element state object when `env` is `PROD`
 
 ```javascript
 {
-   elementType: "CARD_NUMBER"
-   isEmpty: false
-   isFocused: true
-   isValid: false
-   value: ''
-}
+  elementType: 'CARD_NUMBER',
+  isEmpty: false,
+  isFocused: true,
+  isValid: false,
+  value: '',
+};
 ```
 
 ### UI Error for Collect Elements
@@ -814,21 +816,19 @@ Helps to display custom error messages on the Skyflow Elements through the metho
 ##### Sample code snippet for setError and resetError
 
 ```javascript
-
-const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 const cardNumber = container.create({
-    table: "pii_fields",
-    column: "primary_card.card_number",
-    type: Skyflow.ElementType.CARD_NUMBER,
+  table: 'pii_fields',
+  column: 'primary_card.card_number',
+  type: Skyflow.ElementType.CARD_NUMBER,
 });
 
-//Set custom error
-cardNumber.setError("custom error");
+// Set custom error.
+cardNumber.setError('custom error');
 
-//reset custom error
+// Reset custom error.
 cardNumber.resetError();
-
 ```
 
 ### Set and Clear value for Collect Elements (DEV ENV ONLY)
@@ -842,18 +842,18 @@ cardNumber.resetError();
 ##### Sample code snippet for setValue and clearValue
 
 ```javascript
-const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 const cardNumber = container.create({
-    table: "pii_fields",
-    column: "primary_card.card_number",
-    type: Skyflow.ElementType.CARD_NUMBER,
+  table: 'pii_fields',
+  column: 'primary_card.card_number',
+  type: Skyflow.ElementType.CARD_NUMBER,
 });
 
-// Set a value programatically
-cardNumber.setValue("4111111111111111");
+// Set a value programatically.
+cardNumber.setValue('4111111111111111');
 
-// Clear the value
+// Clear the value.
 cardNumber.clearValue();
 
 ```
@@ -877,25 +877,25 @@ For non-PCI use-cases, retrieving data from the vault and revealing it in the br
 
 ```javascript
 const records = {
-  "records": [
-      {
-        token: "string",                    // token for the record to be fetched
-      }
-  ]
-}
+  records: [
+    {
+      token: 'string', // Token for the record to be fetched.
+    },
+  ],
+};
 
-skyflow.detokenize(records)
+skyflow.detokenize(records);
 ```
 An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/pure-js.html) of a detokenize call: 
 
 ```javascript
 skyflow.detokenize({
-  "records": [
+  records: [
     {
-      token: "131e70dc-6f76-4319-bdd3-96281e051051"
-    }
-  ]
-})
+      token: '131e70dc-6f76-4319-bdd3-96281e051051',
+    },
+  ],
+});
 ```
 
 The sample response:
@@ -915,11 +915,11 @@ The sample response:
 
 ```javascript
 {
-  "records": [
+  records: [
     {
-      ids: string[],                      // array of SkyflowID's of the records to be fetched
-      table: string                       // table holding the above skyflow_id's
-      redaction: Skyflow.RedactionType    // redaction to be applied to retrieved data
+      ids: string[],                      // Array of SkyflowID's of the records to be fetched.
+      table: string,                      // Table holding the above skyflow_id's.
+      redaction: Skyflow.RedactionType,   // Redaction to be applied to retrieved data.
     }
   ]
 }
@@ -934,17 +934,16 @@ There are 4 accepted values in Skyflow.RedactionTypes:
 An example of getById call:
 
 ```javascript
-
 skyflow.getById({
   records: [
     {
-      ids: ["f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9"],
-      table: "cards",
+      ids: ['f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9'],
+      table: 'cards',
       redaction: Skyflow.RedactionType.PLAIN_TEXT,
     },
     {
-      ids: ["da26de53-95d5-4bdb-99db-8d8c66a35ff9"],
-      table: "contacts",
+      ids: ['da26de53-95d5-4bdb-99db-8d8c66a35ff9'],
+      table: 'contacts',
       redaction: Skyflow.RedactionType.PLAIN_TEXT,
     },
   ],
@@ -996,14 +995,13 @@ Then define a Skyflow Element to reveal data as shown below.
 
 ```javascript
 const revealElement = {
-  token: "string",                    //required, token of the data being revealed 
-  inputStyles: {},                    //optional styles to be applied to the element
-  labelStyles: {},                    //optional, styles to be applied to the label of the reveal element
-  errorTextStyles: {},                //optional styles that will be applied to the errorText of the reveal element
-  label: "string",                    //optional, label for the form element
-  altText: "string"                   //optional, string that is shown before reveal, will show token if altText is not provided
-}
-
+  token: 'string',     // Required, token of the data being revealed.
+  inputStyles: {},     // Optional, styles to be applied to the element.
+  labelStyles: {},     // Optional, styles to be applied to the label of the reveal element.
+  errorTextStyles: {}, // Optional, styles that will be applied to the errorText of the reveal element.
+  label: 'string',     // Optional, label for the form element.
+  altText: 'string',   // Optional, string that is shown before reveal, will show token if altText is not provided.
+};
 ```
 
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant and `copyIcon` style object. 
@@ -1012,36 +1010,36 @@ An example of a inputStyles object:
 
 ```javascript
 inputStyles: {
-    base: {
-      color: "#1d1d1d"
-    },
-    copyIcon:{
-      position: "absolute",
-      right:"8px",
-      top: "calc(50% - 10px)",
-    }
-}
+  base: {
+    color: '#1d1d1d',
+  },
+  copyIcon: {
+    position: 'absolute',
+    right: '8px',
+    top: 'calc(50% - 10px)',
+  },
+},
 ```
 
 An example of a labelStyles object:
 
 ```javascript
 labelStyles: {
-    base: {
-      fontSize: "12px",
-      fontWeight: "bold"
-    }
-}
+  base: {
+    fontSize: '12px',
+    fontWeight: 'bold',
+  },
+},
 ```
 
 An example of a errorTextStyles object:
 
 ```javascript
 errorTextStyles: {
-    base: {
-      color: "#f44336"
-    }
-}
+  base: {
+    color: '#f44336',
+  },
+},
 ```
 
 Once you've defined a Skyflow Element, you can use the `create(element)` method of the container to create the Element as shown below: 
@@ -1059,13 +1057,14 @@ Elements used for revealing data are mounted to the DOM the same way as Elements
 When the sensitive data is ready to be retrieved and revealed, call the `reveal()` method on the container as shown below: 
 
 ```javascript
-container.reveal()
-  .then((data) => {
-    //handle success
+container
+  .reveal()
+  .then(data => {
+    // Handle success.
   })
-  .catch((err) => {
-    //handle error
-  })
+  .catch(err => {
+    // Handle error.
+  });
 ```
 
 
@@ -1073,55 +1072,55 @@ container.reveal()
 
 **[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/skyflow-elements.html)**
 ```javascript
-//Step 1
-const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
+// Step 1.
+const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
-//Step 2
-const cardNumberElement = container.create({             
-  token: "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+// Step 2.
+const cardNumberElement = container.create({
+  token: 'b63ec4e0-bbad-4e43-96e6-6bd50f483f75',
   inputStyles: {
-      base: {
-        color: "#1d1d1d",
-      },
+    base: {
+      color: '#1d1d1d',
+    },
   },
   labelStyles: {
     base: {
-      fontSize: "12px",
-    }
+      fontSize: '12px',
+    },
   },
   errorTextStyles: {
     base: {
-      color: "#f44336"
-    }
-  }, 
-  label: "card_number",
-  altText: "XXXX XXXX XXXX XXXX" 
-})
-
-const cvvElement = container.create({             
-  token: "89024714-6a26-4256-b9d4-55ad69aa4047",
-  inputStyles: {
-      base: {
-        color: "#1d1d1d",
-      },
+      color: '#f44336',
     },
-  label: "cvv",
-  altText: "XXX" 
-})
+  },
+  label: 'card_number',
+  altText: 'XXXX XXXX XXXX XXXX',
+});
 
-//Step 3
-cardNumberElement.mount("#cardNumber")  //assumes there is a placeholder div with id="#cardNumber" on the page
-cvvElement.mount("#cvv")  //assumes there is a placeholder div with id="#cvv" on the page
-                                        
-//Step 4    
-container                                       
- .reveal()                              
- .then((data) => {
-   //handle success
- })
- .catch((err) => {
-   //handle error
- });
+const cvvElement = container.create({
+  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  inputStyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  label: 'cvv',
+  altText: 'XXX',
+});
+
+// Step 3.
+cardNumberElement.mount('#cardNumber'); // Assumes there is a placeholder div with id='cardNumber' on the page
+cvvElement.mount('#cvv');               // Assumes there is a placeholder div with id='cvv' on the page
+
+// Step 4.
+container
+  .reveal()
+  .then(data => {
+    // Handle success.
+  })
+  .catch(err => {
+    // Handle error.
+  });
 ```
 
 The response below shows that some tokens assigned to the reveal elements get revealed successfully, while others fail and remain unrevealed.
@@ -1157,19 +1156,17 @@ Helps to display custom error messages on the Skyflow Elements through the metho
 ##### Sample code snippet for setError and resetError
 
 ```javascript
-
-const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
+const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 const cardNumber = container.create({
-   token: "89024714-6a26-4256-b9d4-55ad69aa4047",
+  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
 });
 
-//Set custom error
-cardNumber.setError("custom error");
+// Set custom error.
+cardNumber.setError('custom error');
 
-//reset custom error
+// Reset custom error.
 cardNumber.resetError();
-
 ```
 ### Set token for Reveal Elements
 
@@ -1177,15 +1174,14 @@ The `setToken(value: string)` method can be used to set the token of the Reveal 
 
 ##### Sample code snippet for setToken
 ```javascript
-const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
+const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 const cardNumber = container.create({
-   altText:"Card Number",
+  altText: 'Card Number',
 });
 
-// set token 
-cardNumber.setToken("89024714-6a26-4256-b9d4-55ad69aa4047");
-
+// Set token.
+cardNumber.setToken('89024714-6a26-4256-b9d4-55ad69aa4047');
 ```
 ### Set and Clear altText for Reveal Elements
 The `setAltText(value: string)` method can be used to set the altText of the Reveal Element. This will cause the altText to be displayed in the UI regardless of whether the token or value is currently being displayed.
@@ -1194,17 +1190,18 @@ The `setAltText(value: string)` method can be used to set the altText of the Rev
 ##### Sample code snippet for setAltText and clearAltText
 
 ```javascript
-const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
+const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 const cardNumber = container.create({
-   token:"89024714-6a26-4256-b9d4-55ad69aa4047",
+  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
 });
 
-// set altText
-cardNumber.setAltText("Card Number");
+// Set altText.
+cardNumber.setAltText('Card Number');
 
-//clear altText
-cardNumber.clearAltText(); 
+// Clear altText.
+cardNumber.clearAltText();
+
 ```
 
 ## Using Skyflow File Element to upload a file
@@ -1224,13 +1221,13 @@ Skyflow Collect Elements are defined as follows:
 
 ```javascript
 const collectElement =  {
-   table: "string",             //the table this data belongs to
-   column: "string",            //the column into which this data should be inserted
-   skyflowID: "string",         // the skyflow_id of the record
-   type: Skyflow.ElementType.FILE_INPUT,   //Skyflow.ElementType enum
-   inputStyles: {},             //optional styles that should be applied to the form element
-   labelStyles: {},             //optional styles that will be applied to the label of the collect element
-   errorTextStyles:{},          //optional styles that will be applied to the errorText of the collect element
+  type: Skyflow.ElementType.FILE_INPUT,   // Skyflow.ElementType enum.
+  table: 'string',             // The table this data belongs to.
+  column: 'string',            // The column into which this data should be inserted.
+  skyflowID: 'string',         // The skyflow_id of the record.
+  inputStyles: {},             // Optional, styles that should be applied to the form element.
+  labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
+  errorTextStyles:{},          // Optional, styles that will be applied to the errorText of the collect element.
 }
 ```
 The `table` and `column` fields indicate which table and column the Element corresponds to. 
@@ -1256,7 +1253,7 @@ To specify where to render Elements on your page, create placeholder `<div>` ele
 Now, when the `mount(domElement)` method of the Element is called, the Element is inserted in the specified div. For instance, the call below inserts the Element into the div with the id "#file".  
 
 ```javascript
-element.mount("#file")
+element.mount('#file');
 ```
 Use the `unmount` method to reset a Collect Element to its initial state.
 
@@ -1268,7 +1265,7 @@ element.unmount();
 When the file is ready to be uploaded, call the `uploadFiles()` method on the container object.
 
 ```javascript
-container.uploadFiles()
+container.uploadFiles();
 ```
 ### File upload limitations:
 
@@ -1281,38 +1278,38 @@ container.uploadFiles()
 ### End-to-end file upload
 
 ```javascript
-//Step 1
-const container = skyflowClient.container(Skyflow.ContainerType.COLLECT) 
+// Step 1.
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
-//Step 2
-const element = container.create({           
-  table: "pii_fields",
-  column: "file",
-  skyflowID:"431eaa6c-5c15-4513-aa15-29f50babe882",
+// Step 2.
+const element = container.create({
+  table: 'pii_fields',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
   inputstyles: {
-      base: {
-        color: "#1d1d1d",
-      },
+    base: {
+      color: '#1d1d1d',
+    },
   },
   labelStyles: {
-      base: {
-        fontSize: "12px",
-        fontWeight: "bold"
-      }
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
   },
   errorTextStyles: {
-      base: {
-        color: "#f44336"
-      }
+    base: {
+      color: '#f44336',
+    },
   },
-  type: Skyflow.ElementType.FILE_INPUT
-})
+  type: Skyflow.ElementType.FILE_INPUT,
+});
 
-// Step 3
-element.mount("#file")  //assumes there is a div with id="#file" in the webpage
+// Step 3.
+element.mount('#file'); // Assumes there is a div with id='#file' in the webpage.
 
-// Step 4
-container.uploadFiles()
+// Step 4.
+container.uploadFiles();
 ```
 
 **Sample Response :**
@@ -1328,69 +1325,64 @@ container.uploadFiles()
 #### File upload with additional elements
 
 ```javascript
-// Create collect Container
-
+// Create collect Container.
 const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
 
-
-// Create collect elements
-
+// Create collect elements.
 const cardNumberElement = collectContainer.create({
-  table: "newTable",
-  column: "card_number",
+  table: 'newTable',
+  column: 'card_number',
   inputstyles: {
-      base: {
-        color: "#1d1d1d",
-      },
+    base: {
+      color: '#1d1d1d',
+    },
   },
   labelStyles: {
-      base: {
-        fontSize: "12px",
-        fontWeight: "bold"
-      }
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
   },
   errorTextStyles: {
-      base: {
-        color: "#f44336"
-      }
-  },,
-  placeholder: "card number",
-  label: "Card Number",
+    base: {
+      color: '#f44336',
+    },
+  },
+  placeholder: 'card number',
+  label: 'Card Number',
   type: Skyflow.ElementType.CARD_NUMBER,
 });
 
 const fileElement = collectContainer.create({
-  table: "newTable",
-  column: "file",
+  table: 'newTable',
+  column: 'file',
   skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
   inputstyles: {
-      base: {
-        color: "#1d1d1d",
-      },
+    base: {
+      color: '#1d1d1d',
+    },
   },
   labelStyles: {
-      base: {
-        fontSize: "12px",
-        fontWeight: "bold"
-      }
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
   },
   errorTextStyles: {
-      base: {
-        color: "#f44336"
-      }
-  },,
+    base: {
+      color: '#f44336',
+    },
+  },
   type: Skyflow.ElementType.FILE_INPUT,
 });
 
-// Mount the elements
+// Mount the elements.
+cardNumberElement.mount('#collectCardNumber');
+fileElement.mount('#collectFile');
 
-cardNumberElement.mount("#collectCardNumber");
-fileElement.mount("#collectFile");
-
-// Collect and upload methods
-
-container.collect(options={})
-container.uploadFiles()
+// Collect and upload methods.
+container.collect({});
+container.uploadFiles();
 
 ```
 **Sample Response for collect():**
