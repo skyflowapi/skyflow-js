@@ -211,8 +211,8 @@ A Skyflow collect Element is defined as shown below:
 
 ```javascript
 const collectElement =  {
-   table: "string",             //optional, the table this data belongs to
-   column: "string",            //optional, the column into which this data should be inserted
+   table: "string",             //required, the table this data belongs to
+   column: "string",            //required, the column into which this data should be inserted
    type: Skyflow.ElementType,   //Skyflow.ElementType enum
    inputStyles: {},             //optional styles that should be applied to the form element
    labelStyles: {},             //optional styles that will be applied to the label of the collect element
@@ -996,7 +996,7 @@ Then define a Skyflow Element to reveal data as shown below.
 
 ```javascript
 const revealElement = {
-  token: "string",                    //optional, token of the data being revealed 
+  token: "string",                    //required, token of the data being revealed 
   inputStyles: {},                    //optional styles to be applied to the element
   labelStyles: {},                    //optional, styles to be applied to the label of the reveal element
   errorTextStyles: {},                //optional styles that will be applied to the errorText of the reveal element
