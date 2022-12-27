@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.23.0] - 2022-12-27
+### Added
+-  Added new `get` interface.
+
 ## [1.22.0] - 2022-11-15
 ### Added
 - `upsert` support while collecting data through skyflow elements.
