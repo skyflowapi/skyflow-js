@@ -71,9 +71,11 @@ export interface IDetokenizeInput {
 }
 
 export interface ISkyflowIdRecord {
-  ids: string[];
+  ids?: string[];
   redaction: RedactionType;
   table: string;
+  columnName?:string;
+  columnValues?: string[];
 }
 
 export interface IGetByIdInput {

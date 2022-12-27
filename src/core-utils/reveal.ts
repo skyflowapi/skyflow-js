@@ -39,8 +39,11 @@ const getSkyflowIdRecordsFromVault = (
 ) => {
   let paramList: string = '';
 
-  skyflowIdRecord.ids.forEach((skyflowId) => {
+  skyflowIdRecord.ids?.forEach((skyflowId) => {
     paramList += `skyflow_ids=${skyflowId}&`;
+  });
+  skyflowIdRecord.columnValues?.forEach((column) => {
+    paramList += `column_name=${skyflowIdRecord.columnName}&column_values=${column}&`;
   });
 
   const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}?${paramList}redaction=${skyflowIdRecord.redaction}`;
@@ -188,6 +191,8 @@ export const fetchRecordsBySkyflowID = async (
                     description: rejectedResult?.error?.description,
                   },
                   ids: skyflowIdRecord.ids,
+                  ...(skyflowIdRecord?.columnName ? { columnName: skyflowIdRecord?.columnName }
+                    : {}),
                 };
               }
               printLog(rejectedResult.error?.description || '', MessageType.ERROR, LogLevel.ERROR);

@@ -228,7 +228,7 @@ class SkyflowContainer {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT, CLASS_NAME),
+          printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_INPUT, CLASS_NAME),
             MessageType.LOG,
             this.#context.logLevel);
 
@@ -260,7 +260,7 @@ class SkyflowContainer {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#client.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT,
+        printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_INPUT,
           CLASS_NAME), MessageType.LOG,
         this.#context.logLevel);
 
