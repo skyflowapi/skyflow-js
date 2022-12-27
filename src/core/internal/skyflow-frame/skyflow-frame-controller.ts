@@ -78,14 +78,14 @@ class SkyflowFrameController {
             this.#client,
           ).then(
             (resolvedResult) => {
-              printLog(parameterizedString(logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED, CLASS_NAME),
+              printLog(parameterizedString(logs.infoLogs.GET_RESOLVED, CLASS_NAME),
                 MessageType.LOG,
                 this.#context.logLevel);
 
               callback(resolvedResult);
             },
             (rejectedResult) => {
-              printLog(logs.errorLogs.GET_BY_SKYFLOWID_REJECTED, MessageType.ERROR,
+              printLog(logs.errorLogs.GET_REJECTED, MessageType.ERROR,
                 this.#context.logLevel);
 
               callback({ error: rejectedResult });
