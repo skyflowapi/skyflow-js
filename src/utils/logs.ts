@@ -190,19 +190,19 @@ const logs = {
     REVEAL_ELEMENT_ERROR_STATE: 'unable to reveal, since one or more element(s) have setError',
     INVALID_FILE_TYPE: 'Interface: collect element - Invalid file type',
     INVALID_UPSERT_OPTION_TYPE:
-      'Interface: collect container - Invalid upsert option, should be an array',
+      'Invalid upsert option, should be an array',
     EMPTY_UPSERT_OPTIONS_ARRAY:
-      'Interface: collect container - upsert option cannot be an empty array, atleast one object of table and column is required.',
+      'upsert option cannot be an empty array, atleast one object of table and column is required.',
     INVALID_UPSERT_OPTION_OBJECT_TYPE:
-      'Interface: collect container - Invalid upsert object at index %s1, an object of table and column is required.',
+      'Invalid upsert object at index %s1, an object of table and column is required.',
     MISSING_TABLE_IN_UPSERT_OPTION:
-      'Interface: collect container - "table" key is required in upsert options object at index %s1',
+      '"table" key is required in upsert options object at index %s1',
     MISSING_COLUMN_IN_UPSERT_OPTION:
-      'Interface: collect container - "column" key is required in upsert option at index %s1',
+      '"column" key is required in upsert option at index %s1',
     INVALID_TABLE_IN_UPSERT_OPTION:
-      'Interface: collect container - Invalid table in upsert object at index %s1, table of type non empty string is required',
+      'Invalid table in upsert object at index %s1, table of type non empty string is required',
     INVALID_COLUMN_IN_UPSERT_OPTION:
-      'Interface: collect container - Invalid column in upsert object at index %s1, column of type non empty string is required',
+      'Invalid column in upsert object at index %s1, column of type non empty string is required',
     INVALID_RECORD_COLUMN_VALUE: 'Invalid Record Column value.',
     MISSING_RECORD_COLUMN_VALUE: 'Column Values is required when Column Name is specified.',
     MISSING_RECORD_COLUMN_NAME: 'Column Name is required when Column Values are specified.',
