@@ -71,9 +71,11 @@ export interface IDetokenizeInput {
 }
 
 export interface ISkyflowIdRecord {
-  ids: string[];
+  ids?: string[];
   redaction: RedactionType;
   table: string;
+  columnName?:string;
+  columnValues?: string[];
 }
 
 export interface IGetByIdInput {
@@ -88,4 +90,14 @@ export interface Context{
 export interface IValidationRule {
   type: ValidationRuleType;
   params: any;
+}
+
+export interface IUpsertOption {
+  table : string;
+  column: string;
+}
+
+export interface IInsertOptions{
+  tokens?: boolean;
+  upsert?: IUpsertOption[];
 }

@@ -29,6 +29,7 @@ import {
   LogLevel,
   MessageType,
   ValidationRuleType,
+  IInsertOptions,
 } from './utils/common';
 import { formatVaultURL } from './utils/helpers';
 
@@ -173,7 +174,7 @@ class Skyflow {
 
   insert(
     records: IInsertRecordInput,
-    options: Record<string, any> = { tokens: true },
+    options: IInsertOptions,
   ) {
     printLog(parameterizedString(logs.infoLogs.INSERT_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
@@ -187,7 +188,14 @@ class Skyflow {
   }
 
   getById(getByIdInput: IGetByIdInput) {
-    printLog(parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
+    printLog(logs.warnLogs.GET_BY_ID_DEPRECATED, MessageType.WARN, this.#logLevel);
+    printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
+      MessageType.LOG, this.#logLevel);
+    return this.#skyflowContainer.getById(getByIdInput);
+  }
+
+  get(getByIdInput: IGetByIdInput) {
+    printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.getById(getByIdInput);
   }
