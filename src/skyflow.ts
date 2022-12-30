@@ -33,10 +33,12 @@ import {
   IInsertOptions,
 } from './utils/common';
 import { formatVaultURL } from './utils/helpers';
+import ComposableContainer from './core/external/collect/compose-collect-container';
 
 export enum ContainerType {
   COLLECT = 'COLLECT',
   REVEAL = 'REVEAL',
+  COMPOSABLE = 'COMPOSABLE',
 }
 export interface ISkyflow {
   vaultID?: string;
@@ -165,6 +167,19 @@ class Skyflow {
           this.#logLevel);
         return revealContainer;
       }
+      case ContainerType.COMPOSABLE: {
+        const collectContainer = new ComposableContainer(options, {
+          ...this.#metadata,
+          clientJSON: this.#client.toJSON(),
+        },
+        this.#skyflowElements,
+        { logLevel: this.#logLevel, env: this.#env });
+        printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
+          MessageType.LOG,
+          this.#logLevel);
+        return collectContainer;
+      }
+
       default:
         if (!type) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONTAINER_TYPE, [], true);

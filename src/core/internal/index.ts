@@ -269,6 +269,23 @@ export class FrameElement {
           this.domInput.value = state.value || '';
         }
       }
+      const elementType = this.iFrameFormElement.fieldType;
+      const fieldTypeCheck = (elementType === ELEMENTS.CARD_NUMBER.name
+         || elementType === ELEMENTS.CVV.name
+         || elementType === ELEMENTS.EXPIRATION_DATE.name);
+      if (state.value && state.isComplete && state.isValid && fieldTypeCheck) {
+        const elementList = document.getElementsByTagName('input') as any;
+
+        let nextIndex;
+        elementList.forEach((element:HTMLInputElement, index) => {
+          if (element.id === this.iFrameFormElement.iFrameName
+            && (index + 1) !== elementList.length) { nextIndex = index + 1; }
+        });
+        if (nextIndex) {
+          const nextElement = elementList[nextIndex] as HTMLInputElement;
+          nextElement.focus();
+        }
+      }
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
       if (data.options) {

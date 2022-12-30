@@ -119,7 +119,8 @@ export default class FrameElements {
       false,
     );
     const { group } = FrameElements;
-    const { rows } = group;
+    const { rows, styles } = group;
+    // console.log('Style', styles);
     const elements = this.#elements;
 
     group.spacing = getValueAndItsUnit(group.spacing).join('');
@@ -132,6 +133,8 @@ export default class FrameElements {
       spacing: group.spacing,
     });
 
+    // getCssClassesFromJss(styles, '');
+
     injectStylesheet.injectWithAllowlist(
       {
         [`.${rootDiv.className}`]: containerStylesByClassName,
@@ -140,6 +143,7 @@ export default class FrameElements {
     );
 
     // rows
+    // console.log('DATA', JSON.stringify(rows));
     let count = 0;
     rows.forEach((row, rowIndex) => {
       row.spacing = getValueAndItsUnit(row.spacing).join('');
@@ -153,7 +157,7 @@ export default class FrameElements {
       });
       injectStylesheet.injectWithAllowlist(
         {
-          [`.${rowDiv.className}`]: rowStylesByClassName,
+          [`.${rowDiv.className}`]: { ...rowStylesByClassName, ...styles },
         },
         ALLOWED_MULTIPLE_FIELDS_STYLES,
       );

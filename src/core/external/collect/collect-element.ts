@@ -84,9 +84,9 @@ class CollectElement extends SkyflowElement {
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
-    if (this.#isSingleElementAPI && this.#elements.length > 1) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNKNOWN_ERROR, [], true);
-    }
+    // if (this.#isSingleElementAPI && this.#elements.length > 1) {
+    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.UNKNOWN_ERROR, [], true);
+    // }
 
     this.#doesReturnValue = EnvOptions[this.#context.env].doesReturnValue;
     this.elementType = this.#isSingleElementAPI
@@ -321,6 +321,8 @@ class CollectElement extends SkyflowElement {
       ) {
         this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
       } else {
+        // console.log('Recived Data', data);
+        // console.log('Lengrg', this.#elements);
         this.#elements.forEach((element, index) => {
           if (data.name === element.elementName) {
             let emitEvent = '';
@@ -351,6 +353,7 @@ class CollectElement extends SkyflowElement {
               default:
                 throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_TYPE, [], true);
             }
+            // console.log('INSDIE', data);
             this.#states[index].isEmpty = data.value.isEmpty;
             this.#states[index].isValid = data.value.isValid;
             this.#states[index].isComplete = data.value.isComplete;

@@ -346,6 +346,7 @@ export const ALLOWED_MULTIPLE_FIELDS_STYLES = [
   'flex-direction',
   'align-items',
   'justify-content',
+  'border',
 ];
 
 // should be in the order of applying the styles
