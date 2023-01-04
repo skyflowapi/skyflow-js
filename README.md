@@ -344,8 +344,8 @@ Once the Element object and options has been defined, add it to the container us
 
 ```javascript
 const collectElement = {
-  table: 'string',             // Optional, the table this data belongs to.
-  column: 'string',            // Optional, the column into which this data should be inserted.
+  table: 'string',             // Required, the table this data belongs to.
+  column: 'string',            // Required, the column into which this data should be inserted.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional, styles that should be applied to the form element.
   labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
@@ -564,7 +564,7 @@ const cvvElement = container.create({
 
 // Step 3
 cardNumberElement.mount("#cardNumber")  //Assumes there is a div with id="#cardNumber" in the webpage.
-cvvElement.mount("#cvv"); //Aassumes there is a div with id="#cvv" in the webpage.
+cvvElement.mount("#cvv"); //Assumes there is a div with id="#cvv" in the webpage.
  
 // Step 4
  container.collect({
@@ -1149,7 +1149,7 @@ The response below shows that some tokens assigned to the reveal elements get re
 ### UI Error for Reveal Elements
 Helps to display custom error messages on the Skyflow Elements through the methods `setError` and `resetError` on the elements.
 
-`setError(error: string)` method is used to set the error text for the element, when this method is trigerred, all the current errors present on the element will be overridden with the custom error message passed. This error will be displayed on the element until `resetError()` is trigerred on the same element.
+`setError(error: string)` method is used to set the error text for the element, when this method is triggered, all the current errors present on the element will be overridden with the custom error message passed. This error will be displayed on the element until `resetError()` is triggered on the same element.
 
 `resetError()` method is used to clear the custom error message that is set using `setError`.
 
