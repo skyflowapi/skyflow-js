@@ -719,7 +719,7 @@ confirmPinElement.mount('#collectConfirmPIN');
 ### Event Listener on Collect Elements
 
 
-Helps to communicate with skyflow elements / iframes by listening to an event
+Helps to communicate with Skyflow elements / iframes by listening to an event
 
 ```javascript
 element.on(Skyflow.EventName,handler:function)
@@ -809,7 +809,7 @@ cardNumber.on(Skyflow.EventName.CHANGE, state => {
 
 Helps to display custom error messages on the Skyflow Elements through the methods `setError` and `resetError` on the elements.
 
-`setError(error: string)` method is used to set the error text for the element, when this method is trigerred, all the current errors present on the element will be overridden with the custom error message passed. This error will be displayed on the element until `resetError()` is trigerred on the same element.
+`setError(error: string)` method is used to set the error text for the element, when this method is triggered, all the current errors present on the element will be overridden with the custom error message passed. This error will be displayed on the element until `resetError()` is triggered on the same element.
 
 `resetError()` method is used to clear the custom error message that is set using `setError`.
 
