@@ -5,12 +5,14 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
 import { IUpsertOptions } from '../../../core-utils/collect';
+import EventEmitter from '../../../event-emitter';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
 import { formatValidations, formatOptions, validateElementOptions } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
+import { ContainerType } from '../../../skyflow';
 import {
   IValidationRule, IInsertRecordInput, Context, MessageType,
 } from '../../../utils/common';
@@ -27,8 +29,8 @@ import {
   ELEMENTS, FRAME_ELEMENT,
 } from '../../constants';
 import Container from '../common/container';
-import IFrame from '../common/iframe';
 import CollectElement from './collect-element';
+import ComposableElement from './compose-collect-element';
 
 export interface CollectElementInput {
   table?: string;
@@ -65,9 +67,13 @@ class ComposableContainer extends Container {
 
   #skyflowElements:any;
 
+  #eventEmitter: EventEmitter;
+
   #iframe: any;
 
   #options: any;
+
+  type:string = ContainerType.COMPOSABLE;
 
   constructor(options, metaData, skyflowElements, context) {
     super();
@@ -76,6 +82,7 @@ class ComposableContainer extends Container {
     this.#skyflowElements = skyflowElements;
     this.#context = context;
     this.#options = options;
+    this.#eventEmitter = new EventEmitter();
 
     const iframe = iframer({
       name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}`,
@@ -118,13 +125,23 @@ class ComposableContainer extends Container {
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
+    let elementName;
+    elementName = `${input.table}.${input.column}:${btoa(uuid())}`;
+    elementName = (input.table && input.column) ? `${input.type}:${btoa(
+      elementName,
+    )}` : `${input.type}:${btoa(uuid())}`;
+
+    elementName = `${FRAME_ELEMENT}:${elementName}`;
+
     this.#elementsList.push({
       elementType: input.type,
       name: input.column,
       ...input,
       ...formattedOptions,
       validations,
+      elementName,
     });
+    return new ComposableElement(elementName, this.#eventEmitter);
   };
 
   #createMultipleElement = (
@@ -143,19 +160,6 @@ class ComposableContainer extends Container {
         options.replacePattern = options.replacePattern || ELEMENTS[elementType].replacePattern;
         options.mask = options.mask || ELEMENTS[elementType].mask;
 
-        options.elementName = `${options.table}.${options.name}:${btoa(uuid())}`;
-        options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
-          options.elementName,
-        )}` : `${options.elementType}:${btoa(uuid())}`;
-
-        if (
-          options.elementType === ELEMENTS.radio.name
-          || options.elementType === ELEMENTS.checkbox.name
-        ) {
-          options.elementName = `${options.elementName}:${btoa(options.value)}`;
-        }
-
-        options.elementName = `${FRAME_ELEMENT}:${options.elementName}`;
         options.label = element.label;
         options.skyflowID = element.skyflowID;
 
@@ -189,10 +193,11 @@ class ComposableContainer extends Container {
         tempElements,
         this.#metaData,
         this.#containerId,
-        false,
+        true,
         this.#destroyCallback,
         this.#updateCallback,
         this.#context,
+        this.#eventEmitter,
       );
       this.#elements[tempElements.elementName] = element;
       this.#skyflowElements[elementId] = element;
@@ -237,20 +242,13 @@ class ComposableContainer extends Container {
         ['CollectElement'], true);
     }
 
-    // this.#elementsList
     const { layout } = this.#options;
-    // console.log('Options', this.#options);
-    // console.log('Layout options', layout);
-    // { rows: [{ elements: [] }] }
-    // [ no.of elements in row ]
     let count = 0;
     layout.forEach((rowCount, index) => {
-      // console.log('Row Count', rowCount);
       this.#elementGroup.rows = [
         ...this.#elementGroup.rows,
         { elements: [] },
       ];
-      // console.log('Before', this.#elementGroup);
       for (let i = 0; i < rowCount; i++) {
         this.#elementGroup.rows[index].elements.push(
           this.#elementsList[count],
@@ -258,17 +256,14 @@ class ComposableContainer extends Container {
         count++;
       }
     });
-    // console.log(this.#elementGroup);
-    // console.log(this.#elementGroup.rows);
     if (this.#options.styles) {
       this.#elementGroup.styles = {
         ...this.#options.styles,
       };
     }
 
-    const ele = this.#createMultipleElement(this.#elementGroup, false);
-    ele.mount(domElement);
-    return ele;
+    const composableElement = this.#createMultipleElement(this.#elementGroup, false);
+    composableElement.mount(domElement);
   };
 
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {

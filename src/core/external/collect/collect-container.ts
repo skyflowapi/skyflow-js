@@ -9,6 +9,7 @@ import { formatValidations, formatOptions, validateElementOptions } from '../../
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
+import { ContainerType } from '../../../skyflow';
 import {
   IValidationRule, IInsertRecordInput, Context, MessageType,
 } from '../../../utils/common';
@@ -57,6 +58,8 @@ class CollectContainer extends Container {
   #context:Context;
 
   #skyflowElements:any;
+
+  type:string = ContainerType.COLLECT;
 
   constructor(options, metaData, skyflowElements, context) {
     super();

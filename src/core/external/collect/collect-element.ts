@@ -50,9 +50,9 @@ class CollectElement extends SkyflowElement {
 
   #group: any;
 
-  // label focus
-
   #eventEmitter: EventEmitter = new EventEmitter();
+
+  #groupEmitter: EventEmitter | undefined = undefined;
 
   #bus = new Bus();
 
@@ -75,6 +75,7 @@ class CollectElement extends SkyflowElement {
     destroyCallback: Function,
     updateCallback: Function,
     context: Context,
+    groupEventEmitter?: EventEmitter,
   ) {
     super();
 
@@ -84,6 +85,8 @@ class CollectElement extends SkyflowElement {
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
+
+    if (groupEventEmitter) this.#groupEmitter = groupEventEmitter;
     // if (this.#isSingleElementAPI && this.#elements.length > 1) {
     //   throw new SkyflowError(SKYFLOW_ERROR_CODE.UNKNOWN_ERROR, [], true);
     // }
@@ -321,8 +324,7 @@ class CollectElement extends SkyflowElement {
       ) {
         this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
       } else {
-        // console.log('Recived Data', data);
-        // console.log('Lengrg', this.#elements);
+        const isComposable = this.#elements.length > 1;
         this.#elements.forEach((element, index) => {
           if (data.name === element.elementName) {
             let emitEvent = '';
@@ -363,12 +365,17 @@ class CollectElement extends SkyflowElement {
             if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
             else this.#states[index].value = undefined;
 
+            emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
             this.#updateState();
             const emitData = {
-              ...this.getState(),
+              ...this.#states[index],
               elementType: this.elementType,
             };
-            this.#eventEmitter._emit(emitEvent, emitData);
+            if (isComposable && this.#groupEmitter) {
+              this.#groupEmitter._emit(emitEvent, emitData);
+            } else {
+              this.#eventEmitter._emit(emitEvent, emitData);
+            }
           }
         });
       }
