@@ -24,10 +24,13 @@ import logs from '../../../utils/logs';
 import { Context, Env, MessageType } from '../../../utils/common';
 import { formatFrameNameToId, getReturnValue } from '../../../utils/helpers';
 import SkyflowElement from '../common/skyflow-element';
+import { ContainerType } from '../../../skyflow';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
   elementType: string;
+
+  type: string = ContainerType.COLLECT;
 
   #elementId: string;
 
@@ -355,7 +358,6 @@ class CollectElement extends SkyflowElement {
               default:
                 throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_TYPE, [], true);
             }
-            // console.log('INSDIE', data);
             this.#states[index].isEmpty = data.value.isEmpty;
             this.#states[index].isValid = data.value.isValid;
             this.#states[index].isComplete = data.value.isComplete;
@@ -369,7 +371,7 @@ class CollectElement extends SkyflowElement {
             this.#updateState();
             const emitData = {
               ...this.#states[index],
-              elementType: this.elementType,
+              elementType: element.elementType,
             };
             if (isComposable && this.#groupEmitter) {
               this.#groupEmitter._emit(emitEvent, emitData);

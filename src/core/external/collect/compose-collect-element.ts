@@ -1,5 +1,6 @@
 import EventEmitter from '../../../event-emitter';
 import SkyflowError from '../../../libs/skyflow-error';
+import { ContainerType } from '../../../skyflow';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT } from '../../constants';
 
@@ -7,6 +8,8 @@ class ComposableElement {
   #elementName: string;
 
   #eventEmitter: EventEmitter;
+
+  type: string = ContainerType.COMPOSABLE;
 
   constructor(name, eventEmitter) {
     this.#elementName = name;
