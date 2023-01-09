@@ -303,6 +303,56 @@ const SKYFLOW_ERROR_CODE = {
   SKYFLOW_IDS_AND_COLUMN_NAME_BOTH_SPECIFIED: {
     code: 400, description: logs.errorLogs.SKYFLOW_IDS_AND_COLUMN_NAME_BOTH_SPECIFIED,
   },
+  RECORDS_KEY_NOT_FOUND_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.RECORDS_KEY_NOT_FOUND_GETBYID,
+  },
+  INVALID_RECORDS_IN_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.INVALID_RECORDS_IN_GETBYID,
+  },
+  EMPTY_RECORDS_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_RECORDS_GETBYID,
+  },
+  MISSING_IDS_IN_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.MISSING_IDS_IN_GETBYID,
+  },
+  INVALID_IDS_IN_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.INVALID_IDS_IN_GETBYID,
+  },
+  EMPTY_IDS_IN_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_IDS_IN_GETBYID,
+  },
+  INVALID_SKYFLOWID_TYPE_IN_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.INVALID_SKYFLOWID_TYPE_IN_GETBYID,
+  },
+  MISSING_TABLE_IN_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.MISSING_TABLE_IN_GETBYID,
+  },
+  INVALID_TABLE_IN_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.INVALID_TABLE_IN_GETBYID,
+  },
+  MISSING_REDACTION_IN_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.MISSING_REDACTION_IN_GETBYID,
+  },
+  INVALID_REDACTION_TYPE_IN_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.INVALID_REDACTION_TYPE_IN_GETBYID,
+  },
+  EMPTY_SKYFLOWID_IN_GETBYID: { code: 400, description: logs.errorLogs.EMPTY_SKYFLOWID_IN_GETBYID },
+  EMPTY_TABLE_IN_GETBYID: { code: 400, description: logs.errorLogs.EMPTY_TABLE_IN_GETBYID },
+  EMPTY_REDACTION_TYPE_IN_GETBYID: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_REDACTION_TYPE_IN_GETBYID,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;

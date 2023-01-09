@@ -22,13 +22,14 @@ import {
   RequestMethod,
   IInsertRecordInput,
   IDetokenizeInput,
-  IGetByIdInput,
+  IGetInput,
   RedactionType,
   EventName,
   Env,
   LogLevel,
   MessageType,
   ValidationRuleType,
+  IGetByIdInput,
 } from './utils/common';
 import { formatVaultURL } from './utils/helpers';
 
@@ -188,15 +189,15 @@ class Skyflow {
 
   getById(getByIdInput: IGetByIdInput) {
     printLog(logs.warnLogs.GET_BY_ID_DEPRECATED, MessageType.WARN, this.#logLevel);
-    printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
+    printLog(parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.getById(getByIdInput);
   }
 
-  get(getByIdInput: IGetByIdInput) {
+  get(getInput: IGetInput) {
     printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
-    return this.#skyflowContainer.getById(getByIdInput);
+    return this.#skyflowContainer.get(getInput);
   }
 
   static get ContainerType() {

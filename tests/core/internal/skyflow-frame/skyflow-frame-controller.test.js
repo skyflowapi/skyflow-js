@@ -320,7 +320,7 @@ describe('Retrieving data using skyflowId', () => {
 
     const onCb = on.mock.calls[0][1];
     const data = {
-      type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+      type: PUREJS_TYPES.GET,
       records: getByIdReq,
     };
     const cb2 = jest.fn();
@@ -345,7 +345,7 @@ describe('Retrieving data using skyflowId', () => {
 
     const onCb = on.mock.calls[0][1];
     const data = {
-      type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+      type: PUREJS_TYPES.GET,
       records: getByIdReq,
     };
     const cb2 = jest.fn();
@@ -391,7 +391,7 @@ describe('Failed to fetch accessToken', () => {
     onCb(detokenizeData, detokenizeCb);
 
     const getByIdData = {
-      type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+      type: PUREJS_TYPES.GET,
       records: getByIdReq,
     };
     const getByIdCb = jest.fn();
