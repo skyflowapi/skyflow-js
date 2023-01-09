@@ -15,6 +15,7 @@ import {
   validateInitConfig,
   validateGetInput,
   validateGetByIdInput,
+  validateUpsertOptions,
 } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
@@ -28,7 +29,7 @@ import {
 } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import {
-  IDetokenizeInput, IGetInput, Context, MessageType, IGetByIdInput,
+  IDetokenizeInput, IGetInput, Context, MessageType, IGetByIdInput, IInsertOptions,
 } from '../../utils/common';
 
 const CLASS_NAME = 'SkyflowContainer';
@@ -135,15 +136,13 @@ class SkyflowContainer {
     });
   }
 
-  insert(records, options): Promise<any> {
+  insert(records, options:IInsertOptions): Promise<any> {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
           printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
             this.#context.logLevel);
-
-          validateInsertRecords(records, options);
           if (options) {
             options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
           } else {
@@ -151,6 +150,10 @@ class SkyflowContainer {
               tokens: true,
             };
           }
+          if (options?.upsert) {
+            validateUpsertOptions(options.upsert);
+          }
+          validateInsertRecords(records, options);
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)
             .emit(
@@ -183,10 +186,17 @@ class SkyflowContainer {
         printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
           this.#context.logLevel);
 
-        validateInsertRecords(records, options);
         if (options) {
           options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
+        } else {
+          options = {
+            tokens: true,
+          };
         }
+        if (options?.upsert) {
+          validateUpsertOptions(options.upsert);
+        }
+        validateInsertRecords(records, options);
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {

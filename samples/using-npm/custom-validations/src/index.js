@@ -1,12 +1,12 @@
 /*
-Copyright (c) 2022 Skyflow, Inc.
+  Copyright (c) 2022 Skyflow, Inc.
 */
-import Skyflow from "skyflow-js";
+import Skyflow from 'skyflow-js';
 
 try{
     const skyflow = Skyflow.init({
-        vaultID: "<VAULT_ID>",
-        vaultURL: "<VAULT_URL>",
+        vaultID: '<VAULT_ID>',
+        vaultURL: '<VAULT_URL>',
         getBearerToken: () => {
           return new Promise((resolve, reject) => {
             const Http = new XMLHttpRequest();
@@ -17,8 +17,8 @@ try{
                 resolve(response.accessToken);
               }
             };
-            const url = "<TOKEN_END_POINT_URL>";
-            Http.open("GET", url);
+            const url = '<TOKEN_END_POINT_URL>';
+            Http.open('GET', url);
             Http.send();
           });
         },
@@ -28,43 +28,43 @@ try{
         }
       });
 
-      // create collect Container
+      // Create collect Container.
       const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
 
-      //custom styles for collect elements
+      // Custom styles for collect elements.
       const collectStylesOptions = {
         inputStyles: {
           base: {
-            border: "1px solid #eae8ee",
-            padding: "10px 16px",
-            borderRadius: "4px",
-            color: "#1d1d1d",
-            marginTop: "4px",
+            border: '1px solid #eae8ee',
+            padding: '10px 16px',
+            borderRadius: '4px',
+            color: '#1d1d1d',
+            marginTop: '4px',
           },
           complete: {
-            color: "#4caf50",
+            color: '#4caf50',
           },
           empty: {},
           focus: {},
           invalid: {
-            color: "#f44336",
+            color: '#f44336',
           },
         },
         labelStyles: {
           base: {
-            fontSize: "16px",
-            fontWeight: "bold",
+            fontSize: '16px',
+            fontWeight: 'bold',
           },
         },
         errorTextStyles: {
           base: {
-            color: "#f44336",
+            color: '#f44336',
           },
         },
       };
 
 
-      // create a validation rule
+      // Create a validation rule.
       const regexRule = {
         // REGEX Rule will validate the element value with the given regex
         type:Skyflow.ValidationRuleType.REGEX_MATCH_RULE ,
@@ -73,10 +73,10 @@ try{
             regex:/[A-Za-z0-9]+/,
             // specify what error text should be displayed 
             // when this validation rule failed
-            error:"only alphabets are allowed"
+            error:'only alphabets are allowed'
         }
       }
-      // creating a length rule
+      // Creating a length rule.
       const lengthRule = {
         // LENGTH match rule will validate whether the element value length matches with given length.  
         type:Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
@@ -87,16 +87,16 @@ try{
             max:12,
             // specify what error text should be displayed 
             // when this validation rule failed
-            error:"must be between 3 to 12 alphabets"
+            error:'must be between 3 to 12 alphabets'
         }
       }
       
       const userNameElement = collectContainer.create({
-        table: "pii_fields",
-        column: "first_name",
+        table: 'pii_fields',
+        column: 'first_name',
         ...collectStylesOptions,
-        placeholder: "Enter User Name",
-        label: "User Name",
+        placeholder: 'Enter User Name',
+        label: 'User Name',
         type: Skyflow.ElementType.INPUT_FIELD,
         // pass validation rules
         validations:[regexRule,lengthRule]
@@ -104,8 +104,8 @@ try{
 
       const passwordElement = collectContainer.create({
         ...collectStylesOptions,
-        label: "Enter Password",
-        placeholder: "Password",
+        label: 'Enter Password',
+        placeholder: 'Password',
         type: Skyflow.ElementType.INPUT_FIELD,
       });
 
@@ -113,28 +113,28 @@ try{
       // ELEMENT VALUE MATCH RULE validates that element value matches the provied element.
 	    type: Skyflow.ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
 	    params: {
-            // specify with which element value should be matched.
+            // Specify with which element value should be matched.
 	        element: passwordElement,
-            // specify what error text should be displayed 
+            // Specify what error text should be displayed 
             // when this validation rule failed
-            error: "password doesn’t match"
+            error: 'password doesn’t match'
 	    }
     }
 
       const confirmPasswordElement = collectContainer.create({
         ...collectStylesOptions,
-        label: "Confirm Password",
-        placeholder: "confirm password",
+        label: 'Confirm Password',
+        placeholder: 'confirm password',
         type: Skyflow.ElementType.INPUT_FIELD,
-        // add validations
+        // Add validations.
         validations:[elementMatchRule]
       });
 
 
-      // mount the elements
-      userNameElement.mount("#collectUserName");
-      passwordElement.mount("#collectPassword");
-      confirmPasswordElement.mount("#collectConfirmPassword");
+      // Mount the elements.
+      userNameElement.mount('#collectUserName');
+      passwordElement.mount('#collectPassword');
+      confirmPasswordElement.mount('#collectConfirmPassword');
 
 }catch(err){
     console.log(err);

@@ -688,6 +688,154 @@ describe('skyflow get', () => {
   });
 });
 
+describe('skyflow getById', () => {
+  let emitSpy;
+  let targetSpy;
+  let skyflow;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+
+    skyflow = Skyflow.init({
+      vaultID: 'vault123',
+      vaultURL: 'https://vaulturl.com',
+      getBearerToken: jest.fn(),
+    });
+
+    // const frameReayEvent = on.mock.calls
+    //   .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    // const frameReadyCb = frameReayEvent[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({}, cb2);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('getById success', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.getById(getByIdInput);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('getById success else', (done) => {
+    try {
+      const res = skyflow.getById(getByIdInput);
+      const frameReayEvent = on.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+      const frameReadyCb2 = frameReayEvent[1][1];
+      frameReadyCb2();
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+
+  test('getById error', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.getById(getByIdInput);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb({ error: { message: "id doesn't exist", code: 404 } });
+
+      let error;
+      res.catch((err) => error = err);
+
+      setTimeout(() => {
+        expect(error).toBeDefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('getById invalid input-1', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.getById({});
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('getById invalid input-2', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.getById({ records: [] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('getById invalid input-3', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.getById({ records: [{}] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('getById invalid input-4', (done) => {
+    const res = skyflow.getById({ records: [{}] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+});
+
+
 describe('skyflow get', () => {
   let emitSpy;
   let targetSpy;
@@ -982,6 +1130,7 @@ describe('skyflow get', () => {
     });
   });
 });
+
 describe('Skyflow Enums', () => {
   test('Skyflow.ContainerType', () => {
     expect(Skyflow.ContainerType.COLLECT).toEqual(ContainerType.COLLECT);

@@ -101,3 +101,13 @@ export interface IValidationRule {
   type: ValidationRuleType;
   params: any;
 }
+
+export interface IUpsertOption {
+  table : string;
+  column: string;
+}
+
+export interface IInsertOptions{
+  tokens?: boolean;
+  upsert?: IUpsertOption[];
+}
