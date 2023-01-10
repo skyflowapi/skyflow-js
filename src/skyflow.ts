@@ -147,6 +147,7 @@ class Skyflow {
         const collectContainer = new CollectContainer(options, {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
+          containerType: type,
         },
         this.#skyflowElements,
         { logLevel: this.#logLevel, env: this.#env });
@@ -159,6 +160,7 @@ class Skyflow {
         const revealContainer = new RevealContainer({
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
+          containerType: type,
         },
         this.#skyflowElements,
         { logLevel: this.#logLevel });
@@ -171,6 +173,7 @@ class Skyflow {
         const collectContainer = new ComposableContainer(options, {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
+          containerType: type,
         },
         this.#skyflowElements,
         { logLevel: this.#logLevel, env: this.#env });

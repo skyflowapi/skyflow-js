@@ -261,6 +261,11 @@ class ComposableContainer extends Container {
         ...this.#options.styles,
       };
     }
+    if (this.#options.errorTextStyles) {
+      this.#elementGroup.errorTextStyles = {
+        ...this.#options.errorTextStyles,
+      };
+    }
 
     const composableElement = this.#createMultipleElement(this.#elementGroup, false);
     composableElement.mount(domElement);

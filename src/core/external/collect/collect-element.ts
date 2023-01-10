@@ -302,6 +302,7 @@ class CollectElement extends SkyflowElement {
         data.value = '';
       }
       delete data.isComplete;
+      delete data.name;
       handler(data);
     });
   }

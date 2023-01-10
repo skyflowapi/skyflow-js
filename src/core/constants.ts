@@ -13,6 +13,7 @@ import unionPayIcon from '../../assets/unionpay.svg';
 import visaCardIcon from '../../assets/visa.svg';
 import copyIcon from '../../assets/copyIcon.svg';
 import successIcon from '../../assets/path.svg';
+import logs from '../utils/logs';
 
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';
@@ -486,3 +487,34 @@ export enum ContentType {
   FORMURLENCODED = 'application/x-www-form-urlencoded',
   FORMDATA = 'multipart/form-data',
 }
+
+export const ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES = [
+  ElementType.CARD_NUMBER,
+  ElementType.EXPIRATION_DATE,
+  ElementType.EXPIRATION_MONTH,
+  ElementType.EXPIRATION_YEAR,
+];
+
+export const DEFAULT_ERROR_TEXT_ELEMENT_TYPES = {
+  [ElementType.CVV]: 'Invalid cvv',
+  [ElementType.EXPIRATION_DATE]: 'Invalid expiration date',
+  [ElementType.CARD_NUMBER]: 'Invalid card number',
+  [ElementType.CARDHOLDER_NAME]: 'Invalid cardholder name',
+  [ElementType.INPUT_FIELD]: logs.errorLogs.INVALID_COLLECT_VALUE,
+  [ElementType.PIN]: 'Invalid pin',
+  [ElementType.EXPIRATION_MONTH]: 'Invalid expiration month',
+  [ElementType.EXPIRATION_YEAR]: 'Invalid expiration year',
+  [ElementType.FILE_INPUT]: logs.errorLogs.INVALID_COLLECT_VALUE,
+};
+
+export const DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES = {
+  [ElementType.CVV]: 'cvv is required',
+  [ElementType.EXPIRATION_DATE]: 'expiration date is required',
+  [ElementType.CARD_NUMBER]: 'card number is required',
+  [ElementType.CARDHOLDER_NAME]: 'cardholder name is required',
+  [ElementType.INPUT_FIELD]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
+  [ElementType.PIN]: 'pin is required',
+  [ElementType.EXPIRATION_MONTH]: 'expiration month is required',
+  [ElementType.EXPIRATION_YEAR]: 'expiration year is required',
+  [ElementType.FILE_INPUT]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
+};
