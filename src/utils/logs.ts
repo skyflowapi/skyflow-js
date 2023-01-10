@@ -40,7 +40,7 @@ const logs = {
     INSERT_TRIGGERED: '%s1 - Insert method triggered.',
     DETOKENIZE_TRIGGERED: '%s1 - Detokenize method triggered.',
     GET_TRIGGERED: '%s1 - Get method triggered.',
-
+    GET_BY_ID_TRIGGERED: '%s1 - Get method triggered.',
     EMIT_PURE_JS_REQUEST: '%s1 - Emitted %s2 request.',
     CAPTURE_PURE_JS_REQUEST: '%s1 - Captured %s2 event.',
     LISTEN_PURE_JS_REQUEST: '%s1 - Listening to %s2 event.',
@@ -52,6 +52,7 @@ const logs = {
     INSERT_RECORDS_RESOLVED: '%s1 - Insert request is resolved.',
 
     GET_RESOLVED: '%s1 - Get request is resolved.',
+    GET_BY_SKYFLOWID_RESOLVED: '%s1 - GetById request is resolved.',
 
     EMIT_EVENT: '%s1 - %s2 event emitted',
     CAPTURE_EVENT: '%s1 - Captured event %s2',
@@ -75,6 +76,7 @@ const logs = {
     IFRAMEFORM_CONSTRUCTOR_TOKENIZATION_LISTNER: '%s1 - In IFrameForm constructor, Adding listner for TOKENIZATION_REQUEST event',
     CURRENT_ENV: '%s1 - Client Env is %s2',
     CURRENT_LOG_LEVEL: '%s1 - Client LogLevel is %s2',
+    VALIDATE_GET_BY_ID_INPUT: '%s1 - Validating getByID input.',
   },
   errorLogs: {
     CLIENT_CONNECTION: 'Interface: collect container - client connection not established. client info has not reached iframes',
@@ -212,6 +214,22 @@ const logs = {
     EMPTY_COLUMN_VALUE: 'Column Value is empty.',
     MISSING_IDS_OR_COLUMN_VALUES_IN_GET: 'Interface: client get - "ids" key  or "columnValues" key is missing.',
     SKYFLOW_IDS_AND_COLUMN_NAME_BOTH_SPECIFIED: 'ids and columnName can not be specified together.',
+    GET_BY_SKYFLOWID_RESOLVED: '%s1 - GetById request is resolved.',
+    RECORDS_KEY_NOT_FOUND_GETBYID: 'Interface: client getById - records object is required.',
+    INVALID_RECORDS_IN_GETBYID: 'Interface: client getById - Invalid records. records object should be an array.',
+    EMPTY_RECORDS_GETBYID: 'Interface: client getById - records array cannot be empty.',
+    MISSING_IDS_IN_GETBYID: 'Interface: client getById - "ids" key is required in records array at index %s1',
+    INVALID_IDS_IN_GETBYID: 'Interface: client getById - Invalid ids. ids object should be an array.',
+    EMPTY_IDS_IN_GETBYID: 'Interface: client getById - ids array cannot be empty at index %s1',
+    INVALID_SKYFLOWID_TYPE_IN_GETBYID: 'Interface: client getById - Invalid skyflowId in ids array at index %s1',
+    MISSING_TABLE_IN_GETBYID: 'Interface: client getById - "table" key is required in records array at index %s1',
+    INVALID_TABLE_IN_GETBYID: 'Interface: client getById - table of type string is required at index %s1 in records array.',
+    MISSING_REDACTION_IN_GETBYID: 'Interface: client getById - "redaction" key is required in records array at index %s1',
+    INVALID_REDACTION_TYPE_IN_GETBYID: 'Interface: client getById - Invalid redaction type in records array at index %s1',
+    EMPTY_SKYFLOWID_IN_GETBYID: 'Interface: client getById - id cannot be empty in records array at index %s1',
+    EMPTY_TABLE_IN_GETBYID: 'Interface: client getById - table cannot be empty in records array at index %s1',
+    EMPTY_REDACTION_TYPE_IN_GETBYID: 'Interface: client getById - redaction cannot be empty in records array at index %s1',
+    GET_BY_SKYFLOWID_REJECTED: 'Interface: client getById - getById request is rejected.',
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',
