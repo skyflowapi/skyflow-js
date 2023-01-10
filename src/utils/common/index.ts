@@ -70,12 +70,22 @@ export interface IDetokenizeInput {
   records: IRevealRecord[];
 }
 
-export interface ISkyflowIdRecord {
+export interface IGetRecord {
   ids?: string[];
   redaction: RedactionType;
   table: string;
   columnName?:string;
   columnValues?: string[];
+}
+
+export interface IGetInput {
+  records: IGetRecord[];
+}
+
+export interface ISkyflowIdRecord {
+  ids: string[];
+  redaction: RedactionType;
+  table: string;
 }
 
 export interface IGetByIdInput {
