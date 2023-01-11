@@ -70,6 +70,18 @@ export interface IDetokenizeInput {
   records: IRevealRecord[];
 }
 
+export interface IGetRecord {
+  ids?: string[];
+  redaction: RedactionType;
+  table: string;
+  columnName?:string;
+  columnValues?: string[];
+}
+
+export interface IGetInput {
+  records: IGetRecord[];
+}
+
 export interface ISkyflowIdRecord {
   ids: string[];
   redaction: RedactionType;
@@ -88,4 +100,14 @@ export interface Context{
 export interface IValidationRule {
   type: ValidationRuleType;
   params: any;
+}
+
+export interface IUpsertOption {
+  table : string;
+  column: string;
+}
+
+export interface IInsertOptions{
+  tokens?: boolean;
+  upsert?: IUpsertOption[];
 }

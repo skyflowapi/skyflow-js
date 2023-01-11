@@ -85,3 +85,7 @@ export const fileValidation = (value) => {
   if (DANGEROUS_FILE_TYPE.includes(value.type) || value.size > 3200000) return false;
   return true;
 };
+
+export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
+  `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`
+), '');

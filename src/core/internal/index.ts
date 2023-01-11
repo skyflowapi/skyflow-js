@@ -33,7 +33,7 @@ import { parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
-import { appendZeroToOne, handleCopyIconClick } from '../../utils/helpers';
+import { appendZeroToOne, handleCopyIconClick, styleToString } from '../../utils/helpers';
 
 export class FrameController {
   controller?: FrameController;
@@ -101,7 +101,7 @@ export class FrameElement {
 
   private domInput?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLFormElement;
 
-  private domError?: HTMLSpanElement;
+  public domError?: HTMLSpanElement;
 
   private domImg?: HTMLImageElement;
 
@@ -112,6 +112,10 @@ export class FrameElement {
   private copyText?: string;
 
   private hasError?: boolean;
+
+  private labelDiv?: HTMLDivElement;
+
+  private isRequiredLabel?: HTMLLabelElement;
 
   constructor(
     iFrameFormElement: IFrameFormElement,
@@ -128,7 +132,13 @@ export class FrameElement {
   // mount element onto dom
   mount = () => {
     this.iFrameFormElement.resetEvents();
+    this.labelDiv = document.createElement('div');
+
     this.domLabel = document.createElement('label');
+
+    this.labelDiv.setAttribute('style', styleToString(COLLECT_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.BASE]));
+    this.labelDiv.append(this.domLabel);
+
     this.domLabel.htmlFor = this.iFrameFormElement.iFrameName;
 
     this.domError = document.createElement('span');
@@ -153,7 +163,7 @@ export class FrameElement {
       && this.options.enableCardIcon) {
       this.domImg = document.createElement('img');
       this.domImg.src = CARD_ENCODED_ICONS.DEFAULT;
-      this.domImg.setAttribute('style', INPUT_ICON_STYLES);
+      this.domImg.setAttribute('style', this.options.inputStyles.cardIcon ? styleToString(this.options.inputStyles.cardIcon) : INPUT_ICON_STYLES);
       this.inputParent.append(this.domImg);
     }
 
@@ -161,7 +171,7 @@ export class FrameElement {
       this.domCopy = document.createElement('img');
       this.domCopy.src = COPY_UTILS.copyIcon;
       this.domCopy.title = COPY_UTILS.toCopy;
-      this.domCopy.setAttribute('style', COLLECT_COPY_ICON_STYLES);
+      this.domCopy.setAttribute('style', this.options.inputStyles.copyIcon ? styleToString(this.options.inputStyles.copyIcon) : COLLECT_COPY_ICON_STYLES);
       this.inputParent.append(this.domCopy);
 
       this.domCopy.onclick = () => {
@@ -170,6 +180,7 @@ export class FrameElement {
         }
       };
     }
+
     // events and todo: onclick, onescape ...???
     inputElement.onfocus = (event) => {
       this.onFocusChange(event, true);
@@ -178,8 +189,25 @@ export class FrameElement {
       this.onFocusChange(event, false);
     };
 
-    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, () => {
+    // Required asterick
+    if (this.options.required && this.domError) {
+      this.isRequiredLabel = document.createElement('label');
+      this.isRequiredLabel.textContent = ' *';
+      this.isRequiredLabel.setAttribute('style', 'display:inline ; color:red');
+      this.labelDiv.append(this.isRequiredLabel);
+    }
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, (state) => {
       this.focusChange(true);
+      state.isEmpty = false;
+      // On Focus the error state should be false
+      if (state.error && this.domError) {
+        state.isValid = true;
+        this.hasError = false;
+        this.domError.innerText = '';
+      }
+      if (state) {
+        this.updateStyleClasses(state);
+      }
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
@@ -198,20 +226,34 @@ export class FrameElement {
         this.domError.innerText = '';
         this.hasError = false;
       }
+      // FIELD IS EMPTY AND REQUIRED
+      if (this.options.required && state.value === '' && this.domError) {
+        state.isComplete = false;
+        state.isValid = false;
+        state.isEmpty = true;
+        this.hasError = true;
+        this.domError.innerText = this.options.label ? `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
+          this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
+      } else if (this.options.required && !state.isRequired && this.domError) {
+        this.domError.innerText = this.options.label ? `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
+          this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
+      }
       this.updateStyleClasses(state);
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
+      // On CHANGE set isEmpty to false
+      state.isEmpty = false;
+
       if (
         state.value
         && this.iFrameFormElement.fieldType === ELEMENTS.radio.name
       ) {
         (<HTMLInputElement> this.domInput).checked = this.options.value === state.value;
       }
-
       if (this.options.enableCopy) {
         this.copyText = state.value;
       }
-      if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name && state.value) {
+      if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
         const cardType = detectCardType(state.value);
         if (this.options.enableCardIcon) {
           if (this.domImg) {
@@ -335,7 +377,7 @@ export class FrameElement {
 
   updateParentDiv = (newDiv: HTMLDivElement) => {
     this.htmlDivElement = newDiv;
-    if (Object.prototype.hasOwnProperty.call(this.options, 'label')) this.htmlDivElement.append(this.domLabel || '');
+    if (Object.prototype.hasOwnProperty.call(this.options, 'label')) this.htmlDivElement.append(this.labelDiv || '');
 
     this.htmlDivElement.append(this.inputParent || '', this.domError || '');
   };
@@ -385,6 +427,7 @@ export class FrameElement {
     isValid: boolean;
     isEmpty: boolean;
     isComplete: boolean;
+    value: string | Blob | undefined;
   }) {
     const classes: string[] = [];
     const labelClasses: string[] = [];
@@ -393,13 +436,20 @@ export class FrameElement {
       classes.push(STYLE_TYPE.FOCUS);
       labelClasses.push(STYLE_TYPE.FOCUS);
     }
+    if (this.options.required && state.value === '' && !state.isFocused) {
+      classes.push(STYLE_TYPE.INVALID);
+    }
+
+    if (!this.options.required && !state.isEmpty && state.isFocused) {
+      classes.push(STYLE_TYPE.FOCUS);
+    }
     if (state.isEmpty) {
       classes.push(STYLE_TYPE.EMPTY);
     } else {
       if (!state.isValid) {
         classes.push(STYLE_TYPE.INVALID);
       }
-      if (state.isComplete) {
+      if (!state.isFocused && state.isComplete) {
         classes.push(STYLE_TYPE.COMPLETE);
       }
     }

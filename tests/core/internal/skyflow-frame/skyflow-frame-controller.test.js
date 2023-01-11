@@ -44,6 +44,10 @@ const records = {
 
 const options = {
   tokens: true,
+  upsert: [{
+    table: '',
+    column: '',
+  }]
 };
 
 const insertResponse = {
@@ -145,7 +149,7 @@ describe('Inserting records into the vault', () => {
     const data = {
       type: PUREJS_TYPES.INSERT,
       records,
-      options: { tokens: false },
+      options: { tokens: false, upsert: [{ table: '', column: '  ' }] },
     };
     const cb2 = jest.fn();
     onCb(data, cb2);
@@ -210,9 +214,72 @@ const detokenizeErrorResponse = {
 const toJson = jest.fn(() => ({
   config: {},
   metaData: {
-      uuid: ''
+    uuid: ''
   }
 }))
+
+describe('Retrieving data using skyflowId', () => {
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+  });
+
+  test('getById success', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(getByIdRes));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+      records: getByIdReq,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].records.length).toBe(1);
+      done();
+    }, 1000);
+  });
+
+  test('getById error', (done) => {
+    const clientReq = jest.fn(() => Promise.reject(errorResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+      records: getByIdReq,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].error).toBeDefined();
+      done();
+    }, 1000);
+  });
+});
+
 
 describe('Retrieving data using skyflow tokens', () => {
   let emitSpy;
@@ -292,7 +359,7 @@ const getByIdRes = {
   }],
 };
 
-describe('Retrieving data using skyflowId', () => {
+describe('Retrieving data using skyflow tokens', () => {
   let emitSpy;
   let targetSpy;
   beforeEach(() => {
@@ -303,7 +370,71 @@ describe('Retrieving data using skyflowId', () => {
     });
   });
 
-  test('getById success', (done) => {
+  test('detokenize success', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(detokenizeResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.DETOKENIZE,
+      records: detokenizeRecords,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].records.length).toBe(1);
+      done();
+    }, 1000);
+  });
+
+  test('detokenize error', (done) => {
+    const clientReq = jest.fn(() => Promise.reject(detokenizeErrorResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.DETOKENIZE,
+      records: detokenizeRecords,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].records).toBeUndefined();
+      expect(cb2.mock.calls[0][0].error).toBeDefined();
+      done();
+    }, 1000);
+  });
+});
+
+
+describe('Retrieving data using get', () => {
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+  });
+
+  test('get success', (done) => {
     const clientReq = jest.fn(() => Promise.resolve(getByIdRes));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
@@ -316,7 +447,7 @@ describe('Retrieving data using skyflowId', () => {
 
     const onCb = on.mock.calls[0][1];
     const data = {
-      type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+      type: PUREJS_TYPES.GET,
       records: getByIdReq,
     };
     const cb2 = jest.fn();
@@ -328,7 +459,7 @@ describe('Retrieving data using skyflowId', () => {
     }, 1000);
   });
 
-  test('getById error', (done) => {
+  test('get error', (done) => {
     const clientReq = jest.fn(() => Promise.reject(errorResponse));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
@@ -341,7 +472,7 @@ describe('Retrieving data using skyflowId', () => {
 
     const onCb = on.mock.calls[0][1];
     const data = {
-      type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+      type: PUREJS_TYPES.GET,
       records: getByIdReq,
     };
     const cb2 = jest.fn();
@@ -355,7 +486,7 @@ describe('Retrieving data using skyflowId', () => {
 });
 
 
-describe('Failed to fetch accessToken', () => {
+describe('Failed to fetch accessToken get', () => {
   let emitSpy;
   let targetSpy;
   beforeEach(() => {
@@ -374,6 +505,7 @@ describe('Failed to fetch accessToken', () => {
     const insertData = {
       type: PUREJS_TYPES.INSERT,
       records,
+      options: { tokens: false, upsert: [{ table: '', column: '  ' }] },
     };
     const insertCb = jest.fn();
     onCb(insertData, insertCb);
@@ -386,7 +518,53 @@ describe('Failed to fetch accessToken', () => {
     onCb(detokenizeData, detokenizeCb);
 
     const getByIdData = {
-      type: PUREJS_TYPES.GET_BY_SKYFLOWID,
+      type: PUREJS_TYPES.GET,
+      records: getByIdReq,
+    };
+    const getByIdCb = jest.fn();
+    onCb(getByIdData, getByIdCb);
+
+    setTimeout(() => {
+      expect(insertCb.mock.calls[0][0].error).toBeDefined();
+      expect(detokenizeCb.mock.calls[0][0].error).toBeDefined();
+      expect(getByIdCb.mock.calls[0][0].error).toBeDefined();
+      done();
+    }, 1000);
+  });
+});
+describe('Failed to fetch accessToken Getbyid', () => {
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+  });
+
+  test('accessToken error', (done) => {
+    busEvents.getAccessToken = jest.fn(() => Promise.reject({ error: 'error' }));
+    SkyflowFrameController.init();
+    const onCb = on.mock.calls[0][1];
+
+    const insertData = {
+      type: PUREJS_TYPES.INSERT,
+      records,
+      options: { tokens: false, upsert: [{ table: '', column: '  ' }] },
+    };
+    const insertCb = jest.fn();
+    onCb(insertData, insertCb);
+
+    const detokenizeData = {
+      type: PUREJS_TYPES.DETOKENIZE,
+      records: detokenizeRecords,
+    };
+    const detokenizeCb = jest.fn();
+    onCb(detokenizeData, detokenizeCb);
+
+    const getByIdData = {
+      type: PUREJS_TYPES.GET,
       records: getByIdReq,
     };
     const getByIdCb = jest.fn();

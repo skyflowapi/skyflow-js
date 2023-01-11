@@ -1,4 +1,5 @@
 # JS SDK samples
+
 Test the SDK by adding your `VAULT_ID`, `VAULT_URL`, and `SERVICE-ACCOUNT` details as the corresponding values in each sample.
 
 
@@ -16,6 +17,7 @@ Test the SDK by adding your `VAULT_ID`, `VAULT_URL`, and `SERVICE-ACCOUNT` detai
 3. Under Quickstart, click Create.Once the vault is created, click the gear icon and select **Edit Vault Details**.
 
 To run the following commands, you'll need to retrieve your vault-specific values, **<vault_url>** and **<vault_id>**. Find your vault values by clicking the vault menu icon > Edit vault details.Note your **Vault URL** and **Vault ID** values, then click Cancel. You'll need these later.
+
 
 ### Create a service account
 1. In Studio, click **Settings** in the upper navigation.

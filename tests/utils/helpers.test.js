@@ -9,7 +9,8 @@ import {
   getReturnValue,
   copyToClipboard,
   handleCopyIconClick,
-  fileValidation
+  fileValidation,
+  styleToString
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -19,23 +20,6 @@ import {
   detectCardType
 } from '../../src/utils/validators/index';
 import successIcon from '../../assets/path.svg'
-
-const element1 = {
-  iframeName: jest.fn(() => ('reveal:123')),
-  getRecordData: jest.fn(() => ({
-    formatRegex: /..$/,
-    replaceText: '$1'
-  })),
-  isMounted: jest.fn(() => (true))
-}
-
-const element2 = {
-  iframeName: jest.fn(() => ('reveal:456')),
-  getRecordData: jest.fn(() => ({
-    formatRegex: /..$/
-  })),
-  isMounted: jest.fn(() => (true))
-}
 
 
 describe('bin data for for all card number except AMEX element type on CHANGE event', () => {
@@ -156,5 +140,26 @@ describe('test file validation', () => {
       webkitRelativePath: ""
     }
     expect(fileValidation(file)).toBe(false);
+  })
+})
+
+describe('test JSX style object conversion function',()=>{
+  test('valid JSX style test 1', () => {
+    const test = {
+      cursor: "pointer",
+      border: "1px solid red",
+      backgroundColor:"black",
+    }
+    const style = "cursor:pointer;border:1px solid red;background-color:black;"
+    expect(styleToString(test)).toBe(style);
+  })
+  test('valid JSX style test 2', () => {
+    const test = {
+      marginTop: "10px",
+      paddingLeft: "10px",
+      backgroundColor:"black",
+    }
+    const style = "margin-top:10px;padding-left:10px;background-color:black;"
+    expect(styleToString(test)).toBe(style);
   })
 })

@@ -17,9 +17,12 @@ import {
 import EventEmitter from '../../../src/event-emitter';
 import {
   ELEMENT_EVENTS_TO_CLIENT,
-  ELEMENT_EVENTS_TO_IFRAME
+  ELEMENT_EVENTS_TO_IFRAME,
+  CardType
 } from '../../../src/core/constants';
-
+import {
+  detectCardType
+} from '../../../src/utils/validators/index';
 jest.mock('../../../src/event-emitter');
 
 const on = jest.fn();
@@ -115,7 +118,7 @@ describe('test frame controller', () => {
     const focusCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
 
-    focusCb[0][1]();
+    focusCb[0][1](state);
 
     const blurCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
@@ -186,6 +189,50 @@ describe('test frame controller', () => {
 
   })
 
+  test('card_number FrameElement', () => {
+
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[1];
+    const onSpy = inst.on.mock.calls;
+
+    formElement.setValue("4111 1111 1111 1111")
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+
+    expect(formElement.getValue()).toBe('4111 1111 1111 1111')
+    expect(detectCardType(formElement.getValue())).toBe(CardType.VISA)
+
+    formElement.setValue("")
+
+    const changeCbEvent = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCbEvent[0][1](state);
+
+    expect(formElement.getValue()).toBe('')
+    expect(detectCardType(formElement.getValue())).toBe(CardType.DEFAULT)
+
+    const focusCbEvent = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCbEvent[0][1](state);
+
+    expect(formElement.getValue()).toBe('')
+  })
+
   test('expiration_date FrameElement', () => {
 
     const date_element = `element:EXPIRATION_DATE:${tableCol}`;
@@ -218,7 +265,7 @@ describe('test frame controller', () => {
       inputStyles,
       labelStyles,
       errorTextStyles,
-      enableCopy:true
+      enableCopy: true
     }, div);
 
     const inst = EventEmitter.mock.instances[0];

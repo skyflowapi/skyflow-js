@@ -12,14 +12,17 @@ import {
   validateInsertRecords,
   validateAdditionalFieldsInCollect,
   validateDetokenizeInput,
-  validateGetByIdInput,
+  validateGetInput,
   validateInitConfig,
   validateCollectElementInput,
   validateRevealElementRecords,
   isValidExpiryYearFormat,
-  validateCardNumberLengthCheck
+  validateCardNumberLengthCheck,
+  validateUpsertOptions,
+  validateGetByIdInput
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logs-helper';
+import { RedactionType } from '../../src/utils/common';
 
 
 describe('Validation card number and Expiry Date', () => {
@@ -262,7 +265,6 @@ describe('detokenize input validation', () => {
   })
 })
 
-
 describe('getById input validation', () => {
 
   test('invalid records type', () => {
@@ -354,6 +356,230 @@ describe('getById input validation', () => {
     }
   })
 })
+
+
+describe('get input validation', () => {
+
+  test('invalid records type', () => {
+    try {
+      validateGetInput({ records: {} })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_GET.description)
+    }
+  })
+
+
+  test('invalid ids', () => {
+    try {
+      validateGetInput({ records: [{ ids: {} }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_IDS_IN_GET.description, 0))
+    }
+  })
+
+  test('empty ids', () => {
+    try {
+      validateGetInput({ records: [{ ids: [] }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_IDS_IN_GET.description, 0))
+    }
+  })
+
+  test('empty id', () => {
+    try {
+      validateGetInput({ records: [{ ids: [null] }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOWID_IN_GET.description, 0))
+    }
+  })
+
+  test('invalid id', () => {
+    try {
+      validateGetInput({ records: [{ ids: [{}] }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_TYPE_IN_GET.description, 0))
+    }
+  })
+
+  test('missing table', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'] }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_GET.description, 0))
+    }
+  })
+
+  test('empty table', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: null }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_GET.description, 0))
+    }
+  })
+
+  test('invalid table', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: {} }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_GET.description, 0))
+    }
+  })
+
+  test('missing redaction', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_REDACTION_IN_GET.description, 0))
+    }
+  })
+
+  test('empty redaction', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: null }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_REDACTION_TYPE_IN_GET.description, 0))
+    }
+  })
+
+  test('invalid redaction', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: 'test' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_GET.description, 0))
+    }
+  })
+})
+
+describe('get input validation for fetching unique column values',() => {
+  test('invalid column values', () => {
+    try {
+      validateGetInput({ records: [{ table: 'table', columnValues: {}, redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COLUMN_VALUES_IN_GET.description, 0))
+    }
+  })
+  test('empty column values', () => {
+    try {
+      validateGetInput({ records: [{ table: 'table', columnValues: [], redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName'}] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_RECORD_COLUMN_VALUES.description, 0))
+    }
+  })
+
+  test('empty column value', () => {
+    try {
+      validateGetInput({ records: [{ table: 'table', columnValues: [null], redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_COLUMN_VALUE.description, 0))
+    }
+  })
+
+  test('invalid column value', () => {
+    try {
+      validateGetInput({ records: [{ table: 'table', columnValues: [{}], redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_RECORD_COLUMN_VALUE_TYPE.description, 0))
+    }
+  })
+
+  test('missing table', () => {
+    try {
+      validateGetInput({ records: [{columnValues: ['123'], redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_GET.description, 0))
+    }
+  })
+
+  test('empty table', () => {
+    try {
+      validateGetInput({ records: [{ columnValues: ['123'], table: null, redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_GET.description, 0))
+    }
+  })
+
+  test('invalid table', () => {
+    try {
+      validateGetInput({ records: [{ columnValues: ['123'], table: {}, redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_GET.description, 0))
+    }
+  })
+
+  test('missing redaction', () => {
+    try {
+      validateGetInput({ records: [{ columnValues: ['123'], table: 'test', columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_REDACTION_IN_GET.description, 0))
+    }
+  })
+
+  test('empty redaction', () => {
+    try {
+      validateGetInput({ records: [{ columnValues: ['123'], table: 'test', redaction: null, columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_REDACTION_TYPE_IN_GET.description, 0))
+    }
+  })
+
+  test('invalid redaction', () => {
+    try {
+      validateGetInput({ records: [{ columnValues: ['123'], table: 'test', redaction: 'test', columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_GET.description, 0))
+    }
+  })
+  // test('invalid redaction', () => {
+  //   try {
+  //     validateGetInput({ records: [{ columnValues: ['123'], table: 'test', redaction: 'test', columnName: 'columnName' }] })
+  //   } catch (err) {
+  //     expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_GET.description, 0))
+  //   }
+  // })
+  test('invalid column values error', () => {
+    try {
+      validateGetInput({ records: [{ columnValues: {}, columnName:'cloumn', table: 'test', redaction: RedactionType.PLAIN_TEXT }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COLUMN_VALUES_IN_GET.description, 0))
+    }
+  })
+  test('empty column values error', () => {
+    try {
+      validateGetInput({ records: [{ columnValues: [], columnName:'cloumn', table: 'test', redaction: RedactionType.PLAIN_TEXT }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_RECORD_COLUMN_VALUES.description, 0))
+    }
+  })
+  test('missing ids or columnValues in get', () => {
+    try {
+      validateGetInput({ records: [{ table: 'test', redaction: RedactionType.PLAIN_TEXT }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_IDS_OR_COLUMN_VALUES_IN_GET.description, 0))
+    }
+  })
+  test('missing columnValues key in get', () => {
+    try {
+      validateGetInput({ records: [{ table: 'test', redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_RECORD_COLUMN_VALUE.description, 0))
+    }
+  })
+  test('ids and columnName both specified in get', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.SKYFLOW_IDS_AND_COLUMN_NAME_BOTH_SPECIFIED.description, 0))
+    }
+  })
+  test('column values is missing', () => {
+    try {
+      validateGetInput({ records: [{ table: 'test', redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_RECORD_COLUMN_VALUE.description, 0))
+    }
+  })
+})
+
 
 describe('skyflow init validation', () => {
 
@@ -449,7 +675,6 @@ describe("validate reveal element input", () => {
       expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_REVEAL.description)
     }
   })
-
 })
 
 
@@ -466,10 +691,6 @@ const initConfig = {
   getBearerToken: jest.fn()
 }
 
-
-
-
-
 describe("validate expiration year formats", () => {
   test("isValidExpiryYearFormat", () => {
     expect(isValidExpiryYearFormat()).toBeFalsy()
@@ -481,4 +702,67 @@ describe("validate card number length check", () => {
     expect(validateCardNumberLengthCheck('5105105105105100')).toBeTruthy();
     expect(validateCardNumberLengthCheck('510510')).toBeFalsy();
   })
+})
+
+describe("validate upsert options in collect", () => {
+  test('invalid upsert options type', () => {
+    try {
+      validateUpsertOptions({})
+    } catch (err) {
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_UPSERT_OPTION_TYPE.description)
+    }
+  })
+  test('empty upsert array', () => {
+    try {
+      validateUpsertOptions([])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_UPSERT_OPTIONS_ARRAY.description)
+    }
+  })
+  test('invalid upsert object type', () => {
+    try {
+      validateUpsertOptions([undefined])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UPSERT_OPTION_OBJECT_TYPE.description, 0))
+    }
+  })
+  test('missing table key', () => {
+    try {
+      validateUpsertOptions([{
+        column: 'column'
+      }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('missing column key', () => {
+    try {
+      validateUpsertOptions([{
+        table: 'table'
+      }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_COLUMN_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('invalid table key type', () => {
+    try {
+      validateUpsertOptions([{
+        table: true,
+        column: 'column'
+      }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('invalid column key type', () => {
+    try {
+      validateUpsertOptions([{
+        table: 'table',
+        column: true
+      }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+
 })

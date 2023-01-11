@@ -8,7 +8,7 @@ import {
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import Skyflow from '../../../../src/skyflow';
-import { LogLevel,Env, ValidationRuleType } from '../../../../src/utils/common';
+import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
 import logs from '../../../../src/utils/logs';
 const bus = require('framebus');
 
@@ -16,10 +16,10 @@ iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 
 const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve());
 
-const mockUuid = '1234'; 
-jest.mock('../../../../src/libs/uuid',()=>({
+const mockUuid = '1234';
+jest.mock('../../../../src/libs/uuid', () => ({
   __esModule: true,
-  default:jest.fn(()=>(mockUuid)),
+  default: jest.fn(() => (mockUuid)),
 }));
 
 const metaData = {
@@ -54,10 +54,22 @@ const cvvElement = {
   type: 'CVV',
 };
 
+const collectStylesOptions = {
+  inputStyles: {
+    cardIcon: {
+      position: "absolute",
+      left: "8px",
+      top: "calc(50% - 10px)",
+    },
+  },
+};
+
 const cardNumberElement = {
   table: 'pii_fields',
   column: 'primary_card.card_number',
   type: 'CARD_NUMBER',
+  ...collectStylesOptions,
+
 };
 
 const ExpirationDateElement = {
@@ -111,20 +123,20 @@ describe('Collect container', () => {
   });
 
   it('contructor', async () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     await new Promise((r) => setTimeout(r, 2000));
 
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: COLLECT_FRAME_CONTROLLER+mockUuid
+      name: COLLECT_FRAME_CONTROLLER + mockUuid
     }, cb2)
     expect(cb2).toHaveBeenCalled()
     expect(document.querySelector('iframe')).toBeTruthy();
   });
 
   it('Invalid element type', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({ ...cvvElement, type: 'abc' });
     } catch (err) {
@@ -133,7 +145,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid table', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -145,7 +157,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid column', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -157,7 +169,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid validation params, missing element', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -173,7 +185,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid validation params, invalid collect element', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -190,7 +202,7 @@ describe('Collect container', () => {
     }
   });
   it('Invalid validation params, invalid collect element', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -207,7 +219,7 @@ describe('Collect container', () => {
     }
   });
   it('valid validation params, regex match rule', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -215,8 +227,8 @@ describe('Collect container', () => {
         validations: [{
           type: ValidationRuleType.REGEX_MATCH_RULE,
           params: {
-           // pass valid regex
-           regex:/^5*/
+            // pass valid regex
+            regex: /^5*/
           }
         }]
       });
@@ -227,11 +239,11 @@ describe('Collect container', () => {
 
 
   it('create valid Element', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let cvv;
     try {
       cvv = container.create(cvvElement);
-    } catch (err) {}
+    } catch (err) { }
 
     expect(cvv.elementType).toBe('CVV');
 
@@ -239,11 +251,11 @@ describe('Collect container', () => {
   });
 
   it('test default options for card_number', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let card_number;
     try {
       card_number = container.create(cardNumberElement);
-    } catch (err) {}
+    } catch (err) { }
 
     const options = card_number.getOptions()
     expect(options.enableCardIcon).toBe(true);
@@ -251,12 +263,12 @@ describe('Collect container', () => {
   });
 
   it('test invalid option for EXPIRATION_DATE', () => {
-    
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
-      expiryElement = container.create(ExpirationDateElement, {format: 'invalid'});
-    } catch (err) {}
+      expiryElement = container.create(ExpirationDateElement, { format: 'invalid' });
+    } catch (err) { }
 
     const options = expiryElement.getOptions()
     expect(options.format).toBe("MM/YY");
@@ -264,34 +276,57 @@ describe('Collect container', () => {
 
   it('test valid option for EXPIRATION_DATE', () => {
     const validFormat = 'YYYY/MM'
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
-      expiryElement = container.create(ExpirationDateElement, {format: validFormat});
-    } catch (err) {}
+      expiryElement = container.create(ExpirationDateElement, { format: validFormat });
+    } catch (err) { }
 
     const options = expiryElement.getOptions()
     expect(options.format).toBe(validFormat);
   });
 
-  it('test enableCopy option is enabled for elements', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+  it('test enableCardIcon option is enabled for elements', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
-      expiryElement = container.create(ExpirationDateElement, {enableCopy: true});
-    } catch (err) {}
+      expiryElement = container.create(ExpirationDateElement, { enableCardIcon: true });
+    } catch (err) { }
+
+    const options = expiryElement.getOptions()
+    expect(options.enableCardIcon).toBe(true);
+
+  });
+
+  it('test enableCopy option is enabled for elements', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let expiryElement;
+    try {
+      expiryElement = container.create(ExpirationDateElement, { enableCopy: true });
+    } catch (err) { }
 
     const options = expiryElement.getOptions()
     expect(options.enableCopy).toBe(true);
 
   });
 
-  it('test enableCopy option is disabled for elements', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+  it('test enableCardIcon option is disabled for elements', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
-      expiryElement = container.create(ExpirationDateElement, {enableCopy: false});
-    } catch (err) {}
+      expiryElement = container.create(ExpirationDateElement, { enableCardIcon: false });
+    } catch (err) { }
+
+    const options = expiryElement.getOptions()
+    expect(options.enableCardIcon).toBe(false);
+  });
+
+  it('test enableCopy option is disabled for elements', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let expiryElement;
+    try {
+      expiryElement = container.create(ExpirationDateElement, { enableCopy: false });
+    } catch (err) { }
 
     const options = expiryElement.getOptions()
     expect(options.enableCopy).toBe(false);
@@ -299,12 +334,12 @@ describe('Collect container', () => {
   });
 
   it('test invalid option for EXPIRATION_YEAR', () => {
-    
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
-      expiryElement = container.create(ExpirationYearElement, {format: 'invalid'});
-    } catch (err) {}
+      expiryElement = container.create(ExpirationYearElement, { format: 'invalid' });
+    } catch (err) { }
 
     const options = expiryElement.getOptions()
     expect(options.format).toBe("YY");
@@ -312,27 +347,27 @@ describe('Collect container', () => {
 
   it('test valid option for EXPIRATION_YEAR', () => {
     const validFormat = 'YYYY'
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
-      expiryElement = container.create(ExpirationYearElement, {format: validFormat});
-    } catch (err) {}
+      expiryElement = container.create(ExpirationYearElement, { format: validFormat });
+    } catch (err) { }
 
     const options = expiryElement.getOptions()
     expect(options.format).toBe(validFormat);
   });
 
   it("container collect", () => {
-    let container = new CollectContainer({}, metaData,  {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     container.collect();
     const collectCb = emitSpy.mock.calls[0][2];
     collectCb(collectResponse)
-    collectCb({error: 'Error occured'})
+    collectCb({ error: 'Error occured' })
   });
 
-  it("container create options",()=>{
-    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
-    let expiryDate =  container.create({
+  it("container create options", () => {
+    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let expiryDate = container.create({
       table: 'pii_fields',
       column: 'primary_card.cvv',
       styles: {
@@ -343,13 +378,13 @@ describe('Collect container', () => {
       placeholder: 'cvv',
       label: 'cvv',
       type: Skyflow.ElementType.EXPIRATION_DATE,
-    },{
-      format:"MM/YY"
+    }, {
+      format: "MM/YY"
     });
   });
-  it("container create options 2",()=>{
-    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
-    let expiryDate =  container.create({
+  it("container create options 2", () => {
+    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let expiryDate = container.create({
       table: 'pii_fields',
       column: 'primary_card.cvv',
       styles: {
@@ -360,17 +395,17 @@ describe('Collect container', () => {
       placeholder: 'cvv',
       label: 'cvv',
       type: Skyflow.ElementType.EXPIRATION_DATE,
-    },{
-      format:"SS/YYY"
+    }, {
+      format: "SS/YYY"
     });
   });
 
   it('create valid file Element', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let file;
     try {
       file = container.create(FileElement);
-    } catch (err) {}
+    } catch (err) { }
 
     expect(file.elementType).toBe('FILE_INPUT');
 
@@ -378,7 +413,7 @@ describe('Collect container', () => {
   });
 
   it('skyflowID undefined for file Element', () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         ...cvvFileElementElement,
@@ -387,5 +422,29 @@ describe('Collect container', () => {
     } catch (err) {
       expect(err).toBeDefined();
     }
+  });
+  it("container collect options", () => {
+    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const options = {
+      tokens: true,
+      additionalFields: {
+        records: [
+          {
+            table: "string", //table into which record should be inserted
+            fields: {
+              column1: "value",
+            }
+          }
+        ]
+      },
+      upsert: [{
+        table: 'table',
+        column: 'column'
+      }]
+    }
+    container.collect(options);
+    const collectCb = emitSpy.mock.calls[0][2];
+    collectCb(collectResponse)
+    collectCb({ error: 'Error occured' })
   });
 });

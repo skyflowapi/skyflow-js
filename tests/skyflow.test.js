@@ -469,6 +469,224 @@ const getByIdRes = {
     },
   ],
 };
+const getInput = {
+  records: [{
+    columnName: 'cvv',
+    columnValues: ['123'],
+    table: 'pii_fields',
+    redaction: Skyflow.RedactionType.PLAIN_TEXT,
+  }],
+};
+
+const getRes = {
+  records: [
+    {
+      fields: {
+        name: 'test',
+        cvv: '123',
+      },
+      table: 'pii_fields',
+    },
+  ],
+};
+const getInputMissingColumnName= {
+  records: [
+    {
+      table: "cards",
+      columnValues: ["ab"],
+      redaction: "PLAIN_TEXT",
+    },
+  ],
+};
+const getInputMissingColumnValues= {
+  records: [
+    {
+      table: "cards",
+      columnName: "cards",
+      redaction: "PLAIN_TEXT",
+    },
+  ],
+};
+const getInputInvalidColumnNameType= {
+  records: [
+    {
+      table: "cards",
+      columnName: true,
+      columnValues: ["ab"],
+      redaction: "PLAIN_TEXT",
+    },
+  ],
+};
+const getInputInvalidColumnValuesType= {
+  records: [
+    {
+      table: "cards",
+      columnName: "abc",
+      columnValues: true,
+      redaction: "PLAIN_TEXT",
+    },
+  ],
+};
+const getInputEmptyColumnValues= {
+  records: [
+    {
+      table: "cards",
+      columnName: "abc",
+      columnValues: [],
+      redaction: "PLAIN_TEXT",
+    },
+  ],
+};
+const getWithValidUniqColumnOptions= {
+  records: [
+    {
+      table: "cards",
+      columnName: "abc",
+      columnValues: ["value1","value2"],
+      redaction: "PLAIN_TEXT",
+    },
+  ],
+};
+describe('skyflow get', () => {
+  let emitSpy;
+  let targetSpy;
+  let skyflow;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+
+    skyflow = Skyflow.init({
+      vaultID: 'vault123',
+      vaultURL: 'https://vaulturl.com',
+      getBearerToken: jest.fn(),
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('get success', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.get(getByIdInput);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('get success else', (done) => {
+    try {
+      const res = skyflow.get(getByIdInput);
+      const frameReayEvent = on.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+      const frameReadyCb2 = frameReayEvent[1][1];
+      frameReadyCb2();
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+
+  test('get error', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.get(getByIdInput);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb({ error: { message: "id doesn't exist", code: 404 } });
+
+      let error;
+      res.catch((err) => error = err);
+
+      setTimeout(() => {
+        expect(error).toBeDefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('getById invalid input-1', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.getById({});
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('getById invalid input-2', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.getById({ records: [] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('getById invalid input-3', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.getById({ records: [{}] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('getById invalid input-4', (done) => {
+    const res = skyflow.getById({ records: [{}] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+});
 
 describe('skyflow getById', () => {
   let emitSpy;
@@ -618,8 +836,300 @@ describe('skyflow getById', () => {
 });
 
 
+describe('skyflow get', () => {
+  let emitSpy;
+  let targetSpy;
+  let skyflow;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
 
+    skyflow = Skyflow.init({
+      vaultID: 'vault123',
+      vaultURL: 'https://vaulturl.com',
+      getBearerToken: jest.fn(),
+    });
+  });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('get success', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.get(getByIdInput);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('get success else', (done) => {
+    try {
+      const res = skyflow.get(getByIdInput);
+      const frameReayEvent = on.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+      const frameReadyCb2 = frameReayEvent[1][1];
+      frameReadyCb2();
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+
+  test('get error', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.get(getByIdInput);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb({ error: { message: "id doesn't exist", code: 404 } });
+
+      let error;
+      res.catch((err) => error = err);
+
+      setTimeout(() => {
+        expect(error).toBeDefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('get invalid input-1', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.get({});
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('get invalid input-2', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.get({ records: [] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('get invalid input-3', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.get({ records: [{}] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('get invalid input-4', (done) => {
+    const res = skyflow.get({ records: [{}] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+
+  test('get success', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.get(getInput);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('get success else', (done) => {
+    try {
+      const res = skyflow.get(getInput);
+      const frameReayEvent = on.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+      const frameReadyCb2 = frameReayEvent[1][1];
+      frameReadyCb2();
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+
+  test('get error', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.get(getInput);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb({ error: { message: "id doesn't exist", code: 404 } });
+
+      let error;
+      res.catch((err) => error = err);
+
+      setTimeout(() => {
+        expect(error).toBeDefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('get invalid input-1', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.get({});
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('get invalid input-2', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.get({ records: [] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('get invalid input-3', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const res = skyflow.get({ records: [{}] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test('get invalid input-4', (done) => {
+    const res = skyflow.get({ records: [{}] });
+    res.catch((err) => {
+      expect(err).toBeDefined();
+      done();
+    });
+  });
+  test("get missing columnn name", () => {
+    const res = skyflow.get(getInputMissingColumnName);
+    res.catch((err) => {
+      expect(err).toBeDefined();
+    });
+  }); 
+  test("get missing columnn values", () => {
+    const res = skyflow.get(getInputMissingColumnValues);
+    res.catch((err) => {
+      expect(err).toBeDefined();
+    });
+  }); 
+  test("get invalid columnn name type", () => {
+    const res = skyflow.get(getInputInvalidColumnNameType);
+    res.catch((err) => {
+      expect(err).toBeDefined();
+    });
+  });
+  test("get invalid columnn value type", () => {
+    const res = skyflow.get(getInputInvalidColumnValuesType);
+    res.catch((err) => {
+      expect(err).toBeDefined();
+    });
+  });
+  test("get empty columnn value", () => {
+    const res = skyflow.get(getInputEmptyColumnValues);
+    res.catch((err) => {
+      expect(err).toBeDefined();
+    });
+  });
+  test("get with valid column name and column values input", () => {
+    const res = skyflow.get(getWithValidUniqColumnOptions);
+    res.catch((err) => {
+      expect(err.message).toBe(undefined)
+    });
+  });
+});
 
 describe('Skyflow Enums', () => {
   test('Skyflow.ContainerType', () => {
@@ -734,5 +1244,3 @@ describe('Get BearerToken Listener', () => {
     }, 1000);
   });
 });
-
-

@@ -2,171 +2,175 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Skyflow Elements</title>
-    <script src="https://js.skyflow.com/v1/index.js"></script>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-        }
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skyflow Elements</title>
+  <script src="https://js.skyflow.com/v1/index.js"></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+    }
 
-        .empty-div {
-            height: 100px;
-            width: 350px;
-        }
+    .empty-div {
+      height: 100px;
+      width: 350px;
+    }
 
-        .reveal-view {
-            margin-top: 48px;
-        }
-    </style>
+    .reveal-view {
+      margin-top: 48px;
+    }
+  </style>
 </head>
 
 <body>
-    <h3>Collect Elements</h3>
-    <!-- COllect Part -->
+  <h3>Collect Elements</h3>
+  <!-- COllect Part -->
+  <div>
+    <div id="collectCardNumber" class="empty-div"></div>
     <div>
-        <div id="collectCardNumber" class="empty-div"></div>
-        <div>
-            <button id="collectPCIData">Collect PCI Data</button>
-        </div>
-        <br />
-        <div id="collectFile" class="empty-div"></div>
-        <div>
-            <button id="uploadFileData">Upload File</button>
-        </div>
-        <div>
-            <pre id="collectResponse"></pre>
-        </div>
-        <br />
-        <div>
-            <pre id="uploadResponse"></pre>
-        </div>
+      <button id="collectPCIData">Collect PCI Data</button>
     </div>
+    <br />
+    <div id="collectFile" class="empty-div"></div>
+    <div>
+      <button id="uploadFileData">Upload File</button>
+    </div>
+    <div>
+      <pre id="collectResponse"></pre>
+    </div>
+    <br />
+    <div>
+      <pre id="uploadResponse"></pre>
+    </div>
+  </div>
 
 
-    <!-- Javascript -->
-    <script>
-        try {
-            const skyflow = Skyflow.init({
-                vaultID: "<VAULT_ID>",
-                vaultURL: "<VAULT_URL>",
-                getBearerToken: () => {
-                    return new Promise((resolve, reject) => {
-                        const Http = new XMLHttpRequest();
-
-                        Http.onreadystatechange = () => {
-                            if (Http.readyState === 4 && Http.status === 200) {
-                                const response = JSON.parse(Http.responseText);
-                                resolve(response.accessToken);
-                            }
-                        };
-                        const url = "<TOKEN_END_POINT_URL>";
-                        Http.open("GET", url);
-                        Http.send();
-                    });
-                },
-                options: {
-                    logLevel: Skyflow.LogLevel.ERROR,
-                    env: Skyflow.Env.PROD,
-                }
-            });
-            
-            // create collect Container
-            const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
-
-            //custom styles for collect elements
-            const collectStylesOptions = {
-                inputStyles: {
-                    base: {
-                        border: "1px solid #eae8ee",
-                        padding: "10px 16px",
-                        borderRadius: "4px",
-                        color: "#1d1d1d",
-                        marginTop: "4px",
-                    },
-                    complete: {
-                        color: "#4caf50",
-                    },
-                    empty: {},
-                    focus: {},
-                    invalid: {
-                        color: "#f44336",
-                    },
-                },
-                labelStyles: {
-                    base: {
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                    },
-                },
-                errorTextStyles: {
-                    base: {
-                        color: "#f44336",
-                    },
-                },
+  <!-- Javascript -->
+  <script>
+    try {
+      const skyflow = Skyflow.init({
+        vaultID: '<VAULT_ID>',
+        vaultURL: '<VAULT_URL>',
+        getBearerToken: () => {
+          return new Promise((resolve, reject) => {
+            const Http = new XMLHttpRequest();
+  
+            Http.onreadystatechange = () => {
+              if (Http.readyState === 4 && Http.status === 200) {
+                const response = JSON.parse(Http.responseText);
+                resolve(response.accessToken);
+              }
             };
-
-            // create collect elements
-            const cardNumberElement = collectContainer.create({
-                table: "table1",
-                column: "card_number",
-                ...collectStylesOptions,
-                placeholder: "card number",
-                label: "Card Number",
-                type: Skyflow.ElementType.CARD_NUMBER,
-
-            }, {
-                enableCopy: true
-            });
-
-            const fileElement = collectContainer.create({
-                table: "table1",
-                column: "file",
-                ...collectStylesOptions,
-                type: Skyflow.ElementType.FILE_INPUT,
-                skyflowID: ''
-            });
-
-            // mount the elements
-            cardNumberElement.mount("#collectCardNumber");
-            fileElement.mount("#collectFile");
-
-
-            // collect all elements data
-            const collectButton = document.getElementById("collectPCIData");
-            if (collectButton) {
-                collectButton.addEventListener("click", () => {
-                    const collectResponse = collectContainer.collect();
-
-                    collectResponse
-                        .then((response) => {
-                            document.getElementById("collectResponse").innerHTML =
-                                JSON.stringify(response, null, 2);
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                        });
-                });
-            }
-
-            const uploadButton = document.getElementById("uploadFileData");
-            if (uploadButton) {
-                uploadButton.addEventListener("click", () => {
-                    const uploadResponse = collectContainer.uploadFiles().then((res) => {
-                        document.getElementById("uploadResponse").innerHTML =
-                            JSON.stringify(res, null, 2);
-                    }).catch((err) => {
-                        console.log(err);
-                    })
-                })
-            }
-        } catch (err) {
-            console.log(err);
+            const url = '<TOKEN_END_POINT_URL>';
+            Http.open('GET', url);
+            Http.send();
+          });
+        },
+        options: {
+          logLevel: Skyflow.LogLevel.ERROR,
+          env: Skyflow.Env.PROD,
+        },
+      });
+  
+      // Create collect Container.
+      const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+  
+      // Custom styles for collect elements.
+      const collectStylesOptions = {
+        inputStyles: {
+          base: {
+            border: '1px solid #eae8ee',
+            padding: '10px 16px',
+            borderRadius: '4px',
+            color: '#1d1d1d',
+            marginTop: '4px',
+          },
+          complete: {
+            color: '#4caf50',
+          },
+          empty: {},
+          focus: {},
+          invalid: {
+            color: '#f44336',
+          },
+        },
+        labelStyles: {
+          base: {
+            fontSize: '16px',
+            fontWeight: 'bold',
+          },
+        },
+        errorTextStyles: {
+          base: {
+            color: '#f44336',
+          },
+        },
+      };
+  
+      // Create collect elements.
+      const cardNumberElement = collectContainer.create(
+        {
+          table: 'table1',
+          column: 'card_number',
+          ...collectStylesOptions,
+          placeholder: 'card number',
+          label: 'Card Number',
+          type: Skyflow.ElementType.CARD_NUMBER,
+        },
+        {
+          enableCopy: true,
         }
-    </script>
+      );
+  
+      const fileElement = collectContainer.create({
+        table: 'table1',
+        column: 'file',
+        ...collectStylesOptions,
+        type: Skyflow.ElementType.FILE_INPUT,
+        skyflowID: '',
+      });
+  
+      // Mount the elements.
+      cardNumberElement.mount('#collectCardNumber');
+      fileElement.mount('#collectFile');
+  
+      // Collect all elements data.
+      const collectButton = document.getElementById('collectPCIData');
+      if (collectButton) {
+        collectButton.addEventListener('click', () => {
+          const collectResponse = collectContainer.collect();
+  
+          collectResponse
+            .then(response => {
+              document.getElementById('collectResponse').innerHTML =
+                JSON.stringify(response, null, 2);
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        });
+      }
+  
+      const uploadButton = document.getElementById('uploadFileData');
+      if (uploadButton) {
+        uploadButton.addEventListener('click', () => {
+          const uploadResponse = collectContainer
+            .uploadFiles()
+            .then(res => {
+              document.getElementById('uploadResponse').innerHTML =
+                JSON.stringify(res, null, 2);
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  </script>
 </body>
 
 </html>

@@ -8,8 +8,9 @@ import {
   constructInsertRecordResponse,
 } from '../../../core-utils/collect';
 import {
-  fetchRecordsBySkyflowID,
+  fetchRecordsGET,
   fetchRecordsByTokenId,
+  fetchRecordsBySkyflowID,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
 import {
@@ -19,8 +20,8 @@ import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
   IRevealRecord,
-  ISkyflowIdRecord,
-  MessageType, Context,
+  IGetRecord,
+  MessageType, Context, ISkyflowIdRecord,
 } from '../../../utils/common';
 
 const CLASS_NAME = 'SkyflowFrameController';
@@ -72,6 +73,25 @@ class SkyflowFrameController {
                 this.#context.logLevel);
               callback({ error });
             });
+        } else if (data.type === PUREJS_TYPES.GET) {
+          fetchRecordsGET(
+            data.records as IGetRecord[],
+            this.#client,
+          ).then(
+            (resolvedResult) => {
+              printLog(parameterizedString(logs.infoLogs.GET_RESOLVED, CLASS_NAME),
+                MessageType.LOG,
+                this.#context.logLevel);
+
+              callback(resolvedResult);
+            },
+            (rejectedResult) => {
+              printLog(logs.errorLogs.GET_REJECTED, MessageType.ERROR,
+                this.#context.logLevel);
+
+              callback({ error: rejectedResult });
+            },
+          );
         } else if (data.type === PUREJS_TYPES.GET_BY_SKYFLOWID) {
           fetchRecordsBySkyflowID(
             data.records as ISkyflowIdRecord[],
