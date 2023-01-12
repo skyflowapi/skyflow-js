@@ -7,7 +7,8 @@ import CollectContainer from '../src/core/external/collect/collect-container';
 import RevealContainer from '../src/core/external/reveal/reveal-container';
 import * as iframerUtils from '../src/iframe-libs/iframer';
 import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '../src/core/constants';
-import { Env, EventName, LogLevel, RedactionType, RequestMethod } from '../src/utils/common';
+import { Env, EventName, LogLevel, RedactionType, RequestMethod, ValidationRuleType } from '../src/utils/common';
+import ComposableContainer from '../src/core/external/collect/compose-collect-container';
 
 jest.mock('../src/utils/jwt-utils', () => ({
   __esModule: true,
@@ -65,11 +66,14 @@ describe('Create container', () => {
   });
 
   test('create container', () => {
-    const collectContainer = skyflow.container('COLLECT');
+    const collectContainer = skyflow.container(ContainerType.COLLECT);
     expect(collectContainer.constructor).toEqual(CollectContainer);
 
-    const revealContainer = skyflow.container('REVEAL');
+    const revealContainer = skyflow.container(ContainerType.REVEAL);
     expect(revealContainer.constructor).toEqual(RevealContainer);
+
+    const composableContainer = skyflow.container(ContainerType.COMPOSABLE);
+    expect(composableContainer).toBeInstanceOf(ComposableContainer);
 
     try {
       const revealContainer = skyflow.container('test');
@@ -1176,6 +1180,12 @@ describe('Skyflow Enums', () => {
   test('Skflow.Env', () => {
     expect(Skyflow.Env.DEV).toEqual(Env.DEV);
     expect(Skyflow.Env.PROD).toEqual(Env.PROD);
+  });
+
+  test('Skflow.ValidationRuleType', () => {
+    expect(Skyflow.ValidationRuleType.ELEMENT_VALUE_MATCH_RULE).toEqual(ValidationRuleType.ELEMENT_VALUE_MATCH_RULE);
+    expect(Skyflow.ValidationRuleType.LENGTH_MATCH_RULE).toEqual(ValidationRuleType.LENGTH_MATCH_RULE);
+    expect(Skyflow.ValidationRuleType.REGEX_MATCH_RULE).toEqual(ValidationRuleType.REGEX_MATCH_RULE);
   });
 });
 

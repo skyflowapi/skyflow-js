@@ -99,3 +99,74 @@ describe('test frame elements', () => {
     })
 
 })
+
+describe('test composable frame elements', () => {
+  let emitSpy;
+  let windowSpy;
+  beforeEach(() => {
+      windowSpy = jest.spyOn(global, 'window', 'get');
+      windowSpy.mockImplementation(() => ({
+          name: `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR`,
+      }));
+
+      emitSpy = jest.spyOn(bus, 'emit');
+  });
+
+  test('FrameElements constructor', () => {
+      FrameElements.start()
+
+      const emitEventName = emitSpy.mock.calls[0][0];
+      const emitCb = emitSpy.mock.calls[0][2];
+      expect(emitEventName.includes(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY)).toBeTruthy()
+      emitCb(element);
+
+      const mockCreateElement = jest.fn().mockImplementation(()=>{
+          return {
+              resetEvents: jest.fn(),
+              on: jest.fn().mockImplementation((name,cb)=>{
+                if(name === 'BLUR'){
+                  cb({
+                    error:'state'
+                  })
+                }
+              }),
+              getStatus: jest.fn(()=>({
+                  isFocused: false,
+                  isValid: false,
+                  isEmpty: true,
+                  isComplete: false,
+              })),
+              fieldType: 'CARD_NUMBER'
+          }
+      })
+      const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
+      // console.log(frameElement.)
+  });
+
+    
+  test('FrameElements init', () => {
+    FrameElements.start()
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName.includes(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY)).toBeTruthy()
+    emitCb(element);
+
+    const mockCreateElement = jest.fn().mockImplementation(()=>{
+        return {
+            resetEvents: jest.fn(),
+            on: jest.fn(),
+            getStatus: jest.fn(()=>({
+                isFocused: false,
+                isValid: false,
+                isEmpty: true,
+                isComplete: false,
+            })),
+            fieldType: 'CARD_NUMBER'
+        }
+    })
+    const frameElement = FrameElements.init(mockCreateElement, {}, 'ERROR')
+    // console.log(frameElement.)
+});
+
+})
