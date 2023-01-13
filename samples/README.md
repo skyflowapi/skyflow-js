@@ -1,12 +1,10 @@
-# Js SDK samples
+# JS SDK samples
+
 Test the SDK by adding your `VAULT_ID`, `VAULT_URL`, and `SERVICE-ACCOUNT` details as the corresponding values in each sample.
 
 
 ## Prerequisites
-- Sign in to your Skyflow account:A Skylow account. 
-      * For trial environments, use try.skyflow.com.
-      * For sandbox and production environments, use your dedicated sign-in URL.
-  If you don't have an account, you can register for one on the [sign up for a free trial accountTry Skyflow](https://skyflow.com/try-skyflow) page.
+-  A Skyflow account. If you don't have one, register for one on the [Try Skyflow](https://skyflow.com/try-skyflow) page.
 - [Node.js](https://nodejs.org/en/) version 10 or above
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) version 6.x.x
 - [express.js](http://expressjs.com/en/starter/hello-world.html)
@@ -18,7 +16,8 @@ Test the SDK by adding your `VAULT_ID`, `VAULT_URL`, and `SERVICE-ACCOUNT` detai
 2. Create a vault by clicking **Create Vault** > **Start With a Template** > **Quickstart vault**.
 3. Under Quickstart, click Create.Once the vault is created, click the gear icon and select **Edit Vault Details**.
 
-To run the following commands, you'll need to retrieve your vault-specific values, <vault_url> and <vault_id>. Find your vault values by clicking the vault menu icon > Edit vault details.Note your Vault URL and Vault ID values, then click Cancel. You'll need these later.
+To run the following commands, you'll need to retrieve your vault-specific values, **<vault_url>** and **<vault_id>**. Find your vault values by clicking the vault menu icon > Edit vault details.Note your **Vault URL** and **Vault ID** values, then click Cancel. You'll need these later.
+
 
 ### Create a service account
 1. In Studio, click **Settings** in the upper navigation.
