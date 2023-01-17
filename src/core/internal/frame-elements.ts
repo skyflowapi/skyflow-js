@@ -7,6 +7,9 @@ import { FrameElement } from '.';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   ALLOWED_MULTIPLE_FIELDS_STYLES,
+  ELEMENT_EVENTS_TO_CLIENT,
+  ERROR_TEXT_STYLES,
+  STYLE_TYPE,
 } from '../constants';
 import {
   getValueAndItsUnit,
@@ -16,6 +19,9 @@ import { getFlexGridStyles } from '../../libs/styles';
 import { getElementName, parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { LogLevel, MessageType } from '../../utils/common';
+import getCssClassesFromJss from '../../libs/jss-styles';
+import { ContainerType } from '../../skyflow';
+import { getContainerType } from '../../utils/helpers';
 
 const CLASS_NAME = 'FrameElements';
 export default class FrameElements {
@@ -119,8 +125,11 @@ export default class FrameElements {
       false,
     );
     const { group } = FrameElements;
-    const { rows } = group;
+    const {
+      rows, styles, errorTextStyles,
+    } = group;
     const elements = this.#elements;
+    const isComposableContainer = getContainerType(window.name) === ContainerType.COMPOSABLE;
 
     group.spacing = getValueAndItsUnit(group.spacing).join('');
 
@@ -144,24 +153,56 @@ export default class FrameElements {
     rows.forEach((row, rowIndex) => {
       row.spacing = getValueAndItsUnit(row.spacing).join('');
       const rowDiv = document.createElement('div');
-      rowDiv.className = `row-${rowIndex}`;
-      const rowStylesByClassName = getFlexGridStyles({
+      rowDiv.id = `row-${rowIndex}`;
+
+      const intialRowStyles = {
         'align-items': row.alignItems || 'stretch',
         'justify-content': row.justifyContent || 'flex-start',
         spacing: row.spacing,
         padding: group.spacing,
-      });
-      injectStylesheet.injectWithAllowlist(
-        {
-          [`.${rowDiv.className}`]: rowStylesByClassName,
-        },
-        ALLOWED_MULTIPLE_FIELDS_STYLES,
-      );
+      };
+      const rowStylesByClassName = getFlexGridStyles(intialRowStyles);
+      let errorTextElement;
+      if (isComposableContainer) {
+        rowDiv.className = `${rowDiv.id} SkyflowElement-${rowDiv.id}-base`;
+        const rowStyles = {
+          [STYLE_TYPE.BASE]: {
+            // ...rowStylesByClassName,
+            // alignItems: rowStylesByClassName['align-items'],
+            // justifyContent: rowStylesByClassName['justify-content'],
+            ...(styles && styles[STYLE_TYPE.BASE]),
+          },
+        };
+
+        getCssClassesFromJss(rowStyles, `${rowDiv.id}`);
+
+        errorTextElement = document.createElement('span');
+        errorTextElement.id = `${rowDiv.id}-error`;
+        errorTextElement.className = 'SkyflowElement-row-error-base';
+
+        const errorStyles = {
+          [STYLE_TYPE.BASE]: {
+            ...ERROR_TEXT_STYLES,
+            ...(errorTextStyles && errorTextStyles[STYLE_TYPE.BASE]),
+          },
+        };
+        getCssClassesFromJss(errorStyles, 'row-error');
+      } else {
+        rowDiv.className = `row-${rowIndex}`;
+        injectStylesheet.injectWithAllowlist(
+          {
+            [`.${rowDiv.className}`]: rowStylesByClassName,
+          },
+          ALLOWED_MULTIPLE_FIELDS_STYLES,
+        );
+      }
 
       // elements
+      const errorTextMap = {};
       row.elements.forEach((element) => {
         const elementDiv = document.createElement('div');
         elementDiv.className = `element-${count}`;
+        elementDiv.id = `${rowDiv.id}:element-${count}`;
         count += 1;
         const elementStylesByClassName = {
           padding: row.spacing,
@@ -186,9 +227,17 @@ export default class FrameElements {
           elementDiv,
         );
 
+        if (isComposableContainer && errorTextElement) {
+          iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
+            errorTextMap[element.elementName] = state.error;
+            this.#updateCombinedErrorText(errorTextElement.id, errorTextMap);
+          });
+        }
+
         rowDiv.append(elementDiv);
       });
       rootDiv.append(rowDiv);
+      if (isComposableContainer) { rootDiv.append(errorTextElement); }
     });
 
     if (this.#domForm) {
@@ -198,5 +247,14 @@ export default class FrameElements {
       this.#domForm.append(rootDiv);
       document.body.append(this.#domForm);
     }
+  };
+
+  #updateCombinedErrorText = (elementId, errorMessages) => {
+    const currentErrorElememt = document.getElementById(elementId);
+    let errorText = '';
+    Object.values(errorMessages).forEach((message) => {
+      errorText += (message) && `${message}. `;
+    });
+    if (currentErrorElememt) { currentErrorElememt.innerText = errorText; }
   };
 }

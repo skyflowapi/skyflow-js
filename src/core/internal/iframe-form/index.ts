@@ -12,6 +12,8 @@ import {
   COLLECT_FRAME_CONTROLLER,
   ElementType,
   FRAME_ELEMENT,
+  DEFAULT_ERROR_TEXT_ELEMENT_TYPES,
+  DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -49,6 +51,7 @@ import {
 import {
   fileValidation, formatFrameNameToId, getReturnValue, removeSpaces,
 } from '../../../utils/helpers';
+import { ContainerType } from '../../../skyflow';
 
 const set = require('set-value');
 const RegexParser = require('regex-parser');
@@ -99,6 +102,8 @@ export class IFrameFormElement extends EventEmitter {
 
   skyflowID?: string;
 
+  containerType: string;
+
   constructor(name: string, label: string, metaData, context: Context, skyflowID?: string) {
     super();
     const frameValues = name.split(':');
@@ -113,6 +118,7 @@ export class IFrameFormElement extends EventEmitter {
       field.substr(0, field.indexOf('.')),
       field.substr(field.indexOf('.') + 1),
     ];
+    this.containerType = metaData.containerType;
     this.iFrameName = name;
     this.fieldType = fieldType;
 
@@ -274,15 +280,27 @@ export class IFrameFormElement extends EventEmitter {
       this.state.isValid = false;
       this.state.isComplete = false;
       if (!this.errorText) {
-        this.errorText = this.label
-          ? `${parameterizedString(logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
-            this.label)}`
-          : logs.errorLogs.INVALID_COLLECT_VALUE;
+        if (this.label) {
+          this.errorText = `${parameterizedString(
+            logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
+            this.label,
+          )}`;
+        } else {
+          this.errorText = this.containerType === ContainerType.COLLECT
+            ? logs.errorLogs.INVALID_COLLECT_VALUE
+            : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
+        }
       }
       if (!this.state.isValid && this.state.isEmpty) {
         this.state.isRequired = true;
-        this.errorText = this.label ? `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-          this.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
+        if (this.label) {
+          this.errorText = `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
+            this.label)}`;
+        } else {
+          this.errorText = this.containerType === ContainerType.COLLECT
+            ? logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE
+            : DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES[this.fieldType];
+        }
       }
     }
     this.sendChangeStatus(true);
@@ -343,10 +361,16 @@ export class IFrameFormElement extends EventEmitter {
       }
     }
     if (!resp) {
-      this.errorText = this.label
-        ? `${parameterizedString(logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
-          this.label)}`
-        : logs.errorLogs.INVALID_COLLECT_VALUE;
+      if (this.label) {
+        this.errorText = `${parameterizedString(
+          logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
+          this.label,
+        )}`;
+      } else {
+        this.errorText = this.containerType === ContainerType.COLLECT
+          ? logs.errorLogs.INVALID_COLLECT_VALUE
+          : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
+      }
       return resp;
     }
 

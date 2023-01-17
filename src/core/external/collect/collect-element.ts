@@ -24,10 +24,13 @@ import logs from '../../../utils/logs';
 import { Context, Env, MessageType } from '../../../utils/common';
 import { formatFrameNameToId, getReturnValue } from '../../../utils/helpers';
 import SkyflowElement from '../common/skyflow-element';
+import { ContainerType } from '../../../skyflow';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
   elementType: string;
+
+  type: string = ContainerType.COLLECT;
 
   #elementId: string;
 
@@ -50,9 +53,9 @@ class CollectElement extends SkyflowElement {
 
   #group: any;
 
-  // label focus
-
   #eventEmitter: EventEmitter = new EventEmitter();
+
+  #groupEmitter: EventEmitter | undefined = undefined;
 
   #bus = new Bus();
 
@@ -75,6 +78,7 @@ class CollectElement extends SkyflowElement {
     destroyCallback: Function,
     updateCallback: Function,
     context: Context,
+    groupEventEmitter?: EventEmitter,
   ) {
     super();
 
@@ -84,9 +88,11 @@ class CollectElement extends SkyflowElement {
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
-    if (this.#isSingleElementAPI && this.#elements.length > 1) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNKNOWN_ERROR, [], true);
-    }
+
+    if (groupEventEmitter) this.#groupEmitter = groupEventEmitter;
+    // if (this.#isSingleElementAPI && this.#elements.length > 1) {
+    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.UNKNOWN_ERROR, [], true);
+    // }
 
     this.#doesReturnValue = EnvOptions[this.#context.env].doesReturnValue;
     this.elementType = this.#isSingleElementAPI
@@ -296,6 +302,7 @@ class CollectElement extends SkyflowElement {
         data.value = '';
       }
       delete data.isComplete;
+      delete data.name;
       handler(data);
     });
   }
@@ -321,6 +328,7 @@ class CollectElement extends SkyflowElement {
       ) {
         this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
       } else {
+        const isComposable = this.#elements.length > 1;
         this.#elements.forEach((element, index) => {
           if (data.name === element.elementName) {
             let emitEvent = '';
@@ -360,12 +368,17 @@ class CollectElement extends SkyflowElement {
             if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
             else this.#states[index].value = undefined;
 
+            emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
             this.#updateState();
             const emitData = {
-              ...this.getState(),
-              elementType: this.elementType,
+              ...this.#states[index],
+              elementType: element.elementType,
             };
-            this.#eventEmitter._emit(emitEvent, emitData);
+            if (isComposable && this.#groupEmitter) {
+              this.#groupEmitter._emit(emitEvent, emitData);
+            } else {
+              this.#eventEmitter._emit(emitEvent, emitData);
+            }
           }
         });
       }

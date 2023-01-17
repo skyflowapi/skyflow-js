@@ -26,6 +26,7 @@ import {
   EXPIRY_YEAR_MASK,
   COLLECT_COPY_ICON_STYLES,
   COPY_UTILS,
+  ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iframe-form';
 import getCssClassesFromJss from '../../libs/jss-styles';
@@ -34,6 +35,7 @@ import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
 import { appendZeroToOne, handleCopyIconClick, styleToString } from '../../utils/helpers';
+import { ContainerType } from '../../skyflow';
 
 export class FrameController {
   controller?: FrameController;
@@ -226,18 +228,26 @@ export class FrameElement {
         this.domError.innerText = '';
         this.hasError = false;
       }
-      // FIELD IS EMPTY AND REQUIRED
-      if (this.options.required && state.value === '' && this.domError) {
-        state.isComplete = false;
-        state.isValid = false;
-        state.isEmpty = true;
-        this.hasError = true;
-        this.domError.innerText = this.options.label ? `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-          this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
-      } else if (this.options.required && !state.isRequired && this.domError) {
-        this.domError.innerText = this.options.label ? `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-          this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
-      }
+      // // FIELD IS EMPTY AND REQUIRED
+      // if (this.options.required && state.value === '' && this.domError) {
+      //   state.isComplete = false;
+      //   state.isValid = false;
+      //   state.isEmpty = true;
+      //   this.hasError = true;
+      //   this.domError.innerText = this.options.label ? `
+      // ${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
+      //     this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
+      // } else if (this.options.required && !state.isRequired && this.domError) {
+      //   // const spanElementId = this.htmlDivElement.id;
+      //   // const error = document.getElementById(spanElementId);
+      //   // console.log('ELE', error);
+      //   this.domError.innerText = this.options.label ?
+      // `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
+      //     this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
+      // }
+      // const spanElementId = this.htmlDivElement.id.split(':')[0];
+      // const error = document.getElementById(`${spanElementId}-error`);
+      // console.log('ELE', error);
       this.updateStyleClasses(state);
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
@@ -267,6 +277,24 @@ export class FrameElement {
         || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
         if (this.domInput) {
           this.domInput.value = state.value || '';
+        }
+      }
+      if (this.iFrameFormElement.containerType === ContainerType.COMPOSABLE) {
+        const elementType = this.iFrameFormElement.fieldType;
+        const fieldTypeCheck = ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES
+          .includes(elementType as ElementType);
+        if (state.value && state.isComplete && state.isValid && fieldTypeCheck) {
+          const elementList = document.getElementsByTagName('input') as any;
+
+          let nextIndex;
+          elementList.forEach((element:HTMLInputElement, index) => {
+            if (element.id === this.iFrameFormElement.iFrameName
+            && (index + 1) !== elementList.length) { nextIndex = index + 1; }
+          });
+          if (nextIndex) {
+            const nextElement = elementList[nextIndex] as HTMLInputElement;
+            nextElement?.focus();
+          }
         }
       }
     });
@@ -378,8 +406,8 @@ export class FrameElement {
   updateParentDiv = (newDiv: HTMLDivElement) => {
     this.htmlDivElement = newDiv;
     if (Object.prototype.hasOwnProperty.call(this.options, 'label')) this.htmlDivElement.append(this.labelDiv || '');
-
-    this.htmlDivElement.append(this.inputParent || '', this.domError || '');
+    this.htmlDivElement.append(this.inputParent || '');
+    if (this.iFrameFormElement.containerType === ContainerType.COLLECT) { this.htmlDivElement.append(this.domError || ''); }
   };
 
   setValue = (value) => {
