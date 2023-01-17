@@ -5,6 +5,7 @@ import {
   CardType,
   COPY_UTILS, ElementType,
 } from '../../core/constants';
+import { ContainerType } from '../../skyflow';
 import { detectCardType } from '../validators';
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
@@ -89,3 +90,10 @@ export const fileValidation = (value) => {
 export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
   `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`
 ), '');
+
+export const getContainerType = (frameName:string):ContainerType => {
+  const frameNameParts = frameName.split(':');
+  return (frameNameParts[1] === 'group')
+    ? ContainerType.COMPOSABLE
+    : ContainerType.COLLECT;
+};
