@@ -72,7 +72,7 @@ describe('Create container', () => {
     const revealContainer = skyflow.container(ContainerType.REVEAL);
     expect(revealContainer.constructor).toEqual(RevealContainer);
 
-    const composableContainer = skyflow.container(ContainerType.COMPOSABLE);
+    const composableContainer = skyflow.container(ContainerType.COMPOSABLE,{layout:[1]});
     expect(composableContainer).toBeInstanceOf(ComposableContainer);
 
     try {

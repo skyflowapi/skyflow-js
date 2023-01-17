@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Skyflow, Inc.
+  Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
 import CollectElement from '../../../../src/core/external/collect/collect-element';
@@ -23,6 +23,21 @@ const input = {
   placeholder: 'cvv',
   label: 'cvv',
   type: 'CVV',
+};
+
+const composableElementName = 'element:group:YXJ5X2NhcmQuY3Z2cGlpX2ZpZWxkcy5wcmlt';
+const composableInput = {
+  table: 'pii_fields',
+  column: 'primary_card.card_numner',
+  inputStyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+
+  placeholder: 'XXXX XXXX XXXX XXXX',
+  label: 'card number',
+  type: 'CARD_NUMBER',
 };
 
 const labelStyles = {
@@ -53,6 +68,30 @@ const rows = [
   },
 ];
 
+const composableRows = [
+  {
+    elements: [
+      {
+        composableElementName,
+        elementType: input.type,
+        name: input.column,
+        labelStyles,
+        errorTextStyles,
+        ...input,
+      },
+      {
+        composableElementName,
+        elementType: composableInput.type,
+        name: composableInput.column,
+        labelStyles,
+        errorTextStyles,
+        ...composableInput,
+      },
+    ],
+  },
+];
+
+
 const updateElementInput = {
   elementType: 'CVV',
   name: input.column,
@@ -62,8 +101,13 @@ const updateElementInput = {
 const destroyCallback = jest.fn();
 const updateCallback = jest.fn();
 
+const groupEmittFn = jest.fn();
+const groupEmiitter = {
+  _emit: groupEmittFn,
+}
+
 describe('collect element', () => {
-  it('constructor', async () => {
+  it('constructor',  () => {
     const onSpy = jest.spyOn(bus, 'on');
 
     const element = new CollectElement(id,
@@ -114,6 +158,56 @@ describe('collect element', () => {
     expect(element.elementType).toBe(input.type);
     expect(element.isMounted()).toBe(false);
     expect(element.isValidElement()).toBe(true);
+  });
+
+  it('constructor with composable ',  () => {
+    const onSpy = jest.spyOn(bus, 'on');
+    
+    const element = new CollectElement(id,
+      {
+        elementName,
+        rows:composableRows,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD },
+      groupEmiitter
+      );
+
+    const inputEvent = onSpy.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
+    const inputCb = inputEvent[0][1];
+    const cb2 = jest.fn();
+
+    inputCb({
+      name: composableElementName,
+      event: ELEMENT_EVENTS_TO_CLIENT.FOCUS,
+      value: {},
+    }, cb2);
+    inputCb({
+      name: composableElementName,
+      event: ELEMENT_EVENTS_TO_CLIENT.BLUR,
+      value: {},
+    }, cb2);
+    inputCb({
+      name: composableElementName,
+      event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+      value: {},
+    }, cb2);
+    inputCb({
+      name: composableElementName,
+      event: ELEMENT_EVENTS_TO_CLIENT.READY,
+      value: {},
+    }, cb2);
+
+    expect(element.elementType).toBe(input.type);
+    expect(element.isMounted()).toBe(false);
+    expect(element.isValidElement()).toBe(true);
+
+    cb2();
   });
 
   it('mount, invalid dom element', () => {
@@ -493,7 +587,6 @@ describe('collect element validations', () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD });
-      console.log(element);
     } catch (err) {
       console.log(err);
       expect(err).toBeUndefined();

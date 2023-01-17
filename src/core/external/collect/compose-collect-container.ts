@@ -4,6 +4,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import _ from 'lodash';
 import { IUpsertOptions } from '../../../core-utils/collect';
 import EventEmitter from '../../../event-emitter';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
@@ -69,7 +70,7 @@ class ComposableContainer extends Container {
 
   #eventEmitter: EventEmitter;
 
-  #iframe: any;
+  #isMounted: boolean = false;
 
   #options: any;
 
@@ -121,7 +122,6 @@ class ComposableContainer extends Container {
   create = (input: CollectElementInput, options: any = {
     required: false,
   }) => {
-    // console.log('create method triggered', Date.now());
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
@@ -236,13 +236,15 @@ class ComposableContainer extends Container {
   };
 
   mount = (domElement) => {
-    // console.log('Mount method triggered', Date.now());
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT,
         ['CollectElement'], true);
     }
 
     const { layout } = this.#options;
+    if (_.sum(layout) !== this.#elementsList.length) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISMATCH_ELEMENT_COUNT_LAYOUT_SUM, [], true);
+    }
     let count = 0;
     layout.forEach((rowCount, index) => {
       this.#elementGroup.rows = [
@@ -269,11 +271,15 @@ class ComposableContainer extends Container {
 
     const composableElement = this.#createMultipleElement(this.#elementGroup, false);
     composableElement.mount(domElement);
+    this.#isMounted = true;
   };
 
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
+      if (!this.#isMounted) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED, [], true);
+      }
       const collectElements = Object.values(this.#elements);
       collectElements.forEach((element) => {
         if (!element.isMounted()) {

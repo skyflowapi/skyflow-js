@@ -34,6 +34,7 @@ import {
 } from './utils/common';
 import { formatVaultURL } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
+import { validateComposableContainerOptions } from './utils/validators';
 
 export enum ContainerType {
   COLLECT = 'COLLECT',
@@ -170,6 +171,7 @@ class Skyflow {
         return revealContainer;
       }
       case ContainerType.COMPOSABLE: {
+        validateComposableContainerOptions(options);
         const collectContainer = new ComposableContainer(options, {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),

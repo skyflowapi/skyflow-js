@@ -10,6 +10,7 @@ import logs from '../../../../src/utils/logs';
 import ComposableContainer from "../../../../src/core/external/collect/compose-collect-container";
 import ComposableElement from '../../../../src/core/external/collect/compose-collect-element';
 import CollectElement from '../../../../src/core/external/collect/collect-element';
+import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 
 const bus = require('framebus');
 
@@ -133,7 +134,7 @@ describe('test composable container class',()=>{
   
 
   it('test constructor',  () => {
-    const container = new ComposableContainer({}, metaData, {}, context);
+    const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
@@ -169,6 +170,26 @@ describe('test composable container class',()=>{
     const element2 = container.create(cardNumberElement);
     container.mount('#composable');
     container.collect();
+  });
+
+  it('test collect without mounting the container',(done)=>{
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    try{
+      container.collect().then((res)=>{
+        done(res)
+      }).catch((err)=>{
+        expect(err.error.description).toBe(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED.description);
+        done();
+      });
+    }catch(err){
+      done(err)
+    }
+    
   });
 
   it("test container collect", () => {
