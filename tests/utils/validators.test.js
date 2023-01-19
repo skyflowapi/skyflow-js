@@ -267,7 +267,7 @@ describe('detokenize input validation', () => {
 
   test('invalid redaction type', () => {
     try {
-      validateDetokenizeInput({ records: [{ token: '13213', redaction: 'MASKED' }] })
+      validateDetokenizeInput({ records: [{ token: '13213', redaction: 'invalid' }] })
     } catch (err) {
       expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_DETOKENIZE.description, 0))
     }
