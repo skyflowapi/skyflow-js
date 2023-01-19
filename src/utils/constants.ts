@@ -121,6 +121,10 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_REDACTION_TYPE_IN_GET,
   },
+  INVALID_REDACTION_TYPE_IN_DETOKENIZE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_REDACTION_TYPE_IN_DETOKENIZE,
+  },
   INVALID_TOKENS_IN_COLLECT: {
     code: 404,
     description: logs.errorLogs.INVALID_TOKENS_IN_COLLECT,
