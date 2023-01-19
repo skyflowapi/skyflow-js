@@ -240,7 +240,9 @@ class CollectContainer extends Container {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
       const collectElements = Object.values(this.#elements);
+      // console.log(collectElements);
       collectElements.forEach((element) => {
+        // console.log(element.getState);
         if (!element.isMounted()) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
         }
@@ -249,7 +251,9 @@ class CollectContainer extends Container {
       if (options && options.tokens && typeof options.tokens !== 'boolean') {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
       }
+      // console.log(options);
       if (options?.additionalFields) {
+        // console.log('--------- ', options?.additionalFields);
         validateAdditionalFieldsInCollect(options.additionalFields);
       }
       if (options?.upsert) {
