@@ -416,6 +416,13 @@ const options = {
       // ...additional records here.
     ],
   }, // Optional
+  upsert: [
+    // Upsert operations support in the vault
+    {
+      table: 'string', // Table name
+      column: 'value', // Unique column in the table
+    },
+  ],  // Optional
 };
 
 container.collect(options);

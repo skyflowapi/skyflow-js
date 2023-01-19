@@ -7,6 +7,7 @@ import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
+import { ContainerType } from '../../../skyflow';
 import { Context, MessageType, RedactionType } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
@@ -53,6 +54,8 @@ class RevealContainer extends Container {
   #context: Context;
 
   #skyflowElements: any;
+
+  type:string = ContainerType.REVEAL;
 
   constructor(metaData, skyflowElements, context) {
     super();

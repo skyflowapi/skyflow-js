@@ -527,3 +527,36 @@ export const validateUpsertOptions = (upsertOptions) => {
     }
   });
 };
+
+export const validateComposableContainerOptions = (options) => {
+  if (!options) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS, [], true);
+  }
+  if (typeof options !== 'object') {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_CONTAINER_OPTIONS, [], true);
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(options, 'layout')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_LAYOUT_KEY, [], true);
+  }
+
+  if (!options.layout) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE, [], true);
+  }
+
+  if (!Array.isArray(options.layout)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE, [], true);
+  }
+  if (options.layout.length === 0) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_COMPOSABLE_LAYOUT_ARRAY, [], true);
+  }
+
+  options.layout.forEach((row) => {
+    if (typeof row !== 'number') {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE, [], true);
+    }
+    if (row < 0) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.NEGATIVE_VALUES_COMPOSABLE_LAYOUT, [], true);
+    }
+  });
+};

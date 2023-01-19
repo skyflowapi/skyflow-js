@@ -1,8 +1,12 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import _ from 'lodash';
 import { IUpsertOptions } from '../../../core-utils/collect';
+import EventEmitter from '../../../event-emitter';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
 import { formatValidations, formatOptions, validateElementOptions } from '../../../libs/element-options';
@@ -27,6 +31,7 @@ import {
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
+import ComposableElement from './compose-collect-element';
 
 export interface CollectElementInput {
   table?: string;
@@ -48,18 +53,28 @@ interface ICollectOptions {
   upsert?: Array<IUpsertOptions>
 }
 const CLASS_NAME = 'CollectContainer';
-class CollectContainer extends Container {
+class ComposableContainer extends Container {
   #containerId: string;
 
-  #elements: Record<string, CollectElement> = {};
+  #elements: Record<string, any> = {};
 
   #metaData: any;
+
+  #elementGroup: any = { rows: [] };
+
+  #elementsList:any = [];
 
   #context:Context;
 
   #skyflowElements:any;
 
-  type:string = ContainerType.COLLECT;
+  #eventEmitter: EventEmitter;
+
+  #isMounted: boolean = false;
+
+  #options: any;
+
+  type:string = ContainerType.COMPOSABLE;
 
   constructor(options, metaData, skyflowElements, context) {
     super();
@@ -67,6 +82,9 @@ class CollectContainer extends Container {
     this.#metaData = metaData;
     this.#skyflowElements = skyflowElements;
     this.#context = context;
+    this.#options = options;
+    this.#eventEmitter = new EventEmitter();
+
     const iframe = iframer({
       name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}`,
     });
@@ -107,22 +125,23 @@ class CollectContainer extends Container {
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
-    const elementGroup = {
-      rows: [
-        {
-          elements: [
-            {
-              elementType: input.type,
-              name: input.column,
-              ...input,
-              ...formattedOptions,
-              validations,
-            },
-          ],
-        },
-      ],
-    };
-    return this.#createMultipleElement(elementGroup, true);
+    let elementName;
+    elementName = `${input.table}.${input.column}:${btoa(uuid())}`;
+    elementName = (input.table && input.column) ? `${input.type}:${btoa(
+      elementName,
+    )}` : `${input.type}:${btoa(uuid())}`;
+
+    elementName = `${FRAME_ELEMENT}:${elementName}`;
+
+    this.#elementsList.push({
+      elementType: input.type,
+      name: input.column,
+      ...input,
+      ...formattedOptions,
+      validations,
+      elementName,
+    });
+    return new ComposableElement(elementName, this.#eventEmitter);
   };
 
   #createMultipleElement = (
@@ -141,19 +160,6 @@ class CollectContainer extends Container {
         options.replacePattern = options.replacePattern || ELEMENTS[elementType].replacePattern;
         options.mask = options.mask || ELEMENTS[elementType].mask;
 
-        options.elementName = `${options.table}.${options.name}:${btoa(uuid())}`;
-        options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
-          options.elementName,
-        )}` : `${options.elementType}:${btoa(uuid())}`;
-
-        if (
-          options.elementType === ELEMENTS.radio.name
-          || options.elementType === ELEMENTS.checkbox.name
-        ) {
-          options.elementName = `${options.elementName}:${btoa(options.value)}`;
-        }
-
-        options.elementName = `${FRAME_ELEMENT}:${options.elementName}`;
         options.label = element.label;
         options.skyflowID = element.skyflowID;
 
@@ -187,24 +193,14 @@ class CollectContainer extends Container {
         tempElements,
         this.#metaData,
         this.#containerId,
-        isSingleElementAPI,
+        true,
         this.#destroyCallback,
         this.#updateCallback,
         this.#context,
+        this.#eventEmitter,
       );
       this.#elements[tempElements.elementName] = element;
       this.#skyflowElements[elementId] = element;
-    }
-
-    if (!isSingleElementAPI) {
-      elements.forEach((iElement) => {
-        const name = iElement.elementName;
-        if (!this.#elements[name]) {
-          this.#elements[name] = this.create(iElement.elementType, element);
-        } else {
-          this.#elements[name].update(iElement);
-        }
-      });
     }
     return element;
   };
@@ -239,13 +235,53 @@ class CollectContainer extends Container {
     return false;
   };
 
+  mount = (domElement) => {
+    if (!domElement) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT,
+        ['CollectElement'], true);
+    }
+
+    const { layout } = this.#options;
+    if (_.sum(layout) !== this.#elementsList.length) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISMATCH_ELEMENT_COUNT_LAYOUT_SUM, [], true);
+    }
+    let count = 0;
+    layout.forEach((rowCount, index) => {
+      this.#elementGroup.rows = [
+        ...this.#elementGroup.rows,
+        { elements: [] },
+      ];
+      for (let i = 0; i < rowCount; i++) {
+        this.#elementGroup.rows[index].elements.push(
+          this.#elementsList[count],
+        );
+        count++;
+      }
+    });
+    if (this.#options.styles) {
+      this.#elementGroup.styles = {
+        ...this.#options.styles,
+      };
+    }
+    if (this.#options.errorTextStyles) {
+      this.#elementGroup.errorTextStyles = {
+        ...this.#options.errorTextStyles,
+      };
+    }
+
+    const composableElement = this.#createMultipleElement(this.#elementGroup, false);
+    composableElement.mount(domElement);
+    this.#isMounted = true;
+  };
+
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
+      if (!this.#isMounted) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED, [], true);
+      }
       const collectElements = Object.values(this.#elements);
-      // console.log(collectElements);
       collectElements.forEach((element) => {
-        // console.log(element.getState);
         if (!element.isMounted()) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
         }
@@ -254,9 +290,7 @@ class CollectContainer extends Container {
       if (options && options.tokens && typeof options.tokens !== 'boolean') {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
       }
-      // console.log(options);
       if (options?.additionalFields) {
-        // console.log('--------- ', options?.additionalFields);
         validateAdditionalFieldsInCollect(options.additionalFields);
       }
       if (options?.upsert) {
@@ -291,44 +325,5 @@ class CollectContainer extends Container {
       reject(err);
     }
   });
-
-  uploadFiles = (options) => new Promise((resolve, reject) => {
-    try {
-      validateInitConfig(this.#metaData.clientJSON.config);
-      const fileElements = Object.values(this.#elements);
-      fileElements.forEach((element) => {
-        if (!element.isMounted()) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
-        }
-        element.isValidElement();
-      });
-      bus
-      // .target(properties.IFRAME_SECURE_ORGIN)
-        .emit(
-          ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#containerId,
-          {
-            ...options,
-          },
-          (data: any) => {
-            if (!data || data?.error) {
-              printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-              reject(data?.error);
-            } else {
-              printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                MessageType.LOG,
-                this.#context.logLevel);
-
-              resolve(data);
-            }
-          },
-        );
-      printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-        CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
-      MessageType.LOG, this.#context.logLevel);
-    } catch (err) {
-      printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
-      reject(err);
-    }
-  });
 }
-export default CollectContainer;
+export default ComposableContainer;

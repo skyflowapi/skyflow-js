@@ -8,6 +8,7 @@ import { IFrameForm, IFrameFormElement } from '../../../../src/core/internal/ifr
 import * as busEvents from '../../../../src/utils/bus-events';
 import SkyflowError from '../../../../src/libs/skyflow-error';
 import logs from '../../../../src/utils/logs';
+import { ContainerType } from '../../../../src/skyflow';
 
 const tableCol = btoa('table.col')
 const collect_element = `element:CVV:${tableCol}`;
@@ -106,6 +107,64 @@ describe('test iframeFormelement', () => {
 
     })
 
+    test('test error text with label collect element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, 'cvv',{containerType:ContainerType.COLLECT}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('123');
+        expect(element.errorText).toBe('Invalid cvv');
+    });
+    test('test error text without label collect element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COLLECT}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('123');
+        expect(element.errorText).toBe('Invalid value');
+    });
+
+    test('test error text without label composable element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COMPOSABLE}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('123');
+        expect(element.errorText).toBe('Invalid cvv');
+    });
+
+    test('test error text without label collect element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COLLECT}, context)
+        element.setValidation();
+        element.setValue('12');
+        expect(element.errorText).toBe('Invalid value');
+    });
+
+    test('test error text without label composable element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COMPOSABLE}, context)
+        element.setValidation();
+        element.setValue('12');
+        expect(element.errorText).toBe('Invalid cvv');
+    });
+
+    test('test error text without label composable element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COMPOSABLE}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('');
+        expect(element.errorText).toBe('cvv is required');
+    });
+    test('test error text without label collect element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COLLECT}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('');
+        expect(element.errorText).toBe('Field is required');
+    });
+    test('test error text with label composable element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, 'cvv label',{containerType:ContainerType.COMPOSABLE}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('');
+        expect(element.errorText).toBe('cvv label is required');
+    });
     test('test card_number validations', () => {
         const element = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
         element.setValidation()

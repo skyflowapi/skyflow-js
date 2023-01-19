@@ -61,7 +61,11 @@ export const parameterizedString = (...args: any[]) => {
 };
 
 export const getElementName = (name:string = '') => {
-  let tempName = atob(name.split(':')[2]);
+  const nameParts = name.split(':');
+  if (nameParts[1] === 'group') {
+    return 'composable container';
+  }
+  let tempName = atob(nameParts[2]);
   if (tempName.indexOf(':') !== -1) {
     tempName = tempName.substring(0, tempName.indexOf(':'));
   }

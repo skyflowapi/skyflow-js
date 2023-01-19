@@ -19,7 +19,8 @@ import {
   isValidExpiryYearFormat,
   validateCardNumberLengthCheck,
   validateUpsertOptions,
-  validateGetByIdInput
+  validateGetByIdInput,
+  validateComposableContainerOptions
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logs-helper';
 import { RedactionType } from '../../src/utils/common';
@@ -764,5 +765,102 @@ describe("validate upsert options in collect", () => {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_UPSERT_OPTION.description, 0))
     }
   })
+
+})
+
+describe('test validateComposableContainerOptions',()=>{
+  test('missing options',()=>{
+    try{
+      validateComposableContainerOptions();
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS.description);
+    }
+
+    try{
+      validateComposableContainerOptions(undefined);
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS.description);
+    }
+
+    try{
+      validateComposableContainerOptions(null);
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS.description);
+    }
+  });
+
+  test('invalid options type',()=>{
+    try{
+      validateComposableContainerOptions(true);
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_CONTAINER_OPTIONS.description);
+    }
+
+    try{
+      validateComposableContainerOptions(123);
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_CONTAINER_OPTIONS.description);
+    }
+  });
+
+  test('missing layout option',()=>{
+    try{
+      validateComposableContainerOptions({});
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_LAYOUT_KEY.description);
+    }
+  });
+
+  test('invalid layout value',()=>{
+    try{
+      validateComposableContainerOptions({layout:undefined});
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description);
+    }
+
+    try{
+      validateComposableContainerOptions({layout:null});
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description);
+    }
+  });
+
+  test('invalid layout value',()=>{
+    try{
+      validateComposableContainerOptions({layout:'invalid'});
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description);
+    }
+
+    try{
+      validateComposableContainerOptions({layout:true});
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description);
+    }
+  });
+
+  test('empty layout array',()=>{
+    try{
+      validateComposableContainerOptions({layout:[]});
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_COMPOSABLE_LAYOUT_ARRAY.description);
+    }
+  });
+
+  test('invalid value in layout array',()=>{
+    try{
+      validateComposableContainerOptions({layout:[1,'122']});
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description);
+    }
+  });
+
+  test('negative number in layout array',()=>{
+    try{
+      validateComposableContainerOptions({layout:[2,-1]});
+    }catch(err){
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.NEGATIVE_VALUES_COMPOSABLE_LAYOUT.description);
+    }
+  });
 
 })

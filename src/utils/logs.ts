@@ -232,6 +232,16 @@ const logs = {
     EMPTY_TABLE_IN_GETBYID: 'Interface: client getById - table cannot be empty in records array at index %s1',
     EMPTY_REDACTION_TYPE_IN_GETBYID: 'Interface: client getById - redaction cannot be empty in records array at index %s1',
     GET_BY_SKYFLOWID_REJECTED: 'Interface: client getById - getById request is rejected.',
+
+    MISSING_COMPOSABLE_LAYOUT_KEY: 'Interface: client container - layout is required in composable container options.',
+    EMPTY_COMPOSABLE_LAYOUT_ARRAY: 'Interface: client container - layout array cannot be empty in composable container options.',
+    INVALID_COMPOSABLE_LAYOUT_TYPE: 'Interface: client container - invalid layout value, layout should be of type array of numbers in composable container options.',
+    NEGATIVE_VALUES_COMPOSABLE_LAYOUT: 'Interface: client container - layout array should only have postive numbers in composable container options.',
+    MISMATCH_ELEMENT_COUNT_LAYOUT_SUM: 'Interface: composable container mount - created elements count should be equal to sum of layout values.',
+    MISSING_COMPOSABLE_CONTAINER_OPTIONS: 'Interface: client composable container - options object is required for composable container.',
+    INVALID_COMPOSABLE_CONTAINER_OPTIONS: 'Interface: client composable container - invalid options value, should be an object type.',
+    COMPOSABLE_CONTAINER_NOT_MOUNTED: 'Interface: composable collect - container should be mounted before invoking collect.',
+
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',
