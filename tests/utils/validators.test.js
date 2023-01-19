@@ -206,7 +206,21 @@ describe('insert additional records validation', () => {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_ADDITIONAL_FIELDS.description, 0))
     }
   })
+  test('empty skyflow id', () => {
+    try {
+      validateAdditionalFieldsInCollect({ records: [{ table: 'abc',  skyflowID: '', fields: { 'columnName' : 'value'} }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS.description, 0))
+    }
+  })
 
+  test('invalid skyflow id', () => {
+    try {
+      validateAdditionalFieldsInCollect({ records: [{ table: 'abc',  skyflowID: [], fields: { 'columnName' : 'value'} }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOW_ID_IN_ADDITIONAL_FIELDS.description, 0))
+    }
+  })
   test('missing fields', () => {
     try {
       validateAdditionalFieldsInCollect({ records: [{ table: 'abc' }] })

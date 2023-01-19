@@ -870,7 +870,6 @@ export class IFrameForm {
       const {
         state, tableName, validations, skyflowID,
       } = this.iFrameFormElements[formElements[i]];
-      // console.log(state);
       if (
         this.iFrameFormElements[formElements[i]].fieldType
         !== ELEMENTS.FILE_INPUT.name
@@ -931,17 +930,14 @@ export class IFrameForm {
         }
       }
     }
-    // let finalInsertRecords, finalUpdateRecords;
     let finalInsertRequest;
     let finalInsertRecords;
     let finalUpdateRecords;
     let finalResponse: IInsertResponse;
-    // let finalUpdateRequest;
     try {
       [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
         insertResponseObject, updateResponseObject, options,
       );
-      // console.log(finalInsertRecords, finalUpdateRecords);
       finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
     } catch (error) {
       return Promise.reject({
@@ -952,8 +948,6 @@ export class IFrameForm {
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
       const clientId = client.toJSON()?.metaData?.uuid || '';
       getAccessToken(clientId).then((authToken) => {
-        console.log(finalInsertRequest, finalUpdateRecords);
-        // console.log(finalUpdateRecords.updateRecords);
         if (finalInsertRequest.length !== 0) {
           client
             .request({
@@ -961,23 +955,19 @@ export class IFrameForm {
                 records: finalInsertRequest,
               },
               requestMethod: 'POST',
-              url: `vault/v1/vaults/${client.config.vaultID}`,
+              url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
               headers: {
                 authorization: `Bearer ${authToken}`,
                 'content-type': 'application/json',
               },
             })
             .then((response: any) => {
-            // console.log(response);
               finalResponse = constructInsertRecordResponse(
                 response,
                 options.tokens,
                 finalInsertRecords.records,
               );
-              console.log(finalUpdateRecords, (finalUpdateRecords.updateRecords.length === 0));
-              console.log(finalResponse.records);
               if (finalUpdateRecords.updateRecords.length === 0) {
-                console.log(finalResponse, (finalUpdateRecords.updateRecords.length === 0));
                 rootResolve(finalResponse);
               }
             })
@@ -988,9 +978,6 @@ export class IFrameForm {
         if (finalUpdateRecords.updateRecords.length !== 0) {
           updateRecordsBySkyflowID(finalUpdateRecords, client, options)
             .then((response: any) => {
-            // console.log(finalResponse.records);
-              console.log(response);
-
               if (finalResponse === null || finalResponse === undefined) {
                 finalResponse = {
                   records: response,
@@ -1000,10 +987,8 @@ export class IFrameForm {
                   finalResponse.records?.push(res);
                 });
               }
-              console.log(finalResponse.records);
               rootResolve(finalResponse);
             }).catch((error) => {
-              console.log(error);
               rootReject(error);
             });
         }

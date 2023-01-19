@@ -60,7 +60,6 @@ class SkyflowFrameController {
               },
             );
         } else if (data.type === PUREJS_TYPES.INSERT) {
-          console.log(data.records);
           this.insertData(data.records, data.options)
             .then((result) => {
               printLog(parameterizedString(logs.infoLogs.INSERT_RECORDS_RESOLVED, CLASS_NAME),
@@ -136,7 +135,6 @@ class SkyflowFrameController {
 
   insertData(records, options) {
     const requestBody = constructInsertRecordRequest(records, options);
-    console.log(requestBody);
     return new Promise((rootResolve, rootReject) => {
       getAccessToken(this.#clientId).then((authToken) => {
         this.#client
@@ -144,7 +142,7 @@ class SkyflowFrameController {
             body: { records: requestBody },
             requestMethod: 'POST',
             url:
-            `vault/v1/vaults/${
+            `${this.#client.config.vaultURL}/v1/vaults/${
               this.#client.config.vaultID}`,
             headers: {
               Authorization: `Bearer ${authToken}`,
@@ -152,7 +150,6 @@ class SkyflowFrameController {
 
           })
           .then((response: any) => {
-            console.log(response);
             rootResolve(
               constructInsertRecordResponse(
                 response,

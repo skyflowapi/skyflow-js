@@ -169,7 +169,6 @@ export const validateAdditionalFieldsInCollect = (recordObj: IInsertRecordInput)
     if (!record.table) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_ADDITIONAL_FIELDS, [`${index}`], true);
     }
-    console.log('---------', record.fields?.skyflowID);
     if (record.fields?.skyflowID !== undefined) {
       if (!record.fields?.skyflowID) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS, [`${index}`], true);

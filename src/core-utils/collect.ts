@@ -51,7 +51,6 @@ export const constructInsertRecordRequest = (
         tokenization: true,
       });
     });
-    // console.log('if', records.records);
   } else {
     records.records.forEach((record) => {
       const elseUpsertColumn = getUpsertColumn(record.table, options.upsert);
@@ -64,7 +63,6 @@ export const constructInsertRecordRequest = (
         ...(options?.upsert ? { upsert: elseUpsertColumn } : {}),
       });
     });
-    // console.log('else', records.records);
   }
   return requestBody;
 };
@@ -117,7 +115,7 @@ export const constructFinalUpdateRecordResponse = (
   }
   return {
     table: records.table,
-    skyflow_id: responseBody.records[0].skyflow_id,
+    skyflow_id: responseBody.skyflow_id,
   };
 };
 
@@ -145,7 +143,6 @@ const checkDuplicateColumns = (additionalColumns, columns, table) => {
 export const constructElementsInsertReq = (req, update, options) => {
   let tables = Object.keys(req);
   let ids = Object.keys(update);
-  // console.log(tables, ids);
   const additionalFields = options?.additionalFields;
   if (additionalFields) {
     // merge additionalFields in req
@@ -157,7 +154,6 @@ export const constructElementsInsertReq = (req, update, options) => {
           );
           const temp = record.fields;
           _.merge(temp, update[record.fields.skyflowID]);
-          console.log(temp, update[record.fields.skyflowID], record);
           update[record.fields.skyflowID] = temp;
         } else {
           update[record.fields.skyflowID] = {
@@ -182,14 +178,12 @@ export const constructElementsInsertReq = (req, update, options) => {
 
   tables = Object.keys(req);
   tables.forEach((table) => {
-    // console.log(tables, req[table]);
     records.push({
       table,
       fields: req[table],
     });
   });
   ids = Object.keys(update);
-  // console.log(ids);
   ids.forEach((id) => {
     updateRecords.push({
       table: update[id].table,
@@ -197,7 +191,6 @@ export const constructElementsInsertReq = (req, update, options) => {
       skyflowID: id,
     });
   });
-  // console.log(records, updateRecords);
   return [{ records }, { updateRecords }];
 };
 const updateRecordsInVault = (
@@ -210,7 +203,6 @@ const updateRecordsInVault = (
   const skyflowID = skyflowIdRecord.skyflowID;
   skyflowIdRecord.fields = _.omit(skyflowIdRecord.fields, 'table');
   skyflowIdRecord.fields = _.omit(skyflowIdRecord.fields, 'skyflowID');
-  console.log(skyflowIdRecord);
   return client.request({
     body: {
       record: {
@@ -219,7 +211,7 @@ const updateRecordsInVault = (
       tokenization: options.tokens,
     },
     requestMethod: 'PUT',
-    url: `vault/v1/vaults/${client.config.vaultID}/${table}/${skyflowID}`,
+    url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${table}/${skyflowID}`,
     headers: {
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',
@@ -232,9 +224,6 @@ export const updateRecordsBySkyflowID = async (
   client: Client,
   options,
 ) => new Promise((rootResolve, rootReject) => {
-  // let finalResponse: IInsertResponse;
-  console.log(skyflowIdRecords);
-  // console.log(finalResponse);
   let updateResponseSet: Promise<any>[];
   const clientId = client.toJSON()?.metaData?.uuid || '';
   getAccessToken(clientId).then((authToken) => {
@@ -242,18 +231,12 @@ export const updateRecordsBySkyflowID = async (
       (skyflowIdRecord: IInsertRecord) => new Promise((resolve, reject) => {
         updateRecordsInVault(skyflowIdRecord, client, authToken as string, options)
           .then((resolvedResult: any) => {
-            console.log(resolvedResult);
             const resp = constructFinalUpdateRecordResponse(
               resolvedResult, options?.tokens, skyflowIdRecord,
             );
-            // console.log(skyflowIdRecord);
-            console.log(resp);
-            // finalResponse['records'].push(resp);
-            // console.log(resp, finalResponse);
             resolve(resp);
           },
           (rejectedResult) => {
-            console.log(rejectedResult);
             let errorResponse = rejectedResult;
             if (rejectedResult && rejectedResult.error) {
               errorResponse = {
@@ -266,14 +249,11 @@ export const updateRecordsBySkyflowID = async (
             printLog(rejectedResult.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
             reject(errorResponse);
           }).catch((error) => {
-            console.log(error);
             reject(error);
           });
       }),
     );
     Promise.allSettled(updateResponseSet).then((resultSet: any) => {
-      console.log(resultSet);
-      // rootResolve(resultSet);
       const recordsResponse: any[] = [];
       const errorsResponse: any[] = [];
       resultSet.forEach((result: { status: string; value: any; reason?: any; }) => {
@@ -283,8 +263,6 @@ export const updateRecordsBySkyflowID = async (
           errorsResponse.push(result.reason);
         }
       });
-      console.log(recordsResponse);
-      // console.log(errorsResponse);
 
       if (errorsResponse.length === 0) {
         rootResolve(recordsResponse);

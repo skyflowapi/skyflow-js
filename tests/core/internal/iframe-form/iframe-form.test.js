@@ -243,7 +243,8 @@ const data = {
         records: [{
             table: "pii_fields",
             fields: {
-                cvv: '123'
+                cvv: '123',
+                skyflowID: 'ghgjhjh2',
             }
         }, {
             table: 'table',
@@ -255,7 +256,32 @@ const data = {
     tokens: true,
     upsert: [{ table: '', column: '  ' }]
 }
-
+const data2 = {
+    additionalFields: {
+        records: [{
+            table: "pii_fields",
+            fields: {
+                cvv: '123',
+                skyflowID: 'ghgjhjh2',
+            }
+        }]
+    },
+    tokens: false,
+    upsert: [{ table: '', column: '  ' }]
+}
+const data3 = {
+    additionalFields: {
+        records: [{
+            table: "pii_fields",
+            fields: {
+                cvv: '123',
+                skyflowID: '',
+            }
+        }]
+    },
+    tokens: true,
+    upsert: [{ table: '', column: '  ' }]
+}
 const fileData = {
     lastModified: '',
     lastModifiedDate: '',
@@ -384,7 +410,7 @@ describe('test iframeForm collect method', () => {
         tokenizationCb(data, cb3)
 
         setTimeout(() => {
-            expect(cb3.mock.calls[0][0].records.length).toBe(1);
+            expect(cb3.mock.calls[0][0].records.length).toBe(2);
         }, 1000)
 
         const cb4 = jest.fn()
@@ -431,9 +457,27 @@ describe('test iframeForm collect method', () => {
         const cb2 = jest.fn();
         tokenizationCb(data, cb2);
         setTimeout(() => {
-            expect(cb2.mock.calls[0][0].records.length).toBe(1);
-            expect(cb2.mock.calls[0][0].records[0].table).toBe('pii_fields');
+            expect(cb2.mock.calls[0][0].records.length).toBe(2);
+            expect(cb2.mock.calls[0][0].records[0].table).toBe('table');
             expect(Object.keys(cb2.mock.calls[0][0].records[0].fields).length).toBe(2);
+            done()
+        }, 1000)
+    })
+    test('insert records with tokens as false', (done) => {
+        const form = new IFrameForm("controllerId", "", "ERROR");
+        form.setClient(clientObj)
+        form.setClientMetadata(metaData)
+        form.setContext(context)
+
+        const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
+        const tokenizationCb = tokenizationEvent[0][1];
+        const cb2 = jest.fn();
+        tokenizationCb(data2, cb2);
+        setTimeout(() => {
+            console.log(cb2.mock.calls[0][0].records);
+            expect(cb2.mock.calls[0][0].records[0].skyflow_id).toBeUndefined();
+            expect(cb2.mock.calls[0][0].records[0].table).toBe('pii_fields');
+            expect(Object.keys(cb2.mock.calls[0][0].records[0]).length).toBe(2);
             done()
         }, 1000)
     })
