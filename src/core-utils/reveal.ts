@@ -6,6 +6,7 @@ import { getAccessToken } from '../utils/bus-events';
 import SkyflowError from '../libs/skyflow-error';
 import {
   IRevealRecord, IRevealResponseType, MessageType, LogLevel, IGetRecord, ISkyflowIdRecord,
+  RedactionType,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
 
@@ -80,6 +81,7 @@ const getSkyflowIdRecordsFromVault = (
 };
 const getTokenRecordsFromVault = (
   token:string,
+  redaction: RedactionType,
   client: Client,
   authToken:string,
 ): Promise<any> => {
@@ -96,6 +98,7 @@ const getTokenRecordsFromVault = (
         detokenizationParameters: [
           {
             token,
+            redaction,
           },
         ],
       },
@@ -111,7 +114,9 @@ export const fetchRecordsByTokenId = (
     const vaultResponseSet: Promise<any>[] = tokenIdRecords.map(
       (tokenRecord) => new Promise((resolve) => {
         const apiResponse: any = [];
-        getTokenRecordsFromVault(tokenRecord.token, client, authToken as string)
+        const redaction: RedactionType = tokenRecord.redaction ? tokenRecord.redaction
+          : RedactionType.PLAIN_TEXT;
+        getTokenRecordsFromVault(tokenRecord.token, redaction, client, authToken as string)
           .then(
             (response: IApiSuccessResponse) => {
               const fieldsData = formatForPureJsSuccess(response);
