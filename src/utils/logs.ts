@@ -131,6 +131,7 @@ const logs = {
     INVALID_TABLE_IN_GET: 'Interface: client get - table of type string is required at index %s1 in records array.',
     MISSING_REDACTION_IN_GET: 'Interface: client get - "redaction" key is required in records array at index %s1',
     INVALID_REDACTION_TYPE_IN_GET: 'Interface: client get - Invalid redaction type in records array at index %s1',
+    INVALID_REDACTION_TYPE_IN_DETOKENIZE: 'Interface: client get - Invalid redaction type in records array at index %s1',
     EMPTY_RECORDS_REVEAL: 'Interface: reveal container - cannot invoke reveal method before creating reveal elements',
     MISSING_TOKEN_KEY_REVEAL: 'Interface: RevealElement - token key is required ',
     INVALID_TOKEN_ID_REVEAL: 'Interface: RevealElement - token is invalid. token of type string is required',

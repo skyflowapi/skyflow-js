@@ -203,13 +203,12 @@ export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
     if (!(typeof record.token === 'string' || record.token instanceof String)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_IN_DETOKENIZE, [`${index}`]);
     }
-    // const recordRedaction = record.redaction;
-    // if (!recordRedaction) {
-    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
-    // }
-    // if (!Object.values(RedactionType).includes(recordRedaction)) {
-    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
-    // }
+    const recordRedaction = record.redaction;
+    if (recordRedaction) {
+      if (!Object.values(RedactionType).includes(recordRedaction)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_DETOKENIZE, [`${index}`]);
+      }
+    }
   });
 };
 
