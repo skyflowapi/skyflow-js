@@ -360,14 +360,12 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
     if (!(typeof record.token === 'string' || record.token instanceof String)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID_REVEAL);
     }
-    // if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
-    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
-    // }
-    // const recordRedaction = record.redaction;
-    // if (!recordRedaction) throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION_VALUE);
-    // if (!Object.values(RedactionType).includes(recordRedaction)) {
-    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
-    // }
+    const recordRedaction = record.redaction;
+    if (recordRedaction) {
+      if (!Object.values(RedactionType).includes(recordRedaction)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL);
+      }
+    }
 
     if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_LABEL_REVEAL);

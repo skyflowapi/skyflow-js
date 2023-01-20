@@ -137,6 +137,7 @@ const logs = {
     INVALID_TOKEN_ID_REVEAL: 'Interface: RevealElement - token is invalid. token of type string is required',
     INVALID_LABEL_REVEAL: 'Interface: RevealElement - label is invalid.',
     INVALID_ALT_TEXT_REVEAL: 'Interface: RevealElement - Invalid altText.',
+    INVALID_REDACTION_TYPE_REVEAL: 'Interface: RevealElement - Invalid Redaction type.',
     ELEMENTS_NOT_MOUNTED_REVEAL: 'Interface: reveal container - Cannot invoke reveal before mounting the elements',
     EMPTY_TABLE_IN_ADDITIONAL_FIELDS: 'Interface: collect container - table cannot be empty in additionalFields at index %s1',
     EMPTY_FIELDS_IN_ADDITIONAL_FIELDS: 'Interface: collect container - fields cannot be empty in additionalFields at index %s1',
