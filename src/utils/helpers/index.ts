@@ -40,6 +40,20 @@ export const appendZeroToOne = (value) => {
   return value;
 };
 
+export const appendMonthFourDigitYears = (value) => {
+  if (value.length === 6 && Number(value.charAt(5)) === 1) {
+    return `${value.substring(0, 5)}0${value.charAt(5)}`;
+  }
+  return value;
+};
+export const appendMonthTwoDigitYears = (value) => {
+  const lastChar = (value.length > 0 && value.charAt(value.length - 1)) || '';
+  if (value.length === 4 && Number(lastChar) === 1) {
+    return `${value.substring(0, 3)}0${lastChar}`;
+  }
+  return value;
+};
+
 export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {
   if (typeof value === 'string') {
     value = value && value.replace(/\s/g, '');

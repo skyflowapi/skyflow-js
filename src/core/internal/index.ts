@@ -34,7 +34,11 @@ import { parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
-import { appendZeroToOne, handleCopyIconClick, styleToString } from '../../utils/helpers';
+import {
+  appendMonthFourDigitYears,
+  appendMonthTwoDigitYears,
+  appendZeroToOne, handleCopyIconClick, styleToString,
+} from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
 
 export class FrameController {
@@ -165,7 +169,7 @@ export class FrameElement {
       && this.options.enableCardIcon) {
       this.domImg = document.createElement('img');
       this.domImg.src = CARD_ENCODED_ICONS.DEFAULT;
-      this.domImg.setAttribute('style', this.options.inputStyles.cardIcon ? styleToString(this.options.inputStyles.cardIcon) : INPUT_ICON_STYLES);
+      this.domImg.setAttribute('style', this.options?.inputStyles?.cardIcon ? styleToString(this.options.inputStyles.cardIcon) : INPUT_ICON_STYLES);
       this.inputParent.append(this.domImg);
     }
 
@@ -173,7 +177,7 @@ export class FrameElement {
       this.domCopy = document.createElement('img');
       this.domCopy.src = COPY_UTILS.copyIcon;
       this.domCopy.title = COPY_UTILS.toCopy;
-      this.domCopy.setAttribute('style', this.options.inputStyles.copyIcon ? styleToString(this.options.inputStyles.copyIcon) : COLLECT_COPY_ICON_STYLES);
+      this.domCopy.setAttribute('style', this.options?.inputStyles?.copyIcon ? styleToString(this.options.inputStyles.copyIcon) : COLLECT_COPY_ICON_STYLES);
       this.inputParent.append(this.domCopy);
 
       this.domCopy.onclick = () => {
@@ -215,6 +219,15 @@ export class FrameElement {
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
         this.iFrameFormElement.setValue(appendZeroToOne(state.value));
       }
+
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
+        if (this.iFrameFormElement.format === 'YYYY/MM') {
+          this.iFrameFormElement.setValue(appendMonthFourDigitYears(state.value));
+        } else if (this.iFrameFormElement.format === 'YY/MM') {
+          this.iFrameFormElement.setValue(appendMonthTwoDigitYears(state.value));
+        }
+      }
+
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
         this.focusChange(false);
       }
