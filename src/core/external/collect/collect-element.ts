@@ -140,10 +140,22 @@ class CollectElement extends SkyflowElement {
         callback(this.#group);
         this.#onGroupEmitRemoveLocalValue();
         const { name, ...elementState } = this.#states[0];
+        const isComposable = this.#elements.length > 1;
+        if (isComposable) {
+          this.#elements.forEach((element, index) => {
+            if (this.#groupEmitter) {
+              this.#groupEmitter._emit(`${ELEMENT_EVENTS_TO_CLIENT.READY}:${element.elementName}`, {
+                ...this.#states[index],
+                elementType: element.elementType,
+              });
+            }
+          });
+        } else {
+          this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY, {
+            ...elementState,
+          });
+        }
 
-        this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY, {
-          ...elementState,
-        });
         this.#bus.off(
           ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId,
           sub,
