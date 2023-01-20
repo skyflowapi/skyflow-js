@@ -17,7 +17,9 @@ import {
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
 import { parameterizedString, printLog } from '../utils/logs-helper';
-import { isValidExpiryDateFormat, isValidExpiryYearFormat, isValidRegExp } from '../utils/validators';
+import {
+  isValidExpiryDateFormat, isValidExpiryYearFormat, isValidRegExp, validateBooleanOptions,
+} from '../utils/validators';
 import SkyflowError from './skyflow-error';
 import { buildStylesFromClassesAndStyles } from './styles';
 
@@ -286,6 +288,16 @@ export const formatOptions = (elementType, options, logLevel) => {
       format: isvalidFormat ? formattedOptions.format.toUpperCase()
         : DEFAULT_EXPIRATION_YEAR_FORMAT,
     };
+  }
+
+  if (Object.prototype.hasOwnProperty.call(formattedOptions, 'enableCardIcon') && !validateBooleanOptions(formattedOptions.enableCardIcon)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['enableCardIcon'], true);
+  }
+  if (Object.prototype.hasOwnProperty.call(formattedOptions, 'enableCopy') && !validateBooleanOptions(formattedOptions.enableCopy)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['enableCopy'], true);
+  }
+  if (Object.prototype.hasOwnProperty.call(formattedOptions, 'required') && !validateBooleanOptions(formattedOptions.required)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['required'], true);
   }
 
   return formattedOptions;

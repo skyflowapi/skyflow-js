@@ -19,6 +19,7 @@ import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import {
   validateCollectElementInput, validateInitConfig, validateAdditionalFieldsInCollect,
   validateUpsertOptions,
+  validateBooleanOptions,
 } from '../../../utils/validators';
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
@@ -249,7 +250,7 @@ class CollectContainer extends Container {
         }
         element.isValidElement();
       });
-      if (options && options.tokens && typeof options.tokens !== 'boolean') {
+      if (Object.prototype.hasOwnProperty.call(options, 'tokens') && !validateBooleanOptions(options.tokens)) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
       }
       if (options?.additionalFields) {
