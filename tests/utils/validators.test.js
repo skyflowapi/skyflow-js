@@ -684,6 +684,15 @@ describe("validate reveal element input", () => {
       expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_REVEAL.description)
     }
   })
+
+  test("invalid redaction type", () => {
+    try {
+      validateRevealElementRecords([{ token: '123', redaction: 'invalid' }])
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL.description)
+    }
+  })
+
 })
 
 
