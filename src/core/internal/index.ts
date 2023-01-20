@@ -523,7 +523,7 @@ export class FrameElement {
     );
 
     this.options = newOptions;
-    if (options.inputStyles) {
+    if (options?.inputStyles) {
       // update element styles
       options.inputStyles.base = {
         ...INPUT_STYLES,

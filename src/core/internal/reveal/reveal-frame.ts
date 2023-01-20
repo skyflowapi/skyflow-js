@@ -90,7 +90,7 @@ class RevealFrame {
       this.domCopy = document.createElement('img');
       this.domCopy.src = COPY_UTILS.copyIcon;
       this.domCopy.title = COPY_UTILS.toCopy;
-      this.domCopy.setAttribute('style', this.#record.inputStyles.copyIcon ? styleToString(this.#record.inputStyles.copyIcon) : REVEAL_COPY_ICON_STYLES);
+      this.domCopy.setAttribute('style', this.#record?.inputStyles?.copyIcon ? styleToString(this.#record.inputStyles.copyIcon) : REVEAL_COPY_ICON_STYLES);
       this.#elementContainer.append(this.domCopy);
 
       this.domCopy.onclick = () => {
