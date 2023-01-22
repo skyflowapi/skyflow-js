@@ -233,8 +233,10 @@ export class IFrameFormElement extends EventEmitter {
     } else if (this.fieldType === ELEMENTS.EXPIRATION_MONTH.name && value) {
       if (value.length === 1 && Number(value) >= 2) {
         this.state.value = `0${value}`;
+        this.state.isComplete = true;
       } else {
         this.state.value = value;
+        this.state.isComplete = (value.length === 2);
       }
     } else if (this.fieldType === ELEMENTS.EXPIRATION_DATE.name && value) {
       if (this.format.startsWith('MM')) {
@@ -247,15 +249,19 @@ export class IFrameFormElement extends EventEmitter {
         const lastChar = (value.length > 0 && value.charAt(value.length - 1)) || '';
         if (value.length === 6 && Number(lastChar) >= 2) {
           this.state.value = `${value.substring(0, 5)}0${lastChar}`;
+          this.state.isComplete = true;
         } else {
           this.state.value = value;
+          this.state.isComplete = (value.length === 7);
         }
       } else if (this.format.startsWith('YY')) {
         const lastChar = (value.length > 0 && value.charAt(value.length - 1)) || '';
         if (value.length === 4 && Number(lastChar) >= 2) {
           this.state.value = `${value.substring(0, 3)}0${lastChar}`;
+          this.state.isComplete = true;
         } else {
           this.state.value = value;
+          this.state.isComplete = (value.length === 5);
         }
       }
     } else {
@@ -278,7 +284,13 @@ export class IFrameFormElement extends EventEmitter {
     }
     if (valid && !this.doesClientHasError && this.validator(this.state.value)) {
       this.state.isValid = true;
-      this.state.isComplete = true;
+      if (this.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
+        //
+      } else if (this.fieldType === ELEMENTS.EXPIRATION_DATE.name && (this.format.endsWith('MM'))) {
+        //
+      } else {
+        this.state.isComplete = true;
+      }
     } else {
       this.state.isValid = false;
       this.state.isComplete = false;

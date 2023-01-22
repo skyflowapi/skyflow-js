@@ -393,6 +393,10 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.COMPOSABLE_CONTAINER_NOT_MOUNTED,
   },
+  INVALID_BOOLEAN_OPTIONS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_BOOLEAN_OPTIONS,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;

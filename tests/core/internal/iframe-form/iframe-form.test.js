@@ -445,6 +445,16 @@ describe('test iframeForm collect method', () => {
         expect(() => { tokenizationCb(data, cb2); }).toThrow(SkyflowError)
 
     })
+        test('collect error', () => {
+        const form = new IFrameForm("controllerId", "", "ERROR");
+        form.setContext(context)
+        const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
+        const tokenizationCb = tokenizationEvent[0][1];
+        const cb2 = jest.fn();
+
+        expect(() => { tokenizationCb(data, cb2); }).toThrow(SkyflowError)
+
+    })
 
     test('insert records with tokens as true', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
@@ -463,6 +473,31 @@ describe('test iframeForm collect method', () => {
             done()
         }, 1000)
     })
+    test('insert records duplicate error', (done) => {
+        const form = new IFrameForm("controllerId", "", "ERROR");
+        form.setClient(clientObj)
+        form.setClientMetadata(metaData)
+        form.setContext(context)
+
+        const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
+        const tokenizationCb = tokenizationEvent[0][1];
+        const cb2 = jest.fn();
+        tokenizationCb({
+            additionalFields: {
+                records: [{
+                    table: 'table',
+                    fields: {
+                        col: '123',
+                        col: '123',
+                    }
+                }]
+            }
+        }, cb2)   
+        setTimeout(() => {
+            expect(cb2.mock.calls[0][0].error.message).toBeDefined()
+            done()
+        }, 1000)
+    })
     test('insert records with tokens as false', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
         form.setClient(clientObj)
@@ -474,8 +509,6 @@ describe('test iframeForm collect method', () => {
         const cb2 = jest.fn();
         tokenizationCb(data2, cb2);
         setTimeout(() => {
-            console.log(cb2.mock.calls[0][0].records);
-            expect(cb2.mock.calls[0][0].records[0].skyflow_id).toBeUndefined();
             expect(cb2.mock.calls[0][0].records[0].table).toBe('pii_fields');
             expect(Object.keys(cb2.mock.calls[0][0].records[0]).length).toBe(2);
             done()

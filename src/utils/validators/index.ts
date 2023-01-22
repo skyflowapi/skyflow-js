@@ -70,7 +70,8 @@ export const validateExpiryDate = (date: string, format:string) => {
   if (date.trim().length === 0) return true;
   if (!date.includes('/')) return false;
   const { month, year } = getYearAndMonthBasedOnFormat(date, format);
-  const expiryDate = new Date(`${year}-${month}-01`);
+  if (format.endsWith('YYYY') && year.length !== 4) { return false; }
+  const expiryDate = new Date(`${month}-01-${year}`);
   const today = new Date();
 
   const maxDate = new Date();
@@ -558,4 +559,10 @@ export const validateComposableContainerOptions = (options) => {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.NEGATIVE_VALUES_COMPOSABLE_LAYOUT, [], true);
     }
   });
+};
+
+export const validateBooleanOptions = (option) => {
+  if (typeof option !== 'boolean') { return false; }
+
+  return true;
 };

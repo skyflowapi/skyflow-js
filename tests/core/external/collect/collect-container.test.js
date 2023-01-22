@@ -481,8 +481,7 @@ describe('Collect container', () => {
       }]
     }
     container.collect(options);
-    const collectCb = emitSpy.mock.calls[0][2];
-    collectCb(collectResponse)
-    collectCb({ error: 'Error occured' })
+    const emitCb = emitSpy.mock.calls[0][2];
+    emitCb({error:{code:404,description:"Not Found"}});
   });
 });

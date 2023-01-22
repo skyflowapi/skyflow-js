@@ -241,6 +241,7 @@ const logs = {
     MISSING_COMPOSABLE_CONTAINER_OPTIONS: 'Interface: client composable container - options object is required for composable container.',
     INVALID_COMPOSABLE_CONTAINER_OPTIONS: 'Interface: client composable container - invalid options value, should be an object type.',
     COMPOSABLE_CONTAINER_NOT_MOUNTED: 'Interface: composable collect - container should be mounted before invoking collect.',
+    INVALID_BOOLEAN_OPTIONS: 'Interface: container create - Invaild %s1 in options, %s1 of type boolean is required.',
 
   },
   warnLogs: {
