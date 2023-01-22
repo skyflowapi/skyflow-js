@@ -150,7 +150,7 @@ export const constructElementsInsertReq = (req, update, options) => {
       if (record.fields.skyflowID) {
         if (ids.includes(record.fields.skyflowID)) {
           checkDuplicateColumns(
-            record.fields, update[record.fields.skyflowID], record.fields.skyflowID,
+            record.fields, update[record.fields.skyflowID], record.table,
           );
           const temp = record.fields;
           _.merge(temp, update[record.fields.skyflowID]);
