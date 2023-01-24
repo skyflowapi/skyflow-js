@@ -758,9 +758,9 @@ state : {
 ```
 
 `Note:`
-values of SkyflowElements will be returned in elementstate object only when `env` is  `DEV`,  else it is empty string i.e, ''
+values of SkyflowElements will be returned in element state object only when `env` is  `DEV`,  else it is empty string i.e, '', but in case of CARD_NUMBER type element when the `env` is `PROD` for all the card types except AMEX, it will return first eight digits, for AMEX it will return first six digits and rest all digits in masked format.
 
-##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/collect-element-listeners.html) for using listeners
+##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/collect-element-listeners.html) for using listeners 
 ```javascript
 // Create Skyflow client.
 const skyflowClient = Skyflow.init({
@@ -774,6 +774,11 @@ const skyflowClient = Skyflow.init({
 
 const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
+const cardHolderName = container.create({
+  table: 'pii_fields',
+  column: 'first_name',
+  type: Skyflow.ElementType.CARDHOLDER_NAME,
+});
 const cardNumber = container.create({
   table: 'pii_fields',
   column: 'primary_card.card_number',
@@ -781,6 +786,13 @@ const cardNumber = container.create({
 });
 
 cardNumber.mount('#cardNumberContainer');
+cardHolderName.mount('#cardHolderNameContainer');
+
+// Subscribing to CHANGE event, which gets triggered when element changes.
+cardHolderName.on(Skyflow.EventName.CHANGE, state => {
+  // Your implementation when Change event occurs.
+  console.log(state);
+});
 
 // Subscribing to CHANGE event, which gets triggered when element changes.
 cardNumber.on(Skyflow.EventName.CHANGE, state => {
@@ -793,23 +805,38 @@ cardNumber.on(Skyflow.EventName.CHANGE, state => {
 
 ```javascript
 {
+  elementType: 'CARDHOLDER_NAME',
+  isEmpty: false,
+  isFocused: true,
+  isValid: false,
+  value: 'John',
+};
+{
   elementType: 'CARD_NUMBER',
   isEmpty: false,
   isFocused: true,
   isValid: false,
-  value: '411',
+  value: '4111-1111-1111-1111',
 };
 ```
 ##### Sample Element state object when `env` is `PROD`
 
 ```javascript
 {
-  elementType: 'CARD_NUMBER',
+  elementType: 'CARDHOLDER_NAME',
   isEmpty: false,
   isFocused: true,
   isValid: false,
   value: '',
 };
+{
+  elementType: 'CARD_NUMBER',
+  isEmpty: false,
+  isFocused: true,
+  isValid: false,
+  value: '4111-1111-XXXX-XXXX',
+};
+
 ```
 
 ### UI Error for Collect Elements
