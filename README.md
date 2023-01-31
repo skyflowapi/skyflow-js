@@ -1,5 +1,5 @@
 # skyflow-js
-Skyflow’s Javascript SDK can be used to securely collect, tokenize, and reveal sensitive data in the browser without exposing your front-end infrastructure to sensitive data.
+Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal sensitive data in the browser without exposing your front-end infrastructure to sensitive data.
 
 ---
 
@@ -11,6 +11,7 @@ Skyflow’s Javascript SDK can be used to securely collect, tokenize, and reveal
 - [**Including Skyflow.js**](#Including-Skyflowjs) 
 - [**Initializing Skyflow.js**](#Initializing-Skyflowjs)
 - [**Securely collecting data client-side**](#Securely-collecting-data-client-side)
+- [**Securely collecting data client-side using Composable Elements**](#Securely-collecting-data-client-side-using-Composable-Elements)
 - [**Securely revealing data client-side**](#Securely-revealing-data-client-side)
 
 ---
@@ -140,9 +141,9 @@ To insert data into the vault, use the `insert(records, options?)` method of the
 const records = {
   records: [
     {
-      table: 'string', // Table into which record should be inserted.
+      table: 'string',          // Table into which record should be inserted.
       fields: {
-        column1: 'value', // Column names should match vault column names.
+        column1: 'value',      // Column names should match vault column names.
         //...additional fields here
       },
     },
@@ -151,11 +152,11 @@ const records = {
 };
 
 const options = {
-  tokens: true,  // Indicates whether or not tokens should be returned for the inserted data. Defaults to 'true'  
-  upsert: [ // Upsert operations support in the vault
+  tokens: true,               // Indicates whether or not tokens should be returned for the inserted data. Defaults to 'true'  
+  upsert: [                   // Upsert operations support in the vault
       {
-        table: 'string', // Table name
-        column: 'value', // Unique column in the table
+        table: 'string',      // Table name
+        column: 'value',      // Unique column in the table
       }
     ]
 }
@@ -229,13 +230,13 @@ The `table` and `column` fields indicate which table and column in the vault the
 -  Use dot delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`)
 
 The `inputStyles` field accepts a style object which consists of CSS properties that should be applied to the form element in the following states:
-- `base`: all other variants inherit from these styles
-- `complete`: applied when the Element has valid input
-- `empty`: applied when the Element has no input
-- `focus`: applied when the Element has focus
-- `invalid`: applied when the Element has invalid input
-- `cardIcon`: applied to the card type icon in `CARD_NUMBER` Element
-- `copyIcon`: applied to copy icon in Elements when `enableCopy` option is true
+* `base`: all variants inherit from these styles
+* `complete`: applied when the Element has valid input
+* `empty`: applied when the Element has no input
+* `focus`: applied when the Element has focus
+* `invalid`: applied when the Element has invalid input
+* `cardIcon`: applied to the card type icon in CARD_NUMBER Element
+* `copyIcon`: applied to copy icon in Elements when enableCopy option is true
 
 Styles are specified with [JSS](https://cssinjs.org/?v=v10.7.1). 
 
@@ -307,7 +308,7 @@ Finally, the `type` field takes a Skyflow ElementType. Each type applies the app
 - `FILE_INPUT`
   
 
-The `INPUT_FIELD` type is a custom UI element without any built-in validations.  See the section on [validations](#validations) for more information on validations.
+The `INPUT_FIELD` type is a custom UI element without any built-in validations. For information on validations, see [validations](#validations).
 
 Along with CollectElement we can define other options which takes a object of optional parameters as described below:
 
@@ -403,26 +404,25 @@ When the form is ready to be submitted, call the `collect(options?)` method on t
 
 ```javascript
 const options = {
-  tokens: true, // Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'.
+  tokens: true,                             // Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'.
   additionalFields: {
     records: [
       {
-        table: 'string', // Table into which record should be inserted.
+        table: 'string',                   // Table into which record should be inserted.
         fields: {
-          column1: 'value', // Column names should match vault column names.
+          column1: 'value',                // Column names should match vault column names.
           // ...additional fields here.
         },
       },
       // ...additional records here.
     ],
-  }, // Optional
-  upsert: [
-    // Upsert operations support in the vault
+  },                                      // Optional
+  upsert: [                               // Upsert operations support in the vault                                    
     {
-      table: 'string', // Table name
-      column: 'value', // Unique column in the table
+      table: 'string',                    // Table name
+      column: 'value',                    // Unique column in the table
     },
-  ],  // Optional
+  ],                                      // Optional
 };
 
 container.collect(options);
@@ -512,78 +512,78 @@ const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
  
 //Step 2
 const cardNumberElement = container.create({           
-  table: "cards",
-  column: "card_number",
+  table: 'cards',
+  column: 'card_number',
   inputStyles: {
       base: {
-        color: "#1d1d1d",
+        color: '#1d1d1d',
       },
       cardIcon:{
-        position: "absolute",
-        left:"8px", 
-        bottom:"calc(50% - 12px)"
+        position: 'absolute',
+        left:'8px', 
+        bottom:'calc(50% - 12px)'
     },
   },
   labelStyles: {
       base: {
-        fontSize: "12px",
-        fontWeight: "bold"
+        fontSize: '12px',
+        fontWeight: 'bold'
       }
   },
   errorTextStyles: {
       base: {
-        color: "#f44336"
+        color: '#f44336'
       }
   },
-  placeholder: "Card Number",
-  label: "card_number",
+  placeholder: 'Card Number',
+  label: 'card_number',
   type: Skyflow.ElementType.CARD_NUMBER
 })
- 
+
+
 const cvvElement = container.create({           
-  table: "cards",
-  column: "cvv",
+  table: 'cards',
+  column: 'cvv',
   inputStyles: {
       base: {
-        color: "#1d1d1d",
+        color: '#1d1d1d',
       },
       cardIcon:{
-        position: "absolute",
-        left:"8px", 
-        bottom:"calc(50% - 12px)"
+        position: 'absolute',
+        left:'8px', 
+        bottom:'calc(50% - 12px)'
     },
   },
   labelStyles: {
       base: {
-        fontSize: "12px",
-        fontWeight: "bold"
+        fontSize: '12px',
+        fontWeight: 'bold'
       }
   },
   errorTextStyles: {
       base: {
-        color: "#f44336"
+        color: '#f44336'
       }
   },
-  placeholder: "CVV",
-  label: "cvv",
+  placeholder: 'CVV',
+  label: 'cvv',
   type: Skyflow.ElementType.CVV
 })
 
 // Step 3
-cardNumberElement.mount("#cardNumber")  //Assumes there is a div with id="#cardNumber" in the webpage.
-cvvElement.mount("#cvv"); //Assumes there is a div with id="#cvv" in the webpage.
+cardNumberElement.mount('#cardNumber')  //Assumes there is a div with id='#cardNumber' in the webpage.
+cvvElement.mount('#cvv'); //Assumes there is a div with id='#cvv' in the webpage.
  
 // Step 4
  container.collect({
   tokens: true,
   upsert: [
     {
-      table: "cards", 
-      column: "card_number", 
+      table: 'cards', 
+      column: 'card_number', 
     }
   ]
 })
-
  ```
  **Skyflow returns tokens for the record you just inserted.**
 ```javascript
@@ -707,7 +707,7 @@ const elementMatchRule = {
   type: Skyflow.ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
   params: {
     element: pinElement,
-    error: "PIN doesn't match",
+    error: 'PIN does not match',
   },
 };
 
@@ -894,7 +894,446 @@ cardNumber.clearValue();
 
 ---
 
+# Securely collecting data client-side using Composable Elements
 
+Composable Elements combine multiple Skyflow Elements in a single iframe, letting you create multiple Skyflow Elements in a single row. The following steps create a composable element and securely collect data through it.
+
+### Step 1: Create a composable container
+
+Create a container for the composable element using the `container(Skyflow.ContainerType)` method of the Skyflow client:
+
+``` javascript
+ const collectContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE,containerOptions);
+```
+The container requires an options object that contains the following keys:
+
+1. `layout`: An array that indicates the number of rows in the container and the number of elements in each row. The index value of the array defines the number of rows, and each value in the array represents the number of elements in that row, in order.
+  
+    For example: `[2,1]` means the container has two rows, with two elements in the first row and one element in the second row.
+
+    `Note`: The sum of values in the layout array should be equal to the number of elements created
+
+2. `styles`: CSS styles to apply to the composable container.
+3. `errorTextStyles`: CSS styles to apply if an error is encountered.
+
+```javascript
+const options = {
+    layout: [2, 1],                           // Required
+    styles: {                                 // Optional
+        base: {
+            border: '1px solid #DFE3EB',
+            padding: '8px',
+            borderRadius: '4px',
+            margin: '12px 2px',
+        },
+    },
+    errorTextStyles: {                       // Optional
+        base: {
+            color: 'red',
+        },
+    },
+};
+```
+
+### Step 2: Create Composable Elements
+Composable Elements use the following schema:
+
+```javascript
+const composableElement = {
+  table: 'string',             // Required. The table this data belongs to.
+  column: 'string',            // Required. The column this data belongs to.
+  type: Skyflow.ElementType,   // Skyflow.ElementType enum.
+  inputStyles: {},             // Optional. Styles applied to the form element.
+  labelStyles: {},             // Optional. Styles for the label of the collect element.
+  errorTextStyles: {},         // Optional. Styles for the errorText of the collect element.
+  label: 'string',             // Optional. Label for the form element.
+  placeholder: 'string',       // Optional. Placeholder for the form element.
+  altText: 'string',           // (DEPRECATED) Initial value for the collect element.
+  validations: [],             // Optional. Array of validation rules.
+}
+```
+The `table` and `column` fields indicate which table and column in the vault the Element correspond to.
+
+Note: Use dot-delimited strings to specify columns nested inside JSON fields (for example, `address.street.line1`).
+
+All elements can be styled with  [JSS](https://cssinjs.org/?v=v10.7.1) syntax.
+
+The `inputStyles` field accepts an object of CSS properties to apply to the form element in the following states:
+
+* `base`: all variants inherit from these styles
+* `complete`: applied when the Element has valid input
+* `empty`: applied when the Element has no input
+* `focus`: applied when the Element has focus
+* `invalid`: applied when the Element has invalid input
+* `cardIcon`: applied to the card type icon in CARD_NUMBER Element
+* `copyIcon`: applied to copy icon in Elements when enableCopy option is true
+
+An example of an `inputStyles` object:
+
+```javascript
+inputStyles: {
+  base: {
+    border: '1px solid #eae8ee',
+    padding: '10px 16px',
+    borderRadius: '4px',
+    color: '#1d1d1d',
+  },
+  complete: {
+    color: '#4caf50',
+  },
+  empty: {},
+  focus: {},
+  invalid: {
+    color: '#f44336',
+  },
+  cardIcon: {
+    position: 'absolute',
+    left: '8px',
+    bottom: 'calc(50% - 12px)',
+  },
+  copyIcon: {
+    position: 'absolute',
+    right: '8px',
+  },
+}
+```
+The `labelStyles` field supports the `base` and `focus` states.
+
+An example `labelStyles` object:
+
+```javascript
+labelStyles: {
+  base: {
+    fontSize: '12px',
+      fontWeight: 'bold'
+  },
+  focus: {
+    color: '#1d1d1d'
+  }
+}
+```
+The `errorTextStyles` field only supports the `base` state, which appears when there is an error in the composable element.
+
+An example `errorTextStyles` object:
+
+```javascript
+errorTextStyles: {
+  base: {
+    color: '#f44336'
+  }
+}
+```
+The JS SDK supports the following composable elements:
+
+- `CARDHOLDER_NAME`
+- `CARD_NUMBER`
+- `EXPIRATION_DATE`
+- `EXPIRATION_MONTH`
+- `EXPIRATION_YEAR`
+- `CVV`
+- `INPUT_FIELD`
+- `PIN`
+
+`Note`: Only when the entered value in the below composable elements is valid, the focus shifts automatically. The element types are:
+- `CARD_NUMBER`
+- `EXPIRATION_DATE`
+- `EXPIRATION_MONTH`
+- `EXPIRATION_YEAR`
+
+The `INPUT_FIELD` type is a custom UI element without any built-in validations. For information on validations, see [validations](#validations).
+
+Along with the Composable Element definition, you can define additional options for the element:
+
+```javascript
+const options = {
+    required: false,  		// Optional, indicates whether the field is marked as required. Defaults to 'false'
+    enableCardIcon: true, 	// Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
+    format: String, 		// Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType),
+    enableCopy: false 		// Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false')
+}
+```
+
+- `required`: Whether or not the field is marked as required. Defaults to `false`.
+- `enableCardIcon`: Whether or not the icon is visible for the CARD_NUMBER element. Defaults to `true`.
+- `format`: Format pattern for the element. Only applicable to EXPIRATION_DATE and EXPIRATION_YEAR element types.
+- `enableCopy`: Whether or not the copy icon is visible in collect and reveal elements. Defaults to `false`.
+
+The accepted `EXPIRATION_DATE` values are
+
+- `MM/YY` (default)
+- `MM/YYYY`
+- `YY/MM`
+- `YYYY/MM`
+
+
+The accepted `EXPIRATION_YEAR` values are
+
+- `YY` (default)
+- `YYYY`
+
+
+Once you define the Element object and options, add it to the container using the `create(element, options)` method:
+
+```javascript
+const composableElement = {
+  table: 'string',             // Required, the table this data belongs to.
+  column: 'string',            // Required, the column into which this data should be inserted.
+  type: Skyflow.ElementType,   // Skyflow.ElementType enum.
+  inputStyles: {},             // Optional, styles that should be applied to the form element.
+  labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
+  errorTextStyles: {},         // Optional, styles that will be applied to the errorText of the collect element.
+  label: 'string',             // Optional, label for the form element.
+  placeholder: 'string',       // Optional, placeholder for the form element.
+  altText: 'string',           // (DEPRECATED) string that acts as an initial value for the collect element.
+  validations: [],             // Optional, array of validation rules.
+}
+
+const options = {
+  required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
+  enableCardIcon: true, // Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType).
+  format: String,       // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
+  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+};
+
+const element = container.create(composableElement, options);
+```
+
+### Step 3: Mount Container to the DOM
+
+
+To specify where the Elements are rendered on your page, create a placeholder `<div>` element with unique `id` attribute. Use this empty `<div>` placeholder to mount the composable container.
+
+```javascript
+<form>
+  <div id="composableContainer"/>
+  <br/>
+  <div id="button-id"/>
+  <button type="submit">Submit</button>
+</form>
+```
+Use the composable container's `mount(domElement)` method to insert the container's Elements into the specified `<div>`. For instance, the following call inserts Elements into the `<div>` with the `id "#composableContainer"`.
+
+```javacript
+container.mount('#composableContainer');
+```
+
+### Step 4: Collect data from elements
+
+
+When the form is ready to be submitted, call the container's `collect(options?)` method. The options parameter takes an object of optional parameters as follows:
+- `tokens`: Whether or not tokens for the collected data are returned. Defaults to 'true'
+- `additionalFields`: Non-PCI elements data to insert into the vault, specified in the records object format.
+- `upsert`: To support upsert operations,  the table containing the data and a column marked as unique in that table.
+
+```javascript
+const options = {
+  tokens: true,                             // Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'.
+  additionalFields: {
+    records: [
+      {
+        table: 'string',                   // Table into which record should be inserted.
+        fields: {
+          column1: 'value',                // Column names should match vault column names.
+          // ...additional fields here.
+        },
+      },
+      // ...additional records here.
+    ],
+  },                                      // Optional
+  upsert: [                               // Upsert operations support in the vault                                    
+    {
+      table: 'string',                    // Table name
+      column: 'value',                    // Unique column in the table
+    },
+  ],                                      // Optional
+};
+```
+
+### End to end example of collecting data with Composable Elements
+
+```javascript
+// Step 1
+const containerOptions = {
+  layout: [2, 1],
+  styles: {
+    base: {
+      border: '1px solid #eae8ee',
+      padding: '10px 16px',
+      borderRadius: '4px',
+      margin: '12px 2px',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: 'red',
+    },
+  },
+};
+
+const composableContainer = skyflow.container(
+  Skyflow.ContainerType.COMPOSABLE,
+  containerOptions
+);
+
+// Step 2
+
+const collectStylesOptions = {
+  inputStyles: {
+    base: {
+      fontFamily: 'Inter',
+      fontStyle: 'normal',
+      fontWeight: 400,
+      fontSize: '14px',
+      lineHeight: '21px',
+      width: '294px',
+    },
+  },
+  labelStyles: {},
+  errorTextStyles: {
+    base: {},
+  },
+};
+
+const cardHolderNameElement = composableContainer.create({
+  table: 'pii_fields',
+  column: 'first_name',
+  ...collectStylesOptions,
+  placeholder: 'Cardholder Name',
+  type: Skyflow.ElementType.CARDHOLDER_NAME,
+});
+
+const cardNumberElement = composableContainer.create({
+  table: 'pii_fields',
+  column: 'card_number',
+  ...collectStylesOptions,
+  placeholder: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+const cvvElement = composableContainer.create({
+  table: 'pii_fields',
+  column: 'cvv',
+  ...collectStylesOptions,
+  placeholder: 'CVV',
+  type: Skyflow.ElementType.CVV,
+});
+
+// Step 3
+composableContainer.mount('#composableContainer'); // Assumes there is a div with id='#composableContainer' in the webpage.
+
+// Step 4
+composableContainer.collect({
+  tokens: true,
+});
+```
+### Sample Response:
+
+```javascript
+{
+    "records": [
+        {
+            "table": "pii_fields",
+            "fields": {
+                "first_name": "63b5eeee-3624-493f-825e-137a9336f882",
+                "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+                "cvv": "7baf5bda-aa22-4587-a5c5-412f6f783a19",
+            }
+        }
+    ]
+}
+```
+For information on validations, see [validations](#validations).
+
+### Set an event listener on Composable Elements:
+
+You can communicate with Skyflow Elements by listening to element events:
+
+```javascript
+element.on(Skyflow.EventName,handler:function)
+```
+
+
+The SDK supports four events:
+
+- `CHANGE`:riggered when the Element's value changes.
+- `READY`:riggered when the Element is fully rendered.
+- `FOCUS`: Triggered when the Element gains focus.
+- `BLUR`: Triggered when the Element loses focus.
+
+The handler `function(state) => void` is a callback function you provide that's called when the event is fired with a state object that uses the following schema:
+
+```javascript
+state : {
+  elementType: Skyflow.ElementType
+  isEmpty: boolean 
+  isFocused: boolean
+  isValid: boolean
+  value: string
+}
+```
+`Note`: Events only include element values when in the state object when env is DEV. By default, value is an empty string.
+
+### Example Usage of Event Listener on Composable Elements
+
+```javascript
+const containerOptions = {
+  layout: [1],
+  styles: {
+    base: {
+      border: '1px solid #eae8ee',
+      padding: '10px 16px',
+      borderRadius: '4px',
+      margin: '12px 2px',
+    }
+  },
+  errorTextStyles: {
+    base: {
+      color: 'red'
+    }
+  }
+}
+
+const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+
+const cvv = composableContainer.create({
+  table: 'pii_fields',
+  column: 'primary_card.cvv',
+  type: Skyflow.ElementType.CVV,
+});
+
+composableContainer.mount('#cvvContainer');
+
+// Subscribing to CHANGE event, which gets triggered when element changes.
+cvv.on(Skyflow.EventName.CHANGE, state => {
+// Your implementation when Change event occurs.
+console.log(state);
+});
+```
+
+Sample Element state object when env is `DEV`
+
+```javascript
+{
+    elementType: 'CVV'
+    isEmpty: false
+    isFocused: true
+    isValid: false
+    value: '411'
+}
+```
+
+Sample Element state object when env is `PROD`
+
+```javascript
+{
+    elementType: 'CVV'
+    isEmpty: false
+    isFocused: true
+    isValid: false
+    value: ''
+}
+```
+---
 # Securely revealing data client-side
 -  [**Retrieving data from the vault**](#retrieving-data-from-the-vault)
 -  [**Using Skyflow Elements to reveal data**](#using-skyflow-elements-to-reveal-data)
