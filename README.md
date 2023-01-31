@@ -308,7 +308,7 @@ Finally, the `type` field takes a Skyflow ElementType. Each type applies the app
 - `FILE_INPUT`
   
 
-The `InputFieldElement` type is a custom UI element without any built-in validations. For information on validations, see [validations](#validations).
+The `INPUT_FIELD` type is a custom UI element without any built-in validations. For information on validations, see [validations](#validations).
 
 Along with CollectElement we can define other options which takes a object of optional parameters as described below:
 
@@ -513,78 +513,78 @@ const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
  
 //Step 2
 const cardNumberElement = container.create({           
-  table: "cards",
-  column: "card_number",
+  table: 'cards',
+  column: 'card_number',
   inputStyles: {
       base: {
-        color: "#1d1d1d",
+        color: '#1d1d1d',
       },
       cardIcon:{
-        position: "absolute",
-        left:"8px", 
-        bottom:"calc(50% - 12px)"
+        position: 'absolute',
+        left:'8px', 
+        bottom:'calc(50% - 12px)'
     },
   },
   labelStyles: {
       base: {
-        fontSize: "12px",
-        fontWeight: "bold"
+        fontSize: '12px',
+        fontWeight: 'bold'
       }
   },
   errorTextStyles: {
       base: {
-        color: "#f44336"
+        color: '#f44336'
       }
   },
-  placeholder: "Card Number",
-  label: "card_number",
+  placeholder: 'Card Number',
+  label: 'card_number',
   type: Skyflow.ElementType.CARD_NUMBER
 })
- 
+
+
 const cvvElement = container.create({           
-  table: "cards",
-  column: "cvv",
+  table: 'cards',
+  column: 'cvv',
   inputStyles: {
       base: {
-        color: "#1d1d1d",
+        color: '#1d1d1d',
       },
       cardIcon:{
-        position: "absolute",
-        left:"8px", 
-        bottom:"calc(50% - 12px)"
+        position: 'absolute',
+        left:'8px', 
+        bottom:'calc(50% - 12px)'
     },
   },
   labelStyles: {
       base: {
-        fontSize: "12px",
-        fontWeight: "bold"
+        fontSize: '12px',
+        fontWeight: 'bold'
       }
   },
   errorTextStyles: {
       base: {
-        color: "#f44336"
+        color: '#f44336'
       }
   },
-  placeholder: "CVV",
-  label: "cvv",
+  placeholder: 'CVV',
+  label: 'cvv',
   type: Skyflow.ElementType.CVV
 })
 
 // Step 3
-cardNumberElement.mount("#cardNumber")  //Assumes there is a div with id="#cardNumber" in the webpage.
-cvvElement.mount("#cvv"); //Assumes there is a div with id="#cvv" in the webpage.
+cardNumberElement.mount('#cardNumber')  //Assumes there is a div with id='#cardNumber' in the webpage.
+cvvElement.mount('#cvv'); //Assumes there is a div with id='#cvv' in the webpage.
  
 // Step 4
  container.collect({
   tokens: true,
   upsert: [
     {
-      table: "cards", 
-      column: "card_number", 
+      table: 'cards', 
+      column: 'card_number', 
     }
   ]
 })
-
  ```
  **Skyflow returns tokens for the record you just inserted.**
 ```javascript
@@ -708,7 +708,7 @@ const elementMatchRule = {
   type: Skyflow.ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
   params: {
     element: pinElement,
-    error: "PIN doesn't match",
+    error: 'PIN does not match',
   },
 };
 
@@ -919,19 +919,18 @@ The container requires an options object that contains the following keys:
 
 ```javascript
 const options = {
-    layout: [2, 1], // required
-    styles: {
-        // optional
+    layout: [2, 1],                       // Required
+    styles: {                             // Optional
         base: {
-            border: "1px solid #DFE3EB",
-            padding: "8px",
-            borderRadius: "4px",
-            margin: "12px 2px",
+            border: '1px solid #DFE3EB',
+            padding: '8px',
+            borderRadius: '4px',
+            margin: '12px 2px',
         },
     },
-    errorTextStyles: {
+    errorTextStyles: {					 // Optional
         base: {
-            color: "red",
+            color: 'red',
         },
     },
 };
@@ -1006,11 +1005,11 @@ An example `labelStyles` object:
 ```javascript
 labelStyles: {
   base: {
-    fontSize: "12px",
-      fontWeight: "bold"
+    fontSize: '12px',
+      fontWeight: 'bold'
   },
   focus: {
-    color: "#1d1d1d"
+    color: '#1d1d1d'
   }
 }
 ```
@@ -1021,37 +1020,37 @@ An example `errorTextStyles` object:
 ```javascript
 errorTextStyles: {
   base: {
-    color: "#f44336"
+    color: '#f44336'
   }
 }
 ```
 The JS SDK supports the following composable elements:
 
-- CARDHOLDER_NAME
-- CARD_NUMBER
-- EXPIRATION_DATE
-- EXPIRATION_MONTH
-- EXPIRATION_YEAR
-- CVV
-- INPUT_FIELD
-- PIN
+- `CARDHOLDER_NAME`
+- `CARD_NUMBER`
+- `EXPIRATION_DATE`
+- `EXPIRATION_MONTH`
+- `EXPIRATION_YEAR`
+- `CVV`
+- `INPUT_FIELD`
+- `PIN`
 
 `Note`: Only when the entered value in the below composable elements is valid, the focus shifts automatically. The element types are:
-- CARD_NUMBER
-- EXPIRATION_DATE
-- EXPIRATION_MONTH
-- EXPIRATION_YEAR
+- `CARD_NUMBER`
+- `EXPIRATION_DATE`
+- `EXPIRATION_MONTH`
+- `EXPIRATION_YEAR`
 
-The `InputFieldElement` type is a custom UI element without any built-in validations. For information on validations, see [validations](#validations).
+The `INPUT_FIELD` type is a custom UI element without any built-in validations. For information on validations, see [validations](#validations).
 
 Along with the Composable Element definition, you can define additional options for the element:
 
 ```javascript
 const options = {
-    required: false,  //optional, indicates whether the field is marked as required. Defaults to 'false'
-    enableCardIcon: true, // optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
-    format: String, //optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType),
-    enableCopy: false // optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false')
+    required: false,  		// Optional, indicates whether the field is marked as required. Defaults to 'false'
+    enableCardIcon: true, 	// Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
+    format: String, 		// Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType),
+    enableCopy: false 		// Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false')
 }
 ```
 
@@ -1062,16 +1061,16 @@ const options = {
 
 The accepted `EXPIRATION_DATE` values are
 
-- MM/YY (default)
-- MM/YYYY
-- YY/MM
-- YYYY/MM
+- `MM/YY` (default)
+- `MM/YYYY`
+- `YY/MM`
+- `YYYY/MM`
 
 
 The accepted `EXPIRATION_YEAR` values are
 
-- YY (default)
-- YYYY
+- `YY` (default)
+- `YYYY`
 
 
 Once you define the Element object and options, add it to the container using the `create(element, options)` method:
@@ -1116,7 +1115,7 @@ To specify where the Elements are rendered on your page, create a placeholder `<
 Use the composable container's `mount(domElement)` method to insert the container's Elements into the specified `<div>`. For instance, the following call inserts Elements into the `<div>` with the `id "#composableContainer"`.
 
 ```javacript
-container.mount("#composableContainer");
+container.mount('#composableContainer');
 ```
 
 ### Step 4: Collect data from elements
@@ -1129,104 +1128,103 @@ When the form is ready to be submitted, call the container's `collect(options?)`
 
 ```javascript
 const options = {
-  tokens: true, //optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'
+  tokens: true, 			// Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'
   additionalFields: {
     records: [
       {
-        table: "string", //table into which record should be inserted
+        table: 'string',    // Table into which record should be inserted
         fields: {
-          column1: "value", //column names should match vault column names
+          column1: 'value', // Column names should match vault column names
           //...additional fields here
         },
       },
       //...additional records here
     ],
   },
-  upsert: [
-    // upsert operations support in the vault
+  upsert: [ 				// Upsert operations support in the vault
     {
-      table: "string", // table name
-      column: "value  ", // unique column in the table
+      table: 'string', 		// table name
+      column: 'value  ', 	// Unique column in the table
     },
-  ], //optional
+  ], 						// Optional
 };
 ```
 
 ### End to end example of collecting data with Composable Elements
 
 ```javascript
-//Step 1
+// Step 1
 const containerOptions = {
-   layout: [2, 1],
-   styles: {
-      base: {
-         border: "1px solid #eae8ee",
-         padding: "10px 16px",
-         borderRadius: "4px",
-         margin: "12px 2px",
-      },
-   },
-   errorTextStyles: {
-      base: {
-         color: "red",
-      },
-   },
+	layout: [2, 1],
+	styles: {
+		base: {
+			border: '1px solid #eae8ee',
+			padding: '10px 16px',
+			borderRadius: '4px',
+			margin: '12px 2px',
+		},
+	},
+	errorTextStyles: {
+		base: {
+			color: 'red',
+		},
+	},
 };
 
 const composableContainer = skyflow.container(
-   Skyflow.ContainerType.COMPOSABLE,
-   containerOptions
+	Skyflow.ContainerType.COMPOSABLE,
+	containerOptions
 );
 
-//Step 2
+// Step 2
 
 const collectStylesOptions = {
-   inputStyles: {
-      base: {
-         fontFamily: "Inter",
-         fontStyle: "normal",
-         fontWeight: 400,
-         fontSize: "14px",
-         lineHeight: "21px",
-         width: "294px",
-      },
-   },
-   labelStyles: {},
-   errorTextStyles: {
-      base: {},
-   },
+	inputStyles: {
+		base: {
+			fontFamily: 'Inter',
+			fontStyle: 'normal',
+			fontWeight: 400,
+			fontSize: '14px',
+			lineHeight: '21px',
+			width: '294px',
+		},
+	},
+	labelStyles: {},
+	errorTextStyles: {
+		base: {},
+	},
 };
 
 const cardHolderNameElement = composableContainer.create({
-   table: "pii_fields",
-   column: "first_name",
-   ...collectStylesOptions,
-   placeholder: "Cardholder Name",
-   type: Skyflow.ElementType.CARDHOLDER_NAME,
+	table: 'pii_fields',
+	column: 'first_name',
+	...collectStylesOptions,
+	placeholder: 'Cardholder Name',
+	type: Skyflow.ElementType.CARDHOLDER_NAME,
 });
 
 const cardNumberElement = composableContainer.create({
-   table: "pii_fields",
-   column: "card_number",
-   ...collectStylesOptions,
-   placeholder: "Card Number",
-   type: Skyflow.ElementType.CARD_NUMBER,
+	table: 'pii_fields',
+	column: 'card_number',
+	...collectStylesOptions,
+	placeholder: 'Card Number',
+	type: Skyflow.ElementType.CARD_NUMBER,
 });
 
 const cvvElement = composableContainer.create({
-   table: "pii_fields",
-   column: "cvv",
-   ...collectStylesOptions,
-   placeholder: "CVV",
-   type: Skyflow.ElementType.CVV,
+	table: 'pii_fields',
+	column: 'cvv',
+	...collectStylesOptions,
+	placeholder: 'CVV',
+	type: Skyflow.ElementType.CVV,
 });
 
 // Step 3
-composableContainer.mount("#composableContainer"); // Assumes there is a div with id='#composableContainer' in the webpage.
+composableContainer.mount('#composableContainer'); // Assumes there is a div with id='#composableContainer' in the webpage.
 
 // Step 4
 composableContainer.collect({
-   tokens: true,
+	tokens: true,
 });
 
 ```
@@ -1281,35 +1279,36 @@ state : {
 
 ```javascript
 const containerOptions = {
-  layout:[1],
-  styles:{
-    base:{
-      border: "1px solid #eae8ee",
-      padding: "10px 16px",
-      borderRadius: "4px",
-      margin: "12px 2px",
-    }
-  },
-  errorTextStyles:{
-    base:{
-      color: 'red'
-    }
-  }
+	layout: [1],
+	styles: {
+		base: {
+			border: '1px solid #eae8ee',
+			padding: '10px 16px',
+			borderRadius: '4px',
+			margin: '12px 2px',
+		}
+	},
+	errorTextStyles: {
+		base: {
+			color: 'red'
+		}
+	}
 }
-const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE,containerOptions);
+
+const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 const cvv = composableContainer.create({
-  table: 'pii_fields',
-  column: 'primary_card.cvv',
-  type: Skyflow.ElementType.CVV,
+	table: 'pii_fields',
+	column: 'primary_card.cvv',
+	type: Skyflow.ElementType.CVV,
 });
 
 composableContainer.mount('#cvvContainer');
 
 // Subscribing to CHANGE event, which gets triggered when element changes.
 cvv.on(Skyflow.EventName.CHANGE, state => {
-// Your implementation when Change event occurs.
-console.log(state);
+	// Your implementation when Change event occurs.
+	console.log(state);
 });
 ```
 
@@ -1317,11 +1316,11 @@ Sample Element state object when env is `DEV`
 
 ```javascript
 {
-    elementType: "CVV"
+    elementType: 'CVV'
     isEmpty: false
     isFocused: true
     isValid: false
-    value: "411"
+    value: '411'
 }
 ```
 
@@ -1329,7 +1328,7 @@ Sample Element state object when env is `PROD`
 
 ```javascript
 {
-    elementType: "CVV"
+    elementType: 'CVV'
     isEmpty: false
     isFocused: true
     isValid: false
