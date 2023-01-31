@@ -141,9 +141,9 @@ To insert data into the vault, use the `insert(records, options?)` method of the
 const records = {
   records: [
     {
-      table: 'string', // Table into which record should be inserted.
+      table: 'string',          // Table into which record should be inserted.
       fields: {
-        column1: 'value', // Column names should match vault column names.
+        column1: 'value',      // Column names should match vault column names.
         //...additional fields here
       },
     },
@@ -152,11 +152,11 @@ const records = {
 };
 
 const options = {
-  tokens: true,  // Indicates whether or not tokens should be returned for the inserted data. Defaults to 'true'  
-  upsert: [ // Upsert operations support in the vault
+  tokens: true,               // Indicates whether or not tokens should be returned for the inserted data. Defaults to 'true'  
+  upsert: [                   // Upsert operations support in the vault
       {
-        table: 'string', // Table name
-        column: 'value', // Unique column in the table
+        table: 'string',      // Table name
+        column: 'value',      // Unique column in the table
       }
     ]
 }
@@ -404,26 +404,25 @@ When the form is ready to be submitted, call the `collect(options?)` method on t
 
 ```javascript
 const options = {
-  tokens: true, // Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'.
+  tokens: true,                             // Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'.
   additionalFields: {
     records: [
       {
-        table: 'string', // Table into which record should be inserted.
+        table: 'string',                   // Table into which record should be inserted.
         fields: {
-          column1: 'value', // Column names should match vault column names.
+          column1: 'value',                // Column names should match vault column names.
           // ...additional fields here.
         },
       },
       // ...additional records here.
     ],
-  }, // Optional
-  upsert: [
-    // Upsert operations support in the vault
+  },                                      // Optional
+  upsert: [                               // Upsert operations support in the vault                                    
     {
-      table: 'string', // Table name
-      column: 'value', // Unique column in the table
+      table: 'string',                    // Table name
+      column: 'value',                    // Unique column in the table
     },
-  ],  // Optional
+  ],                                      // Optional
 };
 
 container.collect(options);
@@ -919,8 +918,8 @@ The container requires an options object that contains the following keys:
 
 ```javascript
 const options = {
-    layout: [2, 1],                       // Required
-    styles: {                             // Optional
+    layout: [2, 1],                           // Required
+    styles: {                                 // Optional
         base: {
             border: '1px solid #DFE3EB',
             padding: '8px',
@@ -928,7 +927,7 @@ const options = {
             margin: '12px 2px',
         },
     },
-    errorTextStyles: {					 // Optional
+    errorTextStyles: {                       // Optional
         base: {
             color: 'red',
         },
@@ -1128,25 +1127,25 @@ When the form is ready to be submitted, call the container's `collect(options?)`
 
 ```javascript
 const options = {
-  tokens: true, 			// Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'
+  tokens: true,                             // Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'.
   additionalFields: {
     records: [
       {
-        table: 'string',    // Table into which record should be inserted
+        table: 'string',                   // Table into which record should be inserted.
         fields: {
-          column1: 'value', // Column names should match vault column names
-          //...additional fields here
+          column1: 'value',                // Column names should match vault column names.
+          // ...additional fields here.
         },
       },
-      //...additional records here
+      // ...additional records here.
     ],
-  },
-  upsert: [ 				// Upsert operations support in the vault
+  },                                      // Optional
+  upsert: [                               // Upsert operations support in the vault                                    
     {
-      table: 'string', 		// table name
-      column: 'value  ', 	// Unique column in the table
+      table: 'string',                    // Table name
+      column: 'value',                    // Unique column in the table
     },
-  ], 						// Optional
+  ],                                      // Optional
 };
 ```
 
@@ -1226,7 +1225,6 @@ composableContainer.mount('#composableContainer'); // Assumes there is a div wit
 composableContainer.collect({
 	tokens: true,
 });
-
 ```
 ### Sample Response:
 
@@ -1307,8 +1305,8 @@ composableContainer.mount('#cvvContainer');
 
 // Subscribing to CHANGE event, which gets triggered when element changes.
 cvv.on(Skyflow.EventName.CHANGE, state => {
-	// Your implementation when Change event occurs.
-	console.log(state);
+// Your implementation when Change event occurs.
+console.log(state);
 });
 ```
 
