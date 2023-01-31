@@ -1154,68 +1154,68 @@ const options = {
 ```javascript
 // Step 1
 const containerOptions = {
-	layout: [2, 1],
-	styles: {
-		base: {
-			border: '1px solid #eae8ee',
-			padding: '10px 16px',
-			borderRadius: '4px',
-			margin: '12px 2px',
-		},
-	},
-	errorTextStyles: {
-		base: {
-			color: 'red',
-		},
-	},
+  layout: [2, 1],
+  styles: {
+    base: {
+      border: '1px solid #eae8ee',
+      padding: '10px 16px',
+      borderRadius: '4px',
+      margin: '12px 2px',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: 'red',
+    },
+  },
 };
 
 const composableContainer = skyflow.container(
-	Skyflow.ContainerType.COMPOSABLE,
-	containerOptions
+  Skyflow.ContainerType.COMPOSABLE,
+  containerOptions
 );
 
 // Step 2
 
 const collectStylesOptions = {
-	inputStyles: {
-		base: {
-			fontFamily: 'Inter',
-			fontStyle: 'normal',
-			fontWeight: 400,
-			fontSize: '14px',
-			lineHeight: '21px',
-			width: '294px',
-		},
-	},
-	labelStyles: {},
-	errorTextStyles: {
-		base: {},
-	},
+  inputStyles: {
+    base: {
+      fontFamily: 'Inter',
+      fontStyle: 'normal',
+      fontWeight: 400,
+      fontSize: '14px',
+      lineHeight: '21px',
+      width: '294px',
+    },
+  },
+  labelStyles: {},
+  errorTextStyles: {
+    base: {},
+  },
 };
 
 const cardHolderNameElement = composableContainer.create({
-	table: 'pii_fields',
-	column: 'first_name',
-	...collectStylesOptions,
-	placeholder: 'Cardholder Name',
-	type: Skyflow.ElementType.CARDHOLDER_NAME,
+  table: 'pii_fields',
+  column: 'first_name',
+  ...collectStylesOptions,
+  placeholder: 'Cardholder Name',
+  type: Skyflow.ElementType.CARDHOLDER_NAME,
 });
 
 const cardNumberElement = composableContainer.create({
-	table: 'pii_fields',
-	column: 'card_number',
-	...collectStylesOptions,
-	placeholder: 'Card Number',
-	type: Skyflow.ElementType.CARD_NUMBER,
+  table: 'pii_fields',
+  column: 'card_number',
+  ...collectStylesOptions,
+  placeholder: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
 });
 
 const cvvElement = composableContainer.create({
-	table: 'pii_fields',
-	column: 'cvv',
-	...collectStylesOptions,
-	placeholder: 'CVV',
-	type: Skyflow.ElementType.CVV,
+  table: 'pii_fields',
+  column: 'cvv',
+  ...collectStylesOptions,
+  placeholder: 'CVV',
+  type: Skyflow.ElementType.CVV,
 });
 
 // Step 3
@@ -1223,7 +1223,7 @@ composableContainer.mount('#composableContainer'); // Assumes there is a div wit
 
 // Step 4
 composableContainer.collect({
-	tokens: true,
+  tokens: true,
 });
 ```
 ### Sample Response:
@@ -1277,28 +1277,28 @@ state : {
 
 ```javascript
 const containerOptions = {
-	layout: [1],
-	styles: {
-		base: {
-			border: '1px solid #eae8ee',
-			padding: '10px 16px',
-			borderRadius: '4px',
-			margin: '12px 2px',
-		}
-	},
-	errorTextStyles: {
-		base: {
-			color: 'red'
-		}
-	}
+  layout: [1],
+  styles: {
+    base: {
+      border: '1px solid #eae8ee',
+      padding: '10px 16px',
+      borderRadius: '4px',
+      margin: '12px 2px',
+    }
+  },
+  errorTextStyles: {
+    base: {
+      color: 'red'
+    }
+  }
 }
 
 const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 const cvv = composableContainer.create({
-	table: 'pii_fields',
-	column: 'primary_card.cvv',
-	type: Skyflow.ElementType.CVV,
+  table: 'pii_fields',
+  column: 'primary_card.cvv',
+  type: Skyflow.ElementType.CVV,
 });
 
 composableContainer.mount('#cvvContainer');
