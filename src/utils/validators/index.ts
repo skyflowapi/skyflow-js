@@ -70,7 +70,7 @@ export const validateExpiryDate = (date: string, format:string) => {
   if (!date.includes('/')) return false;
   const { month, year } = getYearAndMonthBasedOnFormat(date, format);
   if (format.endsWith('YYYY') && year.length !== 4) { return false; }
-  const expiryDate = new Date(`${month}-01-${year}`);
+  const expiryDate = new Date(`${year}-${month}-01`);
   const today = new Date();
 
   const maxDate = new Date();
