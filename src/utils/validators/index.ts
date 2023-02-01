@@ -20,6 +20,7 @@ import {
   IGetByIdInput,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
+import { appendZeroToOne } from '../helpers';
 import logs from '../logs';
 import { printLog } from '../logs-helper';
 
@@ -57,11 +58,11 @@ export const detectCardType = (cardNumber: string = '') => {
 const getYearAndMonthBasedOnFormat = (cardDate, format:string) => {
   const [part1, part2] = cardDate.split('/');
   switch (format) {
-    case 'MM/YY': return { month: part1, year: 2000 + Number(part2) };
-    case 'YY/MM': return { month: part2, year: 2000 + Number(part1) };
-    case 'YYYY/MM': return { month: part2, year: part1 };
+    case 'MM/YY': return { month: appendZeroToOne(part1), year: 2000 + Number(part2) };
+    case 'YY/MM': return { month: appendZeroToOne(part2), year: 2000 + Number(part1) };
+    case 'YYYY/MM': return { month: appendZeroToOne(part2), year: part1 };
     // MM/YYYY
-    default: return { month: part1, year: part2 };
+    default: return { month: appendZeroToOne(part1), year: part2 };
   }
 };
 
