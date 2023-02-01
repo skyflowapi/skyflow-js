@@ -1353,9 +1353,12 @@ const records = {
   records: [
     {
       token: 'string', // Token for the record to be fetched.
+      redaction: RedactionType // Optional. Redaction to be applied for retrieved data.
     },
   ],
 };
+
+Note: If you do not provide a redaction type, RedactionType.PLAIN_TEXT is the default.
 
 skyflow.detokenize(records);
 ```
@@ -1367,6 +1370,10 @@ skyflow.detokenize({
     {
       token: '131e70dc-6f76-4319-bdd3-96281e051051',
     },
+    {
+     token: '1r434532-6f76-4319-bdd3-96281e051051',
+     redaction: Skyflow.RedactionType.MASKED
+    }
   ],
 });
 ```
@@ -1378,7 +1385,11 @@ The sample response:
     {
       "token": "131e70dc-6f76-4319-bdd3-96281e051051",
       "value": "1990-01-01",
-    }
+    },
+    {
+     "token": "1r434532-6f76-4319-bdd3-96281e051051",
+     "value": "xxxxxxer",
+   }
   ]
 }
 ```
@@ -1474,8 +1485,11 @@ const revealElement = {
   errorTextStyles: {}, // Optional, styles that will be applied to the errorText of the reveal element.
   label: 'string',     // Optional, label for the form element.
   altText: 'string',   // Optional, string that is shown before reveal, will show token if altText is not provided.
+  redaction: RedactionType, //Optional, Redaction Type to be applied to data, RedactionType.PLAIN_TEXT will be applied if not provided.
 };
 ```
+
+Note: If you don't provide a redaction type, RedactionType.PLAIN_TEXT will apply by default.
 
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant and `copyIcon` style object. 
 
@@ -1568,6 +1582,7 @@ const cardNumberElement = container.create({
   },
   label: 'card_number',
   altText: 'XXXX XXXX XXXX XXXX',
+  redaction: SKyflow.RedactionType.MASKED
 });
 
 const cvvElement = container.create({
@@ -1581,9 +1596,20 @@ const cvvElement = container.create({
   altText: 'XXX',
 });
 
+const expiryDate= container.create({
+ token: 'a4b24714-6a26-4256-b9d4-55ad69aa4047',
+ inputStyles: {
+   base: {
+     color: '#1d1d1d',
+   },
+ },
+ label: 'expiryDate',
+ altText: 'MM/YYYY',
+});
 // Step 3.
 cardNumberElement.mount('#cardNumber'); // Assumes there is a placeholder div with id='cardNumber' on the page
 cvvElement.mount('#cvv');               // Assumes there is a placeholder div with id='cvv' on the page
+expiryDate.mount('#expiryDate');        // Assumes there is a placeholder div with id='expiryDate' on the page
 
 // Step 4.
 container
@@ -1603,9 +1629,14 @@ The response below shows that some tokens assigned to the reveal elements get re
 ```
 {
   "success": [
-    {
-      "token": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75"
-    }
+     {
+     "token": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+     "value": "xxxxxxxxx4163"
+   },
+   {
+     "token": "a4b24714-6a26-4256-b9d4-55ad69aa4047",
+     "value": "12/2098"
+   }
   ],
  "errors": [
     {
