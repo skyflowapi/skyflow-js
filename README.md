@@ -1255,8 +1255,8 @@ element.on(Skyflow.EventName,handler:function)
 
 The SDK supports four events:
 
-- `CHANGE`:riggered when the Element's value changes.
-- `READY`:riggered when the Element is fully rendered.
+- `CHANGE`: Triggered when the Element's value changes.
+- `READY`: Triggered when the Element is fully rendered.
 - `FOCUS`: Triggered when the Element gains focus.
 - `BLUR`: Triggered when the Element loses focus.
 
