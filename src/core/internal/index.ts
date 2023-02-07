@@ -216,18 +216,6 @@ export class FrameElement {
       }
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
-      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
-        this.iFrameFormElement.setValue(appendZeroToOne(state.value));
-      }
-
-      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
-        if (this.iFrameFormElement.format === 'YYYY/MM') {
-          this.iFrameFormElement.setValue(appendMonthFourDigitYears(state.value));
-        } else if (this.iFrameFormElement.format === 'YY/MM') {
-          this.iFrameFormElement.setValue(appendMonthTwoDigitYears(state.value));
-        }
-      }
-
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
         this.focusChange(false);
       }
@@ -241,27 +229,27 @@ export class FrameElement {
         this.domError.innerText = '';
         this.hasError = false;
       }
-      // // FIELD IS EMPTY AND REQUIRED
-      // if (this.options.required && state.value === '' && this.domError) {
-      //   state.isComplete = false;
-      //   state.isValid = false;
-      //   state.isEmpty = true;
-      //   this.hasError = true;
-      //   this.domError.innerText = this.options.label ? `
-      // ${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-      //     this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
-      // } else if (this.options.required && !state.isRequired && this.domError) {
-      //   // const spanElementId = this.htmlDivElement.id;
-      //   // const error = document.getElementById(spanElementId);
-      //   // console.log('ELE', error);
-      //   this.domError.innerText = this.options.label ?
-      // `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-      //     this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
-      // }
-      // const spanElementId = this.htmlDivElement.id.split(':')[0];
-      // const error = document.getElementById(`${spanElementId}-error`);
-      // console.log('ELE', error);
       this.updateStyleClasses(state);
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
+        const { isAppended, value } = appendZeroToOne(state.value);
+        if (isAppended) {
+          this.iFrameFormElement.setValue(value);
+        }
+      }
+
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
+        if (this.iFrameFormElement.format === 'YYYY/MM') {
+          const { isAppended, value } = appendMonthFourDigitYears(state.value);
+          if (isAppended) {
+            this.iFrameFormElement.setValue(value);
+          }
+        } else if (this.iFrameFormElement.format === 'YY/MM') {
+          const { isAppended, value } = appendMonthTwoDigitYears(state.value);
+          if (isAppended) {
+            this.iFrameFormElement.setValue(value);
+          }
+        }
+      }
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
       // On CHANGE set isEmpty to false
@@ -292,6 +280,7 @@ export class FrameElement {
           this.domInput.value = state.value || '';
         }
       }
+
       if (this.iFrameFormElement.containerType === ContainerType.COMPOSABLE) {
         const elementType = this.iFrameFormElement.fieldType;
         const fieldTypeCheck = ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES
@@ -309,6 +298,14 @@ export class FrameElement {
             nextElement?.focus();
           }
         }
+      }
+
+      if (
+        !state.isFocused
+        && (this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name
+          || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name)
+      ) {
+        this.updateStyleClasses(state);
       }
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {

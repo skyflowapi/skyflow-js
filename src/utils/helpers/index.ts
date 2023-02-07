@@ -35,23 +35,27 @@ export function checkIfDuplicateExists(arr) {
 
 export const appendZeroToOne = (value) => {
   if (value.length === 1 && Number(value) === 1) {
-    return `0${value}`;
+    return {
+      isAppended: true,
+      value: `0${value}`,
+    };
   }
-  return value;
+  return { isAppended: false, value };
 };
 
 export const appendMonthFourDigitYears = (value) => {
   if (value.length === 6 && Number(value.charAt(5)) === 1) {
-    return `${value.substring(0, 5)}0${value.charAt(5)}`;
+    return { isAppended: true, value: `${value.substring(0, 5)}0${value.charAt(5)}` };
   }
-  return value;
+  return { isAppended: false, value };
 };
+
 export const appendMonthTwoDigitYears = (value) => {
   const lastChar = (value.length > 0 && value.charAt(value.length - 1)) || '';
   if (value.length === 4 && Number(lastChar) === 1) {
-    return `${value.substring(0, 3)}0${lastChar}`;
+    return { isAppended: true, value: `${value.substring(0, 3)}0${lastChar}` };
   }
-  return value;
+  return { isAppended: false, value };
 };
 
 export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {

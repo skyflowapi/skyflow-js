@@ -477,6 +477,18 @@ export class IFrameFormElement extends EventEmitter {
           if (data.options.value !== undefined) {
             // for setting value
             this.setValue(<string | undefined>data.options.value);
+            if (
+              !(
+                this.fieldType === ELEMENTS.EXPIRATION_MONTH.name
+                || this.fieldType === ELEMENTS.EXPIRATION_DATE.name
+              )
+            ) {
+              bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+                name: this.iFrameName,
+                event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+                value: this.getStatus(),
+              });
+            }
           } else if (
             data.options !== undefined
             && data.isSingleElementAPI === true
@@ -541,11 +553,23 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   sendChangeStatus = (inputEvent: boolean = false) => {
-    bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
-      name: this.iFrameName,
-      event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
-      value: this.getStatus(),
-    });
+    if (this.state.isFocused) {
+      bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+        name: this.iFrameName,
+        event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+        value: this.getStatus(),
+      });
+    } else if (
+      this.state.value
+      && (this.fieldType === ELEMENTS.EXPIRATION_DATE.name
+        || this.fieldType === ELEMENTS.EXPIRATION_MONTH.name)
+    ) {
+      bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+        name: this.iFrameName,
+        event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+        value: this.getStatus(),
+      });
+    }
 
     this._emit(ELEMENT_EVENTS_TO_CLIENT.CHANGE, {
       ...this.getStatus(),
