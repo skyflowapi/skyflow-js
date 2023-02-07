@@ -10,7 +10,9 @@ import {
   copyToClipboard,
   handleCopyIconClick,
   fileValidation,
-  styleToString
+  styleToString,
+  appendMonthFourDigitYears,
+  appendMonthTwoDigitYears
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -163,3 +165,25 @@ describe('test JSX style object conversion function',()=>{
     expect(styleToString(test)).toBe(style);
   })
 })
+
+
+describe('test appendMonthFourDigitYears function',()=>{
+    test('test for appended zero for month',()=>{
+      expect(appendMonthFourDigitYears('2032/1')).toEqual({isAppended:true,value:'2032/01'});
+    });
+    test('test for non append for month',()=>{
+      expect(appendMonthFourDigitYears('2032/09')).toEqual({isAppended:false,value:'2032/09'});
+  });
+});
+
+describe('test appendMonthTwoDigitYears function',()=>{
+  
+  test('test for appended zero for month',()=>{
+      expect(appendMonthTwoDigitYears('32/1')).toEqual({isAppended:true,value:'32/01'});
+  });
+
+  test('test for non append for month',()=>{
+    expect(appendMonthTwoDigitYears('32/09')).toEqual({isAppended:false,value:'32/09'});
+  });
+
+});

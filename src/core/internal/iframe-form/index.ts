@@ -279,7 +279,8 @@ export class IFrameFormElement extends EventEmitter {
     } else if (!this.getUnformattedValue() && !this.state.isEmpty) {
       this.state.isEmpty = true;
     }
-    if (valid && !this.doesClientHasError && this.validator(this.state.value)) {
+
+    if (this.validator(this.state.value) && !this.doesClientHasError && valid) {
       this.state.isValid = true;
       if (this.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
         //
