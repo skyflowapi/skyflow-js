@@ -27,6 +27,8 @@ import {
   COLLECT_COPY_ICON_STYLES,
   COPY_UTILS,
   ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES,
+  INPUT_KEYBOARD_EVENTS,
+  CUSTOM_ROW_ID_ATTRIBUTE,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iframe-form';
 import getCssClassesFromJss from '../../libs/jss-styles';
@@ -163,6 +165,7 @@ export class FrameElement {
 
     const inputElement = document.createElement(type);
     this.domInput = inputElement;
+    inputElement.setAttribute(CUSTOM_ROW_ID_ATTRIBUTE, this.htmlDivElement?.id?.split(':')[0] || '');
     this.inputParent.append(inputElement);
 
     if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
@@ -251,6 +254,7 @@ export class FrameElement {
         }
       }
     });
+
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
       // On CHANGE set isEmpty to false
       state.isEmpty = false;
@@ -308,11 +312,13 @@ export class FrameElement {
         this.updateStyleClasses(state);
       }
     });
+
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
       if (data.options) {
         this.updateOptions(data.options);
       }
     });
+
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR, (data) => {
       if (this.domError && data.isTriggerError && data.clientErrorText) {
         this.domError.innerText = data.clientErrorText;
@@ -440,6 +446,63 @@ export class FrameElement {
     } else {
       const target = event.target as HTMLInputElement;
       this.iFrameFormElement.setValue(target.value, target.checkValidity());
+    }
+  };
+
+  findPreviousElement = (currentInput) => {
+    const elementList = document.getElementById(currentInput.getAttribute(CUSTOM_ROW_ID_ATTRIBUTE) || '')?.getElementsByTagName('input') as any;
+    let prevIndex;
+    elementList.forEach((element:HTMLInputElement, index) => {
+      if (element.id === this.iFrameFormElement.iFrameName
+      && (index - 1) !== -1) { prevIndex = index - 1; }
+    });
+    return elementList[prevIndex] as HTMLInputElement;
+  };
+
+  findNextElement = (currentInput) => {
+    const elementList = document.getElementById(currentInput.getAttribute(CUSTOM_ROW_ID_ATTRIBUTE) || '')?.getElementsByTagName('input') as any;
+    let nextIndex;
+    elementList.forEach((element:HTMLInputElement, index) => {
+      if (element.id === this.iFrameFormElement.iFrameName
+      && (index + 1) !== elementList.length) { nextIndex = index + 1; }
+    });
+    return elementList[nextIndex] as HTMLInputElement;
+  };
+
+  onArrowKeys = (event:JQuery.TriggeredEvent) => {
+    const keyBoardEvent = event.originalEvent as KeyboardEvent;
+    const currentInput = keyBoardEvent?.target as HTMLInputElement;
+    const cursorPosition = event.target.selectionEnd;
+
+    switch (keyBoardEvent?.key) {
+      case INPUT_KEYBOARD_EVENTS.RIGHT_ARROW:
+        if (cursorPosition === currentInput.value.length) {
+          const nextElement = this.findNextElement(currentInput);
+          if (nextElement) {
+            nextElement?.focus();
+          }
+        }
+        break;
+
+      case INPUT_KEYBOARD_EVENTS.LEFT_ARROW:
+        if (cursorPosition === 0) {
+          const previousElement = this.findPreviousElement(currentInput);
+          if (previousElement) {
+            previousElement?.focus();
+          }
+        }
+        break;
+
+      case INPUT_KEYBOARD_EVENTS.BACKSPACE:
+        if (cursorPosition === 0) {
+          const previousElement = this.findPreviousElement(currentInput);
+          if (previousElement) {
+            previousElement?.focus();
+          }
+        }
+        break;
+
+      default: break;
     }
   };
 
@@ -616,6 +679,7 @@ export class FrameElement {
         }
 
         $(id).on('input', this.onInputChange);
+        $(id).on('keydown', this.onArrowKeys);
       }
 
       this.setupInputField(

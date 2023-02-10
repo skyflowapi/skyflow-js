@@ -518,3 +518,12 @@ export const DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES = {
   [ElementType.EXPIRATION_YEAR]: 'expiration year is required',
   [ElementType.FILE_INPUT]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
 };
+
+export const INPUT_KEYBOARD_EVENTS = {
+  ENTER: 'Enter',
+  RIGHT_ARROW: 'ArrowRight',
+  LEFT_ARROW: 'ArrowLeft',
+  BACKSPACE: 'Backspace',
+};
+
+export const CUSTOM_ROW_ID_ATTRIBUTE = 'data-row-id';
