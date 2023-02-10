@@ -469,6 +469,14 @@ export class FrameElement {
     return elementList[nextIndex] as HTMLInputElement;
   };
 
+  onSubmit = () => {
+    bus
+      .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+        name: this.iFrameFormElement.iFrameName,
+        event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
+      });
+  };
+
   onArrowKeys = (event:JQuery.TriggeredEvent) => {
     const keyBoardEvent = event.originalEvent as KeyboardEvent;
     const currentInput = keyBoardEvent?.target as HTMLInputElement;
@@ -500,6 +508,10 @@ export class FrameElement {
             previousElement?.focus();
           }
         }
+        break;
+
+      case INPUT_KEYBOARD_EVENTS.ENTER:
+        this.onSubmit();
         break;
 
       default: break;

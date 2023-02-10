@@ -38,6 +38,7 @@ export const ELEMENT_EVENTS_TO_CLIENT = {
   CLICK: 'CLICK',
   ERROR: 'ERROR',
   SUCCESS: 'SUCCESS',
+  SUBMIT: 'SUBMIT',
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {

@@ -27,7 +27,7 @@ import {
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
@@ -233,6 +233,34 @@ class ComposableContainer extends Container {
       }
     }
     return false;
+  };
+
+  on = (eventName:string, handler:any) => {
+    if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
+      throw new SkyflowError(
+        SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER,
+        [],
+        true,
+      );
+    }
+    if (!handler) {
+      throw new SkyflowError(
+        SKYFLOW_ERROR_CODE.MISSING_HANDLER_IN_EVENT_LISTENER,
+        [],
+        true,
+      );
+    }
+    if (typeof handler !== 'function') {
+      throw new SkyflowError(
+        SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER,
+        [],
+        true,
+      );
+    }
+
+    this.#eventEmitter.on(ELEMENT_EVENTS_TO_CLIENT.SUBMIT, () => {
+      handler();
+    });
   };
 
   mount = (domElement) => {

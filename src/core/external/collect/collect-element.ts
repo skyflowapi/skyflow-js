@@ -357,6 +357,9 @@ class CollectElement extends SkyflowElement {
               case ELEMENT_EVENTS_TO_CLIENT.READY:
                 emitEvent = ELEMENT_EVENTS_TO_CLIENT.READY;
                 break;
+              case ELEMENT_EVENTS_TO_CLIENT.SUBMIT:
+                this.#groupEmitter?._emit(ELEMENT_EVENTS_TO_CLIENT.SUBMIT);
+                return;
                 // todo: need to implement the below events
                 // case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
                 //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
