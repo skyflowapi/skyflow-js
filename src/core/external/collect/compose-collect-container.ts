@@ -74,6 +74,8 @@ class ComposableContainer extends Container {
 
   #options: any;
 
+  #containerElement:any;
+
   type:string = ContainerType.COMPOSABLE;
 
   constructor(options, metaData, skyflowElements, context) {
@@ -117,6 +119,7 @@ class ComposableContainer extends Container {
       .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
     document.body.append(iframe);
+    this.#updateListeners();
   }
 
   create = (input: CollectElementInput, options: any = {
@@ -297,8 +300,8 @@ class ComposableContainer extends Container {
       };
     }
 
-    const composableElement = this.#createMultipleElement(this.#elementGroup, false);
-    composableElement.mount(domElement);
+    this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
+    this.#containerElement.mount(domElement);
     this.#isMounted = true;
   };
 
@@ -353,5 +356,24 @@ class ComposableContainer extends Container {
       reject(err);
     }
   });
+
+  #updateListeners = () => {
+    this.#eventEmitter.on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, (data) => {
+      let elementIndex;
+      const elementList = this.#elementsList.map((element, index) => {
+        if (element.elementName === data.elementName) {
+          elementIndex = index;
+          return {
+            ...element,
+            ...data.elementOptions,
+          };
+        }
+        return element;
+      });
+      this.#containerElement.updateElement({
+        ...elementList[elementIndex],
+      });
+    });
+  };
 }
 export default ComposableContainer;

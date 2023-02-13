@@ -240,6 +240,14 @@ class CollectElement extends SkyflowElement {
     }
   };
 
+  updateElement = (elementOptions) => {
+    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+      name: elementOptions.elementName,
+      options: elementOptions,
+      isSingleElementAPI: true,
+    });
+  };
+
   #updateState = () => {
     this.#states.forEach((elementState, index) => {
       if (index === 0) {

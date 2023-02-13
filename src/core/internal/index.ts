@@ -315,7 +315,9 @@ export class FrameElement {
 
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
       if (data.options) {
-        this.updateOptions(data.options);
+        if (data.options.validations) {
+          this.iFrameFormElement.validations = data.options.validations;
+        }
       }
     });
 
