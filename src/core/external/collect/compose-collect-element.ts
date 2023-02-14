@@ -50,6 +50,7 @@ class ComposableElement {
   }
 
   updateElement = (options) => {
+    // eslint-disable-next-line no-underscore-dangle
     this.#eventEmitter
       ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
         elementName: this.#elementName,

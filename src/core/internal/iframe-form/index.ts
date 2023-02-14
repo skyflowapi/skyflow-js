@@ -109,10 +109,10 @@ export class IFrameFormElement extends EventEmitter {
     const frameValues = name.split(':');
 
     const fieldType = frameValues[1];
-    const tempfield = atob(frameValues[2]);
+    // const tempfield = atob(frameValues[2]);
 
-    const removeAfter = tempfield.indexOf(':');
-    const field = removeAfter === -1 ? tempfield : tempfield.substring(0, removeAfter);
+    // const removeAfter = tempfield.indexOf(':');
+    // const field = removeAfter === -1 ? tempfield : tempfield.substring(0, removeAfter);
     // set frame name as frame type of the string besides : is number
     // const [tableName, fieldName] = [
     //   field.substr(0, field.indexOf('.')),
