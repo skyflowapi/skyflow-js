@@ -10,7 +10,7 @@ import SkyflowError from '../../../../src/libs/skyflow-error';
 import logs from '../../../../src/utils/logs';
 import { ContainerType } from '../../../../src/skyflow';
 
-const tableCol = btoa('table.col')
+const tableCol = btoa('1234')
 const collect_element = `element:CVV:${tableCol}`;
 const file_element = `element:FILE_INPUT:${tableCol}`;
 
@@ -365,7 +365,7 @@ describe('test iframeForm collect method', () => {
             }
         }));
 
-        frameReadyCb({ name: collect_element })
+        frameReadyCb({ name:collect_element})
 
         const createFormElement = skyflowInit.mock.calls[0][0]
         const element = createFormElement(collect_element)
@@ -387,6 +387,10 @@ describe('test iframeForm collect method', () => {
             expect(cb3.mock.calls[0][0].records.length).toBe(1);
         }, 1000)
 
+        element.fieldName = 'col';
+        element.tableName = 'table';
+        element.state.name = 'col';
+        
         const cb4 = jest.fn()
         tokenizationCb({
             ...data,
