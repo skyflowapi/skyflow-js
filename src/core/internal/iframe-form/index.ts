@@ -72,9 +72,9 @@ export class IFrameFormElement extends EventEmitter {
 
   private sensitive: boolean;
 
-  tableName: string;
+  tableName?: string;
 
-  fieldName: string;
+  fieldName?: string;
 
   iFrameName: string;
 
@@ -114,22 +114,22 @@ export class IFrameFormElement extends EventEmitter {
     const removeAfter = tempfield.indexOf(':');
     const field = removeAfter === -1 ? tempfield : tempfield.substring(0, removeAfter);
     // set frame name as frame type of the string besides : is number
-    const [tableName, fieldName] = [
-      field.substr(0, field.indexOf('.')),
-      field.substr(field.indexOf('.') + 1),
-    ];
+    // const [tableName, fieldName] = [
+    //   field.substr(0, field.indexOf('.')),
+    //   field.substr(field.indexOf('.') + 1),
+    // ];
     this.containerType = metaData.containerType;
     this.iFrameName = name;
     this.fieldType = fieldType;
 
-    this.tableName = tableName;
-    this.fieldName = fieldName;
+    // this.tableName = tableName;
+    // this.fieldName = fieldName;
     this.label = label;
     this.skyflowID = skyflowID;
 
     this.sensitive = ELEMENTS[this.fieldType].sensitive;
 
-    this.state.name = fieldName;
+    // this.state.name = fieldName;
 
     this.metaData = metaData;
     this.context = context;
@@ -908,38 +908,40 @@ export class IFrameForm {
 
     for (let i = 0; i < formElements.length; i += 1) {
       const { state, tableName, validations } = this.iFrameFormElements[formElements[i]];
-      if (
-        this.iFrameFormElements[formElements[i]].fieldType
-        !== ELEMENTS.FILE_INPUT.name
-      ) {
+      if (tableName) {
         if (
           this.iFrameFormElements[formElements[i]].fieldType
-          === ELEMENTS.checkbox.name
+          !== ELEMENTS.FILE_INPUT.name
         ) {
-          if (responseObject[state.name]) {
-            responseObject[state.name] = `${responseObject[state.name]},${state.value
-            }`;
+          if (
+            this.iFrameFormElements[formElements[i]].fieldType
+            === ELEMENTS.checkbox.name
+          ) {
+            if (responseObject[state.name]) {
+              responseObject[state.name] = `${responseObject[state.name]},${state.value
+              }`;
+            } else {
+              responseObject[state.name] = state.value;
+            }
+          } else if (responseObject[tableName]) {
+            if (get(responseObject[tableName], state.name)
+              && !(validations && checkForElementMatchRule(validations))) {
+              return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
+                [state.name, tableName], true));
+            }
+            set(
+              responseObject[tableName],
+              state.name,
+              this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+            );
           } else {
-            responseObject[state.name] = state.value;
+            responseObject[tableName] = {};
+            set(
+              responseObject[tableName],
+              state.name,
+              this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+            );
           }
-        } else if (responseObject[tableName]) {
-          if (get(responseObject[tableName], state.name)
-            && !(validations && checkForElementMatchRule(validations))) {
-            return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
-              [state.name, tableName], true));
-          }
-          set(
-            responseObject[tableName],
-            state.name,
-            this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-          );
-        } else {
-          responseObject[tableName] = {};
-          set(
-            responseObject[tableName],
-            state.name,
-            this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-          );
         }
       }
     }

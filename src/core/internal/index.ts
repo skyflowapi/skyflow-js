@@ -135,6 +135,9 @@ export class FrameElement {
     this.htmlDivElement = htmlDivElement;
     this.hasError = false;
     this.mount();
+    this.iFrameFormElement.fieldName = options.column;
+    this.iFrameFormElement.tableName = options.table;
+    this.iFrameFormElement.state.name = options.column;
   }
 
   // mount element onto dom
@@ -315,8 +318,40 @@ export class FrameElement {
 
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
       if (data.options) {
-        if (data.options.validations) {
-          this.iFrameFormElement.validations = data.options.validations;
+        const {
+          validations,
+          table,
+          column,
+          label,
+          placeholder,
+          inputStyles,
+          labelStyles,
+          errorTextStyles,
+        } = data.options;
+        if (validations) {
+          this.iFrameFormElement.validations = validations;
+        }
+        if (table) {
+          this.iFrameFormElement.tableName = table;
+        }
+        if (column) {
+          this.options.name = column;
+          this.iFrameFormElement.state.name = column;
+        }
+        if (label) {
+          if (this.domLabel) { this.domLabel.textContent = label; }
+        }
+        if (placeholder) {
+          this.domInput?.setAttribute('placeholder', placeholder);
+        }
+        if (inputStyles) {
+          this.injectInputStyles(inputStyles);
+        }
+        if (errorTextStyles) {
+          this.injectInputStyles(errorTextStyles, 'error');
+        }
+        if (labelStyles) {
+          this.injectInputStyles(labelStyles, 'label');
         }
       }
     });

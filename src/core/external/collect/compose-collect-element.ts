@@ -49,7 +49,7 @@ class ComposableElement {
     });
   }
 
-  updateElement = (options?) => {
+  updateElement = (options) => {
     this.#eventEmitter
       ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
         elementName: this.#elementName,

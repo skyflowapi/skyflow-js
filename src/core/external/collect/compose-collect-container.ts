@@ -128,13 +128,13 @@ class ComposableContainer extends Container {
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
-    let elementName;
-    elementName = `${input.table}.${input.column}:${btoa(uuid())}`;
-    elementName = (input.table && input.column) ? `${input.type}:${btoa(
-      elementName,
-    )}` : `${input.type}:${btoa(uuid())}`;
+    // let elementName;
+    // elementName = `${input.table}.${input.column}:${btoa(uuid())}`;
+    // elementName = (input.table && input.column) ? `${input.type}:${btoa(
+    //   elementName,
+    // )}` : ;
 
-    elementName = `${FRAME_ELEMENT}:${elementName}`;
+    const elementName = `${FRAME_ELEMENT}:${input.type}:${btoa(uuid())}`;
 
     this.#elementsList.push({
       elementType: input.type,
@@ -305,6 +305,10 @@ class ComposableContainer extends Container {
     this.#isMounted = true;
   };
 
+  unmount = () => {
+    this.#containerElement.unmount();
+  };
+
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
@@ -364,7 +368,7 @@ class ComposableContainer extends Container {
         if (element.elementName === data.elementName) {
           elementIndex = index;
           return {
-            ...element,
+            elementName: element.elementName,
             ...data.elementOptions,
           };
         }
