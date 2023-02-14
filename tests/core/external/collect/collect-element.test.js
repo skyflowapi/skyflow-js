@@ -155,9 +155,12 @@ describe('collect element', () => {
       }, cb2);
     }).toThrow(SkyflowError);
 
+    element.updateElement({table:'table'});
+
     expect(element.elementType).toBe(input.type);
     expect(element.isMounted()).toBe(false);
     expect(element.isValidElement()).toBe(true);
+
   });
 
   it('constructor with composable ',  () => {
@@ -656,7 +659,7 @@ describe('collect element methods', () => {
     try {
       testCollectElementDev.on('invalid_listener', (state) => {
         console.log(state);
-      });
+      });testCollectElementProd
     } catch (err) {
       expect(err).toBeDefined();
     }

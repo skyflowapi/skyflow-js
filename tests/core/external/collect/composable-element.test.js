@@ -2,6 +2,7 @@ import ComposableElement from '../../../../src/core/external/collect/compose-col
 import { ContainerType } from '../../../../src/skyflow';
 
 describe('test composable element',()=>{
+  const emitter = jest.fn();
     const testEventEmitter = {
         on:(name,cb)=>{
           if(name.includes('FOCUS')){
@@ -20,7 +21,8 @@ describe('test composable element',()=>{
           })
           }
          
-        }
+        },
+        _emit:emitter,
     }
     const handler = jest.fn();
     const testElement = new ComposableElement('testce1',testEventEmitter);
@@ -58,6 +60,15 @@ describe('test composable element',()=>{
         } catch (err) {
           expect(err).toBeDefined();
         }
+      });
+
+      it('update element',()=>{
+          const testUpdateOptions = {table:'table'};
+          testElement.updateElement(testUpdateOptions);
+          expect(emitter).toBeCalledWith('COMPOSABLE_UPDATE_OPTIONS',{
+            elementName:'testce1',
+            elementOptions:testUpdateOptions
+          });
       });
     
 });
