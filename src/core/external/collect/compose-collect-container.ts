@@ -27,7 +27,7 @@ import {
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
@@ -74,6 +74,8 @@ class ComposableContainer extends Container {
 
   #options: any;
 
+  #containerElement:any;
+
   type:string = ContainerType.COMPOSABLE;
 
   constructor(options, metaData, skyflowElements, context) {
@@ -117,6 +119,7 @@ class ComposableContainer extends Container {
       .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
     document.body.append(iframe);
+    this.#updateListeners();
   }
 
   create = (input: CollectElementInput, options: any = {
@@ -125,13 +128,13 @@ class ComposableContainer extends Container {
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
-    let elementName;
-    elementName = `${input.table}.${input.column}:${btoa(uuid())}`;
-    elementName = (input.table && input.column) ? `${input.type}:${btoa(
-      elementName,
-    )}` : `${input.type}:${btoa(uuid())}`;
+    // let elementName;
+    // elementName = `${input.table}.${input.column}:${btoa(uuid())}`;
+    // elementName = (input.table && input.column) ? `${input.type}:${btoa(
+    //   elementName,
+    // )}` : ;
 
-    elementName = `${FRAME_ELEMENT}:${elementName}`;
+    const elementName = `${FRAME_ELEMENT}:${input.type}:${btoa(uuid())}`;
 
     this.#elementsList.push({
       elementType: input.type,
@@ -235,6 +238,34 @@ class ComposableContainer extends Container {
     return false;
   };
 
+  on = (eventName:string, handler:any) => {
+    if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
+      throw new SkyflowError(
+        SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER,
+        [],
+        true,
+      );
+    }
+    if (!handler) {
+      throw new SkyflowError(
+        SKYFLOW_ERROR_CODE.MISSING_HANDLER_IN_EVENT_LISTENER,
+        [],
+        true,
+      );
+    }
+    if (typeof handler !== 'function') {
+      throw new SkyflowError(
+        SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER,
+        [],
+        true,
+      );
+    }
+
+    this.#eventEmitter.on(ELEMENT_EVENTS_TO_CLIENT.SUBMIT, () => {
+      handler();
+    });
+  };
+
   mount = (domElement) => {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT,
@@ -269,9 +300,13 @@ class ComposableContainer extends Container {
       };
     }
 
-    const composableElement = this.#createMultipleElement(this.#elementGroup, false);
-    composableElement.mount(domElement);
+    this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
+    this.#containerElement.mount(domElement);
     this.#isMounted = true;
+  };
+
+  unmount = () => {
+    this.#containerElement.unmount();
   };
 
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
@@ -325,5 +360,24 @@ class ComposableContainer extends Container {
       reject(err);
     }
   });
+
+  #updateListeners = () => {
+    this.#eventEmitter.on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, (data) => {
+      let elementIndex;
+      const elementList = this.#elementsList.map((element, index) => {
+        if (element.elementName === data.elementName) {
+          elementIndex = index;
+          return {
+            elementName: element.elementName,
+            ...data.elementOptions,
+          };
+        }
+        return element;
+      });
+      this.#containerElement.updateElement({
+        ...elementList[elementIndex],
+      });
+    });
+  };
 }
 export default ComposableContainer;

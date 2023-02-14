@@ -142,10 +142,10 @@ class CollectContainer extends Container {
         options.replacePattern = options.replacePattern || ELEMENTS[elementType].replacePattern;
         options.mask = options.mask || ELEMENTS[elementType].mask;
 
-        options.elementName = `${options.table}.${options.name}:${btoa(uuid())}`;
-        options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
-          options.elementName,
-        )}` : `${options.elementType}:${btoa(uuid())}`;
+        // options.elementName = `${options.table}.${options.name}:${btoa(uuid())}`;
+        // options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
+        //   options.elementName,
+        // )}` : `${options.elementType}:${btoa(uuid())}`;
 
         if (
           options.elementType === ELEMENTS.radio.name
@@ -154,7 +154,7 @@ class CollectContainer extends Container {
           options.elementName = `${options.elementName}:${btoa(options.value)}`;
         }
 
-        options.elementName = `${FRAME_ELEMENT}:${options.elementName}`;
+        options.elementName = `${FRAME_ELEMENT}:${options.elementType}:${btoa(uuid())}`;
         options.label = element.label;
         options.skyflowID = element.skyflowID;
 
