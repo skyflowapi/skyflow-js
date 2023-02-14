@@ -400,12 +400,18 @@ export class IFrameFormElement extends EventEmitter {
       for (let i = 0; i < this.validations.length; i += 1) {
         switch (this.validations[i].type) {
           case ValidationRuleType.REGEX_MATCH_RULE:
+            if (this.fieldType === ElementType.CARD_NUMBER) {
+              value = value.replace(/[\s-]/g, '');
+            }
             if (this.validations[i].params.regex) {
               const tempRegex = RegexParser(this.validations[i].params.regex);
               resp = tempRegex.test(value);
             }
             break;
           case ValidationRuleType.LENGTH_MATCH_RULE:
+            if (this.fieldType === ElementType.CARD_NUMBER) {
+              value = value.replace(/[\s-]/g, '');
+            }
             if (this.validations[i].params.min && value.length < this.validations[i].params.min) {
               resp = false;
             }
