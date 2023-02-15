@@ -230,7 +230,35 @@ describe('test iframeFormelement', () => {
         isValid = element.validator('99999')
         expect(isValid).toBe(false)
         expect(element.errorText).toBe(logs.errorLogs.VALIDATION_FAILED)
-    })
+    });
+    
+    test('card number custom validation',()=>{
+
+        const lengthRule2 = {
+            type: ValidationRuleType.LENGTH_MATCH_RULE,
+            params: {
+                min: 16,
+                max: 16,
+                error: "Invalid length",
+            }
+        }
+
+        const regexRule2 = {
+            type: ValidationRuleType.REGEX_MATCH_RULE,
+            params: {
+                regex: "/^4\d*/"
+            }
+        }
+        const cardNumberElement = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
+        cardNumberElement.setValidation([lengthRule2, regexRule2]);
+        let isValid = cardNumberElement.validator('3700 0000 0000 002')
+        expect(isValid).toBe(false)
+        expect(cardNumberElement.errorText).toBe("Invalid length")
+
+        isValid = cardNumberElement.validator('5555 3412 4444 1115')
+        expect(isValid).toBe(false)
+        expect(cardNumberElement.errorText).toBe(logs.errorLogs.VALIDATION_FAILED)
+    });
 
 })
 

@@ -335,11 +335,14 @@ export class FrameElement {
           this.iFrameFormElement.tableName = table;
         }
         if (column) {
-          this.options.name = column;
           this.iFrameFormElement.state.name = column;
         }
         if (label) {
-          if (this.domLabel) { this.domLabel.textContent = label; }
+          if (this.domLabel) {
+            this.domLabel.textContent = label;
+            this.options.label = label;
+            this.updateParentDiv(this.htmlDivElement);
+          }
         }
         if (placeholder) {
           this.domInput?.setAttribute('placeholder', placeholder);
@@ -573,7 +576,7 @@ export class FrameElement {
         customStyles[type] = styles[type];
       }
     });
-    getCssClassesFromJss(customStyles, `${preText}-${this.options.name}`);
+    getCssClassesFromJss(customStyles, `${preText}-${this.options.elementName}`);
   }
 
   updateStyleClasses(state: {
@@ -621,7 +624,7 @@ export class FrameElement {
         if (types.includes(type)) classes.push(type);
       });
       classes = classes.map(
-        (type) => `SkyflowElement-${preText}-${this.options.name}-${type}`,
+        (type) => `SkyflowElement-${preText}-${this.options.elementName}-${type}`,
       );
       dom.className = classes.join(' ');
     }

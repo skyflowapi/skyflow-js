@@ -374,9 +374,11 @@ class ComposableContainer extends Container {
         }
         return element;
       });
-      this.#containerElement.updateElement({
-        ...elementList[elementIndex],
-      });
+      if (elementIndex) {
+        this.#containerElement.updateElement({
+          ...elementList[elementIndex],
+        });
+      }
     });
   };
 }

@@ -49,7 +49,7 @@ class ComposableElement {
     });
   }
 
-  updateElement = (options) => {
+  update = (options) => {
     // eslint-disable-next-line no-underscore-dangle
     this.#eventEmitter
       ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {

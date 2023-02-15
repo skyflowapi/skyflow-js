@@ -64,7 +64,7 @@ describe('test composable element',()=>{
 
       it('update element',()=>{
           const testUpdateOptions = {table:'table'};
-          testElement.updateElement(testUpdateOptions);
+          testElement.update(testUpdateOptions);
           expect(emitter).toBeCalledWith('COMPOSABLE_UPDATE_OPTIONS',{
             elementName:'testce1',
             elementOptions:testUpdateOptions
