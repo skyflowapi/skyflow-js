@@ -91,7 +91,8 @@ describe('test frame elements', () => {
                     isEmpty: true,
                     isComplete: false,
                 })),
-                fieldType: 'CARD_NUMBER'
+                fieldType: 'CARD_NUMBER',
+                state:{name:''}
             }
         })
         const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
@@ -136,11 +137,12 @@ describe('test composable frame elements', () => {
                   isEmpty: true,
                   isComplete: false,
               })),
-              fieldType: 'CARD_NUMBER'
+              fieldType: 'CARD_NUMBER',
+              state:{name:''}
+
           }
       })
       const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
-      // console.log(frameElement.)
   });
 
     
@@ -162,11 +164,11 @@ describe('test composable frame elements', () => {
                 isEmpty: true,
                 isComplete: false,
             })),
-            fieldType: 'CARD_NUMBER'
+            fieldType: 'CARD_NUMBER',
+            state:{name:''}
         }
     })
     const frameElement = FrameElements.init(mockCreateElement, {}, 'ERROR')
-    // console.log(frameElement.)
 });
 
 })

@@ -58,11 +58,11 @@ export const detectCardType = (cardNumber: string = '') => {
 const getYearAndMonthBasedOnFormat = (cardDate, format:string) => {
   const [part1, part2] = cardDate.split('/');
   switch (format) {
-    case 'MM/YY': return { month: appendZeroToOne(part1), year: 2000 + Number(part2) };
-    case 'YY/MM': return { month: appendZeroToOne(part2), year: 2000 + Number(part1) };
-    case 'YYYY/MM': return { month: appendZeroToOne(part2), year: part1 };
+    case 'MM/YY': return { month: appendZeroToOne(part1).value, year: 2000 + Number(part2) };
+    case 'YY/MM': return { month: appendZeroToOne(part2).value, year: 2000 + Number(part1) };
+    case 'YYYY/MM': return { month: appendZeroToOne(part2).value, year: part1 };
     // MM/YYYY
-    default: return { month: appendZeroToOne(part1), year: part2 };
+    default: return { month: appendZeroToOne(part1).value, year: part2 };
   }
 };
 
