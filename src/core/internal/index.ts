@@ -525,6 +525,7 @@ export class FrameElement {
           const nextElement = this.findNextElement(currentInput);
           if (nextElement) {
             nextElement?.focus();
+            keyBoardEvent.preventDefault();
           }
         }
         break;
@@ -534,6 +535,7 @@ export class FrameElement {
           const previousElement = this.findPreviousElement(currentInput);
           if (previousElement) {
             previousElement?.focus();
+            keyBoardEvent.preventDefault();
           }
         }
         break;
@@ -543,12 +545,14 @@ export class FrameElement {
           const previousElement = this.findPreviousElement(currentInput);
           if (previousElement) {
             previousElement?.focus();
+            keyBoardEvent.preventDefault();
           }
         }
         break;
 
       case INPUT_KEYBOARD_EVENTS.ENTER:
         this.onSubmit();
+        keyBoardEvent.preventDefault();
         break;
 
       default: break;
