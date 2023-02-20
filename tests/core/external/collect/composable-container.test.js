@@ -26,19 +26,21 @@ jest.mock('../../../../src/libs/uuid', () => ({
 }));
 
 const mockUnmount = jest.fn();
+const updateMock = jest.fn();
 jest.mock('../../../../src/core/external/collect/collect-element');
 CollectElement.mockImplementation(()=>({
   isMounted : ()=>(true),
   mount: jest.fn(),
   isValidElement: ()=>(true),
   unmount:mockUnmount,
-  updateElement:jest.fn()
+  updateElement:updateMock
 }))
 
 jest.mock('../../../../src/event-emitter');
 const emitMock = jest.fn();
+let emitterSpy;
 EventEmitter.mockImplementation(()=>({
-  on: jest.fn().mockImplementation((name,cb)=>{cb()})
+  on: jest.fn().mockImplementation((name,cb)=>{emitterSpy = cb})
 }));
 
 
@@ -248,7 +250,7 @@ describe('test composable container class',()=>{
     expect(mockUnmount).toBeCalled();
   });
 
-  it("test container unmount",()=>{
+  it("test container update element",()=>{
     const div = document.createElement('div');
     div.id = 'composable'
     document.body.append(div);
@@ -256,7 +258,14 @@ describe('test composable container class',()=>{
     const container = new ComposableContainer({layout:[2]}, metaData, {}, context);
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
-    
+    container.mount('#composable');
+    const testElementName = 'element:CVV:MTIzNA==';
+    const testUpdateOptions = {table:'test1',label:'test update'}
+    emitterSpy({
+      elementName:testElementName,
+      elementOptions:testUpdateOptions
+    });
+    expect(updateMock).toBeCalled();
   });
 
 

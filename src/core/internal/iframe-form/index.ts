@@ -398,20 +398,17 @@ export class IFrameFormElement extends EventEmitter {
     let resp = true;
     if (this.validations && this.validations.length) {
       for (let i = 0; i < this.validations.length; i += 1) {
+        if (this.fieldType === ElementType.CARD_NUMBER) {
+          value = value.replace(/[\s-]/g, '');
+        }
         switch (this.validations[i].type) {
           case ValidationRuleType.REGEX_MATCH_RULE:
-            if (this.fieldType === ElementType.CARD_NUMBER) {
-              value = value.replace(/[\s-]/g, '');
-            }
             if (this.validations[i].params.regex) {
               const tempRegex = RegexParser(this.validations[i].params.regex);
               resp = tempRegex.test(value);
             }
             break;
           case ValidationRuleType.LENGTH_MATCH_RULE:
-            if (this.fieldType === ElementType.CARD_NUMBER) {
-              value = value.replace(/[\s-]/g, '');
-            }
             if (this.validations[i].params.min && value.length < this.validations[i].params.min) {
               resp = false;
             }
@@ -435,6 +432,9 @@ export class IFrameFormElement extends EventEmitter {
                   .document.getElementById(elementId) as HTMLInputElement;
                 if (collectInputElement) {
                   elementValue = collectInputElement.value;
+                  if (this.fieldType === ElementType.CARD_NUMBER) {
+                    elementValue = elementValue.replace(/[\s-]/g, '');
+                  }
                 }
               }
               if (elementValue !== value) {
@@ -569,7 +569,8 @@ export class IFrameFormElement extends EventEmitter {
     } else if (
       this.state.value
       && (this.fieldType === ELEMENTS.EXPIRATION_DATE.name
-        || this.fieldType === ELEMENTS.EXPIRATION_MONTH.name)
+        || this.fieldType === ELEMENTS.EXPIRATION_MONTH.name
+        || this.fieldType === ELEMENTS.FILE_INPUT.name)
     ) {
       bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
         name: this.iFrameName,

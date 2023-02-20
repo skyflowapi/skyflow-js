@@ -28,7 +28,8 @@ describe('test iframeFormelement', () => {
     let emitSpy;
     let targetSpy;
     let on = jest.fn()
-
+    let windowSpy
+    let testValue;
     beforeEach(() => {
         jest.clearAllMocks()
         emitSpy = jest.spyOn(bus, 'emit');
@@ -36,7 +37,19 @@ describe('test iframeFormelement', () => {
         targetSpy.mockReturnValue({
             on,
         });
+        windowSpy = jest.spyOn(window,'parent','get');
+        windowSpy.mockImplementation(()=>({
+         
+                frames:{
+                'element:CARD_NUMBER:${tableCol}':{document:{
+                    getElementById:()=>({value:testValue})
+                }}
+                }
+        }));
     });
+    afterEach(() => {
+        windowSpy.mockRestore();
+      });
 
     test('iframeFormelement constructor', () => {
         const element = new IFrameFormElement(collect_element, {}, context)
@@ -203,6 +216,14 @@ describe('test iframeFormelement', () => {
         expect(valid).toBe(true)
     })
 
+    test('invalid custom validations', () => {
+        const element2 = new IFrameFormElement(`element:EXPIRATION_MONTH:${tableCol}`, {}, context)
+        element2.setValidation([{type:'DEFAULT',params:{}}])
+
+        const isValid = element2.validator('12')
+        expect(isValid).toBe(false)
+    })
+
     test('test custom validations', () => {
 
         const lengthRule = {
@@ -224,6 +245,10 @@ describe('test iframeFormelement', () => {
         const element = new IFrameFormElement(`element:PIN:${tableCol}`, {}, context)
         element.setValidation([lengthRule, regexRule]);
         let isValid = element.validator('1234')
+        expect(isValid).toBe(false)
+        expect(element.errorText).toBe("Invalid length")
+
+        isValid = element.validator('123456789')
         expect(isValid).toBe(false)
         expect(element.errorText).toBe("Invalid length")
 
@@ -256,6 +281,22 @@ describe('test iframeFormelement', () => {
         expect(cardNumberElement.errorText).toBe("Invalid length")
 
         isValid = cardNumberElement.validator('5555 3412 4444 1115')
+        expect(isValid).toBe(false)
+        expect(cardNumberElement.errorText).toBe(logs.errorLogs.VALIDATION_FAILED)
+    });
+
+    test('card number custom validation',()=>{
+        testValue = '5555 3412 4444 '
+        const elementRule = {
+            type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
+            params: {
+                element:'element:CARD_NUMBER:${tableCol}',
+            }
+        }
+        const cardNumberElement = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
+        cardNumberElement.setValidation([elementRule]);
+
+        let isValid = cardNumberElement.validator('5555 3412 4444 1115')
         expect(isValid).toBe(false)
         expect(cardNumberElement.errorText).toBe(logs.errorLogs.VALIDATION_FAILED)
     });
