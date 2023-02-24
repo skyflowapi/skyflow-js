@@ -24,7 +24,6 @@ import { handleCopyIconClick, styleToString } from '../../../utils/helpers';
 import regExFromString from '../../../libs/regex';
 const RegexParser = require('regex-parser');
 
-
 const CLASS_NAME = 'RevealFrame';
 class RevealFrame {
 	static revealFrame: RevealFrame;
