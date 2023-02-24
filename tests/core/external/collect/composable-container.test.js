@@ -11,6 +11,7 @@ import ComposableContainer from "../../../../src/core/external/collect/compose-c
 import ComposableElement from '../../../../src/core/external/collect/compose-collect-element';
 import CollectElement from '../../../../src/core/external/collect/collect-element';
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
+import EventEmitter from '../../../../src/event-emitter';
 
 const bus = require('framebus');
 
@@ -24,12 +25,24 @@ jest.mock('../../../../src/libs/uuid', () => ({
   default: jest.fn(() => (mockUuid)),
 }));
 
+const mockUnmount = jest.fn();
+const updateMock = jest.fn();
 jest.mock('../../../../src/core/external/collect/collect-element');
 CollectElement.mockImplementation(()=>({
   isMounted : ()=>(true),
   mount: jest.fn(),
-  isValidElement: ()=>(true)
+  isValidElement: ()=>(true),
+  unmount:mockUnmount,
+  updateElement:updateMock
 }))
+
+jest.mock('../../../../src/event-emitter');
+const emitMock = jest.fn();
+let emitterSpy;
+EventEmitter.mockImplementation(()=>({
+  on: jest.fn().mockImplementation((name,cb)=>{emitterSpy = cb})
+}));
+
 
 const metaData = {
   uuid: '123',
@@ -223,6 +236,38 @@ describe('test composable container class',()=>{
       collectCb(collectResponse);
       collectCb({ error: 'Error occured' })
   });
+
+  it("test container unmount",()=>{
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+
+    const container = new ComposableContainer({layout:[2]}, metaData, {}, context);
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    container.mount('#composable');
+    container.unmount();
+    expect(mockUnmount).toBeCalled();
+  });
+
+  it("test container update element",()=>{
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+
+    const container = new ComposableContainer({layout:[2]}, metaData, {}, context);
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    container.mount('#composable');
+    const testElementName = 'element:CVV:MTIzNA==';
+    const testUpdateOptions = {table:'test1',label:'test update'}
+    emitterSpy({
+      elementName:testElementName,
+      elementOptions:testUpdateOptions
+    });
+    expect(updateMock).toBeCalled();
+  });
+
 
     
 });

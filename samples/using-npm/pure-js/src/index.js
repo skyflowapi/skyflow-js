@@ -87,12 +87,14 @@ try {
                   records: [
                     {
                       token: fieldsTokenData.primary_card.card_number,
+                      redaction: Skyflow.RedactionType.MASKED
                     },
                     {
                       token: fieldsTokenData.primary_card.cvv,
+                      redaction: Skyflow.RedactionType.REDACTED
                     },
                     {
-                      token: fieldsTokenData.expiry_date,
+                      token: fieldsTokenData.primary_card.expiry_date,
                     },
                     {
                       token: fieldsTokenData.first_name,

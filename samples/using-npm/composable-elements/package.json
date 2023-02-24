@@ -1,7 +1,7 @@
 {
-  "name": "purejs",
+  "name": "composableelements",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Sample on how to add Composable Elements ",
   "main": "index.js",
   "scripts": {
     "start": "parcel src/index.html --open",

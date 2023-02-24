@@ -152,6 +152,7 @@ try {
           const revealCardNumberElement = revealContainer.create({
             token: fieldsTokenData.primary_card.card_number,
             label: 'Card Number',
+            redaction: Skyflow.RedactionType.MASKED,
             ...revealStyleOptions,
           });
           revealCardNumberElement.mount('#revealCardNumber');
@@ -159,6 +160,7 @@ try {
           const revealCardCvvElement = revealContainer.create({
             token: fieldsTokenData.primary_card.cvv,
             label: 'CVV',
+            redaction: Skyflow.RedactionType.REDACTED,
             ...revealStyleOptions,
             altText: '###',
           });

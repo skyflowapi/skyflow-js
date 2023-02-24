@@ -2,7 +2,7 @@ import EventEmitter from '../../../event-emitter';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
-import { ELEMENT_EVENTS_TO_CLIENT } from '../../constants';
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../constants';
 
 class ComposableElement {
   #elementName: string;
@@ -48,6 +48,15 @@ class ComposableElement {
       handler(data);
     });
   }
+
+  update = (options) => {
+    // eslint-disable-next-line no-underscore-dangle
+    this.#eventEmitter
+      ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
+        elementName: this.#elementName,
+        elementOptions: options,
+      });
+  };
 }
 
 export default ComposableElement;

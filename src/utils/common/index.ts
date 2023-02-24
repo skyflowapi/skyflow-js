@@ -21,6 +21,7 @@ export enum EventName {
   READY = 'READY',
   FOCUS = 'FOCUS',
   BLUR = 'BLUR',
+  SUBMIT = 'SUBMIT',
 }
 
 export enum LogLevel{

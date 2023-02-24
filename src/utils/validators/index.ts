@@ -21,6 +21,7 @@ import {
   IGetByIdInput,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
+import { appendZeroToOne } from '../helpers';
 import logs from '../logs';
 import { printLog } from '../logs-helper';
 
@@ -58,11 +59,11 @@ export const detectCardType = (cardNumber: string = '') => {
 const getYearAndMonthBasedOnFormat = (cardDate, format:string) => {
   const [part1, part2] = cardDate.split('/');
   switch (format) {
-    case 'MM/YY': return { month: part1, year: 2000 + Number(part2) };
-    case 'YY/MM': return { month: part2, year: 2000 + Number(part1) };
-    case 'YYYY/MM': return { month: part2, year: part1 };
+    case 'MM/YY': return { month: appendZeroToOne(part1).value, year: 2000 + Number(part2) };
+    case 'YY/MM': return { month: appendZeroToOne(part2).value, year: 2000 + Number(part1) };
+    case 'YYYY/MM': return { month: appendZeroToOne(part2).value, year: part1 };
     // MM/YYYY
-    default: return { month: part1, year: part2 };
+    default: return { month: appendZeroToOne(part1).value, year: part2 };
   }
 };
 
@@ -71,7 +72,7 @@ export const validateExpiryDate = (date: string, format:string) => {
   if (!date.includes('/')) return false;
   const { month, year } = getYearAndMonthBasedOnFormat(date, format);
   if (format.endsWith('YYYY') && year.length !== 4) { return false; }
-  const expiryDate = new Date(`${month}-01-${year}`);
+  const expiryDate = new Date(`${year}-${month}-01`);
   const today = new Date();
 
   const maxDate = new Date();
@@ -212,13 +213,12 @@ export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
     if (!(typeof record.token === 'string' || record.token instanceof String)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_IN_DETOKENIZE, [`${index}`]);
     }
-    // const recordRedaction = record.redaction;
-    // if (!recordRedaction) {
-    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
-    // }
-    // if (!Object.values(RedactionType).includes(recordRedaction)) {
-    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
-    // }
+    const recordRedaction = record.redaction;
+    if (recordRedaction) {
+      if (!Object.values(RedactionType).includes(recordRedaction)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_DETOKENIZE, [`${index}`]);
+      }
+    }
   });
 };
 
@@ -371,14 +371,12 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
     if (!(typeof record.token === 'string' || record.token instanceof String)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID_REVEAL);
     }
-    // if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
-    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION);
-    // }
-    // const recordRedaction = record.redaction;
-    // if (!recordRedaction) throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION_VALUE);
-    // if (!Object.values(RedactionType).includes(recordRedaction)) {
-    //   throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE);
-    // }
+    const recordRedaction = record.redaction;
+    if (recordRedaction) {
+      if (!Object.values(RedactionType).includes(recordRedaction)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL);
+      }
+    }
 
     if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_LABEL_REVEAL);

@@ -10,7 +10,7 @@ import SkyflowError from '../../../../src/libs/skyflow-error';
 import logs from '../../../../src/utils/logs';
 import { ContainerType } from '../../../../src/skyflow';
 
-const tableCol = btoa('table.col')
+const tableCol = btoa('1234')
 const collect_element = `element:CVV:${tableCol}`;
 const file_element = `element:FILE_INPUT:${tableCol}`;
 
@@ -28,7 +28,8 @@ describe('test iframeFormelement', () => {
     let emitSpy;
     let targetSpy;
     let on = jest.fn()
-
+    let windowSpy
+    let testValue;
     beforeEach(() => {
         jest.clearAllMocks()
         emitSpy = jest.spyOn(bus, 'emit');
@@ -36,7 +37,19 @@ describe('test iframeFormelement', () => {
         targetSpy.mockReturnValue({
             on,
         });
+        windowSpy = jest.spyOn(window,'parent','get');
+        windowSpy.mockImplementation(()=>({
+         
+                frames:{
+                'element:CARD_NUMBER:${tableCol}':{document:{
+                    getElementById:()=>({value:testValue})
+                }}
+                }
+        }));
     });
+    afterEach(() => {
+        windowSpy.mockRestore();
+      });
 
     test('iframeFormelement constructor', () => {
         const element = new IFrameFormElement(collect_element, {}, context)
@@ -203,6 +216,14 @@ describe('test iframeFormelement', () => {
         expect(valid).toBe(true)
     })
 
+    test('invalid custom validations', () => {
+        const element2 = new IFrameFormElement(`element:EXPIRATION_MONTH:${tableCol}`, {}, context)
+        element2.setValidation([{type:'DEFAULT',params:{}}])
+
+        const isValid = element2.validator('12')
+        expect(isValid).toBe(false)
+    })
+
     test('test custom validations', () => {
 
         const lengthRule = {
@@ -227,10 +248,58 @@ describe('test iframeFormelement', () => {
         expect(isValid).toBe(false)
         expect(element.errorText).toBe("Invalid length")
 
+        isValid = element.validator('123456789')
+        expect(isValid).toBe(false)
+        expect(element.errorText).toBe("Invalid length")
+
         isValid = element.validator('99999')
         expect(isValid).toBe(false)
         expect(element.errorText).toBe(logs.errorLogs.VALIDATION_FAILED)
-    })
+    });
+    
+    test('card number custom validation',()=>{
+
+        const lengthRule2 = {
+            type: ValidationRuleType.LENGTH_MATCH_RULE,
+            params: {
+                min: 16,
+                max: 16,
+                error: "Invalid length",
+            }
+        }
+
+        const regexRule2 = {
+            type: ValidationRuleType.REGEX_MATCH_RULE,
+            params: {
+                regex: "/^4\d*/"
+            }
+        }
+        const cardNumberElement = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
+        cardNumberElement.setValidation([lengthRule2, regexRule2]);
+        let isValid = cardNumberElement.validator('3700 0000 0000 002')
+        expect(isValid).toBe(false)
+        expect(cardNumberElement.errorText).toBe("Invalid length")
+
+        isValid = cardNumberElement.validator('5555 3412 4444 1115')
+        expect(isValid).toBe(false)
+        expect(cardNumberElement.errorText).toBe(logs.errorLogs.VALIDATION_FAILED)
+    });
+
+    test('card number custom validation',()=>{
+        testValue = '5555 3412 4444 '
+        const elementRule = {
+            type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
+            params: {
+                element:'element:CARD_NUMBER:${tableCol}',
+            }
+        }
+        const cardNumberElement = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
+        cardNumberElement.setValidation([elementRule]);
+
+        let isValid = cardNumberElement.validator('5555 3412 4444 1115')
+        expect(isValid).toBe(false)
+        expect(cardNumberElement.errorText).toBe(logs.errorLogs.VALIDATION_FAILED)
+    });
 
 })
 
@@ -392,7 +461,7 @@ describe('test iframeForm collect method', () => {
             }
         }));
 
-        frameReadyCb({ name: collect_element })
+        frameReadyCb({ name:collect_element})
 
         const createFormElement = skyflowInit.mock.calls[0][0]
         const element = createFormElement(collect_element)
@@ -414,6 +483,10 @@ describe('test iframeForm collect method', () => {
             expect(cb3.mock.calls[0][0].records.length).toBe(2);
         }, 1000)
 
+        element.fieldName = 'col';
+        element.tableName = 'table';
+        element.state.name = 'col';
+        
         const cb4 = jest.fn()
         tokenizationCb({
             ...data,

@@ -27,6 +27,8 @@ import {
   COLLECT_COPY_ICON_STYLES,
   COPY_UTILS,
   ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES,
+  INPUT_KEYBOARD_EVENTS,
+  CUSTOM_ROW_ID_ATTRIBUTE,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iframe-form';
 import getCssClassesFromJss from '../../libs/jss-styles';
@@ -133,6 +135,9 @@ export class FrameElement {
     this.htmlDivElement = htmlDivElement;
     this.hasError = false;
     this.mount();
+    this.iFrameFormElement.fieldName = options.column;
+    this.iFrameFormElement.tableName = options.table;
+    this.iFrameFormElement.state.name = options.column;
   }
 
   // mount element onto dom
@@ -163,6 +168,7 @@ export class FrameElement {
 
     const inputElement = document.createElement(type);
     this.domInput = inputElement;
+    inputElement.setAttribute(CUSTOM_ROW_ID_ATTRIBUTE, this.htmlDivElement?.id?.split(':')[0] || '');
     this.inputParent.append(inputElement);
 
     if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
@@ -216,18 +222,6 @@ export class FrameElement {
       }
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
-      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
-        this.iFrameFormElement.setValue(appendZeroToOne(state.value));
-      }
-
-      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
-        if (this.iFrameFormElement.format === 'YYYY/MM') {
-          this.iFrameFormElement.setValue(appendMonthFourDigitYears(state.value));
-        } else if (this.iFrameFormElement.format === 'YY/MM') {
-          this.iFrameFormElement.setValue(appendMonthTwoDigitYears(state.value));
-        }
-      }
-
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
         this.focusChange(false);
       }
@@ -241,28 +235,29 @@ export class FrameElement {
         this.domError.innerText = '';
         this.hasError = false;
       }
-      // // FIELD IS EMPTY AND REQUIRED
-      // if (this.options.required && state.value === '' && this.domError) {
-      //   state.isComplete = false;
-      //   state.isValid = false;
-      //   state.isEmpty = true;
-      //   this.hasError = true;
-      //   this.domError.innerText = this.options.label ? `
-      // ${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-      //     this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
-      // } else if (this.options.required && !state.isRequired && this.domError) {
-      //   // const spanElementId = this.htmlDivElement.id;
-      //   // const error = document.getElementById(spanElementId);
-      //   // console.log('ELE', error);
-      //   this.domError.innerText = this.options.label ?
-      // `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-      //     this.options.label)}` : logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE;
-      // }
-      // const spanElementId = this.htmlDivElement.id.split(':')[0];
-      // const error = document.getElementById(`${spanElementId}-error`);
-      // console.log('ELE', error);
       this.updateStyleClasses(state);
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name) {
+        const { isAppended, value } = appendZeroToOne(state.value);
+        if (isAppended) {
+          this.iFrameFormElement.setValue(value);
+        }
+      }
+
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
+        if (this.iFrameFormElement.format === 'YYYY/MM') {
+          const { isAppended, value } = appendMonthFourDigitYears(state.value);
+          if (isAppended) {
+            this.iFrameFormElement.setValue(value);
+          }
+        } else if (this.iFrameFormElement.format === 'YY/MM') {
+          const { isAppended, value } = appendMonthTwoDigitYears(state.value);
+          if (isAppended) {
+            this.iFrameFormElement.setValue(value);
+          }
+        }
+      }
     });
+
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
       // On CHANGE set isEmpty to false
       state.isEmpty = false;
@@ -292,6 +287,7 @@ export class FrameElement {
           this.domInput.value = state.value || '';
         }
       }
+
       if (this.iFrameFormElement.containerType === ContainerType.COMPOSABLE) {
         const elementType = this.iFrameFormElement.fieldType;
         const fieldTypeCheck = ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES
@@ -310,12 +306,59 @@ export class FrameElement {
           }
         }
       }
-    });
-    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
-      if (data.options) {
-        this.updateOptions(data.options);
+
+      if (
+        !state.isFocused
+        && (this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name
+          || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name)
+      ) {
+        this.updateStyleClasses(state);
       }
     });
+
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+      if (data.options) {
+        const {
+          validations,
+          table,
+          column,
+          label,
+          placeholder,
+          inputStyles,
+          labelStyles,
+          errorTextStyles,
+        } = data.options;
+        if (validations) {
+          this.iFrameFormElement.validations = validations;
+        }
+        if (table) {
+          this.iFrameFormElement.tableName = table;
+        }
+        if (column) {
+          this.iFrameFormElement.state.name = column;
+        }
+        if (label) {
+          if (this.domLabel) {
+            this.domLabel.textContent = label;
+            this.options.label = label;
+            this.updateParentDiv(this.htmlDivElement);
+          }
+        }
+        if (placeholder) {
+          this.domInput?.setAttribute('placeholder', placeholder);
+        }
+        if (inputStyles) {
+          this.injectInputStyles(inputStyles);
+        }
+        if (errorTextStyles) {
+          this.injectInputStyles(errorTextStyles, 'error');
+        }
+        if (labelStyles) {
+          this.injectInputStyles(labelStyles, 'label');
+        }
+      }
+    });
+
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR, (data) => {
       if (this.domError && data.isTriggerError && data.clientErrorText) {
         this.domError.innerText = data.clientErrorText;
@@ -446,6 +489,79 @@ export class FrameElement {
     }
   };
 
+  findPreviousElement = (currentInput) => {
+    const elementList = document.getElementById(currentInput.getAttribute(CUSTOM_ROW_ID_ATTRIBUTE) || '')?.getElementsByTagName('input') as any;
+    let prevIndex;
+    elementList.forEach((element:HTMLInputElement, index) => {
+      if (element.id === this.iFrameFormElement.iFrameName
+      && (index - 1) !== -1) { prevIndex = index - 1; }
+    });
+    return elementList[prevIndex] as HTMLInputElement;
+  };
+
+  findNextElement = (currentInput) => {
+    const elementList = document.getElementById(currentInput.getAttribute(CUSTOM_ROW_ID_ATTRIBUTE) || '')?.getElementsByTagName('input') as any;
+    let nextIndex;
+    elementList.forEach((element:HTMLInputElement, index) => {
+      if (element.id === this.iFrameFormElement.iFrameName
+      && (index + 1) !== elementList.length) { nextIndex = index + 1; }
+    });
+    return elementList[nextIndex] as HTMLInputElement;
+  };
+
+  onSubmit = () => {
+    bus
+      .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+        name: this.iFrameFormElement.iFrameName,
+        event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
+      });
+  };
+
+  onArrowKeys = (event:JQuery.TriggeredEvent) => {
+    const keyBoardEvent = event.originalEvent as KeyboardEvent;
+    const currentInput = keyBoardEvent?.target as HTMLInputElement;
+    const cursorPosition = event.target.selectionEnd;
+
+    switch (keyBoardEvent?.key) {
+      case INPUT_KEYBOARD_EVENTS.RIGHT_ARROW:
+        if (cursorPosition === currentInput.value.length) {
+          const nextElement = this.findNextElement(currentInput);
+          if (nextElement) {
+            nextElement?.focus();
+            keyBoardEvent.preventDefault();
+          }
+        }
+        break;
+
+      case INPUT_KEYBOARD_EVENTS.LEFT_ARROW:
+        if (cursorPosition === 0) {
+          const previousElement = this.findPreviousElement(currentInput);
+          if (previousElement) {
+            previousElement?.focus();
+            keyBoardEvent.preventDefault();
+          }
+        }
+        break;
+
+      case INPUT_KEYBOARD_EVENTS.BACKSPACE:
+        if (cursorPosition === 0) {
+          const previousElement = this.findPreviousElement(currentInput);
+          if (previousElement) {
+            previousElement?.focus();
+            keyBoardEvent.preventDefault();
+          }
+        }
+        break;
+
+      case INPUT_KEYBOARD_EVENTS.ENTER:
+        this.onSubmit();
+        keyBoardEvent.preventDefault();
+        break;
+
+      default: break;
+    }
+  };
+
   focusChange = (focus: boolean) => {
     if (focus) this.domInput?.focus();
     else this.domInput?.blur();
@@ -460,7 +576,7 @@ export class FrameElement {
         customStyles[type] = styles[type];
       }
     });
-    getCssClassesFromJss(customStyles, `${preText}-${this.options.name}`);
+    getCssClassesFromJss(customStyles, `${preText}-${this.options.elementName}`);
   }
 
   updateStyleClasses(state: {
@@ -508,7 +624,7 @@ export class FrameElement {
         if (types.includes(type)) classes.push(type);
       });
       classes = classes.map(
-        (type) => `SkyflowElement-${preText}-${this.options.name}-${type}`,
+        (type) => `SkyflowElement-${preText}-${this.options.elementName}-${type}`,
       );
       dom.className = classes.join(' ');
     }
@@ -619,6 +735,7 @@ export class FrameElement {
         }
 
         $(id).on('input', this.onInputChange);
+        $(id).on('keydown', this.onArrowKeys);
       }
 
       this.setupInputField(

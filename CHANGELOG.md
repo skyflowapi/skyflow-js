@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.25.0] - 2023-02-01
+-   Added `redaction` type support in `detokenize` interface.
+
+## [1.24.0] - 2023-01-17
+### Added
+-  Added new `Composable` Elements.
 ## [1.23.0] - 2022-12-27
 ### Added
 -  Added new `get` interface.

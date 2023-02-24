@@ -125,6 +125,10 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_REDACTION_TYPE_IN_GET,
   },
+  INVALID_REDACTION_TYPE_IN_DETOKENIZE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_REDACTION_TYPE_IN_DETOKENIZE,
+  },
   INVALID_TOKENS_IN_COLLECT: {
     code: 404,
     description: logs.errorLogs.INVALID_TOKENS_IN_COLLECT,
@@ -166,6 +170,10 @@ const SKYFLOW_ERROR_CODE = {
   INVALID_TOKEN_ID_REVEAL: { code: 400, description: logs.errorLogs.INVALID_TOKEN_ID_REVEAL },
   INVALID_LABEL_REVEAL: { code: 400, description: logs.errorLogs.INVALID_LABEL_REVEAL },
   INVALID_ALT_TEXT_REVEAL: { code: 400, description: logs.errorLogs.INVALID_ALT_TEXT_REVEAL },
+  INVALID_REDACTION_TYPE_REVEAL: {
+    code: 400,
+    description: logs.errorLogs.INVALID_REDACTION_TYPE_REVEAL,
+  },
   EMPTY_TABLE_IN_ADDITIONAL_FIELDS: {
     code: 400,
     description: logs.errorLogs.EMPTY_TABLE_IN_ADDITIONAL_FIELDS,

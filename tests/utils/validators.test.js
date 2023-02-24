@@ -277,6 +277,14 @@ describe('detokenize input validation', () => {
       expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TOKEN_IN_DETOKENIZE.description, 0))
     }
   })
+
+  test('invalid redaction type', () => {
+    try {
+      validateDetokenizeInput({ records: [{ token: '13213', redaction: 'invalid' }] })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_DETOKENIZE.description, 0))
+    }
+  })
 })
 
 describe('getById input validation', () => {
@@ -704,6 +712,15 @@ describe("validate reveal element input", () => {
       expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_REVEAL.description)
     }
   })
+
+  test("invalid redaction type", () => {
+    try {
+      validateRevealElementRecords([{ token: '123', redaction: 'invalid' }])
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL.description)
+    }
+  })
+
 })
 
 

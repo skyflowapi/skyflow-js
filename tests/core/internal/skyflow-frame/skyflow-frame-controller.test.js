@@ -5,7 +5,7 @@ import bus from 'framebus';
 import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../../../src/core/constants';
 import clientModule from '../../../../src/client';
 import * as busEvents from '../../../../src/utils/bus-events';
-import { LogLevel, Env } from '../../../../src/utils/common';
+import { LogLevel, Env, RedactionType } from '../../../../src/utils/common';
 import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
 
 jest.mock('easy-soap-request')
@@ -193,12 +193,22 @@ const detokenizeRecords = [{
   token: 'token1',
   // redaction: 'PLAIN_TEXT',
 }];
+const detokenizeRecordWithRedaction = [{
+  token: 'token1',
+  redaction: RedactionType.MASKED,
+}]
 const detokenizeResponse = {
   records: [{
     token_id: 'token1',
     fields: {
       cvv: '123',
     },
+  }],
+};
+const detokenizeResponseWithRedaction = {
+  records: [{
+    token_id: 'token1',
+    value: '123'
   }],
 };
 const detokenizeErrorResponse = {
@@ -377,7 +387,7 @@ describe('Retrieving data using skyflow tokens', () => {
   });
 
   test('detokenize success', (done) => {
-    const clientReq = jest.fn(() => Promise.resolve(detokenizeResponse));
+    const clientReq = jest.fn(() => Promise.resolve(detokenizeResponseWithRedaction));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
     SkyflowFrameController.init();
@@ -390,7 +400,7 @@ describe('Retrieving data using skyflow tokens', () => {
     const onCb = on.mock.calls[0][1];
     const data = {
       type: PUREJS_TYPES.DETOKENIZE,
-      records: detokenizeRecords,
+      records: detokenizeRecordWithRedaction,
     };
     const cb2 = jest.fn();
     onCb(data, cb2);
@@ -415,7 +425,7 @@ describe('Retrieving data using skyflow tokens', () => {
     const onCb = on.mock.calls[0][1];
     const data = {
       type: PUREJS_TYPES.DETOKENIZE,
-      records: detokenizeRecords,
+      records: detokenizeRecordWithRedaction,
     };
     const cb2 = jest.fn();
     onCb(data, cb2);
