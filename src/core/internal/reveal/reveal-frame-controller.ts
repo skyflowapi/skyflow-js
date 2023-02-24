@@ -59,9 +59,9 @@ class RevealFrameController {
           callback({ error: rejectedResult });
         },
       );
-      bus
-        .target(this.#clientDomain)
-        .off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId, sub);
+      // bus
+      //   .target(this.#clientDomain)
+      //   .off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId, sub);
     };
 
     bus
