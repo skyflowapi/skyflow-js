@@ -4,6 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import {
   ALLOWED_EXPIRY_DATE_FORMATS,
   ALLOWED_EXPIRY_YEAR_FORMATS,
+  CARDNUMBER_REVEAL_FORMAT,
   CardType, CARD_TYPE_REGEX,
   DEFAULT_CARD_LENGTH_RANGE,
 } from '../../core/constants';
@@ -55,7 +56,7 @@ export const detectCardType = (cardNumber: string = '') => {
   return detectedType;
 };
 
-const getYearAndMonthBasedOnFormat = (cardDate, format:string) => {
+const getYearAndMonthBasedOnFormat = (cardDate, format: string) => {
   const [part1, part2] = cardDate.split('/');
   switch (format) {
     case 'MM/YY': return { month: appendZeroToOne(part1).value, year: 2000 + Number(part2) };
@@ -66,7 +67,7 @@ const getYearAndMonthBasedOnFormat = (cardDate, format:string) => {
   }
 };
 
-export const validateExpiryDate = (date: string, format:string) => {
+export const validateExpiryDate = (date: string, format: string) => {
   if (date.trim().length === 0) return true;
   if (!date.includes('/')) return false;
   const { month, year } = getYearAndMonthBasedOnFormat(date, format);
@@ -80,7 +81,7 @@ export const validateExpiryDate = (date: string, format:string) => {
   return expiryDate > today && expiryDate <= maxDate;
 };
 
-export const validateExpiryYear = (year: string, format:string) => {
+export const validateExpiryYear = (year: string, format: string) => {
   if (year.trim().length === 0) return true;
   let expiryYear = Number(year);
   if (format === 'YY') {
@@ -101,14 +102,14 @@ export const validateExpiryMonth = (month: string) => {
   return false;
 };
 
-export const isValidExpiryDateFormat = (format:string):boolean => {
+export const isValidExpiryDateFormat = (format: string): boolean => {
   if (format) {
     return ALLOWED_EXPIRY_DATE_FORMATS.includes(format);
   }
   return false;
 };
 
-export const isValidExpiryYearFormat = (format:string):boolean => {
+export const isValidExpiryYearFormat = (format: string): boolean => {
   if (format) {
     return ALLOWED_EXPIRY_YEAR_FORMATS.includes(format);
   }
@@ -126,7 +127,7 @@ export const validateInsertRecords = (recordObj: IInsertRecordInput, options: an
   if (records.length === 0) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_IN_INSERT, [], true);
   }
-  records.forEach((record:any, index: number) => {
+  records.forEach((record: any, index: number) => {
     if (!(record && Object.prototype.hasOwnProperty.call(record, 'table'))) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_INSERT, [`${index}`], true);
     }
@@ -376,6 +377,16 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
     if (Object.prototype.hasOwnProperty.call(record, 'altText') && typeof record.altText !== 'string') {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_REVEAL);
     }
+
+    if (Object.prototype.hasOwnProperty.call(record, 'format') && typeof record.format !== 'string') {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FORMAT_REVEAL);
+    }
+    if (Object.prototype.hasOwnProperty.call(record, 'format') && record.format === '') {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_FORMAT_REVEAL);
+    }
+    if (Object.prototype.hasOwnProperty.call(record, 'format') && !Object.values(CARDNUMBER_REVEAL_FORMAT).includes(record.format)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FORMAT_VALUE_REVEAL);
+    }
   });
 };
 
@@ -405,11 +416,11 @@ export const isValidRegExp = (input) => {
   return isValid;
 };
 
-export const validateCardNumberLengthCheck = (cardNumber:string = ''):boolean => {
-  const cardType:CardType = detectCardType(cardNumber);
+export const validateCardNumberLengthCheck = (cardNumber: string = ''): boolean => {
+  const cardType: CardType = detectCardType(cardNumber);
   const cardLength = cardNumber.replace(/[\s-]/g, '').length;
-  const validLengths:number[] = CARD_TYPE_REGEX[cardType]?.cardLengthRange
-                                || DEFAULT_CARD_LENGTH_RANGE;
+  const validLengths: number[] = CARD_TYPE_REGEX[cardType]?.cardLengthRange
+    || DEFAULT_CARD_LENGTH_RANGE;
   return validLengths.includes(cardLength);
 };
 

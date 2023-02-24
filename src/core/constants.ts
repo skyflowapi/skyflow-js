@@ -229,6 +229,12 @@ export const ELEMENTS = {
   },
 };
 
+export const CARDNUMBER_REVEAL_FORMAT = {
+  SPACE_FORMAT: 'XXXX XXXX XXXX XXXX',
+  DASH_FORMAT:'XXXX-XXXX-XXXX-XXXX',
+  AMEX_FORMAT:'XXXX XXXXXX XXXXX'
+}
+
 export const IFRAME_DEFAULT_STYLES = {
   height: '100%',
   width: '100%',
