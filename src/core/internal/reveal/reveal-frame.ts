@@ -12,7 +12,7 @@ import {
   REVEAL_ELEMENT_OPTIONS_TYPES,
   COPY_UTILS,
   REVEAL_COPY_ICON_STYLES,
-	CARDNUMBER_REVEAL_FORMAT,
+  CARDNUMBER_REVEAL_FORMAT,
 } from '../../constants';
 import getCssClassesFromJss from '../../../libs/jss-styles';
 import {
@@ -134,25 +134,39 @@ class RevealFrame {
         this.#revealedValue = responseValue;
         this.isRevealCalled = true;
         // TODO: Hardcoded as the regex provide from SDK side is not getting escaped.
-				let formattedString = ''
-				if (this.#record.format !== undefined && (responseValue.length === 16 || responseValue.length === 15)) {
-					for (const [k, v] of Object.entries(CARDNUMBER_REVEAL_FORMAT)) {
-						if (CARDNUMBER_REVEAL_FORMAT.SPACE_FORMAT === this.#record.format) {
-							formattedString = responseValue.replace(/(\d{4}(?!\s))/g, '$1 ');
-						} else if (CARDNUMBER_REVEAL_FORMAT.DASH_FORMAT === this.#record.format) {
-							formattedString = responseValue.replace(/^(\d{4})(\d{4})(\d{4})(\d{4})$/, '$1-$2-$3-$4');
-						} else if (CARDNUMBER_REVEAL_FORMAT.AMEX_FORMAT === this.#record.format) {
-							formattedString = responseValue.replace(/^(\d{4})(\d{6})(\d{5})$/, '$1 $2 $3');
-						}
-						else {
-							formattedString = responseValue
-						}
-					}
-				} else {
-					formattedString = responseValue
-				}
+        let formattedString = '';
+        if (
+          this.#record.format !== undefined
+          && (responseValue.length === 16 || responseValue.length === 15)
+        ) {
+          // eslint-disable-next-line no-restricted-syntax
+          for (const [k, v] of Object.entries(CARDNUMBER_REVEAL_FORMAT)) {
+            if (CARDNUMBER_REVEAL_FORMAT.SPACE_FORMAT === this.#record.format) {
+              formattedString = responseValue.replace(/(\d{4}(?!\s))/g, '$1 ');
+            } else if (
+              CARDNUMBER_REVEAL_FORMAT.DASH_FORMAT === this.#record.format
+            ) {
+              formattedString = responseValue.replace(
+                /^(\d{4})(\d{4})(\d{4})(\d{4})$/,
+                '$1-$2-$3-$4',
+              );
+            } else if (
+              CARDNUMBER_REVEAL_FORMAT.AMEX_FORMAT === this.#record.format
+            ) {
+              formattedString = responseValue.replace(
+                /^(\d{4})(\d{6})(\d{5})$/,
+                '$1 $2 $3',
+              );
+            } else {
+              formattedString = responseValue;
+            }
+          }
+        } else {
+          formattedString = responseValue;
+        }
 
-				this.#dataElememt.innerText = this.#record.format === undefined ? responseValue : formattedString;
+        this.#dataElememt.innerText = this.#record.format === undefined
+          ? responseValue : formattedString;
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
           CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
 
