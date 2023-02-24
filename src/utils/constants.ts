@@ -164,7 +164,9 @@ const SKYFLOW_ERROR_CODE = {
   INVALID_ALT_TEXT_REVEAL: { code: 400, description: logs.errorLogs.INVALID_ALT_TEXT_REVEAL },
   INVALID_FORMAT_REVEAL: { code: 400, description: logs.errorLogs.INVALID_FORMAT_REVEAL },
   EMPTY_FORMAT_REVEAL: { code: 400, description: logs.errorLogs.EMPTY_FORMAT_REVEAL },
-  INVALID_FORMAT_VALUE_REVEAL: { code: 400, description: logs.errorLogs.INVALID_FORMAT_VALUE_REVEAL },
+  INVALID_FORMAT_VALUE_REVEAL: {
+    code: 400, description: logs.errorLogs.INVALID_FORMAT_VALUE_REVEAL,
+  },
   INVALID_REDACTION_TYPE_REVEAL: {
     code: 400,
     description: logs.errorLogs.INVALID_REDACTION_TYPE_REVEAL,

@@ -140,26 +140,24 @@ class RevealFrame {
           && (responseValue.length === 16 || responseValue.length === 15)
         ) {
           // eslint-disable-next-line no-restricted-syntax
-          for (const [k, v] of Object.entries(CARDNUMBER_REVEAL_FORMAT)) {
-            if (CARDNUMBER_REVEAL_FORMAT.SPACE_FORMAT === this.#record.format) {
-              formattedString = responseValue.replace(/(\d{4}(?!\s))/g, '$1 ');
-            } else if (
-              CARDNUMBER_REVEAL_FORMAT.DASH_FORMAT === this.#record.format
-            ) {
-              formattedString = responseValue.replace(
-                /^(\d{4})(\d{4})(\d{4})(\d{4})$/,
-                '$1-$2-$3-$4',
-              );
-            } else if (
-              CARDNUMBER_REVEAL_FORMAT.AMEX_FORMAT === this.#record.format
-            ) {
-              formattedString = responseValue.replace(
-                /^(\d{4})(\d{6})(\d{5})$/,
-                '$1 $2 $3',
-              );
-            } else {
-              formattedString = responseValue;
-            }
+          if (CARDNUMBER_REVEAL_FORMAT.SPACE_FORMAT === this.#record.format) {
+            formattedString = responseValue.replace(/(\d{4}(?!\s))/g, '$1 ');
+          } else if (
+            CARDNUMBER_REVEAL_FORMAT.DASH_FORMAT === this.#record.format
+          ) {
+            formattedString = responseValue.replace(
+              /^(\d{4})(\d{4})(\d{4})(\d{4})$/,
+              '$1-$2-$3-$4',
+            );
+          } else if (
+            CARDNUMBER_REVEAL_FORMAT.AMEX_FORMAT === this.#record.format
+          ) {
+            formattedString = responseValue.replace(
+              /^(\d{4})(\d{6})(\d{5})$/,
+              '$1 $2 $3',
+            );
+          } else {
+            formattedString = responseValue;
           }
         } else {
           formattedString = responseValue;
