@@ -423,6 +423,19 @@ describe('Collect container', () => {
       expect(err).toBeDefined();
     }
   });
+  it('skyflowID undefined for collect Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const cvv = container.create({
+        ...cvvElement,
+        skyflowID: undefined,
+      });
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+
+
   it("container collect options", () => {
     let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const options = {
@@ -446,5 +459,29 @@ describe('Collect container', () => {
     const collectCb = emitSpy.mock.calls[0][2];
     collectCb(collectResponse)
     collectCb({ error: 'Error occured' })
+  });
+  it("container collect options error", () => {
+    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const options = {
+      tokens: true,
+      additionalFields: {
+        records: [
+          {
+            table: "string", //table into which record should be inserted
+            fields: {
+              column1: "value",
+              skyflowID: 'id'
+            }
+          }
+        ]
+      },
+      upsert: [{
+        table: 'table',
+        column: 'column'
+      }]
+    }
+    container.collect(options);
+    const emitCb = emitSpy.mock.calls[0][2];
+    emitCb({error:{code:404,description:"Not Found"}});
   });
 });

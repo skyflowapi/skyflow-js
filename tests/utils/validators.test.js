@@ -206,7 +206,20 @@ describe('insert additional records validation', () => {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_ADDITIONAL_FIELDS.description, 0))
     }
   })
-
+  test('empty skyflow id', () => {
+    try {
+      validateAdditionalFieldsInCollect({ records: [{ table: 'abc', fields: { 'columnName' : 'value',  skyflowID: ''} }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS.description, 0,true ))
+    }
+  })
+  test('invalid skyflow id', () => {
+    try {
+      validateAdditionalFieldsInCollect({ records: [{ table: 'abc', fields: { 'columnName' : 'value', skyflowID: []} }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOW_ID_IN_ADDITIONAL_FIELDS.description, 0, true))
+    }
+  })
   test('missing fields', () => {
     try {
       validateAdditionalFieldsInCollect({ records: [{ table: 'abc' }] })
@@ -469,7 +482,7 @@ describe('get input validation for fetching unique column values',() => {
   })
   test('empty column values', () => {
     try {
-      validateGetInput({ records: [{ table: 'table', columnValues: [], redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName'}] })
+      validateGetInput({ records: [{ table: 'table', columnValues: null, redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName'}] })
     } catch (err) {
       expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_RECORD_COLUMN_VALUES.description, 0))
     }
@@ -568,7 +581,7 @@ describe('get input validation for fetching unique column values',() => {
   })
   test('missing columnValues key in get', () => {
     try {
-      validateGetInput({ records: [{ table: 'test', redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
+      validateGetInput({ records: [{ table: 'test', redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName', columnValues: undefined }] })
     } catch (err) {
       expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_RECORD_COLUMN_VALUE.description, 0))
     }
@@ -623,6 +636,13 @@ describe('skyflow init validation', () => {
       expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_VAULTURL_IN_INIT.description)
     }
   })
+  test('empty vaultURL', () => {
+    try {
+      validateInitConfig({ vaultID: '123', vaultURL: null })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT.description)
+    }
+  })
 
   test('missing getBearerToken', () => {
     try {
@@ -631,6 +651,7 @@ describe('skyflow init validation', () => {
       expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED.description)
     }
   })
+
 })
 
 
@@ -661,6 +682,13 @@ describe("validate reveal element input", () => {
     }
   })
 
+  test("empty token type", () => {
+    try {
+      validateRevealElementRecords([{ token: null }])
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_TOKEN_ID_REVEAL.description)
+    }
+  })
   test("invalid token type", () => {
     try {
       validateRevealElementRecords([{ token: {} }])

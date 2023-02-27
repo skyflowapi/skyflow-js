@@ -55,6 +55,7 @@ export interface IInsertRecordInput {
 export interface IInsertRecord {
   table: string;
   fields: Record<string, any>;
+  skyflowID?: string;
 }
 
 export interface IRevealRecord {
@@ -62,6 +63,14 @@ export interface IRevealRecord {
   redaction?: RedactionType;
 }
 
+export interface IInsertResponse {
+  records: IInsertResponseReocrds[];
+}
+export interface IInsertResponseReocrds {
+  table: string;
+  fields?: Record<string, any>;
+  skyflowID?: string;
+}
 export interface IRevealResponseType {
   records?: Record<string, string>[];
   errors?: Record<string, any>[];
