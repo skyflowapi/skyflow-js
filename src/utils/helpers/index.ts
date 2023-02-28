@@ -100,7 +100,10 @@ export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
 const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-package', 'application/vnd.microsoft.portable-executable', 'application/vnd.rar'];
 // Check file type and file size in KB
 export const fileValidation = (value) => {
-  if (value === undefined) return true;
+  if (value === undefined || value === '') {
+    return false;
+  }
+
   if (DANGEROUS_FILE_TYPE.includes(value.type) || value.size > 3200000) return false;
   return true;
 };
