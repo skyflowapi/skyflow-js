@@ -101,7 +101,7 @@ const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-p
 // Check file type and file size in KB
 export const fileValidation = (value) => {
   if (value === undefined) return true;
-  if (DANGEROUS_FILE_TYPE.includes(value.type) || value.size > 3200000) return false;
+  if (DANGEROUS_FILE_TYPE.includes(value.type) || value.size > 32000000) return false;
   return true;
 };
 
