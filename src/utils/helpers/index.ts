@@ -5,7 +5,9 @@ import {
   CardType,
   COPY_UTILS, ElementType,
 } from '../../core/constants';
+import SkyflowError from '../../libs/skyflow-error';
 import { ContainerType } from '../../skyflow';
+import SKYFLOW_ERROR_CODE from '../constants';
 import { detectCardType } from '../validators';
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
@@ -60,16 +62,18 @@ export const appendMonthTwoDigitYears = (value) => {
 
 export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {
   if (typeof value === 'string') {
-    value = value && value.replace(/\s/g, '');
-    if (doesReturnValue) {
-      return value;
-    } if (element === ElementType.CARD_NUMBER
-      && !doesReturnValue) {
-      const cardType = detectCardType(value);
-      const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
-      if (value.length > threshold) {
-        return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
+    if (element === ElementType.CARD_NUMBER) {
+      value = value && value.replace(/\s/g, '');
+      if (!doesReturnValue) {
+        const cardType = detectCardType(value);
+        const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
+        if (value.length > threshold) {
+          return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
+        }
+        return value;
       }
+      return value;
+    } if (doesReturnValue) {
       return value;
     }
   } else {
@@ -100,8 +104,18 @@ export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
 const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-package', 'application/vnd.microsoft.portable-executable', 'application/vnd.rar'];
 // Check file type and file size in KB
 export const fileValidation = (value) => {
-  if (value === undefined) return true;
-  if (DANGEROUS_FILE_TYPE.includes(value.type) || value.size > 3200000) return false;
+  if (value === undefined || value === '') {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED, [], true);
+  }
+
+  if (DANGEROUS_FILE_TYPE.includes(value.type)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
+  }
+
+  if (value.size > 32000000) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
+  }
+
   return true;
 };
 
