@@ -154,6 +154,14 @@ describe('test file validation', () => {
       expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description)
     }
   })
+  test('no file selected', () => {
+    const file = {}
+    try {
+      fileValidation(file);
+    } catch(err) {
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED.description)
+    }
+  })
 })
 
 describe('test JSX style object conversion function',()=>{
