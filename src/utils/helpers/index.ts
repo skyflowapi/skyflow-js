@@ -62,16 +62,18 @@ export const appendMonthTwoDigitYears = (value) => {
 
 export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {
   if (typeof value === 'string') {
-    value = value && value.replace(/\s/g, '');
-    if (doesReturnValue) {
-      return value;
-    } if (element === ElementType.CARD_NUMBER
-      && !doesReturnValue) {
-      const cardType = detectCardType(value);
-      const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
-      if (value.length > threshold) {
-        return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
+    if (element === ElementType.CARD_NUMBER) {
+      value = value && value.replace(/\s/g, '');
+      if (!doesReturnValue) {
+        const cardType = detectCardType(value);
+        const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
+        if (value.length > threshold) {
+          return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
+        }
+        return value;
       }
+      return value;
+    } if (doesReturnValue) {
       return value;
     }
   } else {
