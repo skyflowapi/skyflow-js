@@ -366,7 +366,11 @@ export class IFrameFormElement extends EventEmitter {
     } else if (this.fieldType === ElementType.EXPIRATION_YEAR && value) {
       resp = validateExpiryYear(value, this.format);
     } else if (this.fieldType === ElementType.FILE_INPUT) {
-      resp = fileValidation(value);
+      try {
+        resp = fileValidation(value);
+      } catch (err) {
+        resp = false;
+      }
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex && value) {
@@ -832,6 +836,12 @@ export class IFrameForm {
       onFocusChange(false);
     }
 
+    try {
+      fileValidation(state.value);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+
     const validatedFileState = fileValidation(state.value);
 
     if (!validatedFileState) {
@@ -888,18 +898,23 @@ export class IFrameForm {
     const formElements = Object.keys(this.iFrameFormElements);
     let errorMessage = '';
     for (let i = 0; i < formElements.length; i += 1) {
-      const {
-        state, doesClientHasError, clientErrorText, errorText, onFocusChange,
-      } = this.iFrameFormElements[formElements[i]];
+      if (
+        this.iFrameFormElements[formElements[i]].fieldType
+        !== ELEMENTS.FILE_INPUT.name
+      ) {
+        const {
+          state, doesClientHasError, clientErrorText, errorText, onFocusChange,
+        } = this.iFrameFormElements[formElements[i]];
 
-      if (state.isRequired) {
-        onFocusChange(false);
-      }
+        if (state.isRequired) {
+          onFocusChange(false);
+        }
 
-      if (!state.isValid || !state.isComplete) {
-        if (doesClientHasError) {
-          errorMessage += `${state.name}:${clientErrorText}`;
-        } else { errorMessage += `${state.name}:${errorText} `; }
+        if (!state.isValid || !state.isComplete) {
+          if (doesClientHasError) {
+            errorMessage += `${state.name}:${clientErrorText}`;
+          } else { errorMessage += `${state.name}:${errorText} `; }
+        }
       }
     }
 

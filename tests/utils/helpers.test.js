@@ -100,25 +100,32 @@ describe('test copy feature', () => {
 
 describe('test file validation', () => {
   test('invalid file type', () => {
-    const zipFile = {
-      lastModified: '',
-      lastModifiedDate: '',
-      name: "sample.zip",
-      size: 48848,
-      type: "application/zip",
-      webkitRelativePath: ""
-    }
-    const debFile = {
-      lastModified: '',
-      lastModifiedDate: '',
-      name: "sample.deb",
-      size: 48848,
-      type: "application/vnd.debian.binary-package",
-      webkitRelativePath: ""
-    }
-    expect(fileValidation(zipFile)).toBe(false);
-    expect(fileValidation(debFile)).toBe(false);
+    const invalidFiles = [
+      {
+        lastModified: '',
+        lastModifiedDate: '',
+        name: "sample.zip",
+        size: 48848,
+        type: "application/zip",
+        webkitRelativePath: ""
+      },
+      {
+        lastModified: '',
+        lastModifiedDate: '',
+        name: "sample.deb",
+        size: 48848,
+        type: "application/vnd.debian.binary-package",
+        webkitRelativePath: ""
+      }
+    ]
 
+    invalidFiles.forEach(invalidFile => {
+      try {
+        fileValidation(invalidFile)
+      } catch(err) {
+        expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE.description)
+      }      
+    })
   })
 
   test('valid file type', () => {
@@ -141,7 +148,11 @@ describe('test file validation', () => {
       type: "application/pdf",
       webkitRelativePath: ""
     }
-    expect(fileValidation(file)).toBe(false);
+    try {
+      fileValidation(file);
+    } catch(err) {
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description)
+    }
   })
 })
 

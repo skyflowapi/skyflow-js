@@ -274,6 +274,14 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_FILE_TYPE,
   },
+  INVALID_FILE_SIZE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_FILE_SIZE,
+  },
+  NO_FILE_SELECTED: {
+    code: 400,
+    description: logs.errorLogs.NO_FILE_SELECTED,
+  },
   INVALID_TABLE_IN_UPSERT_OPTION: {
     code: 400,
     description: logs.errorLogs.INVALID_TABLE_IN_UPSERT_OPTION,
