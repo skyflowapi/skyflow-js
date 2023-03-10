@@ -156,8 +156,14 @@ describe('test file validation', () => {
   })
   test('no file selected', () => {
     const file = {}
+      const isValid = fileValidation(file);
+      expect(isValid).toBe(true);
+  })
+
+  test('no file selected for required file input', () => {
+    const file = {}
     try {
-      fileValidation(file);
+      fileValidation(file, true);
     } catch(err) {
       expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED.description)
     }

@@ -367,7 +367,7 @@ export class IFrameFormElement extends EventEmitter {
       resp = validateExpiryYear(value, this.format);
     } else if (this.fieldType === ElementType.FILE_INPUT) {
       try {
-        resp = fileValidation(value);
+        resp = fileValidation(value, this.state.isRequired);
       } catch (err) {
         resp = false;
       }
@@ -837,12 +837,12 @@ export class IFrameForm {
     }
 
     try {
-      fileValidation(state.value);
+      fileValidation(state.value, state.isRequired);
     } catch (err) {
       return Promise.reject(err);
     }
 
-    const validatedFileState = fileValidation(state.value);
+    const validatedFileState = fileValidation(state.value, state.isRequired);
 
     if (!validatedFileState) {
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true));
