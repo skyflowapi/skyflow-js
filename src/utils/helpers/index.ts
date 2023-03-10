@@ -103,8 +103,8 @@ export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
 
 const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-package', 'application/vnd.microsoft.portable-executable', 'application/vnd.rar'];
 // Check file type and file size in KB
-export const fileValidation = (value) => {
-  if (value === undefined || value === '') {
+export const fileValidation = (value, required: Boolean = false) => {
+  if (required && (value === undefined || value === '')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED, [], true);
   }
 
