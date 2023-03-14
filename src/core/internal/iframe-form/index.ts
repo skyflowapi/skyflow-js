@@ -944,7 +944,7 @@ export class IFrameForm {
             } else {
               insertResponseObject[state.name] = state.value;
             }
-          } else if (insertResponseObject[tableName] && (!skyflowID || skyflowID === undefined)) {
+          } else if (insertResponseObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
             if (get(insertResponseObject[tableName], state.name)
             && !(validations && checkForElementMatchRule(validations))) {
               return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
@@ -955,8 +955,8 @@ export class IFrameForm {
               state.name,
               this.iFrameFormElements[formElements[i]].getUnformattedValue(),
             );
-          } else if (skyflowID) {
-            if (skyflowID === null) {
+          } else if (skyflowID || skyflowID === '') {
+            if (skyflowID === '' || skyflowID === null) {
               return Promise.reject(new SkyflowError(
                 SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
               ));

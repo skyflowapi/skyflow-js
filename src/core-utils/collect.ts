@@ -106,11 +106,11 @@ export const constructFinalUpdateRecordResponse = (
 ) => {
   if (tokens) {
     return {
+      table: records.table,
       fields: {
         skyflow_id: records.skyflowID,
         ...responseBody.tokens,
       },
-      table: records.table,
     };
   }
   return {
@@ -208,7 +208,7 @@ const updateRecordsInVault = (
       record: {
         fields: { ...skyflowIdRecord.fields },
       },
-      tokenization: options.tokens,
+      tokenization: options?.tokens !== undefined ? options.tokens : true,
     },
     requestMethod: 'PUT',
     url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${table}/${skyflowID}`,

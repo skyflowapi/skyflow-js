@@ -474,7 +474,7 @@ describe('Retrieving data using get', () => {
       done();
     }, 1000);
   });
-  test('get success2', (done) => {
+  test('get success second case', (done) => {
     const clientReq = jest.fn(() => Promise.resolve(getByIdRes));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
