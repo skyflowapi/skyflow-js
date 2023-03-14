@@ -369,7 +369,11 @@ export class IFrameFormElement extends EventEmitter {
     } else if (this.fieldType === ElementType.EXPIRATION_YEAR && value) {
       resp = validateExpiryYear(value, this.format);
     } else if (this.fieldType === ElementType.FILE_INPUT) {
-      resp = fileValidation(value);
+      try {
+        resp = fileValidation(value, this.state.isRequired);
+      } catch (err) {
+        resp = false;
+      }
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex && value) {
@@ -835,7 +839,13 @@ export class IFrameForm {
       onFocusChange(false);
     }
 
-    const validatedFileState = fileValidation(state.value);
+    try {
+      fileValidation(state.value, state.isRequired);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+
+    const validatedFileState = fileValidation(state.value, state.isRequired);
 
     if (!validatedFileState) {
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true));
@@ -891,18 +901,23 @@ export class IFrameForm {
     const formElements = Object.keys(this.iFrameFormElements);
     let errorMessage = '';
     for (let i = 0; i < formElements.length; i += 1) {
-      const {
-        state, doesClientHasError, clientErrorText, errorText, onFocusChange,
-      } = this.iFrameFormElements[formElements[i]];
+      if (
+        this.iFrameFormElements[formElements[i]].fieldType
+        !== ELEMENTS.FILE_INPUT.name
+      ) {
+        const {
+          state, doesClientHasError, clientErrorText, errorText, onFocusChange,
+        } = this.iFrameFormElements[formElements[i]];
 
-      if (state.isRequired) {
-        onFocusChange(false);
-      }
+        if (state.isRequired) {
+          onFocusChange(false);
+        }
 
-      if (!state.isValid || !state.isComplete) {
-        if (doesClientHasError) {
-          errorMessage += `${state.name}:${clientErrorText}`;
-        } else { errorMessage += `${state.name}:${errorText} `; }
+        if (!state.isValid || !state.isComplete) {
+          if (doesClientHasError) {
+            errorMessage += `${state.name}:${clientErrorText}`;
+          } else { errorMessage += `${state.name}:${errorText} `; }
+        }
       }
     }
 

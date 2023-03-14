@@ -197,7 +197,9 @@ const logs = {
     EMPTY_ELEMENT_IN_MOUNT: 'Interface: mount element with type %s1 - Mount cannot be empty.',
     VALIDATION_FAILED: 'Validation failed',
     REVEAL_ELEMENT_ERROR_STATE: 'unable to reveal, since one or more element(s) have setError',
-    INVALID_FILE_TYPE: 'Interface: collect element - Invalid file type',
+    INVALID_FILE_TYPE: 'Interface: collect element - Invalid File Type',
+    INVALID_FILE_SIZE: 'Interface: collect element - Invalid File Size',
+    NO_FILE_SELECTED: 'Interface: collect element - No File Selected',
     INVALID_UPSERT_OPTION_TYPE:
       'Invalid upsert option, should be an array',
     EMPTY_UPSERT_OPTIONS_ARRAY:
