@@ -125,6 +125,7 @@ class ComposableContainer extends Container {
   create = (input: CollectElementInput, options: any = {
     required: false,
   }) => {
+    console.log('create called.', input.type);
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
@@ -272,7 +273,10 @@ class ComposableContainer extends Container {
         ['CollectElement'], true);
     }
 
+    console.log('JS SDK -> Mount Called', this.#elementsList.length);
+    console.log('JS SDK -> Mount Called element list', this.#elementsList);
     const { layout } = this.#options;
+    console.log('JS SDK -> Layout count,', layout);
     if (_.sum(layout) !== this.#elementsList.length) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.MISMATCH_ELEMENT_COUNT_LAYOUT_SUM, [], true);
     }
@@ -374,10 +378,13 @@ class ComposableContainer extends Container {
         }
         return element;
       });
-
-      this.#containerElement.updateElement({
-        ...elementList[elementIndex],
-      });
+      console.log('entered in the listener');
+      if (this.#containerElement) {
+        console.log('we have element');
+        this.#containerElement.updateElement({
+          ...elementList[elementIndex],
+        });
+      }
     });
   };
 }

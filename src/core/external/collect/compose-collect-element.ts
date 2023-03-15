@@ -11,6 +11,10 @@ class ComposableElement {
 
   type: string = ContainerType.COMPOSABLE;
 
+  #isMounted = false;
+
+  #isUpdateCalled = false;
+
   constructor(name, eventEmitter) {
     this.#elementName = name;
     this.#eventEmitter = eventEmitter;
@@ -50,12 +54,29 @@ class ComposableElement {
   }
 
   update = (options) => {
-    // eslint-disable-next-line no-underscore-dangle
-    this.#eventEmitter
-      ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
-        elementName: this.#elementName,
-        elementOptions: options,
+    console.log('Update method called', options);
+    this.#isUpdateCalled = true;
+
+    if (this.#isMounted) {
+      // eslint-disable-next-line no-underscore-dangle
+      this.#eventEmitter
+        ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
+          elementName: this.#elementName,
+          elementOptions: options,
+        });
+      this.#isUpdateCalled = false;
+    } else if (this.#isUpdateCalled) {
+      this.#eventEmitter.on(`READY:${this.#elementName}`, (_) => {
+        console.log('Element Mounted..!', options);
+        // eslint-disable-next-line no-underscore-dangle
+        this.#eventEmitter
+          ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
+            elementName: this.#elementName,
+            elementOptions: options,
+          });
       });
+      this.#isUpdateCalled = false;
+    }
   };
 }
 
