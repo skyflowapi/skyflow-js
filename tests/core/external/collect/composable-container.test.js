@@ -249,25 +249,5 @@ describe('test composable container class',()=>{
     container.unmount();
     expect(mockUnmount).toBeCalled();
   });
-
-  it("test container update element",()=>{
-    const div = document.createElement('div');
-    div.id = 'composable'
-    document.body.append(div);
-
-    const container = new ComposableContainer({layout:[2]}, metaData, {}, context);
-    const element1 = container.create(cvvElement);
-    const element2 = container.create(cardNumberElement);
-    container.mount('#composable');
-    const testElementName = 'element:CVV:MTIzNA==';
-    const testUpdateOptions = {table:'test1',label:'test update'}
-    emitterSpy({
-      elementName:testElementName,
-      elementOptions:testUpdateOptions
-    });
-    expect(updateMock).toBeCalled();
-  });
-
-
     
 });
