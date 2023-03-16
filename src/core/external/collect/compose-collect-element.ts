@@ -19,7 +19,7 @@ class ComposableElement {
   constructor(name, eventEmitter) {
     this.#elementName = name;
     this.#eventEmitter = eventEmitter;
-    this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, (_) => {
+    this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
       this.#isMounted = true;
     });
   }
@@ -68,7 +68,7 @@ class ComposableElement {
         });
       this.#isUpdateCalled = false;
     } else if (this.#isUpdateCalled) {
-      this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, (_) => {
+      this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
         // eslint-disable-next-line no-underscore-dangle
         this.#eventEmitter
           ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
