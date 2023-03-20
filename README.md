@@ -248,6 +248,9 @@ inputStyles: {
     padding: '10px 16px',
     borderRadius: '4px',
     color: '#1d1d1d',
+    '&:hover': {    // Hover styles.
+        borderColor: 'green'
+    },
   },
   complete: {
     color: '#4caf50',
@@ -1885,8 +1888,8 @@ cardNumberElement.mount('#collectCardNumber');
 fileElement.mount('#collectFile');
 
 // Collect and upload methods.
-container.collect({});
-container.uploadFiles();
+collectContainer.collect({});
+collectContainer.uploadFiles();
 
 ```
 **Sample Response for collect():**
