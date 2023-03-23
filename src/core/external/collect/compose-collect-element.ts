@@ -1,6 +1,7 @@
 import EventEmitter from '../../../event-emitter';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
+import { EventName } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../constants';
 
@@ -11,9 +12,16 @@ class ComposableElement {
 
   type: string = ContainerType.COMPOSABLE;
 
+  #isMounted = false;
+
+  #isUpdateCalled = false;
+
   constructor(name, eventEmitter) {
     this.#elementName = name;
     this.#eventEmitter = eventEmitter;
+    this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
+      this.#isMounted = true;
+    });
   }
 
   on(eventName: string, handler: any) {
@@ -50,12 +58,27 @@ class ComposableElement {
   }
 
   update = (options) => {
-    // eslint-disable-next-line no-underscore-dangle
-    this.#eventEmitter
-      ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
-        elementName: this.#elementName,
-        elementOptions: options,
+    this.#isUpdateCalled = true;
+    if (this.#isMounted) {
+      // eslint-disable-next-line no-underscore-dangle
+      this.#eventEmitter
+        ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
+          elementName: this.#elementName,
+          elementOptions: options,
+        });
+      this.#isUpdateCalled = false;
+    } else if (this.#isUpdateCalled) {
+      this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
+        // eslint-disable-next-line no-underscore-dangle
+        this.#eventEmitter
+          ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
+            elementName: this.#elementName,
+            elementOptions: options,
+          });
+        this.#isMounted = true;
+        this.#isUpdateCalled = false;
       });
+    }
   };
 }
 
