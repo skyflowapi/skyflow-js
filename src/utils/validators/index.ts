@@ -8,6 +8,7 @@ import {
   CARDNUMBER_REVEAL_FORMAT,
   CardType, CARD_TYPE_REGEX,
   DEFAULT_CARD_LENGTH_RANGE,
+  ElementType,
 } from '../../core/constants';
 import { CollectElementInput } from '../../core/external/collect/collect-container';
 import { IRevealElementInput } from '../../core/external/reveal/reveal-container';
@@ -463,6 +464,13 @@ export const validateCollectElementInput = (input: CollectElementInput, logLevel
   }
   if (Object.prototype.hasOwnProperty.call(input, 'altText')) {
     printLog(logs.warnLogs.COLLECT_ALT_TEXT_DEPERECATED, MessageType.WARN, logLevel);
+  }
+  if (Object.prototype.hasOwnProperty.call(input, 'skyflowID') && !(typeof input.skyflowID === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT, [], true);
+  }
+  if (input.type === ElementType.FILE_INPUT
+    && !Object.keys(input).includes('skyflowID')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_IN_COLLECT, [], true);
   }
 };
 

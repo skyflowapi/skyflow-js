@@ -3,13 +3,18 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import {
   COLLECT_FRAME_CONTROLLER,
+  ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
+  ELEMENT_EVENTS_TO_CONTAINER
 } from '../../../../src/core/constants';
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
+import SkyflowError from '../../../../src/libs/skyflow-error';
 import Skyflow from '../../../../src/skyflow';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
+import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import logs from '../../../../src/utils/logs';
+
 const bus = require('framebus');
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
@@ -53,6 +58,20 @@ const cvvElement = {
   label: 'cvv',
   type: 'CVV',
 };
+const cvvElement2 = {
+  table: 'pii_fields',
+  column: 'primary_card.cvv',
+  styles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  placeholder: 'cvv',
+  label: 'cvv',
+  type: 'CVV',
+  skyflowID: '123'
+};
+
 
 const collectStylesOptions = {
   inputStyles: {
@@ -91,6 +110,19 @@ const FileElement = {
   skyflowID: "abc-def"
 };
 
+const cvvFileElementElement = {
+  table: 'pii_fields',
+  column: 'primary_card.cvv',
+  styles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  placeholder: 'cvv',
+  label: 'cvv',
+  type: 'FILE_INPUT',
+};
+
 
 const on = jest.fn();
 
@@ -108,7 +140,27 @@ const collectResponse = {
     },
   ],
 };
-
+const collectResponse2 = {
+  errors: [
+    {
+     error: 'error',
+     code: '200'
+    },
+  ],
+};
+const records = {
+  tokens: true,
+  additionalFields: {
+  records: [
+    {
+      table: 'pii_fields',
+      fields: {
+        "primary_card.cvv": '1234',
+    },
+    },
+  ],
+  },
+  };
 describe('Collect container', () => {
 
   let emitSpy;
@@ -364,7 +416,6 @@ describe('Collect container', () => {
     collectCb(collectResponse)
     collectCb({ error: 'Error occured' })
   });
-
   it("container create options", () => {
     let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryDate = container.create({
@@ -419,6 +470,153 @@ describe('Collect container', () => {
         ...cvvFileElementElement,
         skyflowID: undefined,
       });
+      file.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('empty table for Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        column: 'col',
+        type: 'CARD_NUMBER'
+      });
+      file.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('invalid table for Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        column: 'col',
+        type: 'CARD_NUMBER',
+        table: null
+      });
+      file.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('invalid table for Element case 2', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        column: 'col',
+        type: 'CARD_NUMBER',
+        table: []
+      });
+      file.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('missing column for Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        type: 'CARD_NUMBER',
+        table: 'table'
+      });
+      file.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('invalid column for Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        type: 'CARD_NUMBER',
+        table: 'table',
+        column: null
+      });
+      file.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('invalid column for Element case 2', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        type: 'CARD_NUMBER',
+        table: 'table',
+        column: []
+      });
+      file.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('invalid column for Element case 2', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        type: 'CARD_NUMBER',
+        table: 'table',
+        column: 'col'
+      });
+      file.isValidElement().toBeTruthy();
+    } catch (err) {
+    }
+  });
+  it('skyflowID is missing for file Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        ...cvvFileElementElement,
+      });
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('skyflowID empty for file Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        ...cvvFileElementElement,
+        skyflowID: '',
+      });
+      file.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('skyflowID null for file Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        ...cvvFileElementElement,
+        skyflowID: null,
+      });
+      file.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('skyflowID of invalid type for file Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        ...cvvFileElementElement,
+        skyflowID: [],
+      });
+      file.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('skyflowID of invalid type for file Element another case', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const file = container.create({
+        ...cvvFileElementElement,
+        skyflowID: {},
+      });
+      file.isValidElement()
     } catch (err) {
       expect(err).toBeDefined();
     }
@@ -430,11 +628,59 @@ describe('Collect container', () => {
         ...cvvElement,
         skyflowID: undefined,
       });
+      cvv.isValidElement()
     } catch (err) {
       expect(err).toBeDefined();
     }
   });
-
+  it('skyflowID empty for collect Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const cvv = container.create({
+        ...cvvElement,
+        skyflowID: '',
+      });
+      cvv.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('skyflowID null for collect Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const cvv = container.create({
+        ...cvvElement,
+        skyflowID: null,
+      });
+      cvv.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('skyflowID of invalid type for collect Element', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const cvv = container.create({
+        ...cvvElement,
+        skyflowID: [],
+      });
+      cvv.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  it('skyflowID null for collect Element another case', () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    try {
+      const cvv = container.create({
+        ...cvvElement,
+        skyflowID: true,
+      });
+      cvv.isValidElement()
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
 
   it("container collect options", () => {
     let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
@@ -460,6 +706,54 @@ describe('Collect container', () => {
     collectCb(collectResponse)
     collectCb({ error: 'Error occured' })
   });
+  it("container collect options error case 2", () => {
+    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const element1 = container.create(cvvElement2);
+    const options = {
+      tokens: true,
+      additionalFields: {
+        records: [
+          {
+            table: "string", //table into which record should be inserted
+            fields: {
+              column1: "value",
+              skyflowID:''
+            }
+          }
+        ]
+      },
+      upsert: [{
+        table: 'table',
+        column: 'column'
+      }]
+    }
+    container.collect(options).then().catch(err => {
+      expect(err).toBeDefined();
+    })
+  });
+  it('test collect and additional fields duplicate elements',(done)=>{
+    const div1 = document.createElement('div');
+    const div2 = document.createElement('div');
+
+    let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    element1.mount(div1);
+    element2.mount(div2);
+    try{
+      container.collect(records).then((res)=>{
+        done(res)
+      }).catch((err)=>{
+        expect(err).toBeDefined();
+        done();
+      });
+    }catch(err){
+      expect(err).toBeDefined();
+      done(err)
+    }
+    
+  });
+
   it("container collect options error", () => {
     let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const options = {

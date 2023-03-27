@@ -672,6 +672,27 @@ describe("validate collect element input", () => {
     }
   })
 })
+test("invalid skyflow id", () => {
+  try {
+    validateCollectElementInput({type: 'CARD_NUMBER', skyflowID: undefined })
+  } catch (err) {
+    expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT.description)
+  }
+})
+test("invalid skyflow id", () => {
+  try {
+    validateCollectElementInput({type: 'FILE_INPUT', skyflowID: undefined, altText: 'text' })
+  } catch (err) {
+    expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT.description)
+  }
+})
+test("missing skyflow id for file type element", () => {
+  try {
+    validateCollectElementInput({type: 'FILE_INPUT' })
+  } catch (err) {
+    expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_IN_COLLECT.description)
+  }
+})
 
 describe("validate reveal element input", () => {
   test("missing token", () => {

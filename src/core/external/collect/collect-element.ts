@@ -452,6 +452,11 @@ class CollectElement extends SkyflowElement {
       if (!(typeof this.#elements[i].column === 'string' || this.#elements[i].column instanceof String)) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_COLLECT, [], true);
       }
+      if (this.#elements[i].skyflowID !== undefined && !this.#elements[i].skyflowID) {
+        throw new SkyflowError(
+          SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS, [], true,
+        );
+      }
     }
     return true;
   }

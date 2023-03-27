@@ -25,7 +25,16 @@ const SKYFLOW_ERROR_CODE = {
     description: logs.errorLogs.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
   },
   INVALID_TABLE_IN_COLLECT: { code: 400, description: logs.errorLogs.INVALID_TABLE_IN_COLLECT },
+  INVALID_SKYFLOWID_IN_COLLECT: {
+    code: 400,
+    description: logs.errorLogs.INVALID_SKYFLOWID_IN_COLLECT,
+  },
   MISSING_COLUMN_IN_COLLECT: { code: 400, description: logs.errorLogs.MISSING_COLUMN_IN_COLLECT },
+  MISSING_SKYFLOWID_IN_COLLECT: {
+    code: 400,
+    description: logs.errorLogs.MISSING_SKYFLOWID_IN_COLLECT,
+  },
+
   EMPTY_COLUMN_IN_COLLECT: { code: 400, description: logs.errorLogs.EMPTY_TABLE_IN_COLLECT },
   INVALID_COLUMN_IN_COLLECT: { code: 400, description: logs.errorLogs.INVALID_COLUMN_IN_COLLECT },
   CLIENT_CONNECTION: { code: 400, description: logs.errorLogs.CLIENT_CONNECTION },
