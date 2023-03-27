@@ -248,6 +248,9 @@ inputStyles: {
     padding: '10px 16px',
     borderRadius: '4px',
     color: '#1d1d1d',
+    '&:hover': {    // Hover styles.
+        borderColor: 'green'
+    },
   },
   complete: {
     color: '#4caf50',
@@ -1333,6 +1336,150 @@ Sample Element state object when env is `PROD`
     value: ''
 }
 ```
+
+### Update composable elements 
+You can update composable element properties with the `update` interface.
+
+
+The `update` interface takes the below object:
+```javascript
+const updateElement = {
+  table: 'string',       // Optional. The table this data belongs to.
+  column: 'string',      // Optional. The column this data belongs to.
+  inputStyles: {},       // Optional. Styles applied to the form element.
+  labelStyles: {},       // Optional. Styles for the label of the element.
+  errorTextStyles: {},   // Optional. Styles for the errorText of element.
+  label: 'string',       // Optional. Label for the form element.
+  placeholder: 'string', // Optional. Placeholder for the form element.
+  validations: [],       // Optional. Array of validation rules.
+};
+```
+
+Only include the properties that you want to update for the specified composable element. 
+
+Properties your provided when you created the element remain the same until you explicitly update them.
+
+`Note`: You can't update the `type` property of an element.
+
+### End to end example
+```javascript
+const containerOptions = { layout: [2, 1] };
+
+// Create a composable container. 
+const composableContainer = skyflow.container(
+  Skyflow.ContainerType.COMPOSABLE,
+  containerOptions
+);
+
+const stylesOptions = {
+  inputStyles: {
+    base: {
+      fontFamily: 'Inter',
+      fontStyle: 'normal',
+      fontWeight: 400,
+      fontSize: '14px',
+      lineHeight: '21px',
+      width: '294px',
+    },
+  },
+  labelStyles: {},
+  errorTextStyles: {
+    base: {},
+  },
+};
+
+// Create composable elements.
+const cardHolderNameElement = composableContainer.create({
+  table: 'pii_fields',
+  column: 'first_name',
+  ...stylesOptions,
+  placeholder: 'Cardholder Name',
+  type: Skyflow.ElementType.CARDHOLDER_NAME,
+});
+
+
+const cardNumberElement = composableContainer.create({
+  table: 'pii_fields',
+  column: 'card_number',
+  ...stylesOptions,
+  placeholder: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+const cvvElement = composableContainer.create({
+  table: 'pii_fields',
+  column: 'cvv',
+  ...stylesOptions,
+  placeholder: 'CVV',
+  type: Skyflow.ElementType.CVV,
+});
+
+// Mount the composable container.
+composableContainer.mount('#compostableContainer'); // Assumes there is a div with id='#composableContainer' in the webpage.
+
+// ...
+
+// Update validations property on cvvElement.
+cvvElement.update({
+  validations: [{
+    type: Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
+    params: {
+      max: 3,
+      error: 'cvv must be 3 digits',
+    },
+  }]
+})
+
+// Update label, placeholder properties on cardHolderNameElement.
+cardHolderNameElement.update({
+  label: 'CARDHOLDER NAME',
+  placeholder: 'Eg: John'
+});
+
+// Update table, column, inputStyles properties on cardNumberElement.
+cardNumberElement.update({
+  table:'cards',
+  column:'card_number',
+  inputStyles:{
+    base:{
+      color:'blue'
+    }
+  }
+});
+
+
+```
+### Set an event listener on a composable container
+Currently, the SDK supports one event:
+- `SUBMIT`: Triggered when the `Enter` key is pressed in any container element.
+
+The handler `function(void) => void` is a callback function you provide that's called when the `SUBMIT' event fires.
+
+### Example
+```javascript
+const containerOptions = { layout: [1] }
+
+// Creating a composable container.
+const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+
+// Creating the element.
+const cvv = composableContainer.create({
+  table: 'pii_fields',
+  column: 'primary_card.cvv',
+  type: Skyflow.ElementType.CVV,
+});
+
+// Mounting the container.
+composableContainer.mount('#cvvContainer');
+
+// Subscribing to the `SUBMIT` event, which gets triggered when the user hits `enter` key in any container element input.
+composableContainer.on(Skyflow.EventName.SUBMIT, ()=> {
+  // Your implementation when the SUBMIT(enter) event occurs.
+  console.log('Submit Event Listener is being Triggered.');
+});
+```
+
+
 ---
 # Securely revealing data client-side
 -  [**Retrieving data from the vault**](#retrieving-data-from-the-vault)
@@ -1885,8 +2032,8 @@ cardNumberElement.mount('#collectCardNumber');
 fileElement.mount('#collectFile');
 
 // Collect and upload methods.
-container.collect({});
-container.uploadFiles();
+collectContainer.collect({});
+collectContainer.uploadFiles();
 
 ```
 **Sample Response for collect():**
