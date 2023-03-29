@@ -341,6 +341,7 @@ export class FrameElement {
           if (this.domLabel) {
             this.domLabel.textContent = label;
             this.options.label = label;
+            this.iFrameFormElement.label = label;
             this.updateParentDiv(this.htmlDivElement);
           }
         }

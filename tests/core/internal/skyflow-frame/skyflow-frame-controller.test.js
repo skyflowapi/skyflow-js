@@ -359,6 +359,12 @@ const getByIdReq = [{
   redaction: 'PLAIN_TEXT',
   table: 'table1',
 }];
+const getByColumnReq = [{
+  columnValues: ['id1'],
+  columnName: 'column1',
+  redaction: 'PLAIN_TEXT',
+  table: 'table1',
+}];
 
 const getByIdRes = {
   records: [{
@@ -468,6 +474,31 @@ describe('Retrieving data using get', () => {
       done();
     }, 1000);
   });
+  test('get success second case', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(getByIdRes));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.GET,
+      records: getByColumnReq,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].records.length).toBe(1);
+      done();
+    }, 1000);
+  });
+
 
   test('get error', (done) => {
     const clientReq = jest.fn(() => Promise.reject(errorResponse));
@@ -494,7 +525,6 @@ describe('Retrieving data using get', () => {
     }, 1000);
   });
 });
-
 
 describe('Failed to fetch accessToken get', () => {
   let emitSpy;

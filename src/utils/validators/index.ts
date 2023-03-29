@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
@@ -7,6 +8,7 @@ import {
   CARDNUMBER_REVEAL_FORMAT,
   CardType, CARD_TYPE_REGEX,
   DEFAULT_CARD_LENGTH_RANGE,
+  ElementType,
 } from '../../core/constants';
 import { CollectElementInput } from '../../core/external/collect/collect-container';
 import { IRevealElementInput } from '../../core/external/reveal/reveal-container';
@@ -170,6 +172,14 @@ export const validateAdditionalFieldsInCollect = (recordObj: IInsertRecordInput)
     }
     if (!record.table) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+    }
+    if (record.fields?.skyflowID !== undefined) {
+      if (!record.fields?.skyflowID) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+      }
+      if (!(typeof record.fields?.skyflowID === 'string' || record.fields?.skyflowID instanceof String)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SKYFLOW_ID_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+      }
     }
     if (!(typeof record.table === 'string' || record.table instanceof String)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_ADDITIONAL_FIELDS, [`${index}`], true);
@@ -454,6 +464,13 @@ export const validateCollectElementInput = (input: CollectElementInput, logLevel
   }
   if (Object.prototype.hasOwnProperty.call(input, 'altText')) {
     printLog(logs.warnLogs.COLLECT_ALT_TEXT_DEPERECATED, MessageType.WARN, logLevel);
+  }
+  if (Object.prototype.hasOwnProperty.call(input, 'skyflowID') && !(typeof input.skyflowID === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT, [], true);
+  }
+  if (input.type === ElementType.FILE_INPUT
+    && !Object.keys(input).includes('skyflowID')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_IN_COLLECT, [], true);
   }
 };
 

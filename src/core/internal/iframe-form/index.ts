@@ -5,6 +5,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import get from 'lodash/get';
 import Client from '../../../client';
+
 import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
@@ -30,6 +31,7 @@ import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,
   constructUploadResponse,
+  updateRecordsBySkyflowID,
 } from '../../../core-utils/collect';
 import { getAccessToken } from '../../../utils/bus-events';
 import {
@@ -43,6 +45,7 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import {
   Context,
+  IInsertResponse,
   IValidationRule,
   LogLevel,
   MessageType,
@@ -893,8 +896,8 @@ export class IFrameForm {
 
   tokenize = (options) => {
     if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
-    const responseObject: any = {};
-
+    const insertResponseObject: any = {};
+    const updateResponseObject: any = {};
     const formElements = Object.keys(this.iFrameFormElements);
     let errorMessage = '';
     for (let i = 0; i < formElements.length; i += 1) {
@@ -923,37 +926,64 @@ export class IFrameForm {
     }
 
     for (let i = 0; i < formElements.length; i += 1) {
-      const { state, tableName, validations } = this.iFrameFormElements[formElements[i]];
+      const {
+        state, tableName, validations, skyflowID,
+      } = this.iFrameFormElements[formElements[i]];
       if (tableName) {
         if (
           this.iFrameFormElements[formElements[i]].fieldType
-          !== ELEMENTS.FILE_INPUT.name
+        !== ELEMENTS.FILE_INPUT.name
         ) {
           if (
             this.iFrameFormElements[formElements[i]].fieldType
-            === ELEMENTS.checkbox.name
+          === ELEMENTS.checkbox.name
           ) {
-            if (responseObject[state.name]) {
-              responseObject[state.name] = `${responseObject[state.name]},${state.value
+            if (insertResponseObject[state.name]) {
+              insertResponseObject[state.name] = `${insertResponseObject[state.name]},${state.value
               }`;
             } else {
-              responseObject[state.name] = state.value;
+              insertResponseObject[state.name] = state.value;
             }
-          } else if (responseObject[tableName]) {
-            if (get(responseObject[tableName], state.name)
-              && !(validations && checkForElementMatchRule(validations))) {
+          } else if (insertResponseObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
+            if (get(insertResponseObject[tableName], state.name)
+            && !(validations && checkForElementMatchRule(validations))) {
               return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
                 [state.name, tableName], true));
             }
             set(
-              responseObject[tableName],
+              insertResponseObject[tableName],
               state.name,
               this.iFrameFormElements[formElements[i]].getUnformattedValue(),
             );
+          } else if (skyflowID || skyflowID === '') {
+            if (skyflowID === '' || skyflowID === null) {
+              return Promise.reject(new SkyflowError(
+                SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
+              ));
+            }
+            if (updateResponseObject[skyflowID]) {
+              set(
+                updateResponseObject[skyflowID],
+                state.name,
+                this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+              );
+            } else {
+              updateResponseObject[skyflowID] = {};
+              set(
+                updateResponseObject[skyflowID],
+                state.name,
+                this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+              );
+              set(
+                updateResponseObject[skyflowID],
+                'table',
+                tableName,
+              );
+            }
           } else {
-            responseObject[tableName] = {};
+            insertResponseObject[tableName] = {};
             set(
-              responseObject[tableName],
+              insertResponseObject[tableName],
               state.name,
               this.iFrameFormElements[formElements[i]].getUnformattedValue(),
             );
@@ -961,45 +991,129 @@ export class IFrameForm {
         }
       }
     }
-    let finalRecords;
-    let finalRequest;
+    let finalInsertRequest;
+    let finalInsertRecords;
+    let finalUpdateRecords;
+    let insertResponse: IInsertResponse;
+    let updateResponse: IInsertResponse;
+    let insertErrorResponse: any;
+    let updateErrorResponse;
+    let insertDone = false;
+    let updateDone = false;
     try {
-      finalRecords = constructElementsInsertReq(responseObject, options);
-      finalRequest = constructInsertRecordRequest(finalRecords, options);
+      [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
+        insertResponseObject, updateResponseObject, options,
+      );
+      finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
     } catch (error) {
       return Promise.reject({
         error: error?.message,
       });
     }
-
     const { client } = this;
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
       const clientId = client.toJSON()?.metaData?.uuid || '';
       getAccessToken(clientId).then((authToken) => {
-        client
-          .request({
-            body: {
-              records: finalRequest,
-            },
-            requestMethod: 'POST',
-            url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
-            headers: {
-              authorization: `Bearer ${authToken}`,
-              'content-type': 'application/json',
-            },
-          })
-          .then((response: any) => {
-            rootResolve(
-              constructInsertRecordResponse(
+        if (finalInsertRequest.length !== 0) {
+          client
+            .request({
+              body: {
+                records: finalInsertRequest,
+              },
+              requestMethod: 'POST',
+              url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+              headers: {
+                authorization: `Bearer ${authToken}`,
+                'content-type': 'application/json',
+              },
+            })
+            .then((response: any) => {
+              insertResponse = constructInsertRecordResponse(
                 response,
                 options.tokens,
-                finalRecords.records,
-              ),
-            );
-          })
-          .catch((error) => {
-            rootReject(error);
-          });
+                finalInsertRecords.records,
+              );
+              insertDone = true;
+              if (finalUpdateRecords.updateRecords.length === 0) {
+                rootResolve(insertResponse);
+              }
+              if (updateDone && updateErrorResponse !== undefined) {
+                if (updateErrorResponse.records === undefined) {
+                  updateErrorResponse.records = insertResponse.records;
+                } else {
+                  updateErrorResponse.records = insertResponse.records
+                    .concat(updateErrorResponse.records);
+                }
+                rootReject(updateErrorResponse);
+              } else if (updateDone && updateResponse !== undefined) {
+                rootResolve({ records: insertResponse.records.concat(updateResponse.records) });
+              }
+            })
+            .catch((error) => {
+              insertDone = true;
+              if (finalUpdateRecords.updateRecords.length === 0) {
+                rootReject(error);
+              } else {
+                insertErrorResponse = {
+                  errors: [
+                    {
+                      error: {
+                        code: error?.error?.code,
+                        description: error?.error?.description,
+                      },
+                    },
+                  ],
+                };
+              }
+              if (updateDone && updateResponse !== undefined) {
+                const errors = insertErrorResponse.errors;
+                const records = updateResponse.records;
+                rootReject({ errors, records });
+              } else if (updateDone && updateErrorResponse !== undefined) {
+                updateErrorResponse.errors = updateErrorResponse.errors
+                  .concat(insertErrorResponse.errors);
+                rootReject(updateErrorResponse);
+              }
+            });
+        }
+        if (finalUpdateRecords.updateRecords.length !== 0) {
+          updateRecordsBySkyflowID(finalUpdateRecords, client, options)
+            .then((response: any) => {
+              updateResponse = {
+                records: response,
+              };
+              updateDone = true;
+              if (finalInsertRequest.length === 0) {
+                rootResolve(updateResponse);
+              }
+              if (insertDone && insertResponse !== undefined) {
+                rootResolve({ records: insertResponse.records.concat(updateResponse.records) });
+              } else if (insertDone && insertErrorResponse !== undefined) {
+                const errors = insertErrorResponse.errors;
+                const records = updateResponse.records;
+                rootReject({ errors, records });
+              }
+            }).catch((error) => {
+              updateErrorResponse = error;
+              updateDone = true;
+              if (finalInsertRequest.length === 0) {
+                rootReject(error);
+              }
+              if (insertDone && insertResponse !== undefined) {
+                if (updateErrorResponse.records === undefined) {
+                  updateErrorResponse.records = insertResponse.records;
+                } else {
+                  updateErrorResponse.records = insertResponse.records
+                    .concat(updateErrorResponse.records);
+                }
+                rootReject(updateErrorResponse);
+              } else if (insertDone && insertErrorResponse !== undefined) {
+                updateErrorResponse.errors = updateErrorResponse.errors
+                  .concat(insertErrorResponse.errors);
+                rootReject(updateErrorResponse);
+              }
+            });
+        }
       }).catch((err) => {
         rootReject(err);
       });

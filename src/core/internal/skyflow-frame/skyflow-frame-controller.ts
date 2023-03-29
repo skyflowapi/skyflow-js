@@ -142,8 +142,7 @@ class SkyflowFrameController {
             body: { records: requestBody },
             requestMethod: 'POST',
             url:
-            `${this.#client.config.vaultURL
-            }/v1/vaults/${
+            `${this.#client.config.vaultURL}/v1/vaults/${
               this.#client.config.vaultID}`,
             headers: {
               Authorization: `Bearer ${authToken}`,
