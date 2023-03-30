@@ -128,9 +128,10 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 # Securely collecting data client-side
 -  [**Insert data into the vault**](#insert-data-into-the-vault)
 -  [**Using Skyflow Elements to collect data**](#using-skyflow-elements-to-collect-data)
+-  [**Using Skyflow Elements to update data**](#using-skyflow-elements-to-update-data)
 -  [**Using validations on Collect Elements**](#validations)
 -  [**Event Listener on Collect Elements**](#event-listener-on-collect-elements)
--  [**UI Error for Collect Eements**](#ui-error-for-collect-elements)
+-  [**UI Error for Collect Elements**](#ui-error-for-collect-elements)
 - [**Set and Clear value for Collect Elements (DEV ENV ONLY)**](#set-and-clear-value-for-collect-elements-dev-env-only)
 - [**Using Skyflow File Element to upload a file**](#using-skyflow-file-element-to-upload-a-file)
 ## Insert data into the vault
@@ -600,6 +601,211 @@ cvvElement.mount('#cvv'); //Assumes there is a div with id='#cvv' in the webpage
       }
     }
   ]
+}
+```
+## Using Skyflow Elements to update data
+
+You can update the data in a vault with Skyflow Elements. Use the following steps to securely update data. 
+
+### Step 1: Create a container
+Create a container for the form elements using the `container(Skyflow.ContainerType)` method of the Skyflow client:
+
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
+```
+
+### Step 2: Create a collect Element 
+Create a collect element. Collect Elements are defined as follows:
+
+```javascript
+const collectElement = {
+ table: "string",             // Required, the table this data belongs to.
+ column: "string",            // Required, the column into which this data should be updated.
+ type: Skyflow.ElementType,   // Skyflow.ElementType enum.
+ inputStyles: {},             // Optional, styles that should be applied to the form element.
+ labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
+ errorTextStyles: {},         // Optional, styles that will be applied to the errorText of the collect element.
+ label: "string",             // Optional, label for the form element.
+ placeholder: "string",       // Optional, placeholder for the form element.
+ altText: "string",           // (DEPRECATED) string that acts as an initial value for the collect element.
+ validations: [],             // Optional, array of validation rules.
+ skyflowID: "string",         // The skyflow_id of the record to be updated.
+};
+const options = {
+ required: false,             // Optional, indicates whether the field is marked as required. Defaults to 'false'.
+ enableCardIcon: true,        // Optional, indicates whether  the element needs a card icon (only applicable for CARD_NUMBER ElementType).
+ format: String,              // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
+ enableCopy: false,           // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+};
+const element = container.create(collectElement, options);
+```
+The `table` and `column` fields indicate which table and column the Element corresponds to.
+
+`skyflowID` indicates the record that you want to update.
+
+**Notes:** 
+- Use dot-delimited strings to specify columns nested inside JSON fields (for example, `address.street.line1`)
+
+### Step 3: Mount Elements to the DOM 
+To specify where the Elements are rendered on your page, create placeholder `<div>` elements with unique `id` tags. For instance, the form below has three empty elements with unique IDs as placeholders for three Skyflow Elements.
+```html
+<form>
+ <div id="cardNumber" />
+ <br/>
+ <div id="expireDate" />
+ <br/>
+ <div id="cvv" />
+ <br/>
+ <button type="submit">Submit</button>
+</form>
+```
+Now, when you call the `mount(domElement)` method, the Elements is inserted in the specified divs. For instance, the call below inserts the Element into the div with the id "#cardNumber".
+```javascript
+element.mount('#cardNumber');
+```
+Use the `unmount` method to reset a Collect Element to its initial state.
+```javascript
+element.unmount();
+```
+
+
+### Step 4: Update data from Elements 
+When the form is ready to submit, call the `collect(options?)` method on the container object. The `options` parameter takes a object of optional parameters as shown below:
+- `tokens`: indicates whether tokens for the collected data should be returned or not. Defaults to 'true'
+- `additionalFields`: Non-PCI elements data to update or insert into the vault which should be in the records object format.
+- `upsert`: To support upsert operations while collecting data from Skyflow elements, pass the table and column marked as unique in the table.
+
+```javascript
+const options = {
+ tokens: true,                   // Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true'.
+ additionalFields: {
+   records: [
+     {
+       table: "string",          // Table into which record should be updated.
+       fields: {
+         column1: "value",       // Column names should match vault column names.
+         skyflowID: "value",     // The skyflow_id of the record to be updated.
+        // ...additional fields here.
+       },
+     },
+     // ...additional records here.
+   ],
+ },// Optional
+ upsert: [                       // Upsert operations support in the vault
+   {
+     table: "string",            // Table name
+     column: "value",            // Unique column in the table
+   },
+ ], // Optional
+};
+container.collect(options);
+```
+**Note:** `skyflowID` is required if you want to update the data. If `skyflowID` isn't specified, the `collect(options?)` method creates a new record in the vault.
+
+### End to end example of updating data with Skyflow Elements
+
+**Sample Code:**
+
+```javascript
+//Step 1
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
+
+//Step 2
+const cardNumberElement = container.create({
+ table: 'cards',
+ column: 'cardNumber',
+ inputStyles: {
+   base: {
+     color: '#1d1d1d',
+   },
+   cardIcon: {
+     position: 'absolute',
+     left: '8px',
+     bottom: 'calc(50% - 12px)',
+   },
+ },
+ labelStyles: {
+   base: {
+     fontSize: '12px',
+     fontWeight: 'bold',
+   },
+ },
+ errorTextStyles: {
+   base: {
+     color: '#f44336',
+   },
+ },
+ placeholder: 'Card Number',
+ label: 'Card Number',
+ type: Skyflow.ElementType.CARD_NUMBER,
+ skyflowID:  '431eaa6c-5c15-4513-aa15-29f50babe882',
+});
+const cardHolderNameElement = container.create({
+ table: 'cards',
+ column: 'first_name',
+ inputStyles: {
+   base: {
+     color: '#1d1d1d',
+   },
+   cardIcon: {
+     position: 'absolute',
+     left: '8px',
+     bottom: 'calc(50% - 12px)',
+   },
+ },
+ labelStyles: {
+   base: {
+     fontSize: '12px',
+     fontWeight: 'bold',
+   },
+ },
+ errorTextStyles: {
+   base: {
+     color: '#f44336',
+   },
+ },
+ placeholder: 'Card Holder Name',
+ label: 'Card Holder Name',
+ type: Skyflow.ElementType.CARDHOLDER_NAME,
+ skyflowID:  '431eaa6c-5c15-4513-aa15-29f50babe882',
+});
+
+// Step 3
+cardNumberElement.mount('#cardNumber');          // Assumes there is a div with id='#cardNumber' in the webpage.
+cardHolderNameElement.mount('#cardHolderName');  // Assumes there is a div with id='#cardHolderName' in the webpage.
+
+// Step 4
+const nonPCIRecords = {
+ records: [
+   {
+     table: 'cards',
+     fields: {
+       gender: 'MALE',
+       skyflowID:  '431eaa6c-5c15-4513-aa15-29f50babe882',
+     },
+   },
+ ],
+};
+
+container.collect({
+ tokens: true,
+ additionalFields: nonPCIRecords,
+});
+```
+**Sample Response :**
+```javascript
+{
+ "records": [
+   {
+     "table": "cards",
+     "fields": {
+       "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+       "cardNumber": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+       "first_name": "131e70dc-6f76-4319-bdd3-96281e051051",
+       "gender": "12f670af-6c7d-4837-83fb-30365fbc0b1e"
+     }
+   }
+ ]
 }
 ```
 
