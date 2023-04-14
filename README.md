@@ -1692,11 +1692,11 @@ composableContainer.on(Skyflow.EventName.SUBMIT, ()=> {
 -  [**Using Skyflow Elements to reveal data**](#using-skyflow-elements-to-reveal-data)
 -  [**UI Error for Reveal Elements**](#ui-error-for-reveal-elements)
 -  [**Set token for Reveal Elements**](#set-token-for-reveal-elements)
-- [**Set and clear altText for Reveal Elements**](#set-and-clear-alttext-for-reveal-elements)
+-  [**Set and clear altText for Reveal Elements**](#set-and-clear-alttext-for-reveal-elements)
 
 ## Retrieving data from the vault
 
-For non-PCI use-cases, retrieving data from the vault and revealing it in the browser can be done either using the SkyflowID's or tokens as described below
+For non-PCI use-cases, retrieving data from the vault and revealing it in the browser can be done either using the SkyflowID's, unique column values or tokens as described below
 
 - ### Using Skyflow tokens
     In order to retrieve data from your vault using tokens that you have previously generated for that data, you can use the `detokenize(records)` method. The records parameter takes a JSON object that contains `records` to be fetched as shown below.
@@ -1747,71 +1747,134 @@ The sample response:
 }
 ```
 
-- ### Using Skyflow ID's
-    In order to retrieve data from your vault using SkyflowIDs, use the `getById(records)` method.The records parameter takes a JSON object that contains `records` to be fetched as shown below.
+- ### Using Skyflow ID's or Unique Column Values
+    You can retrieve data from the vault with the get(records) method using either Skyflow IDs or unique column values.
+
+    The records parameter accepts a JSON object that contains an array of either Skyflow IDs or unique column names and values.
+
+    Note: You can use either Skyflow IDs  or unique values to retrieve records. You can't use both at the same time.
+
+    Skyflow.RedactionTypes accepts four values:
+    - `PLAIN_TEXT`
+    - `MASKED`
+    - `REDACTED`
+    - `DEFAULT`
+
+    You must apply a redaction type to retrieve data.
+
+#### Schema (Skyflow IDs)
 
 ```javascript
-{
-  records: [
-    {
-      ids: string[],                      // Array of SkyflowID's of the records to be fetched.
-      table: string,                      // Table holding the above skyflow_id's.
-      redaction: Skyflow.RedactionType,   // Redaction to be applied to retrieved data.
-    }
-  ]
-}
+data = {
+ records: [
+   {
+     ids: ["SKYFLOW_ID_1", "SKYFLOW_ID_2"],      // List of skyflow_ids for the records to fetch.
+     table: "NAME_OF_SKYFLOW_TABLE",             // Name of table holding the records in the vault.
+     redaction: Skyflow.RedactionType,           // Redaction type to apply to retrieved data.
+   },
+ ],
+};
 ```
-
-There are 4 accepted values in Skyflow.RedactionTypes:
-- `PLAIN_TEXT`
-- `MASKED`
-- `REDACTED`
-- `DEFAULT`
-
-An example of getById call:
+#### Schema (Unique column values)
 
 ```javascript
-skyflow.getById({
-  records: [
-    {
-      ids: ['f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9'],
-      table: 'cards',
-      redaction: Skyflow.RedactionType.PLAIN_TEXT,
-    },
-    {
-      ids: ['da26de53-95d5-4bdb-99db-8d8c66a35ff9'],
-      table: 'contacts',
-      redaction: Skyflow.RedactionType.PLAIN_TEXT,
-    },
-  ],
+data = {
+ records: [
+   {
+     table: "NAME_OF_SKYFLOW_TABLE",        // Name of table holding the records in the vault.
+     columnName: "UNIQUE_COLUMN_NAME",      // Unique column name in the vault.
+     columnValues: [                        // List of given unique column values. 
+       "<COLUMN_VALUE_2>",
+       "<COLUMN_VALUE_3>",
+     ],                                     // Required when specifying a unique column
+     redaction: Skyflow.RedactionType,      // Redaction type applies to retrieved data.
+
+   },
+ ],
+};
+```
+[Example usage (Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/get-pure-js.html)
+
+```javascript
+skyflow.get({
+ records: [
+   {
+     ids: ["f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9"],
+     table: "cards",
+     redaction: Skyflow.RedactionType.PLAIN_TEXT,
+   },
+   {
+     ids: ["da26de53-95d5-4bdb-99db-8d8c66a35ff9"],
+     table: "contacts",
+     redaction: Skyflow.RedactionType.PLAIN_TEXT,
+   },
+ ],
 });
 ```
-
-The sample response:
+Example response
 
 ```javascript
 {
-    "records": [
-        {
-            "fields": {
-                "card_number": "4111111111111111",
-                "cvv": "127",
-                "expiry_date": "11/2035",
-                "fullname": "myname",
-                "id": "f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9"
-            },
-            "table": "cards"
-        }
-    ],
-    "errors": [
-        {
-            "error": {
-                "code": "404",
-                "description": "No Records Found"
-            },
-            "ids": ["da26de53-95d5-4bdb-99db-8d8c66a35ff9"]
-        }
-    ]
+   "records": [
+       {
+           "fields": {
+              "card_number": "4111111111111111",
+              "cvv": "127",
+              "expiry_date": "11/2035",
+              "fullname": "myname",
+              "id": "f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9"
+           },
+           "table": "cards"
+       }
+   ],
+   "errors": [
+       {
+           "error": {
+              "code": "404",
+              "description": "No Records Found"
+           },
+           "ids": ["da26de53-95d5-4bdb-99db-8d8c66a35ff9"]
+       }
+   ]
+}
+```
+[Example usage (Unique column values)](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/get-pure-js.html)
+
+```javascript
+skyflow.get({
+ records: [
+   {
+   table: "cards",
+   redaction: RedactionType.PLAIN_TEXT,
+   columnName: "card_id",
+   columnValues: ["123", "456"],
+  }
+ ],
+});
+```
+Sample response: 
+```javascript
+{
+   "records": [
+       {
+           "fields": {
+               "card_id": "123",
+               "expiry_date": "11/35",
+               "fullname": "myname",
+               "id": "f8d2-b557-4c6b-a12c-c5ebfd9"
+           },
+           "table": "cards"
+       },
+       {
+           "fields": {
+               "card_id": "456",
+               "expiry_date": "10/23",
+               "fullname": "sam",
+               "id": "da53-95d5-4bdb-99db-8d8c5ff9"
+           },
+           "table": "cards"
+       }
+   ]
 }
 ```
 
