@@ -22,6 +22,7 @@ import {
   validateGetByIdInput,
   validateComposableContainerOptions,
   validateDeleteRecords
+  validateInputFormatOptions
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logs-helper';
 import { RedactionType } from '../../src/utils/common';
@@ -1006,3 +1007,112 @@ describe('delete input records validation', () => {
   });
 
 })
+
+describe('test validateInputFormatOptions', () => {
+  
+  test("should not throw error if options are undefined", (done) => {
+    try {
+      const options = undefined;
+      validateInputFormatOptions(null)
+      done();
+    } catch (err) {
+      done(err);
+    }
+  });
+
+  test("should throw error if the format value is other than string type - undefined", (done) => {
+    try {
+      const options = { format: undefined }
+      validateInputFormatOptions(options)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description);
+      done();
+    }
+  });
+
+  test("should throw error if the format value is other than string type - null", (done) => {
+    try {
+      const options = { format: null }
+      validateInputFormatOptions(options)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description);
+      done();
+    }
+  });
+
+  test("should throw error if the format value is other than string type - Number", (done) => {
+    try {
+      const options = { format: 1233 }
+      validateInputFormatOptions(options)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description);
+      done();
+    }
+  });
+
+
+
+
+  test('should throw error if the translation value is other than object type', (done) => {
+    try {
+      const options = { translation: undefined }
+      validateInputFormatOptions(options)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description);
+      done();
+    }
+  });
+
+
+  test('should throw error if the translation value is other than object type - undefined', (done) => {
+    try {
+      const options = { translation: undefined }
+      validateInputFormatOptions(options)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description);
+      done();
+    }
+  });
+
+
+  test('should throw error if the translation value is other than object type - null', (done) => {
+    try {
+      const options = { translation: null }
+      validateInputFormatOptions(options)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description);
+      done();
+    }
+  });
+
+  test('should throw error if the translation value is other than object type - array', (done) => {
+    try {
+      const options = { translation: [] }
+      validateInputFormatOptions(options)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description);
+      done();
+    }
+  });
+
+  test('should throw error if the translation value is other than object type - number', (done) => {
+    try {
+      const options = { translation: 12334 }
+      validateInputFormatOptions(options)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description);
+      done();
+    }
+  });
+
+
+
+});

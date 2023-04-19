@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { CardType, ElementType,COPY_UTILS } from '../../src/core/constants';
+import { CardType, ElementType,COPY_UTILS, CARD_NUMBER_MASK, DEFAULT_CARD_NUMBER_SEPERATOR, CARD_NUMBER_HYPEN_SEPERATOR } from '../../src/core/constants';
 import SKYFLOW_ERROR_CODE from '../../src/utils/constants';
 import {
   replaceIdInResponseXml,
@@ -12,7 +12,10 @@ import {
   fileValidation,
   styleToString,
   appendMonthFourDigitYears,
-  appendMonthTwoDigitYears
+  appendMonthTwoDigitYears,
+  addSeperatorToCardNumberMask,
+  constructMaskTranslation,
+  formatRevealElementOptions
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -209,6 +212,89 @@ describe('test appendMonthTwoDigitYears function',()=>{
 
   test('test for non append for month',()=>{
     expect(appendMonthTwoDigitYears('32/09')).toEqual({isAppended:false,value:'32/09'});
+  });
+
+});
+
+describe('test addSeperatorToCardNumberMask function',()=>{
+  
+  test('should return default visa mask with spaces if cardSeperator is not provided',()=>{
+      expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.VISA)).toEqual(CARD_NUMBER_MASK.VISA);
+  });
+  
+  test('should return default visa mask with spaces if cardSeperator is space',()=>{
+    expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.VISA,DEFAULT_CARD_NUMBER_SEPERATOR)).toEqual(CARD_NUMBER_MASK.VISA);
+  });
+
+  test('should return mask with hypen if cardSeperator is hypen',()=>{
+    expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.VISA,CARD_NUMBER_HYPEN_SEPERATOR)).toEqual(['XXXX-XXXX-XXXX-XXXX',CARD_NUMBER_MASK.VISA[1]]);
+  });
+
+  test('should return default amex mask with hypen if cardSeperator is space',()=>{
+    expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.AMEX,DEFAULT_CARD_NUMBER_SEPERATOR)).toEqual(['XXXX XXXXXX XXXXX',CARD_NUMBER_MASK.AMEX[1]]);
+  });
+
+  test('should return amex mask with hypen if cardSeperator is hypen',()=>{
+    expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.AMEX,CARD_NUMBER_HYPEN_SEPERATOR)).toEqual(['XXXX-XXXXXX-XXXXX',CARD_NUMBER_MASK.AMEX[1]]);
+  });
+
+});
+
+
+describe('test constructMaskTranslation function', () => {
+  test('should return empty translation object if no mask is provided', () => {
+    expect(constructMaskTranslation()).toEqual({});
+    expect(constructMaskTranslation(undefined)).toEqual({});
+    expect(constructMaskTranslation(null)).toEqual({});
+  });
+
+  test('should return valid translation object if valid mask is provided', () => {
+    expect(constructMaskTranslation(['XXXX', null, { X: '[0-9]' }])).toEqual( { X: { pattern: '[0-9]' } });
+    expect(constructMaskTranslation(['XXYX', null, { X: '[0-9]', Y: '[A-Z]' }])).toEqual({ X: { pattern: '[0-9]' }, Y: { pattern: '[A-Z]' } } );
+  });
+});
+
+
+describe('test formatRevealElementOptions function', () => {
+  test('should return empty object if no options are provided', () => {
+    expect(formatRevealElementOptions(null)).toEqual({});
+    expect(formatRevealElementOptions(undefined)).toEqual({});
+    expect(formatRevealElementOptions({})).toEqual({});
+  });
+
+  test('should throw error if passed enableCopy option is invalid type', (done) => {
+    try {
+      formatRevealElementOptions({ enableCopy: '123' })
+      done('should throw error');
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description,'enableCopy'))
+      done()
+    }
+  });
+
+  test('should not throw error if passed enableCopy option is boolean value type', (done) => {
+    try {
+      formatRevealElementOptions({ enableCopy: true })
+      done();
+    } catch (err) {
+      done(err)
+    }
+  });
+
+  test('should return mask in options if both format and translation are provided',()=>{
+    expect(formatRevealElementOptions({format:'YY-YY',translation:{Y:'[A-Z]'}})).toEqual({mask:['YY-YY',null,{Y:'[A-Z]'}]});
+  });
+
+  test('should return mask with default translation if only format is provided',()=>{
+    expect(formatRevealElementOptions({format:'XX-XX'})).toEqual({mask:['XX-XX',null,{X:'[0-9]'}]});
+  });
+
+  test('should return not return mask if only translation is provided, format is missing',()=>{
+    expect(formatRevealElementOptions({translation:{X:'[0-9]'}})).toEqual({});
+  });
+
+  test('should return not return mask if format and translation are provided',()=>{
+    expect(formatRevealElementOptions({enableCopy:true})).toEqual({enableCopy:true});
   });
 
 });
