@@ -362,6 +362,7 @@ export const validateGetByIdInput = (getByIdInput: IGetByIdInput) => {
   });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const validateDeleteRecords = (recordObj: IDeleteRecordInput, options: any) => {
   if (!(recordObj && Object.prototype.hasOwnProperty.call(recordObj, 'records'))) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_DELETE, [], true);
