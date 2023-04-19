@@ -3,12 +3,13 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import {
   CardType,
-  COPY_UTILS, ElementType,
+  COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType,
 } from '../../core/constants';
+import { IRevealElementOptions } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
 import { ContainerType } from '../../skyflow';
 import SKYFLOW_ERROR_CODE from '../constants';
-import { detectCardType } from '../validators';
+import { detectCardType, validateBooleanOptions } from '../validators';
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
@@ -128,4 +129,56 @@ export const getContainerType = (frameName:string):ContainerType => {
   return (frameNameParts[1] === 'group')
     ? ContainerType.COMPOSABLE
     : ContainerType.COLLECT;
+};
+
+export const addSeperatorToCardNumberMask = (
+  cardNumberMask: any,
+  seperator?: string,
+) => {
+  if (seperator) {
+    return [cardNumberMask[0].replace(/[\s]/g, seperator), cardNumberMask[1]];
+  }
+  return cardNumberMask;
+};
+
+export const constructMaskTranslation = (mask) => {
+  const translation = {};
+  if (mask) {
+    Object.keys(mask[2]).forEach((key) => {
+      translation[key] = { pattern: mask[2][key] };
+    });
+  }
+  return translation;
+};
+
+export const formatRevealElementOptions = (options:IRevealElementOptions) => {
+  let revealOptions:any = {};
+  if (options) {
+    revealOptions = { ...options };
+    if (Object.prototype.hasOwnProperty.call(revealOptions, 'enableCopy') && !validateBooleanOptions(revealOptions.enableCopy)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['enableCopy'], true);
+    }
+    if (Object.prototype.hasOwnProperty.call(revealOptions, 'format')
+    || Object.prototype.hasOwnProperty.call(revealOptions, 'translation')) {
+      const revealElementMask:any[] = [];
+      if (revealOptions.format) {
+        revealElementMask.push(revealOptions.format);
+      }
+
+      revealElementMask.push(null); // for replacer
+
+      if (revealOptions.translation) {
+        revealElementMask.push(revealOptions.translation);
+      } else if (revealOptions.format) {
+        revealElementMask.push(DEFAULT_INPUT_FORMAT_TRANSLATION);
+      }
+      revealOptions = {
+        ...revealOptions,
+        ...((revealElementMask.length === 3) ? { mask: revealElementMask } : {}),
+      };
+      delete revealOptions?.format;
+      delete revealOptions?.translation;
+    }
+  }
+  return revealOptions;
 };
