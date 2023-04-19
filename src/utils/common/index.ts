@@ -121,3 +121,20 @@ export interface IInsertOptions{
   tokens?: boolean;
   upsert?: IUpsertOption[];
 }
+
+export interface IDeleteRecord {
+  id: String;
+  table: String;
+}
+
+export interface IDeleteOptions {}
+
+export interface IDeleteRecordInput {
+  options?: IDeleteOptions;
+  records: IDeleteRecord[];
+}
+
+export interface IDeleteResponseType {
+  records?: Record<string, string>[];
+  errors?: Record<string, any>[];
+}
