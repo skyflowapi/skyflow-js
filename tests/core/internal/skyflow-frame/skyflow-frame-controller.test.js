@@ -618,3 +618,151 @@ describe('Failed to fetch accessToken Getbyid', () => {
     }, 1000);
   });
 });
+
+const deleteRecords = {
+  records: [
+    {
+      table: 'pii_fields',
+      id: '29ebda8d-5272-4063-af58-15cc674e332b',
+    },
+    {
+      table: 'pii_fields',
+      id: '29ebda8d-5272-4063-af58-15cc674e332b',
+    },
+  ],
+};
+
+const deleteOptions = {};
+
+const deleteResponse = {  
+  skyflow_id: '29ebda8d-5272-4063-af58-15cc674e332b',
+  deleted: true
+};
+
+const deleteErrorResponse = {
+  error: {
+      grpc_code: 5,
+      http_code: 404,
+      message: "No Records Found",
+      http_status: "Not Found",
+      details: []
+  }
+}
+
+describe('Deleting records from the vault', () => {
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+
+    busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
+  });
+
+  test('delete records success', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(deleteResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.DELETE,
+      records: deleteRecords,
+      options: deleteOptions,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+    
+    setTimeout(() => {
+      try {
+        expect(cb2.mock.calls[0][0].records.length).toBe(2);
+        expect(cb2.mock.calls[0][0].records[0].deleted).toBeTruthy();
+        expect(cb2.mock.calls[0][0].records[1].deleted).toBeTruthy();
+        expect(cb2.mock.calls[0][0].error).toBeUndefined();
+        done();
+      } catch(err) {
+        done(err);
+      }
+    }, 1000);
+  });
+
+  test('delete records with error', (done) => {
+    const clientReq = jest.fn(() => Promise.reject(deleteErrorResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.DELETE,
+      records: deleteRecords,
+      options: deleteOptions,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      try {
+        expect(cb2.mock.calls[0][0].error).toBeDefined();
+        done();
+      } catch(err) {
+        done(err);
+      }
+    }, 1000);
+  });
+});
+
+describe('getAcessToken error delete', () => {
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+  });
+  
+  test('accessToken error', (done) => {
+    busEvents.getAccessToken = jest.fn(() => Promise.reject({ error: 'error' }));
+    
+    SkyflowFrameController.init();
+    
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const deleteData = {
+      type: PUREJS_TYPES.DELETE,
+      records: deleteRecords,
+      options: deleteOptions,
+    };
+    const deleteCb = jest.fn();
+    onCb(deleteData, deleteCb);
+
+    setTimeout(() => {
+      try {
+        expect(deleteCb.mock.calls[0][0].error).toBeDefined();
+        done();
+      } catch(err) {
+        done(err);
+      }
+    }, 1000);
+  });
+});

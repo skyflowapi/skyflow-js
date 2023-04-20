@@ -16,6 +16,7 @@ import {
   validateGetInput,
   validateGetByIdInput,
   validateUpsertOptions,
+  validateDeleteRecords,
 } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
@@ -29,7 +30,14 @@ import {
 } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import {
-  IDetokenizeInput, IGetInput, Context, MessageType, IGetByIdInput, IInsertOptions,
+  IDetokenizeInput,
+  IGetInput,
+  Context,
+  MessageType,
+  IGetByIdInput,
+  IInsertOptions,
+  IDeleteOptions,
+  IDeleteRecordInput,
 } from '../../utils/common';
 
 const CLASS_NAME = 'SkyflowContainer';
@@ -356,6 +364,80 @@ class SkyflowContainer {
       } catch (e) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
+        reject(e);
+      }
+    });
+  }
+
+  delete(records: IDeleteRecordInput, options: IDeleteOptions) {
+    if (this.#isControllerFrameReady) {
+      return new Promise((resolve, reject) => {
+        validateInitConfig(this.#client.config);
+        try {
+          printLog(
+            parameterizedString(logs.infoLogs.VALIDATE_DELETE_INPUT, CLASS_NAME), MessageType.LOG,
+            this.#context.logLevel,
+          );
+
+          validateDeleteRecords(records, options);
+          bus
+            // .target(properties.IFRAME_SECURE_ORGIN)
+            .emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
+              {
+                type: PUREJS_TYPES.DELETE,
+                records,
+                options,
+              },
+              (deletedData: any) => {
+                if (deletedData.error) {
+                  printLog(`${JSON.stringify(deletedData.error)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(deletedData.error);
+                } else {
+                  resolve(deletedData);
+                }
+              },
+            );
+          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
+            PUREJS_TYPES.DELETE),
+          MessageType.LOG, this.#context.logLevel);
+        } catch (e) {
+          printLog(e.message, MessageType.ERROR, this.#context.logLevel);
+
+          reject(e);
+        }
+      });
+    }
+    return new Promise((resolve, reject) => {
+      try {
+        validateInitConfig(this.#client.config);
+        printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
+          this.#context.logLevel);
+
+        validateDeleteRecords(records, options);
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
+            bus.emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
+              {
+                type: PUREJS_TYPES.DELETE,
+                records,
+                options,
+              },
+              (deletedData: any) => {
+                if (deletedData.error) {
+                  printLog(`${JSON.stringify(deletedData.error)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(deletedData.error);
+                } else resolve(deletedData);
+              },
+            );
+          });
+        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
+          PUREJS_TYPES.DELETE),
+        MessageType.LOG, this.#context.logLevel);
+      } catch (e) {
+        printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);
       }
     });
