@@ -71,35 +71,3 @@ describe("Delete PureJS -> delete() method input", () => {
       });
   });
 });
-
-// describe("delete method tests", () => {
-//   const cause = {
-//     error: {
-//       code: 400,
-//       description: "invalid",
-//     },
-//   };
-//   test("formatErrorResponse fn test", () => {
-		
-// 	});
-// });
-
-// describe("delete fn response test", () => {
-//   test("only success response", () => {
-//     const testInput = {
-//       records: [{ id: "29ebda8d-5272-4063-af58-15cc674e332b", table: "cards" }],
-//     };
-//     const deleteResponse = { deleted: true };
-//     const res = skyflow.delete(testInput);
-//   });
-
-//   test("both error and success response", () => {});
-
-//   test("only error response", () => {
-//     const testInput = {
-//       records: [{ id: "29ebda8d-5272-4063-af58-15cc674e332b", table: "cards" }],
-//     };
-//     const deleteResponse = { deleted: true };
-//     const res = skyflow.delete(testInput);
-//   });
-// });

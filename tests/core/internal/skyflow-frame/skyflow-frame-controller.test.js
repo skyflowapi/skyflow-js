@@ -658,6 +658,8 @@ describe('Deleting records from the vault', () => {
     targetSpy.mockReturnValue({
       on,
     });
+
+    busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
   });
 
   test('delete records success', (done) => {
@@ -681,11 +683,15 @@ describe('Deleting records from the vault', () => {
     onCb(data, cb2);
     
     setTimeout(() => {
-      expect(cb2.mock.calls[0][0].records.length).toBe(2);
-      expect(cb2.mock.calls[0][0].records[0].deleted).toBeTruthy();
-      expect(cb2.mock.calls[0][0].records[1].deleted).toBeTruthy();
-      expect(cb2.mock.calls[0][0].error).toBeUndefined();
-      done();
+      try {
+        expect(cb2.mock.calls[0][0].records.length).toBe(2);
+        expect(cb2.mock.calls[0][0].records[0].deleted).toBeTruthy();
+        expect(cb2.mock.calls[0][0].records[1].deleted).toBeTruthy();
+        expect(cb2.mock.calls[0][0].error).toBeUndefined();
+        done();
+      } catch(err) {
+        done(err);
+      }
     }, 1000);
   });
 
@@ -710,8 +716,12 @@ describe('Deleting records from the vault', () => {
     onCb(data, cb2);
 
     setTimeout(() => {
-      expect(cb2.mock.calls[0][0].error).toBeDefined();
-      done();
+      try {
+        expect(cb2.mock.calls[0][0].error).toBeDefined();
+        done();
+      } catch(err) {
+        done(err);
+      }
     }, 1000);
   });
 });
@@ -729,9 +739,15 @@ describe('getAcessToken error delete', () => {
   
   test('accessToken error', (done) => {
     busEvents.getAccessToken = jest.fn(() => Promise.reject({ error: 'error' }));
+    
     SkyflowFrameController.init();
-    const onCb = on.mock.calls[0][1];
+    
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
 
+    const onCb = on.mock.calls[0][1];
     const deleteData = {
       type: PUREJS_TYPES.DELETE,
       records: deleteRecords,
@@ -741,8 +757,12 @@ describe('getAcessToken error delete', () => {
     onCb(deleteData, deleteCb);
 
     setTimeout(() => {
-      expect(deleteCb.mock.calls[0][0].error).toBeDefined();
-      done();
+      try {
+        expect(deleteCb.mock.calls[0][0].error).toBeDefined();
+        done();
+      } catch(err) {
+        done(err);
+      }
     }, 1000);
   });
 });

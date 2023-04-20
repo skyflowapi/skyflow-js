@@ -392,10 +392,8 @@ class SkyflowContainer {
               (deletedData: any) => {
                 if (deletedData.error) {
                   printLog(`${JSON.stringify(deletedData.error)}`, MessageType.ERROR, this.#context.logLevel);
-                  console.log('error is ', deletedData);
                   reject(deletedData.error);
                 } else {
-                  console.log('deleted data', deletedData);
                   resolve(deletedData);
                 }
               },

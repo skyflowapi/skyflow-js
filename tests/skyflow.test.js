@@ -1279,11 +1279,14 @@ describe('Skyflow delete tests', () => {
   let emitSpy;
   let targetSpy;
   let skyflow;
+  const on = jest.fn();
+  const emit = jest.fn();
   beforeEach(() => {
     emitSpy = jest.spyOn(bus, 'emit');
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit
     });
 
     skyflow = Skyflow.init({
@@ -1311,14 +1314,17 @@ describe('Skyflow delete tests', () => {
       emitCb(deleteResponse);
 
       let data;
-      res.then((res) => data = res);
-
-      setTimeout(() => {
-        expect(data.records.length).toBe(1);
-        expect(data.records[0].deleted).toBeTruthy();
-        expect(data.error).toBeUndefined();
-        done();
-      }, 1000);
+      res.then((res) => {
+        try {
+          data = res
+          expect(data.records.length).toBe(1);
+          expect(data.records[0].deleted).toBeTruthy();
+          expect(data.error).toBeUndefined();
+          done();
+        }catch(err) {
+          done(err);
+        }
+      });
     } catch (err) {
       done(err);
     }
@@ -1339,13 +1345,17 @@ describe('Skyflow delete tests', () => {
       emitCb({ error: { message: "No Records Found", code: 404 } });
 
       let error;
-      res.catch((err) => error = err);
-
-      setTimeout(() => {
-        expect(error).toBeDefined();
-        done();
-      }, 1000);
+      res.catch((err) => {
+        try {
+          error = err;
+          expect(error).toBeDefined();
+          done();
+        } catch(err) {
+          done(err);
+        }
+      });
     } catch (err) {
+      done(err);
     }
   });
   
@@ -1363,15 +1373,19 @@ describe('Skyflow delete tests', () => {
       emitCb(deleteResponse);
 
       let data;
-      res.then((res) => data = res);
-
-      setTimeout(() => {
-        expect(data.records.length).toBe(1);
-        expect(data.records[0].deleted).toBeTruthy();
-        expect(data.error).toBeUndefined();
-        done();
-      }, 1000);
+      res.then((res) => {
+        try {
+          data = res
+          expect(data.records.length).toBe(1);
+          expect(data.records[0].deleted).toBeTruthy();
+          expect(data.error).toBeUndefined();
+          done();
+        }catch(err) {
+          done(err);
+        }
+      });
     } catch (err) {
+      done(err);
     }
   });
 
@@ -1389,13 +1403,17 @@ describe('Skyflow delete tests', () => {
       emitCb({ error: { message: "No Records Found", code: 404 } });
 
       let error;
-      res.catch((err) => error = err);
-
-      setTimeout(() => {
-        expect(error).toBeDefined();
-        done();
-      }, 1000);
+      res.catch((err) => {
+        try {
+          error = err;
+          expect(error).toBeDefined();
+          done();
+        } catch(err) {
+          done(err);
+        }
+      });
     } catch (err) {
+      done(err);
     }
   });
 
