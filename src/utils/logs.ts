@@ -15,6 +15,7 @@ const logs = {
     VALIDATE_RECORDS: '%s1 - Validating insert records.',
     VALIDATE_DETOKENIZE_INPUT: '%s1 - Validating detokenize input.',
     VALIDATE_GET_INPUT: '%s1 - Validating get input.',
+    VALIDATE_DELETE_INPUT: '%s1 - Validating delete input.',
     VALIDATE_COLLECT_RECORDS: '%s1 - Validating collect element input.',
     VALIDATE_REVEAL_RECORDS: '%s1 - Validating reveal element input.',
 
@@ -27,6 +28,7 @@ const logs = {
     INSERT_DATA_SUCCESS: '%s1 - Data has been inserted successfully.',
     DETOKENIZE_SUCCESS: '%s1 - Data has been revealed successfully.',
     GET_SUCCESS: '%s1 - Data has been revealed successfully.',
+    DELETE_SUCCESS: '%s1 - Data has been deleted successfully.',
 
     BEARER_TOKEN_LISTENER: '%s1 - Get bearer token listener added.',
     CAPTURED_BEARER_TOKEN_EVENT: '%s1 - Captured bearer token event.',
@@ -41,6 +43,7 @@ const logs = {
     DETOKENIZE_TRIGGERED: '%s1 - Detokenize method triggered.',
     GET_TRIGGERED: '%s1 - Get method triggered.',
     GET_BY_ID_TRIGGERED: '%s1 - Get method triggered.',
+    DELETE_TRIGGERED: '%s1 - Delete method triggered.',
     EMIT_PURE_JS_REQUEST: '%s1 - Emitted %s2 request.',
     CAPTURE_PURE_JS_REQUEST: '%s1 - Captured %s2 event.',
     LISTEN_PURE_JS_REQUEST: '%s1 - Listening to %s2 event.',
@@ -53,6 +56,8 @@ const logs = {
 
     GET_RESOLVED: '%s1 - Get request is resolved.',
     GET_BY_SKYFLOWID_RESOLVED: '%s1 - GetById request is resolved.',
+
+    DELETE_RESOLVED: '%s1 - Delete request is resolved',
 
     EMIT_EVENT: '%s1 - %s2 event emitted',
     CAPTURE_EVENT: '%s1 - Captured event %s2',
@@ -106,6 +111,16 @@ const logs = {
     MISSING_FIELDS_IN_INSERT: 'Interface: client insert - "fields" key is required in records array at index %s1',
     INVALID_FIELDS_IN_INSERT: 'Interface: client insert - fields of type object is required at index %s1 in records array.',
     INVALID_TOKENS_IN_INSERT: 'Interface: client insert - Invalid tokens in options. tokens of type boolean is required.',
+    RECORDS_KEY_NOT_FOUND_DELETE: 'Interface: client delete - records object is required.',
+    INVALID_RECORDS_IN_DELETE: 'Interface: client delete - Invalid records. records object should be an array.',
+    EMPTY_RECORDS_IN_DELETE: 'Interface: client delete - records array cannot be empty.',
+    MISSING_TABLE_IN_DELETE: 'Interface: client delete - "table" key is required in records array at index %s1',
+    EMPTY_TABLE_IN_DELETE: 'Interface: client delete - table cannot be empty in records array at index %s1',
+    INVALID_TABLE_IN_DELETE: 'Interface: client delete - table of type string is required at index %s1 in records array.',
+    MISSING_ID_IN_DELETE: 'Interface: client delete - "id" key is required in records array at index %s1',
+    EMPTY_ID_IN_DELETE: 'Interface: client delete - id cannot be empty in records array at index %s1',
+    INVALID_ID_IN_DELETE: 'Interface: client delete - id of type string is required at index %s1 in records array.',
+    DELETE_RECORDS_REJECTED: 'Interface: client delete - delete request is rejected.',
     INVALID_TOKENS_IN_COLLECT: 'Interface: collect container - Invalid tokens. tokens of type boolean is required.',
     RECORDS_KEY_NOT_FOUND_IN_ADDITIONAL_FIELDS: 'Interface: collect container - "records" key not found in additionalFields',
     INVALID_RECORDS_IN_ADDITIONAL_FIELDS: 'Interface: collect container - records should be an array inside additionalFields',

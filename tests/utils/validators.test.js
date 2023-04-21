@@ -20,7 +20,8 @@ import {
   validateCardNumberLengthCheck,
   validateUpsertOptions,
   validateGetByIdInput,
-  validateComposableContainerOptions
+  validateComposableContainerOptions,
+  validateDeleteRecords
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logs-helper';
 import { RedactionType } from '../../src/utils/common';
@@ -926,6 +927,81 @@ describe('test validateComposableContainerOptions',()=>{
       validateComposableContainerOptions({layout:[2,-1]});
     }catch(err){
       expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.NEGATIVE_VALUES_COMPOSABLE_LAYOUT.description);
+    }
+  });
+
+})
+
+describe('delete input records validation', () => {
+  test('missing records', () => {
+    try {
+      validateDeleteRecords({ recordss: {} })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_DELETE.description);
+    }
+  });
+
+  test('invalid records', () => {
+    try {
+      validateDeleteRecords({ records: {} })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_DELETE.description);
+    }
+  });
+  
+  test('empty records', () => {
+    try {
+      validateDeleteRecords({ records: [] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_IN_DELETE.description, 0));
+    }
+  });
+  
+  test('missing table key', () => {
+    try {
+      validateDeleteRecords({ records: [{}] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_DELETE.description, 0));
+    }
+  });
+  
+  test('invalid table key value', () => {
+    try {
+      validateDeleteRecords({ records: [{ table: [] }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_DELETE.description, 0));
+    }
+  });
+
+  test('empty table key value', () => {
+    try {
+      validateDeleteRecords({ records: [{ table: '' }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_DELETE.description, 0));
+    }
+  });
+  
+  test('missing skyflow id', () => {
+    try {
+      validateDeleteRecords({ records: [{ table: 'table',  }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_ID_IN_DELETE.description, 0));
+    }
+  });
+
+  test('invalid skyflow id key value', () => {
+    try {
+      validateDeleteRecords({ records: [{ table: 'table', id: 123 }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_ID_IN_DELETE.description, 0));
+    }
+  });
+
+  test('empty skyflow id key', () => {
+    try {
+      validateDeleteRecords({ records: [{ table: 'table', id: '' }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_ID_IN_DELETE.description, 0));
     }
   });
 

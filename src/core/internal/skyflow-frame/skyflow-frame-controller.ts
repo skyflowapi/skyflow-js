@@ -13,16 +13,18 @@ import {
   fetchRecordsBySkyflowID,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
-import {
-  ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES,
-} from '../../constants';
+import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
   IRevealRecord,
   IGetRecord,
-  MessageType, Context, ISkyflowIdRecord,
+  MessageType,
+  Context,
+  ISkyflowIdRecord,
+  IDeleteRecord,
 } from '../../../utils/common';
+import { deleteData } from '../../../core-utils/delete';
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -32,87 +34,152 @@ class SkyflowFrameController {
 
   #client!: Client;
 
-  #context!:Context;
+  #context!: Context;
 
   constructor(clientId) {
     this.#clientId = clientId || '';
     this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/');
     bus
       .target(this.#clientDomain)
-      .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#clientId, (data, callback) => {
-        printLog(parameterizedString(logs.infoLogs.CAPTURE_PURE_JS_REQUEST, CLASS_NAME, data.type),
-          MessageType.LOG, this.#context.logLevel);
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#clientId,
+        (data, callback) => {
+          printLog(
+            parameterizedString(
+              logs.infoLogs.CAPTURE_PURE_JS_REQUEST,
+              CLASS_NAME,
+              data.type,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
 
-        if (data.type === PUREJS_TYPES.DETOKENIZE) {
-          fetchRecordsByTokenId(data.records as IRevealRecord[], this.#client)
-            .then(
+          if (data.type === PUREJS_TYPES.DETOKENIZE) {
+            fetchRecordsByTokenId(
+              data.records as IRevealRecord[],
+              this.#client,
+            ).then(
               (resolvedResult) => {
-                printLog(parameterizedString(logs.infoLogs.FETCH_RECORDS_RESOLVED, CLASS_NAME),
+                printLog(
+                  parameterizedString(
+                    logs.infoLogs.FETCH_RECORDS_RESOLVED,
+                    CLASS_NAME,
+                  ),
                   MessageType.LOG,
-                  this.#context.logLevel);
+                  this.#context.logLevel,
+                );
                 callback(resolvedResult);
               },
               (rejectedResult) => {
-                printLog(logs.errorLogs.FETCH_RECORDS_REJECTED, MessageType.ERROR,
-                  this.#context.logLevel);
+                printLog(
+                  logs.errorLogs.FETCH_RECORDS_REJECTED,
+                  MessageType.ERROR,
+                  this.#context.logLevel,
+                );
 
                 callback({ error: rejectedResult });
               },
             );
-        } else if (data.type === PUREJS_TYPES.INSERT) {
-          this.insertData(data.records, data.options)
-            .then((result) => {
-              printLog(parameterizedString(logs.infoLogs.INSERT_RECORDS_RESOLVED, CLASS_NAME),
-                MessageType.LOG,
-                this.#context.logLevel);
+          } else if (data.type === PUREJS_TYPES.INSERT) {
+            this.insertData(data.records, data.options)
+              .then((result) => {
+                printLog(
+                  parameterizedString(
+                    logs.infoLogs.INSERT_RECORDS_RESOLVED,
+                    CLASS_NAME,
+                  ),
+                  MessageType.LOG,
+                  this.#context.logLevel,
+                );
 
-              callback(result);
-            })
-            .catch((error) => {
-              printLog(logs.errorLogs.INSERT_RECORDS_REJECTED, MessageType.ERROR,
-                this.#context.logLevel);
-              callback({ error });
+                callback(result);
+              })
+              .catch((error) => {
+                printLog(
+                  logs.errorLogs.INSERT_RECORDS_REJECTED,
+                  MessageType.ERROR,
+                  this.#context.logLevel,
+                );
+                callback({ error });
+              });
+          } else if (data.type === PUREJS_TYPES.GET) {
+            fetchRecordsGET(data.records as IGetRecord[], this.#client).then(
+              (resolvedResult) => {
+                printLog(
+                  parameterizedString(logs.infoLogs.GET_RESOLVED, CLASS_NAME),
+                  MessageType.LOG,
+                  this.#context.logLevel,
+                );
+
+                callback(resolvedResult);
+              },
+              (rejectedResult) => {
+                printLog(
+                  logs.errorLogs.GET_REJECTED,
+                  MessageType.ERROR,
+                  this.#context.logLevel,
+                );
+
+                callback({ error: rejectedResult });
+              },
+            );
+          } else if (data.type === PUREJS_TYPES.GET_BY_SKYFLOWID) {
+            fetchRecordsBySkyflowID(
+              data.records as ISkyflowIdRecord[],
+              this.#client,
+            ).then(
+              (resolvedResult) => {
+                printLog(
+                  parameterizedString(
+                    logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED,
+                    CLASS_NAME,
+                  ),
+                  MessageType.LOG,
+                  this.#context.logLevel,
+                );
+
+                callback(resolvedResult);
+              },
+              (rejectedResult) => {
+                printLog(
+                  logs.errorLogs.GET_BY_SKYFLOWID_REJECTED,
+                  MessageType.ERROR,
+                  this.#context.logLevel,
+                );
+
+                callback({ error: rejectedResult });
+              },
+            );
+          } else if (data.type === PUREJS_TYPES.DELETE) {
+            deleteData(
+              data.records as IDeleteRecord[],
+              data.options,
+              this.#client,
+            ).then(
+              (resolvedResult) => {
+                printLog(
+                  parameterizedString(
+                    logs.infoLogs.DELETE_RESOLVED,
+                    CLASS_NAME,
+                  ),
+                  MessageType.LOG,
+                  this.#context.logLevel,
+                );
+
+                callback(resolvedResult);
+              },
+            ).catch((rejectedResult) => {
+              printLog(
+                logs.errorLogs.DELETE_RECORDS_REJECTED,
+                MessageType.ERROR,
+                this.#context.logLevel,
+              );
+
+              callback({ error: rejectedResult });
             });
-        } else if (data.type === PUREJS_TYPES.GET) {
-          fetchRecordsGET(
-            data.records as IGetRecord[],
-            this.#client,
-          ).then(
-            (resolvedResult) => {
-              printLog(parameterizedString(logs.infoLogs.GET_RESOLVED, CLASS_NAME),
-                MessageType.LOG,
-                this.#context.logLevel);
-
-              callback(resolvedResult);
-            },
-            (rejectedResult) => {
-              printLog(logs.errorLogs.GET_REJECTED, MessageType.ERROR,
-                this.#context.logLevel);
-
-              callback({ error: rejectedResult });
-            },
-          );
-        } else if (data.type === PUREJS_TYPES.GET_BY_SKYFLOWID) {
-          fetchRecordsBySkyflowID(
-            data.records as ISkyflowIdRecord[],
-            this.#client,
-          ).then(
-            (resolvedResult) => {
-              printLog(parameterizedString(logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED, CLASS_NAME),
-                MessageType.LOG,
-                this.#context.logLevel);
-
-              callback(resolvedResult);
-            },
-            (rejectedResult) => {
-              printLog(logs.errorLogs.GET_BY_SKYFLOWID_REJECTED, MessageType.ERROR,
-                this.#context.logLevel);
-
-              callback({ error: rejectedResult });
-            },
-          );
-        }
-      });
+          }
+        },
+      );
 
     bus
       // .target(this.#clientDomain)

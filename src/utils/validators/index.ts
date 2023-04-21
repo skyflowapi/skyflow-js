@@ -21,6 +21,7 @@ import {
   IGetInput,
   MessageType,
   IGetByIdInput,
+  IDeleteRecordInput,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { appendZeroToOne } from '../helpers';
@@ -357,6 +358,40 @@ export const validateGetByIdInput = (getByIdInput: IGetByIdInput) => {
     }
     if (!Object.values(RedactionType).includes(record.redaction)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_GETBYID, [`${index}`]);
+    }
+  });
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const validateDeleteRecords = (recordObj: IDeleteRecordInput, options: any) => {
+  if (!(recordObj && Object.prototype.hasOwnProperty.call(recordObj, 'records'))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_DELETE, [], true);
+  }
+  const { records } = recordObj;
+  if (!(records && Array.isArray(records))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_DELETE, [], true);
+  }
+  if (records.length === 0) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_IN_DELETE, [], true);
+  }
+  records.forEach((record: any, index: number) => {
+    if (!(record && Object.prototype.hasOwnProperty.call(record, 'table'))) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_DELETE, [`${index}`], true);
+    }
+    if (!record.table) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_DELETE, [`${index}`], true);
+    }
+    if (!(typeof record.table === 'string' || record.table instanceof String)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_DELETE, [`${index}`], true);
+    }
+    if (!Object.prototype.hasOwnProperty.call(record, 'id')) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ID_IN_DELETE, [`${index}`], true);
+    }
+    if (!record.id) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ID_IN_DELETE, [`${index}`], true);
+    }
+    if (!(typeof record.id === 'string' || record.id instanceof String)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ID_IN_DELETE, [`${index}`], true);
     }
   });
 };

@@ -31,6 +31,8 @@ import {
   ValidationRuleType,
   IGetByIdInput,
   IInsertOptions,
+  IDeleteRecordInput,
+  IDeleteOptions,
 } from './utils/common';
 import { formatVaultURL } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
@@ -219,6 +221,12 @@ class Skyflow {
     printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.get(getInput);
+  }
+
+  delete(records: IDeleteRecordInput, options: IDeleteOptions) {
+    printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,
+      this.#logLevel);
+    return this.#skyflowContainer.delete(records, options);
   }
 
   static get ContainerType() {
