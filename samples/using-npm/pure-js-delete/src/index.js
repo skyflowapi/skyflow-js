@@ -33,17 +33,11 @@ try {
         const deleteButton = document.getElementById("deleteButton");
         if (deleteButton) {
           deleteButton.addEventListener("click", () => {
-            const skyflowIDData = document
-              .getElementById("skyflowID")
-              .value.split(",");
-
-            const records = skyflowIDData.map((id) => ({
-              id: id,
-              table: "pii_fields",
-            }));
-
             const response = skyflow.delete({
-              records: records,
+              records: [
+                { id: "<SKYFLOW_ID_1>", table: "<TABLE_NAME>" },
+                { id: "<SKYFLOW_ID_2>", table: "<TABLE_NAME>" },
+              ],
             });
 
             response

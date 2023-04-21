@@ -16,21 +16,6 @@
     <div>
       <h3>Delete</h3>
       <form>
-        <div id="skyflowIDContainer" class="field">
-          <label for="skyflowID">Skyflow IDs</label>
-          <br />
-          <textarea
-            id="skyflowID"
-            type="text"
-            placeholder="comma separated skyflow ids"
-            name="skyflowID"
-            rows="5"
-            cols="50"
-          ></textarea>
-        </div>
-
-        <br />
-        <br />
         <button id="deleteButton" type="button">Delete</button>
       </form>
 
@@ -68,17 +53,11 @@
         const deleteButton = document.getElementById("deleteButton");
         if (deleteButton) {
           deleteButton.addEventListener("click", () => {
-            const skyflowIDData = document
-              .getElementById("skyflowID")
-              .value.split(",");
-
-            const records = skyflowIDData.map((id, index) => ({
-              id: id,
-              table: "pii_fields",
-            }));
-
             const response = skyflow.delete({
-              records: records,
+              records: [
+                { id: "<SKYFLOW_ID_1>", table: "<TABLE_NAME>" },
+                { id: "<SKYFLOW_ID_2>", table: "<TABLE_NAME>" },
+              ],
             });
 
             response
