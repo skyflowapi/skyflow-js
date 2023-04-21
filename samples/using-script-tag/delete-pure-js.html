@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pure Js Delete</title>
+    <script src="https://js.skyflow.com/v1/index.js"></script>
+    <style>
+      .field {
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h3>Delete</h3>
+      <form>
+        <div id="skyflowIDContainer" class="field">
+          <label for="skyflowID">Skyflow IDs</label>
+          <br />
+          <textarea
+            id="skyflowID"
+            type="text"
+            placeholder="comma separated skyflow ids"
+            name="skyflowID"
+            rows="5"
+            cols="50"
+          ></textarea>
+        </div>
+
+        <br />
+        <br />
+        <button id="deleteButton" type="button">Delete</button>
+      </form>
+
+      <div>
+        <h3>Delete Response</h3>
+        <pre id="deleteResponse"></pre>
+      </div>
+    </div>
+
+    <br />
+
+    <script>
+      try {
+        const skyflow = Skyflow.init({
+          vaultID: "<VAULT_ID>",
+          vaultURL: "<VAULT_URL>",
+          getBearerToken: () => {
+            return new Promise((resolve, reject) => {
+              const Http = new XMLHttpRequest();
+
+              Http.onreadystatechange = () => {
+                if (Http.readyState === 4 && Http.status === 200) {
+                  const response = JSON.parse(Http.responseText);
+                  resolve(response.accessToken);
+                }
+              };
+              const url = "<TOKEN_END_POINT_URL>";
+              Http.open("GET", url);
+              Http.send();
+            });
+          },
+        });
+
+        // form delete request
+        const deleteButton = document.getElementById("deleteButton");
+        if (deleteButton) {
+          deleteButton.addEventListener("click", () => {
+            const skyflowIDData = document
+              .getElementById("skyflowID")
+              .value.split(",");
+
+            const records = skyflowIDData.map((id, index) => ({
+              id: id,
+              table: "pii_fields",
+            }));
+
+            const response = skyflow.delete({
+              records: records,
+            });
+
+            response
+              .then(
+                (res) => {
+                  document.getElementById("deleteResponse").innerHTML =
+                    JSON.stringify(res, null, 2);
+                },
+                (err) => {
+                  document.getElementById("deleteResponse").innerHTML =
+                    JSON.stringify(err, null, 2);
+                }
+              )
+              .catch((err) => {
+                document.getElementById("deleteResponse").innerHTML =
+                  JSON.stringify(err, null, 2);
+              });
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    </script>
+  </body>
+</html>
