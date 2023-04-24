@@ -23,6 +23,6 @@ jobs:
       - run: npm install
 
       - name: unpublish to npm
-        run: npm unpublish skyflow-js@1.29.0-beta.1
+        run: npm unpublish skyflow-js@1.29.0-beta.1 --force
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
