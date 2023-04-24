@@ -19,10 +19,11 @@ jobs:
           ref: master
           fetch-depth: 0
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
           node-version: 14.17.6
-      - run: npm install
+          registry-url: 'https://registry.npmjs.org'
+        - run: npm install
       
       - name: npm build
         run: npm run build-browser-sdk
@@ -53,9 +54,6 @@ jobs:
           IFRAME_SECURE_ORGIN: ${{ secrets.SANDBOX_IFRAME_SECURE_ORIGIN }}
           IFRAME_SECURE_SITE: ${{ secrets.SANDBOX_IFRAME_SECURE_SITE }}
         run: |
-          curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
-          npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
-          npm config set unsafe-perm true
           npm run build:types 
           npm run build-node-sdk
 
@@ -78,9 +76,10 @@ jobs:
            git commit -m "[AUTOMATED] Beta Release - ${{ steps.previoustag.outputs.tag }}"
            git push origin
           
-      - name: publish to jfrog
-        run: |
-            npm publish  
+      - name: publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
           
   aws-cf-invalidate:

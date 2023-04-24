@@ -2,7 +2,7 @@ name: Public Release
 
 on:
   push:
-    tags: '*.*.*'
+    tags: '*.*.\d+'
     paths-ignore:
       - "package.json"
       - "package-lock.json"
