@@ -1,0 +1,28 @@
+name: unpublish Release
+
+on:
+  push:
+    branches:
+      - SK-624/unpublish
+
+jobs:
+  build-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT_ACTIONS }}
+          ref: master
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14.17.6
+          registry-url: 'https://registry.npmjs.org'
+      
+      - run: npm install
+
+      - name: unpublish to npm
+        run: npm unpublish skyflow-js@1.29.0-beta.1
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
