@@ -23,7 +23,8 @@ jobs:
         with:
           node-version: 14.17.6
           registry-url: 'https://registry.npmjs.org'
-        - run: npm install
+      
+      - run: npm install
       
       - name: npm build
         run: npm run build-browser-sdk
