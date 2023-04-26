@@ -13,6 +13,7 @@ Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal
 - [**Securely collecting data client-side**](#Securely-collecting-data-client-side)
 - [**Securely collecting data client-side using Composable Elements**](#Securely-collecting-data-client-side-using-Composable-Elements)
 - [**Securely revealing data client-side**](#Securely-revealing-data-client-side)
+- [**Securely deleting data cleint-side**](#Securely-deleting-data-client-side)
 
 ---
 
@@ -2326,6 +2327,62 @@ collectContainer.uploadFiles();
             "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
         }
     ]
+}
+```
+
+---
+# Securely deleting data client-side
+-  [**Deleting data from the vault**](#deleting-data-from-the-vault)
+
+## Deleting data from the vault
+
+To delete data from the vault, use the `delete(records, options?)` method of the Skyflow client. The `records` parameter takes an array of records to delete in the following format. The `options` parameter is optional and takes an object of deletion parameters. Currently, there are no supported deletion parameters.
+
+```javascript
+const records = [
+  {
+    id: "<SKYFLOW_ID_1>", // skyflow id of the record to delete
+    table: "<TABLE_NAME>" // Table from which the record is to be deleted
+  },
+  {
+    // ...additional records here
+  },
+],
+
+skyflowClient.delete(records);
+```
+
+An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/delete-pure-js.html) of delete call:
+
+```javascript
+skyflowClient.delete({
+  records: [
+    {
+      id: "29ebda8d-5272-4063-af58-15cc674e332b",
+      table: "cards",
+    },
+    {
+      id: "d5f4b926-7b1a-41df-8fac-7950d2cbd923",
+      table: "cards",
+    }
+  ],
+});
+```
+
+A sample response:
+
+```json
+{
+  "records": [
+    {
+     "skyflow_id": "29ebda8d-5272-4063-af58-15cc674e332b", // skyflow id of the deleted record.
+     "deleted": true,
+    },
+    {
+     "skyflow_id": "29ebda8d-5272-4063-af58-15cc674e332b", // skyflow id of the deleted record.
+     "deleted": true,
+    }
+  ]
 }
 ```
 
