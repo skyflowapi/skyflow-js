@@ -37,6 +37,7 @@ import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
 import {
+  addSeperatorToCardNumberMask,
   appendMonthFourDigitYears,
   appendMonthTwoDigitYears,
   appendZeroToOne, handleCopyIconClick, styleToString,
@@ -278,7 +279,10 @@ export class FrameElement {
             this.domImg.src = CARD_ENCODED_ICONS[cardType] || 'none';
           }
         }
-        const cardNumberMask = CARD_NUMBER_MASK[cardType];
+        const cardNumberMask = addSeperatorToCardNumberMask(
+          CARD_NUMBER_MASK[cardType],
+          this.options?.cardSeperator,
+        );
         this.iFrameFormElement.setMask(cardNumberMask as string[]);
         this.applyMask();
       } else if (this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name
@@ -755,10 +759,15 @@ export class FrameElement {
       Object.keys(mask[2]).forEach((key) => {
         translation[key] = { pattern: mask[2][key] };
       });
-
-      $(id).mask(mask[0], {
-        translation,
-      });
+      try {
+        $(id).mask(mask[0], {
+          translation,
+        });
+      } catch (err) {
+        printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
+          this.iFrameFormElement.fieldType), MessageType.WARN,
+        (this.iFrameFormElement.context.logLevel || LogLevel.ERROR));
+      }
     }
   }
 }

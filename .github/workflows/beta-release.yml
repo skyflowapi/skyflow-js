@@ -1,8 +1,8 @@
-name: Public Release
+name: Public Beta Release
 
 on:
-  push:
-    tags: '*.*.\d+'
+ push:
+    tags: '*.*.*-beta.*'
     paths-ignore:
       - "package.json"
       - "package-lock.json"
@@ -23,36 +23,37 @@ jobs:
         with:
           node-version: 14.17.6
           registry-url: 'https://registry.npmjs.org'
+      
       - run: npm install
       
       - name: npm build
         run: npm run build-browser-sdk
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_ORGIN: ${{ secrets.SANDBOX_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.SANDBOX_IFRAME_SECURE_SITE }}
 
       - name: npm build iframe
         run: npm run build-iframe
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_ORGIN: ${{ secrets.SANDBOX_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.SANDBOX_IFRAME_SECURE_SITE }}
  
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         with:
-          args: --acl public-read --delete
+          args:  --delete
         env:
-          AWS_S3_BUCKET: ${{ secrets.PROD_AWS_BUCKET_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_ACCESS_KEY_SECRET }}
-          AWS_REGION: ${{ secrets.PROD_AWS_REGION }}
+          AWS_S3_BUCKET: ${{ secrets.SANDBOX_AWS_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_SECRET }}
+          AWS_REGION: ${{ secrets.SANDBOX_AWS_REGION }}
           SOURCE_DIR: "dist/v1"
           DEST_DIR: "v1/"
 
       - name: build node-sdk
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_ORGIN: ${{ secrets.SANDBOX_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: ${{ secrets.SANDBOX_IFRAME_SECURE_SITE }}
         run: |
           npm run build:types 
           npm run build-node-sdk
@@ -73,7 +74,7 @@ jobs:
            git config user.name ${{ github.actor }}
            git config user.email ${{ github.actor }}@users.noreply.github.com
            git add package.json
-           git commit -m "[AUTOMATED] Public Release - ${{ steps.previoustag.outputs.tag }}"
+           git commit -m "[AUTOMATED] Beta Release - ${{ steps.previoustag.outputs.tag }}"
            git push origin
           
       - name: publish to npm
@@ -89,11 +90,11 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0      
-    - name: Configure AWS credentials Prod account
+    - name: Configure AWS credentials SANDBOX account
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.PROD_AWS_ACCESS_KEY_SECRET }}
-        aws-region: ${{ secrets.PROD_AWS_REGION }}
+        aws-access-key-id: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_SECRET }}
+        aws-region: ${{ secrets.SANDBOX_AWS_REGION }}
     - name: invalidate-cf-distribution
-      run: aws cloudfront create-invalidation --distribution-id ${{ secrets.PROD_CF_DISTRIBUTION_ID }} --paths "/*"
+      run: aws cloudfront create-invalidation --distribution-id ${{ secrets.SANDBOX_CF_DISTRIBUTION_ID }} --paths "/*"
