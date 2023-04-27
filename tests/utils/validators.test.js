@@ -21,7 +21,7 @@ import {
   validateUpsertOptions,
   validateGetByIdInput,
   validateComposableContainerOptions,
-  validateDeleteRecords
+  validateDeleteRecords,
   validateInputFormatOptions
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logs-helper';

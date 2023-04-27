@@ -24,7 +24,7 @@ export function formatFrameNameToId(name: string) {
 }
 
 export function removeSpaces(inputString:string) {
-  return inputString.trim().replace(/[\s]/g, '');
+  return inputString.trim().replace(/[\s-]/g, '');
 }
 
 export function formatVaultURL(vaultURL) {
