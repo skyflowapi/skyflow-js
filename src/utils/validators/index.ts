@@ -5,7 +5,6 @@ Copyright (c) 2022 Skyflow, Inc.
 import {
   ALLOWED_EXPIRY_DATE_FORMATS,
   ALLOWED_EXPIRY_YEAR_FORMATS,
-  CARDNUMBER_REVEAL_FORMAT,
   CardType, CARD_TYPE_REGEX,
   DEFAULT_CARD_LENGTH_RANGE,
   ElementType,
@@ -429,9 +428,6 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
     if (Object.prototype.hasOwnProperty.call(record, 'format') && record.format === '') {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_FORMAT_REVEAL);
     }
-    if (Object.prototype.hasOwnProperty.call(record, 'format') && !Object.values(CARDNUMBER_REVEAL_FORMAT).includes(record.format)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FORMAT_VALUE_REVEAL);
-    }
   });
 };
 
@@ -617,4 +613,21 @@ export const validateBooleanOptions = (option) => {
   if (typeof option !== 'boolean') { return false; }
 
   return true;
+};
+
+export const validateInputFormatOptions = (options) => {
+  if (options) {
+    if (Object.prototype.hasOwnProperty.call(options, 'format')
+    && !(typeof options.format === 'string')) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT, [], true);
+    }
+
+    if (
+      Object.prototype.hasOwnProperty.call(options, 'translation')
+      && ((!(typeof options.translation === 'object')
+      || (Object.prototype.toString.call(options.translation) !== '[object Object]')))
+    ) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION, [], true);
+    }
+  }
 };

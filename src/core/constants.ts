@@ -230,7 +230,7 @@ export const ELEMENTS = {
   },
 };
 
-export const CARDNUMBER_REVEAL_FORMAT = {
+export const CARDNUMBER_INPUT_FORMAT = {
   SPACE_FORMAT: 'XXXX XXXX XXXX XXXX',
   DASH_FORMAT: 'XXXX-XXXX-XXXX-XXXX',
   AMEX_FORMAT: 'XXXX XXXXXX XXXXX',
@@ -536,3 +536,16 @@ export const INPUT_KEYBOARD_EVENTS = {
 };
 
 export const CUSTOM_ROW_ID_ATTRIBUTE = 'data-row-id';
+
+export const INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES = [
+  ElementType.CARDHOLDER_NAME,
+  ElementType.EXPIRATION_MONTH,
+  ElementType.FILE_INPUT,
+  ElementType.PIN,
+  ElementType.CVV,
+];
+
+export const DEFAULT_CARD_NUMBER_SEPERATOR = ' ';
+export const CARD_NUMBER_HYPEN_SEPERATOR = '-';
+
+export const DEFAULT_INPUT_FORMAT_TRANSLATION = { X: '[0-9]' };

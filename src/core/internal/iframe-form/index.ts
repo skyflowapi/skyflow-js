@@ -188,14 +188,21 @@ export class IFrameFormElement extends EventEmitter {
     newMask[0] = mask[0];
     newMask[1] = null; // todo: replacer options
     newMask[2] = mask[1];
-    if (newMask[2]) {
-      Object.keys(newMask[2]).forEach((key) => {
-        newMask[2][key] = new RegExp(newMask[2][key]);
-      });
-    } else {
-      newMask[2]['9'] = /[0-9]/;
-      newMask[2].a = /[a-zA-Z]/;
-      newMask[2]['*'] = /[a-zA-Z0-9]/;
+    try {
+      if (newMask[2]) {
+        Object.keys(newMask[2]).forEach((key) => {
+          newMask[2][key] = new RegExp(newMask[2][key]);
+        });
+      } else {
+        newMask[2]['9'] = /[0-9]/;
+        newMask[2].a = /[a-zA-Z]/;
+        newMask[2]['*'] = /[a-zA-Z0-9]/;
+      }
+    } catch (err) {
+      printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
+        this.fieldType),
+      MessageType.WARN, this.context?.logLevel || LogLevel.ERROR);
+      return;
     }
     this.mask = newMask;
   }

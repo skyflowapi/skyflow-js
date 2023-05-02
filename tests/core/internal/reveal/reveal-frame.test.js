@@ -119,6 +119,43 @@ describe("Reveal Frame Class",()=>{
     onRevealResponseCb({"1815-6223-1073-1425":"card_value"})
 
   });
+
+  test("init callback after reveal with response value with mask value",()=>{
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        token:"1815",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        },
+        mask:['XX-XX',null,{X:'0-9'}]
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    // reveal response ready
+    const onRevealResponseName = on.mock.calls[0][0];
+    // undefined since with jest window.name will be emptyString("") 
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+undefined);
+    const onRevealResponseCb = on.mock.calls[0][1];
+    onRevealResponseCb({"1815":"1234"})
+    
+
+  });
   test("init callback after reveal without value",()=>{
     const testFrame = RevealFrame.init();
     // const onCb = jest.fn();
