@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.28.0] - 2023-03-29
+### Added
+-  Update data through collect element using skyflow id
+
+## [1.27.4] - 2023-03-16
+### Added
+-  Added update element interface for composable  elements.
+
+## [1.27.3] - 2023-03-10
+### Fixed
+-  Fixed Validation for File Input
+
+## [1.27.2] - 2023-03-09
+### Removed
+-  Removed grace period logic in bearer token generation
+
+## [1.27.1] - 2023-03-01
+### Fixed
+-  Fix grace period in caching of bearer token
+
+## [1.27.0] - 2023-02-20
+### Added
+-  Input formatting to reveal elements
+
+## [1.26.1] - 2023-02-20
+### Fixed
+-  Bug fixes related to change event listeners,custom validations. 
+
+## [1.26.0] - 2023-02-15
+### Fixed
+-  Composable elements improvements and minor bug fixes.
+
 ## [1.25.0] - 2023-02-01
 -   Added `redaction` type support in `detokenize` interface.
 
