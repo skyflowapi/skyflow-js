@@ -6,6 +6,8 @@ import SkyflowError from '../libs/skyflow-error';
 import { ISkyflow } from '../skyflow';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
+import sdkDetails from '../../package.json';
+import { getBrowserInfo, getDeviceType, getOSDetails } from '../utils/helpers';
 
 export interface IClientRequest {
   body?: any;
@@ -53,6 +55,17 @@ class Client {
     httpRequest.open(request.requestMethod, request.url);
 
     if (request.headers) {
+      const SDKversion = `${sdkDetails.name}@${sdkDetails.version}`;
+      const osDetail = getOSDetails(navigator.userAgent);
+      const browserDetails = getBrowserInfo(navigator.userAgent);
+      const deviceDetails = getDeviceType(navigator.userAgent);
+      const metaObject = {
+        sdk_name_version: SDKversion,
+        sdk_client_device_model: deviceDetails ?? '',
+        sdk_os_version: navigator.platform ?? `${osDetail.os ?? ''} ${osDetail.version ?? ''}`,
+        sdk_runtime_details: `${browserDetails.browserName ?? ''} ${browserDetails.browserVersion ?? ''}`,
+      };
+      request.headers['sky-metadata'] = JSON.stringify(metaObject);
       const { headers } = request;
       Object.keys(request.headers).forEach((key) => {
         if (!(key === 'content-type' && headers[key] && headers[key].includes(ContentType.FORMDATA))) {

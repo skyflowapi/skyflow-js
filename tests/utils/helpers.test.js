@@ -15,7 +15,10 @@ import {
   appendMonthTwoDigitYears,
   addSeperatorToCardNumberMask,
   constructMaskTranslation,
-  formatRevealElementOptions
+  formatRevealElementOptions,
+  getDeviceType,
+  getBrowserInfo,
+  getOSDetails,
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -297,4 +300,99 @@ describe('test formatRevealElementOptions function', () => {
     expect(formatRevealElementOptions({enableCopy:true})).toEqual({enableCopy:true});
   });
 
+});
+
+describe('getDeviceType', () => {
+  it('should return "mobile" for mobile user agents', () => {
+    const userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
+    const deviceType = getDeviceType(userAgent);
+    expect(deviceType).toBe('mobile');
+  });
+
+  it('should return "tablet" for tablet user agents', () => {
+    const userAgent = 'Mozilla/5.0 (iPad; CPU OS 14_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1';
+    const deviceType = getDeviceType(userAgent);
+    expect(deviceType).toBe('tablet');
+  });
+
+  it('should return "desktop" for desktop user agents', () => {
+    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36';
+    const deviceType = getDeviceType(userAgent);
+    expect(deviceType).toBe('desktop');
+  });
+
+  it('should return desktop for user agents that do not contain device information', () => {
+    const userAgent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+    const deviceType = getDeviceType(userAgent);
+    expect(deviceType).toBe('desktop');
+  });
+});
+
+describe('getBrowserInfo', () => {
+  it('should correctly identify Internet Explorer', () => {
+    const result = getBrowserInfo('Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; AS; rv:11.0) like Gecko');
+    expect(result).toEqual({ browserName: 'Internet Explorer', browserVersion: '11.0' });
+  });
+
+  it('should correctly identify Microsoft Edge', () => {
+    const result = getBrowserInfo('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299');
+    expect(result).toEqual({ browserName: 'Microsoft Edge', browserVersion: '16.16299' });
+  });
+
+  it('should correctly identify Google Chrome', () => {
+    const result = getBrowserInfo('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36');
+    expect(result).toEqual({ browserName: 'Google Chrome', browserVersion: '58.0.3029.110' });
+  });
+
+  it('should correctly identify Mozilla Firefox', () => {
+    const result = getBrowserInfo('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0');
+    expect(result).toEqual({ browserName: 'Mozilla Firefox', browserVersion: '54.0' });
+  });
+
+  it('should correctly identify Apple Safari', () => {
+    const result = getBrowserInfo('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/604.3.5 (KHTML, like Gecko) Version/11.0.3 Safari/604.3.5');
+    expect(result).toEqual({ browserName: 'Apple Safari', browserVersion: '11.0.3' });
+  });
+
+  it('should return an empty object if the user agent string is not recognized', () => {
+    const result = getBrowserInfo('Unknown User Agent');
+    expect(result).toEqual({ browserName: '', browserVersion: '' });
+  });
+});
+
+describe('getOSDetails', () => {
+  it('should correctly parse Windows user agent string', () => {
+    const userAgentString = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36';
+    const osDetails = getOSDetails(userAgentString);
+    expect(osDetails.os).toEqual('Windows');
+    expect(osDetails.version).toEqual('10.0');
+  });
+
+  it('should correctly parse Mac OS X user agent string', () => {
+    const userAgentString = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36';
+    const osDetails = getOSDetails(userAgentString);
+    expect(osDetails.os).toEqual('Mac OS X');
+    expect(osDetails.version).toEqual('10.15.7');
+  });
+
+  it('should correctly parse Linux user agent string', () => {
+    const userAgentString = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0';
+    const osDetails = getOSDetails(userAgentString);
+    expect(osDetails.os).toEqual('Linux');
+    expect(osDetails.version).toEqual(null);
+  });
+
+  it('should correctly parse Android user agent string', () => {
+    const userAgentString = 'Mozilla/5.0 (Linux; Android 11; SM-G991U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.62 Mobile Safari/537.36';
+    const osDetails = getOSDetails(userAgentString);
+    expect(osDetails.os).toEqual('Android');
+    expect(osDetails.version).toEqual(null);
+  });
+
+  it('should correctly parse iOS user agent string', () => {
+    const userAgentString = 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1';
+    const osDetails = getOSDetails(userAgentString);
+    expect(osDetails.os).toEqual('iOS');
+    expect(osDetails.version).toEqual('15.0');
+  });
 });
