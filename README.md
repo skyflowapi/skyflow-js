@@ -187,6 +187,7 @@ The sample response:
     {
      "table": "cards",
      "fields":{
+        "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
         "cardNumber": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
         "cvv": "1989cb56-63da-4482-a2df-1f74cd0dd1a5"
       }
@@ -500,6 +501,7 @@ container.collect({
     {
       "table": "cards",
       "fields": {
+        "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
         "cardNumber": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
         "gender": "12f670af-6c7d-4837-83fb-30365fbc0b1e"
       }
@@ -596,6 +598,7 @@ cvvElement.mount('#cvv'); //Assumes there is a div with id='#cvv' in the webpage
     {
       "table": "cards",
       "fields": {
+        "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
         "cardNumber": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
         "gender": "12f670af-6c7d-4837-83fb-30365fbc0b1e"
       }
@@ -1443,6 +1446,7 @@ composableContainer.collect({
         {
             "table": "pii_fields",
             "fields": {
+                "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
                 "first_name": "63b5eeee-3624-493f-825e-137a9336f882",
                 "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
                 "cvv": "7baf5bda-aa22-4587-a5c5-412f6f783a19",
