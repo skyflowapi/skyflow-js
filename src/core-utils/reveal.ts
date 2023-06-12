@@ -7,6 +7,7 @@ import SkyflowError from '../libs/skyflow-error';
 import {
   IRevealRecord, IRevealResponseType, MessageType, LogLevel, IGetRecord, ISkyflowIdRecord,
   RedactionType,
+  IGetOptions,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
 
@@ -37,17 +38,30 @@ const getRecordsFromVault = (
   skyflowIdRecord: IGetRecord,
   client: Client,
   authToken:string,
+  options?: IGetOptions,
 ) => {
   let paramList: string = '';
 
   skyflowIdRecord.ids?.forEach((skyflowId) => {
     paramList += `skyflow_ids=${skyflowId}&`;
   });
+
   skyflowIdRecord.columnValues?.forEach((column) => {
     paramList += `column_name=${skyflowIdRecord.columnName}&column_values=${column}&`;
   });
 
-  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}?${paramList}redaction=${skyflowIdRecord.redaction}`;
+  if (options && Object.prototype.hasOwnProperty.call(options, 'tokens')) {
+    paramList += `tokenization=${options.tokens}&`;
+  }
+
+  if (skyflowIdRecord?.redaction) {
+    paramList += `redaction=${skyflowIdRecord.redaction}`;
+  }
+
+  // const vault = client.config.vaultURL;
+  const vault = 'vault';
+  const vaultEndPointurl: string = `${vault}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}?${paramList}`;
+
   return client.request({
     requestMethod: 'GET',
     url: vaultEndPointurl,
@@ -181,13 +195,14 @@ export const formatRecordsForClient = (response: IRevealResponseType) => {
 export const fetchRecordsGET = async (
   skyflowIdRecords: IGetRecord[],
   client: Client,
+  options?: IGetOptions,
 ) => new Promise((rootResolve, rootReject) => {
   let vaultResponseSet: Promise<any>[];
   const clientId = client.toJSON()?.metaData?.uuid || '';
   getAccessToken(clientId).then((authToken) => {
     vaultResponseSet = skyflowIdRecords.map(
       (skyflowIdRecord) => new Promise((resolve, reject) => {
-        getRecordsFromVault(skyflowIdRecord, client, authToken as string)
+        getRecordsFromVault(skyflowIdRecord, client, authToken as string, options)
           .then(
             (resolvedResult: any) => {
               const response: any[] = [];

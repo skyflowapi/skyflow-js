@@ -359,6 +359,15 @@ const getByIdReq = [{
   redaction: 'PLAIN_TEXT',
   table: 'table1',
 }];
+
+const getByIdReqWithoutRedaction = [{
+  ids: ['id1'],
+  table: 'table1',
+}];
+
+const getOptionsTrue = { tokens: true };
+const getOptionsFalse = { tokens: false };
+
 const getByColumnReq = [{
   columnValues: ['id1'],
   columnName: 'column1',
@@ -474,6 +483,7 @@ describe('Retrieving data using get', () => {
       done();
     }, 1000);
   });
+
   test('get success second case', (done) => {
     const clientReq = jest.fn(() => Promise.resolve(getByIdRes));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
@@ -499,6 +509,77 @@ describe('Retrieving data using get', () => {
     }, 1000);
   });
 
+  test('get method should send request url with tokenization true and without redaction when tokens flag is true', (done) => {
+    let reqArg;
+    const clientReq = jest.fn((arg) => {
+      reqArg = arg;
+      return Promise.resolve(getByIdRes)
+    });
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.GET,
+      records: getByIdReqWithoutRedaction,
+      options: getOptionsTrue
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    try {
+      setTimeout(() => {
+        expect(cb2.mock.calls[0][0].records.length).toBe(1);
+        expect((reqArg.url).includes('tokenization=true')).toBe(true);
+        expect((reqArg.url).includes('redaction=PLAIN_TEXT')).toBe(false);
+        done();
+      }, 1000);
+    } catch (err) {
+      done(err);
+    }
+  });
+
+  test('get method should send request url with tokenization false and redaction when tokens flag is false', (done) => {
+    let reqArg;
+    const clientReq = jest.fn((arg) => {
+      reqArg = arg;
+      return Promise.resolve(getByIdRes)
+    });
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.GET,
+      records: getByIdReq,
+      options: getOptionsFalse
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    try {
+      setTimeout(() => {
+        expect(cb2.mock.calls[0][0].records.length).toBe(1);
+        expect((reqArg.url).includes('tokenization=false')).toBe(true);
+        expect((reqArg.url).includes('redaction=PLAIN_TEXT')).toBe(true);
+        done();
+      }, 1000);
+    } catch (err) {
+      done(err);
+    }
+  });
 
   test('get error', (done) => {
     const clientReq = jest.fn(() => Promise.reject(errorResponse));
