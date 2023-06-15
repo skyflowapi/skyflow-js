@@ -134,6 +134,18 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_REDACTION_TYPE_IN_GET,
   },
+  INVALID_TOKENS_IN_GET: {
+    code: 400,
+    description: logs.errorLogs.INVALID_TOKENS_IN_GET,
+  },
+  TOKENS_GET_COLUMN_NOT_SUPPORTED: {
+    code: 400,
+    description: logs.errorLogs.TOKENS_GET_COLUMN_NOT_SUPPORTED,
+  },
+  REDACTION_WITH_TOKENS_NOT_SUPPORTED: {
+    code: 400,
+    description: logs.errorLogs.REDACTION_WITH_TOKENS_NOT_SUPPORTED,
+  },
   INVALID_REDACTION_TYPE_IN_DETOKENIZE: {
     code: 400,
     description: logs.errorLogs.INVALID_REDACTION_TYPE_IN_DETOKENIZE,

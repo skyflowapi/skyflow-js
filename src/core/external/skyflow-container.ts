@@ -38,6 +38,7 @@ import {
   IInsertOptions,
   IDeleteOptions,
   IDeleteRecordInput,
+  IGetOptions,
 } from '../../utils/common';
 
 const CLASS_NAME = 'SkyflowContainer';
@@ -301,7 +302,7 @@ class SkyflowContainer {
     });
   }
 
-  get(getInput: IGetInput) {
+  get(getInput: IGetInput, options?: IGetOptions) {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
@@ -309,9 +310,7 @@ class SkyflowContainer {
           printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_INPUT, CLASS_NAME),
             MessageType.LOG,
             this.#context.logLevel);
-
-          validateGetInput(getInput);
-
+          validateGetInput(getInput, options);
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)
             .emit(
@@ -319,6 +318,7 @@ class SkyflowContainer {
               {
                 type: PUREJS_TYPES.GET,
                 records: getInput.records,
+                options,
               },
               (revealData: any) => {
                 if (revealData.error) reject(revealData.error);
@@ -342,7 +342,7 @@ class SkyflowContainer {
           CLASS_NAME), MessageType.LOG,
         this.#context.logLevel);
 
-        validateGetInput(getInput);
+        validateGetInput(getInput, options);
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
@@ -351,6 +351,7 @@ class SkyflowContainer {
               {
                 type: PUREJS_TYPES.GET,
                 records: getInput.records,
+                options,
               },
               (revealData: any) => {
                 if (revealData.error) reject(revealData.error);

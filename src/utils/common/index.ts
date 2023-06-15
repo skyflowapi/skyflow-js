@@ -82,7 +82,7 @@ export interface IDetokenizeInput {
 
 export interface IGetRecord {
   ids?: string[];
-  redaction: RedactionType;
+  redaction?: RedactionType;
   table: string;
   columnName?:string;
   columnValues?: string[];
@@ -90,6 +90,10 @@ export interface IGetRecord {
 
 export interface IGetInput {
   records: IGetRecord[];
+}
+
+export interface IGetOptions {
+  tokens?: boolean;
 }
 
 export interface ISkyflowIdRecord {
