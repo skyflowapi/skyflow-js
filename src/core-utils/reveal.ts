@@ -58,8 +58,7 @@ const getRecordsFromVault = (
     paramList += `redaction=${skyflowIdRecord.redaction}`;
   }
 
-  // const vault = client.config.vaultURL;
-  const vault = 'vault';
+  const vault = client.config.vaultURL;
   const vaultEndPointurl: string = `${vault}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}?${paramList}`;
 
   return client.request({
