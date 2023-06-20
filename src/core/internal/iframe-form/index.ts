@@ -591,6 +591,12 @@ export class IFrameFormElement extends EventEmitter {
         event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
         value: this.getStatus(),
       });
+    } else if (!this.state.isEmpty) {
+      bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+        name: this.iFrameName,
+        event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+        value: this.getStatus(),
+      });
     }
 
     this._emit(ELEMENT_EVENTS_TO_CLIENT.CHANGE, {
