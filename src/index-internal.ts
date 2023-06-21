@@ -26,6 +26,15 @@ import {
   try {
     const names = root.name.split(':');
     if (names[0] === COLLECT_FRAME_CONTROLLER && names[1] !== undefined) {
+      printLog(
+        parameterizedString(
+          logs.infoLogs.COLLECT_CONTROLLER_START,
+          'index-internal',
+          'collect container',
+        ),
+        MessageType.LOG,
+        LogLevel[names[names.length - 1]],
+      );
       root.Skyflow = FrameController;
       FrameController.init(names[1], names[2]);
     } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] !== undefined) {
