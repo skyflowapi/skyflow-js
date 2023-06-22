@@ -74,7 +74,6 @@ const logs = {
     SETUP_IN_START: '%s1 - Inside FrameElements start(), calling setup',
     SETUP_IN_CONSTRUCTOR: '%s1 - Inside FrameElements constructor, calling setup',
     COLLECT_ELEMET_START: '%s1 - %s2, Collect Element start',
-    COLLECT_CONTROLLER_START: '%s1 - %s2, Collect Controller start',
     REVEAL_ELEMENT_START: '%s1 - %s2, Reveal Element start',
     EMIT_COLLECT_FRAME_CONTROLLER_EVENT: '%s1 - Emit collect FrameController FRAME_READY event',
     EXECUTE_COLLECT_CONTROLLER_READY_CB: '%s1 - Executing collect FrameController FRAME_READY callback, set client metadata',
