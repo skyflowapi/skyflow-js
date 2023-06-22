@@ -27,7 +27,7 @@ import {
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
@@ -78,8 +78,6 @@ class ComposableContainer extends Container {
 
   type:string = ContainerType.COMPOSABLE;
 
-  #containerMounted: boolean = false;
-
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -112,13 +110,6 @@ class ComposableContainer extends Container {
           },
           context,
         });
-        this.#containerMounted = true;
-        // eslint-disable-next-line no-underscore-dangle
-        this.#eventEmitter._emit(
-          ELEMENT_EVENTS_TO_CONTAINER.COMPOSABLE_CONTAINER_MOUNTED + this.#containerId,
-          { containerId: this.#containerId },
-        );
-
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
@@ -309,21 +300,9 @@ class ComposableContainer extends Container {
       };
     }
 
-    if (this.#containerMounted) {
-      this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
-      this.#containerElement.mount(domElement);
-      this.#isMounted = true;
-      return;
-    }
-
-    this.#eventEmitter.on(
-      ELEMENT_EVENTS_TO_CONTAINER.COMPOSABLE_CONTAINER_MOUNTED + this.#containerId,
-      () => {
-        this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
-        this.#containerElement.mount(domElement);
-        this.#isMounted = true;
-      },
-    );
+    this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
+    this.#containerElement.mount(domElement);
+    this.#isMounted = true;
   };
 
   unmount = () => {

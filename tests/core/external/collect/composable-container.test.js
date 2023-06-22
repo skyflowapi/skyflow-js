@@ -40,8 +40,7 @@ jest.mock('../../../../src/event-emitter');
 const emitMock = jest.fn();
 let emitterSpy;
 EventEmitter.mockImplementation(()=>({
-  on: jest.fn().mockImplementation((name,cb)=>{emitterSpy = cb}),
-  _emit: jest.fn()
+  on: jest.fn().mockImplementation((name,cb)=>{emitterSpy = cb})
 }));
 
 
@@ -172,7 +171,6 @@ describe('test composable container class',()=>{
     const container = new ComposableContainer({layout:[2]}, metaData, {}, context);
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
-    emitterSpy();
     container.mount('#composable');
   });
 
@@ -183,9 +181,7 @@ describe('test composable container class',()=>{
     const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
-    emitterSpy();
     container.mount('#composable');
-   
     container.collect();
   });
 
@@ -235,14 +231,10 @@ describe('test composable container class',()=>{
         column: 'column'
       }]
     }
-    emitterSpy();
-    setTimeout(()=>{
       container.collect(options);
       const collectCb = emitSpy.mock.calls[0][2];
       collectCb(collectResponse);
       collectCb({ error: 'Error occured' })
-    },200);
-
   });
 
   it("test container unmount",()=>{
@@ -251,20 +243,11 @@ describe('test composable container class',()=>{
     document.body.append(div);
 
     const container = new ComposableContainer({layout:[2]}, metaData, {}, context);
-    const frameReadyCb = on.mock.calls[0][1];
-    const cb2 = jest.fn();
-    frameReadyCb({
-      name: COLLECT_FRAME_CONTROLLER + mockUuid
-    }, cb2)
-    emitterSpy();
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
-    setTimeout(()=>{
-      container.mount('#composable');
-      container.unmount();
-      expect(mockUnmount).toBeCalled();
-    },0)
-
+    container.mount('#composable');
+    container.unmount();
+    expect(mockUnmount).toBeCalled();
   });
     
 });
