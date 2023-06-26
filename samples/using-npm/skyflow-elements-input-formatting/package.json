@@ -10,7 +10,7 @@
   "keywords": [],
   "license": "ISC",
   "dependencies": {
-    "skyflow-js": "1.29.0-beta.2"
+    "skyflow-js": "^1.29.1"
   },
   "devDependencies": {
     "parcel": "^2.0.1"
