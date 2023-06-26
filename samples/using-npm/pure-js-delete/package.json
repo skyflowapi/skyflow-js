@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "skyflow-js": "^1.28.0"
+    "skyflow-js": "^1.29.1"
   },
   "devDependencies": {
     "parcel": "^2.0.1"
