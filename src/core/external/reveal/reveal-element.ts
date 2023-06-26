@@ -15,6 +15,7 @@ import {
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
+import { formatRevealElementOptions } from '../../../utils/helpers';
 
 const CLASS_NAME = 'RevealElement';
 
@@ -43,7 +44,7 @@ class RevealElement extends SkyflowElement {
     this.#metaData = metaData;
     this.#recordData = {
       ...record,
-      ...options,
+      ...formatRevealElementOptions(options),
     };
     this.#containerId = containerId;
     this.#context = context;

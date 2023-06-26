@@ -74,6 +74,7 @@ const logs = {
     SETUP_IN_START: '%s1 - Inside FrameElements start(), calling setup',
     SETUP_IN_CONSTRUCTOR: '%s1 - Inside FrameElements constructor, calling setup',
     COLLECT_ELEMET_START: '%s1 - %s2, Collect Element start',
+    COLLECT_CONTROLLER_START: '%s1 - %s2, Collect Controller start',
     REVEAL_ELEMENT_START: '%s1 - %s2, Reveal Element start',
     EMIT_COLLECT_FRAME_CONTROLLER_EVENT: '%s1 - Emit collect FrameController FRAME_READY event',
     EXECUTE_COLLECT_CONTROLLER_READY_CB: '%s1 - Executing collect FrameController FRAME_READY callback, set client metadata',
@@ -267,6 +268,10 @@ const logs = {
     COMPOSABLE_CONTAINER_NOT_MOUNTED: 'Interface: composable collect - container should be mounted before invoking collect.',
     INVALID_BOOLEAN_OPTIONS: 'Interface: container create - Invaild %s1 in options, %s1 of type boolean is required.',
 
+    INVALID_INPUT_OPTIONS_FORMAT: 'Interface: container create - Invalid type, format must be of non-empty string type.',
+    INVALID_INPUT_OPTIONS_TRANSLATION: 'Interface: container create - Invalid type, translation must be of non-empty object type.',
+    EMPTY_COLLECT_CUSTOM_FORMAT: 'Interface: container create - %s1 cannot be empty object.',
+
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',
@@ -275,6 +280,8 @@ const logs = {
     UNABLE_TO_CLEAR_VALUE_IN_PROD_ENV: '%s1 clearValue() cannot invoked while in PROD env. It is Not Recommeded',
     COLLECT_ALT_TEXT_DEPERECATED: 'altText is DEPERECATED, passing altText will not have any effect',
     GET_BY_ID_DEPRECATED: 'getById is deprecated, use new get method',
+    INPUT_FORMATTING_NOT_SUPPROTED: 'format or translation are not supported on %s1 element type.',
+    INVALID_INPUT_TRANSLATION: 'invalid or unsupported translation provided for %s1 element type.',
   },
 };
 

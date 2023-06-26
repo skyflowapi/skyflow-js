@@ -439,6 +439,22 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_BOOLEAN_OPTIONS,
   },
+
+  EMPTY_COLLECT_CUSTOM_FORMAT: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_COLLECT_CUSTOM_FORMAT,
+  },
+
+  INVALID_INPUT_OPTIONS_FORMAT: {
+    code: 400,
+    description: logs.errorLogs.INVALID_INPUT_OPTIONS_FORMAT,
+  },
+
+  INVALID_INPUT_OPTIONS_TRANSLATION: {
+    code: 400,
+    description: logs.errorLogs.INVALID_INPUT_OPTIONS_TRANSLATION,
+  },
+
 };
 
 export default SKYFLOW_ERROR_CODE;
