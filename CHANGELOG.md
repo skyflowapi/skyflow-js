@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.29.1] - 2023-06-22
+### Fixed
+- Patch fix for autofill and iframe loading issue
+
+## [1.29.0] - 2023-06-22
+### Added
+- Added new `delete` interface
+- Added input formatting for collect and reveal elements
+    
 ## [1.25.0] - 2023-02-01
 -   Added `redaction` type support in `detokenize` interface.
 
