@@ -396,8 +396,9 @@ const collectElement = {
 const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
   enableCardIcon: true, // Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType).
-  format: String,       // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
   enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+  format: String,       // Optional, format for the element
+  translation: {},      // Optional, indicates the allowed data type value for format.
 };
 
 const element = container.create(collectElement, options);
@@ -666,8 +667,9 @@ const collectElement = {
 const options = {
  required: false,             // Optional, indicates whether the field is marked as required. Defaults to 'false'.
  enableCardIcon: true,        // Optional, indicates whether  the element needs a card icon (only applicable for CARD_NUMBER ElementType).
- format: String,              // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
  enableCopy: false,           // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+ format: String,              // Optional, format for the element
+ translation: {},             // Optional, indicates the allowed data type value for format.
 };
 const element = container.create(collectElement, options);
 ```
