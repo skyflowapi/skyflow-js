@@ -9,6 +9,7 @@ import * as busEvents from '../../../../src/utils/bus-events';
 import SkyflowError from '../../../../src/libs/skyflow-error';
 import logs from '../../../../src/utils/logs';
 import { ContainerType } from '../../../../src/skyflow';
+import { parameterizedString } from '../../../../src/utils/logs-helper';
 
 const tableCol = btoa('1234')
 const collect_element = `element:CVV:${tableCol}`;
@@ -107,6 +108,29 @@ describe('test iframeFormelement', () => {
         })
 
     })
+
+    test('set mask with null value',()=>{
+        const element = new IFrameFormElement(collect_element, '',{} ,context);
+        element.setReplacePattern(null);
+        element.setMask(null);
+        expect(element.mask).toBe(undefined)
+        expect(element.replacePattern).toBe(undefined);
+    });
+
+    test('set mask  should throw warining invalid regex in translation mask',()=>{
+        const spy = jest.spyOn(console, 'warn'); 
+        const element = new IFrameFormElement(collect_element, '',{} ,{logLevel:LogLevel.WARN,env:Env.PROD});
+        element.setMask(["XXX", { X: "*" }]);
+        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
+            'CVV')}`)
+    });
+
+    test('set mask should not throw warining invalid regex in translation mask with error log level',()=>{
+        const spy = jest.spyOn(console, 'warn'); 
+        const element = new IFrameFormElement(collect_element, '',{} ,{env:Env.PROD});
+        element.setMask(["XXX", { X: "*" }]);
+        expect(spy).not.toBeCalledTimes(1);
+    });
 
     test('test setValue for expiration_month', () => {
         const element = new IFrameFormElement(`element:EXPIRATION_MONTH:${tableCol}`, {}, context)

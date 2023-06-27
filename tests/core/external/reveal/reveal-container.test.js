@@ -7,6 +7,7 @@ import bus from "framebus";
 import { LogLevel,Env } from "../../../../src/utils/common";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
+import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 const mockUuid = '1234'; 
@@ -100,6 +101,20 @@ describe("Reveal Container Class", () => {
       });
     } catch (error) {
       expect(error.message).toBe("Invalid Token Id true");
+    }
+  });
+
+  test('create()  will throw error for invalid input format options',(done)=>{
+    try {
+      testRevealContainer.create({
+        token: "1244",
+      },{
+        format:undefined
+      });
+      done('should throw error');
+    } catch (error) {
+      expect(error.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description);
+      done();
     }
   });
 

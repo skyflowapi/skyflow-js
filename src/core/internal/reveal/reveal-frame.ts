@@ -2,6 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import $ from 'jquery';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
@@ -12,7 +13,6 @@ import {
   REVEAL_ELEMENT_OPTIONS_TYPES,
   COPY_UTILS,
   REVEAL_COPY_ICON_STYLES,
-  CARDNUMBER_REVEAL_FORMAT,
 } from '../../constants';
 import getCssClassesFromJss from '../../../libs/jss-styles';
 import {
@@ -20,7 +20,8 @@ import {
 } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import { Context, MessageType } from '../../../utils/common';
-import { handleCopyIconClick, styleToString } from '../../../utils/helpers';
+import { constructMaskTranslation, handleCopyIconClick, styleToString } from '../../../utils/helpers';
+import 'jquery-mask-plugin/dist/jquery.mask.min';
 
 const CLASS_NAME = 'RevealFrame';
 class RevealFrame {
@@ -133,38 +134,12 @@ class RevealFrame {
         const responseValue = data[this.#record.token] as string;
         this.#revealedValue = responseValue;
         this.isRevealCalled = true;
-        // TODO: Hardcoded as the regex provide from SDK side is not getting escaped.
-        let formattedString = '';
-        if (
-          this.#record.format !== undefined
-          && (responseValue.length === 16 || responseValue.length === 15)
-        ) {
-          // eslint-disable-next-line no-restricted-syntax
-          if (CARDNUMBER_REVEAL_FORMAT.SPACE_FORMAT === this.#record.format) {
-            formattedString = responseValue.replace(/(\d{4}(?!\s))/g, '$1 ');
-          } else if (
-            CARDNUMBER_REVEAL_FORMAT.DASH_FORMAT === this.#record.format
-          ) {
-            formattedString = responseValue.replace(
-              /^(\d{4})(\d{4})(\d{4})(\d{4})$/,
-              '$1-$2-$3-$4',
-            );
-          } else if (
-            CARDNUMBER_REVEAL_FORMAT.AMEX_FORMAT === this.#record.format
-          ) {
-            formattedString = responseValue.replace(
-              /^(\d{4})(\d{6})(\d{5})$/,
-              '$1 $2 $3',
-            );
-          } else {
-            formattedString = responseValue;
-          }
-        } else {
-          formattedString = responseValue;
+        this.#dataElememt.innerText = responseValue;
+        if (this.#record.mask) {
+          $(this.#dataElememt).mask(this.#record.mask[0], {
+            translation: constructMaskTranslation(this.#record.mask),
+          });
         }
-
-        this.#dataElememt.innerText = this.#record.format === undefined
-          ? responseValue : formattedString;
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
           CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
 
