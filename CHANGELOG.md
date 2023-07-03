@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.29.1] - 2023-06-22
+### Fixed
+- Patch fix for autofill and iframe loading issue
+
+## [1.29.0] - 2023-06-22
+### Added
+- Added new `delete` interface
+- Added input formatting for collect and reveal elements
+    
 ## [1.28.0] - 2023-03-29
 ### Added
 -  Update data through collect element using skyflow id
