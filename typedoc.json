@@ -1,0 +1,26 @@
+{
+    "out": "docs",
+    "exclude": "**/node_modules/**",
+    "excludeExternals": false,
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "excludeInternal": true,
+    "name": "Skyflow-js",
+    "theme": "default",
+    "plugin": ["typedoc-plugin-markdown"],
+    "entryPoints": ["src/skyflow.ts","src/utils/common/index.ts", "src/core/external/collect", "src/core/external/reveal", "src/core/constants.ts"],
+    "entryPointStrategy": "expand",
+    "githubPages": false,
+    "readme": "none",
+    "hideGenerator": true,
+    "hideInPageTOC": true,
+    "disableSources": true,
+    "hideBreadcrumbs": true,
+    "markedOptions": {
+      "sanitize": true,
+      "tables": true,
+      "smartypants": true
+    },
+    "sort": ["source-order"],
+    "categorizeByGroup": false
+  }

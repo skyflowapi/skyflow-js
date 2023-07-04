@@ -2,6 +2,11 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 /* eslint-disable no-underscore-dangle */
+
+/**
+ * This is the doc comment for CollectElement Module
+ * @module CollectElement
+ */
 import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
@@ -27,6 +32,11 @@ import SkyflowElement from '../common/skyflow-element';
 import { ContainerType } from '../../../skyflow';
 
 const CLASS_NAME = 'Element';
+
+/**
+  * This is the documentation for CollectElement Class
+  * @class CollectElement
+  */
 class CollectElement extends SkyflowElement {
   elementType: string;
 
@@ -69,6 +79,18 @@ class CollectElement extends SkyflowElement {
 
   #doesReturnValue:boolean;
 
+  /**
+  * Some documentation for constructor
+  * @param elementId This is a description of the elementId parameter.
+  * @param elementGroup This is a description of the elementGroup parameter.
+  * @param metaData This is a description of the metaData parameter.
+  * @param containerId This is a description of the containerId parameter.
+  * @param isSingleElementAPI This is a description of the isSingleElementAPI parameter.
+  * @param destroyCallback This is a description of the destroyCallback parameter.
+  * @param updateCallback This is a description of the updateCallback parameter.
+  * @param context This is a description of the context parameter.
+  * @param groupEventEmitter This is a description of the groupEventEmitter parameter.
+  */
   constructor(
     elementId: string,
     elementGroup: any,
@@ -128,8 +150,14 @@ class CollectElement extends SkyflowElement {
     this.#context.logLevel);
   }
 
+  /** @internal */
   getID = () => this.#elementId;
 
+  /**
+  * Some documentation for mount method
+  * @param domElement This is a description of the domElement parameter.
+  * @returns This is a description of what the method returns.
+  */
   mount = (domElement) => {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
@@ -170,10 +198,15 @@ class CollectElement extends SkyflowElement {
     this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
   };
 
+  /**
+  * Some documentation for unmount method
+  * @returns This is a description of what the method returns.
+  */
   unmount = () => {
     this.#iframe.unmount();
   };
 
+  /** @internal */
   update = (group) => {
     let tempGroup = deepClone(group);
 
@@ -240,6 +273,7 @@ class CollectElement extends SkyflowElement {
     }
   };
 
+  /** @internal */
   updateElement = (elementOptions) => {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
       name: elementOptions.elementName,
@@ -277,6 +311,7 @@ class CollectElement extends SkyflowElement {
     });
   };
 
+  /** @internal */
   getState = () => ({
     isEmpty: this.#state.isEmpty,
     isComplete: this.#state.isComplete,
@@ -286,6 +321,7 @@ class CollectElement extends SkyflowElement {
     required: this.#state.isRequired,
   });
 
+  /** @internal */
   getOptions = () => {
     // todo: remove all names
     let options = deepClone(this.#group);
@@ -307,6 +343,12 @@ class CollectElement extends SkyflowElement {
 
   // listening to element events and error messages on iframe
   // todo: off methods
+  /**
+  * Some documentation for on method
+  * @param eventName This is a description of the eventName parameter.
+  * @param handler This is a description of the handler parameter.
+  * @returns This is a description of what the method returns.
+  */
   on(eventName: string, handler) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER, [], true);
@@ -424,14 +466,17 @@ class CollectElement extends SkyflowElement {
     this.#elements = getElements(this.#group);
   };
 
+  /** @internal */
   iframeName(): string {
     return this.#iframe.name;
   }
 
+  /** @internal */
   isMounted():boolean {
     return this.#mounted;
   }
 
+  /** @internal */
   isValidElement():boolean {
     for (let i = 0; i < this.#elements.length; i += 1) {
       if (!Object.prototype.hasOwnProperty.call(this.#elements[i], 'table')) {
@@ -461,6 +506,10 @@ class CollectElement extends SkyflowElement {
     return true;
   }
 
+  /**
+  * Some documentation for setError method
+  * @returns This is a description of what the method returns.
+  */
   setError(clientErrorText:string) {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
       {
@@ -470,6 +519,10 @@ class CollectElement extends SkyflowElement {
       });
   }
 
+  /**
+  * Some documentation for resetError method
+  * @returns This is a description of what the method returns.
+  */
   resetError() {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
       {
@@ -478,6 +531,11 @@ class CollectElement extends SkyflowElement {
       });
   }
 
+  /**
+  * Some documentation for setValue method
+  * @param elementValue This is a description of the elementValue parameter.
+  * @returns This is a description of what the method returns.
+  */
   setValue(elementValue:string) {
     if (this.#context.env === Env.PROD) {
       printLog(parameterizedString(logs.warnLogs.UNABLE_TO_SET_VALUE_IN_PROD_ENV,
@@ -497,6 +555,10 @@ class CollectElement extends SkyflowElement {
     }
   }
 
+  /**
+  * Some documentation for clearValue method
+  * @returns This is a description of what the method returns.
+  */
   clearValue() {
     if (this.#context.env === Env.PROD) {
       printLog(parameterizedString(logs.warnLogs.UNABLE_TO_CLEAR_VALUE_IN_PROD_ENV,

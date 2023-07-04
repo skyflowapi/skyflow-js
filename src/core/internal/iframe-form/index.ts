@@ -1018,7 +1018,7 @@ export class IFrameForm {
         insertResponseObject, updateResponseObject, options,
       );
       finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
-    } catch (error) {
+    } catch (error: any) {
       return Promise.reject({
         error: error?.message,
       });
