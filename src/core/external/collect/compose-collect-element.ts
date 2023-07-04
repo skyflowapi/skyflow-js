@@ -1,3 +1,7 @@
+/**
+ * This is the doc comment for ComposeCollectElement Module
+ * @module ComposeCollectElement
+ */
 import EventEmitter from '../../../event-emitter';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
@@ -5,6 +9,10 @@ import { EventName } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../constants';
 
+/**
+  * This is the documentation for ComposableElement Class
+  * @class ComposableElement
+  */
 class ComposableElement {
   #elementName: string;
 
@@ -16,6 +24,11 @@ class ComposableElement {
 
   #isUpdateCalled = false;
 
+  /**
+  * Some documentation for constructor
+  * @param name This is a description of the name parameter.
+  * @param eventEmitter This is a description of the eventEmitter parameter.
+  */
   constructor(name, eventEmitter) {
     this.#elementName = name;
     this.#eventEmitter = eventEmitter;
@@ -24,6 +37,12 @@ class ComposableElement {
     });
   }
 
+  /**
+  * Some documentation for on method
+  * @param eventName This is a description of the eventName parameter.
+  * @param handler This is a description of the handler parameter.
+  * @returns This is a description of what the method returns.
+  */
   on(eventName: string, handler: any) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(
@@ -57,6 +76,11 @@ class ComposableElement {
     });
   }
 
+  /**
+  * Some documentation for update method
+  * @param options This is a description of the options parameter.
+  * @returns This is a description of what the method returns.
+  */
   update = (options) => {
     this.#isUpdateCalled = true;
     if (this.#isMounted) {

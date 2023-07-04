@@ -3,6 +3,11 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+
+/**
+ * This is the doc comment for ComposeCollectContainer Module
+ * @module ComposeCollectContainer
+ */
 import bus from 'framebus';
 import _ from 'lodash';
 import { IUpsertOptions } from '../../../core-utils/collect';
@@ -33,6 +38,7 @@ import Container from '../common/container';
 import CollectElement from './collect-element';
 import ComposableElement from './compose-collect-element';
 
+/** @internal */
 export interface CollectElementInput {
   table?: string;
   column?: string;
@@ -53,6 +59,11 @@ interface ICollectOptions {
   upsert?: Array<IUpsertOptions>
 }
 const CLASS_NAME = 'CollectContainer';
+
+/**
+  * This is the documentation for ComposableContainer Class
+  * @class ComposableContainer
+  */
 class ComposableContainer extends Container {
   #containerId: string;
 
@@ -80,6 +91,13 @@ class ComposableContainer extends Container {
 
   #containerMounted: boolean = false;
 
+  /**
+  * Some documentation for constructor
+  * @param options This is a description of the options parameter.
+  * @param metaData This is a description of the metaData parameter.
+  * @param skyflowElements This is a description of the skyflowElements parameter.
+  * @param context This is a description of the context parameter.
+  */
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -131,6 +149,12 @@ class ComposableContainer extends Container {
     this.#updateListeners();
   }
 
+  /**
+  * Some documentation for create method
+  * @param input This is a description of the input parameter.
+  * @param options This is a description of the options parameter.
+  * @returns This is a description of what the method returns.
+  */
   create = (input: CollectElementInput, options: any = {
     required: false,
   }) => {
@@ -247,6 +271,12 @@ class ComposableContainer extends Container {
     return false;
   };
 
+  /**
+  * Some documentation for on method
+  * @param eventName This is a description of the eventName parameter.
+  * @param handler This is a description of the handler parameter.
+  * @returns This is a description of what the method returns.
+  */
   on = (eventName:string, handler:any) => {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(
@@ -275,6 +305,11 @@ class ComposableContainer extends Container {
     });
   };
 
+  /**
+  * Some documentation for mount method
+  * @param domElement This is a description of the domElement parameter.
+  * @returns This is a description of what the method returns.
+  */
   mount = (domElement) => {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT,
@@ -326,10 +361,19 @@ class ComposableContainer extends Container {
     );
   };
 
+  /**
+  * Some documentation for unmount method
+  * @returns This is a description of what the method returns.
+  */
   unmount = () => {
     this.#containerElement.unmount();
   };
 
+  /**
+  * Some documentation for collect method
+  * @param options This is a description of the options parameter.
+  * @returns This is a description of what the method returns.
+  */
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
@@ -376,7 +420,7 @@ class ComposableContainer extends Container {
       printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
         CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
       MessageType.LOG, this.#context.logLevel);
-    } catch (err) {
+    } catch (err: any) {
       printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
       reject(err);
     }

@@ -1,6 +1,11 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+
+/**
+ * This is the doc comment for RevealContainer Module
+ * @module RevealContainer
+ */
 import bus from 'framebus';
 import EventEmitter from '../../../event-emitter';
 import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe-libs/iframer';
@@ -19,23 +24,40 @@ import {
 import Container from '../common/container';
 import RevealElement from './reveal-element';
 
+/** This is documentation for interface IRevealElementInput. */
 export interface IRevealElementInput {
+  /** This is the description for token property */
   token?: string;
+  /** This is the description for redaction property */
   redaction?: RedactionType;
+  /** This is the description for inputStyles property */
   inputStyles?: object;
+  /** This is the description for label property */
   label?: string;
+  /** This is the description for labelStyles property */
   labelStyles?: object;
+  /** This is the description for altText property */
   altText?: string;
+  /** This is the description for errorTextStyles property */
   errorTextStyles?: object;
 }
 
+/** This is documentation for interface IRevealElementOptions. */
 export interface IRevealElementOptions {
+  /** This is the description for enableCopy property */
   enableCopy?: boolean;
+  /** This is the description for format property */
   format?: string;
+  /** This is the description for translation property */
   translation?:Record<string, string>
 }
 
 const CLASS_NAME = 'RevealContainer';
+
+/**
+  * This is the documentation for RevealContainer Class
+  * @class RevealContainer
+  */
 class RevealContainer extends Container {
   #revealRecords: IRevealElementInput[] = [];
 
@@ -59,6 +81,12 @@ class RevealContainer extends Container {
 
   type:string = ContainerType.REVEAL;
 
+  /**
+  * Some documentation for constructor
+  * @param metaData This is a description of the metaData parameter.
+  * @param skyflowElements This is a description of the skyflowElements parameter.
+  * @param context This is a description of the context parameter.
+  */
   constructor(metaData, skyflowElements, context) {
     super();
     this.#metaData = metaData;
@@ -125,6 +153,12 @@ class RevealContainer extends Container {
       );
   }
 
+  /**
+  * Some documentation for create method
+  * @param record This is a description of the record parameter.
+  * @param options This is a description of the options parameter.
+  * @returns This is a description of what the method returns.
+  */
   create(record: IRevealElementInput, options?: IRevealElementOptions) {
     // this.#revealRecords.push(record);
     const elementId = uuid();
@@ -136,6 +170,10 @@ class RevealContainer extends Container {
     return revealElement;
   }
 
+  /**
+  * Some documentation for reveal method
+  * @returns This is a description of what the method returns.
+  */
   reveal() {
     this.#isRevealCalled = true;
     if (this.#isElementsMounted) {
@@ -178,7 +216,7 @@ class RevealContainer extends Container {
           printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
           MessageType.LOG, this.#context.logLevel);
-        } catch (err) {
+        } catch (err: any) {
           printLog(`Error: ${err.message}`, MessageType.ERROR,
             this.#context.logLevel);
           reject(err);
@@ -233,7 +271,7 @@ class RevealContainer extends Container {
               );
           },
         );
-      } catch (err) {
+      } catch (err: any) {
         printLog(err.message, MessageType.ERROR,
           this.#context.logLevel);
 

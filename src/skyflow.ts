@@ -1,6 +1,11 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+
+/**
+ * This is the doc comment for Skyflow Module
+ * @module Skyflow
+ */
 import bus from 'framebus';
 import uuid from './libs/uuid';
 import {
@@ -38,18 +43,32 @@ import { formatVaultURL } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
 
+/**
+ * This is documentation for ContainerType enumeration.
+ */
 export enum ContainerType {
   COLLECT = 'COLLECT',
   REVEAL = 'REVEAL',
   COMPOSABLE = 'COMPOSABLE',
 }
+
+/** This is documentation for interface ISkyflow. */
 export interface ISkyflow {
+  /** This is the description for vaultID property */
   vaultID?: string;
+  /** This is the description for vaultURL property */
   vaultURL?: string;
+  /** This is the description for getBearerToken property */
   getBearerToken: () => Promise<string>;
+  /** This is the description for options property */
   options?: Record<string, any>;
 }
 const CLASS_NAME = 'Skyflow';
+
+/**
+  * This is the documentation for Skyflow Class
+  * @class Skyflow
+  */
 class Skyflow {
   #client: Client;
 
@@ -72,6 +91,10 @@ class Skyflow {
 
   #skyflowElements: any;
 
+  /**
+  * Some documentation for constructor
+  * @param config This is a description of the config parameter.
+  */
   constructor(config: ISkyflow) {
     this.#client = new Client(
       {
@@ -131,6 +154,12 @@ class Skyflow {
       MessageType.LOG, this.#logLevel);
   }
 
+  /**
+  * Some documentation for init method
+  * @public
+  * @param config This is a description of the config parameter.
+  * @returns This is a description of what the method returns.
+  */
   static init(config: ISkyflow): Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
     printLog(parameterizedString(logs.infoLogs.INITIALIZE_CLIENT, CLASS_NAME), MessageType.LOG,
@@ -144,6 +173,13 @@ class Skyflow {
     return skyflow;
   }
 
+  /**
+  * Some documentation for container method
+  * @public
+  * @param type This is a description of the type parameter.
+  * @param options This is a description of the options parameter.
+  * @returns This is a description of what the method returns.
+  */
   container(type: ContainerType, options?: Record<string, any>) {
     switch (type) {
       case ContainerType.COLLECT: {
@@ -195,6 +231,13 @@ class Skyflow {
     }
   }
 
+  /**
+  * Some documentation for insert method
+  * @public
+  * @param records This is a description of the records parameter.
+  * @param options This is a description of the options parameter.
+  * @returns This is a description of what the method returns.
+  */
   insert(
     records: IInsertRecordInput,
     options: IInsertOptions,
@@ -204,12 +247,24 @@ class Skyflow {
     return this.#skyflowContainer.insert(records, options);
   }
 
+  /**
+  * Some documentation for detokenize method
+  * @public
+  * @param detokenizeInput This is a description of the detokenizeInput parameter.
+  * @returns This is a description of what the method returns.
+  */
   detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
     printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.detokenize(detokenizeInput);
   }
 
+  /**
+  * Some documentation for getById method
+  * @public
+  * @param getByIdInput This is a description of the getByIdInput parameter.
+  * @returns This is a description of what the method returns.
+  */
   getById(getByIdInput: IGetByIdInput) {
     printLog(logs.warnLogs.GET_BY_ID_DEPRECATED, MessageType.WARN, this.#logLevel);
     printLog(parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
@@ -217,12 +272,25 @@ class Skyflow {
     return this.#skyflowContainer.getById(getByIdInput);
   }
 
+  /**
+  * Some documentation for get method
+  * @public
+  * @param getInput This is a description of the getInput parameter.
+  * @returns This is a description of what the method returns.
+  */
   get(getInput: IGetInput) {
     printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.get(getInput);
   }
 
+  /**
+  * Some documentation for delete method
+  * @public
+  * @param records This is a description of the records parameter.
+  * @param options This is a description of the options parameter.
+  * @returns This is a description of what the method returns.
+  */
   delete(records: IDeleteRecordInput, options: IDeleteOptions) {
     printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);

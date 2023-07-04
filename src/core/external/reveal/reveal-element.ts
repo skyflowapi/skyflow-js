@@ -1,6 +1,11 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+
+/**
+ * This is the doc comment for RevealElement Module
+ * @module RevealElement
+ */
 import bus from 'framebus';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
@@ -19,6 +24,10 @@ import { formatRevealElementOptions } from '../../../utils/helpers';
 
 const CLASS_NAME = 'RevealElement';
 
+/**
+  * This is the documentation for RevealElement Class
+  * @class RevealElement
+  */
 class RevealElement extends SkyflowElement {
   #iframe: IFrame;
 
@@ -36,6 +45,15 @@ class RevealElement extends SkyflowElement {
 
   #elementId: string;
 
+  /**
+  * Some documentation for constructor
+  * @param record This is a description of the record parameter.
+  * @param options This is a description of the options parameter.
+  * @param metaData This is a description of the metaData parameter.
+  * @param containerId This is a description of the containerId parameter.
+  * @param elementId This is a description of the elementId parameter.
+  * @param context This is a description of the context parameter.
+  */
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
     metaData: any, containerId: string, elementId: string, context: Context) {
@@ -57,10 +75,16 @@ class RevealElement extends SkyflowElement {
     printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, CLASS_NAME, `${record.token || ''} reveal `), MessageType.LOG, this.#context.logLevel);
   }
 
+  /** @internal */
   getID() {
     return this.#elementId;
   }
 
+  /**
+  * Some documentation for mount method
+  * @param domElementSelector This is a description of the domElementSelector parameter.
+  * @returns This is a description of what the method returns.
+  */
   mount(domElementSelector) {
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
@@ -93,27 +117,37 @@ class RevealElement extends SkyflowElement {
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
   }
 
+  /** @internal */
   iframeName(): string {
     return this.#iframe.name;
   }
 
+  /** @internal */
   isMounted():boolean {
     return this.#isMounted;
   }
 
+  /** @internal */
   hasToken():boolean {
     if (this.#recordData.token) return true;
     return false;
   }
 
+  /** @internal */
   isClientSetError():boolean {
     return this.#isClientSetError;
   }
 
+  /** @internal */
   getRecordData() {
     return this.#recordData;
   }
 
+  /**
+  * Some documentation for setError method
+  * @param clientErrorText This is a description of the clientErrorText parameter.
+  * @returns This is a description of what the method returns.
+  */
   setError(clientErrorText:string) {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
       name: this.#iframe.name,
@@ -123,6 +157,10 @@ class RevealElement extends SkyflowElement {
     this.#isClientSetError = true;
   }
 
+  /**
+  * Some documentation for resetError method
+  * @returns This is a description of what the method returns.
+  */
   resetError() {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
       name: this.#iframe.name,
@@ -131,6 +169,11 @@ class RevealElement extends SkyflowElement {
     this.#isClientSetError = false;
   }
 
+  /**
+  * Some documentation for setAltText method
+  * @param altText This is a description of the altText parameter.
+  * @returns This is a description of what the method returns.
+  */
   setAltText(altText:string) {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
       name: this.#iframe.name,
@@ -139,6 +182,10 @@ class RevealElement extends SkyflowElement {
     });
   }
 
+  /**
+  * Some documentation for clearAltText method
+  * @returns This is a description of what the method returns.
+  */
   clearAltText() {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
       name: this.#iframe.name,
@@ -147,6 +194,11 @@ class RevealElement extends SkyflowElement {
     });
   }
 
+  /**
+  * Some documentation for setToken method
+  * @param token This is a description of the token parameter.
+  * @returns This is a description of what the method returns.
+  */
   setToken(token:string) {
     this.#recordData = {
       ...this.#recordData,
@@ -159,6 +211,10 @@ class RevealElement extends SkyflowElement {
     });
   }
 
+  /**
+  * Some documentation for unmount method
+  * @returns This is a description of what the method returns.
+  */
   unmount() {
     this.#iframe.unmount();
   }

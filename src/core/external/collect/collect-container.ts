@@ -1,6 +1,11 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+
+/**
+ * This is the doc comment for CollectContainer Module
+ * @module CollectContainer
+ */
 import bus from 'framebus';
 import { IUpsertOptions } from '../../../core-utils/collect';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
@@ -29,26 +34,47 @@ import {
 import Container from '../common/container';
 import CollectElement from './collect-element';
 
+/** This is documentation for interface CollectElementInput. */
 export interface CollectElementInput {
+  /** This is the description for table property */
   table?: string;
+  /** This is the description for column property */
   column?: string;
+  /** This is the description for inputStyles property */
   inputStyles?: object;
+  /** This is the description for label property */
   label?: string;
+  /** This is the description for labelStyles property */
   labelStyles?: object;
+  /** This is the description for errorTextStyles property */
   errorTextStyles?: object;
+  /** This is the description for placeholder property */
   placeholder?: string;
+  /** This is the description for type property */
   type: ElementType;
+  /** This is the description for altText property */
   altText?: string;
+  /** This is the description for validations property */
   validations?: IValidationRule[]
+  /** This is the description for skyflowID property */
   skyflowID?: string;
 }
 
-interface ICollectOptions {
+/** This is documentation for interface ICollectOptions. */
+export interface ICollectOptions {
+  /** This is the description for tokens property */
   tokens?: boolean;
+  /** This is the description for additionalFields property */
   additionalFields?: IInsertRecordInput;
+  /** This is the description for upsert property */
   upsert?: Array<IUpsertOptions>
 }
 const CLASS_NAME = 'CollectContainer';
+
+/**
+  * This is the documentation for CollectContainer Class
+  * @class CollectContainer
+  */
 class CollectContainer extends Container {
   #containerId: string;
 
@@ -62,6 +88,13 @@ class CollectContainer extends Container {
 
   type:string = ContainerType.COLLECT;
 
+  /**
+  * Some documentation for constructor
+  * @param options This is a description of the options parameter.
+  * @param metaData This is a description of the metaData parameter.
+  * @param skyflowElements This is a description of the skyflowElements parameter.
+  * @param context This is a description of the context parameter.
+  */
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -102,6 +135,12 @@ class CollectContainer extends Container {
     document.body.append(iframe);
   }
 
+  /**
+  * Some documentation for create method
+  * @param input This is a description of the input parameter.
+  * @param options This is a description of the options parameter.
+  * @returns This is a description of what the method returns.
+  */
   create = (input: CollectElementInput, options: any = {
     required: false,
   }) => {
@@ -240,6 +279,11 @@ class CollectContainer extends Container {
     return false;
   };
 
+  /**
+  * Some documentation for collect method
+  * @param options This is a description of the options parameter.
+  * @returns This is a description of what the method returns.
+  */
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
@@ -283,12 +327,17 @@ class CollectContainer extends Container {
       printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
         CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
       MessageType.LOG, this.#context.logLevel);
-    } catch (err) {
+    } catch (err: any) {
       printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
       reject(err);
     }
   });
 
+  /**
+  * Some documentation for uploadFiles method
+  * @param options This is a description of the options parameter.
+  * @returns This is a description of what the method returns.
+  */
   uploadFiles = (options) => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
@@ -322,7 +371,7 @@ class CollectContainer extends Container {
       printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
         CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
       MessageType.LOG, this.#context.logLevel);
-    } catch (err) {
+    } catch (err: any) {
       printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
       reject(err);
     }
