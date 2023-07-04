@@ -1,6 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+import { SdkInfo } from '../../client';
 import {
   CardType,
   COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType,
@@ -182,17 +183,20 @@ export const formatRevealElementOptions = (options:IRevealElementOptions) => {
   }
   return revealOptions;
 };
-
 interface OSInfo {
   os: string | null;
   version: string | null;
 }
-
 interface BrowserInfo {
   browserName: string;
   browserVersion: string;
 }
-
+export function getSdkVersionName(metaDataVersion: string, sdkData: SdkInfo): string {
+  if (metaDataVersion !== '') {
+    return `${metaDataVersion}@${sdkData.sdkVersion}`;
+  }
+  return `${sdkData.sdkName}@${sdkData.sdkVersion}`;
+}
 export function getOSDetails(userAgentString: string): OSInfo {
   let os: string | null = null;
   let version: string | null = null;
@@ -267,4 +271,22 @@ export function getDeviceType(userAgent: string): string | undefined {
     return 'mobile';
   }
   return 'desktop';
+}
+
+export function getMetaObject(sdkDetails: any, metaData: any, navigator: any) {
+  const sdkData: SdkInfo = {
+    sdkName: sdkDetails.name,
+    sdkVersion: sdkDetails.version,
+  };
+  const SDKversion = getSdkVersionName(metaData.sdkVersion, sdkData);
+  const osDetail = getOSDetails(navigator.userAgent);
+  const browserDetails = getBrowserInfo(navigator.userAgent);
+  const deviceDetails = getDeviceType(navigator.userAgent);
+  const metaObject = {
+    sdk_name_version: SDKversion,
+    sdk_client_device_model: deviceDetails,
+    sdk_os_version: navigator.platform ?? `${osDetail.os ?? ''} ${osDetail.version ?? ''}`,
+    sdk_runtime_details: `${browserDetails.browserName ?? ''} ${browserDetails.browserVersion ?? ''}`,
+  };
+  return metaObject;
 }

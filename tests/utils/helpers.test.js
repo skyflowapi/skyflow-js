@@ -19,6 +19,8 @@ import {
   getDeviceType,
   getBrowserInfo,
   getOSDetails,
+  getSdkVersionName,
+  getMetaObject,
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -208,7 +210,7 @@ describe('test appendMonthFourDigitYears function',()=>{
 });
 
 describe('test appendMonthTwoDigitYears function',()=>{
-  
+
   test('test for appended zero for month',()=>{
       expect(appendMonthTwoDigitYears('32/1')).toEqual({isAppended:true,value:'32/01'});
   });
@@ -220,11 +222,11 @@ describe('test appendMonthTwoDigitYears function',()=>{
 });
 
 describe('test addSeperatorToCardNumberMask function',()=>{
-  
+
   test('should return default visa mask with spaces if cardSeperator is not provided',()=>{
       expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.VISA)).toEqual(CARD_NUMBER_MASK.VISA);
   });
-  
+
   test('should return default visa mask with spaces if cardSeperator is space',()=>{
     expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.VISA,DEFAULT_CARD_NUMBER_SEPERATOR)).toEqual(CARD_NUMBER_MASK.VISA);
   });
@@ -292,14 +294,81 @@ describe('test formatRevealElementOptions function', () => {
     expect(formatRevealElementOptions({format:'XX-XX'})).toEqual({mask:['XX-XX',null,{X:'[0-9]'}]});
   });
 
-  test('should return not return mask if only translation is provided, format is missing',()=>{
-    expect(formatRevealElementOptions({translation:{X:'[0-9]'}})).toEqual({});
+  test('should return not return mask if only translation is provided, format is missing', () => {
+    expect(formatRevealElementOptions({ translation: { X: '[0-9]' } })).toEqual({});
   });
 
-  test('should return not return mask if format and translation are provided',()=>{
-    expect(formatRevealElementOptions({enableCopy:true})).toEqual({enableCopy:true});
+  test('should return not return mask if format and translation are provided', () => {
+    expect(formatRevealElementOptions({ enableCopy: true })).toEqual({ enableCopy: true });
   });
 
+});
+
+describe('getMetaObject', () => {
+ 
+  it('should return metaObject  with sdk name skyflow react js', () => {
+    const userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
+    const navigator = {
+      'userAgent': userAgent
+    };
+    const sdkDetails = {
+      'sdkName': 'skyflow-js',
+      'sdkVersion': '1.28@beta'
+    };
+    const metaData = {
+      'sdkVersion': 'skyflow-react-js'
+    };
+    const deviceType = getMetaObject(sdkDetails, metaData, navigator);
+    expect(deviceType).toStrictEqual(
+      {
+           "sdk_client_device_model": "mobile",
+           "sdk_name_version": "skyflow-react-js@undefined",
+           "sdk_os_version": "iOS 14.5",
+           "sdk_runtime_details": " ",
+         }
+    );
+  });
+
+  it('should return metaObject with sdk name skyflow js', () => {
+    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36';
+    const navigator = {
+      'userAgent': userAgent
+    };
+    const sdkDetails = {
+      'name': 'skyflow-js',
+      'version': '1.28@beta'
+    };
+    const metaData = {
+      'sdkVersion': ''
+    };
+    const deviceType = getMetaObject(sdkDetails, metaData, navigator);
+    expect(deviceType).toStrictEqual({
+      "sdk_client_device_model": "desktop",
+      "sdk_name_version": "skyflow-js@1.28@beta",
+      "sdk_os_version": "Windows 10.0",
+      "sdk_runtime_details": "Google Chrome 90.0.4430.212",
+    });
+  });
+
+  it('should return metaObject with sdk name skyflow js and other detalis as null', () => {
+    const navigator = {
+      'userAgent': ''
+    };
+    const sdkDetails = {
+      'name': 'skyflow-js',
+      'version': '1.28@beta'
+    };
+    const metaData = {
+      'sdkVersion': ''
+    };
+    const deviceType = getMetaObject(sdkDetails, metaData, navigator);
+    expect(deviceType).toStrictEqual({
+      "sdk_client_device_model": "desktop",
+      "sdk_name_version": "skyflow-js@1.28@beta",
+      "sdk_os_version": " ",
+      "sdk_runtime_details": " ",
+    });
+  });
 });
 
 describe('getDeviceType', () => {
@@ -334,9 +403,19 @@ describe('getBrowserInfo', () => {
     expect(result).toEqual({ browserName: 'Internet Explorer', browserVersion: '11.0' });
   });
 
+  it('should correctly identify Internet Explorer and version as null', () => {
+    const result = getBrowserInfo('Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/ ; AS;) like Gecko');
+    expect(result).toEqual({ browserName: 'Internet Explorer', browserVersion: '' });
+  });
+
   it('should correctly identify Microsoft Edge', () => {
     const result = getBrowserInfo('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299');
     expect(result).toEqual({ browserName: 'Microsoft Edge', browserVersion: '16.16299' });
+  });
+
+  it('should correctly identify Microsoft Edge and version as null', () => {
+    const result = getBrowserInfo('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge');
+    expect(result).toEqual({ browserName: 'Microsoft Edge', browserVersion: '' });
   });
 
   it('should correctly identify Google Chrome', () => {
@@ -344,9 +423,24 @@ describe('getBrowserInfo', () => {
     expect(result).toEqual({ browserName: 'Google Chrome', browserVersion: '58.0.3029.110' });
   });
 
+  it('should correctly identify Google Chrome and version as null', () => {
+    const result = getBrowserInfo('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36 Chrome');
+    expect(result).toEqual({ browserName: 'Google Chrome', browserVersion: '' });
+  });
+
   it('should correctly identify Mozilla Firefox', () => {
     const result = getBrowserInfo('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0');
     expect(result).toEqual({ browserName: 'Mozilla Firefox', browserVersion: '54.0' });
+  });
+
+  it('should correctly identify Mozilla Firefox and version as null', () => {
+    const result = getBrowserInfo('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox');
+    expect(result).toEqual({ browserName: 'Mozilla Firefox', browserVersion: '' });
+  });
+
+  it('should correctly identify Apple Safari and version as null', () => {
+    const result = getBrowserInfo('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/604.3.5 (KHTML, like Gecko) Version Safari');
+    expect(result).toEqual({ browserName: 'Apple Safari', browserVersion: '' });
   });
 
   it('should correctly identify Apple Safari', () => {
@@ -360,6 +454,25 @@ describe('getBrowserInfo', () => {
   });
 });
 
+describe('getSdkVersionName', () => {
+  it('should correctly identify js sdk name when we pass metadata version as empty string', () => {
+    const sdkData = {
+      sdkName: 'skyflow-js',
+      sdkVersion: '1.29@beta',
+    };
+    const result = getSdkVersionName('', sdkData);
+    expect(result).toEqual('skyflow-js@1.29@beta');
+  });
+
+  it('should correctly identify react sdk name when we pass metadata version as skyflow-react-js', () => {
+    const sdkData = {
+      sdkName: 'skyflow-js',
+      sdkVersion: '1.29@beta',
+    };
+    const result = getSdkVersionName('skyflow-react-js', sdkData);
+    expect(result).toEqual('skyflow-react-js@1.29@beta');
+  });
+});
 describe('getOSDetails', () => {
   it('should correctly parse Windows user agent string', () => {
     const userAgentString = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36';
@@ -368,11 +481,25 @@ describe('getOSDetails', () => {
     expect(osDetails.version).toEqual('10.0');
   });
 
+  it('should parse Windows user agent string and version as null', () => {
+    const userAgentString = 'Mozilla/5.0 (Windows NT ; Win64; x64) AppleWebKit/ (KHTML, like Gecko) Chrome/ Safari/';
+    const osDetails = getOSDetails(userAgentString);
+    expect(osDetails.os).toEqual('Windows');
+    expect(osDetails.version).toEqual(null);
+  });
+
   it('should correctly parse Mac OS X user agent string', () => {
     const userAgentString = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36';
     const osDetails = getOSDetails(userAgentString);
     expect(osDetails.os).toEqual('Mac OS X');
     expect(osDetails.version).toEqual('10.15.7');
+  });
+
+  it('should correctly parse Mac OS X user agent string and version as null', () => {
+    const userAgentString = 'Mozilla/5.0 (Macintosh; Intel Mac OS X ) AppleWebKit/ (KHTML, like Gecko) Chrome/ Safari/';
+    const osDetails = getOSDetails(userAgentString);
+    expect(osDetails.os).toEqual('Mac OS X');
+    expect(osDetails.version).toEqual(null);
   });
 
   it('should correctly parse Linux user agent string', () => {
@@ -394,5 +521,12 @@ describe('getOSDetails', () => {
     const osDetails = getOSDetails(userAgentString);
     expect(osDetails.os).toEqual('iOS');
     expect(osDetails.version).toEqual('15.0');
+  });
+  
+  it('should correctly parse iOS user agent string and version as null', () => {
+    const userAgentString = 'Mozilla/5.0 (iPhone; CPU iPhone OS like Mac OS X) AppleWebKit/ (KHTML, like Gecko) Version/ Mobile/ Safari/';
+    const osDetails = getOSDetails(userAgentString);
+    expect(osDetails.os).toEqual('iOS');
+    expect(osDetails.version).toEqual(null);
   });
 });
