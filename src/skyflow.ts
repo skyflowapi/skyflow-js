@@ -6,6 +6,7 @@ import uuid from './libs/uuid';
 import {
   ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
+  SDK_VERSION,
 } from './core/constants';
 import Client from './client';
 import RevealContainer from './core/external/reveal/reveal-container';
@@ -73,6 +74,8 @@ class Skyflow {
   #skyflowElements: any;
 
   constructor(config: ISkyflow) {
+    const localSDKversion = localStorage.getItem('sdk_version') || '';
+    this.#metadata[SDK_VERSION] = localSDKversion;
     this.#client = new Client(
       {
         ...config,
