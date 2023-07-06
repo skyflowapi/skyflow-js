@@ -13,12 +13,12 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
-    "resolveJsonModule": true,
+    "resolveJsonModule": false,
     "isolatedModules": false,
     "noEmit": false,
     "declaration": true,
     "outDir": "types"
   },
-  "include": ["src","src/custom.d.ts"],
+  "include": ["src","src/custom.d.ts","typings.d.ts"],
   "exclude": ["node_modules", "dist", "tests/*.test.*"]
 }
