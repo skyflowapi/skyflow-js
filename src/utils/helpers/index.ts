@@ -193,7 +193,7 @@ interface BrowserInfo {
 }
 export function getSdkVersionName(metaDataVersion: string, sdkData: SdkInfo): string {
   if (metaDataVersion !== '') {
-    return `${metaDataVersion}@${sdkData.sdkVersion}`;
+    return `${metaDataVersion}`;
   }
   return `${sdkData.sdkName}@${sdkData.sdkVersion}`;
 }

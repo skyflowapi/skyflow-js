@@ -322,7 +322,7 @@ describe('getMetaObject', () => {
     expect(deviceType).toStrictEqual(
       {
            "sdk_client_device_model": "mobile",
-           "sdk_name_version": "skyflow-react-js@undefined",
+           "sdk_name_version": "skyflow-react-js",
            "sdk_os_version": "iOS 14.5",
            "sdk_runtime_details": " ",
          }
@@ -470,7 +470,7 @@ describe('getSdkVersionName', () => {
       sdkVersion: '1.29@beta',
     };
     const result = getSdkVersionName('skyflow-react-js', sdkData);
-    expect(result).toEqual('skyflow-react-js@1.29@beta');
+    expect(result).toEqual('skyflow-react-js');
   });
 });
 describe('getOSDetails', () => {
