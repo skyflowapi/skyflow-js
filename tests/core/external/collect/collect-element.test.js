@@ -152,6 +152,12 @@ describe('collect element', () => {
       value: {},
     }, cb2);
 
+    expect(() => {
+      inputCb({
+        name: elementName,
+        event: 'Invalid event',
+      }, cb2);
+    }).toThrow(SkyflowError);
 
     element.updateElement({table:'table'});
 
@@ -271,11 +277,6 @@ describe('collect element', () => {
     frameReadyCb({
       name: `${elementName}:containerId` + ':ERROR',
     }, cb2);
-    const inputCb = onSpy.mock.calls[0][1];
-    inputCb({
-      name:elementName,
-      event:'CREATED'
-    })
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
     },0);  
@@ -310,11 +311,6 @@ describe('collect element', () => {
     frameReadyCb({
       name: `${elementName}:containerId` + ':ERROR',
     }, cb2);
-    const inputCb = onSpy.mock.calls[0][1];
-    inputCb({
-      name:elementName,
-      event:'CREATED'
-    })
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
     },0);  
@@ -351,11 +347,6 @@ describe('collect element', () => {
       name: `${elementName}:containerId` + ':ERROR',
     }, cb2);
     groupOnCb({containerId:'containerId'});
-    const inputCb = onSpy.mock.calls[0][1];
-    inputCb({
-      name:elementName,
-      event:'CREATED'
-    })
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
     },0);  
