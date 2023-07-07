@@ -118,6 +118,51 @@ describe("Client Class",()=>{
             console.log(err);
         }
     });
+    test("Client Request Method with url-formencoded content-type and navigator as null",()=>{
+        try{
+            const mockNavigator = {
+                userAgent: "", // Set userAgent to null or any desired value
+                // Add other properties or methods as needed for your test case
+              };
+              
+              // Replace the original navigator object with the mock navigator
+              Object.defineProperty(window, 'navigator', {
+                value: mockNavigator,
+                configurable: true,
+                enumerable: true,
+                writable: false,
+              });
+              
+            const xhrMock = {
+                open: jest.fn(),
+                send: jest.fn(),
+                setRequestHeader: jest.fn(),
+                onload: jest.fn(),
+                readyState: 4,
+                status: 200,
+                response: JSON.stringify({'message':'Hello World!'}),
+                getAllResponseHeaders:jest.fn().mockImplementation(()=>(`content-type: application/json 
+                x-request-id: req_123`))
+              };
+            
+            jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
+            const testClient = new Client({},{});
+            const resp = testClient.request({
+                requestMethod:"GET",
+                url:"https://example-test.com",
+                headers:{
+                    "content-type": "application/x-www-form-urlencoded" 
+                },
+                body:{
+                    "key":"value"
+                }
+            });
+            expect(xhrMock.setRequestHeader).toBeCalledWith("content-type","application/x-www-form-urlencoded");
+            xhrMock.onload();
+        }catch(err){
+            console.log(err);
+        }
+    });
     
     test("Client Request Method with error 1",()=>{
         try{

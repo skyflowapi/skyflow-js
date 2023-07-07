@@ -24,10 +24,11 @@ import {
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CONTAINER,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
+import EventEmitter from '../../../event-emitter';
 
 export interface CollectElementInput {
   table?: string;
@@ -62,12 +63,16 @@ class CollectContainer extends Container {
 
   type:string = ContainerType.COLLECT;
 
+  #eventEmitter: EventEmitter;
+
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
     this.#metaData = metaData;
     this.#skyflowElements = skyflowElements;
     this.#context = context;
+    this.#eventEmitter = new EventEmitter();
+
     const iframe = iframer({
       name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}`,
     });
@@ -91,6 +96,13 @@ class CollectContainer extends Container {
           },
           context,
         });
+
+        // eslint-disable-next-line no-underscore-dangle
+        this.#eventEmitter._emit(
+          ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED,
+          { containerId: this.#containerId },
+        );
+
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
@@ -192,6 +204,7 @@ class CollectContainer extends Container {
         this.#destroyCallback,
         this.#updateCallback,
         this.#context,
+        this.#eventEmitter,
       );
       this.#elements[tempElements.elementName] = element;
       this.#skyflowElements[elementId] = element;

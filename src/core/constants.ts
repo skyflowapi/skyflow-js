@@ -15,6 +15,8 @@ import copyIcon from '../../assets/copyIcon.svg';
 import successIcon from '../../assets/path.svg';
 import logs from '../utils/logs';
 
+export const SKY_METADATA_HEADER = 'sky-metadata';
+export const SDK_VERSION = 'sdkVersion';
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';
 export const SKYFLOW_FRAME_CONTROLLER = 'skyflow_controller';
@@ -40,6 +42,7 @@ export const ELEMENT_EVENTS_TO_CLIENT = {
   ERROR: 'ERROR',
   SUCCESS: 'SUCCESS',
   SUBMIT: 'SUBMIT',
+  CREATED: 'CREATED',
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {
@@ -77,6 +80,7 @@ export const ELEMENT_EVENTS_TO_CONTAINER = {
   ELEMENT_MOUNTED: 'ELEMENT_MOUNTED',
   ALL_ELEMENTS_MOUNTED: 'ALL_ELEMENTS_MOUNTED',
   COMPOSABLE_CONTAINER_MOUNTED: 'COMPOSABLE_CONTAINER_MOUNTED',
+  COLLECT_CONTAINER_MOUNTED: 'COLLECT_CONTAINER_MOUNTED',
 };
 
 export enum ElementType {

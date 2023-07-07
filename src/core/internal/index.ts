@@ -383,6 +383,12 @@ export class FrameElement {
 
     this.updateParentDiv(this.htmlDivElement);
 
+    bus
+      .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+        name: this.iFrameFormElement.iFrameName,
+        event: ELEMENT_EVENTS_TO_CLIENT.CREATED,
+      });
+
     this.updateStyleClasses(this.iFrameFormElement.getStatus());
   };
 
