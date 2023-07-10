@@ -1,5 +1,4 @@
 /**
- * This is the doc comment for ComposeCollectElement Module
  * @module ComposeCollectElement
  */
 import EventEmitter from '../../../event-emitter';
@@ -10,7 +9,7 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../constants';
 
 /**
-  * This is the documentation for ComposableElement Class
+  * An instance of skyflow composable elements, returned by create method
   * @class ComposableElement
   */
 class ComposableElement {
@@ -38,10 +37,9 @@ class ComposableElement {
   }
 
   /**
-  * Some documentation for on method
-  * @param eventName This is a description of the eventName parameter.
-  * @param handler This is a description of the handler parameter.
-  * @returns This is a description of what the method returns.
+  * Helps to communicate with Skyflow elements/iframes by listening to an event
+  * @param eventName The name of the event, the iframe will be listening to.
+  * @param handler This is a callback function you provide, that will be called when the event is fired with the state.
   */
   on(eventName: string, handler: any) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
@@ -77,9 +75,8 @@ class ComposableElement {
   }
 
   /**
-  * Some documentation for update method
+  * Update the configuration of elements inside composable container
   * @param options This is a description of the options parameter.
-  * @returns This is a description of what the method returns.
   */
   update = (options) => {
     this.#isUpdateCalled = true;

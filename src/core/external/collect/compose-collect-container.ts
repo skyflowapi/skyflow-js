@@ -5,7 +5,6 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 
 /**
- * This is the doc comment for ComposeCollectContainer Module
  * @module ComposeCollectContainer
  */
 import bus from 'framebus';
@@ -61,7 +60,7 @@ interface ICollectOptions {
 const CLASS_NAME = 'CollectContainer';
 
 /**
-  * This is the documentation for ComposableContainer Class
+  * This container will wrap all the composable elements
   * @class ComposableContainer
   */
 class ComposableContainer extends Container {
@@ -91,13 +90,7 @@ class ComposableContainer extends Container {
 
   #containerMounted: boolean = false;
 
-  /**
-  * Some documentation for constructor
-  * @param options This is a description of the options parameter.
-  * @param metaData This is a description of the metaData parameter.
-  * @param skyflowElements This is a description of the skyflowElements parameter.
-  * @param context This is a description of the context parameter.
-  */
+  /** @internal */
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -150,10 +143,10 @@ class ComposableContainer extends Container {
   }
 
   /**
-  * Some documentation for create method
-  * @param input This is a description of the input parameter.
-  * @param options This is a description of the options parameter.
-  * @returns This is a description of what the method returns.
+  * This method is called to create the skyflow collect element
+  * @param input Collect element input.
+  * @param options Collect element options.
+  * @returns Returns the collect element.
   */
   create = (input: CollectElementInput, options: any = {
     required: false,
@@ -272,10 +265,9 @@ class ComposableContainer extends Container {
   };
 
   /**
-  * Some documentation for on method
-  * @param eventName This is a description of the eventName parameter.
-  * @param handler This is a description of the handler parameter.
-  * @returns This is a description of what the method returns.
+  * Helps to communicate with Skyflow elements/iframes by listening to an event
+  * @param eventName The name of the event, the iframe will be listening to.
+  * @param handler This is a callback function you provide, that will be called when the event is fired with the state.
   */
   on = (eventName:string, handler:any) => {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
@@ -306,9 +298,8 @@ class ComposableContainer extends Container {
   };
 
   /**
-  * Some documentation for mount method
-  * @param domElement This is a description of the domElement parameter.
-  * @returns This is a description of what the method returns.
+  * when the mount(domElement) method of the Element is called, the Element will be inserted in the specified div
+  * @param domElement The Element that will be inserted in the specified div.
   */
   mount = (domElement) => {
     if (!domElement) {
@@ -362,17 +353,16 @@ class ComposableContainer extends Container {
   };
 
   /**
-  * Some documentation for unmount method
-  * @returns This is a description of what the method returns.
+  * This method is used to reset any collect element to it's initial state
   */
   unmount = () => {
     this.#containerElement.unmount();
   };
 
   /**
-  * Some documentation for collect method
-  * @param options This is a description of the options parameter.
-  * @returns This is a description of what the method returns.
+  * Collect method will collect the data and send it to the vault
+  * @param options Takes collect options as input.
+  * @returns Returns the data inserted or the error.
   */
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {

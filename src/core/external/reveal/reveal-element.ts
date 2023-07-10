@@ -3,7 +3,6 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 
 /**
- * This is the doc comment for RevealElement Module
  * @module RevealElement
  */
 import bus from 'framebus';
@@ -25,7 +24,7 @@ import { formatRevealElementOptions } from '../../../utils/helpers';
 const CLASS_NAME = 'RevealElement';
 
 /**
-  * This is the documentation for RevealElement Class
+  * The type of skyflow reveal elements, that will be returned by create method
   * @class RevealElement
   */
 class RevealElement extends SkyflowElement {
@@ -45,15 +44,7 @@ class RevealElement extends SkyflowElement {
 
   #elementId: string;
 
-  /**
-  * Some documentation for constructor
-  * @param record This is a description of the record parameter.
-  * @param options This is a description of the options parameter.
-  * @param metaData This is a description of the metaData parameter.
-  * @param containerId This is a description of the containerId parameter.
-  * @param elementId This is a description of the elementId parameter.
-  * @param context This is a description of the context parameter.
-  */
+  /** @internal */
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
     metaData: any, containerId: string, elementId: string, context: Context) {
@@ -81,9 +72,8 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for mount method
-  * @param domElementSelector This is a description of the domElementSelector parameter.
-  * @returns This is a description of what the method returns.
+  * When the mount(domElement) method of the Element is called, the Element will be inserted in the specified div.
+  * @param domElementSelector Native html element which will be mounted inside the iframe.
   */
   mount(domElementSelector) {
     if (!domElementSelector) {
@@ -144,9 +134,8 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for setError method
-  * @param clientErrorText This is a description of the clientErrorText parameter.
-  * @returns This is a description of what the method returns.
+  * This method is used to set the error text for the element. All the current errors present on the element will be overridden with the custom error message passed.
+  * @param clientErrorText The error text value to set.
   */
   setError(clientErrorText:string) {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
@@ -158,8 +147,7 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for resetError method
-  * @returns This is a description of what the method returns.
+  * This method is used to clear the custom error message that is set using setError
   */
   resetError() {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
@@ -170,9 +158,8 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for setAltText method
-  * @param altText This is a description of the altText parameter.
-  * @returns This is a description of what the method returns.
+  * This method can be used to set the altText of the reveal element. This will display the altText in the UI
+  * @param altText An alt text value to set.
   */
   setAltText(altText:string) {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
@@ -183,8 +170,7 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for clearAltText method
-  * @returns This is a description of what the method returns.
+  * This method can be used to clear the altText. This will cause the element to display the token or actual value of the element. If the element has no token, the element will be empty.
   */
   clearAltText() {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
@@ -195,9 +181,8 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for setToken method
-  * @param token This is a description of the token parameter.
-  * @returns This is a description of what the method returns.
+  * This method can be used to set the token of the reveal element
+  * @param token The value of the skyflow token to set.
   */
   setToken(token:string) {
     this.#recordData = {
@@ -212,8 +197,7 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for unmount method
-  * @returns This is a description of what the method returns.
+  *  This method is used to reset any collect element to it's initial state
   */
   unmount() {
     this.#iframe.unmount();

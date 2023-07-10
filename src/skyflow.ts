@@ -3,7 +3,6 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 
 /**
- * This is the doc comment for Skyflow Module
  * @module Skyflow
  */
 import bus from 'framebus';
@@ -44,7 +43,7 @@ import ComposableContainer from './core/external/collect/compose-collect-contain
 import { validateComposableContainerOptions } from './utils/validators';
 
 /**
- * This is documentation for ContainerType enumeration.
+ * Supported Container types.
  */
 export enum ContainerType {
   COLLECT = 'COLLECT',
@@ -52,21 +51,21 @@ export enum ContainerType {
   COMPOSABLE = 'COMPOSABLE',
 }
 
-/** This is documentation for interface ISkyflow. */
+/** Wrapper for parameters required by Skyflow. */
 export interface ISkyflow {
-  /** This is the description for vaultID property */
+  /** Id of the vault that the client should connect to */
   vaultID?: string;
-  /** This is the description for vaultURL property */
+  /** URL of the vault that the client should connect to */
   vaultURL?: string;
-  /** This is the description for getBearerToken property */
+  /** Helper function that retrieves a Skyflow bearer token from your backend */
   getBearerToken: () => Promise<string>;
-  /** This is the description for options property */
+  /** an optional object that contains keys as env, loglevel */
   options?: Record<string, any>;
 }
 const CLASS_NAME = 'Skyflow';
 
 /**
-  * This is the documentation for Skyflow Class
+  * Parent skyflow class, that consists of all the methods, exposed to client
   * @class Skyflow
   */
 class Skyflow {
@@ -91,10 +90,7 @@ class Skyflow {
 
   #skyflowElements: any;
 
-  /**
-  * Some documentation for constructor
-  * @param config This is a description of the config parameter.
-  */
+  /** @internal */
   constructor(config: ISkyflow) {
     this.#client = new Client(
       {
@@ -155,10 +151,10 @@ class Skyflow {
   }
 
   /**
-  * Some documentation for init method
+  * Method to initialize skyflow client
   * @public
-  * @param config This is a description of the config parameter.
-  * @returns This is a description of what the method returns.
+  * @param config Configuration for the skyflow client.
+  * @returns returns an instance of skyflow client.
   */
   static init(config: ISkyflow): Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
@@ -174,11 +170,11 @@ class Skyflow {
   }
 
   /**
-  * Some documentation for container method
+  * This method is used to create the skyflow container
   * @public
-  * @param type This is a description of the type parameter.
-  * @param options This is a description of the options parameter.
-  * @returns This is a description of what the method returns.
+  * @param type Type of skyflow container to create.
+  * @param options optional, additional paramater for container.
+  * @returns Returns the skyflow container of the specified type.
   */
   container(type: ContainerType, options?: Record<string, any>) {
     switch (type) {
@@ -232,11 +228,11 @@ class Skyflow {
   }
 
   /**
-  * Some documentation for insert method
+  * This method is used to insert data into the vault
   * @public
-  * @param records This is a description of the records parameter.
-  * @param options This is a description of the options parameter.
-  * @returns This is a description of what the method returns.
+  * @param records The records parameter takes a JSON object of the records to insert into the below format. 
+  * @param options The options parameter takes an object of optional parameters for the insertion.
+  * @returns Returns the insert response.
   */
   insert(
     records: IInsertRecordInput,
@@ -248,10 +244,10 @@ class Skyflow {
   }
 
   /**
-  * Some documentation for detokenize method
+  * This method is used to reveal using skyflow tokens
   * @public
-  * @param detokenizeInput This is a description of the detokenizeInput parameter.
-  * @returns This is a description of what the method returns.
+  * @param detokenizeInput Input required by detokenize method.
+  * @returns It will return detokenized values that correspond to the specified tokens.
   */
   detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
     printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
@@ -260,10 +256,10 @@ class Skyflow {
   }
 
   /**
-  * Some documentation for getById method
+  * To reveal elements using skyflow ids
   * @public
-  * @param getByIdInput This is a description of the getByIdInput parameter.
-  * @returns This is a description of what the method returns.
+  * @param getByIdInput Input required by getById method.
+  * @returns Returns the records of fetched by skyflow ids. It returns errors if any.
   */
   getById(getByIdInput: IGetByIdInput) {
     printLog(logs.warnLogs.GET_BY_ID_DEPRECATED, MessageType.WARN, this.#logLevel);
@@ -273,10 +269,10 @@ class Skyflow {
   }
 
   /**
-  * Some documentation for get method
+  * Use to fetch records either by skyflow ids or by column values
   * @public
-  * @param getInput This is a description of the getInput parameter.
-  * @returns This is a description of what the method returns.
+  * @param getInput Input required by get method.
+  * @returns Returns an array of fetched records or errors if any.
   */
   get(getInput: IGetInput) {
     printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
@@ -285,11 +281,11 @@ class Skyflow {
   }
 
   /**
-  * Some documentation for delete method
+  * This method is used to delete data from the vault
   * @public
-  * @param records This is a description of the records parameter.
-  * @param options This is a description of the options parameter.
-  * @returns This is a description of what the method returns.
+  * @param records The records parameter takes an array of records to delete in the following format.
+  * @param options The options parameter is optional and takes an object of deletion parameters. 
+  * @returns Returns an array of deleted records or errors if any.
   */
   delete(records: IDeleteRecordInput, options: IDeleteOptions) {
     printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,

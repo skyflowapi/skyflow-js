@@ -3,7 +3,6 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 
 /**
- * This is the doc comment for CollectContainer Module
  * @module CollectContainer
  */
 import bus from 'framebus';
@@ -34,46 +33,45 @@ import {
 import Container from '../common/container';
 import CollectElement from './collect-element';
 
-/** This is documentation for interface CollectElementInput. */
+/** Type of skyflow element. */
 export interface CollectElementInput {
-  /** This is the description for table property */
+  /** optional, the table this data belongs to */
   table?: string;
-  /** This is the description for column property */
+  /** optional, the column into which this data should be inserted */
   column?: string;
-  /** This is the description for inputStyles property */
+  /** optional styles that should be applied to the form element */
   inputStyles?: object;
-  /** This is the description for label property */
+  /** optional label for the form element */
   label?: string;
-  /** This is the description for labelStyles property */
+  /** optional styles that will be applied to the label of the collect element */
   labelStyles?: object;
-  /** This is the description for errorTextStyles property */
+  /** optional styles that will be applied to the errorText of the collect element */
   errorTextStyles?: object;
-  /** This is the description for placeholder property */
+  /** optional placeholder for the form element */
   placeholder?: string;
-  /** This is the description for type property */
+  /** Skyflow.ElementType enum */
   type: ElementType;
-  /** This is the description for altText property */
+  /** optional string that acts as an initial value for the collect element */
   altText?: string;
-  /** This is the description for validations property */
+  /** optional set of validations for collect element */
   validations?: IValidationRule[]
-  /** This is the description for skyflowID property */
+  /** optional skyflowID of the element */
   skyflowID?: string;
 }
 
-/** This is documentation for interface ICollectOptions. */
+/** Wrapper for the options for Collect Method. */
 export interface ICollectOptions {
-  /** This is the description for tokens property */
+  /** Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true' */
   tokens?: boolean;
-  /** This is the description for additionalFields property */
+  /** Optional, non-PCI elements data to be inserted into the vault which should be in the records object format */
   additionalFields?: IInsertRecordInput;
-  /** This is the description for upsert property */
+  /** Optional, to support upsert operations while collecting data from Skyflow elements, pass the table and column marked as unique in the table */
   upsert?: Array<IUpsertOptions>
 }
 const CLASS_NAME = 'CollectContainer';
 
 /**
-  * This is the documentation for CollectContainer Class
-  * @class CollectContainer
+  * @class This will wrap all collect elements
   */
 class CollectContainer extends Container {
   #containerId: string;
@@ -88,13 +86,7 @@ class CollectContainer extends Container {
 
   type:string = ContainerType.COLLECT;
 
-  /**
-  * Some documentation for constructor
-  * @param options This is a description of the options parameter.
-  * @param metaData This is a description of the metaData parameter.
-  * @param skyflowElements This is a description of the skyflowElements parameter.
-  * @param context This is a description of the context parameter.
-  */
+  /** @internal */
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -136,10 +128,10 @@ class CollectContainer extends Container {
   }
 
   /**
-  * Some documentation for create method
-  * @param input This is a description of the input parameter.
-  * @param options This is a description of the options parameter.
-  * @returns This is a description of what the method returns.
+  * This method is called to create the skyflow collect element
+  * @param input Collect element input.
+  * @param options Collect element options.
+  * @returns Returns the collect element.
   */
   create = (input: CollectElementInput, options: any = {
     required: false,
@@ -280,9 +272,9 @@ class CollectContainer extends Container {
   };
 
   /**
-  * Some documentation for collect method
-  * @param options This is a description of the options parameter.
-  * @returns This is a description of what the method returns.
+  * This method will collect the data and send it to the vault
+  * @param options Takes collect options as input.
+  * @returns Returns the data inserted or the error.
   */
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
@@ -334,9 +326,8 @@ class CollectContainer extends Container {
   });
 
   /**
-  * Some documentation for uploadFiles method
-  * @param options This is a description of the options parameter.
-  * @returns This is a description of what the method returns.
+  * This method is used to insert file type data in to the vault
+  * @returns This will return the inserted data.
   */
   uploadFiles = (options) => new Promise((resolve, reject) => {
     try {

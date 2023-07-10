@@ -3,12 +3,11 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 
 /**
- * This is the doc comment for Utils Module
  * @module Utils
  */
 
 /**
- * This is documentation for RedactionType enumeration.
+ * Supported redaction types.
  */
 export enum RedactionType {
   DEFAULT = 'DEFAULT',
@@ -18,7 +17,7 @@ export enum RedactionType {
 }
 
 /**
- * This is documentation for RequestMethod enumeration.
+ * Supported request methods.
  */
 export enum RequestMethod {
   GET = 'GET',
@@ -29,7 +28,7 @@ export enum RequestMethod {
 }
 
 /**
- * This is documentation for EventName enumeration.
+ * Supported event names.
  */
 export enum EventName {
   CHANGE = 'CHANGE',
@@ -40,7 +39,7 @@ export enum EventName {
 }
 
 /**
- * This is documentation for LogLevel enumeration.
+ * Supported log levels.
  */
 export enum LogLevel{
   WARN = 'WARN',
@@ -50,7 +49,7 @@ export enum LogLevel{
 }
 
 /**
- * This is documentation for Env enumeration.
+ * Supported Envs.
  */
 export enum Env{
   DEV = 'DEV',
@@ -58,7 +57,7 @@ export enum Env{
 }
 
 /**
- * This is documentation for MessageType enumeration.
+ * Supported message types.
  */
 export enum MessageType{
   LOG = 'LOG',
@@ -67,7 +66,7 @@ export enum MessageType{
 }
 
 /**
- * This is documentation for ValidationRuleType enumeration.
+ * Supported validation rule types.
  */
 export enum ValidationRuleType {
   REGEX_MATCH_RULE = 'REGEX_MATCH_RULE',
@@ -75,151 +74,151 @@ export enum ValidationRuleType {
   ELEMENT_VALUE_MATCH_RULE = 'ELEMENT_VALUE_MATCH_RULE',
 }
 
-/** This is documentation for interface IInsertRecordInput. */
+/** Wrapper for parameters required by insert record input. */
 export interface IInsertRecordInput {
-  /** This is the description for records property */
+  /** An array of insert records */
   records: IInsertRecord[];
 }
 
-/** This is documentation for interface IInsertRecord. */
+/** Wrapper for parameters required by insert record. */
 export interface IInsertRecord {
-  /** This is the description for table property */
+  /** Table name */
   table: string;
-  /** This is the description for fields property */
+  /** Fields to be inserted */
   fields: Record<string, any>;
-  /** This is the description for skyflowID property */
+  /** Optional, skyflowID of the record, required for update */
   skyflowID?: string;
 }
 
-/** This is documentation for interface IRevealRecord. */
+/** Wrapper for parameters required by reveal record. */
 export interface IRevealRecord {
-  /** This is the description for token property */
+  /** Required, token of the data being revealed */
   token: string;
-  /** This is the description for redaction property */
+  /** Optional, Redaction Type to be applied to data, RedactionType.PLAIN_TEXT will be applied if not provided */
   redaction?: RedactionType;
 }
 
-/** This is documentation for interface IInsertResponse. */
+/** Wrapper for parameters required by insert response. */
 export interface IInsertResponse {
-  /** This is the description for records property */
+  /** An array of insert response records */
   records: IInsertResponseReocrds[];
 }
 
-/** This is documentation for interface IInsertResponseReocrds. */
+/** Wrapper for parameters required by insert response record. */
 export interface IInsertResponseReocrds {
-  /** This is the description for table property */
+  /** The table this data belongs to */
   table: string;
-  /** This is the description for fields property */
+  /** Optional, fields that are inserted */
   fields?: Record<string, any>;
-  /** This is the description for skyflowID property */
+  /** Optional, skyflowID of the inserted record */
   skyflowID?: string;
 }
 
-/** This is documentation for interface IRevealResponseType. */
+/** Wrapper for parameters required by reveal response. */
 export interface IRevealResponseType {
-  /** This is the description for records property */
+  /** Optional, array of records that are revealed, if any */
   records?: Record<string, string>[];
-  /** This is the description for errors property */
+  /** Optional, array of errors, if any */
   errors?: Record<string, any>[];
 }
 
-/** This is documentation for interface IDetokenizeInput. */
+/** Wrapper for parameters required by detokenize input. */
 export interface IDetokenizeInput {
-  /** This is the description for records property */
+  /** An array of reveal records */
   records: IRevealRecord[];
 }
 
-/** This is documentation for interface IGetRecord. */
+/** Wrapper for parameters required to get records. */
 export interface IGetRecord {
-  /** This is the description for ids property */
+  /** Optional, skyflow ids of the records to fetch */
   ids?: string[];
-  /** This is the description for redaction property */
+  /** Redaction for the fetched records */
   redaction: RedactionType;
-  /** This is the description for table property */
+  /** The table this data belongs to */
   table: string;
-  /** This is the description for columnName property */
+  /** Optional, Name of a unique column */
   columnName?:string;
-  /** This is the description for columnValues property */
+  /** Optional, values of unique columns of records to fetch */
   columnValues?: string[];
 }
 
-/** This is documentation for interface IGetInput. */
+/** Wrapper for parameters required to get input. */
 export interface IGetInput {
-  /** This is the description for records property */
+  /** An array of get records */
   records: IGetRecord[];
 }
 
-/** This is documentation for interface ISkyflowIdRecord. */
+/** Wrapper for parameters required by skyflow id record. */
 export interface ISkyflowIdRecord {
-  /** This is the description for ids property */
+  /** Array of skyflow ids of the records to fetch */
   ids: string[];
-  /** This is the description for redaction property */
+  /** Redaction for the fetched records */
   redaction: RedactionType;
-  /** This is the description for table property */
+  /** The table this data belongs to */
   table: string;
 }
 
-/** This is documentation for interface IGetByIdInput. */
+/** Wrapper for parameters required by get by id input. */
 export interface IGetByIdInput {
-  /** This is the description for records property */
+  /** An array of skyflow id records */
   records: ISkyflowIdRecord[];
 }
 
-/** This is documentation for interface Context. */
+/** Wrapper for parameters required by context. */
 export interface Context{
-  /** This is the description for logLevel property */
+  /** log level to be applied. */
   logLevel:LogLevel
-  /** This is the description for env property */
+  /** Type of environment */
   env:Env
 }
 
-/** This is documentation for interface IValidationRule. */
+/** Wrapper for parameters required by validation rule. */
 export interface IValidationRule {
-  /** This is the description for type property */
+  /** Type of skyflow validation rule */
   type: ValidationRuleType;
-  /** This is the description for params property */
+  /** Any additional parameters supported by validation rule */
   params: any;
 }
 
-/** This is documentation for interface IUpsertOption. */
+/** Wrapper for parameters required by upsert option. */
 export interface IUpsertOption {
-  /** This is the description for table property */
+  /** The table this data belongs to */
   table : string;
-  /** This is the description for column property */
+  /** Unique column name */
   column: string;
 }
 
-/** This is documentation for interface IInsertOptions. */
+/** Wrapper for parameters required by insert options. */
 export interface IInsertOptions{
-  /** This is the description for tokens property */
+  /** Optional, indicates whether tokens for the collected data should be returned */
   tokens?: boolean;
-  /** This is the description for upsert property */
+  /** Optional, will upsert data if provided, otherwise insert will be performed */
   upsert?: IUpsertOption[];
 }
 
-/** This is documentation for interface IDeleteRecord. */
+/** Wrapper for parameters required by delete record. */
 export interface IDeleteRecord {
-  /** This is the description for id property */
+  /** Skyflow id of the record to delete */
   id: String;
-  /** This is the description for table property */
+  /** The table this data belongs to */
   table: String;
 }
 
-/** This is documentation for interface IDeleteOptions. */
+/** Wrapper for parameters required by delete options. */
 export interface IDeleteOptions {}
 
-/** This is documentation for interface IDeleteRecordInput. */
+/** Wrapper for parameters required by delete record input */
 export interface IDeleteRecordInput {
-  /** This is the description for options property */
+  /** Optional, additional configuration options for delete record input */
   options?: IDeleteOptions;
-  /** This is the description for records property */
+  /** Array of records to be deleted */
   records: IDeleteRecord[];
 }
 
-/** This is documentation for interface IDeleteResponseType. */
+/** Wrapper for parameters required by delete response type. */
 export interface IDeleteResponseType {
-  /** This is the description for records property */
+  /** Array of deleted records, if any */
   records?: Record<string, string>[];
-  /** This is the description for errors property */
+  /** Array of errors, if any */
   errors?: Record<string, any>[];
 }

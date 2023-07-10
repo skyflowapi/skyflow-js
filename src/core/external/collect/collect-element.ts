@@ -4,7 +4,6 @@ Copyright (c) 2022 Skyflow, Inc.
 /* eslint-disable no-underscore-dangle */
 
 /**
- * This is the doc comment for CollectElement Module
  * @module CollectElement
  */
 import {
@@ -34,7 +33,7 @@ import { ContainerType } from '../../../skyflow';
 const CLASS_NAME = 'Element';
 
 /**
-  * This is the documentation for CollectElement Class
+  * The type of skyflow collect elements, that will be returned by create method
   * @class CollectElement
   */
 class CollectElement extends SkyflowElement {
@@ -79,18 +78,7 @@ class CollectElement extends SkyflowElement {
 
   #doesReturnValue:boolean;
 
-  /**
-  * Some documentation for constructor
-  * @param elementId This is a description of the elementId parameter.
-  * @param elementGroup This is a description of the elementGroup parameter.
-  * @param metaData This is a description of the metaData parameter.
-  * @param containerId This is a description of the containerId parameter.
-  * @param isSingleElementAPI This is a description of the isSingleElementAPI parameter.
-  * @param destroyCallback This is a description of the destroyCallback parameter.
-  * @param updateCallback This is a description of the updateCallback parameter.
-  * @param context This is a description of the context parameter.
-  * @param groupEventEmitter This is a description of the groupEventEmitter parameter.
-  */
+  /** @internal */  
   constructor(
     elementId: string,
     elementGroup: any,
@@ -154,9 +142,8 @@ class CollectElement extends SkyflowElement {
   getID = () => this.#elementId;
 
   /**
-  * Some documentation for mount method
-  * @param domElement This is a description of the domElement parameter.
-  * @returns This is a description of what the method returns.
+  * When the mount(domElement) method of the Element is called, the Element will be inserted in the specified div
+  * @param domElement Native html element which will be mounted inside the iframe.
   */
   mount = (domElement) => {
     if (!domElement) {
@@ -199,8 +186,7 @@ class CollectElement extends SkyflowElement {
   };
 
   /**
-  * Some documentation for unmount method
-  * @returns This is a description of what the method returns.
+  *  This method is used to reset any collect element to it's initial state
   */
   unmount = () => {
     this.#iframe.unmount();
@@ -344,10 +330,9 @@ class CollectElement extends SkyflowElement {
   // listening to element events and error messages on iframe
   // todo: off methods
   /**
-  * Some documentation for on method
-  * @param eventName This is a description of the eventName parameter.
-  * @param handler This is a description of the handler parameter.
-  * @returns This is a description of what the method returns.
+  * Helps to communicate with Skyflow elements/iframes by listening to an event
+  * @param eventName The name of the event, the iframe will be listening to.
+  * @param handler This is a callback function you provide, that will be called when the event is fired with the state.
   */
   on(eventName: string, handler) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
@@ -507,8 +492,7 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for setError method
-  * @returns This is a description of what the method returns.
+  * This method is used to set the error text for the element. All the current errors present on the element will be overridden with the custom error message passed.
   */
   setError(clientErrorText:string) {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
@@ -520,8 +504,7 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for resetError method
-  * @returns This is a description of what the method returns.
+  * This method is used to clear the custom error message that is set using setError
   */
   resetError() {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
@@ -532,9 +515,8 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for setValue method
-  * @param elementValue This is a description of the elementValue parameter.
-  * @returns This is a description of what the method returns.
+  * This method is used to set the value of the element
+  * @param elementValue Any value for the element.
   */
   setValue(elementValue:string) {
     if (this.#context.env === Env.PROD) {
@@ -556,8 +538,7 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * Some documentation for clearValue method
-  * @returns This is a description of what the method returns.
+  * This method is used to reset the value of the element
   */
   clearValue() {
     if (this.#context.env === Env.PROD) {
