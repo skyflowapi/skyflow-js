@@ -16,7 +16,7 @@ class ComposableElement {
   #elementName: string;
 
   #eventEmitter: EventEmitter;
-
+  /** Type of the container */
   type: string = ContainerType.COMPOSABLE;
 
   #isMounted = false;

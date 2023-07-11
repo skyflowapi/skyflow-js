@@ -3,7 +3,6 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 
 /**
- * This is the doc comment for Constants Module
  * @module Constants
  */
 import defaultCardIcon from '../../assets/default.svg';
