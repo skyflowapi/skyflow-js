@@ -86,7 +86,7 @@ export interface IInsertRecord {
   table: string;
   /** Fields to be inserted */
   fields: Record<string, any>;
-  /** Optional, skyflowID of the record, required for update */
+  /** SkyflowID of the record, required for update */
   skyflowID?: string;
 }
 
@@ -94,7 +94,7 @@ export interface IInsertRecord {
 export interface IRevealRecord {
   /** Required, token of the data being revealed */
   token: string;
-  /** Optional, Redaction Type to be applied to data, RedactionType.PLAIN_TEXT will be applied if not provided */
+  /** Redaction Type to be applied to data, RedactionType.PLAIN_TEXT will be applied if not provided */
   redaction?: RedactionType;
 }
 
@@ -108,17 +108,17 @@ export interface IInsertResponse {
 export interface IInsertResponseReocrds {
   /** The table this data belongs to */
   table: string;
-  /** Optional, fields that are inserted */
+  /** Fields that are inserted */
   fields?: Record<string, any>;
-  /** Optional, skyflowID of the inserted record */
+  /** SkyflowID of the inserted record */
   skyflowID?: string;
 }
 
 /** Wrapper for parameters required by reveal response. */
 export interface IRevealResponseType {
-  /** Optional, array of records that are revealed, if any */
+  /** Array of records that are revealed, if any */
   records?: Record<string, string>[];
-  /** Optional, array of errors, if any */
+  /** Array of errors, if any */
   errors?: Record<string, any>[];
 }
 
@@ -130,15 +130,15 @@ export interface IDetokenizeInput {
 
 /** Wrapper for parameters required to get records. */
 export interface IGetRecord {
-  /** Optional, skyflow ids of the records to fetch */
+  /** Skyflow ids of the records to fetch */
   ids?: string[];
   /** Redaction for the fetched records */
   redaction: RedactionType;
   /** The table this data belongs to */
   table: string;
-  /** Optional, Name of a unique column */
+  /** Name of a unique column */
   columnName?:string;
-  /** Optional, values of unique columns of records to fetch */
+  /** Values of unique columns of records to fetch */
   columnValues?: string[];
 }
 
@@ -190,9 +190,9 @@ export interface IUpsertOption {
 
 /** Wrapper for parameters required by insert options. */
 export interface IInsertOptions{
-  /** Optional, indicates whether tokens for the collected data should be returned */
+  /** Indicates whether tokens for the collected data should be returned */
   tokens?: boolean;
-  /** Optional, will upsert data if provided, otherwise insert will be performed */
+  /** Will upsert data if provided, otherwise insert will be performed */
   upsert?: IUpsertOption[];
 }
 
@@ -209,7 +209,7 @@ export interface IDeleteOptions {}
 
 /** Wrapper for parameters required by delete record input */
 export interface IDeleteRecordInput {
-  /** Optional, additional configuration options for delete record input */
+  /** Additional configuration options for delete record input */
   options?: IDeleteOptions;
   /** Array of records to be deleted */
   records: IDeleteRecord[];

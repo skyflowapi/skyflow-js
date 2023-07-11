@@ -33,39 +33,39 @@ import {
 import Container from '../common/container';
 import CollectElement from './collect-element';
 
-/** Type of skyflow element. */
+/** Type of Skyflow element. */
 export interface CollectElementInput {
-  /** optional, the table this data belongs to */
+  /** The table this data belongs to */
   table?: string;
-  /** optional, the column into which this data should be inserted */
+  /** The column into which this data should be inserted */
   column?: string;
-  /** optional styles that should be applied to the form element */
+  /** Styles that should be applied to the form element */
   inputStyles?: object;
-  /** optional label for the form element */
+  /** Label for the form element */
   label?: string;
-  /** optional styles that will be applied to the label of the collect element */
+  /** Styles that will be applied to the label of the collect element */
   labelStyles?: object;
-  /** optional styles that will be applied to the errorText of the collect element */
+  /** Styles that will be applied to the errorText of the collect element */
   errorTextStyles?: object;
-  /** optional placeholder for the form element */
+  /** Placeholder for the form element */
   placeholder?: string;
   /** Skyflow.ElementType enum */
   type: ElementType;
-  /** optional string that acts as an initial value for the collect element */
+  /** String that acts as an initial value for the collect element */
   altText?: string;
-  /** optional set of validations for collect element */
+  /** Set of validations for collect element */
   validations?: IValidationRule[]
-  /** optional skyflowID of the element */
+  /** SkyflowID of the element */
   skyflowID?: string;
 }
 
 /** Wrapper for the options for Collect Method. */
 export interface ICollectOptions {
-  /** Optional, indicates whether tokens for the collected data should be returned. Defaults to 'true' */
+  /** Indicates whether tokens for the collected data should be returned. Defaults to 'true' */
   tokens?: boolean;
-  /** Optional, non-PCI elements data to be inserted into the vault which should be in the records object format */
+  /** Non-PCI elements data to be inserted into the vault which should be in the records object format */
   additionalFields?: IInsertRecordInput;
-  /** Optional, to support upsert operations while collecting data from Skyflow elements, pass the table and column marked as unique in the table */
+  /** To support upsert operations while collecting data from Skyflow elements, pass the table and column marked as unique in the table */
   upsert?: Array<IUpsertOptions>
 }
 const CLASS_NAME = 'CollectContainer';
@@ -83,7 +83,7 @@ class CollectContainer extends Container {
   #context:Context;
 
   #skyflowElements:any;
-
+  /** Type of the container */
   type:string = ContainerType.COLLECT;
 
   /** @internal */

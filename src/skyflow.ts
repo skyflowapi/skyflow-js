@@ -59,13 +59,13 @@ export interface ISkyflow {
   vaultURL?: string;
   /** Helper function that retrieves a Skyflow bearer token from your backend */
   getBearerToken: () => Promise<string>;
-  /** an optional object that contains keys as env, loglevel */
+  /** An optional object that contains keys as env, loglevel */
   options?: Record<string, any>;
 }
 const CLASS_NAME = 'Skyflow';
 
 /**
-  * Parent skyflow class, that consists of all the methods, exposed to client
+  * Parent skyflow class, that consists of all the methods exposed to the client.
   * @class Skyflow
   */
 class Skyflow {
@@ -173,7 +173,7 @@ class Skyflow {
   * This method is used to create the skyflow container
   * @public
   * @param type Type of skyflow container to create.
-  * @param options optional, additional paramater for container.
+  * @param options Additional paramater for container.
   * @returns Returns the skyflow container of the specified type.
   */
   container(type: ContainerType, options?: Record<string, any>) {

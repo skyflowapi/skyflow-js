@@ -85,7 +85,7 @@ class ComposableContainer extends Container {
   #options: any;
 
   #containerElement:any;
-
+  /** Type of the container */
   type:string = ContainerType.COMPOSABLE;
 
   #containerMounted: boolean = false;

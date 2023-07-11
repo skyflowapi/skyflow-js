@@ -25,29 +25,29 @@ import RevealElement from './reveal-element';
 
 /** Configuration for skyflow reveal elements. */
 export interface IRevealElementInput {
-  /** Optional, skyflow token that would be detokenised */
+  /** Skyflow token that would be detokenised */
   token?: string;
-  /** Optional,redaction type of the revealed data */
+  /** Redaction type of the revealed data */
   redaction?: RedactionType;
-  /** Optional, styles for the input in the reveal element */
+  /** Styles for the input in the reveal element */
   inputStyles?: object;
-  /** Optional, label value for reveal elements */
+  /** Label value for reveal elements */
   label?: string;
-  /** Optional, styles for label in reveal element */
+  /** Styles for label in reveal element */
   labelStyles?: object;
-  /** Optional, alternate text for the reveal element */
+  /** Alternate text for the reveal element */
   altText?: string;
-  /** Optional, styles for the error text in reveal element */
+  /** Styles for the error text in reveal element */
   errorTextStyles?: object;
 }
 
 /** Additional configutartion options for reveal element. */
 export interface IRevealElementOptions {
-  /** Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false'. */
+  /** Enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false'. */
   enableCopy?: boolean;
-  /** Optional, format for the element */
+  /** Format for the element */
   format?: string;
-  /** Optional, indicates the allowed data type value for format */
+  /** Indicates the allowed data type value for format */
   translation?:Record<string, string>
 }
 
@@ -77,7 +77,7 @@ class RevealContainer extends Container {
   #context: Context;
 
   #skyflowElements: any;
-
+  /** Type of the container */
   type:string = ContainerType.REVEAL;
 
   /** @internal */

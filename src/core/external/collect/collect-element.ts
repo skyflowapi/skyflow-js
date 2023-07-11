@@ -37,12 +37,13 @@ const CLASS_NAME = 'Element';
   * @class CollectElement
   */
 class CollectElement extends SkyflowElement {
+  /** Type of the collect element */
   elementType: string;
-
+  /** Type of the container */
   type: string = ContainerType.COLLECT;
 
   #elementId: string;
-
+  /** Id of the container */
   containerId: string;
 
   #isSingleElementAPI: boolean = false;
