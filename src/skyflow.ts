@@ -51,21 +51,21 @@ export enum ContainerType {
   COMPOSABLE = 'COMPOSABLE',
 }
 
-/** Wrapper for parameters required by Skyflow. */
+/** This interface wraps the parameters required by Skyflow. */
 export interface ISkyflow {
-  /** Id of the vault that the client should connect to */
+  /** The client should connect to the vault ID. */
   vaultID?: string;
-  /** URL of the vault that the client should connect to */
+  /** The client should connect to the URL of the vault. */
   vaultURL?: string;
-  /** Helper function that retrieves a Skyflow bearer token from your backend */
+  /** This helper function retrieves a Skyflow bearer token from your backend. */
   getBearerToken: () => Promise<string>;
-  /** An optional object that contains keys as env, loglevel */
+  /** The optional object contains keys such as env and loglevel. */
   options?: Record<string, any>;
 }
 const CLASS_NAME = 'Skyflow';
 
 /**
-  * Parent skyflow class, that consists of all the methods exposed to the client.
+  * The parent Skyflow class consists of all the methods exposed to the client.
   * @class Skyflow
   */
 class Skyflow {
@@ -151,10 +151,10 @@ class Skyflow {
   }
 
   /**
-  * Method to initialize skyflow client
+  * This method initializes the Skyflow client.
   * @public
-  * @param config Configuration for the skyflow client.
-  * @returns returns an instance of skyflow client.
+  * @param config The configuration for the skyflow client.
+  * @returns This method returns an instance of the Skyflow client.
   */
   static init(config: ISkyflow): Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
@@ -170,11 +170,11 @@ class Skyflow {
   }
 
   /**
-  * This method is used to create the skyflow container
+  * This method creates the skyflow container.
   * @public
-  * @param type Type of skyflow container to create.
-  * @param options Additional paramater for container.
-  * @returns Returns the skyflow container of the specified type.
+  * @param type The type of Skyflow container to create is specified.
+  * @param options This is an additional parameter for the container.
+  * @returns This method returns the skyflow container of the specified type.
   */
   container(type: ContainerType, options?: Record<string, any>) {
     switch (type) {
@@ -228,11 +228,11 @@ class Skyflow {
   }
 
   /**
-  * This method is used to insert data into the vault
+  * This method inserts data into the vault.
   * @public
-  * @param records The records parameter takes a JSON object of the records to insert into the below format. 
-  * @param options The options parameter takes an object of optional parameters for the insertion.
-  * @returns Returns the insert response.
+  * @param records This parameter accepts a JSON object that represents the records to be inserted in the following format.
+  * @param options This parameter accepts an object containing optional parameters for the insertion.
+  * @returns This method returns the insert response.
   */
   insert(
     records: IInsertRecordInput,
@@ -244,10 +244,10 @@ class Skyflow {
   }
 
   /**
-  * This method returns records that correspond to the specified tokens
+  * This method returns records that correspond to the specified tokens.
   * @public
-  * @param detokenizeInput Input required by detokenize method.
-  * @returns It will return detokenized values that correspond to the specified tokens.
+  * @param detokenizeInput The detokenize method requires input.
+  * @returns This method returns detokenized values that correspond to the specified tokens.
   */
   detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
     printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
@@ -256,10 +256,10 @@ class Skyflow {
   }
 
   /**
-  * To reveal elements using skyflow ids
+  * This method reveals elements by using Skyflow IDs.
   * @public
-  * @param getByIdInput Input required by getById method.
-  * @returns Returns the records of fetched by skyflow ids. It returns errors if any.
+  * @param getByIdInput The getById method requires input.
+  * @returns This method returns the records fetched by Skyflow IDs and also returns any errors encountered.
   */
   getById(getByIdInput: IGetByIdInput) {
     printLog(logs.warnLogs.GET_BY_ID_DEPRECATED, MessageType.WARN, this.#logLevel);
@@ -269,10 +269,10 @@ class Skyflow {
   }
 
   /**
-  * Use to fetch records either by skyflow ids or by column values
+  * This method fetches records either by Skyflow IDs or by column values.
   * @public
-  * @param getInput Input required by get method.
-  * @returns Returns an array of fetched records or errors if any.
+  * @param getInput This method requires input for the get operation.
+  * @returns This method returns an array of fetched records or errors if any.
   */
   get(getInput: IGetInput) {
     printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
@@ -281,11 +281,11 @@ class Skyflow {
   }
 
   /**
-  * This method is used to delete data from the vault
+  * This method deletes data from the vault.
   * @public
-  * @param records The records parameter takes an array of records to delete in the following format.
-  * @param options The options parameter is optional and takes an object of deletion parameters. 
-  * @returns Returns an array of deleted records or errors if any.
+  * @param records This parameter takes an array of records in the following format for deletion.
+  * @param options This parameter accepts an object containing deletion parameters.
+  * @returns This method returns an array of deleted records or errors if any.
   */
   delete(records: IDeleteRecordInput, options: IDeleteOptions) {
     printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,

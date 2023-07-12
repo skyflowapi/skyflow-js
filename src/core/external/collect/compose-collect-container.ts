@@ -60,7 +60,7 @@ interface ICollectOptions {
 const CLASS_NAME = 'CollectContainer';
 
 /**
-  * This container will wrap all the composable elements
+  * This container wraps all the composable elements.
   * @class ComposableContainer
   */
 class ComposableContainer extends Container {
@@ -85,7 +85,7 @@ class ComposableContainer extends Container {
   #options: any;
 
   #containerElement:any;
-  /** Type of the container */
+  /** The type of container. */
   type:string = ContainerType.COMPOSABLE;
 
   #containerMounted: boolean = false;
@@ -143,10 +143,10 @@ class ComposableContainer extends Container {
   }
 
   /**
-  * This method is called to create the skyflow collect element
+  * This method creates the skyflow collect element.
   * @param input Collect element input.
   * @param options Collect element options.
-  * @returns Returns the collect element.
+  * @returns This method returns the collect element.
   */
   create = (input: CollectElementInput, options: any = {
     required: false,
@@ -265,9 +265,9 @@ class ComposableContainer extends Container {
   };
 
   /**
-  * Helps to communicate with Skyflow elements/iframes by listening to an event
-  * @param eventName The name of the event, the iframe will be listening to.
-  * @param handler This is a callback function you provide, that will be called when the event is fired with the state.
+  * This method helps to communicate with Skyflow elements/iframes by listening to an event.
+  * @param eventName The name of the event.
+  * @param handler You provide a callback function that gets called when the event is fired with the state.
   */
   on = (eventName:string, handler:any) => {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
@@ -298,8 +298,8 @@ class ComposableContainer extends Container {
   };
 
   /**
-  * when the mount(domElement) method of the Element is called, the Element will be inserted in the specified div
-  * @param domElement The Element that will be inserted in the specified div.
+  * This method inserts the element into the specified div.
+  * @param domElement The native HTML element that mounts inside the iframe.
   */
   mount = (domElement) => {
     if (!domElement) {
@@ -353,16 +353,16 @@ class ComposableContainer extends Container {
   };
 
   /**
-  * This method is used to reset any collect element to it's initial state
+  * This method resets any collect element to its initial state.
   */
   unmount = () => {
     this.#containerElement.unmount();
   };
 
   /**
-  * Collect method will collect the data and send it to the vault
+  * This method collects the data and sends it to the vault.
   * @param options Takes collect options as input.
-  * @returns Returns the data inserted or the error.
+  * @returns This method returns the inserted data or the error.
   */
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {

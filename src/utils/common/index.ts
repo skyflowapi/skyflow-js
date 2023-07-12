@@ -74,151 +74,151 @@ export enum ValidationRuleType {
   ELEMENT_VALUE_MATCH_RULE = 'ELEMENT_VALUE_MATCH_RULE',
 }
 
-/** Wrapper for parameters required by insert record input. */
+/** This interface wraps the parameters required for the insert record input. */
 export interface IInsertRecordInput {
   /** An array of insert records */
   records: IInsertRecord[];
 }
 
-/** Wrapper for parameters required by insert record. */
+/** This interface wraps the parameters required for inserting a record. */
 export interface IInsertRecord {
-  /** Table name */
+  /** The data belongs to the table. */
   table: string;
-  /** Fields to be inserted */
+  /** The fields need to be inserted. */
   fields: Record<string, any>;
-  /** SkyflowID of the record, required for update */
+  /** The record requires the SkyflowID for update. */
   skyflowID?: string;
 }
 
-/** Wrapper for parameters required by reveal record. */
+/** This interface wraps the parameters required by the Reveal record. */
 export interface IRevealRecord {
-  /** Required, token of the data being revealed */
+  /** The token of the revealed data. */
   token: string;
-  /** Redaction Type to be applied to data, RedactionType.PLAIN_TEXT will be applied if not provided */
+  /** The redaction type applies to the data, and if not provided, the RedactionType.PLAIN_TEXT will be applied. */
   redaction?: RedactionType;
 }
 
-/** Wrapper for parameters required by insert response. */
+/** This interface wraps the parameters required for an insert response. */
 export interface IInsertResponse {
-  /** An array of insert response records */
+  /** An array of insert response records. */
   records: IInsertResponseReocrds[];
 }
 
-/** Wrapper for parameters required by insert response record. */
+/** This interface wraps the parameters required for an insert response record. */
 export interface IInsertResponseReocrds {
-  /** The table this data belongs to */
+  /** This data belongs to the table. */
   table: string;
-  /** Fields that are inserted */
+  /** The inserted fields. */
   fields?: Record<string, any>;
-  /** SkyflowID of the inserted record */
+  /** The inserted record's SkyflowID. */
   skyflowID?: string;
 }
 
-/** Wrapper for parameters required by reveal response. */
+/** This interface wraps the parameters required by the reveal response. */
 export interface IRevealResponseType {
-  /** Array of records that are revealed, if any */
+  /** The array of records reveals if there are any. */
   records?: Record<string, string>[];
-  /** Array of errors, if any */
+  /** The array of errors, if there are any. */
   errors?: Record<string, any>[];
 }
 
-/** Wrapper for parameters required by detokenize input. */
+/** This interface wraps the parameters required for detokenizing input. */
 export interface IDetokenizeInput {
-  /** An array of reveal records */
+  /** The array of reveal records */
   records: IRevealRecord[];
 }
 
-/** Wrapper for parameters required to get records. */
+/** This interface serves as a wrapper for the parameters required to retrieve records. */
 export interface IGetRecord {
-  /** Skyflow ids of the records to fetch */
+  /** The Skyflow IDs of the records. */
   ids?: string[];
-  /** Redaction for the fetched records */
+  /** The fetched records undergo redaction. */
   redaction: RedactionType;
-  /** The table this data belongs to */
+  /** The data belongs to the table. */
   table: string;
-  /** Name of a unique column */
+  /** Name of the unique column. */
   columnName?:string;
-  /** Values of unique columns of records to fetch */
+  /** Values of the unique columns of records. */
   columnValues?: string[];
 }
 
-/** Wrapper for parameters required to get input. */
+/** This interface serves as a wrapper for the parameters that are required to retrieve input. */
 export interface IGetInput {
-  /** An array of get records */
+  /** The array contains get records. */
   records: IGetRecord[];
 }
 
-/** Wrapper for parameters required by skyflow id record. */
+/** This interface serves as a wrapper for the parameters required by Skyflow ID record. */
 export interface ISkyflowIdRecord {
-  /** Array of skyflow ids of the records to fetch */
+  /** An array of skyflow ids of the records to fetch. */
   ids: string[];
-  /** Redaction for the fetched records */
+  /** The fetched records are redacted. */
   redaction: RedactionType;
-  /** The table this data belongs to */
+  /** The data belongs to the table. */
   table: string;
 }
 
-/** Wrapper for parameters required by get by id input. */
+/** This interface serves as a wrapper for the parameters that are required by the getbyid input. */
 export interface IGetByIdInput {
-  /** An array of skyflow id records */
+  /** An array of skyflow id records. */
   records: ISkyflowIdRecord[];
 }
 
-/** Wrapper for parameters required by context. */
+/** This interface serves as a wrapper for parameters required by context. */
 export interface Context{
-  /** log level to be applied. */
+  /** The log level to be applied. */
   logLevel:LogLevel
-  /** Type of environment */
+  /** The type of environment. */
   env:Env
 }
 
-/** Wrapper for parameters required by validation rule. */
+/** This interface serves as a wrapper for parameters required by validation rule. */
 export interface IValidationRule {
-  /** Type of skyflow validation rule */
+  /** The type of skyflow validation rule. */
   type: ValidationRuleType;
-  /** Any additional parameters supported by validation rule */
+  /** Any additional parameters supported by validation rule. */
   params: any;
 }
 
-/** Wrapper for parameters required by upsert option. */
+/** This interface serves as a wrapper for parameters required by upsert option. */
 export interface IUpsertOption {
-  /** The table this data belongs to */
+  /** The data belongs to the table. */
   table : string;
-  /** Unique column name */
+  /** Name of the unique column. */
   column: string;
 }
 
-/** Wrapper for parameters required by insert options. */
+/** This interface serves as a wrapper for parameters required by insert options. */
 export interface IInsertOptions{
-  /** Indicates whether tokens for the collected data should be returned */
+  /** Indicates whether tokens for the collected data should be returned. */
   tokens?: boolean;
-  /** Will upsert data if provided, otherwise insert will be performed */
+  /** Will upsert data if provided, otherwise insert will be performed. */
   upsert?: IUpsertOption[];
 }
 
-/** Wrapper for parameters required by delete record. */
+/** This interface serves as a wrapper for parameters required by delete record. */
 export interface IDeleteRecord {
-  /** Skyflow id of the record to delete */
+  /** The Skyflow id of the record. */
   id: String;
-  /** The table this data belongs to */
+  /** The data belongs to the table. */
   table: String;
 }
 
-/** Wrapper for parameters required by delete options. */
+/** This interface serves as a wrapper for parameters required by delete options. */
 export interface IDeleteOptions {}
 
-/** Wrapper for parameters required by delete record input */
+/** This interface serves as a wrapper for parameters required by delete record input. */
 export interface IDeleteRecordInput {
-  /** Additional configuration options for delete record input */
+  /** Additional configuration options for delete record input. */
   options?: IDeleteOptions;
-  /** Array of records to be deleted */
+  /** Array of records to be deleted. */
   records: IDeleteRecord[];
 }
 
-/** Wrapper for parameters required by delete response type. */
+/** This interface serves as a wrapper for parameters required by delete response type. */
 export interface IDeleteResponseType {
-  /** Array of deleted records, if any */
+  /** Array of deleted records, if any. */
   records?: Record<string, string>[];
-  /** Array of errors, if any */
+  /** Array of errors, if any. */
   errors?: Record<string, any>[];
 }

@@ -37,41 +37,41 @@ import CollectElement from './collect-element';
 export interface CollectElementInput {
   /** The table this data belongs to */
   table?: string;
-  /** The column into which this data should be inserted */
+  /** The data should be inserted into the column. */
   column?: string;
-  /** Styles that should be applied to the form element */
+  /** The styles should be applied to the form element. */
   inputStyles?: object;
-  /** Label for the form element */
+  /** The label for the form element. */
   label?: string;
-  /** Styles that will be applied to the label of the collect element */
+  /** The styles applied to the label of the collect element. */
   labelStyles?: object;
-  /** Styles that will be applied to the errorText of the collect element */
+  /** The styles that apply to the error text of the collect element will be added. */
   errorTextStyles?: object;
-  /** Placeholder for the form element */
+  /** This is a placeholder for the form element. */
   placeholder?: string;
   /** Skyflow.ElementType enum */
   type: ElementType;
-  /** String that acts as an initial value for the collect element */
+  /** The string acts as an initial value for the collect element. */
   altText?: string;
-  /** Set of validations for collect element */
+  /** A set of validations for collect element. */
   validations?: IValidationRule[]
-  /** SkyflowID of the element */
+  /** The element's SkyflowID. */
   skyflowID?: string;
 }
 
-/** Wrapper for the options for Collect Method. */
+/** This class wraps the options for the Collect method. */
 export interface ICollectOptions {
-  /** Indicates whether tokens for the collected data should be returned. Defaults to 'true' */
+  /** The property indicates whether to return tokens for the collected data. It defaults to 'true'. */
   tokens?: boolean;
-  /** Non-PCI elements data to be inserted into the vault which should be in the records object format */
+  /** Insert the non-PCI elements data into the vault in the format of the records object. */
   additionalFields?: IInsertRecordInput;
-  /** To support upsert operations while collecting data from Skyflow elements, pass the table and column marked as unique in the table */
+  /** To support upsert operations while collecting data from Skyflow elements, you should pass the table and column marked as unique in the table. */
   upsert?: Array<IUpsertOptions>
 }
 const CLASS_NAME = 'CollectContainer';
 
 /**
-  * @class This will wrap all collect elements
+  * @class This class wraps all collect elements.
   */
 class CollectContainer extends Container {
   #containerId: string;
@@ -83,7 +83,7 @@ class CollectContainer extends Container {
   #context:Context;
 
   #skyflowElements:any;
-  /** Type of the container */
+  /** The type of the container. */
   type:string = ContainerType.COLLECT;
 
   /** @internal */
@@ -128,10 +128,10 @@ class CollectContainer extends Container {
   }
 
   /**
-  * This method is called to create the skyflow collect element
+  * We call this method to create the Skyflow Collect element.
   * @param input Collect element input.
   * @param options Collect element options.
-  * @returns Returns the collect element.
+  * @returns The method returns the collect element.
   */
   create = (input: CollectElementInput, options: any = {
     required: false,
@@ -272,9 +272,9 @@ class CollectContainer extends Container {
   };
 
   /**
-  * This method will collect the data and send it to the vault
-  * @param options Takes collect options as input.
-  * @returns Returns the data inserted or the error.
+  * This method collects the data and sends it to the vault.
+  * @param options It collects the data and sends it to the vault.
+  * @returns It returns the inserted data or the error.
   */
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
@@ -326,8 +326,8 @@ class CollectContainer extends Container {
   });
 
   /**
-  * This method is used to insert file type data in to the vault
-  * @returns This will return the inserted data.
+  * This method inserts file type data into the vault.
+  * @returns It returns the inserted data.
   */
   uploadFiles = (options) => new Promise((resolve, reject) => {
     try {

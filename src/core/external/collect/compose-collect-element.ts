@@ -9,7 +9,7 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../constants';
 
 /**
-  * An instance of skyflow composable elements, returned by create method
+  * The create method returns an instance of Skyflow composable elements.
   * @class ComposableElement
   */
 class ComposableElement {
@@ -23,11 +23,7 @@ class ComposableElement {
 
   #isUpdateCalled = false;
 
-  /**
-  * Some documentation for constructor
-  * @param name This is a description of the name parameter.
-  * @param eventEmitter This is a description of the eventEmitter parameter.
-  */
+  /** @internal */
   constructor(name, eventEmitter) {
     this.#elementName = name;
     this.#eventEmitter = eventEmitter;
@@ -37,9 +33,9 @@ class ComposableElement {
   }
 
   /**
-  * Helps to communicate with Skyflow elements/iframes by listening to an event
-  * @param eventName The name of the event, the iframe will be listening to.
-  * @param handler This is a callback function you provide, that will be called when the event is fired with the state.
+  * This method helps to communicate with Skyflow elements/iframes by listening to an event.
+  * @param eventName The name of the event.
+  * @param handler You provide a callback function that gets called when the event is fired with the state.
   */
   on(eventName: string, handler: any) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
@@ -75,8 +71,8 @@ class ComposableElement {
   }
 
   /**
-  * Update the configuration of elements inside composable container
-  * @param options This is a description of the options parameter.
+  * The configuration of elements inside the composable container is updated.
+  * @param options This parameter takes an object for the insertion. 
   */
   update = (options) => {
     this.#isUpdateCalled = true;
@@ -86,7 +82,7 @@ class ComposableElement {
         ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
           elementName: this.#elementName,
           elementOptions: options,
-        });
+        }); 
       this.#isUpdateCalled = false;
     } else if (this.#isUpdateCalled) {
       this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {

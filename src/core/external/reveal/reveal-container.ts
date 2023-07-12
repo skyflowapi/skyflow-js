@@ -23,38 +23,38 @@ import {
 import Container from '../common/container';
 import RevealElement from './reveal-element';
 
-/** Configuration for skyflow reveal elements. */
+/** This configuration handles skyflow reveal elements. */
 export interface IRevealElementInput {
-  /** Skyflow token that would be detokenised */
+  /** A Skyflow token that would be detokenised. */
   token?: string;
-  /** Redaction type of the revealed data */
+  /** The redaction type of the revealed data. */
   redaction?: RedactionType;
-  /** Styles for the input in the reveal element */
+  /** The styles for the input in reveal element. */
   inputStyles?: object;
-  /** Label value for reveal elements */
+  /** The label value for the reveal elements. */
   label?: string;
-  /** Styles for label in reveal element */
+  /** The styles for the label in reveal element. */
   labelStyles?: object;
-  /** Alternate text for the reveal element */
+  /** An alternate text for the reveal element. */
   altText?: string;
-  /** Styles for the error text in reveal element */
+  /** The styles for the error text in the reveal element. */
   errorTextStyles?: object;
 }
 
-/** Additional configutartion options for reveal element. */
+/** This provides additional configuration options for the reveal element. */
 export interface IRevealElementOptions {
-  /** Enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false'. */
+  /** The copy icon enables revealing elements to copy text to the clipboard. It defaults to 'false'. */
   enableCopy?: boolean;
-  /** Format for the element */
+  /** Tohe format for the element. */
   format?: string;
-  /** Indicates the allowed data type value for format */
+  /** This property indicates the allowed data type value for the format. */
   translation?:Record<string, string>
 }
 
 const CLASS_NAME = 'RevealContainer';
 
 /**
-  * This container will wrap all the skyflow reveal elements
+  * The container wraps all the Skyflow reveal elements.
   * @class RevealContainer
   */
 class RevealContainer extends Container {
@@ -77,7 +77,7 @@ class RevealContainer extends Container {
   #context: Context;
 
   #skyflowElements: any;
-  /** Type of the container */
+  /** The type of the container. */
   type:string = ContainerType.REVEAL;
 
   /** @internal */
@@ -148,10 +148,10 @@ class RevealContainer extends Container {
   }
 
   /**
-  * This method is used to create a skyflow reveal element
-  * @param record input configuration for the reveal element.
-  * @param options additional configuration for reveal element.
-  * @returns This will return the reveal element.
+  * This method creates a skyflow reveal element.
+  * @param record The input configuration for the reveal element.
+  * @param options An additional configuration for reveal element.
+  * @returns This method returns the reveal element.
   */
   create(record: IRevealElementInput, options?: IRevealElementOptions) {
     // this.#revealRecords.push(record);
@@ -165,8 +165,8 @@ class RevealContainer extends Container {
   }
 
   /**
-  * This method is called when the sensitive data is ready to be retrieved and revealed
-  * @returns It will return the retrieved and revealed data.
+  * The method is called when the sensitive data is ready to retrieve and reveal.
+  * @returns It returns the retrieved and revealed data.
   */
   reveal() {
     this.#isRevealCalled = true;

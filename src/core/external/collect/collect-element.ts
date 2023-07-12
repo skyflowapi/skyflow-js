@@ -33,17 +33,17 @@ import { ContainerType } from '../../../skyflow';
 const CLASS_NAME = 'Element';
 
 /**
-  * The type of skyflow collect elements, that will be returned by create method
+  * The create method returns the type of Skyflow collect elements.
   * @class CollectElement
   */
 class CollectElement extends SkyflowElement {
-  /** Type of the collect element */
+  /** The type of collect element. */
   elementType: string;
-  /** Type of the container */
+  /** The type of container. */
   type: string = ContainerType.COLLECT;
 
   #elementId: string;
-  /** Id of the container */
+  /** The id of the container. */
   containerId: string;
 
   #isSingleElementAPI: boolean = false;
@@ -143,8 +143,8 @@ class CollectElement extends SkyflowElement {
   getID = () => this.#elementId;
 
   /**
-  * When the mount(domElement) method of the Element is called, the Element will be inserted in the specified div
-  * @param domElement Native html element which will be mounted inside the iframe.
+  * This method inserts the element into the specified div.
+  * @param domElement The native HTML element that mounts inside the iframe.
   */
   mount = (domElement) => {
     if (!domElement) {
@@ -187,7 +187,7 @@ class CollectElement extends SkyflowElement {
   };
 
   /**
-  *  This method is used to reset any collect element to it's initial state
+  *  This method resets any collect element to its initial state.
   */
   unmount = () => {
     this.#iframe.unmount();
@@ -331,9 +331,9 @@ class CollectElement extends SkyflowElement {
   // listening to element events and error messages on iframe
   // todo: off methods
   /**
-  * Helps to communicate with Skyflow elements/iframes by listening to an event
-  * @param eventName The name of the event, the iframe will be listening to.
-  * @param handler This is a callback function you provide, that will be called when the event is fired with the state.
+  * This method communicates with Skyflow elements/iframes by listening to an event.
+  * @param eventName The name of the event.
+  * @param handler You provide a callback function that gets called when the event is fired with the state.
   */
   on(eventName: string, handler) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
@@ -493,7 +493,8 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * This method is used to set the error text for the element. All the current errors present on the element will be overridden with the custom error message passed.
+  * This method sets the error text for the element, overriding all current errors on the element with the custom error message passed.
+  * @param clientErrorText The error text value.
   */
   setError(clientErrorText:string) {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
@@ -505,7 +506,7 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * This method is used to clear the custom error message that is set using setError
+  * This method clears the custom error message that is set using setError.
   */
   resetError() {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
@@ -516,7 +517,7 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * This method is used to set the value of the element
+  * This method sets the value of the element.
   * @param elementValue Any value for the element.
   */
   setValue(elementValue:string) {
@@ -539,7 +540,7 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * This method is used to reset the value of the element
+  * This method resets the value of the element.
   */
   clearValue() {
     if (this.#context.env === Env.PROD) {
