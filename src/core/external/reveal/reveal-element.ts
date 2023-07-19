@@ -24,7 +24,7 @@ import { formatRevealElementOptions } from '../../../utils/helpers';
 const CLASS_NAME = 'RevealElement';
 
 /**
-  * The create method returns the type of Skyflow reveal elements.
+  * The create method returns the type of Skyflow Reveal Elements.
   * @class RevealElement
   */
 class RevealElement extends SkyflowElement {
@@ -72,7 +72,7 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * This method inserts the element into the specified div.
+  * Inserts the element into the specified div.
   * @param domElementSelector The native HTML element that mounts inside the iframe.
   */
   mount(domElementSelector) {
@@ -134,8 +134,8 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * This method sets the error text for the element, overriding all current errors on the element with the custom error message passed.
-  * @param clientErrorText The error text value.
+  * Sets the error text for the element, overriding all current errors on the element with the custom error message passed.
+  * @param clientErrorText Error text value.
   */
   setError(clientErrorText:string) {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
@@ -147,7 +147,7 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * This method clears the custom error message that is set using setError.
+  * Clears the custom error message that is set using setError.
   */
   resetError() {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
@@ -158,7 +158,7 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * The method sets the altText of the reveal element, displaying it in the UI.
+  * Sets the altText of the reveal element, displaying it in the UI.
   * @param altText Set an alt text value.
   */
   setAltText(altText:string) {
@@ -170,7 +170,7 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * This method clears the altText, causing the element to display the token or actual value of the element. If the element has no token, the element becomes empty.
+  * Clears the altText, causing the element to display the token or actual value of the element. If the element has no token, the element becomes empty.
   */
   clearAltText() {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
@@ -181,7 +181,7 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  * This method sets the token of the reveal element.
+  * Sets the token of the reveal element.
   * @param token Set the value of the Skyflow token.
   */
   setToken(token:string) {
@@ -197,7 +197,7 @@ class RevealElement extends SkyflowElement {
   }
 
   /**
-  *  This method resets any collect element to its initial state.
+  *  Resets any collect element to its initial state.
   */
   unmount() {
     this.#iframe.unmount();

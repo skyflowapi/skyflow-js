@@ -33,17 +33,17 @@ import { ContainerType } from '../../../skyflow';
 const CLASS_NAME = 'Element';
 
 /**
-  * The create method returns the type of Skyflow collect elements.
+  * The create method returns the type of Skyflow Collect Elements.
   * @class CollectElement
   */
 class CollectElement extends SkyflowElement {
-  /** The type of collect element. */
+  /** Type of the Collect Element. */
   elementType: string;
-  /** The type of container. */
+  /** Type of the container. */
   type: string = ContainerType.COLLECT;
 
   #elementId: string;
-  /** The id of the container. */
+  /** Id of the container. */
   containerId: string;
 
   #isSingleElementAPI: boolean = false;
@@ -143,7 +143,7 @@ class CollectElement extends SkyflowElement {
   getID = () => this.#elementId;
 
   /**
-  * This method inserts the element into the specified div.
+  * Inserts the element into the specified div.
   * @param domElement The native HTML element that mounts inside the iframe.
   */
   mount = (domElement) => {
@@ -187,7 +187,7 @@ class CollectElement extends SkyflowElement {
   };
 
   /**
-  *  This method resets any collect element to its initial state.
+  *  Resets any collect element to its initial state.
   */
   unmount = () => {
     this.#iframe.unmount();
@@ -331,8 +331,8 @@ class CollectElement extends SkyflowElement {
   // listening to element events and error messages on iframe
   // todo: off methods
   /**
-  * This method communicates with Skyflow elements/iframes by listening to an event.
-  * @param eventName The name of the event.
+  * Communicates with Skyflow elements/iframes by listening to an event.
+  * @param eventName Name of the event.
   * @param handler You provide a callback function that gets called when the event is fired with the state.
   */
   on(eventName: string, handler) {
@@ -493,8 +493,8 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * This method sets the error text for the element, overriding all current errors on the element with the custom error message passed.
-  * @param clientErrorText The error text value.
+  * Sets the error text for the element, overriding all current errors on the element with the custom error message passed.
+  * @param clientErrorText Error text value.
   */
   setError(clientErrorText:string) {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
@@ -506,7 +506,7 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * This method clears the custom error message that is set using setError.
+  * Clears the custom error message that is set using setError.
   */
   resetError() {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
@@ -517,7 +517,7 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * This method sets the value of the element.
+  * Sets the value of the element.
   * @param elementValue Any value for the element.
   */
   setValue(elementValue:string) {
@@ -540,7 +540,7 @@ class CollectElement extends SkyflowElement {
   }
 
   /**
-  * This method resets the value of the element.
+  * Resets the value of the element.
   */
   clearValue() {
     if (this.#context.env === Env.PROD) {

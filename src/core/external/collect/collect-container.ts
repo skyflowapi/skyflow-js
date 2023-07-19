@@ -33,35 +33,35 @@ import {
 import Container from '../common/container';
 import CollectElement from './collect-element';
 
-/** Type of Skyflow element. */
+/** Type of Skyflow Element. */
 export interface CollectElementInput {
-  /** The table this data belongs to */
+  /** Table this data belongs to */
   table?: string;
-  /** The data should be inserted into the column. */
+  /** Data should be inserted into the column. */
   column?: string;
-  /** The styles should be applied to the form element. */
+  /** Styles should be applied to the form element. */
   inputStyles?: object;
-  /** The label for the form element. */
+  /** Label for the form element. */
   label?: string;
-  /** The styles applied to the label of the collect element. */
+  /** Styles applied to the label of the collect element. */
   labelStyles?: object;
-  /** The styles that apply to the error text of the collect element will be added. */
+  /** Styles that apply to the error text of the collect element will be added. */
   errorTextStyles?: object;
-  /** This is a placeholder for the form element. */
+  /** A placeholder for the form element. */
   placeholder?: string;
   /** Skyflow.ElementType enum */
   type: ElementType;
-  /** The string acts as an initial value for the collect element. */
+  /** It string acts as an initial value for the Collect Element. */
   altText?: string;
-  /** A set of validations for collect element. */
+  /** A set of validations for Collect Element. */
   validations?: IValidationRule[]
-  /** The element's SkyflowID. */
+  /** SkyflowID fo the element. */
   skyflowID?: string;
 }
 
-/** This class wraps the options for the Collect method. */
+/** Wraps the options for the Collect method. */
 export interface ICollectOptions {
-  /** The property indicates whether to return tokens for the collected data. It defaults to 'true'. */
+  /** Indicates whether to return tokens for the collected data. It defaults to 'true'. */
   tokens?: boolean;
   /** Insert the non-PCI elements data into the vault in the format of the records object. */
   additionalFields?: IInsertRecordInput;
@@ -71,7 +71,7 @@ export interface ICollectOptions {
 const CLASS_NAME = 'CollectContainer';
 
 /**
-  * @class This class wraps all collect elements.
+  * @class Wraps all collect elements.
   */
 class CollectContainer extends Container {
   #containerId: string;
@@ -83,7 +83,7 @@ class CollectContainer extends Container {
   #context:Context;
 
   #skyflowElements:any;
-  /** The type of the container. */
+  /** Type of the container. */
   type:string = ContainerType.COLLECT;
 
   /** @internal */
@@ -128,10 +128,10 @@ class CollectContainer extends Container {
   }
 
   /**
-  * We call this method to create the Skyflow Collect element.
-  * @param input Collect element input.
-  * @param options Collect element options.
-  * @returns The method returns the collect element.
+  * Creates the Skyflow Collect Element.
+  * @param input Collect Element input.
+  * @param options Collect Element options.
+  * @returns Returns the collect element.
   */
   create = (input: CollectElementInput, options: any = {
     required: false,
@@ -272,9 +272,9 @@ class CollectContainer extends Container {
   };
 
   /**
-  * This method collects the data and sends it to the vault.
-  * @param options It collects the data and sends it to the vault.
-  * @returns It returns the inserted data or the error.
+  * Collects the data and sends it to the vault.
+  * @param options Collects the data and sends it to the vault.
+  * @returns Returns the inserted data or the error.
   */
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
@@ -326,8 +326,8 @@ class CollectContainer extends Container {
   });
 
   /**
-  * This method inserts file type data into the vault.
-  * @returns It returns the inserted data.
+  * Inserts file type data into the vault.
+  * @returns Returns the inserted data.
   */
   uploadFiles = (options) => new Promise((resolve, reject) => {
     try {

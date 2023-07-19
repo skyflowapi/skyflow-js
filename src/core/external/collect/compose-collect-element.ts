@@ -9,7 +9,7 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../constants';
 
 /**
-  * The create method returns an instance of Skyflow composable elements.
+  * The create method returns an instance of Skyflow Composable Elements.
   * @class ComposableElement
   */
 class ComposableElement {
@@ -33,8 +33,8 @@ class ComposableElement {
   }
 
   /**
-  * This method helps to communicate with Skyflow elements/iframes by listening to an event.
-  * @param eventName The name of the event.
+  * Helps to communicate with Skyflow elements/iframes by listening to an event.
+  * @param eventName Name of the event.
   * @param handler You provide a callback function that gets called when the event is fired with the state.
   */
   on(eventName: string, handler: any) {
@@ -71,8 +71,8 @@ class ComposableElement {
   }
 
   /**
-  * The configuration of elements inside the composable container is updated.
-  * @param options This parameter takes an object for the insertion. 
+  * Updates the configuration of elements inside the composable container.
+  * @param options Takes an object for the insertion. 
   */
   update = (options) => {
     this.#isUpdateCalled = true;
