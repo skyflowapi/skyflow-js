@@ -472,7 +472,7 @@ export class FrameElement {
 
   updateParentDiv = (newDiv: HTMLDivElement) => {
     this.htmlDivElement = newDiv;
-    if (Object.prototype.hasOwnProperty.call(this.options, 'label')) this.htmlDivElement.append(this.labelDiv || '');
+    if (Object.prototype.hasOwnProperty.call(this.options, 'label') && this.options.label) this.htmlDivElement.append(this.labelDiv || '');
     this.htmlDivElement.append(this.inputParent || '');
     if (this.iFrameFormElement.containerType === ContainerType.COLLECT) { this.htmlDivElement.append(this.domError || ''); }
   };

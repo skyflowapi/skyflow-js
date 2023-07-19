@@ -26,7 +26,7 @@ class RevealElement extends SkyflowElement {
 
   #recordData: any;
 
-  #containerId: string;
+  #containerId: any;
 
   #isMounted:boolean = false;
 
@@ -36,9 +36,13 @@ class RevealElement extends SkyflowElement {
 
   #elementId: string;
 
+  #readyToMount: boolean = false;
+
+  #eventEmitter:any;
+
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
-    metaData: any, containerId: string, elementId: string, context: Context) {
+    metaData: any, container: any, elementId: string, context: Context) {
     super();
     this.#elementId = elementId;
     this.#metaData = metaData;
@@ -46,7 +50,9 @@ class RevealElement extends SkyflowElement {
       ...record,
       ...formatRevealElementOptions(options),
     };
-    this.#containerId = containerId;
+    this.#containerId = container.containerId;
+    this.#readyToMount = container.isMounted;
+    this.#eventEmitter = container.eventEmitter;
     this.#context = context;
     this.#iframe = new IFrame(
       `${FRAME_REVEAL}:${btoa(uuid())}`,
@@ -54,6 +60,12 @@ class RevealElement extends SkyflowElement {
       this.#containerId,
       this.#context.logLevel,
     );
+
+    if (!this.#readyToMount) {
+      this.#eventEmitter.on(ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED, (data) => {
+        if (data?.containerId === this.#containerId) { this.#readyToMount = true; }
+      });
+    }
     printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, CLASS_NAME, `${record.token || ''} reveal `), MessageType.LOG, this.#context.logLevel);
   }
 
@@ -65,7 +77,6 @@ class RevealElement extends SkyflowElement {
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
-    this.#iframe.mount(domElementSelector);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback({
@@ -88,9 +99,22 @@ class RevealElement extends SkyflowElement {
         this.#isMounted = true;
       }
     };
-    bus
-      .target(properties.IFRAME_SECURE_ORGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+
+    if (this.#readyToMount) {
+      this.#iframe.mount(domElementSelector);
+      bus
+        .target(properties.IFRAME_SECURE_ORGIN)
+        .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+      return;
+    }
+    this.#eventEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED, (data) => {
+      if (data?.containerId === this.#containerId) {
+        this.#iframe.mount(domElementSelector);
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
+          .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+      }
+    });
   }
 
   iframeName(): string {

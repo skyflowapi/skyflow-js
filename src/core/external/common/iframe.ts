@@ -37,7 +37,9 @@ export default class IFrame {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
       }
     } catch (e) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
+      // eslint-disable-next-line no-console
+      console.error(e);
+      // throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
     }
 
     setAttributes(this.iframe, { src: getIframeSrc() });
