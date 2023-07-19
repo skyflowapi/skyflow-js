@@ -205,7 +205,7 @@ class ComposableContainer extends Container {
         tempElements,
         this.#metaData,
         {
-          containerID: this.#containerId,
+          containerId: this.#containerId,
           isMounted: this.#containerMounted,
         },
         true,
