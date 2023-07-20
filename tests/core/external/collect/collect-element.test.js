@@ -223,13 +223,14 @@ describe('collect element', () => {
       rows,
     },
     {},
-    'containerId',
+    {containerId:'containerId',isMounted:false},
     true,
     destroyCallback,
     updateCallback,
     { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
     groupOnCb({containerId:'containerId'});
-    expect(() => { element.mount('#123'); }).toThrow(SkyflowError);
+    expect(() => { element.mount('#123'); }).not.toThrow(SkyflowError);
+
   });
 
   it('collect element, not a single element', () => {
@@ -239,7 +240,7 @@ describe('collect element', () => {
         rows,
       },
       {},
-      'containerId',
+      {containerId:'containerId',isMounted:false},
       false,
       destroyCallback,
       updateCallback,
@@ -258,7 +259,7 @@ describe('collect element', () => {
       rows,
     },
     {},
-    'containerId',
+    {containerId:'containerId',isMounted:false},
     true,
     destroyCallback,
     updateCallback,

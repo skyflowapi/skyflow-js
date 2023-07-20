@@ -16,6 +16,14 @@ jest.mock('../../../../src/libs/uuid',()=>({
 // const _emit = jest.fn();
 const getBearerToken = jest.fn();
 
+const groupEmittFn = jest.fn();
+let groupOnCb;
+const groupEmiitter = {
+  _emit: groupEmittFn,
+  on:jest.fn().mockImplementation((args,cb)=>{
+    groupOnCb = cb;
+  })
+}
 // bus.on = _on;
 // bus.target = jest.fn().mockReturnValue({
 //   on: _on,
@@ -62,7 +70,7 @@ describe("Reveal Element Class", () => {
       testRecord,
       undefined,
       metaData,
-      containerId,
+      {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -73,7 +81,7 @@ describe("Reveal Element Class", () => {
       testRecord,
       undefined,
       metaData,
-      containerId,
+      {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -109,7 +117,7 @@ describe("Reveal Element Class", () => {
       {},
       undefined,
       metaData,
-      containerId,
+      {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -124,7 +132,7 @@ describe("Reveal Element Methods",()=>{
     },
     undefined,
     metaData,
-    containerId,
+    {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
     elementId,
     { logLevel: LogLevel.ERROR,env:Env.PROD }
   );

@@ -65,6 +65,8 @@ class CollectContainer extends Container {
 
   #eventEmitter: EventEmitter;
 
+  #isMounted: boolean = false;
+
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -97,6 +99,7 @@ class CollectContainer extends Container {
           context,
         });
 
+        this.#isMounted = true;
         // eslint-disable-next-line no-underscore-dangle
         this.#eventEmitter._emit(
           ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED,
@@ -199,7 +202,10 @@ class CollectContainer extends Container {
         elementId,
         tempElements,
         this.#metaData,
-        this.#containerId,
+        {
+          containerId: this.#containerId,
+          isMounted: this.#isMounted,
+        },
         isSingleElementAPI,
         this.#destroyCallback,
         this.#updateCallback,

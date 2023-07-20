@@ -76,7 +76,7 @@ class CollectElement extends SkyflowElement {
     elementId: string,
     elementGroup: any,
     metaData: any,
-    containerId: string,
+    container: any,
     isSingleElementAPI: boolean = false,
     destroyCallback: Function,
     updateCallback: Function,
@@ -85,7 +85,7 @@ class CollectElement extends SkyflowElement {
   ) {
     super();
 
-    this.containerId = containerId;
+    this.containerId = container.containerId;
     this.#elementId = elementId;
     this.#context = context;
     this.#group = validateAndSetupGroupOptions(elementGroup);
@@ -129,6 +129,8 @@ class CollectElement extends SkyflowElement {
     printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT,
       CLASS_NAME, getElementName(this.#iframe.name)), MessageType.LOG,
     this.#context.logLevel);
+
+    this.#readyToMount = container.isMounted;
 
     this.#groupEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED, (data) => {
       if (data?.containerId === this.containerId) { this.#readyToMount = true; }
