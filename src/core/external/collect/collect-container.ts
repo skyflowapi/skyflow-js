@@ -162,6 +162,8 @@ class CollectContainer extends Container {
         //   options.elementName,
         // )}` : `${options.elementType}:${btoa(uuid())}`;
 
+        options.isMounted = false;
+
         if (
           options.elementType === ELEMENTS.radio.name
           || options.elementType === ELEMENTS.checkbox.name
@@ -205,6 +207,7 @@ class CollectContainer extends Container {
         {
           containerId: this.#containerId,
           isMounted: this.#isMounted,
+          type: this.type,
         },
         isSingleElementAPI,
         this.#destroyCallback,

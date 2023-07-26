@@ -135,6 +135,20 @@ class CollectElement extends SkyflowElement {
     this.#groupEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED, (data) => {
       if (data?.containerId === this.containerId) { this.#readyToMount = true; }
     });
+
+    this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED, (data) => {
+      if (container.type === ContainerType.COMPOSABLE) {
+        this.#elements.forEach((element) => {
+          if (data.name === element.elementName) {
+            element.isMounted = true;
+            this.#mounted = true;
+          }
+        });
+      } else if (data.name === this.#elements[0].elementName) {
+        this.#elements[0].isMounted = true;
+        this.#mounted = true;
+      }
+    });
   }
 
   getID = () => this.#elementId;
@@ -168,7 +182,7 @@ class CollectElement extends SkyflowElement {
           ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId,
           sub,
         );
-        this.#mounted = true;
+        // this.#mounted = true;
         printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, CLASS_NAME, getElementName(this.#iframe.name))} `, MessageType.LOG,
           this.#context.logLevel);
         this.#updateCallbacks.forEach((func) => func());
