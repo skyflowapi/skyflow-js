@@ -168,6 +168,7 @@ export const ELEMENTS = {
     attributes: {
       type: 'text',
       autocomplete: 'cc-number',
+      inputmode: 'numeric',
     },
     sensitive: true,
     mask: CARD_NUMBER_MASK[CardType.DEFAULT],
@@ -178,6 +179,7 @@ export const ELEMENTS = {
     attributes: {
       type: 'text',
       autocomplete: 'cc-exp',
+      inputmode: 'numeric',
     },
     sensitive: true,
     // mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
@@ -188,6 +190,7 @@ export const ELEMENTS = {
     attributes: {
       maxLength: 2,
       type: 'text',
+      inputmode: 'numeric',
       autocomplete: 'cc-exp-month',
     },
     sensitive: true,
@@ -198,6 +201,7 @@ export const ELEMENTS = {
     attributes: {
       maxLength: 4,
       type: 'text',
+      inputmode: 'numeric',
       autocomplete: 'cc-exp-year',
     },
     sensitive: true,
@@ -206,6 +210,7 @@ export const ELEMENTS = {
     name: 'CVV',
     attributes: {
       type: 'text',
+      inputmode: 'numeric',
       maxLength: 4,
     },
     sensitive: true,
@@ -222,6 +227,7 @@ export const ELEMENTS = {
     name: 'PIN',
     attributes: {
       type: 'text',
+      inputmode: 'numeric',
       maxLength: 12,
       minLength: 4,
     },
