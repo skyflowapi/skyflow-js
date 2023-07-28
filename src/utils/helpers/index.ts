@@ -290,3 +290,12 @@ export function getMetaObject(sdkDetails: any, metaData: any, navigator: any) {
   };
   return metaObject;
 }
+
+export function isValidURL(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    return !!url.origin;
+  } catch (error) {
+    return false;
+  }
+}
