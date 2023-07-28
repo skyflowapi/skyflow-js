@@ -8,12 +8,12 @@ Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal
 [![License](https://img.shields.io/github/license/skyflowapi/skyflow-android)](https://github.com/skyflowapi/skyflow-js/blob/master/LICENSE)
 
 # Table of Contents
-- [**Including Skyflow.js**](#Including-Skyflowjs) 
-- [**Initializing Skyflow.js**](#Initializing-Skyflowjs)
-- [**Securely collecting data client-side**](#Securely-collecting-data-client-side)
-- [**Securely collecting data client-side using Composable Elements**](#Securely-collecting-data-client-side-using-Composable-Elements)
-- [**Securely revealing data client-side**](#Securely-revealing-data-client-side)
-- [**Securely deleting data cleint-side**](#Securely-deleting-data-client-side)
+- [**Including Skyflow.js**](#including-skyflowjs) 
+- [**Initializing Skyflow.js**](#initializing-skyflowjs)
+- [**Securely collecting data client-side**](#securely-collecting-data-client-side)
+- [**Securely collecting data client-side using Composable Elements**](#securely-collecting-data-client-side-using-composable-elements)
+- [**Securely revealing data client-side**](#securely-revealing-data-client-side)
+- [**Securely deleting data cleint-side**](#securely-deleting-data-client-side)
 
 ---
 
