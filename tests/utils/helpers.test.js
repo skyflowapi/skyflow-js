@@ -21,7 +21,7 @@ import {
   getOSDetails,
   getSdkVersionName,
   getMetaObject,
-  isValidURL,
+  checkAndSetForCustomUrl
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -31,7 +31,7 @@ import {
   detectCardType
 } from '../../src/utils/validators/index';
 import successIcon from '../../assets/path.svg'
-
+import { isValidURL } from '../../src/utils/validators/index';
 
 describe('bin data for for all card number except AMEX element type on CHANGE event', () => {
   test("in PROD return bin data only for card number element", () => {
@@ -523,7 +523,7 @@ describe('getOSDetails', () => {
     expect(osDetails.os).toEqual('iOS');
     expect(osDetails.version).toEqual('15.0');
   });
-  
+
   it('should correctly parse iOS user agent string and version as null', () => {
     const userAgentString = 'Mozilla/5.0 (iPhone; CPU iPhone OS like Mac OS X) AppleWebKit/ (KHTML, like Gecko) Version/ Mobile/ Safari/';
     const osDetails = getOSDetails(userAgentString);
@@ -531,16 +531,28 @@ describe('getOSDetails', () => {
     expect(osDetails.version).toEqual(null);
   });
 });
-describe('isValidURL', () => {
-  it('should correctly parse url string', () => {
-    const urlString = 'https://js.skyflow.com';
-    const isValid = isValidURL(urlString);
+describe('checkAndSetForCustomUrl', () => {
+  it('should correctly parse url string and set IFRAME_SECURE origin and site', () => {
+    const config = {
+      getBearerToken: () => { },
+      options: {
+        customElementsURL: 'https://js.skyflow.com'
+      },
+    };
+    checkAndSetForCustomUrl(config);
+    const isValid = isValidURL(config.options.customElementsURL);
     expect(isValid).toEqual(true);
   });
 
-  it('should not parse url string', () => {
-    const urlString = 'wrong_url';
-    const isValid = isValidURL(urlString);
+  it('should not parse url string and set IFRAME_SECURE origin and site', () => {
+    const config = {
+      getBearerToken: () => { },
+      options: {
+        customElementsURL: 'wrong_url'
+      },
+    };
+    checkAndSetForCustomUrl(config);
+    const isValid = isValidURL(config.options.customElementsURL);
     expect(isValid).toEqual(false);
   });
 });

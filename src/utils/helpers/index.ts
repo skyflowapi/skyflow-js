@@ -8,9 +8,10 @@ import {
 } from '../../core/constants';
 import { IRevealElementOptions } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
-import { ContainerType } from '../../skyflow';
+import { ContainerType, ISkyflow } from '../../skyflow';
 import SKYFLOW_ERROR_CODE from '../constants';
-import { detectCardType, validateBooleanOptions } from '../validators';
+import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
+import properties from '../../properties';
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
@@ -291,11 +292,17 @@ export function getMetaObject(sdkDetails: any, metaData: any, navigator: any) {
   return metaObject;
 }
 
-export function isValidURL(urlString: string): boolean {
-  try {
+export function checkAndSetForCustomUrl(config: ISkyflow) {
+  if (
+    config?.options?.customElementsURL
+    && isValidURL(config?.options?.customElementsURL)
+  ) {
+    const urlString = config?.options?.customElementsURL;
     const url = new URL(urlString);
-    return !!url.origin;
-  } catch (error) {
-    return false;
+    const protocol = url.protocol;
+    const domain = url.hostname;
+    const fullDomain = `${protocol}//${domain}`;
+    properties.IFRAME_SECURE_ORGIN = fullDomain;
+    properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
   }
 }

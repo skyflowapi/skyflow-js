@@ -35,7 +35,7 @@ import {
   IDeleteRecordInput,
   IDeleteOptions,
 } from './utils/common';
-import { formatVaultURL, isValidURL } from './utils/helpers';
+import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
 
@@ -136,18 +136,7 @@ class Skyflow {
 
   static init(config: ISkyflow): Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
-    if (
-      config?.options?.customElementsURL
-      && isValidURL(config?.options?.customElementsURL)
-    ) {
-      const urlString = config?.options?.customElementsURL;
-      const url = new URL(urlString);
-      const protocol = url.protocol;
-      const domain = url.hostname;
-      const fullDomain = `${protocol}//${domain}`;
-      properties.IFRAME_SECURE_ORGIN = fullDomain;
-      properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
-    }
+    checkAndSetForCustomUrl(config);
     printLog(parameterizedString(logs.infoLogs.INITIALIZE_CLIENT, CLASS_NAME), MessageType.LOG,
       logLevel);
 
