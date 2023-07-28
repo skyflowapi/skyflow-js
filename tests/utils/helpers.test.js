@@ -21,6 +21,7 @@ import {
   getOSDetails,
   getSdkVersionName,
   getMetaObject,
+  isValidURL,
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -528,5 +529,18 @@ describe('getOSDetails', () => {
     const osDetails = getOSDetails(userAgentString);
     expect(osDetails.os).toEqual('iOS');
     expect(osDetails.version).toEqual(null);
+  });
+});
+describe('isValidURL', () => {
+  it('should correctly parse url string', () => {
+    const urlString = 'https://js.skyflow.com';
+    const isValid = isValidURL(urlString);
+    expect(isValid).toEqual(true);
+  });
+
+  it('should not parse url string', () => {
+    const urlString = 'wrong_url';
+    const isValid = isValidURL(urlString);
+    expect(isValid).toEqual(false);
   });
 });
