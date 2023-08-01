@@ -35,7 +35,7 @@ import {
   IDeleteRecordInput,
   IDeleteOptions,
 } from './utils/common';
-import { formatVaultURL } from './utils/helpers';
+import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
 
@@ -136,6 +136,7 @@ class Skyflow {
 
   static init(config: ISkyflow): Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
+    checkAndSetForCustomUrl(config);
     printLog(parameterizedString(logs.infoLogs.INITIALIZE_CLIENT, CLASS_NAME), MessageType.LOG,
       logLevel);
 
