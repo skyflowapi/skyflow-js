@@ -30,6 +30,18 @@ describe('Skyflow initialization', () => {
     expect(skyflow.constructor === Skyflow).toBe(true);
   });
 
+  test('should initialize the skyflow object with custom url  ', () => {
+    const skyflow = Skyflow.init({
+      vaultID: 'vault_id',
+      vaultURL: 'https://vault.test.com',
+      getBearerToken: jest.fn(),
+      options: {
+        customElementsURL: "https://js.skyflow.com/v1/elements/index.html",
+      }
+    });
+    expect(skyflow.constructor === Skyflow).toBe(true);
+  });
+
   test('invalid vaultURL testing', async () => {
     try {
       const skyflow = Skyflow.init({
