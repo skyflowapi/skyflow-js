@@ -144,7 +144,7 @@ class CollectElement extends SkyflowElement {
 
   /**
   * Mounts the Collect Element onto the specified DOM element.
-  * @param domElement The native HTML element that mounts inside the iframe.
+  * @param domElement The DOM element to mount the Collect Element onto.
   */
   mount = (domElement) => {
     if (!domElement) {
@@ -187,7 +187,7 @@ class CollectElement extends SkyflowElement {
   };
 
   /**
-  *  Resets any collect element to its initial state.
+  *  Removes the Collect Element from the DOM element it's mounted onto.
   */
   unmount = () => {
     this.#iframe.unmount();
