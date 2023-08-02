@@ -60,7 +60,7 @@ interface ICollectOptions {
 const CLASS_NAME = 'CollectContainer';
 
 /**
-  * Wraps all the Composable Elements.
+  * Container for all composable elements.
   * @class ComposableContainer
   */
 class ComposableContainer extends Container {
@@ -143,10 +143,10 @@ class ComposableContainer extends Container {
   }
 
   /**
-  * Creates the Skyflow Collect Element.
-  * @param input Collect element input.
-  * @param options Collect element options.
-  * @returns Returns the collect element.
+  * Creates a Collect Element.
+  * @param input Collect Element input.
+  * @param options Collect Element options.
+  * @returns Returns the Collect Element.
   */
   create = (input: CollectElementInput, options: any = {
     required: false,
@@ -265,9 +265,9 @@ class ComposableContainer extends Container {
   };
 
   /**
-  * Helps to communicate with Skyflow elements/iframes by listening to an event.
+  * Listens for events in the composable container.
   * @param eventName Name of the event.
-  * @param handler You provide a callback function that gets called when the event is fired with the state.
+  * @param handler Callback function to run.
   */
   on = (eventName:string, handler:any) => {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
@@ -298,7 +298,7 @@ class ComposableContainer extends Container {
   };
 
   /**
-  * Inserts the element into the specified div.
+  * Mounts the composable element onto the specified DOM element.
   * @param domElement The native HTML element that mounts inside the iframe.
   */
   mount = (domElement) => {
@@ -353,7 +353,7 @@ class ComposableContainer extends Container {
   };
 
   /**
-  * Resets any collect element to its initial state.
+  * Removes the composable element from the DOM element it's mounted onto.
   */
   unmount = () => {
     this.#containerElement.unmount();
@@ -361,8 +361,8 @@ class ComposableContainer extends Container {
 
   /**
   * Collects the data and sends it to the vault.
-  * @param options Takes collect options as input.
-  * @returns Returns the inserted data or the error.
+  * @param options Collects the data and sends it to the vault.
+  * @returns Returns the inserted data or an error.
   */
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {

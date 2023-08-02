@@ -23,38 +23,38 @@ import {
 import Container from '../common/container';
 import RevealElement from './reveal-element';
 
-/** This configuration handles Skyflow Reveal Elements. */
+/** Configuration for Reveal Elements. */
 export interface IRevealElementInput {
-  /** A Skyflow token that would be detokenised. */
+  /** A token to retrieve the value of. */
   token?: string;
   /** Redaction type of the revealed data. */
   redaction?: RedactionType;
-  /** Styles for the input in reveal element. */
+  /** Input styles for the Reveal Element. */
   inputStyles?: object;
-  /** Label value for the reveal elements. */
+  /** Label for the Reveal Element. */
   label?: string;
-  /** Styles for the label in reveal element. */
+  /** Styles for the Reveal Element's label. */
   labelStyles?: object;
-  /** An alternate text for the reveal element. */
+  /** Alternative text for the Reveal Element. */
   altText?: string;
-  /** Styles for the error text in the reveal element. */
+  /** Styles for the Reveal Element's error text. */
   errorTextStyles?: object;
 }
 
-/** Provides an additional configuration options for the reveal element. */
+/** Configuration options for a Reveal Element. */
 export interface IRevealElementOptions {
-  /** Copy icon enables revealing elements to copy text to the clipboard. It defaults to 'false'. */
+  /** If `true` displays a copy button that copies the Reveal Element value to the clipboard. Defaults to `false`. */
   enableCopy?: boolean;
-  /** Format for the element. */
+  /** Format of the Reveal element. */
   format?: string;
-  /** It indicates the allowed data type value for the format. */
+  /** Custom allowed substitutions and regex patterns for `format`. */
   translation?:Record<string, string>
 }
 
 const CLASS_NAME = 'RevealContainer';
 
 /**
-  * Wraps all the Skyflow reveal elements.
+  * Wraps all Reveal Elements.
   * @class RevealContainer
   */
 class RevealContainer extends Container {
@@ -148,10 +148,10 @@ class RevealContainer extends Container {
   }
 
   /**
-  * Creates a skyflow reveal element.
-  * @param record Input configuration for the reveal element.
-  * @param options An additional configuration for reveal element.
-  * @returns This method returns the reveal element.
+  * Creates a Reveal Element.
+  * @param record Input configuration for a Reveal Element.
+  * @param options Additional options for a Reveal Element.
+  * @returns Returns a Reveal element.
   */
   create(record: IRevealElementInput, options?: IRevealElementOptions) {
     // this.#revealRecords.push(record);

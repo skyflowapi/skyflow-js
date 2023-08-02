@@ -16,7 +16,7 @@ class ComposableElement {
   #elementName: string;
 
   #eventEmitter: EventEmitter;
-  /** Type of the container */
+  /** Type of the container. */
   type: string = ContainerType.COMPOSABLE;
 
   #isMounted = false;
@@ -33,9 +33,9 @@ class ComposableElement {
   }
 
   /**
-  * Helps to communicate with Skyflow elements/iframes by listening to an event.
+  * Listens for events in the composable element.
   * @param eventName Name of the event.
-  * @param handler You provide a callback function that gets called when the event is fired with the state.
+  * @param handler Callback function to run.
   */
   on(eventName: string, handler: any) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {

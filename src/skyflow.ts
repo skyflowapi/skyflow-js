@@ -53,13 +53,13 @@ export enum ContainerType {
 
 /** Wraps the parameters required by Skyflow. */
 export interface ISkyflow {
-  /** Client should connect to the vault ID. */
+  /** ID of the vault to connect to. */
   vaultID?: string;
-  /** Client should connect to the URL of the vault. */
+  /** URL of the vault to connect to. */
   vaultURL?: string;
-  /** This helper function retrieves a Skyflow bearer token from your backend. */
+  /** Function that retrieves a Skyflow bearer token from your backend. */
   getBearerToken: () => Promise<string>;
-  /** Contains keys such as env and loglevel. */
+  /** Additional configuration options. */
   options?: Record<string, any>;
 }
 const CLASS_NAME = 'Skyflow';
@@ -170,11 +170,11 @@ class Skyflow {
   }
 
   /**
-  * Creates the sSyflow container.
+  * Creates a container.
   * @public
-  * @param type Type of Skyflow container to create is specified.
-  * @param options An additional parameter for the container.
-  * @returns Returns the skyflow container of the specified type.
+  * @param type Type of the container.
+  * @param options Options for the container.
+  * @returns Returns a container of the specified type.
   */
   container(type: ContainerType, options?: Record<string, any>) {
     switch (type) {
@@ -230,8 +230,8 @@ class Skyflow {
   /**
   * Inserts data into the vault.
   * @public
-  * @param records Accepts a JSON object that represents the records to be inserted in the following format.
-  * @param options Accepts an object containing optional parameters for the insertion.
+  * @param records Records to insert.
+  * @param options Options for the insertion.
   * @returns Returns the insert response.
   */
   insert(
@@ -244,10 +244,10 @@ class Skyflow {
   }
 
   /**
-  * Returns records that correspond to the specified tokens.
+  * Returns values that correspond to the specified tokens.
   * @public
-  * @param detokenizeInput The detokenize method requires input.
-  * @returns Returns detokenized values that correspond to the specified tokens.
+  * @param detokenizeInput Tokens to return values for.
+  * @returns Tokens to return values for.
   */
   detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
     printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
@@ -256,10 +256,10 @@ class Skyflow {
   }
 
   /**
-  * Reveals elements by using Skyflow IDs.
+  * Reveals records by Skyflow ID.
   * @public
-  * @param getByIdInput The getById method requires input.
-  * @returns Returns the records fetched by Skyflow IDs and also returns any errors encountered.
+  * @param getByIdInput Skyflow IDs
+  * @returns Returns the specified records and any errors.
   */
   getById(getByIdInput: IGetByIdInput) {
     printLog(logs.warnLogs.GET_BY_ID_DEPRECATED, MessageType.WARN, this.#logLevel);
@@ -269,10 +269,10 @@ class Skyflow {
   }
 
   /**
-  * Fetches records either by Skyflow IDs or by column values.
+  * Returns records by Skyflow IDs or column values.
   * @public
-  * @param getInput Requires input for the get operation.
-  * @returns Returns an array of fetched records or errors if any.
+  * @param getInput Identifiers for the records.
+  * @returns Returns the specified records and any errors.
   */
   get(getInput: IGetInput) {
     printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
@@ -281,11 +281,11 @@ class Skyflow {
   }
 
   /**
-  * Deletes data from the vault.
+  * Deletes records from the vault.
   * @public
-  * @param records Takes an array of records in the following format for deletion.
-  * @param options Accepts an object containing deletion parameters.
-  * @returns Returns an array of deleted records or errors if any.
+  * @param records Records to delete.
+  * @param options Options for the deletion.
+  * @returns Returns the deleted records and any errors.
   */
   delete(records: IDeleteRecordInput, options: IDeleteOptions) {
     printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,

@@ -33,39 +33,39 @@ import {
 import Container from '../common/container';
 import CollectElement from './collect-element';
 
-/** Type of Skyflow Element. */
+/** Configuration for a Collect Element. */
 export interface CollectElementInput {
-  /** Table this data belongs to */
+  /** Table that the data belongs to. */
   table?: string;
-  /** Data should be inserted into the column. */
+  /** Column that the data belongs to. */
   column?: string;
-  /** Styles should be applied to the form element. */
+  /** Styles for the element. */
   inputStyles?: object;
-  /** Label for the form element. */
+  /** Label for the element. */
   label?: string;
-  /** Styles applied to the label of the collect element. */
+  /** Styles for the element's label. */
   labelStyles?: object;
-  /** Styles that apply to the error text of the collect element will be added. */
+  /** Styles for the element's error text. */
   errorTextStyles?: object;
-  /** A placeholder for the form element. */
+  /** Placeholder text for the element. */
   placeholder?: string;
-  /** Skyflow.ElementType enum */
+  /** Type of the element. */
   type: ElementType;
-  /** It string acts as an initial value for the Collect Element. */
+  /** Alt text for the element. */
   altText?: string;
-  /** A set of validations for Collect Element. */
+  /** Input validation rules for the element. */
   validations?: IValidationRule[]
-  /** SkyflowID fo the element. */
+  /** Skyflow ID for the record that the data belongs to. */
   skyflowID?: string;
 }
 
-/** Wraps the options for the Collect method. */
+/** Options for a Collect Element. */
 export interface ICollectOptions {
-  /** Indicates whether to return tokens for the collected data. It defaults to 'true'. */
+  /** If `true`, returns tokens for the collected data. Defaults to `true`. */
   tokens?: boolean;
-  /** Insert the non-PCI elements data into the vault in the format of the records object. */
+  /** Additional, non-sensitive data to insert into the vault. Uses the format of a [`records`](https://docs.skyflow.com/record/#RecordService_InsertRecord) object. */
   additionalFields?: IInsertRecordInput;
-  /** To support upsert operations while collecting data from Skyflow elements, you should pass the table and column marked as unique in the table. */
+  /** Upsert configuration for the element. */
   upsert?: Array<IUpsertOptions>
 }
 const CLASS_NAME = 'CollectContainer';
@@ -128,7 +128,7 @@ class CollectContainer extends Container {
   }
 
   /**
-  * Creates the Skyflow Collect Element.
+  * Creates a Collect Element.
   * @param input Collect Element input.
   * @param options Collect Element options.
   * @returns Returns the collect element.
@@ -326,7 +326,7 @@ class CollectContainer extends Container {
   });
 
   /**
-  * Inserts file type data into the vault.
+  * Inserts file data into the vault.
   * @returns Returns the inserted data.
   */
   uploadFiles = (options) => new Promise((resolve, reject) => {
