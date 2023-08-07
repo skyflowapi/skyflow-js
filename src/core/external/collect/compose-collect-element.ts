@@ -72,7 +72,7 @@ class ComposableElement {
 
   /**
   * Updates the configuration of elements inside the composable container.
-  * @param options Takes an object for the insertion. 
+  * @param options Options for the container update.
   */
   update = (options) => {
     this.#isUpdateCalled = true;

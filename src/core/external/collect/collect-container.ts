@@ -131,7 +131,7 @@ class CollectContainer extends Container {
   * Creates a Collect Element.
   * @param input Collect Element input.
   * @param options Collect Element options.
-  * @returns Returns the collect element.
+  * @returns Returns the Collect Element.
   */
   create = (input: CollectElementInput, options: any = {
     required: false,

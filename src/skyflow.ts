@@ -258,7 +258,7 @@ class Skyflow {
   /**
   * Reveals records by Skyflow ID.
   * @public
-  * @param getByIdInput Skyflow IDs
+  * @param getByIdInput Skyflow IDs.
   * @returns Returns the specified records and any errors.
   */
   getById(getByIdInput: IGetByIdInput) {

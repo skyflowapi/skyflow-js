@@ -73,7 +73,7 @@ class RevealElement extends SkyflowElement {
 
   /**
   * Mounts the Reveal Element onto the specified DOM element.
-  * @param domElementSelector The DOM element that the Reveal Element mounts onto
+  * @param domElementSelector The DOM element that the Reveal Element mounts onto.
   */
   mount(domElementSelector) {
     if (!domElementSelector) {

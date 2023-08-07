@@ -49,7 +49,7 @@ export enum LogLevel{
 }
 
 /**
- * Supported envs.
+ * Supported environments.
  */
 export enum Env{
   DEV = 'DEV',
@@ -76,97 +76,97 @@ export enum ValidationRuleType {
 
 /** Wraps the parameters required for the insert record input. */
 export interface IInsertRecordInput {
-  /** An array of insert records */
+  /** An array of insert records. */
   records: IInsertRecord[];
 }
 
 /** Wraps the parameters required for inserting a record. */
 export interface IInsertRecord {
-  /** Data belongs to the table. */
+  /** Table that the data belongs to. */
   table: string;
-  /** Fields need to be inserted. */
+  /** Fields to insert data into. */
   fields: Record<string, any>;
-  /** Record requires the SkyflowID for update. */
+  /** ID for the record to update. */
   skyflowID?: string;
 }
 
 /** Wraps the parameters required by the Reveal record. */
 export interface IRevealRecord {
-  /** The token of the revealed data. */
+  /** Token of the revealed data. */
   token: string;
-  /** Redaction type applies to the data, and if not provided, the RedactionType.PLAIN_TEXT will be applied. */
+  /** Redaction type applied to the data. Defaults to `RedactionType.PLAIN_TEXT`. */
   redaction?: RedactionType;
 }
 
 /** Wraps the parameters required for an insert response. */
 export interface IInsertResponse {
-  /** An array of insert response records. */
+  /** Response records. */
   records: IInsertResponseReocrds[];
 }
 
 /** Wraps the parameters required for an insert response record. */
 export interface IInsertResponseReocrds {
-  /** Data belongs to the table. */
+  /** Table that the data belongs to. */
   table: string;
-  /** Inserted fields. */
+  /** Fields that data was inserted into. */
   fields?: Record<string, any>;
-  /** Inserted record's SkyflowID. */
+  /** ID of the record. */
   skyflowID?: string;
 }
 
 /** Wraps the parameters required by the reveal response. */
 export interface IRevealResponseType {
-  /** Array of records reveals if there are any. */
+  /** Records revealed, if any. */
   records?: Record<string, string>[];
-  /** Array of errors, if there are any. */
+  /** Errors, if any. */
   errors?: Record<string, any>[];
 }
 
 /** Wraps the parameters required for detokenizing input. */
 export interface IDetokenizeInput {
-  /** Array of reveal records */
+  /** Revealed records. */
   records: IRevealRecord[];
 }
 
 /** Wrapper for the parameters required to retrieve records. */
 export interface IGetRecord {
-  /** Skyflow IDs of the records. */
+  /** IDs of the records. */
   ids?: string[];
-  /** Fetched records undergo redaction. */
+  /** Type of redaction applied. */
   redaction: RedactionType;
-  /** Data belongs to the table. */
+  /** Table the data belongs to. */
   table: string;
-  /** Name of the unique column. */
+  /** Column the data belongs to. */
   columnName?:string;
-  /** Values of the unique columns of records. */
+  /** Values of the records. */
   columnValues?: string[];
 }
 
 /** Wrapper for the parameters that are required to retrieve input. */
 export interface IGetInput {
-  /** Array contains get records. */
+  /** Records to retrieve. */
   records: IGetRecord[];
 }
 
 /** Wrapper for the parameters required by Skyflow ID record. */
 export interface ISkyflowIdRecord {
-  /** An array of skyflow ids of the records to fetch. */
+  /** Skyflow IDs of the records to get. */
   ids: string[];
-  /** Fetched records are redacted. */
+  /** Type of redaction for values. */
   redaction: RedactionType;
-  /** Data belongs to the table. */
+  /** Table that the data belongs to. */
   table: string;
 }
 
 /** Wrapper for the parameters that are required by the getbyid input. */
 export interface IGetByIdInput {
-  /** An array of skyflow id records. */
+  /** Records to get. */
   records: ISkyflowIdRecord[];
 }
 
 /** Wrapper for parameters required by context. */
 export interface Context{
-  /** Log level to be applied. */
+  /** Log level to apply. */
   logLevel:LogLevel
   /** Type of environment. */
   env:Env
@@ -174,15 +174,15 @@ export interface Context{
 
 /** Wrapper for parameters required by validation rule. */
 export interface IValidationRule {
-  /** Type of skyflow validation rule. */
+  /** Type of validation rule. */
   type: ValidationRuleType;
-  /** Any additional parameters supported by validation rule. */
+  /** Additional validation rule parameters. */
   params: any;
 }
 
 /** Wrapper for parameters required by upsert option. */
 export interface IUpsertOption {
-  /** Data belongs to the table. */
+  /** Table that the data belongs to. */
   table : string;
   /** Name of the unique column. */
   column: string;
@@ -190,17 +190,17 @@ export interface IUpsertOption {
 
 /** Wrapper for parameters required by insert options. */
 export interface IInsertOptions{
-  /** Indicates whether tokens for the collected data should be returned. */
+  /** If `true`, returns tokens for the collected data. Defaults to `false`. */
   tokens?: boolean;
-  /** Will upsert data if provided, otherwise insert will be performed. */
+  /** If specified, upserts data. If not specified, inserts data. */
   upsert?: IUpsertOption[];
 }
 
 /** Wrapper for parameters required by delete record. */
 export interface IDeleteRecord {
-  /** Skyflow id of the record. */
+  /** Skyflow ID of the record. */
   id: String;
-  /** Data belongs to the table. */
+  /** Table that the data belongs to. */
   table: String;
 }
 
@@ -209,16 +209,16 @@ export interface IDeleteOptions {}
 
 /** Wrapper for parameters required by delete record input. */
 export interface IDeleteRecordInput {
-  /** Additional configuration options for delete record input. */
+  /** Options for deleting records. */
   options?: IDeleteOptions;
-  /** Array of records to be deleted. */
+  /** Records to delete. */
   records: IDeleteRecord[];
 }
 
 /** Wrapper for parameters required by delete response type. */
 export interface IDeleteResponseType {
-  /** Array of deleted records, if any. */
+  /** Deleted records, if any. */
   records?: Record<string, string>[];
-  /** Array of errors, if any. */
+  /** Errors, if any. */
   errors?: Record<string, any>[];
 }
