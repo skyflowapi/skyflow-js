@@ -708,6 +708,11 @@ export class FrameElement {
             ...options.labelStyles[STYLE_TYPE.REQUIRED_ASTERISK],
           };
         }
+        if (options.labelStyles?.[STYLE_TYPE.GLOBAL]) {
+          labelStyles[STYLE_TYPE.GLOBAL] = {
+            ...options.labelStyles[STYLE_TYPE.GLOBAL],
+          };
+        }
         this.injectInputStyles(labelStyles, 'label');
       } else {
         this.injectInputStyles(COLLECT_ELEMENT_LABEL_DEFAULT_STYLES, 'label');
@@ -723,6 +728,13 @@ export class FrameElement {
           ...options.errorTextStyles[STYLE_TYPE.BASE],
         },
       };
+
+      if (options?.errorTextStyles?.[STYLE_TYPE.GLOBAL]) {
+        errorStyles[STYLE_TYPE.GLOBAL] = {
+          ...options?.errorTextStyles?.[STYLE_TYPE.GLOBAL],
+        };
+      }
+
       this.injectInputStyles(errorStyles, 'error');
     } else {
       const errorStyles = {

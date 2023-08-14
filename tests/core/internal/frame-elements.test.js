@@ -60,7 +60,16 @@ const element = {
                 ...stylesOptions
             }
         ]
-    }]
+    }],
+    errorTextStyles:{
+      base: {
+        color: "#f44336",
+        fontFamily:'Inter',
+      },
+      global:{
+        '@import':'https://font-url.com/Inter'
+      }
+    }
 }
 describe('test frame elements', () => {
     let emitSpy;
