@@ -6,7 +6,6 @@ import Skyflow from 'skyflow-js';
 try {
   const revealView = document.getElementById('revealView');
   revealView.style.visibility = 'hidden';
-
   const skyflow = Skyflow.init({
     vaultID: '<VAULT_ID>',
     vaultURL: '<VAULT_URL>',
@@ -43,6 +42,7 @@ try {
         borderRadius: '4px',
         color: '#1d1d1d',
         marginTop: '4px',
+        fontFamily: '"Roboto", sans-serif'
       },
       complete: {
         color: '#4caf50',
@@ -52,17 +52,31 @@ try {
       invalid: {
         color: '#f44336',
       },
+      global: {
+        '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+      }
     },
     labelStyles: {
       base: {
         fontSize: '16px',
         fontWeight: 'bold',
+        fontFamily: '"Roboto", sans-serif'
       },
+      global: {
+        '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+      },
+      requiredAsterisk:{
+        color: 'red'
+      }
     },
     errorTextStyles: {
       base: {
         color: '#f44336',
+        fontFamily: '"Roboto", sans-serif'
       },
+      global: {
+        '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+      }
     },
   };
 
@@ -74,6 +88,8 @@ try {
     placeholder: 'card number',
     label: 'Card Number',
     type: Skyflow.ElementType.CARD_NUMBER,
+  },{
+    required: true
   });
 
   const cvvElement = collectContainer.create({
@@ -129,18 +145,30 @@ try {
                 borderRadius: '4px',
                 color: '#1d1d1d',
                 marginTop: '4px',
+                fontFamily: '"Roboto", sans-serif'
               },
+              global: {
+                '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+              }
             },
             labelStyles: {
               base: {
                 fontSize: '16px',
                 fontWeight: 'bold',
+                fontFamily: '"Roboto", sans-serif'
               },
+              global: {
+                '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+              }
             },
             errorTextStyles: {
               base: {
                 color: '#f44336',
+                fontFamily: '"Roboto", sans-serif'
               },
+              global: {
+                '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+              }
             },
           };
 
