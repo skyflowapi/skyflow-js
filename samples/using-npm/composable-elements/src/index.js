@@ -35,24 +35,25 @@ try {
 	const cardholderStyles = {
 		inputStyles: {
 			base: {
-				fontFamily: 'Inter',
+				fontFamily: '"Roboto", sans-serif',
 				fontStyle: 'normal',
 				fontWeight: 400,
 				fontSize: '14px',
 				lineHeight: '21px',
 				width: '294px'
 			},
+			global: {
+				'@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+			}
 		},
 		labelStyles: {
-		},
-		errorTextStyles: {
 		},
 	};
 
 	const cardNumberStyles = {
 		inputStyles: {
 			base: {
-				fontFamily: 'Inter',
+				fontFamily: '"Roboto", sans-serif',
 				fontStyle: 'normal',
 				fontWeight: 400,
 				fontSize: '14px',
@@ -63,14 +64,12 @@ try {
 		},
 		labelStyles: {
 		},
-		errorTextStyles: {
-		},
 	};
 
 	const expiryDateStyles = {
 		inputStyles: {
 			base: {
-				fontFamily: 'Inter',
+				fontFamily: '"Roboto", sans-serif',
 				fontStyle: 'normal',
 				fontWeight: 400,
 				fontSize: '14px',
@@ -80,14 +79,12 @@ try {
 		},
 		labelStyles: {
 		},
-		errorTextStyles: {
-		},
 	};
 
 	const cvvStyles = {
 		inputStyles: {
 			base: {
-				fontFamily: 'Inter',
+				fontFamily: '"Roboto", sans-serif',
 				fontStyle: 'normal',
 				fontWeight: 400,
 				fontSize: '14px',
@@ -96,11 +93,6 @@ try {
 			},
 		},
 		labelStyles: {
-		},
-		errorTextStyles: {
-			base: {
-				color: 'red'
-			}
 		},
 	};
 
@@ -117,7 +109,11 @@ try {
 		},
 		errorTextStyles: {
 			base: {
-				color: 'red'
+				color: 'red',
+				fontFamily: '"Roboto", sans-serif'
+			},
+			global: {
+				'@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
 			}
 		}
 	}
@@ -180,17 +176,23 @@ try {
 								borderRadius: '4px',
 								color: '#1d1d1d',
 								marginTop: '4px',
+								fontFamily: '"Roboto", sans-serif'
 							},
+							global: {
+								'@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+							}
 						},
 						labelStyles: {
 							base: {
 								fontSize: '16px',
 								fontWeight: 'bold',
+								fontFamily: '"Roboto", sans-serif'
 							},
 						},
 						errorTextStyles: {
 							base: {
 								color: '#f44336',
+								fontFamily: '"Roboto", sans-serif'
 							},
 						},
 					};

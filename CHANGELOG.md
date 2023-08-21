@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.30.1]
+### Added
+- Add requiredAsterisk style and global styles.
+
+## [1.30.0] - 2023-08-01
+### Added
+- Add numeric keyboard support.
+
+## [1.29.5] - 2023-07-26
+### Fixed
+- fix conditions for element mount. 
+
+## [1.29.4] - 2023-07-20
+### Fixed 
+- fix reveal elements iframe race condition.    
+
+## [1.29.3] - 2023-07-07
+### Fixed 
+- patch fix for previous version. 
+
+## [1.29.2] - 2023-07-07
+### Fixed
+- fix iframe race condition between collect element and container.
+
 ## [1.29.1] - 2023-06-22
 ### Fixed
 - Patch fix for autofill and iframe loading issue
