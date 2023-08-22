@@ -13,7 +13,7 @@ Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal
 - [**Securely collecting data client-side**](#securely-collecting-data-client-side)
 - [**Securely collecting data client-side using Composable Elements**](#securely-collecting-data-client-side-using-composable-elements)
 - [**Securely revealing data client-side**](#securely-revealing-data-client-side)
-- [**Securely deleting data cleint-side**](#securely-deleting-data-client-side)
+- [**Securely deleting data client-side**](#securely-deleting-data-client-side)
 
 ---
 
