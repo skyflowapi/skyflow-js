@@ -386,32 +386,29 @@ class SkyflowContainer {
           );
           let guestCheckout = false;
           if (
-            threeDSInput.cardDetails.cardNumber instanceof
-            CollectElement
+            threeDSInput.cardDetails.cardNumber
+            instanceof CollectElement
           ) {
             guestCheckout = true;
             threeDSConfigParser(threeDSInput.cardDetails);
           } else if (
-            typeof threeDSInput.cardDetails.cardNumber ===
-            'string'
+            typeof threeDSInput.cardDetails.cardNumber
+            === 'string'
           ) {
             if (
-              threeDSInput.cardDetails.cardNumber.charAt(0) ===
-              '#'
+              threeDSInput.cardDetails.cardNumber.charAt(0)
+              === '#'
             ) {
               guestCheckout = true;
-              threeDSInput.cardDetails.cardNumber =
-                getIframeNameUsingId(
-                  threeDSInput.cardDetails.cardNumber,
-                );
-              threeDSInput.cardDetails.cardExpiry =
-                getIframeNameUsingId(
-                  threeDSInput.cardDetails.cardExpiry,
-                );
-              threeDSInput.cardDetails.cardHolderName =
-                getIframeNameUsingId(
-                  threeDSInput.cardDetails.cardHolderName,
-                );
+              threeDSInput.cardDetails.cardNumber = getIframeNameUsingId(
+                threeDSInput.cardDetails.cardNumber,
+              );
+              threeDSInput.cardDetails.cardExpiry = getIframeNameUsingId(
+                threeDSInput.cardDetails.cardExpiry,
+              );
+              threeDSInput.cardDetails.cardHolderName = getIframeNameUsingId(
+                threeDSInput.cardDetails.cardHolderName,
+              );
             }
           }
           validateThreeDSInput(threeDSInput);
