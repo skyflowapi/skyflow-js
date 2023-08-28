@@ -766,3 +766,112 @@ describe('getAcessToken error delete', () => {
     }, 1000);
   });
 });
+
+describe('Invoke 3DS method', () => {
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+
+    busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
+  });
+
+  const test3DSRequest = {
+    guestCheckout: true,
+    cardDetails: {
+      cardNumber: '4111',
+      cardHolderName: 'TestName',
+      cardExpiry: '12/23',
+      schemeID: 'Visa',
+    },
+    config: {
+      vaultID: 'testID',
+      acquirerDetails: {
+        acquirerID: 'testID',
+        acquirerBIN: '000999',
+        acquirerMerchantID: 'testID',
+      },
+      merchantDetails: {
+        mcc: '4900',
+        merchantName: 'Test Merchant',
+        merchantUrl: 'https://testUrl',
+        merchantCountryCode: '356',
+      },
+      threeDSRequestorName: 'Skyflow',
+      threeDSRequestorId: 'testID',
+      threeDSRequestorFinalAuthRespURL: 'http://testUrl',
+    },
+    amountDetails: {
+      amount: '100',
+      purchaseCurrency: '840',
+      purchaseExponent: 1,
+    },
+    browserDetails: {
+      browserAcceptHeader: 'application/json',
+      browserLanguage: 'en',
+      browserColorDepth: '8',
+      browserScreenHeight: 1,
+      browserScreenWidth: 1,
+      browserTZ: 1,
+      browserUserAgent:
+        'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0',
+    },
+  };
+
+  const test3DSResponse = {
+    authenticationResponse: {
+      messageType: 'pArs',
+      threeDSServerTransID: 'testID',
+      acsTransID: 'testID',
+      acsReferenceNumber: '3DS_Number',
+      acsOperatorID: 'testID',
+      acsURL:
+        'https://dummyUrl',
+      authenticationType: '02',
+      acsChallengeMandated: 'Y',
+      dsReferenceNumber: '3DS_Number',
+      dsTransID: 'testID',
+      messageVersion: '2.1.0',
+      transStatus: 'C',
+      transStatusReason: '15',
+      broadInfo: {
+        message: 'TLS',
+      },
+    },
+    creq: 'creqResponse',
+  };
+
+  test('3DS success', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(test3DSResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+      ...clientData.client,
+      request: clientReq,
+      toJSON: toJson,
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.THREE_DS,
+      config: test3DSRequest,
+    };
+    const cb3DS = jest.fn();
+    onCb(data, cb3DS);
+
+    setTimeout(() => {
+      expect(cb3DS.mock.calls[0][0].authenticationResponse).toHaveProperty("threeDSServerTransID");
+      expect(cb3DS.mock.calls[0][0].error).toBeUndefined();
+      done();
+    }, 1000);
+  });
+});

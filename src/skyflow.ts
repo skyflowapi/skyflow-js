@@ -34,6 +34,7 @@ import {
   IInsertOptions,
   IDeleteRecordInput,
   IDeleteOptions,
+  IThreeDSInput,
 } from './utils/common';
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
@@ -212,6 +213,15 @@ class Skyflow {
     printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.detokenize(detokenizeInput);
+  }
+
+  invoke3DS(threeDSInput: IThreeDSInput) {
+    printLog(
+      parameterizedString(logs.infoLogs.THREE_DS_TRIGGERED, CLASS_NAME),
+      MessageType.LOG,
+      this.#logLevel,
+    );
+    return this.#skyflowContainer.threeDS(threeDSInput);
   }
 
   getById(getByIdInput: IGetByIdInput) {

@@ -4,7 +4,10 @@ Copyright (c) 2022 Skyflow, Inc.
 import { SdkInfo } from '../../client';
 import {
   CardType,
-  COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType,
+  COPY_UTILS,
+  DEFAULT_INPUT_FORMAT_TRANSLATION,
+  ElementType,
+  FRAME_ELEMENT,
 } from '../../core/constants';
 import { IRevealElementOptions } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
@@ -12,6 +15,11 @@ import { ContainerType, ISkyflow } from '../../skyflow';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
 import properties from '../../properties';
+import { getCollectElementValue } from '../bus-events';
+import CollectElement from '../../core/external/collect/collect-element';
+import { getElementName } from '../logs-helper';
+
+const set = require('set-value');
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
@@ -176,7 +184,7 @@ export const formatRevealElementOptions = (options:IRevealElementOptions) => {
       }
       revealOptions = {
         ...revealOptions,
-        ...((revealElementMask.length === 3) ? { mask: revealElementMask } : {}),
+        ...(revealElementMask.length === 3 ? { mask: revealElementMask } : {}),
       };
       delete revealOptions?.format;
       delete revealOptions?.translation;
@@ -305,4 +313,85 @@ export function checkAndSetForCustomUrl(config: ISkyflow) {
     properties.IFRAME_SECURE_ORGIN = fullDomain;
     properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
   }
+}
+
+export function threeDSConfigParser(data) {
+  Object.entries(data).forEach(([key, value]) => {
+    if (value instanceof CollectElement) {
+      if (!value.isMounted()) {
+        throw new SkyflowError(
+          SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED_INVOKE_3DS,
+          [getElementName(formatFrameNameToId(value.iframeName()))],
+        );
+      }
+      data[key] = value.iframeName();
+    } else if (value instanceof Object) {
+      threeDSConfigParser(value);
+    }
+  });
+}
+
+export function construct3DSRequest(data: any) {
+  const collectElements = {};
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (typeof value === 'string') {
+      const isCollectElement = value.startsWith(`${FRAME_ELEMENT}:`);
+      if (isCollectElement) {
+        collectElements[key] = value;
+      }
+    }
+  });
+
+  const promiseList: any = [];
+
+  Object.entries(collectElements).forEach(([key, value]) => {
+    promiseList.push(getCollectElementValue(key, value));
+  });
+
+  return Promise.all(promiseList)
+    .then((res) => {
+      res.forEach((element: any) => {
+        set(data, element.key, element.value);
+      });
+      return data;
+    })
+    .catch((err) => {
+      throw err;
+    });
+}
+
+export function encodePayload(payload) {
+  return encodeURIComponent(payload);
+}
+
+// Function to redirect with a POST request
+export function redirectWithPost(url, payload) {
+  const encodedPayload = encodePayload(payload);
+
+  // Create a dynamic form
+  const form = document.createElement('form');
+  form.setAttribute('action', url);
+  form.setAttribute('method', 'POST');
+
+  // Create a hidden input field to hold the encoded payload
+  const payloadField = document.createElement('input');
+  payloadField.setAttribute('type', 'hidden');
+  payloadField.setAttribute('name', 'creq');
+  payloadField.setAttribute('value', encodedPayload);
+
+  // Add the payload field to the form
+  form.appendChild(payloadField);
+
+  // Append the form to the document body
+  document.body.appendChild(form);
+
+  // Submit the form
+  form.submit();
+}
+
+export function getIframeNameUsingId(id) {
+  const afterFirstIndex = id.substring(1);
+  const element = document.getElementById(afterFirstIndex);
+  return element?.querySelector('iframe')?.getAttribute('name');
 }

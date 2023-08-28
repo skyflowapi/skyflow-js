@@ -17,6 +17,7 @@ import {
   validateGetByIdInput,
   validateUpsertOptions,
   validateDeleteRecords,
+  validateThreeDSInput,
 } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
@@ -38,7 +39,11 @@ import {
   IInsertOptions,
   IDeleteOptions,
   IDeleteRecordInput,
+  IConstructedThreeDSRecord,
+  IThreeDSInput,
 } from '../../utils/common';
+import { threeDSConfigParser, getIframeNameUsingId, redirectWithPost } from '../../utils/helpers';
+import CollectElement from './collect/collect-element';
 
 const CLASS_NAME = 'SkyflowContainer';
 class SkyflowContainer {
@@ -364,6 +369,165 @@ class SkyflowContainer {
       } catch (e) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
+        reject(e);
+      }
+    });
+  }
+
+  threeDS(threeDSInput: IThreeDSInput) {
+    if (this.#isControllerFrameReady) {
+      return new Promise((resolve, reject) => {
+        validateInitConfig(this.#client.config);
+        try {
+          printLog(
+            parameterizedString(logs.infoLogs.VALIDATE_3DS_INPUT, CLASS_NAME),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
+          let guestCheckout = false;
+          if (
+            threeDSInput.cardDetails.cardNumber instanceof
+            CollectElement
+          ) {
+            guestCheckout = true;
+            threeDSConfigParser(threeDSInput.cardDetails);
+          } else if (
+            typeof threeDSInput.cardDetails.cardNumber ===
+            'string'
+          ) {
+            if (
+              threeDSInput.cardDetails.cardNumber.charAt(0) ===
+              '#'
+            ) {
+              guestCheckout = true;
+              threeDSInput.cardDetails.cardNumber =
+                getIframeNameUsingId(
+                  threeDSInput.cardDetails.cardNumber,
+                );
+              threeDSInput.cardDetails.cardExpiry =
+                getIframeNameUsingId(
+                  threeDSInput.cardDetails.cardExpiry,
+                );
+              threeDSInput.cardDetails.cardHolderName =
+                getIframeNameUsingId(
+                  threeDSInput.cardDetails.cardHolderName,
+                );
+            }
+          }
+          validateThreeDSInput(threeDSInput);
+
+          // Get the current local time offset in minutes
+          const localTimeOffsetMinutes = new Date().getTimezoneOffset();
+
+          // Calculate the time difference between UTC and local time in minutes
+          const timeDifferenceMinutes = -localTimeOffsetMinutes;
+
+          const screenHeight = window.screen.height;
+          const screenWidth = window.screen.width;
+          const constructed3DSObject: IConstructedThreeDSRecord = {
+            ...threeDSInput,
+            guestCheckout,
+            config: {
+              vaultID: this.#client.config.vaultID || '',
+              ...threeDSInput.config,
+            },
+            browserDetails: {
+              browserAcceptHeader: 'application/json',
+              browserLanguage: navigator.language || 'en',
+              browserColorDepth: String(window.screen.colorDepth),
+              browserScreenHeight: screenHeight,
+              browserScreenWidth: screenWidth,
+              browserTZ: timeDifferenceMinutes,
+              browserUserAgent: window.navigator.userAgent,
+              browserJavascriptEnabled: true,
+              browserJavaEnabled: window.navigator.javaEnabled() || false,
+            },
+          };
+          bus
+            // .target(properties.IFRAME_SECURE_ORGIN)
+            .emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
+              {
+                type: PUREJS_TYPES.THREE_DS,
+                config: constructed3DSObject,
+              },
+              (response: any) => {
+                if (response.error) reject(response.error);
+                else {
+                  if (response.authenticationResponse.transStatus === 'C') {
+                    redirectWithPost(
+                      response.authenticationResponse.acsURL,
+                      String(response.creq),
+                    );
+                    const challengeResponse = {
+                      messageType: response.authenticationResponse.messageType,
+                      threeDSServerTransID:
+                        response.authenticationResponse.threeDSServerTransID,
+                      transStatus: response.authenticationResponse.transStatus,
+                      messageVersion:
+                        response.authenticationResponse.messageVersion,
+                    };
+                    resolve(challengeResponse);
+                  }
+                  resolve(response);
+                }
+              },
+            );
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EMIT_PURE_JS_REQUEST,
+              CLASS_NAME,
+              PUREJS_TYPES.GET,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
+        } catch (e) {
+          printLog(e.message, MessageType.ERROR, this.#context.logLevel);
+          reject(e);
+        }
+      });
+    }
+    return new Promise((resolve, reject) => {
+      try {
+        validateInitConfig(this.#client.config);
+        printLog(
+          parameterizedString(logs.infoLogs.VALIDATE_3DS_INPUT, CLASS_NAME),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
+        validateThreeDSInput(threeDSInput);
+        bus
+          .target(properties.IFRAME_SECURE_ORGIN)
+          .on(
+            ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId,
+            () => {
+              bus.emit(
+                ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
+                {
+                  type: PUREJS_TYPES.THREE_DS,
+                  data: threeDSInput,
+                },
+                (responseData: any) => {
+                  if (responseData.error) reject(responseData.error);
+                  else {
+                    resolve = () => responseData;
+                  }
+                },
+              );
+            },
+          );
+        printLog(
+          parameterizedString(
+            logs.infoLogs.EMIT_PURE_JS_REQUEST,
+            CLASS_NAME,
+            PUREJS_TYPES.THREE_DS,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
+      } catch (e) {
+        printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);
       }
     });

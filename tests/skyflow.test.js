@@ -1494,3 +1494,155 @@ describe('Skyflow delete tests', () => {
     });
   });
 });
+
+describe('skyflow invoke 3DS invalid', () => {
+  const skyflow = Skyflow.init({
+    vaultID: 'vault_id',
+    vaultURL: 'https://vault.test.com',
+    getBearerToken: jest.fn(),
+  });
+
+  test('invalid input', async () => {
+    try {
+      const res = await skyflow.invoke3DS({});
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+
+  test('3DS object empty', async () => {
+    try {
+      const res = await skyflow.invoke3DS({
+        threeDSObject: {},
+      });
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+});
+
+describe('skyflow invoke 3DS', () => {
+  let emitSpy;
+  let targetSpy;
+  let skyflow;
+  const on = jest.fn();
+  const emit = jest.fn();
+
+  const mockSkyflowContainer = {
+    threeDS: jest.fn().mockReturnValue('mockedReturnValue'),
+  };
+
+  const test3DSRequest = {
+    threeDSObject: {
+      cardDetails: {
+        cardNumber: '4111',
+        cardHolderName: 'TestName',
+        cardExpiry: '12/23',
+        schemeID: 'Visa',
+      },
+      config: {
+        vaultID: 'testID',
+        acquirerDetails: {
+          acquirerID: 'testID',
+          acquirerBIN: '000999',
+          acquirerMerchantID: 'testID',
+        },
+        merchantDetails: {
+          mcc: '4900',
+          merchantName: 'Test Merchant',
+          merchantUrl: 'https://testUrl',
+          merchantCountryCode: '356',
+        },
+        threeDSRequestorName: 'Skyflow',
+        threeDSRequestorId: 'testID',
+        threeDSRequestorFinalAuthRespURL: 'http://testUrl',
+      },
+      amountDetails: {
+        amount: '100',
+        purchaseCurrency: '840',
+        purchaseExponent: 1,
+      },
+    },
+  };
+
+  const test3DSResponse = {
+    authenticationResponse: {
+      messageType: 'pArs',
+      threeDSServerTransID: 'testID',
+      acsTransID: 'testID',
+      acsReferenceNumber: '3DS_Number',
+      acsOperatorID: 'testID',
+      acsURL:
+        'https://dummyUrl',
+      authenticationType: '02',
+      acsChallengeMandated: 'Y',
+      dsReferenceNumber: '3DS_Number',
+      dsTransID: 'testID',
+      messageVersion: '2.1.0',
+      transStatus: 'C',
+      transStatusReason: '15',
+      broadInfo: {
+        message: 'TLS',
+      },
+    },
+    creq: 'creqResponse',
+  };
+
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+      emit,
+    });
+
+    skyflow = Skyflow.init({
+      vaultID: 'vault123',
+      vaultURL: 'https://vaulturl.com',
+      getBearerToken: jest.fn(),
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('test 3DS', async () => {
+    try {
+      const res = await mockSkyflowContainer.threeDS(test3DSRequest);
+
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+
+  test('test 3DS Success', async () => {
+    const frameReadyEvent = on.mock.calls.filter((data) =>
+      data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY),
+    );
+    const frameReadyCb = frameReadyEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.invoke3DS(test3DSRequest);
+      const emitEvent = emitSpy.mock.calls.filter((data) =>
+        data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST),
+      );
+      const emitCb = emitEvent[0][2];
+      emitCb(test3DSResponse);
+
+      let data;
+      res.then((res) => {
+        try {
+          data = res;
+          expect(data.authenticationResponse).toHaveProperty("threeDSServerTransID");
+          expect(data.error).toBeUndefined();
+        } catch (err) {
+          return err
+        }
+      });
+    } catch (err) {
+      return err
+    }
+  });
+});

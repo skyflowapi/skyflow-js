@@ -134,6 +134,154 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_REDACTION_TYPE_IN_GET,
   },
+  ELEMENTS_NOT_MOUNTED_INVOKE_3DS: {
+    code: 400,
+    description: logs.errorLogs.ELEMENTS_NOT_MOUNTED_INVOKE_3DS,
+  },
+  INVALID_OBJECT_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_OBJECT_IN_3DS,
+  },
+  INVALID_CARD_NUMBER_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_CARD_NUMBER_IN_3DS,
+  },
+  MISSING_CARD_NUMBER_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_CARD_NUMBER_IN_3DS,
+  },
+  INVALID_CARDHOLDER_NAME_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_CARDHOLDER_NAME_IN_3DS,
+  },
+  MISSING_CARDHOLDER_NAME_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_CARDHOLDER_NAME_IN_3DS,
+  },
+  INVALID_CARD_EXPIRY_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_CARD_EXPIRY_IN_3DS,
+  },
+  MISSING_CARD_EXPIRY_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_CARD_EXPIRY_IN_3DS,
+  },
+  INVALID_SCHEME_ID_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_SCHEME_ID_IN_3DS,
+  },
+  MISSING_SCHEME_ID_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_SCHEME_ID_IN_3DS,
+  },
+  INVALID_ACQUIRER_ID_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_ACQUIRER_ID_IN_3DS,
+  },
+  INVALID_ACQUIRER_BIN_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_ACQUIRER_BIN_IN_3DS,
+  },
+  MISSING_ACQUIRER_BIN_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_ACQUIRER_BIN_IN_3DS,
+  },
+  INVALID_ACQUIRER_MERCHANT_ID_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_ACQUIRER_MERCHANT_ID_IN_3DS,
+  },
+  MISSING_ACQUIRER_MERCHANT_ID_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_ACQUIRER_MERCHANT_ID_IN_3DS,
+  },
+  INVALID_MERCHANT_MCC_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_MERCHANT_MCC_IN_3DS,
+  },
+  MISSING_MERCHANT_MCC_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_MERCHANT_MCC_IN_3DS,
+  },
+  INVALID_MERCHANT_NAME_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_MERCHANT_NAME_IN_3DS,
+  },
+  MISSING_MERCHANT_NAME_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_MERCHANT_NAME_IN_3DS,
+  },
+  INVALID_MERCHANT_URL_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_MERCHANT_URL_IN_3DS,
+  },
+  MISSING_MERCHANT_URL_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_MERCHANT_URL_IN_3DS,
+  },
+  INVALID_MERCHANT_COUNTRY_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_MERCHANT_COUNTRY_IN_3DS,
+  },
+  MISSING_MERCHANT_COUNTRY_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_MERCHANT_COUNTRY_IN_3DS,
+  },
+  INVALID_REQUESTOR_NAME_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_REQUESTOR_NAME_IN_3DS,
+  },
+  MISSING_REQUESTOR_NAME_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_REQUESTOR_NAME_IN_3DS,
+  },
+  INVALID_REQUESTOR_ID_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_REQUESTOR_ID_IN_3DS,
+  },
+  MISSING_REQUESTOR_ID_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_REQUESTOR_ID_IN_3DS,
+  },
+  INVALID_REQUESTOR_URL_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_REQUESTOR_URL_IN_3DS,
+  },
+  MISSING_REQUESTOR_URL_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_REQUESTOR_URL_IN_3DS,
+  },
+  INVALID_REQUESTOR_TRANS_ID_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_REQUESTOR_TRANS_ID_IN_3DS,
+  },
+  INVALID_PROTOCOL_VERSION_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_PROTOCOL_VERSION_IN_3DS,
+  },
+  INVALID_AMOUNT_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_AMOUNT_IN_3DS,
+  },
+  MISSING_AMOUNT_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_AMOUNT_IN_3DS,
+  },
+  MISSING_PURCHASE_CURRENCY_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_PURCHASE_CURRENCY_IN_3DS,
+  },
+  INVALID_PURCHASE_CURRENCY_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_PURCHASE_CURRENCY_IN_3DS,
+  },
+  MISSING_PURCHASE_EXPONENT_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_PURCHASE_EXPONENT_IN_3DS,
+  },
+  INVALID_PURCHASE_EXPONENT_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_PURCHASE_EXPONENT_IN_3DS,
+  },
   INVALID_REDACTION_TYPE_IN_DETOKENIZE: {
     code: 400,
     description: logs.errorLogs.INVALID_REDACTION_TYPE_IN_DETOKENIZE,
