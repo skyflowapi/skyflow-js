@@ -217,6 +217,9 @@ describe("Reveal Frame Class",()=>{
         errorTextStyles:{
           base:{
             color:"red"
+          },
+          global:{
+            '@import':'https://font-url.com'
           }
         }
       },
@@ -435,6 +438,48 @@ describe("Reveal Frame Class",()=>{
         errorTextStyles:{
           base:{
             color:"red"
+          }
+        },
+        enableCopy: true
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+  })
+
+  test("global style variant in reveal elements",()=>{
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        token:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          },
+          global:{
+            '@import':'https://font-url.com'
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          },
+          global:{
+            '@import':'https://font-url.com'
+          }
+        },
+        errorTextStyles:{
+          base:{
+            color:"red"
+          },
+          global:{
+            '@import':'https://font-url.com'
           }
         },
         enableCopy: true

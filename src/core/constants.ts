@@ -381,6 +381,8 @@ export const STYLE_TYPE = {
   COMPLETE: 'complete',
   EMPTY: 'empty',
   INVALID: 'invalid',
+  GLOBAL: 'global',
+  REQUIRED_ASTERISK: 'requiredAsterisk',
 };
 export const REVEAL_ELEMENT_DIV_STYLE = {
   container: {
@@ -407,6 +409,10 @@ export const REVEAL_ELEMENT_ERROR_TEXT = 'Invalid Token';
 export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
   [STYLE_TYPE.BASE]: {
     marginBottom: '4px',
+  },
+  [STYLE_TYPE.REQUIRED_ASTERISK]: {
+    display: 'inline',
+    color: 'red',
   },
 };
 

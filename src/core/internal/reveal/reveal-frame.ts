@@ -14,7 +14,7 @@ import {
   COPY_UTILS,
   REVEAL_COPY_ICON_STYLES,
 } from '../../constants';
-import getCssClassesFromJss from '../../../libs/jss-styles';
+import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import {
   printLog, parameterizedString,
 } from '../../../utils/logs-helper';
@@ -109,20 +109,30 @@ class RevealFrame {
       this.#elementContainer.append(this.#labelElement);
 
       if (Object.prototype.hasOwnProperty.call(this.#record, 'labelStyles')) {
-        this.#labelStyles = this.#record.labelStyles;
+        this.#labelStyles = {};
         this.#labelStyles[STYLE_TYPE.BASE] = {
           ...REVEAL_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.BASE],
-          ...this.#labelStyles[STYLE_TYPE.BASE],
+          ...this.#record.labelStyles[STYLE_TYPE.BASE],
         };
         getCssClassesFromJss(this.#labelStyles, 'label');
+
+        if (this.#record.labelStyles[STYLE_TYPE.GLOBAL]) {
+          generateCssWithoutClass(this.#record.labelStyles[STYLE_TYPE.GLOBAL]);
+        }
       } else {
         getCssClassesFromJss(REVEAL_ELEMENT_LABEL_DEFAULT_STYLES, 'label');
       }
     }
     this.updateDataView();
     if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
-      this.#inputStyles = this.#record.inputStyles;
+      this.#inputStyles = {};
+      this.#inputStyles[STYLE_TYPE.BASE] = {
+        ...this.#record.inputStyles[STYLE_TYPE.BASE],
+      };
       getCssClassesFromJss(this.#inputStyles, 'content');
+      if (this.#record.inputStyles[STYLE_TYPE.GLOBAL]) {
+        generateCssWithoutClass(this.#record.inputStyles[STYLE_TYPE.GLOBAL]);
+      }
     }
 
     this.#elementContainer.appendChild(this.#dataElememt);
@@ -176,12 +186,15 @@ class RevealFrame {
       Object.prototype.hasOwnProperty.call(this.#record, 'errorTextStyles')
       && Object.prototype.hasOwnProperty.call(this.#record.errorTextStyles, STYLE_TYPE.BASE)
     ) {
-      this.#errorTextStyles = this.#record.errorTextStyles;
+      this.#errorTextStyles = {};
       this.#errorTextStyles[STYLE_TYPE.BASE] = {
         ...REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES[STYLE_TYPE.BASE],
-        ...this.#errorTextStyles[STYLE_TYPE.BASE],
+        ...this.#record.errorTextStyles[STYLE_TYPE.BASE],
       };
       getCssClassesFromJss(this.#errorTextStyles, 'error');
+      if (this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]) {
+        generateCssWithoutClass(this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]);
+      }
     } else {
       getCssClassesFromJss(
         REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,

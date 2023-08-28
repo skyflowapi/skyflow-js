@@ -192,7 +192,7 @@ class RevealContainer extends Container {
           printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
           MessageType.LOG, this.#context.logLevel);
-        } catch (err) {
+        } catch (err:any) {
           printLog(`Error: ${err.message}`, MessageType.ERROR,
             this.#context.logLevel);
           reject(err);
@@ -247,7 +247,7 @@ class RevealContainer extends Container {
               );
           },
         );
-      } catch (err) {
+      } catch (err:any) {
         printLog(err.message, MessageType.ERROR,
           this.#context.logLevel);
 

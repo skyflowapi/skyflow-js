@@ -12,3 +12,8 @@ export default function getCssClassesFromJss(styles, name) {
   const cssStyle = jss.createStyleSheet(styles);
   return cssStyle.attach().classes;
 }
+
+export function generateCssWithoutClass(styles) {
+  const cssStyle = jss.createStyleSheet(styles);
+  return cssStyle.attach().classes;
+}

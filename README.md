@@ -13,7 +13,7 @@ Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal
 - [**Securely collecting data client-side**](#securely-collecting-data-client-side)
 - [**Securely collecting data client-side using Composable Elements**](#securely-collecting-data-client-side-using-composable-elements)
 - [**Securely revealing data client-side**](#securely-revealing-data-client-side)
-- [**Securely deleting data cleint-side**](#securely-deleting-data-client-side)
+- [**Securely deleting data client-side**](#securely-deleting-data-client-side)
 
 ---
 
@@ -240,6 +240,7 @@ The `inputStyles` field accepts a style object which consists of CSS properties 
 * `invalid`: applied when the Element has invalid input
 * `cardIcon`: applied to the card type icon in CARD_NUMBER Element
 * `copyIcon`: applied to copy icon in Elements when enableCopy option is true
+* `global`: used for global styles like font-family.
 
 Styles are specified with [JSS](https://cssinjs.org/?v=v10.7.1). 
 
@@ -254,6 +255,7 @@ inputStyles: {
     '&:hover': {    // Hover styles.
         borderColor: 'green'
     },
+    fontFamily: '"Roboto", sans-serif'
   },
   complete: {
     color: '#4caf50',
@@ -272,9 +274,13 @@ inputStyles: {
     position: 'absolute',
     right: '8px',
   },
+  global: {   
+    '@import': 'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 },
 ```
-The states that are available for `labelStyles` are `base` and `focus`.
+The states that are available for `labelStyles` are `base`, `focus`, `global` and `requiredAsterisk`.
+* `requiredAsterisk`: styles applied for the Asterisk symbol in the label.
 
 An example of a labelStyles object:
 
@@ -283,14 +289,21 @@ labelStyles: {
   base: {
     fontSize: '12px',
     fontWeight: 'bold',
+    fontFamily: '"Roboto", sans-serif'
   },
   focus: {
     color: '#1d1d1d',
   },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  },
+  requiredAsterisk:{
+    color: 'red'
+  }
 },
 ```
 
-The state that is available for `errorTextStyles` is only the `base` state, it shows up when there is some error in the collect element.
+The state that is available for `errorTextStyles` are `base` and `global`, it shows up when there is some error in the collect element.
 
 An example of a errorTextStyles object:
 
@@ -298,7 +311,11 @@ An example of a errorTextStyles object:
 errorTextStyles: {
   base: {
     color: '#f44336',
+    fontFamily: '"Roboto", sans-serif'
   },
+  global: {
+    '@import': 'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 },
 ```
 
@@ -1176,7 +1193,11 @@ const options = {
     errorTextStyles: {                       // Optional
         base: {
             color: 'red',
+            fontFamily: '"Roboto", sans-serif'
         },
+        global: {
+            '@import': 'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+        }        
     },
 };
 ```
@@ -1213,6 +1234,7 @@ The `inputStyles` field accepts an object of CSS properties to apply to the form
 * `invalid`: applied when the Element has invalid input
 * `cardIcon`: applied to the card type icon in CARD_NUMBER Element
 * `copyIcon`: applied to copy icon in Elements when enableCopy option is true
+* `global`: used for global styles like font-family.
 
 An example of an `inputStyles` object:
 
@@ -1223,6 +1245,7 @@ inputStyles: {
     padding: '10px 16px',
     borderRadius: '4px',
     color: '#1d1d1d',
+    fontFamily: '"Roboto", sans-serif'
   },
   complete: {
     color: '#4caf50',
@@ -1241,9 +1264,13 @@ inputStyles: {
     position: 'absolute',
     right: '8px',
   },
+  global: {   
+    '@import': 'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 }
 ```
-The `labelStyles` field supports the `base` and `focus` states.
+The states that are available for `labelStyles` are `base`, `focus`, `global`.
+* requiredAsterisk: styles applied for the Asterisk symbol in the label.
 
 An example `labelStyles` object:
 
@@ -1251,24 +1278,18 @@ An example `labelStyles` object:
 labelStyles: {
   base: {
     fontSize: '12px',
-      fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontFamily: '"Roboto", sans-serif'
   },
   focus: {
     color: '#1d1d1d'
+  },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
   }
 }
 ```
-The `errorTextStyles` field only supports the `base` state, which appears when there is an error in the composable element.
 
-An example `errorTextStyles` object:
-
-```javascript
-errorTextStyles: {
-  base: {
-    color: '#f44336'
-  }
-}
-```
 The JS SDK supports the following composable elements:
 
 - `CARDHOLDER_NAME`
@@ -1945,7 +1966,7 @@ const revealElement = {
 
 Note: If you don't provide a redaction type, RedactionType.PLAIN_TEXT will apply by default.
 
-The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant and `copyIcon` style object. 
+The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant, `copyIcon` and `global` style objects. 
 
 An example of a inputStyles object:
 
@@ -1959,6 +1980,9 @@ inputStyles: {
     right: '8px',
     top: 'calc(50% - 10px)',
   },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 },
 ```
 
@@ -1970,6 +1994,9 @@ labelStyles: {
     fontSize: '12px',
     fontWeight: 'bold',
   },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 },
 ```
 
@@ -1980,6 +2007,9 @@ errorTextStyles: {
   base: {
     color: '#f44336',
   },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 },
 ```
 
