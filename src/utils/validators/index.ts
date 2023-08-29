@@ -380,10 +380,10 @@ export const validateThreeDSInput = (threeDSInput: IThreeDSInput) => {
   }
 
   if (!threeDSInput.amountDetails.purchaseExponent) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_PURCHASE_CURRENCY_IN_3DS, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_PURCHASE_EXPONENT_IN_3DS, [], true);
   }
   if (!(typeof threeDSInput.amountDetails.purchaseExponent === 'number')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_PURCHASE_CURRENCY_IN_3DS, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_PURCHASE_EXPONENT_IN_3DS, [], true);
   }
 };
 
