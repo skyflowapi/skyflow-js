@@ -479,7 +479,7 @@ class SkyflowContainer {
             MessageType.LOG,
             this.#context.logLevel,
           );
-        } catch (e) {
+        } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
           reject(e);
         }
@@ -523,7 +523,7 @@ class SkyflowContainer {
           MessageType.LOG,
           this.#context.logLevel,
         );
-      } catch (e) {
+      } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);
       }

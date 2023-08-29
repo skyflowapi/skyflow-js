@@ -142,6 +142,18 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_OBJECT_IN_3DS,
   },
+  MISSING_CARD_DETAILS_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_CARD_DETAILS_IN_3DS,
+  },
+  MISSING_CONFIG_DETAILS_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_CONFIG_DETAILS_IN_3DS,
+  },
+  MISSING_AMOUNT_DETAILS_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.MISSING_AMOUNT_DETAILS_IN_3DS,
+  },
   INVALID_CARD_NUMBER_IN_3DS: {
     code: 400,
     description: logs.errorLogs.INVALID_CARD_NUMBER_IN_3DS,
