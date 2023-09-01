@@ -346,6 +346,10 @@ export const validateThreeDSInput = (threeDSInput: IThreeDSInput) => {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REQUESTOR_ID_IN_3DS, [], true);
   }
 
+  if (!threeDSInput.config.threeDSServerTransId) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TRANSACTION_ID_IN_3DS, [], true);
+  }
+
   if (!threeDSInput.config.threeDSRequestorFinalAuthRespURL) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REQUESTOR_URL_IN_3DS, [], true);
   }

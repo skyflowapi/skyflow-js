@@ -845,6 +845,8 @@ describe('Invoke 3DS method', () => {
     creq: 'creqResponse',
   };
 
+  const rejection = "Promise Rejected. Please check the payload"
+
   test('3DS success', (done) => {
     const clientReq = jest.fn(() => Promise.resolve(test3DSResponse));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
@@ -871,6 +873,35 @@ describe('Invoke 3DS method', () => {
     setTimeout(() => {
       expect(cb3DS.mock.calls[0][0].authenticationResponse).toHaveProperty("threeDSServerTransID");
       expect(cb3DS.mock.calls[0][0].error).toBeUndefined();
+      done();
+    }, 1000);
+  });
+
+  test('3DS error', (done) => {
+    const clientReq = jest.fn(() => Promise.reject(rejection));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+      ...clientData.client,
+      request: clientReq,
+      toJSON: toJson,
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.THREE_DS,
+      config: test3DSRequest,
+    };
+    const cb3DS = jest.fn();
+    onCb(data, cb3DS);
+
+    setTimeout(() => {
+      expect(cb3DS.mock.calls[0][0].error.errors[0]).toBe("Promise Rejected. Please check the payload");
       done();
     }, 1000);
   });

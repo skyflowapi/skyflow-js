@@ -1485,6 +1485,36 @@ describe('threeDS validation', () => {
     }
   })
 
+  test('Transaction ID is missing', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: "https://testUrl",
+          merchantCountryCode: "123",
+        },
+        threeDSRequestorName: "Skyflow",
+        threeDSRequestorId: "testID",
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_TRANSACTION_ID_IN_3DS.description)
+      done();
+    }
+  })
+
   test('Requestor final Url is missing', (done) => {
     try {
       threeDSInput.cardDetails={
@@ -1506,6 +1536,7 @@ describe('threeDS validation', () => {
         },
         threeDSRequestorName: "Skyflow",
         threeDSRequestorId: "testID",
+        threeDSServerTransId: "testID",
       }
       validateThreeDSInput(threeDSInput)
       done('should throw error');
@@ -1537,6 +1568,7 @@ describe('threeDS validation', () => {
         },
         threeDSRequestorName: "Skyflow",
         threeDSRequestorId: "testID",
+        threeDSServerTransId: "testID",
         threeDSRequestorFinalAuthRespURL: "http://testUrl"
       }
       validateThreeDSInput(threeDSInput)
@@ -1569,6 +1601,7 @@ describe('threeDS validation', () => {
         },
         threeDSRequestorName: "Skyflow",
         threeDSRequestorId: "testID",
+        threeDSServerTransId: "testID",
         threeDSRequestorFinalAuthRespURL: "http://testUrl"
       }
       threeDSInput.amountDetails={
@@ -1604,6 +1637,7 @@ describe('threeDS validation', () => {
         },
         threeDSRequestorName: "Skyflow",
         threeDSRequestorId: "testID",
+        threeDSServerTransId: "testID",
         threeDSRequestorFinalAuthRespURL: "http://testUrl"
       }
       threeDSInput.amountDetails={
@@ -1639,6 +1673,7 @@ describe('threeDS validation', () => {
         },
         threeDSRequestorName: "Skyflow",
         threeDSRequestorId: "testID",
+        threeDSServerTransId: "testID",
         threeDSRequestorFinalAuthRespURL: "http://testUrl"
       }
       threeDSInput.amountDetails={

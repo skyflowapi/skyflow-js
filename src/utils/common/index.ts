@@ -110,7 +110,7 @@ export interface IConstructedThreeDSRecord{
     };
     threeDSRequestorName: string;
     threeDSRequestorId: string;
-    threeDSServerTransId?: string;
+    threeDSServerTransId: string;
     threeDSRequestorFinalAuthRespURL: string;
     preferredProtocolVersion?: string;
   };
@@ -154,7 +154,7 @@ export interface IThreeDSInput{
     };
     threeDSRequestorName: string;
     threeDSRequestorId: string;
-    threeDSServerTransId?: string;
+    threeDSServerTransId: string;
     threeDSRequestorFinalAuthRespURL: string;
     preferredProtocolVersion?: string;
   };

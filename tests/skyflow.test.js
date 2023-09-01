@@ -1528,9 +1528,6 @@ describe('skyflow invoke 3DS', () => {
   const on = jest.fn();
   const emit = jest.fn();
 
-  const mockSkyflowContainer = {
-    threeDS: jest.fn().mockReturnValue('mockedReturnValue'),
-  };
 
   const test3DSRequest = {
     threeDSObject: {
@@ -1607,12 +1604,30 @@ describe('skyflow invoke 3DS', () => {
     jest.clearAllMocks();
   });
 
-  test('test 3DS', async () => {
+  test('test 3DS error', async () => {
+    const frameReadyEvent = on.mock.calls.filter((data) =>
+      data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY),
+    );
+    const frameReadyCb = frameReadyEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
     try {
-      const res = await mockSkyflowContainer.threeDS(test3DSRequest);
+      const res = skyflow.invoke3DS(test3DSRequest);
+      const emitEvent = emitSpy.mock.calls.filter((data) =>
+        data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST),
+      );
+      const emitCb = emitEvent[0][2];
+      emitCb({ error: { message: "Promise Rejected. Please check payload", code: 400 } });
 
+      let error;
+      res.catch((err) => error = err);
+
+      setTimeout(() => {
+        expect(error).toBeDefined();
+        done();
+      }, 1000);
     } catch (err) {
-      expect(err).toBeDefined();
+      return err
     }
   });
 
