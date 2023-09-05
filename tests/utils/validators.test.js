@@ -1132,7 +1132,7 @@ describe('threeDS validation', () => {
 
   test('threeDS Input not valid', (done) => {
     try {
-      validateThreeDSInput("")
+      validateThreeDSInput(123)
       done('should throw error');
     } catch (err) {
       expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_OBJECT_IN_3DS.description)
@@ -1301,6 +1301,30 @@ describe('threeDS validation', () => {
     }
   })
 
+  test('Acquirer BIN is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: 123,
+        },
+        merchantDetails:{
+
+        }
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_ACQUIRER_BIN_IN_3DS.description)
+      done();
+    }
+  })
+
   test('Acquirer merchant ID is missing', (done) => {
     try {
       threeDSInput.cardDetails={
@@ -1321,6 +1345,57 @@ describe('threeDS validation', () => {
       done('should throw error');
     } catch (err) {
       expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_ACQUIRER_MERCHANT_ID_IN_3DS.description)
+      done();
+    }
+  })
+
+  test('Acquirer merchant ID is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: 123
+        },
+        merchantDetails:{
+
+        }
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_ACQUIRER_MERCHANT_ID_IN_3DS.description)
+      done();
+    }
+  })
+
+  test('Acquirer ID is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "123",
+          acquirerID: 123
+        },
+        merchantDetails:{
+
+        }
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_ACQUIRER_ID_IN_3DS.description)
       done();
     }
   })
@@ -1350,6 +1425,31 @@ describe('threeDS validation', () => {
     }
   })
 
+  test('Merchant mcc is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: 123,
+        }
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_MERCHANT_MCC_IN_3DS.description)
+      done();
+    }
+  })
+
   test('Merchant name is missing', (done) => {
     try {
       threeDSInput.cardDetails={
@@ -1371,6 +1471,32 @@ describe('threeDS validation', () => {
       done('should throw error');
     } catch (err) {
       expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_MERCHANT_NAME_IN_3DS.description)
+      done();
+    }
+  })
+
+  test('Merchant name is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: 123,
+        }
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_MERCHANT_NAME_IN_3DS.description)
       done();
     }
   })
@@ -1401,6 +1527,33 @@ describe('threeDS validation', () => {
     }
   })
 
+  test('Merchant url is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: 123,
+        }
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_MERCHANT_URL_IN_3DS.description)
+      done();
+    }
+  })
+
   test('Merchant country code is missing', (done) => {
     try {
       threeDSInput.cardDetails={
@@ -1424,6 +1577,34 @@ describe('threeDS validation', () => {
       done('should throw error');
     } catch (err) {
       expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_MERCHANT_COUNTRY_IN_3DS.description)
+      done();
+    }
+  })
+
+  test('Merchant country code is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: "https://testUrl",
+          merchantCountryCode: 123,
+        }
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_MERCHANT_COUNTRY_IN_3DS.description)
       done();
     }
   })
@@ -1456,6 +1637,35 @@ describe('threeDS validation', () => {
     }
   })
 
+  test('Requestor name is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: "https://testUrl",
+          merchantCountryCode: "123",
+        },
+        threeDSRequestorName: 123,
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_REQUESTOR_NAME_IN_3DS.description)
+      done();
+    }
+  })
+
   test('Requestor ID is missing', (done) => {
     try {
       threeDSInput.cardDetails={
@@ -1481,6 +1691,36 @@ describe('threeDS validation', () => {
       done('should throw error');
     } catch (err) {
       expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_REQUESTOR_ID_IN_3DS.description)
+      done();
+    }
+  })
+
+  test('Requestor ID is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: "https://testUrl",
+          merchantCountryCode: "123",
+        },
+        threeDSRequestorName: "Skyflow",
+        threeDSRequestorId: 123,
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_REQUESTOR_ID_IN_3DS.description)
       done();
     }
   })
@@ -1515,6 +1755,37 @@ describe('threeDS validation', () => {
     }
   })
 
+  test('Transaction ID is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: "https://testUrl",
+          merchantCountryCode: "123",
+        },
+        threeDSRequestorName: "Skyflow",
+        threeDSRequestorId: "testID",
+        threeDSServerTransId: 123,
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_TRANSACTION_ID_IN_3DS.description)
+      done();
+    }
+  })
+
   test('Requestor final Url is missing', (done) => {
     try {
       threeDSInput.cardDetails={
@@ -1542,6 +1813,73 @@ describe('threeDS validation', () => {
       done('should throw error');
     } catch (err) {
       expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_REQUESTOR_URL_IN_3DS.description)
+      done();
+    }
+  })
+
+  test('Requestor final Url is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerID: "testID",
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: "https://testUrl",
+          merchantCountryCode: "123",
+        },
+        threeDSRequestorName: "Skyflow",
+        threeDSRequestorId: "testID",
+        threeDSServerTransId: "testID",
+        threeDSRequestorFinalAuthRespURL: 123
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_REQUESTOR_URL_IN_3DS.description)
+      done();
+    }
+  })
+
+  test('Preferred protocol version is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerID: "testID",
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: "https://testUrl",
+          merchantCountryCode: "123",
+        },
+        threeDSRequestorName: "Skyflow",
+        threeDSRequestorId: "testID",
+        threeDSServerTransId: "testID",
+        threeDSRequestorFinalAuthRespURL: "http://testUrl",
+        preferredProtocolVersion: 123,
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_PROTOCOL_VERSION_IN_3DS.description)
       done();
     }
   })
@@ -1615,6 +1953,42 @@ describe('threeDS validation', () => {
     }
   })
 
+  test('amount is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerID: "testID",
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: "https://testUrl",
+          merchantCountryCode: "123",
+        },
+        threeDSRequestorName: "Skyflow",
+        threeDSRequestorId: "testID",
+        threeDSServerTransId: "testID",
+        threeDSRequestorFinalAuthRespURL: "http://testUrl"
+      }
+      threeDSInput.amountDetails={
+        amount: 100
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_AMOUNT_IN_3DS.description)
+      done();
+    }
+  })
+
   test('purchase currency is missing', (done) => {
     try {
       threeDSInput.cardDetails={
@@ -1647,6 +2021,43 @@ describe('threeDS validation', () => {
       done('should throw error');
     } catch (err) {
       expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_PURCHASE_CURRENCY_IN_3DS.description)
+      done();
+    }
+  })
+
+  test('purchase currency is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerID: "testID",
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: "https://testUrl",
+          merchantCountryCode: "123",
+        },
+        threeDSRequestorName: "Skyflow",
+        threeDSRequestorId: "testID",
+        threeDSServerTransId: "testID",
+        threeDSRequestorFinalAuthRespURL: "http://testUrl"
+      }
+      threeDSInput.amountDetails={
+        amount: "100",
+        purchaseCurrency: 123
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_PURCHASE_CURRENCY_IN_3DS.description)
       done();
     }
   })
@@ -1684,6 +2095,44 @@ describe('threeDS validation', () => {
       done('should throw error');
     } catch (err) {
       expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_PURCHASE_EXPONENT_IN_3DS.description)
+      done();
+    }
+  })
+
+  test('purchase exponent is invalid', (done) => {
+    try {
+      threeDSInput.cardDetails={
+        cardNumber: "123",
+        cardHolderName: "testName",
+        cardExpiry: "123",
+        schemeID: "Visa"
+      }
+      threeDSInput.config={
+        acquirerDetails:{
+          acquirerID: "testID",
+          acquirerBIN: "testBIN",
+          acquirerMerchantID: "testID"
+        },
+        merchantDetails:{
+          mcc: "123",
+          merchantName: "Test Merchant",
+          merchantUrl: "https://testUrl",
+          merchantCountryCode: "123",
+        },
+        threeDSRequestorName: "Skyflow",
+        threeDSRequestorId: "testID",
+        threeDSServerTransId: "testID",
+        threeDSRequestorFinalAuthRespURL: "http://testUrl"
+      }
+      threeDSInput.amountDetails={
+        amount: "100",
+        purchaseCurrency: "123",
+        purchaseExponent: "123"
+      }
+      validateThreeDSInput(threeDSInput)
+      done('should throw error');
+    } catch (err) {
+      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_PURCHASE_EXPONENT_IN_3DS.description)
       done();
     }
   })

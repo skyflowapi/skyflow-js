@@ -181,6 +181,7 @@ const logs = {
     MISSING_REQUESTOR_NAME_IN_3DS: 'Interface: client 3DS - Missing Requestor name. 3DS object is invalid.',
     INVALID_REQUESTOR_ID_IN_3DS: 'Interface: client 3DS - Invalid Requestor ID. 3DS object is invalid.',
     MISSING_REQUESTOR_ID_IN_3DS: 'Interface: client 3DS - Missing Requestor ID. 3DS object is invalid.',
+    INVALID_TRANSACTION_ID_IN_3DS: 'Interface: client 3DS - Invalid Transaction ID. 3DS object is invalid.',
     MISSING_TRANSACTION_ID_IN_3DS: 'Interface: client 3DS - Missing Transaction ID. 3DS object is invalid.',
     INVALID_REQUESTOR_URL_IN_3DS: 'Interface: client 3DS - Invalid Requestor final Auth URL. 3DS object is invalid.',
     MISSING_REQUESTOR_URL_IN_3DS: 'Interface: client 3DS - Missing Requestor final Auth URL. 3DS object is invalid.',

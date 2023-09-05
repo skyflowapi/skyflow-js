@@ -258,6 +258,10 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.MISSING_TRANSACTION_ID_IN_3DS,
   },
+  INVALID_TRANSACTION_ID_IN_3DS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_TRANSACTION_ID_IN_3DS,
+  },
   INVALID_REQUESTOR_URL_IN_3DS: {
     code: 400,
     description: logs.errorLogs.INVALID_REQUESTOR_URL_IN_3DS,

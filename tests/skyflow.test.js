@@ -1528,40 +1528,6 @@ describe('skyflow invoke 3DS', () => {
   const on = jest.fn();
   const emit = jest.fn();
 
-
-  const test3DSRequest = {
-    threeDSObject: {
-      cardDetails: {
-        cardNumber: '4111',
-        cardHolderName: 'TestName',
-        cardExpiry: '12/23',
-        schemeID: 'Visa',
-      },
-      config: {
-        vaultID: 'testID',
-        acquirerDetails: {
-          acquirerID: 'testID',
-          acquirerBIN: '000999',
-          acquirerMerchantID: 'testID',
-        },
-        merchantDetails: {
-          mcc: '4900',
-          merchantName: 'Test Merchant',
-          merchantUrl: 'https://testUrl',
-          merchantCountryCode: '356',
-        },
-        threeDSRequestorName: 'Skyflow',
-        threeDSRequestorId: 'testID',
-        threeDSRequestorFinalAuthRespURL: 'http://testUrl',
-      },
-      amountDetails: {
-        amount: '100',
-        purchaseCurrency: '840',
-        purchaseExponent: 1,
-      },
-    },
-  };
-
   const test3DSResponse = {
     authenticationResponse: {
       messageType: 'pArs',
@@ -1584,6 +1550,7 @@ describe('skyflow invoke 3DS', () => {
     },
     creq: 'creqResponse',
   };
+  let test3DSRequest={}
 
   beforeEach(() => {
     emitSpy = jest.spyOn(bus, 'emit');
@@ -1598,6 +1565,37 @@ describe('skyflow invoke 3DS', () => {
       vaultURL: 'https://vaulturl.com',
       getBearerToken: jest.fn(),
     });
+    test3DSRequest = {
+      cardDetails: {
+        cardNumber: '#411111111111',
+        cardHolderName: '#TestName',
+        cardExpiry: '#12/23',
+        schemeID: 'Visa',
+      },
+      config: {
+        vaultID: 'testID',
+        acquirerDetails: {
+          acquirerID: 'testID',
+          acquirerBIN: '000999',
+          acquirerMerchantID: 'testID',
+        },
+        merchantDetails: {
+          mcc: '4900',
+          merchantName: 'Test Merchant',
+          merchantUrl: 'https://testUrl',
+          merchantCountryCode: '356',
+        },
+        threeDSRequestorName: 'Skyflow',
+        threeDSRequestorId: 'testID',
+        threeDSServerTransId: "testID",
+        threeDSRequestorFinalAuthRespURL: 'http://testUrl',
+      },
+      amountDetails: {
+        amount: '100',
+        purchaseCurrency: '840',
+        purchaseExponent: 1,
+      },
+  };
   });
 
   afterEach(() => {
@@ -1639,6 +1637,9 @@ describe('skyflow invoke 3DS', () => {
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
     try {
+      test3DSRequest.cardDetails.cardNumber = "411111111111"
+      test3DSRequest.cardDetails.cardHolderName = "TestName"
+      test3DSRequest.cardDetails.cardExpiry = "12/23"
       const res = skyflow.invoke3DS(test3DSRequest);
       const emitEvent = emitSpy.mock.calls.filter((data) =>
         data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST),
