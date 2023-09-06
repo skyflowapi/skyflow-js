@@ -564,13 +564,12 @@ export class IFrameFormElement extends EventEmitter {
         });
     }
 
-    // for connection
-    // bus.target(window.location.origin).on(ELEMENT_EVENTS_TO_IFRAME.GET_COLLECT_ELEMENT,
-    //   (data, callback) => {
-    //     if (data.name === this.iFrameName) {
-    //       callback({ ...this.getStatus(), value: this.getUnformattedValue() });
-    //     }
-    //   });
+    bus.target(window.location.origin).on(ELEMENT_EVENTS_TO_IFRAME.GET_COLLECT_ELEMENT,
+      (data, callback) => {
+        if (data.name === this.iFrameName) {
+          callback({ ...this.getStatus(), value: this.getUnformattedValue() });
+        }
+      });
   };
 
   sendChangeStatus = (inputEvent: boolean = false) => {

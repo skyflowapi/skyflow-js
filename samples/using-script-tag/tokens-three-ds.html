@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skyflow Elements</title>
+  <script src="https://js.skyflow.com/v1/index.js"></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .empty-div {
+      height: 100px;
+      width: 350px;
+    }
+
+    .reveal-view {
+      margin-top: 48px;
+    }
+  </style>
+</head>
+
+<body>
+  <h3>3DS authentication</h3>
+  <!-- COllect Part -->
+  <div>
+    <div>
+      <button id="collectPCIData">Authenticate</button>
+    </div>
+    <div>
+      <pre id="collectResponse"></pre>
+    </div>
+  </div>
+  <div>
+    <pre id="3dsResponse"></pre>
+  </div>
+  <!-- Reveal Part-->
+  <div id="revealView" class="reveal-view">
+    <div>
+      <button id="revealPCIData">Reveal PCI Data</button>
+    </div>
+  </div>
+
+  <!-- Javascript -->
+  <script>
+    try {
+      const revealView = document.getElementById('revealView');
+      revealView.style.visibility = 'hidden';
+      const skyflow = Skyflow.init({
+        vaultID: '<VAULT_ID>',
+        vaultURL: '<VAULT_URL>',
+        getBearerToken: () => {
+          return new Promise((resolve, reject) => {
+            const Http = new XMLHttpRequest();
+
+            Http.onreadystatechange = () => {
+              if (Http.readyState === 4 && Http.status === 200) {
+                const response = JSON.parse(Http.responseText);
+                resolve(response.accessToken);
+              }
+            };
+            const url = '<TOKEN_END_POINT_URL>';
+            Http.open('GET', url);
+            Http.send();
+          });
+        },
+        options: {
+          logLevel: Skyflow.LogLevel.ERROR,
+          env: Skyflow.Env.PROD,
+        },
+      });
+
+      // Create collect Container.
+      const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+
+      // Custom styles for collect elements.
+      const collectStylesOptions = {
+        inputStyles: {
+          base: {
+            border: '1px solid #eae8ee',
+            padding: '10px 16px',
+            borderRadius: '4px',
+            color: '#1d1d1d',
+            marginTop: '4px',
+          },
+          complete: {
+            color: '#4caf50',
+          },
+          empty: {},
+          focus: {},
+          invalid: {
+            color: '#f44336',
+          },
+        },
+        labelStyles: {
+          base: {
+            fontSize: '16px',
+            fontWeight: 'bold',
+          },
+        },
+        errorTextStyles: {
+          base: {
+            color: '#f44336',
+          },
+        },
+      };
+
+
+      // Collect all elements data.
+      const collectButton = document.getElementById('collectPCIData');
+      if (collectButton) {
+        collectButton.addEventListener('click', () => {
+          const threeDSReq = {
+              cardDetails: {
+                cardNumber: "<CardNumber_Token>",
+                cardHolderName: "<CardHolderName_Token>",
+                cardExpiry: "<CardExpiry_Token>",
+                schemeID: "<SchemeID>"
+              },
+              config: {
+                acquirerDetails: {
+                  acquirerID: "<AcquirerID>",
+                  acquirerBIN: "<AcquirerBIN>",
+                  acquirerMerchantID: "<AcquirerMerchantID>"
+                },
+                merchantDetails: {
+                  mcc: "<MCC>",
+                  merchantName: "<Merchant Name>",
+                  merchantUrl: "<MerchantURL>",
+                  merchantCountryCode: "<MerchantCountryCode>",
+                },
+                threeDSRequestorName: "<ThreeDSRequestorName>",
+                threeDSRequestorId: "<ThreeDSRequestorID>",
+                threeDSRequestorFinalAuthRespURL: "<threeDSRequestorFinalAuthRespURL>",
+              },
+              amountDetails: {
+                amount: "<Amount>",
+                purchaseCurrency: "<PurchaseCurrency>",
+                purchaseExponent: 1
+              }
+          }
+          const threeDSResponse = skyflow.invoke3DS(threeDSReq);
+          threeDSResponse.then(response => {
+            console.log("3ds passed", response)
+            document.getElementById("3dsResponse").innerHTML = JSON.stringify(response, null, 2);
+          }).catch(err => {
+            console.log("3ds failed", err);
+          })
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  </script>
+</body>
+
+</html>

@@ -13,7 +13,11 @@ import {
   fetchRecordsBySkyflowID,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
-import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../constants';
+import {
+  ContentType,
+  ELEMENT_EVENTS_TO_IFRAME,
+  PUREJS_TYPES,
+} from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
@@ -23,8 +27,10 @@ import {
   Context,
   ISkyflowIdRecord,
   IDeleteRecord,
+  IConstructedThreeDSRecord,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
+import { construct3DSRequest } from '../../../utils/helpers';
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -123,6 +129,48 @@ class SkyflowFrameController {
                 callback({ error: rejectedResult });
               },
             );
+          } else if (data.type === PUREJS_TYPES.THREE_DS) {
+            const config = data.config as IConstructedThreeDSRecord;
+
+            const promiseList = [] as any;
+            if (config.cardDetails) {
+              promiseList.push(construct3DSRequest(config.cardDetails));
+            }
+
+            Promise.all(promiseList)
+              .then(() => {
+                config.cardDetails.cardExpiry = config.cardDetails.cardExpiry.replace(/\//g, '');
+                this.send3DSRequest(config)
+                  .then((resultResponse: any) => {
+                    printLog(
+                      parameterizedString(
+                        logs.infoLogs.INVOKE_3DS_RESOLVED,
+                        CLASS_NAME,
+                      ),
+                      MessageType.LOG,
+                      this.#context.logLevel,
+                    );
+                    callback(resultResponse);
+                  })
+                  .catch((rejectedResponse) => {
+                    printLog(
+                      logs.errorLogs.INVOKE_3DS_REJECTED,
+                      MessageType.ERROR,
+                      this.#context.logLevel,
+                    );
+
+                    callback({ error: rejectedResponse });
+                  });
+              })
+              .catch((error) => {
+                printLog(
+                  logs.errorLogs.INVOKE_3DS_REJECTED,
+                  MessageType.ERROR,
+                  this.#context.logLevel,
+                );
+
+                callback({ error });
+              });
           } else if (data.type === PUREJS_TYPES.GET_BY_SKYFLOWID) {
             fetchRecordsBySkyflowID(
               data.records as ISkyflowIdRecord[],
@@ -233,5 +281,33 @@ class SkyflowFrameController {
       });
     });
   }
+
+  send3DSRequest(config: IConstructedThreeDSRecord) {
+    return new Promise((rootResolve, rootReject) => {
+      getAccessToken(this.#clientId)
+        .then((authToken) => {
+          const invokeRequest = this.#client.request({
+            url: `${this.#client.config.vaultURL}/v1/3ds/authentication`,
+            requestMethod: 'POST',
+            body: config,
+            headers: {
+              'x-skyflow-authorization': String(authToken),
+              'content-type': ContentType.APPLICATIONORJSON,
+            },
+          });
+          invokeRequest
+            .then((response: any) => {
+              rootResolve(response);
+            })
+            .catch((err) => {
+              rootReject({ errors: [err] });
+            });
+        })
+        .catch((err) => {
+          rootReject(err);
+        });
+    });
+  }
 }
+
 export default SkyflowFrameController;

@@ -21,7 +21,10 @@ import {
   getOSDetails,
   getSdkVersionName,
   getMetaObject,
-  checkAndSetForCustomUrl
+  checkAndSetForCustomUrl,
+  redirectWithPost,
+  encodePayload,
+  threeDSConfigParser,
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -32,6 +35,40 @@ import {
 } from '../../src/utils/validators/index';
 import successIcon from '../../assets/path.svg'
 import { isValidURL } from '../../src/utils/validators/index';
+import CollectElement from '../../src/core/external/collect/collect-element';
+import { LogLevel, Env, ValidationRuleType } from '../../src/utils/common';
+
+const elementName = 'element:CVV:cGlpX2ZpZWxkcy5wcmltYXJ5X2NhcmQuY3Z2';
+const id = 'id';
+const input = {
+  table: 'pii_fields',
+  column: 'primary_card.cvv',
+  inputStyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+
+  placeholder: 'cvv',
+  label: 'cvv',
+  type: 'CVV',
+};
+
+const rows = [
+  {
+    elements: [
+      {
+        elementName,
+        elementType: input.type,
+        name: input.column,
+        ...input,
+      },
+    ],
+  },
+];
+
+const destroyCallback = jest.fn();
+const updateCallback = jest.fn();
 
 describe('bin data for for all card number except AMEX element type on CHANGE event', () => {
   test("in PROD return bin data only for card number element", () => {
@@ -554,5 +591,84 @@ describe('checkAndSetForCustomUrl', () => {
     checkAndSetForCustomUrl(config);
     const isValid = isValidURL(config.options.customElementsURL);
     expect(isValid).toEqual(false);
+  });
+});
+
+describe('encodePayload', () => {
+  it('should correctly encode the payload', () => {
+    const payload = { key: 'value', anotherKey: 'anotherValue' };
+    const encodedPayload = encodePayload(payload);
+    expect(encodedPayload.length).toBeGreaterThan(0);
+    expect(typeof encodedPayload).toBe('string');
+  });
+});
+
+describe('redirectWithPost', () => {
+  it('should create and submit a form with the correct payload', () => {
+    const url = 'https://example.com';
+    const payload = { key: 'value', anotherKey: 'anotherValue' };
+
+    // Mocking document.createElement and other DOM methods
+    const createElementMock = jest.spyOn(document, 'createElement');
+    const appendChildMock = jest.fn(); // Mock appendChild method
+    const submitMock = jest.fn();
+
+    const formMock = {
+      setAttribute: jest.fn(),
+      appendChild: jest.fn(),
+      submit: submitMock,
+    };
+
+    const inputMock = {
+      setAttribute: jest.fn(),
+    };
+
+    createElementMock.mockReturnValueOnce(formMock).mockReturnValueOnce(inputMock);
+    document.body.appendChild = appendChildMock; // Mock appendChild method
+
+    redirectWithPost(url, payload);
+
+    expect(createElementMock).toHaveBeenCalledTimes(2);
+    expect(createElementMock).toHaveBeenCalledWith('form');
+    expect(createElementMock).toHaveBeenCalledWith('input');
+
+    expect(formMock.setAttribute).toHaveBeenCalledWith('action', url);
+    expect(formMock.setAttribute).toHaveBeenCalledWith('method', 'POST');
+
+    expect(inputMock.setAttribute).toHaveBeenCalledWith('type', 'hidden');
+    expect(inputMock.setAttribute).toHaveBeenCalledWith('name', 'creq');
+
+    expect(formMock.appendChild).toHaveBeenCalledWith(inputMock);
+
+    expect(appendChildMock).toHaveBeenCalledWith(formMock); // Expect form to be appended to body
+    expect(submitMock).toHaveBeenCalledTimes(1);
+
+    // Clean up spies
+    createElementMock.mockRestore();
+    document.body.appendChild = undefined; // Restore the original appendChild method
+  });
+});
+
+describe('threeDSConfigParser', () => {
+  it('should parse the card details payload', () => {
+    const element = new CollectElement(id,
+      {
+        elementName,
+        rows,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    element.isMounted = jest.fn(() => true);
+    element.iframeName = jest.fn(() => 'mockFrame');
+    const payload = { card: element, object: {
+      configTest: element
+    }};
+    threeDSConfigParser(payload);
+    expect(element.isMounted).toHaveBeenCalledTimes(2);
+    expect(element.iframeName).toHaveBeenCalledTimes(2);
   });
 });

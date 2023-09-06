@@ -92,6 +92,85 @@ export interface IGetInput {
   records: IGetRecord[];
 }
 
+export interface IConstructedThreeDSRecord{
+  guestCheckout?: boolean;
+  config: {
+    vaultID: string
+    acquirerDetails: {
+      acquirerID?: string;
+      acquirerBIN: string;
+      acquirerMerchantID: string;
+    };
+    merchantDetails: {
+      mcc: string;
+      merchantName: string;
+      merchantUrl: string;
+      merchantCountryCode: string;
+      merchantConfigurationId?: string;
+    };
+    threeDSRequestorName: string;
+    threeDSRequestorId: string;
+    threeDSServerTransId: string;
+    threeDSRequestorFinalAuthRespURL: string;
+    preferredProtocolVersion?: string;
+  };
+  cardDetails: {
+    cardNumber: string;
+    cardExpiry: string;
+    cardHolderName: string;
+    schemeID: string;
+  };
+  amountDetails: {
+    amount: string;
+    purchaseCurrency: string;
+    purchaseExponent: number;
+  };
+  browserDetails: {
+    browserAcceptHeader: string;
+    browserLanguage: string;
+    browserColorDepth: string;
+    browserScreenHeight: number;
+    browserScreenWidth: number;
+    browserTZ: number;
+    browserUserAgent: string;
+    browserJavascriptEnabled: boolean;
+    browserJavaEnabled: boolean;
+  }
+}
+
+export interface IThreeDSInput{
+  config: {
+    acquirerDetails: {
+      acquirerID?: string;
+      acquirerBIN: string;
+      acquirerMerchantID: string;
+    };
+    merchantDetails: {
+      mcc: string;
+      merchantName: string;
+      merchantUrl: string;
+      merchantCountryCode: string;
+      merchantConfigurationId?: string;
+    };
+    threeDSRequestorName: string;
+    threeDSRequestorId: string;
+    threeDSServerTransId: string;
+    threeDSRequestorFinalAuthRespURL: string;
+    preferredProtocolVersion?: string;
+  };
+  cardDetails: {
+    cardNumber: string | any;
+    cardExpiry: string | any;
+    cardHolderName: string | any;
+    schemeID: string;
+  };
+  amountDetails: {
+    amount: string | any;
+    purchaseCurrency: string;
+    purchaseExponent: number;
+  };
+}
+
 export interface ISkyflowIdRecord {
   ids: string[];
   redaction: RedactionType;

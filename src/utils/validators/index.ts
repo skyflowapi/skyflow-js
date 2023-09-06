@@ -21,6 +21,7 @@ import {
   MessageType,
   IGetByIdInput,
   IDeleteRecordInput,
+  IThreeDSInput,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { appendZeroToOne } from '../helpers';
@@ -222,6 +223,176 @@ export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
       }
     }
   });
+};
+
+export const validateThreeDSInput = (threeDSInput: IThreeDSInput) => {
+  if (
+    !(threeDSInput)
+  ) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_OBJECT_IN_3DS, [], true);
+  }
+
+  if (!(threeDSInput && typeof threeDSInput === 'object')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_OBJECT_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.cardDetails) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CARD_DETAILS_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.cardDetails.cardNumber) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CARD_NUMBER_IN_3DS, [], true);
+  }
+  if (
+    !(
+      typeof threeDSInput.cardDetails.cardNumber === 'string'
+      || typeof threeDSInput.cardDetails.cardNumber === 'object'
+    )
+  ) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CARD_NUMBER_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.cardDetails.cardHolderName) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CARDHOLDER_NAME_IN_3DS, [], true);
+  }
+  if (
+    !(
+      typeof threeDSInput.cardDetails.cardHolderName === 'string'
+      || typeof threeDSInput.cardDetails.cardHolderName === 'object'
+    )
+  ) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CARDHOLDER_NAME_IN_3DS, [], true);
+  }
+  if (!threeDSInput.cardDetails.cardExpiry) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CARD_EXPIRY_IN_3DS, [], true);
+  }
+  if (
+    !(
+      typeof threeDSInput.cardDetails.cardExpiry === 'string'
+      || typeof threeDSInput.cardDetails.cardExpiry === 'object'
+    )
+  ) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CARD_EXPIRY_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.cardDetails.schemeID) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SCHEME_ID_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.cardDetails.schemeID === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SCHEME_ID_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config || !threeDSInput.config.acquirerDetails || !threeDSInput.config.merchantDetails) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_CONFIG_DETAILS_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config.acquirerDetails.acquirerBIN) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ACQUIRER_BIN_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.config.acquirerDetails.acquirerBIN === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ACQUIRER_BIN_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config.acquirerDetails.acquirerMerchantID) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ACQUIRER_MERCHANT_ID_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.config.acquirerDetails.acquirerMerchantID === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ACQUIRER_MERCHANT_ID_IN_3DS, [], true);
+  }
+
+  if (threeDSInput.config.acquirerDetails.acquirerID && !(typeof threeDSInput.config.acquirerDetails.acquirerID === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ACQUIRER_ID_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config.merchantDetails.mcc) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MERCHANT_MCC_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.config.merchantDetails.mcc === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_MERCHANT_MCC_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config.merchantDetails.merchantName) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MERCHANT_NAME_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.config.merchantDetails.merchantName === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_MERCHANT_NAME_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config.merchantDetails.merchantUrl) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MERCHANT_URL_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.config.merchantDetails.merchantUrl === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_MERCHANT_URL_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config.merchantDetails.merchantCountryCode) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MERCHANT_COUNTRY_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.config.merchantDetails.merchantCountryCode === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_MERCHANT_COUNTRY_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config.threeDSRequestorName) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REQUESTOR_NAME_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.config.threeDSRequestorName === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REQUESTOR_NAME_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config.threeDSRequestorId) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REQUESTOR_ID_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.config.threeDSRequestorId === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REQUESTOR_ID_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config.threeDSServerTransId) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TRANSACTION_ID_IN_3DS, [], true);
+  }
+
+  if (!(typeof threeDSInput.config.threeDSServerTransId === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TRANSACTION_ID_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.config.threeDSRequestorFinalAuthRespURL) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REQUESTOR_URL_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.config.threeDSRequestorFinalAuthRespURL === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REQUESTOR_URL_IN_3DS, [], true);
+  }
+
+  if (threeDSInput.config.threeDSServerTransId && !(typeof threeDSInput.config.threeDSServerTransId === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REQUESTOR_TRANS_ID_IN_3DS, [], true);
+  }
+
+  if (threeDSInput.config.preferredProtocolVersion && !(typeof threeDSInput.config.preferredProtocolVersion === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_PROTOCOL_VERSION_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.amountDetails) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_AMOUNT_DETAILS_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.amountDetails.amount) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_AMOUNT_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.amountDetails.amount === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_AMOUNT_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.amountDetails.purchaseCurrency) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_PURCHASE_CURRENCY_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.amountDetails.purchaseCurrency === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_PURCHASE_CURRENCY_IN_3DS, [], true);
+  }
+
+  if (!threeDSInput.amountDetails.purchaseExponent) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_PURCHASE_EXPONENT_IN_3DS, [], true);
+  }
+  if (!(typeof threeDSInput.amountDetails.purchaseExponent === 'number')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_PURCHASE_EXPONENT_IN_3DS, [], true);
+  }
 };
 
 export const validateGetInput = (getInput: IGetInput) => {
