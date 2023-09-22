@@ -1,7 +1,9 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import _ from 'lodash';
+import merge from 'lodash/merge';
+import omit from 'lodash/omit';
+import get from 'lodash/get';
 import Client from '../client';
 import SkyflowError from '../libs/skyflow-error';
 import { getAccessToken } from '../utils/bus-events';
@@ -133,7 +135,7 @@ const keyify = (obj, prefix = '') => Object.keys(obj).reduce((res: any, el) => {
 const checkDuplicateColumns = (additionalColumns, columns, table) => {
   const keys = keyify(additionalColumns);
   keys.forEach((key) => {
-    const value = _.get(columns, key);
+    const value = get(columns, key);
     if (value) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT, [`${key}`, `${table}`], true);
     }
@@ -153,7 +155,7 @@ export const constructElementsInsertReq = (req, update, options) => {
             record.fields, update[record.fields.skyflowID], record.table,
           );
           const temp = record.fields;
-          _.merge(temp, update[record.fields.skyflowID]);
+          merge(temp, update[record.fields.skyflowID]);
           update[record.fields.skyflowID] = temp;
         } else {
           update[record.fields.skyflowID] = {
@@ -165,7 +167,7 @@ export const constructElementsInsertReq = (req, update, options) => {
         if (tables.includes(record.table)) {
           checkDuplicateColumns(record.fields, req[record.table], record.table);
           const temp = record.fields;
-          _.merge(temp, req[record.table]);
+          merge(temp, req[record.table]);
           req[record.table] = temp;
         } else {
           req[record.table] = record.fields;
@@ -201,8 +203,8 @@ const updateRecordsInVault = (
 ) => {
   const table = skyflowIdRecord.fields.table;
   const skyflowID = skyflowIdRecord.skyflowID;
-  skyflowIdRecord.fields = _.omit(skyflowIdRecord.fields, 'table');
-  skyflowIdRecord.fields = _.omit(skyflowIdRecord.fields, 'skyflowID');
+  skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'table');
+  skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'skyflowID');
   return client.request({
     body: {
       record: {
