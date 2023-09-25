@@ -40,7 +40,7 @@ import {
   addSeperatorToCardNumberMask,
   appendMonthFourDigitYears,
   appendMonthTwoDigitYears,
-  appendZeroToOne, handleCopyIconClick, styleToString,
+  appendZeroToOne, domReady, getMaskedOutput, handleCopyIconClick, styleToString,
 } from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
 
@@ -289,6 +289,8 @@ export class FrameElement {
         || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
         if (this.domInput) {
           this.domInput.value = state.value || '';
+          // this.applyMask();
+          // The masking is only working on when we call it here, look at it more
         }
       }
 
@@ -461,8 +463,15 @@ export class FrameElement {
         this.iFrameFormElement.mask
         || this.iFrameFormElement.replacePattern
       ) {
-        $(document).ready(() => {
-          $(this.domInput as any).trigger('input');
+        domReady(() => {
+          const domInput = this.domInput;
+          if (domInput) {
+            const inputEvent = new Event('input', {
+              bubbles: true,
+              cancelable: true,
+            });
+            domInput.dispatchEvent(inputEvent);
+          }
         });
       }
     }
@@ -747,7 +756,7 @@ export class FrameElement {
 
     if (this.domLabel) this.domLabel.textContent = this.options.label;
 
-    $(document).ready(() => {
+    domReady(() => {
       const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
 
       this.iFrameFormElement.setValidation(this.options.validations);
@@ -764,6 +773,7 @@ export class FrameElement {
 
       // const { mask } = this.iFrameFormElement;
       $(id).off('input');
+      // TODO Remove all Event Listeners on #input
       (<any>$).jMaskGlobals.translation = {};
       (<any>$).jMaskGlobals.clearIfNotMatch = true;
 
@@ -802,9 +812,10 @@ export class FrameElement {
         translation[key] = { pattern: mask[2][key] };
       });
       try {
-        $(id).mask(mask[0], {
-          translation,
-        });
+        id.value = getMaskedOutput(id.value, mask[0], translation);
+        // $(id).mask(mask[0], {
+        //   translation,
+        // });
       } catch (err) {
         printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
           this.iFrameFormElement.fieldType), MessageType.WARN,

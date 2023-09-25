@@ -84,6 +84,44 @@ export const getReturnValue = (value: string | Blob, element: string, doesReturn
   }
   return undefined;
 };
+export function domReady(fn) {
+  if (document.readyState !== 'loading') {
+    fn();
+    return;
+  }
+  document.addEventListener('DOMContentLoaded', fn);
+}
+
+export const getMaskedOutput = (input: string, format: string, translation: any): string => {
+  const inputArray = Array.from(input);
+  const formatArray = Array.from(format);
+  let output = '';
+  let j = 0;
+
+  for (let i = 0; i < inputArray.length; i += 1) {
+    const character = inputArray[i];
+    if (j < formatArray.length) {
+      let formatChar = formatArray[j];
+      if (!translation[formatChar] || character === formatChar) {
+        output += formatChar;
+        j += 1;
+      }
+      formatChar = formatArray[j];
+      if (translation[formatChar]) {
+        const translationString = translation[formatChar].pattern;
+        const regex = new RegExp(translationString);
+        const characterString = character.toString();
+        if (regex.test(characterString)) {
+          output += characterString;
+          j += 1;
+        }
+      }
+    } else {
+      break;
+    }
+  }
+  return output;
+};
 
 export const copyToClipboard = (text:string) => {
   navigator.clipboard
