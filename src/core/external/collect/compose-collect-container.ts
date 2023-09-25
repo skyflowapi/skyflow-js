@@ -1,7 +1,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /*
-Copyright (c) 2022 Skyflow, Inc.
+Copyright (c) 2023 Skyflow, Inc.
 */
 import bus from 'framebus';
 import sum from 'lodash/sum';
