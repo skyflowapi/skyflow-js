@@ -354,7 +354,7 @@ export class FrameElement {
           }
         }
         if (placeholder) {
-          this.domInput?.setAttribute('placeholder', placeholder);
+        this.domInput?.setAttribute('placeholder', placeholder);
         }
         if (inputStyles) {
           this.injectInputStyles(inputStyles);
@@ -402,6 +402,7 @@ export class FrameElement {
       name: this.iFrameFormElement.fieldName,
       id: this.iFrameFormElement.iFrameName,
       placeholder: this.options.placeholder,
+      accept: this.options.accept,
       disabled: this.options.disabled ? true : undefined,
       readOnly: this.options.readOnly ? true : undefined,
       required: this.options.required ? true : undefined,

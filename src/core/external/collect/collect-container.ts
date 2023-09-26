@@ -38,6 +38,7 @@ export interface CollectElementInput {
   labelStyles?: object;
   errorTextStyles?: object;
   placeholder?: string;
+  accept?:string;
   type: ElementType;
   altText?: string;
   validations?: IValidationRule[]
@@ -130,6 +131,7 @@ class CollectContainer extends Container {
             {
               elementType: input.type,
               name: input.column,
+               accept:options.allowedFileType,
               ...input,
               ...formattedOptions,
               validations,
