@@ -354,7 +354,7 @@ export class FrameElement {
           }
         }
         if (placeholder) {
-        this.domInput?.setAttribute('placeholder', placeholder);
+          this.domInput?.setAttribute('placeholder', placeholder);
         }
         if (inputStyles) {
           this.injectInputStyles(inputStyles);

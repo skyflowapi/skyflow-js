@@ -306,7 +306,7 @@ export const ALLOWED_ATTRIBUTES = {
   'aria-required': 'boolean',
   disabled: 'boolean',
   placeholder: 'string',
-  accept:'string',
+  accept: 'string',
 };
 
 export const ALLOWED_STYLES = [

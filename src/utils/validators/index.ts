@@ -504,6 +504,18 @@ export const validateCollectElementInput = (input: CollectElementInput, logLevel
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_IN_COLLECT, [], true);
   }
 };
+export const validateCollectElementFileInput = (input: CollectElementInput, options) => {
+  if (options.allowedFileType){
+    if(!Array.isArray(options.allowedFileType))
+     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_OPTIONS, [], true);
+     if(options.allowedFileType.length <=0)
+     throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ALLOWED_OPTIONS_ARRAY, [], true);
+     if(!options.allowedFileType.every((item) => typeof item === 'string'))
+     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_FILETYPE_ARRAY, [], true);
+
+  }
+  
+};
 
 export const validateUpsertOptions = (upsertOptions) => {
   if (!(upsertOptions && Array.isArray(upsertOptions))) {
