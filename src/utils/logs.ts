@@ -283,7 +283,7 @@ const logs = {
     COLLECT_ALT_TEXT_DEPERECATED: 'altText is DEPERECATED, passing altText will not have any effect',
     GET_BY_ID_DEPRECATED: 'getById is deprecated, use new get method',
     INPUT_FORMATTING_NOT_SUPPROTED: 'format or translation are not supported on %s1 element type.',
-    INVALID_INPUT_TRANSLATION: 'invalid or unsupported translation provided for %s1 element type.', 
+    INVALID_INPUT_TRANSLATION: 'invalid or unsupported translation provided for %s1 element type.',
 
   },
 };

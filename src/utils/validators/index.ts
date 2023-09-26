@@ -514,9 +514,8 @@ export const validateCollectElementFileInput = (input: CollectElementInput, opti
     }
     if (!options.allowedFileType.every((item) => typeof item === 'string')) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_FILETYPE_ARRAY, [], true);
-    }     
+    }
   }
-  
 };
 
 export const validateUpsertOptions = (upsertOptions) => {
