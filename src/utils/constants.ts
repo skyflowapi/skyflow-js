@@ -227,7 +227,7 @@ const SKYFLOW_ERROR_CODE = {
   EMPTY_ALLOWED_OPTIONS_ARRAY: {
     code: 400,
     description: logs.errorLogs.EMPTY_ALLOWED_OPTIONS_ARRAY,
-  },  
+  },
   INVALID_ALLOWED_FILETYPE_ARRAY: {
     code: 400,
     description: logs.errorLogs.INVALID_ALLOWED_FILETYPE_ARRAY,
