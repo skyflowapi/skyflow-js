@@ -1,10 +1,10 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /*
-Copyright (c) 2022 Skyflow, Inc.
+Copyright (c) 2023 Skyflow, Inc.
 */
 import bus from 'framebus';
-import _ from 'lodash';
+import sum from 'lodash/sum';
 import { IUpsertOptions } from '../../../core-utils/collect';
 import EventEmitter from '../../../event-emitter';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
@@ -292,7 +292,7 @@ class ComposableContainer extends Container {
     }
 
     const { layout } = this.#options;
-    if (_.sum(layout) !== this.#elementsList.length) {
+    if (sum(layout) !== this.#elementsList.length) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.MISMATCH_ELEMENT_COUNT_LAYOUT_SUM, [], true);
     }
     let count = 0;

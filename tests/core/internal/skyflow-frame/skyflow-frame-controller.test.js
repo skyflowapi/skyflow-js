@@ -8,8 +8,6 @@ import * as busEvents from '../../../../src/utils/bus-events';
 import { LogLevel, Env, RedactionType } from '../../../../src/utils/common';
 import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
 
-jest.mock('easy-soap-request')
-const soapRequest = require('easy-soap-request');
 
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();
