@@ -412,7 +412,6 @@ class SkyflowContainer {
             }
           }
           validateThreeDSInput(threeDSInput);
-
           // Get the current local time offset in minutes
           const localTimeOffsetMinutes = new Date().getTimezoneOffset();
 
