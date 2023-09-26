@@ -17,7 +17,8 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import {
-  validateCollectElementFileInput,validateCollectElementInput, validateInitConfig, validateAdditionalFieldsInCollect,
+  validateCollectElementFileInput, validateCollectElementInput, validateInitConfig, 
+  validateAdditionalFieldsInCollect,
   validateUpsertOptions,
   validateBooleanOptions,
 } from '../../../utils/validators';
@@ -122,10 +123,9 @@ class CollectContainer extends Container {
     required: false,
   }) => {
     validateCollectElementInput(input, this.#context.logLevel);
-    if(input.type ==ElementType.FILE_INPUT)
-    {
-      validateCollectElementFileInput(input,options);
-    }
+    if (input.type === ElementType.FILE_INPUT) {
+      validateCollectElementFileInput(input, options);
+      }
     const validations = formatValidations(input);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
     const elementGroup = {

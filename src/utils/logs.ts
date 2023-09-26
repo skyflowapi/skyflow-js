@@ -271,10 +271,9 @@ const logs = {
     INVALID_INPUT_OPTIONS_FORMAT: 'Interface: container create - Invalid type, format must be of non-empty string type.',
     INVALID_INPUT_OPTIONS_TRANSLATION: 'Interface: container create - Invalid type, translation must be of non-empty object type.',
     EMPTY_COLLECT_CUSTOM_FORMAT: 'Interface: container create - %s1 cannot be empty object.',
-    
-    INVALID_ALLOWED_OPTIONS:'Interface: collect element - Invalid options, allowedFileType must be of string array type.',
-    EMPTY_ALLOWED_OPTIONS_ARRAY:'Interface: collect element - Invalid options value, allowedFileType array is empty.',
-    INVALID_ALLOWED_FILETYPE_ARRAY:'Interface: collect element - Invalid options value, allowedFileType array must contain only string elements.'
+    INVALID_ALLOWED_OPTIONS: 'Interface: collect element - Invalid options, allowedFileType must be of string array type.',
+    EMPTY_ALLOWED_OPTIONS_ARRAY: 'Interface: collect element - Invalid options value, allowedFileType array is empty.',
+    INVALID_ALLOWED_FILETYPE_ARRAY: 'Interface: collect element - Invalid options value, allowedFileType array must contain only string elements.',
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',
@@ -284,8 +283,7 @@ const logs = {
     COLLECT_ALT_TEXT_DEPERECATED: 'altText is DEPERECATED, passing altText will not have any effect',
     GET_BY_ID_DEPRECATED: 'getById is deprecated, use new get method',
     INPUT_FORMATTING_NOT_SUPPROTED: 'format or translation are not supported on %s1 element type.',
-    INVALID_INPUT_TRANSLATION: 'invalid or unsupported translation provided for %s1 element type.',
-    
+    INVALID_INPUT_TRANSLATION: 'invalid or unsupported translation provided for %s1 element type.', 
 
   },
 };
