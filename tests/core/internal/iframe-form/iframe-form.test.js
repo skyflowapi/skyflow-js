@@ -9,6 +9,7 @@ import * as busEvents from '../../../../src/utils/bus-events';
 import SkyflowError from '../../../../src/libs/skyflow-error';
 import logs from '../../../../src/utils/logs';
 import { ContainerType } from '../../../../src/skyflow';
+import { validateCollectElementFileInput } from '../../../../src/utils/validators'
 import { parameterizedString } from '../../../../src/utils/logs-helper';
 
 const tableCol = btoa('1234')
@@ -788,6 +789,39 @@ describe('test file Upload method', () => {
             expect(cb3.mock.calls[0][0].records.length).toBe(1);
             done()
         }, 1000)
-    })
+    });
+    test('validateCollectElementFileInput - valid allowedFileType array', () => {
+        const input = { type: 'file', column: 'file' };
+        const options = { allowedFileType: [".pdf", ".png"] };
+
+        expect(() => {
+            validateCollectElementFileInput(input, options);
+        }).not.toThrow();
+    });
+    test('validateCollectElementFileInput - invalid file types in allowedFileType array', () => {
+        const input = { type: 'file', column: 'file' };
+        const options = { allowedFileType: [".pdf", 42] };
+
+        expect(() => {
+            validateCollectElementFileInput(input, options);
+        }).toThrowError(logs.errorLogs.INVALID_ALLOWED_FILETYPE_ARRAY);
+    });
+    test('validateCollectElementFileInput - invalid allowedFileType (not an array)', () => {
+        const input = { type: 'file', column: 'file' };
+        const options = { allowedFileType: 'invalidFileType' };
+
+        expect(() => {
+            validateCollectElementFileInput(input, options);
+        }).toThrowError(logs.errorLogs.INVALID_ALLOWED_OPTIONS);
+    });
+
+    test('validateCollectElementFileInput - empty allowedFileType array', () => {
+        const input = { type: 'file', column: 'file' };
+        const options = { allowedFileType: [] };
+
+        expect(() => {
+            validateCollectElementFileInput(input, options);
+        }).toThrowError(logs.errorLogs.EMPTY_ALLOWED_OPTIONS_ARRAY);
+    });
 
 })
