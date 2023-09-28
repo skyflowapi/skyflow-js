@@ -274,9 +274,12 @@ export class FrameElement {
       }
       if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
         const cardType = detectCardType(state.value);
-        if (this.options.enableCardIcon) {
-          if (this.domImg) {
-            this.domImg.src = CARD_ENCODED_ICONS[cardType] || 'none';
+        if (cardType !== this.iFrameFormElement.cardType) {
+          if (this.options.enableCardIcon) {
+            if (this.domImg) {
+              this.domImg.src = CARD_ENCODED_ICONS[cardType] || 'none';
+              this.iFrameFormElement.cardType = cardType;
+            }
           }
         }
         const cardNumberMask = addSeperatorToCardNumberMask(
