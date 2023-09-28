@@ -9,7 +9,7 @@ module.exports = function (api) {
       '@babel/preset-env',
       {
         corejs: { version: 3 },
-        useBuiltIns: 'usage',
+        useBuiltIns: 'entry',
         targets: {
           edge: '17',
           firefox: '60',

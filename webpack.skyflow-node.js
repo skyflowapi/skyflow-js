@@ -12,7 +12,7 @@ const common = require('./webpack.common.js');
 module.exports = () => merge(common, {
   mode: 'production',
   entry: {
-    index: ['core-js/stable', path.resolve(__dirname, 'src/index-node.ts')],
+    index: [ path.resolve(__dirname, 'src/index-node.ts')],
   },
   output: {
     filename: '[name].js',

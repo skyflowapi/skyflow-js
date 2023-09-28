@@ -20,9 +20,8 @@ const minify = {
 
 module.exports = () => merge(common, {
   entry: {
-    skyflow: ['core-js/stable', path.resolve(__dirname, 'src/index.ts')],
+    skyflow: [ path.resolve(__dirname, 'src/index.ts')],
     iframe: [
-      'core-js/stable',
       path.resolve(__dirname, 'src/index-internal.ts'),
     ],
   },
