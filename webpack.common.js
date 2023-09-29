@@ -15,7 +15,7 @@ module.exports = {
       { test: /\.(ts|js)x?$/, loader: 'babel-loader', exclude: /node_modules/ },
       {
         test:/\.svg$/,
-        type:'asset/inline'
+        type:'asset/resource'
       }
     ],
   },

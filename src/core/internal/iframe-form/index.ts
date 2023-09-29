@@ -15,6 +15,7 @@ import {
   FRAME_ELEMENT,
   DEFAULT_ERROR_TEXT_ELEMENT_TYPES,
   DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES,
+  CardType,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -106,6 +107,8 @@ export class IFrameFormElement extends EventEmitter {
   skyflowID?: string;
 
   containerType: string;
+
+  cardType: string = CardType.DEFAULT;
 
   constructor(name: string, label: string, metaData, context: Context, skyflowID?: string) {
     super();

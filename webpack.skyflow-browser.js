@@ -13,7 +13,7 @@ module.exports = () => merge(common, {
   mode: 'production',
 
   entry: {
-    index: ['core-js/stable', path.resolve(__dirname, 'src/index.ts')],
+    index: [ path.resolve(__dirname, 'src/index.ts')],
   },
 
   output: {
