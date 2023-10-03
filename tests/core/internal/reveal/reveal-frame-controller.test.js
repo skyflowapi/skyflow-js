@@ -78,7 +78,7 @@ describe('RevealFrameController Class', () => {
     fetchRecordsByTokenId.mockImplementation(()=>{
       return new Promise((resolve,)=>{
         resolve({
-          records:[{token:"1815-6223-1073-1425",value:"3242"}]
+          records:[{token:"1815-6223-1073-1425",value:"3242", valueType : "STRING"}]
         })
       });
     })
