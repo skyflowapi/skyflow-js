@@ -6,7 +6,7 @@ import { IUpsertOptions } from '../../../core-utils/collect';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
 import {
-  formatValidations, formatOptions, validateElementOptions
+  formatValidations, formatOptions, validateElementOptions,
 } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
@@ -18,7 +18,8 @@ import {
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
-import { validateCollectElementInput, validateInitConfig,
+import {
+  validateCollectElementInput, validateInitConfig,
   validateAdditionalFieldsInCollect,
   validateUpsertOptions,
   validateBooleanOptions,
