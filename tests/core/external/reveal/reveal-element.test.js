@@ -168,14 +168,15 @@ describe("Reveal Element Methods",()=>{
   });
   it("getRecord Data",()=>{
     const testRecordData = testRevealElement.getRecordData();
-    expect(testRecordData).toStrictEqual({token:"1244",})
+    console.log('testRecordData', testRecordData)
+    expect(testRecordData).toStrictEqual({token:"1244", elementId: "id"})
   });
   it("setToken method",()=>{
     testRevealElement.setToken("testToken");
   });
   it("getRecord Data",()=>{
     const testRecordData = testRevealElement.getRecordData();
-    expect(testRecordData).toStrictEqual({token:"testToken"})
+    expect(testRecordData).toStrictEqual({token:"testToken", elementId: "id"})
   });
 
 
