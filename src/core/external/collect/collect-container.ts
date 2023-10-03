@@ -5,7 +5,9 @@ import bus from 'framebus';
 import { IUpsertOptions } from '../../../core-utils/collect';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
-import { formatValidations, formatOptions, validateElementOptions } from '../../../libs/element-options';
+import {
+  formatValidations, formatOptions, validateElementOptions
+} from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
