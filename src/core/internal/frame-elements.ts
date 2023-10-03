@@ -250,6 +250,9 @@ export default class FrameElements {
       this.#domForm.append(rootDiv);
       document.body.append(this.#domForm);
     }
+    bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (data, callback) => {
+      callback({ height: rootDiv.scrollHeight, name: this.#name });
+    });
   };
 
   #updateCombinedErrorText = (elementId, errorMessages) => {
