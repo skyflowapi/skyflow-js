@@ -50,7 +50,6 @@ class RevealFrameController {
       printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
         CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
       MessageType.LOG, this.#context.logLevel);
-
       this.revealData(data.records as any).then(
         (resolvedResult) => {
           callback(resolvedResult);
@@ -77,7 +76,7 @@ class RevealFrameController {
     return new Promise((resolve, reject) => {
       fetchRecordsByTokenId(revealRecords, this.#client).then(
         (resolvedResult) => {
-          const formattedResult = formatRecordsForIframe(resolvedResult);
+          const formattedResult = formatRecordsForIframe(resolvedResult, revealRecords);
           bus
             .target(properties.IFRAME_SECURE_SITE)
             .emit(
@@ -88,7 +87,7 @@ class RevealFrameController {
           resolve(formatRecordsForClient(resolvedResult));
         },
         (rejectedResult) => {
-          const formattedResult = formatRecordsForIframe(rejectedResult);
+          const formattedResult = formatRecordsForIframe(rejectedResult, revealRecords);
           bus
             .target(properties.IFRAME_SECURE_SITE)
             .emit(

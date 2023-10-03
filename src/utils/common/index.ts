@@ -61,6 +61,7 @@ export interface IInsertRecord {
 export interface IRevealRecord {
   token: string;
   redaction?: RedactionType;
+  elementId?: string;
 }
 
 export interface IInsertResponse {

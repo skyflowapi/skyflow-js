@@ -20,17 +20,19 @@ interface IApiSuccessResponse {
   ];
 }
 
-const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
+const formatForPureJsSuccess = (response: IApiSuccessResponse, elementId?: String) => {
   const currentResponseRecords = response.records;
-  return currentResponseRecords.map((record) => ({ token: record.token, value: record.value }));
+  return currentResponseRecords.map((record) => (
+    { token: record.token, value: record.value, elementId }));
 };
 
-const formatForPureJsFailure = (cause, tokenId:string) => ({
+const formatForPureJsFailure = (cause, tokenId:string, elementId?: String) => ({
   token: tokenId,
   ...new SkyflowError({
     code: cause?.error?.code,
     description: cause?.error?.description,
   }, [], true),
+  elementId,
 });
 
 const getRecordsFromVault = (
@@ -119,11 +121,13 @@ export const fetchRecordsByTokenId = (
         getTokenRecordsFromVault(tokenRecord.token, redaction, client, authToken as string)
           .then(
             (response: IApiSuccessResponse) => {
-              const fieldsData = formatForPureJsSuccess(response);
+              const fieldsData = formatForPureJsSuccess(response, tokenRecord.elementId);
               apiResponse.push(...fieldsData);
             },
             (cause: any) => {
-              const errorData = formatForPureJsFailure(cause, tokenRecord.token);
+              const errorData = formatForPureJsFailure(
+                cause, tokenRecord.token, tokenRecord.elementId,
+              );
               printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
               apiResponse.push(errorData);
             },
@@ -157,11 +161,21 @@ export const fetchRecordsByTokenId = (
     rootReject(err);
   });
 });
-export const formatRecordsForIframe = (response: IRevealResponseType) => {
+export const formatRecordsForIframe = (
+  response: IRevealResponseType,
+  revealRecords: IRevealRecord[],
+) => {
   const result: Record<string, string> = {};
   if (response.records) {
     response.records.forEach((record) => {
-      result[record.token] = record.value;
+      if (revealRecords && Array.isArray(revealRecords)) {
+        const elementIds = revealRecords.map((item) => item.elementId);
+        elementIds.forEach((elementId) => {
+          if (elementId === record.elementId) {
+            result[String(elementId)] = record.value;
+          }
+        });
+      }
     });
   }
   return result;
@@ -172,10 +186,18 @@ export const formatRecordsForClient = (response: IRevealResponseType) => {
     const successRecords = response.records.map((record) => ({
       token: record.token,
     }));
-    if (response.errors) return { success: successRecords, errors: response.errors };
+    const modifiedObject = response.errors?.map((error) => ({
+      token: error.token,
+      error: error.error,
+    }));
+    if (response.errors) return { success: successRecords, errors: modifiedObject };
     return { success: successRecords };
   }
-  return { errors: response.errors };
+  const modifiedObject = response.errors?.map((error) => ({
+    token: error.token,
+    error: error.error,
+  }));
+  return { errors: modifiedObject };
 };
 
 export const fetchRecordsGET = async (
