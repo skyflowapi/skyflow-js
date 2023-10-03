@@ -2,11 +2,9 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import $ from 'jquery';
 import Client from '../../client';
 import { setAttributes } from '../../iframe-libs/iframer';
 import { validateElementOptions } from '../../libs/element-options';
-import 'jquery-mask-plugin/dist/jquery.mask.min';
 import {
   ELEMENTS,
   ELEMENT_EVENTS_TO_CLIENT,
@@ -289,8 +287,7 @@ export class FrameElement {
         || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
         if (this.domInput) {
           this.domInput.value = state.value || '';
-          // this.applyMask();
-          // The masking is only working on when we call it here, look at it more
+          this.applyMask();
         }
       }
 
@@ -548,7 +545,7 @@ export class FrameElement {
       });
   };
 
-  onArrowKeys = (event:JQuery.TriggeredEvent) => {
+  onArrowKeys = (event: any) => {
     const keyBoardEvent = event.originalEvent as KeyboardEvent;
     const currentInput = keyBoardEvent?.target as HTMLInputElement;
     const cursorPosition = event.target.selectionEnd;
@@ -772,18 +769,27 @@ export class FrameElement {
       }
 
       // const { mask } = this.iFrameFormElement;
-      $(id).off('input');
-      // TODO Remove all Event Listeners on #input
-      (<any>$).jMaskGlobals.translation = {};
-      (<any>$).jMaskGlobals.clearIfNotMatch = true;
+      // function recreateNode(el, withChildren) {
+      //   if (withChildren) {
+      //     el.parentNode.replaceChild(el.cloneNode(true), el);
+      //   } else {
+      //     const newEl = el.cloneNode(false);
+      //     while (el.hasChildNodes()) newEl.appendChild(el.firstChild);
+      //     el.parentNode.replaceChild(newEl, el);
+      //   }
+      // }
 
-      $(id).unmask();
+      // recreateNode(id, true);
+      // TODO see how eventHandlers are taken care of, how to remove all of specific events
+      $(id).off('input');
+
+      // $(id).unmask();
       this.applyMask();
 
       if (this.domInput) {
         const { replacePattern } = this.iFrameFormElement;
         if (replacePattern) {
-          $(id).on('input', (event) => {
+          id.addEventListener('input', (event) => {
             event.target.value = event.target.value.replace(
               replacePattern[0],
               replacePattern[1],
@@ -791,8 +797,8 @@ export class FrameElement {
           });
         }
 
-        $(id).on('input', this.onInputChange);
-        $(id).on('keydown', this.onArrowKeys);
+        id.addEventListener('input', this.onInputChange);
+        id.addEventListener('keydown', this.onArrowKeys);
       }
 
       this.setupInputField(
@@ -821,6 +827,9 @@ export class FrameElement {
           this.iFrameFormElement.fieldType), MessageType.WARN,
         (this.iFrameFormElement.context.logLevel || LogLevel.ERROR));
       }
+    }
+    if (this.domInput?.value !== this.iFrameFormElement.getValue()) {
+      this.iFrameFormElement.setValue(this.domInput?.value);
     }
   }
 }
