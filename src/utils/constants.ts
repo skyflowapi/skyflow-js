@@ -223,6 +223,15 @@ const SKYFLOW_ERROR_CODE = {
   },
   MISSING_ELEMENT_TYPE: { code: 400, description: logs.errorLogs.MISSING_ELEMENT_TYPE },
   EMPTY_ELEMENT_TYPE: { code: 400, description: logs.errorLogs.EMPTY_ELEMENT_TYPE },
+  INVALID_ALLOWED_OPTIONS: { code: 400, description: logs.errorLogs.INVALID_ALLOWED_OPTIONS },
+  EMPTY_ALLOWED_OPTIONS_ARRAY: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_ALLOWED_OPTIONS_ARRAY,
+  },
+  INVALID_ALLOWED_FILETYPE_ARRAY: {
+    code: 400,
+    description: logs.errorLogs.INVALID_ALLOWED_FILETYPE_ARRAY,
+  },
   INVALID_ELEMENT_TYPE: { code: 400, description: logs.errorLogs.INVALID_ELEMENT_TYPE },
   INVALID_ELEMENT_SELECTOR: { code: 400, description: logs.errorLogs.INVALID_ELEMENT_SELECTOR },
   FRAME_NOT_FOUND: { code: 400, description: logs.errorLogs.FRAME_NOT_FOUND },

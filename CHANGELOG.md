@@ -2,7 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.30.1]
+## [1.31.0] - 2023-10-06
+### Added
+- `allowedFileType` option for file input element.
+- `valueType` in detokenize and reveal response.
+
+### Fixed
+- iFrame height resize.
+## [1.30.3] - 2023-09-29
+### Fixed
+- removed assets from build and updated build config for core-js.
+## [1.30.2] - 2023-09-26
+### Fixed
+- updated internal imports and removed unused dependencies.
+## [1.30.1] - 2023-08-14
 ### Added
 - Add requiredAsterisk style and global styles.
 

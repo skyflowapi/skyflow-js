@@ -44,6 +44,7 @@ export const ELEMENT_EVENTS_TO_CLIENT = {
   SUBMIT: 'SUBMIT',
   CREATED: 'CREATED',
   MOUNTED: 'MOUNTED',
+  HEIGHT: 'HEIGHT',
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {
@@ -306,6 +307,7 @@ export const ALLOWED_ATTRIBUTES = {
   'aria-required': 'boolean',
   disabled: 'boolean',
   placeholder: 'string',
+  accept: 'string',
 };
 
 export const ALLOWED_STYLES = [
@@ -354,6 +356,7 @@ export const ALLOWED_PSEUDO_STYLES = [
   ':hover',
   ':focus',
   '::placeholder',
+  '::accept',
   '::selection',
   ':disabled',
   ':-webkit-autofill',
