@@ -1797,10 +1797,12 @@ The sample response:
     {
       "token": "131e70dc-6f76-4319-bdd3-96281e051051",
       "value": "1990-01-01",
+      "valueType": "STRING"
     },
     {
      "token": "1r434532-6f76-4319-bdd3-96281e051051",
      "value": "xxxxxxer",
+     "valueType": "STRING"
    }
   ]
 }
@@ -2164,10 +2166,12 @@ The response below shows that some tokens assigned to the reveal elements get re
      {
      "token": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
      "value": "xxxxxxxxx4163"
+     "valueType": "STRING"
    },
    {
      "token": "a4b24714-6a26-4256-b9d4-55ad69aa4047",
      "value": "12/2098"
+     "valueType": "STRING"
    }
   ],
  "errors": [
