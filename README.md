@@ -2362,6 +2362,106 @@ container.uploadFiles();
     ]
 }
 ```
+### File upload with options:
+
+Along with fileElementInput, you can define other options in the Options object as described below: 
+```js
+const options = {
+ allowedFileType: String[],  // Optional, indicates the allowed file types for upload
+}
+```
+`allowedFileType`: An array of string value that indicates the allowedFileTypes to be uploaded.
+
+#### File upload with options example
+
+```javascript
+// Create collect Container.
+const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+
+// Create collect elements.
+const cardNumberElement = collectContainer.create({
+  table: 'newTable',
+  column: 'card_number',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  placeholder: 'card number',
+  label: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+const options = { 
+    allowedFileType: [".pdf",".png"];
+};
+const fileElement = collectContainer.create({
+  table: 'newTable',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.FILE_INPUT,
+},
+  options
+);
+
+// Mount the elements.
+cardNumberElement.mount('#collectCardNumber');
+fileElement.mount('#collectFile');
+
+// Collect and upload methods.
+collectContainer.collect({});
+collectContainer.uploadFiles();
+
+```
+**Sample Response for collect():**
+```javascript
+{
+  "records": [
+    {
+      "table": "newTable",
+      "fields": {
+        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+      }
+    }
+  ]
+}
+```
+**Sample Response for file uploadFiles() :**
+```javascript
+{
+    "fileUploadResponse": [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
 #### File upload with additional elements
 
 ```javascript
@@ -2448,106 +2548,7 @@ collectContainer.uploadFiles();
     ]
 }
 ```
-Along with fileElementInput, you can define other options in the Options object as described below: 
-```js
-const options = {
- allowedFileType: String[],  // Optional, indicates the allowed file types for upload
-}
-```
 
-`allowedFileType`: An array of string value that indicates the allowedFileTypes to be uploaded.
-
-#### File upload with options example
-
-```javascript
-// Create collect Container.
-const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
-
-// Create collect elements.
-const cardNumberElement = collectContainer.create({
-  table: 'newTable',
-  column: 'card_number',
-  inputstyles: {
-    base: {
-      color: '#1d1d1d',
-    },
-  },
-  labelStyles: {
-    base: {
-      fontSize: '12px',
-      fontWeight: 'bold',
-    },
-  },
-  errorTextStyles: {
-    base: {
-      color: '#f44336',
-    },
-  },
-  placeholder: 'card number',
-  label: 'Card Number',
-  type: Skyflow.ElementType.CARD_NUMBER,
-});
-const options = { 
-    allowedFileType: [".pdf",".png"];
-};
-const fileElement = collectContainer.create({
-  table: 'newTable',
-  column: 'file',
-  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
-    base: {
-      color: '#1d1d1d',
-    },
-  },
-  labelStyles: {
-    base: {
-      fontSize: '12px',
-      fontWeight: 'bold',
-    },
-  },
-  errorTextStyles: {
-    base: {
-      color: '#f44336',
-    },
-  },
-  type: Skyflow.ElementType.FILE_INPUT,
-},
-  options
-);
-
-// Mount the elements.
-cardNumberElement.mount('#collectCardNumber');
-fileElement.mount('#collectFile');
-
-// Collect and upload methods.
-collectContainer.collect({});
-collectContainer.uploadFiles();
-
-```
-```
-**Sample Response for collect():**
-```javascript
-{
-  "records": [
-    {
-      "table": "newTable",
-      "fields": {
-        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
-      }
-    }
-  ]
-}
-```
-**Sample Response for file uploadFiles() :**
-```javascript
-{
-    fileUploadResponse: [
-        {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
-        }
-    ]
-}
-```
 ---
 # Securely deleting data client-side
 -  [**Deleting data from the vault**](#deleting-data-from-the-vault)
