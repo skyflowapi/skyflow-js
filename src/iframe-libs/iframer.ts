@@ -11,7 +11,7 @@ export const iframeDefaultAttributes = {
   frameBorder: 0,
   allowtransparency: true,
   scrolling: 'no',
-  style: 'width: 100%; height: 100%',
+  style: 'width: 100%;',
   allow: 'clipboard-read; clipboard-write',
 };
 

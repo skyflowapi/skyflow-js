@@ -46,6 +46,12 @@ export default class IFrame {
     this.container?.appendChild(this.iframe);
   };
 
+  setIframeHeight = (height) => {
+    if (this.iframe.getAttribute('height') !== height) {
+      this.iframe.setAttribute('height', `${height}px`);
+    }
+  };
+
   unmount = () => {
     this.iframe.remove();
   };
