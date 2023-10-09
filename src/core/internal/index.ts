@@ -769,19 +769,8 @@ export class FrameElement {
       }
 
       // const { mask } = this.iFrameFormElement;
-      // function recreateNode(el, withChildren) {
-      //   if (withChildren) {
-      //     el.parentNode.replaceChild(el.cloneNode(true), el);
-      //   } else {
-      //     const newEl = el.cloneNode(false);
-      //     while (el.hasChildNodes()) newEl.appendChild(el.firstChild);
-      //     el.parentNode.replaceChild(newEl, el);
-      //   }
-      // }
 
-      // recreateNode(id, true);
-      // TODO see how eventHandlers are taken care of, how to remove all of specific events
-      $(id).off('input');
+      // $(id).off('input');
 
       // $(id).unmask();
       this.applyMask();
