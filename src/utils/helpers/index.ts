@@ -99,6 +99,7 @@ export const getMaskedOutput = (input: string, format: string, translation: any)
   let j = 0;
 
   for (let i = 0; i < inputArray.length; i += 1) {
+    if (j < i) { j = i; }
     const character = inputArray[i];
     if (j < formatArray.length) {
       let formatChar = formatArray[j];
