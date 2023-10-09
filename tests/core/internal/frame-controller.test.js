@@ -507,6 +507,34 @@ describe('test frame controller', () => {
     expect(formElement.getValue()).toBe('')
   })
 
+  test('card_number extra input on FrameElement', () => {
+
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    formElement.setValue("41111111111111112")
+    element.setValue('41111111111111112')
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1]({...state, value:'41111111111111112'});
+
+    expect(formElement.getValue()).toBe('4111 1111 1111 1111')
+    expect(detectCardType(formElement.getValue())).toBe(CardType.VISA)
+  })
+
   test('expiration_date FrameElement', () => {
 
     const date_element = `element:EXPIRATION_DATE:${tableCol}`;
