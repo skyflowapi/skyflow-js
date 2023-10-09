@@ -799,26 +799,27 @@ export class FrameElement {
   }
 
   private applyMask() {
-    const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
     const { mask } = this.iFrameFormElement;
+    let output = '';
     if (mask) {
       const translation = {};
       Object.keys(mask[2]).forEach((key) => {
         translation[key] = { pattern: mask[2][key] };
       });
       try {
-        id.value = getMaskedOutput(id.value, mask[0], translation);
-        // $(id).mask(mask[0], {
-        //   translation,
-        // });
+        const value = this.domInput?.value || this.iFrameFormElement.getValue();
+        output = getMaskedOutput(value, mask[0], translation);
+        if (this.domInput) {
+          this.domInput.value = output;
+        }
+        if (output !== this.iFrameFormElement.getValue()) {
+          this.iFrameFormElement.setValue(output);
+        }
       } catch (err) {
         printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
           this.iFrameFormElement.fieldType), MessageType.WARN,
         (this.iFrameFormElement.context.logLevel || LogLevel.ERROR));
       }
-    }
-    if (this.domInput?.value !== this.iFrameFormElement.getValue()) {
-      this.iFrameFormElement.setValue(this.domInput?.value);
     }
   }
 }

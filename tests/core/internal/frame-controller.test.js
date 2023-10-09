@@ -242,7 +242,7 @@ describe('test frame controller', () => {
     const changeCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
 
-    changeCb[0][1](state);
+    changeCb[0][1]({...state, value:'2'});
 
     expect(formElement.getValue()).toBe('02')
 
@@ -477,22 +477,24 @@ describe('test frame controller', () => {
     const inst = EventEmitter.mock.instances[0];
     const onSpy = inst.on.mock.calls;
 
-    formElement.setValue("4111 1111 1111 1111")
+    formElement.setValue("4111111111111111")
+    element.setValue('4111111111111111')
 
     const changeCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
 
-    changeCb[0][1](state);
+    changeCb[0][1]({...state, value:'4111111111111111'});
 
     expect(formElement.getValue()).toBe('4111 1111 1111 1111')
     expect(detectCardType(formElement.getValue())).toBe(CardType.VISA)
 
     formElement.setValue("")
+    element.setValue('')
 
     const changeCbEvent = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
 
-    changeCbEvent[0][1](state);
+    changeCbEvent[0][1]({...state,value:''});
 
     expect(formElement.getValue()).toBe('')
     expect(detectCardType(formElement.getValue())).toBe(CardType.DEFAULT)
