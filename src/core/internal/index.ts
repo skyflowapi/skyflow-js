@@ -463,10 +463,7 @@ export class FrameElement {
         domReady(() => {
           const domInput = this.domInput;
           if (domInput) {
-            const inputEvent = new Event('input', {
-              bubbles: true,
-              cancelable: true,
-            });
+            const inputEvent = new Event('input', { bubbles: true, cancelable: true });
             domInput.dispatchEvent(inputEvent);
           }
         });
