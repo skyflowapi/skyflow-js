@@ -2,11 +2,9 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import $ from 'jquery';
 import Client from '../../client';
 import { setAttributes } from '../../iframe-libs/iframer';
 import { validateElementOptions } from '../../libs/element-options';
-import 'jquery-mask-plugin/dist/jquery.mask.min';
 import {
   ELEMENTS,
   ELEMENT_EVENTS_TO_CLIENT,
@@ -40,7 +38,7 @@ import {
   addSeperatorToCardNumberMask,
   appendMonthFourDigitYears,
   appendMonthTwoDigitYears,
-  appendZeroToOne, handleCopyIconClick, styleToString,
+  appendZeroToOne, domReady, getMaskedOutput, handleCopyIconClick, styleToString,
 } from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
 
@@ -293,6 +291,7 @@ export class FrameElement {
         || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
         if (this.domInput) {
           this.domInput.value = state.value || '';
+          this.applyMask();
         }
       }
 
@@ -466,8 +465,12 @@ export class FrameElement {
         this.iFrameFormElement.mask
         || this.iFrameFormElement.replacePattern
       ) {
-        $(document).ready(() => {
-          $(this.domInput as any).trigger('input');
+        domReady(() => {
+          const domInput = this.domInput;
+          if (domInput) {
+            const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+            domInput.dispatchEvent(inputEvent);
+          }
         });
       }
     }
@@ -544,7 +547,7 @@ export class FrameElement {
       });
   };
 
-  onArrowKeys = (event:JQuery.TriggeredEvent) => {
+  onArrowKeys = (event: any) => {
     const keyBoardEvent = event.originalEvent as KeyboardEvent;
     const currentInput = keyBoardEvent?.target as HTMLInputElement;
     const cursorPosition = event.target.selectionEnd;
@@ -752,7 +755,7 @@ export class FrameElement {
 
     if (this.domLabel) this.domLabel.textContent = this.options.label;
 
-    $(document).ready(() => {
+    domReady(() => {
       const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
 
       this.iFrameFormElement.setValidation(this.options.validations);
@@ -768,17 +771,16 @@ export class FrameElement {
       }
 
       // const { mask } = this.iFrameFormElement;
-      $(id).off('input');
-      (<any>$).jMaskGlobals.translation = {};
-      (<any>$).jMaskGlobals.clearIfNotMatch = true;
 
-      $(id).unmask();
+      // $(id).off('input');
+
+      // $(id).unmask();
       this.applyMask();
 
       if (this.domInput) {
         const { replacePattern } = this.iFrameFormElement;
         if (replacePattern) {
-          $(id).on('input', (event) => {
+          id.addEventListener('input', (event) => {
             event.target.value = event.target.value.replace(
               replacePattern[0],
               replacePattern[1],
@@ -786,8 +788,8 @@ export class FrameElement {
           });
         }
 
-        $(id).on('input', this.onInputChange);
-        $(id).on('keydown', this.onArrowKeys);
+        id.addEventListener('input', this.onInputChange);
+        id.addEventListener('keydown', this.onArrowKeys);
       }
 
       this.setupInputField(
@@ -799,17 +801,22 @@ export class FrameElement {
   }
 
   private applyMask() {
-    const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
     const { mask } = this.iFrameFormElement;
+    let output = '';
     if (mask) {
       const translation = {};
       Object.keys(mask[2]).forEach((key) => {
         translation[key] = { pattern: mask[2][key] };
       });
       try {
-        $(id).mask(mask[0], {
-          translation,
-        });
+        const value = this.domInput?.value || this.iFrameFormElement.getValue();
+        output = getMaskedOutput(value, mask[0], translation);
+        if (this.domInput) {
+          this.domInput.value = output;
+        }
+        if (output !== this.iFrameFormElement.getValue()) {
+          this.iFrameFormElement.setValue(output);
+        }
       } catch (err) {
         printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
           this.iFrameFormElement.fieldType), MessageType.WARN,
