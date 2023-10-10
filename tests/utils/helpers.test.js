@@ -21,7 +21,8 @@ import {
   getOSDetails,
   getSdkVersionName,
   getMetaObject,
-  checkAndSetForCustomUrl
+  checkAndSetForCustomUrl,
+  domReady
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -556,3 +557,41 @@ describe('checkAndSetForCustomUrl', () => {
     expect(isValid).toEqual(false);
   });
 });
+
+
+describe('test domReady function', () => {
+  let pagestate="loading";
+  Object.defineProperty(document, "readyState", {
+    get() { return pagestate; }
+  });
+
+  test('should add function to eventListener DOMContentLoaded if readyState is loading', () => {
+    const testSpyFunction = jest.fn();
+    document.addEventListener = jest
+    .fn()
+    .mockImplementationOnce((event, callback) => {
+      callback();
+    });
+    pagestate="loading";
+    
+    domReady(testSpyFunction);
+    expect(document.addEventListener).toBeCalledWith(
+      "DOMContentLoaded",
+      testSpyFunction
+      );
+  })
+  
+  test('should call function directly if readyState is not loading', () => {
+    const testSpyFunction = jest.fn();
+    document.addEventListener = jest
+    .fn()
+    .mockImplementationOnce((event, callback) => {
+      callback();
+    });
+    pagestate="complete";
+    domReady(testSpyFunction);
+    expect(document.addEventListener).toBeCalledTimes(0)
+      expect(testSpyFunction).toBeCalled()
+  })
+})
+
