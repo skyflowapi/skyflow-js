@@ -2,7 +2,6 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import $ from 'jquery';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
@@ -20,8 +19,9 @@ import {
 } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import { Context, MessageType } from '../../../utils/common';
-import { constructMaskTranslation, handleCopyIconClick, styleToString } from '../../../utils/helpers';
-import 'jquery-mask-plugin/dist/jquery.mask.min';
+import {
+  constructMaskTranslation, getMaskedOutput, handleCopyIconClick, styleToString,
+} from '../../../utils/helpers';
 
 const CLASS_NAME = 'RevealFrame';
 class RevealFrame {
@@ -146,9 +146,9 @@ class RevealFrame {
         this.isRevealCalled = true;
         this.#dataElememt.innerText = responseValue;
         if (this.#record.mask) {
-          $(this.#dataElememt).mask(this.#record.mask[0], {
-            translation: constructMaskTranslation(this.#record.mask),
-          });
+          this.#dataElememt.innerText = getMaskedOutput(this.#dataElememt.innerText,
+            this.#record.mask[0],
+            constructMaskTranslation(this.#record.mask));
         }
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
           CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
