@@ -175,7 +175,8 @@ export class FrameElement {
     if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
       && this.options.enableCardIcon) {
       this.domImg = document.createElement('img');
-      this.domImg.src = CARD_ENCODED_ICONS.DEFAULT;
+      this.domImg.src = CARD_ENCODED_ICONS[this.iFrameFormElement?.cardType]
+        || CARD_ENCODED_ICONS.DEFAULT;
       this.domImg.setAttribute('style', this.options?.inputStyles?.cardIcon ? styleToString(this.options.inputStyles.cardIcon) : INPUT_ICON_STYLES);
       this.inputParent.append(this.domImg);
     }
