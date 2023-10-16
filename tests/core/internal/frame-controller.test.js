@@ -219,6 +219,46 @@ describe('test frame controller', () => {
     element.setupInputField();
   });
 
+  test('card element FrameElement with card type', () => {
+
+    const cardElement = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(cardElement, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      enableCardIcon: true,
+    }, div);
+  })
+
+  test('card element FrameElement without default card type', () => {
+
+    const cardElement = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(cardElement, {}, context);
+    const element = new FrameElement({
+      resetEvents: jest.fn(),
+      on: jest.fn(),
+      getStatus: jest.fn(()=>({
+          isFocused: false,
+          isValid: false,
+          isEmpty: true,
+          isComplete: false,
+      })),
+      fieldType: 'CARD_NUMBER',
+      state:{name:''}
+  }, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      enableCardIcon: true,
+    }, div);
+  })
 
 
   test('expiration_month FrameElement', () => {
