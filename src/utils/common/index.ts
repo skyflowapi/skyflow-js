@@ -156,7 +156,7 @@ export interface MeticsObjectType {
   latency?: number,
   status: 'SUCCESS' | 'INITIALIZED' | 'PARTIAL_RENDER' | 'FAILED' | string,
   sdk_name_version: string,
-  sdk_client_device_model:  string | undefined,
+  sdk_client_device_model: string | undefined,
   sdk_client_os_details: string,
   sdk_runtime_details: string
 }
