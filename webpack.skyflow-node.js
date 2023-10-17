@@ -21,6 +21,7 @@ module.exports = () => merge(common, {
     libraryTarget: 'umd',
     globalObject: 'this',
     umdNamedDefine: true,
+    publicPath: '',
   },
   optimization: {
     runtimeChunk: false,

@@ -200,7 +200,7 @@ export const ELEMENTS = {
   [ElementType.EXPIRATION_YEAR]: {
     name: 'EXPIRATION_YEAR',
     attributes: {
-      maxLength: 4,
+      // maxLength: 4,
       type: 'text',
       inputmode: 'numeric',
       autocomplete: 'cc-exp-year',
