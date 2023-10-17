@@ -54,6 +54,8 @@ class RevealElement extends SkyflowElement {
     this.#readyToMount = container.isMounted;
     this.#eventEmitter = container.eventEmitter;
     this.#context = context;
+    this.initalizeMetricObject(metaData, elementId)
+    this.updateMetricObjectValue(this.#elementId, 'element_type', 'REVEAL');
     this.#iframe = new IFrame(
       `${FRAME_REVEAL}:${btoa(uuid())}`,
       { metaData },
@@ -63,7 +65,9 @@ class RevealElement extends SkyflowElement {
 
     if (!this.#readyToMount) {
       this.#eventEmitter.on(ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED, (data) => {
-        if (data?.containerId === this.#containerId) { this.#readyToMount = true; }
+        if (data?.containerId === this.#containerId) { 
+          this.#readyToMount = true; 
+        }
       });
     }
     printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT, CLASS_NAME, `${record.token || ''} reveal `), MessageType.LOG, this.#context.logLevel);
@@ -77,8 +81,11 @@ class RevealElement extends SkyflowElement {
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
+    this.updateMetricObjectValue(this.#elementId, 'div_id', domElementSelector);
+    this.pushElementEventWithTimeout(this.#elementId)
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
+        this.updateMetricObjectValue(this.#elementId, 'events', 'FRAME_READY');
         callback({
           ...this.#metaData,
           record: this.#recordData,
@@ -97,6 +104,8 @@ class RevealElement extends SkyflowElement {
             },
           );
         this.#isMounted = true;
+        this.updateMetricObjectValue(this.#elementId, 'mount_end_time', Date.now());
+        this.updateMetricObjectValue(this.#elementId, 'events', 'MOUNTED');      
       }
     };
 
@@ -113,6 +122,7 @@ class RevealElement extends SkyflowElement {
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+        this.updateMetricObjectValue(this.#elementId, 'mount_start_time', Date.now());
       }
     });
   }
