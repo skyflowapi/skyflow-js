@@ -7,6 +7,7 @@ import iframer, {
 } from '../../../iframe-libs/iframer';
 import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
+import { updateMetricObjectValue } from '../../../utils/helpers';
 
 export default class IFrame {
   name: string;
@@ -27,7 +28,7 @@ export default class IFrame {
     setAttributes(this.iframe, { src: responseValue });
   };
 
-  mount = (domElement) => {
+  mount = (domElement, elementId?: string) => {
     this.unmount();
     try {
       if (typeof domElement === 'string') {
@@ -40,9 +41,10 @@ export default class IFrame {
       } else {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
       }
-    } catch (e) {
+    } catch (e: any) {
       // eslint-disable-next-line no-console
       console.error(e);
+      if (elementId) { updateMetricObjectValue(elementId, 'error', e.message); }
       // throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
     }
 
