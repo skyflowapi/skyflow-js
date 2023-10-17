@@ -23,7 +23,13 @@ import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { Context, Env, MessageType } from '../../../utils/common';
-import { formatFrameNameToId, getReturnValue } from '../../../utils/helpers';
+import {
+  formatFrameNameToId,
+  getReturnValue,
+  initalizeMetricObject,
+  pushElementEventWithTimeout,
+  updateMetricObjectValue,
+} from '../../../utils/helpers';
 import SkyflowElement from '../common/skyflow-element';
 import { ContainerType } from '../../../skyflow';
 
@@ -101,13 +107,13 @@ class CollectElement extends SkyflowElement {
     this.elementType = this.#isSingleElementAPI
       ? this.#elements[0].elementType
       : 'group';
-    this.initalizeMetricObject(metaData, elementId);
+    initalizeMetricObject(metaData, elementId);
     if (!this.#isSingleElementAPI) {
-      this.updateMetricObjectValue(this.#elementId, 'element_type', this.elementType);
+      updateMetricObjectValue(this.#elementId, 'element_type', this.elementType);
     }
     this.#states = [];
     this.#elements.forEach((element) => {
-      this.updateMetricObjectValue(this.#elementId, 'element_type', element.elementType);
+      updateMetricObjectValue(this.#elementId, 'element_type', element.elementType);
       this.#states.push({
         isEmpty: true,
         isComplete: false,
@@ -142,20 +148,20 @@ class CollectElement extends SkyflowElement {
 
     this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED, (data) => {
       if (container.type === ContainerType.COMPOSABLE) {
-        this.updateMetricObjectValue(this.#elementId, 'mount_end_time', Date.now());
+        updateMetricObjectValue(this.#elementId, 'mount_end_time', Date.now());
         this.#elements.forEach((element) => {
           if (data.name === element.elementName) {
-            this.updateMetricObjectValue(this.#elementId, 'events', `${element.elementType}_MOUNTED`);
+            updateMetricObjectValue(this.#elementId, 'events', `${element.elementType}_MOUNTED`);
             element.isMounted = true;
             this.#mounted = true;
           }
         });
       } else if (data.name === this.#elements[0].elementName) {
-        this.updateMetricObjectValue(this.#elementId, 'mount_end_time', Date.now());
-        this.updateMetricObjectValue(this.#elementId, 'events', 'MOUNTED');
+        updateMetricObjectValue(this.#elementId, 'mount_end_time', Date.now());
+        updateMetricObjectValue(this.#elementId, 'events', 'MOUNTED');
         this.#elements[0].isMounted = true;
         this.#mounted = true;
-    }
+      }
       this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
         {}, (payload:any) => {
           this.#iframe.setIframeHeight(payload.height);
@@ -169,8 +175,8 @@ class CollectElement extends SkyflowElement {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
     }
-    this.updateMetricObjectValue(this.#elementId, 'div_id', domElement);
-    this.pushElementEventWithTimeout(this.#elementId);
+    updateMetricObjectValue(this.#elementId, 'div_id', domElement);
+    pushElementEventWithTimeout(this.#elementId);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
@@ -184,14 +190,14 @@ class CollectElement extends SkyflowElement {
                 ...this.#states[index],
                 elementType: element.elementType,
               });
-              this.updateMetricObjectValue(this.#elementId, 'events', `${element.elementType}_FRAME_READY`);
+              updateMetricObjectValue(this.#elementId, 'events', `${element.elementType}_FRAME_READY`);
             }
           });
         } else {
           this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY, {
             ...elementState,
           });
-          this.updateMetricObjectValue(this.#elementId, 'events', 'FRAME_READY');
+          updateMetricObjectValue(this.#elementId, 'events', 'FRAME_READY');
         }
 
         this.#bus.off(
@@ -208,20 +214,20 @@ class CollectElement extends SkyflowElement {
 
     const isComposable = this.#elements.length > 1;
     if (isComposable) {
-      this.#iframe.mount(domElement);
+      this.#iframe.mount(domElement, this.#elementId);
       this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
-      this.updateMetricObjectValue(this.#elementId, 'mount_start_time', Date.now());
+      updateMetricObjectValue(this.#elementId, 'mount_start_time', Date.now());
     } else {
       if (this.#readyToMount) {
-        this.#iframe.mount(domElement);
+        this.#iframe.mount(domElement, this.#elementId);
         this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
-        this.updateMetricObjectValue(this.#elementId, 'mount_start_time', Date.now());
+        updateMetricObjectValue(this.#elementId, 'mount_start_time', Date.now());
         return;
       }
       this.#groupEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED, (data) => {
         if (data?.containerId === this.containerId) {
-          this.updateMetricObjectValue(this.#elementId, 'mount_start_time', Date.now());
-          this.#iframe.mount(domElement);
+          updateMetricObjectValue(this.#elementId, 'mount_start_time', Date.now());
+          this.#iframe.mount(domElement, this.#elementId);
           this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
         }
       });
@@ -389,7 +395,7 @@ class CollectElement extends SkyflowElement {
     this.#eventEmitter.on(
       ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
       () => {
-        this.updateMetricObjectValue(this.#elementId, 'events', 'DESTROY_FRAME');
+        updateMetricObjectValue(this.#elementId, 'events', 'DESTROY_FRAME');
         const names = this.#elements.map((element) => element.elementName);
         if (!this.#isSingleElementAPI) names.push(this.#iframe.name);
         callback(names);
