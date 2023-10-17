@@ -15,6 +15,7 @@ import { detectCardType, isValidURL, validateBooleanOptions } from '../validator
 import properties from '../../properties';
 import METRIC_OBJECT from '../../metrics';
 import { MeticsObjectType } from '../common';
+import sdkPackageDetails from '../../../package.json';
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
@@ -259,7 +260,7 @@ interface BrowserInfo {
   browserVersion: string;
 }
 export function getSdkVersionName(metaDataVersion: string, sdkData: SdkInfo): string {
-  if (metaDataVersion !== '') {
+  if (metaDataVersion && metaDataVersion !== '') {
     return `${metaDataVersion}`;
   }
   return `${sdkData.sdkName}@${sdkData.sdkVersion}`;
@@ -345,7 +346,7 @@ export function getMetaObject(sdkDetails: any, metaData: any, navigator: any) {
     sdkName: sdkDetails.name,
     sdkVersion: sdkDetails.version,
   };
-  const SDKversion = getSdkVersionName(metaData.sdkVersion, sdkData);
+  const SDKversion = getSdkVersionName(metaData?.sdkVersion, sdkData);
   const osDetail = getOSDetails(navigator.userAgent);
   const browserDetails = getBrowserInfo(navigator.userAgent);
   const deviceDetails = getDeviceType(navigator.userAgent);
@@ -373,24 +374,73 @@ export function checkAndSetForCustomUrl(config: ISkyflow) {
   }
 }
 
+export function setBearerToken(metadata: any) {
+  metadata?.clientJSON?.config?.getBearerToken?.().then((authToken: string) => {
+    METRIC_OBJECT.bearerToken = authToken;
+  }).catch((err: any) => {
+    // eslint-disable-next-line no-console
+    console.error(err);
+  });
+}
+
+export function initalizeMetricObject(metadata: any, elementId: string) {
+  setBearerToken(metadata);
+  const metaDataObject = getMetaObject(sdkPackageDetails, metadata, navigator);
+  const elementMetricObject = {
+    element_id: elementId,
+    element_type: [],
+    div_id: '',
+    container_id: metadata?.uuid || '',
+    session_id: metadata?.session_id || '',
+    vault_id: metadata?.clientJSON?.config?.vaultID || '',
+    vault_url: metadata?.clientJSON?.config?.vaultURL || '',
+    events: [],
+    created_at: Date.now(),
+    region: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    status: 'INITIALIZED',
+    sdk_name_version: metaDataObject.sdk_name_version,
+    sdk_client_device_model: metaDataObject.sdk_client_device_model,
+    sdk_client_os_details: metaDataObject.sdk_os_version,
+    sdk_runtime_details: metaDataObject.sdk_runtime_details,
+  };
+  METRIC_OBJECT.records.push(
+    elementMetricObject,
+  );
+}
+
+export function updateMetricObjectValue(id: string, key: string, value: any) {
+  METRIC_OBJECT.records.forEach((event) => {
+    if (event.element_id === id) {
+      if (key === 'events' || key === 'element_type') {
+        event[key].push(value);
+      } else if (key === 'mount_end_time' && event.mount_start_time) {
+        event[key] = value;
+        event.latency = value - event.mount_start_time;
+      } else {
+        event[key] = value;
+      }
+    }
+  });
+}
+
 export function getEventStatus(metricEvent: MeticsObjectType): string {
-  if (metricEvent.events.length == 0 || metricEvent.error) {
-    return 'FAILED';
-  } else if (metricEvent.events.filter(element => element.includes('MOUNTED')).length > 0) {
-    return 'SUCCESS';
+  let status = metricEvent.status;
+  if (metricEvent.events.length === 0 || metricEvent.error) {
+    status = 'FAILED';
+  } else if (metricEvent.events.filter((element) => element.includes('MOUNTED')).length > 0) {
+    status = 'SUCCESS';
   } else if (metricEvent.events.length > 0) {
-    return 'PARTIAL_RENDER';
-  } else {
-    return metricEvent.status;
+    status = 'PARTIAL_RENDER';
   }
+  return status;
 }
 
 export function pushEventToMixpanel(elementId: string) {
-  const metricEvent = METRIC_OBJECT.records.filter(event => event.element_id == elementId)[0];
+  const metricEvent = METRIC_OBJECT.records.filter((event) => event.element_id === elementId)[0];
   metricEvent.status = getEventStatus(metricEvent);
   const vaultURL = metricEvent.vault_url;
-  const event =
-  {
+  let eventPushed = false;
+  const event = {
     event: metricEvent.container_id,
     properties: {
       ...metricEvent,
@@ -405,12 +455,20 @@ export function pushEventToMixpanel(elementId: string) {
       body: JSON.stringify(event),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${METRIC_OBJECT.bearerToken}`,
-      }
+        Authorization: `Bearer ${METRIC_OBJECT.bearerToken}`,
+      },
     })
-      .then(res => {
+      .then((response: any) => {
+        eventPushed = response.data && (response.data >= 1);
       })
-      .catch(e => {
+      .catch((error) => {
+        eventPushed = error || eventPushed;
       });
   }
+}
+
+export function pushElementEventWithTimeout(elementID: string) {
+  setTimeout(() => {
+    pushEventToMixpanel(elementID);
+  }, 20000);
 }

@@ -14,11 +14,18 @@ import {
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
-import { formatRevealElementOptions } from '../../../utils/helpers';
 import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
-import { formatForRenderClient } from '../../../core-utils/reveal';
 
+import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
+import { formatForRenderClient, formatRecordsForRender } from '../../../core-utils/reveal';
+import { setStyles } from '../../../iframe-libs/iframer';
+import {
+  formatRevealElementOptions,
+  initalizeMetricObject,
+  pushElementEventWithTimeout,
+  updateMetricObjectValue,
+} from '../../../utils/helpers';
 const CLASS_NAME = 'RevealElement';
 
 class RevealElement extends SkyflowElement {
@@ -63,6 +70,8 @@ class RevealElement extends SkyflowElement {
     this.#readyToMount = container.isMounted;
     this.#eventEmitter = container.eventEmitter;
     this.#context = context;
+    initalizeMetricObject(metaData, elementId);
+    updateMetricObjectValue(this.#elementId, 'element_type', 'REVEAL');
     this.#iframe = new IFrame(
       `${FRAME_REVEAL}:${btoa(uuid())}`,
       { metaData },
@@ -96,6 +105,19 @@ class RevealElement extends SkyflowElement {
           record: this.#recordData,
           context: this.#context,
         });
+    updateMetricObjectValue(this.#elementId, 'div_id', domElementSelector);
+    pushElementEventWithTimeout(this.#elementId);
+    if (!this.#recordData.skyflowID || this.#isRenderFileCalled) {
+      const sub = (data, callback) => {
+        if (data.name === this.#iframe.name) {
+          updateMetricObjectValue(this.#elementId, 'events', 'FRAME_READY');
+          callback({
+            ...this.#metaData,
+            record: this.#recordData,
+            context: this.#context,
+          });
+
+          bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
 
         bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
         if (this.#recordData.skyflowID) {
@@ -118,6 +140,9 @@ class RevealElement extends SkyflowElement {
                 containerId: this.#containerId,
               },
             );
+          this.#isMounted = true;
+          updateMetricObjectValue(this.#elementId, 'mount_end_time', Date.now());
+          updateMetricObjectValue(this.#elementId, 'events', 'MOUNTED');
         }
         this.#isMounted = true;
         if (Object.prototype.hasOwnProperty.call(this.#recordData, 'skyflowID')) {
@@ -144,6 +169,88 @@ class RevealElement extends SkyflowElement {
           .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
       }
     });
+      this.#eventEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED, (data) => {
+        if (data?.containerId === this.#containerId) {
+          this.#iframe.mount(domElementSelector);
+          bus
+            .target(properties.IFRAME_SECURE_ORGIN)
+            .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+          updateMetricObjectValue(this.#elementId, 'mount_start_time', Date.now());
+        }
+      });
+    } else if (this.#recordData.skyflowID) {
+      this.#isMounted = true;
+      this.#addRenderFilePreElement(domElementSelector);
+    }
+  }
+
+  #addRenderFilePreElement(domElementSelector) {
+    this.#renderFileAltText.className = `SkyflowElement-${this.#elementId}-${STYLE_TYPE.BASE}`;
+    this.#renderFileErrorText.className = `SkyflowElement-${this.#elementId}error-${STYLE_TYPE.BASE}`;
+    this.#updateFileRenderAltText(this.#recordData.altText);
+    this.#updateErrorText('');
+    this.#iframe.container = document.querySelector(domElementSelector);
+    this.#iframe.container?.appendChild(this.#renderFileAltText);
+    this.#iframe.container?.appendChild(this.#renderFileErrorText);
+  }
+
+  #updateErrorText(error: string) {
+    getCssClassesFromJss(REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES, `${this.#elementId}error`);
+    this.#renderFileErrorText.innerText = error;
+    if (
+      Object.prototype.hasOwnProperty.call(this.#recordData, 'errorTextStyles')
+      && Object.prototype.hasOwnProperty.call(this.#recordData.errorTextStyles, STYLE_TYPE.BASE)
+    ) {
+      this.#errorTextStyles = {};
+      this.#errorTextStyles[STYLE_TYPE.BASE] = {
+        ...REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES[STYLE_TYPE.BASE],
+        ...this.#recordData.errorTextStyles[STYLE_TYPE.BASE],
+      };
+      getCssClassesFromJss(this.#errorTextStyles, `${this.#elementId}error`);
+      if (this.#recordData.errorTextStyles[STYLE_TYPE.GLOBAL]) {
+        generateCssWithoutClass(this.#recordData.errorTextStyles[STYLE_TYPE.GLOBAL]);
+      }
+    } else {
+      getCssClassesFromJss(
+        REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
+        `${this.#elementId}error`,
+      );
+    }
+  }
+
+  #updateFileRenderAltText(altText: string) {
+    getCssClassesFromJss(RENDER_FILE_ELEMENT_ALT_TEXT_DEFAULT_STYLES, this.#elementId);
+    this.#renderFileAltText.innerText = altText;
+    if (Object.prototype.hasOwnProperty.call(this.#recordData, 'inputStyles')) {
+      this.#inputStyles = {};
+      this.#inputStyles[STYLE_TYPE.BASE] = {
+        ...this.#recordData.inputStyles[STYLE_TYPE.BASE],
+      };
+      getCssClassesFromJss(this.#inputStyles, this.#elementId);
+      if (this.#recordData.inputStyles[STYLE_TYPE.GLOBAL]) {
+        generateCssWithoutClass(this.#recordData.inputStyles[STYLE_TYPE.GLOBAL]);
+      }
+    }
+  }
+
+  #removeFilePreElement(responseValue) {
+    if (this.#iframe.container?.hasChildNodes()) {
+      const nodeExists = this.#iframe.container?.querySelector('span');
+
+      if (nodeExists) {
+        this.#iframe.container?.removeChild(this.#renderFileAltText);
+        this.#iframe.container?.removeChild(this.#renderFileErrorText);
+        this.mount(this.#domSelecter);
+        if (Object.prototype.hasOwnProperty.call(this.#recordData, 'inputStyles')) {
+          this.#inputStyles = {};
+          this.#inputStyles[STYLE_TYPE.BASE] = {
+            ...this.#recordData.inputStyles[STYLE_TYPE.BASE],
+          };
+          setStyles(this.#iframe.iframe, this.#inputStyles[STYLE_TYPE.BASE]);
+        }
+        this.#iframe.setAttributess(responseValue);
+      }
+    }
   }
 
   renderFile() {
