@@ -84,12 +84,33 @@ export const getReturnValue = (value: string | Blob, element: string, doesReturn
   }
   return undefined;
 };
+
+const fns : Function[] = [];
 export function domReady(fn) {
-  if (document.readyState !== 'loading') {
-    fn();
-    return;
-  }
-  document.addEventListener('DOMContentLoaded', fn);
+  (() => {
+    let listener;
+    const doc = typeof document === 'object' ? document : undefined;
+    const domContentLoaded = 'DOMContentLoaded';
+    let loaded = doc && (/^loaded|^i|^c/).test(doc.readyState);
+    if (!loaded && doc) {
+      doc.addEventListener(domContentLoaded, listener = () => {
+        doc.removeEventListener(domContentLoaded, listener);
+        loaded = true;
+        listener = fns.shift();
+        while (listener) {
+          listener();
+          listener = fns.shift();
+        }
+      });
+    }
+    return (fun): void => {
+      if (loaded) {
+        setTimeout(fun, 0);
+      } else {
+        fns.push(fun);
+      }
+    };
+  })()(fn);
 }
 
 export const getMaskedOutput = (input: string, format: string, translation: any): string => {

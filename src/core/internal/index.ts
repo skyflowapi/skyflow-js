@@ -286,12 +286,10 @@ export class FrameElement {
           this.options?.cardSeperator,
         );
         this.iFrameFormElement.setMask(cardNumberMask as string[]);
-        this.applyMask();
       } else if (this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name
         || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
         if (this.domInput) {
           this.domInput.value = state.value || '';
-          this.applyMask();
         }
       }
 
@@ -324,6 +322,9 @@ export class FrameElement {
           || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name)
       ) {
         this.updateStyleClasses(state);
+      }
+      if (this.iFrameFormElement.mask) {
+        this.applyMask();
       }
     });
 
@@ -756,8 +757,7 @@ export class FrameElement {
     if (this.domLabel) this.domLabel.textContent = this.options.label;
 
     domReady(() => {
-      const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
-
+      const id: any = this.domInput;
       this.iFrameFormElement.setValidation(this.options.validations);
       this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
       if (options.elementType === ElementType.EXPIRATION_DATE) {
@@ -813,6 +813,7 @@ export class FrameElement {
         output = getMaskedOutput(value, mask[0], translation);
         if (this.domInput) {
           this.domInput.value = output;
+          if (!this.domInput.getAttribute('maxlength')) { this.domInput.setAttribute('maxlength', mask[0].length); }
         }
         if (output !== this.iFrameFormElement.getValue()) {
           this.iFrameFormElement.setValue(output);
