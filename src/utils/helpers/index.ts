@@ -13,6 +13,8 @@ import { ContainerType, ISkyflow } from '../../skyflow';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
 import properties from '../../properties';
+import METRIC_OBJECT from '../../metrics';
+import { MeticsObjectType } from '../common';
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
@@ -368,5 +370,47 @@ export function checkAndSetForCustomUrl(config: ISkyflow) {
     const fullDomain = `${protocol}//${domain}`;
     properties.IFRAME_SECURE_ORGIN = fullDomain;
     properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
+  }
+}
+
+export function getEventStatus(metricEvent: MeticsObjectType): string {
+  if (metricEvent.events.length == 0 || metricEvent.error) {
+    return 'FAILED';
+  } else if (metricEvent.events.filter(element => element.includes('MOUNTED')).length > 0) {
+    return 'SUCCESS';
+  } else if (metricEvent.events.length > 0) {
+    return 'PARTIAL_RENDER';
+  } else {
+    return metricEvent.status;
+  }
+}
+
+export function pushEventToMixpanel(elementId: string) {
+  const metricEvent = METRIC_OBJECT.records.filter(event => event.element_id == elementId)[0];
+  metricEvent.status = getEventStatus(metricEvent);
+  const vaultURL = metricEvent.vault_url;
+  const event =
+  {
+    event: metricEvent.container_id,
+    properties: {
+      ...metricEvent,
+      time: Math.floor(Date.now() / 1000),
+      distinct_id: metricEvent.container_id,
+    },
+  };
+
+  if (METRIC_OBJECT.bearerToken) {
+    fetch(`${vaultURL}/sdk/sdk-metrics`, {
+      method: 'POST',
+      body: JSON.stringify(event),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${METRIC_OBJECT.bearerToken}`,
+      }
+    })
+      .then(res => {
+      })
+      .catch(e => {
+      });
   }
 }

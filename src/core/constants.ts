@@ -15,6 +15,7 @@ import copyIcon from '../../assets/copyIcon.svg';
 import successIcon from '../../assets/path.svg';
 import logs from '../utils/logs';
 
+export const SESSION_ID = 'session_id';
 export const SKY_METADATA_HEADER = 'sky-metadata';
 export const SDK_VERSION = 'sdkVersion';
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
