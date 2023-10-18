@@ -22,10 +22,13 @@ import { formatForRenderClient, formatRecordsForRender } from '../../../core-uti
 import { setStyles } from '../../../iframe-libs/iframer';
 import {
   formatRevealElementOptions,
+} from '../../../utils/helpers';
+import {
   initalizeMetricObject,
   pushElementEventWithTimeout,
   updateMetricObjectValue,
-} from '../../../utils/helpers';
+} from '../../../metrics';
+
 const CLASS_NAME = 'RevealElement';
 
 class RevealElement extends SkyflowElement {
