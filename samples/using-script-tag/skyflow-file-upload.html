@@ -108,11 +108,11 @@
           },
         },
       };
-  
+
       // Create collect elements.
       const cardNumberElement = collectContainer.create(
         {
-          table: 'table1',
+          table: 'cards',
           column: 'card_number',
           ...collectStylesOptions,
           placeholder: 'card number',
@@ -123,19 +123,25 @@
           enableCopy: true,
         }
       );
-  
+
+      const options = {
+        allowedFileType: ["<allowedFileType1>", "<allowedFileType2>"]
+      }
+
       const fileElement = collectContainer.create({
-        table: 'table1',
+        table: 'cards',
         column: 'file',
         ...collectStylesOptions,
         type: Skyflow.ElementType.FILE_INPUT,
         skyflowID: '',
-      });
+      },
+      options
+      );
   
       // Mount the elements.
       cardNumberElement.mount('#collectCardNumber');
       fileElement.mount('#collectFile');
-  
+      
       // Collect all elements data.
       const collectButton = document.getElementById('collectPCIData');
       if (collectButton) {
