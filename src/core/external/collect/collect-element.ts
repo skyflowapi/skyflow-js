@@ -34,7 +34,7 @@ import { ContainerType } from '../../../skyflow';
 import {
   initalizeMetricObject,
   pushElementEventWithTimeout,
-  updateMetricObjectValue
+  updateMetricObjectValue,
 } from '../../../metrics';
 
 const CLASS_NAME = 'Element';
