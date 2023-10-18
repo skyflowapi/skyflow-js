@@ -31,4 +31,14 @@ describe('Mount and Unmount Iframe', () => {
       expect(err).toBeDefined();
     }
   });
+
+  it('invalid selector with element id', async () => {
+    const frameElement = new IFrame('frameName', {}, 'containerId');
+    const elementId = 123;
+    try {
+      frameElement.mount('abc',elementId);
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
 });
