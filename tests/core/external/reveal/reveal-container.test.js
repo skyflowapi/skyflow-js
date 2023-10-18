@@ -31,12 +31,13 @@ describe("Reveal Container Class", () => {
       off
     });
   });
+  const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve());
   const testMetaData = {
     uuid: "123",
     config: {
       vaultID: "vault123",
       vaultURL: "sb.vault.dev",
-      getBearerToken: jest.fn(),
+      getBearerToken,
     },
     metaData: {
       clientDomain: "http://abc.com",
@@ -45,7 +46,7 @@ describe("Reveal Container Class", () => {
   const skyflowConfig = {
     vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
     vaultURL: 'https://testurl.com',
-    getBearerToken: jest.fn(),
+    getBearerToken,
   };
   
   const clientData = {
@@ -57,7 +58,7 @@ describe("Reveal Container Class", () => {
       context: { logLevel: LogLevel.ERROR,env:Env.PROD},
       config:{
         ...skyflowConfig,
-        getBearerToken:jest.fn().toString()
+        getBearerToken
       }
     } 
   }
@@ -150,8 +151,9 @@ describe("Reveal Container Class", () => {
     expect(onCbName).toBe(eventName);
     const onCb = on.mock.calls[1][1];
     onCb(data);
-
-    testRevealContainer.reveal();
+    testRevealContainer.reveal().catch(err => {
+      console.log(err)
+    });
     const emitEventName = emitSpy.mock.calls[1][0];
     const emitCb = emitSpy.mock.calls[1][2];
     expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST+mockUuid);
@@ -264,7 +266,9 @@ describe("Reveal Container Class", () => {
       containerId:mockUuid
     }
     
-    testRevealContainer.reveal();
+    testRevealContainer.reveal().catch(err => {
+      console.log(err);
+    });
     const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
     bus.emit(eventName,data);
     const onCbName = on.mock.calls[1][0];

@@ -16,12 +16,12 @@ import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import {
-  formatRevealElementOptions
+  formatRevealElementOptions,
 } from '../../../utils/helpers';
 import {
   initalizeMetricObject,
   pushElementEventWithTimeout,
-  updateMetricObjectValue
+  updateMetricObjectValue,
 } from '../../../metrics';
 
 const CLASS_NAME = 'RevealElement';
