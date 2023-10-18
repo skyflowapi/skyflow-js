@@ -548,10 +548,9 @@ export class FrameElement {
       });
   };
 
-  onArrowKeys = (event: any) => {
-    const keyBoardEvent = event.originalEvent as KeyboardEvent;
+  onArrowKeys = (keyBoardEvent: KeyboardEvent) => {
     const currentInput = keyBoardEvent?.target as HTMLInputElement;
-    const cursorPosition = event.target.selectionEnd;
+    const cursorPosition = currentInput.selectionEnd;
 
     switch (keyBoardEvent?.key) {
       case INPUT_KEYBOARD_EVENTS.RIGHT_ARROW:

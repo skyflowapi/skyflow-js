@@ -463,40 +463,39 @@ describe('test frame controller', () => {
     const spy2 = jest.spyOn(element,'findPreviousElement').mockImplementation(()=>(document.createElement('input')));
     const mockPrevent = jest.fn();
     
-    element.onArrowKeys({originalEvent:{
-      target:{value:''},
+    element.onArrowKeys({
+      target:{value:'',selectionEnd:0},
       key:INPUT_KEYBOARD_EVENTS.RIGHT_ARROW,
       preventDefault:mockPrevent,
-    },target:{selectionEnd:0}});
+    });
 
     expect(mockPrevent).toBeCalled();
-
-    element.onArrowKeys({originalEvent:{
-      target:{value:''},
+    element.onArrowKeys({
+      target:{value:'',selectionEnd:0},
       key:INPUT_KEYBOARD_EVENTS.LEFT_ARROW,
       preventDefault:mockPrevent,
-    },target:{selectionEnd:0}});
+    });
     expect(mockPrevent).toBeCalled();
 
-    element.onArrowKeys({originalEvent:{
-      target:{value:''},
+    element.onArrowKeys({
+      target:{value:'',selectionEnd:0},
       key:INPUT_KEYBOARD_EVENTS.ENTER,
       preventDefault:mockPrevent,
-    },target:{selectionEnd:0}});
+    });
     expect(mockPrevent).toBeCalled();
 
-    element.onArrowKeys({originalEvent:{
-      target:{value:''},
+    element.onArrowKeys({
+      target:{value:'',selectionEnd:0},
       key:INPUT_KEYBOARD_EVENTS.BACKSPACE,
       preventDefault:mockPrevent,
-    },target:{selectionEnd:0}});
+    });
     expect(mockPrevent).toBeCalled();
 
-    element.onArrowKeys({originalEvent:{
+    element.onArrowKeys({
       target:{value:'1'},
       key:'Digit1',
       preventDefault:mockPrevent,
-    },target:{selectionEnd:0}});
+    });
     
 
   });
