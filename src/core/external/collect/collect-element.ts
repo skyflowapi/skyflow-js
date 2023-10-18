@@ -26,12 +26,14 @@ import { Context, Env, EventName, MessageType } from '../../../utils/common';
 import {
   formatFrameNameToId,
   getReturnValue,
-  initalizeMetricObject,
-  pushElementEventWithTimeout,
-  updateMetricObjectValue,
 } from '../../../utils/helpers';
 import SkyflowElement from '../common/skyflow-element';
 import { ContainerType } from '../../../skyflow';
+import {
+  initalizeMetricObject,
+  pushElementEventWithTimeout,
+  updateMetricObjectValue
+} from '../../../metrics';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
