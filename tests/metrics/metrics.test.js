@@ -136,18 +136,18 @@ describe('metric object test', () => {
     global.fetch = jest.fn(() => Promise.resolve({ data: 1 }));
 
     it('should push an event to Mixpanel if bearer token is available', async () => {
-      METRIC_OBJECT.bearerToken = 'BearerTokenMock';
+      const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve());
+      METRIC_OBJECT.bearerToken = getBearerToken();
       METRIC_OBJECT.records.push({ element_id: 'ElementIDMock', vault_url: 'VaultURLMock', events: ["MOUNTED"] });
 
       const elementId = 'ElementIDMock';
       await pushEventToMixpanel(elementId);
-
       expect(fetch).toHaveBeenCalledWith('VaultURLMock/sdk/sdk-metrics', {
         method: 'POST',
         body: expect.any(String),
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer BearerTokenMock',
+          'Authorization': `Bearer ${METRIC_OBJECT.bearerToken}`,
         },
       });
     });

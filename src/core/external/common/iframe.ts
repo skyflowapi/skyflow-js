@@ -7,7 +7,7 @@ import iframer, {
 } from '../../../iframe-libs/iframer';
 import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
-import { updateMetricObjectValue } from '../../../utils/helpers';
+import { updateMetricObjectValue } from '../../../metrics/index';
 
 export default class IFrame {
   name: string;
