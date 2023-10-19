@@ -434,7 +434,6 @@ class CollectElement extends SkyflowElement {
     this.#eventEmitter.on(
       ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
       () => {
-        updateMetricObjectValue(this.#elementId, 'events', 'DESTROY_FRAME');
         const names = this.#elements.map((element) => element.elementName);
         if (!this.#isSingleElementAPI) names.push(this.#iframe.name);
         callback(names);
