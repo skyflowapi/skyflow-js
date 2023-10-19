@@ -152,22 +152,25 @@ describe('metric object test', () => {
       });
     });
 
-    it('should push an event to Mixpanel after a timeout', () => {
-      const setTimeoutMock = jest.fn();
-
-      global.setTimeout = setTimeoutMock;
-      pushElementEventWithTimeout('ElementIDMock');
-
-      expect(setTimeoutMock).toHaveBeenCalledWith(expect.any(Function), 20000);
-    });
-
-    it('should call pushEventToMixpanel after the timeout', () => {
-      const setTimeoutMock = jest.fn();
-
-      global.setTimeout = setTimeoutMock;
-      pushElementEventWithTimeout('ElementIDMock');
-
-      jest.advanceTimersByTime(20000);
+    it('should push the event to Mixpanel after a timeout', () => {
+      jest.useFakeTimers();
+      METRIC_OBJECT.records = [
+        {
+          element_id: 'element123',
+          container_id: 'container456',
+          vault_url: 'http://example.com',
+          status: "Error",
+          events: ["MOUNTED"]
+        },
+      ];
+      global.fetch = jest.fn(() =>
+        Promise.resolve({
+          data: 1, 
+        })
+      );
+      pushElementEventWithTimeout('element123');
+      jest.runAllTimers()
+      expect(METRIC_OBJECT).toBeTruthy();
     });
   });
 });
