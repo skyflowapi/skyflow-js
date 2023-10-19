@@ -487,6 +487,34 @@ describe('collect element', () => {
     element.unmount();
   });
 
+  it('mount before conatiner mount, valid dom element  isMounted false ', () => {
+    const onSpy = jest.spyOn(bus, 'on');
+
+    const element = new CollectElement(id, {
+      elementName,
+      rows,
+    },
+    {},
+    {type:ContainerType.COLLECT, containerId:'containerId',isMounted:false},
+    true,
+    destroyCallback,
+    updateCallback,
+    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+
+    const div = document.createElement('div');
+
+    expect(element.isMounted()).toBe(false);
+   
+    element.mount(div);
+
+    groupOnCb({containerId:'containerId'});
+    setTimeout(()=>{
+      expect(element.isMounted()).toBe(true);
+    },0);  
+    element.update(updateElementInput);
+    element.unmount();
+  });
+
   it('get options', async () => {
     const element = new CollectElement(id,
       {
