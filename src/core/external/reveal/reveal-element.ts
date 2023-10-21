@@ -10,7 +10,13 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import {
-  FRAME_REVEAL, ELEMENT_EVENTS_TO_IFRAME, ELEMENT_EVENTS_TO_CONTAINER, REVEAL_ELEMENT_OPTIONS_TYPES,
+  FRAME_REVEAL,
+  ELEMENT_EVENTS_TO_IFRAME,
+  ELEMENT_EVENTS_TO_CONTAINER,
+  REVEAL_ELEMENT_OPTIONS_TYPES,
+  METRIC_TYPES,
+  ELEMENT_TYPES,
+  EVENT_TYPES,
 } from '../../constants';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
@@ -62,7 +68,7 @@ class RevealElement extends SkyflowElement {
     this.#eventEmitter = container.eventEmitter;
     this.#context = context;
     initalizeMetricObject(metaData, elementId);
-    updateMetricObjectValue(this.#elementId, 'element_type', 'REVEAL');
+    updateMetricObjectValue(this.#elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, ELEMENT_TYPES.REVEAL);
     this.#iframe = new IFrame(
       `${FRAME_REVEAL}:${btoa(uuid())}`,
       { metaData },
@@ -86,11 +92,11 @@ class RevealElement extends SkyflowElement {
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
-    updateMetricObjectValue(this.#elementId, 'div_id', domElementSelector);
+    updateMetricObjectValue(this.#elementId, METRIC_TYPES.DIV_ID, domElementSelector);
     pushElementEventWithTimeout(this.#elementId);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
-        updateMetricObjectValue(this.#elementId, 'events', 'FRAME_READY');
+        updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
         callback({
           ...this.#metaData,
           record: this.#recordData,
@@ -109,8 +115,8 @@ class RevealElement extends SkyflowElement {
             },
           );
         this.#isMounted = true;
-        updateMetricObjectValue(this.#elementId, 'mount_end_time', Date.now());
-        updateMetricObjectValue(this.#elementId, 'events', 'MOUNTED');
+        updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
+        updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
       }
     };
 
@@ -127,7 +133,7 @@ class RevealElement extends SkyflowElement {
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
-        updateMetricObjectValue(this.#elementId, 'mount_start_time', Date.now());
+        updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
       }
     });
   }
