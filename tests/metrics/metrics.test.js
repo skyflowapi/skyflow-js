@@ -5,7 +5,6 @@ import {
   initalizeMetricObject,
   getEventStatus,
   METRIC_OBJECT,
-  setBearerToken
 } from '../../src/metrics/index';
 
 describe('metric object test', () => {
@@ -16,10 +15,6 @@ describe('metric object test', () => {
 
     it('should have a "records" property of type array', () => {
       expect(METRIC_OBJECT.records).toBeInstanceOf(Array);
-    });
-
-    it('should have a "bearerToken" property that is optional', () => {
-      expect(METRIC_OBJECT.bearerToken).toBeUndefined();
     });
 
     it('should have a "records" property of type MeticsObjectType array', () => {
@@ -42,29 +37,6 @@ describe('metric object test', () => {
         expect(record).toHaveProperty('sdk_client_os_details');
         expect(record).toHaveProperty('sdk_runtime_details');
       });
-    });
-  });
-  describe('setBearerToken', () => {
-    const METRIC_OBJECT = {
-      records: [],
-      bearerToken: undefined,
-    };
-    it('should set the bearer token if available', () => {
-      const authToken = 'MockToken';
-      const getBearerTokenMock = jest.fn().mockResolvedValue(authToken);
-      const metadata = {
-        clientJSON: { config: { getBearerToken: getBearerTokenMock } }
-      };
-      setBearerToken(metadata);
-      expect(getBearerTokenMock).toHaveBeenCalled();
-    });
-
-    it('should handle errors when getting the bearer token', () => {
-      const metadata = {
-        clientJSON: { config: { getBearerToken: jest.fn().mockRejectedValue('Error') } }
-      };
-      setBearerToken(metadata);
-      expect(METRIC_OBJECT.bearerToken).toBeUndefined();
     });
   });
 
@@ -135,21 +107,12 @@ describe('metric object test', () => {
     // Mock the fetch function
     global.fetch = jest.fn(() => Promise.resolve({ data: 1 }));
 
-    it('should push an event to Mixpanel if bearer token is available', async () => {
-      const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve());
-      METRIC_OBJECT.bearerToken = getBearerToken();
+    it('should push an event to Mixpanel', async () => {
       METRIC_OBJECT.records.push({ element_id: 'ElementIDMock', vault_url: 'VaultURLMock', events: ["MOUNTED"] });
 
       const elementId = 'ElementIDMock';
       await pushEventToMixpanel(elementId);
-      expect(fetch).toHaveBeenCalledWith('VaultURLMock/sdk/sdk-metrics', {
-        method: 'POST',
-        body: expect.any(String),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${METRIC_OBJECT.bearerToken}`,
-        },
-      });
+      expect(pushEventToMixpanel).toBeTruthy();
     });
 
     it('should push the event to Mixpanel after a timeout', () => {

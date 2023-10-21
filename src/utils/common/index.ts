@@ -174,5 +174,4 @@ export interface MeticsObjectType {
 
 export interface SharedMeticsObjectType {
   records: MeticsObjectType[];
-  bearerToken?: string;
 }
