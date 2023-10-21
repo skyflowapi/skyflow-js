@@ -215,6 +215,21 @@ class SkyflowFrameController {
             CLASS_NAME, PUREJS_TYPES[key]), MessageType.LOG, this.#context.logLevel);
         });
       });
+    bus
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT,
+        (data: any) => {
+          this.pushData(data.event)
+            .then((result) => {
+              // eslint-disable-next-line no-console
+              console.log(result);
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.log(error);
+            });
+        }
+      );
   }
 
   static init(clientId) {
@@ -268,6 +283,33 @@ class SkyflowFrameController {
       } catch (err) {
         reject(err);
       }
+    });
+  }
+
+  pushData(event: any) {
+    return new Promise((resolve, reject) => {
+      getAccessToken(this.#clientId).then((authToken) => {
+        this.#client
+          .request({
+            body: event,
+            requestMethod: 'POST',
+            url:
+              `${event.properties.vaultURL}/sdk/sdk-metrics`,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authToken}`,
+            },
+
+          })
+          .then((response: any) => {
+            resolve(response);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      }).catch((err) => {
+        reject(err);
+      });
     });
   }
 }

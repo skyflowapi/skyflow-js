@@ -25,6 +25,43 @@ export const FRAME_REVEAL = 'reveal';
 
 export const FRAME_ELEMENT = 'element';
 
+export const ELEMENT_TYPES = {
+  COLLECT: 'COLLECT',
+  REVEAL: 'REVEAL',
+};
+
+export const EVENT_TYPES = {
+  MOUNTED: 'MOUNTED',
+  READY: 'FRAME_READY',
+};
+
+export const STATUS_TYPES = {
+  SUCCESS: 'SUCCESS',
+  INITIALIZED: 'INITIALIZED',
+  PARTIAL_RENDER: 'PARTIAL_RENDER',
+  FAILED: 'FAILED',
+};
+
+export const METRIC_TYPES = {
+  ELEMENT_ID: 'element_id',
+  ELEMENT_TYPE: ELEMENT_TYPES,
+  ELEMENT_TYPE_KEY: 'element_type',
+  DIV_ID: 'div_id',
+  CONTAINER_ID: 'container_id',
+  SESSION_ID: 'session_id',
+  VAULT_ID: 'vault_id',
+  VAULT_URL: 'vault_url',
+  EVENTS: EVENT_TYPES,
+  EVENTS_KEY: 'events',
+  CREATED_AT: 'created_at',
+  REGION: 'region',
+  MOUNT_START_TIME: 'mount_start_time',
+  MOUNT_END_TIME: 'mount_end_time',
+  ERROR: 'error',
+  LATENCY: 'latency',
+  STATUS: STATUS_TYPES,
+};
+
 export const PUREJS_TYPES = {
   INSERT: 'INSERT',
   DETOKENIZE: 'DETOKENIZE',
@@ -73,8 +110,7 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
   REVEAL_ELEMENT_UPDATE_OPTIONS: 'REVEAL_ELEMENT_UPDATE_OPTIONS',
   FILE_UPLOAD: 'FILE_UPLOAD',
   COMPOSABLE_UPDATE_OPTIONS: 'COMPOSABLE_UPDATE_OPTIONS',
-  RENDER_FILE_RESPONSE_READY: 'RENDER_FILE_RESPONSE_READY',
-  RENDER_FILE_REQUEST: 'RENDER_FILE_REQUEST',
+  PUSH_EVENT: 'PUSH_EVENT',
 };
 
 export const REVEAL_ELEMENT_OPTIONS_TYPES = {
