@@ -1,20 +1,16 @@
+import bus from 'framebus';
 import { MeticsObjectType, SharedMeticsObjectType } from '../utils/common';
 import sdkDetails from '../../package.json';
 import { getMetaObject } from '../utils/helpers';
+import {
+  ELEMENT_EVENTS_TO_IFRAME,
+  EVENT_TYPES,
+  METRIC_TYPES
+} from '../core/constants';
 
 export const METRIC_OBJECT: SharedMeticsObjectType = { records: [] };
 
-export function setBearerToken(metadata: any) {
-  metadata?.clientJSON?.config?.getBearerToken?.().then((authToken: string) => {
-    METRIC_OBJECT.bearerToken = authToken;
-  }).catch((err: any) => {
-    // eslint-disable-next-line no-console
-    console.error(err);
-  });
-}
-
 export function initalizeMetricObject(metadata: any, elementId: string) {
-  setBearerToken(metadata);
   const metaDataObject = getMetaObject(sdkDetails, metadata, navigator);
   const elementMetricObject = {
     element_id: elementId,
@@ -27,7 +23,7 @@ export function initalizeMetricObject(metadata: any, elementId: string) {
     events: [],
     created_at: Date.now(),
     region: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    status: 'INITIALIZED',
+    status: METRIC_TYPES.STATUS.INITIALIZED,
     sdk_name_version: metaDataObject.sdk_name_version,
     sdk_client_device_model: metaDataObject.sdk_client_device_model,
     sdk_client_os_details: metaDataObject.sdk_os_version,
@@ -41,9 +37,9 @@ export function initalizeMetricObject(metadata: any, elementId: string) {
 export function updateMetricObjectValue(id: string, key: string, value: any) {
   METRIC_OBJECT.records.forEach((event) => {
     if (event.element_id === id) {
-      if (key === 'events' || key === 'element_type') {
+      if (key === METRIC_TYPES.EVENTS_KEY || key === METRIC_TYPES.ELEMENT_TYPE_KEY) {
         event[key].push(value);
-      } else if (key === 'mount_end_time' && event.mount_start_time) {
+      } else if (key === METRIC_TYPES.MOUNT_END_TIME && event.mount_start_time) {
         event[key] = value;
         event.latency = value - event.mount_start_time;
       } else {
@@ -56,11 +52,11 @@ export function updateMetricObjectValue(id: string, key: string, value: any) {
 export function getEventStatus(metricEvent: MeticsObjectType): string {
   let status = metricEvent.status;
   if (metricEvent.events.length === 0 || metricEvent.error) {
-    status = 'FAILED';
-  } else if (metricEvent.events.filter((element) => element.includes('MOUNTED')).length > 0) {
-    status = 'SUCCESS';
+    status = METRIC_TYPES.STATUS.FAILED;
+  } else if (metricEvent.events.filter((event) => event.includes(EVENT_TYPES.MOUNTED)).length > 0) {
+    status = METRIC_TYPES.STATUS.SUCCESS;
   } else if (metricEvent.events.length > 0) {
-    status = 'PARTIAL_RENDER';
+    status = METRIC_TYPES.STATUS.PARTIAL_RENDER;
   }
   return status;
 }
@@ -68,8 +64,6 @@ export function getEventStatus(metricEvent: MeticsObjectType): string {
 export function pushEventToMixpanel(elementId: string) {
   const metricEvent = METRIC_OBJECT.records.filter((event) => event.element_id === elementId)[0];
   metricEvent.status = getEventStatus(metricEvent);
-  const vaultURL = metricEvent.vault_url;
-  let eventPushed = false;
   const event = {
     event: metricEvent.container_id,
     properties: {
@@ -78,23 +72,10 @@ export function pushEventToMixpanel(elementId: string) {
       distinct_id: metricEvent.container_id,
     },
   };
-
-  if (METRIC_OBJECT.bearerToken) {
-    fetch(`${vaultURL}/sdk/sdk-metrics`, {
-      method: 'POST',
-      body: JSON.stringify(event),
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${METRIC_OBJECT.bearerToken}`,
-      },
-    })
-      .then((response: any) => {
-        eventPushed = response.data && (response.data >= 1);
-      })
-      .catch((error) => {
-        eventPushed = error || eventPushed;
-      });
-  }
+  bus
+    .emit(ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT, {
+      event,
+    });
 }
 
 export function pushElementEventWithTimeout(elementID: string) {

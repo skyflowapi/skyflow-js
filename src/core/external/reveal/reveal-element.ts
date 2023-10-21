@@ -14,20 +14,13 @@ import {
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
+import { formatRevealElementOptions } from '../../../utils/helpers';
 import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import { formatForRenderClient, formatRecordsForRender } from '../../../core-utils/reveal';
 import { setStyles } from '../../../iframe-libs/iframer';
-import {
-  formatRevealElementOptions,
-} from '../../../utils/helpers';
-import {
-  initalizeMetricObject,
-  pushElementEventWithTimeout,
-  updateMetricObjectValue,
-} from '../../../metrics';
 
 const CLASS_NAME = 'RevealElement';
 
@@ -73,8 +66,6 @@ class RevealElement extends SkyflowElement {
     this.#readyToMount = container.isMounted;
     this.#eventEmitter = container.eventEmitter;
     this.#context = context;
-    initalizeMetricObject(metaData, elementId);
-    updateMetricObjectValue(this.#elementId, 'element_type', 'REVEAL');
     this.#iframe = new IFrame(
       `${FRAME_REVEAL}:${btoa(uuid())}`,
       { metaData },
@@ -113,7 +104,6 @@ class RevealElement extends SkyflowElement {
     if (!this.#recordData.skyflowID || this.#isRenderFileCalled) {
       const sub = (data, callback) => {
         if (data.name === this.#iframe.name) {
-          updateMetricObjectValue(this.#elementId, 'events', 'FRAME_READY');
           callback({
             ...this.#metaData,
             record: this.#recordData,
@@ -144,8 +134,6 @@ class RevealElement extends SkyflowElement {
               },
             );
           this.#isMounted = true;
-          updateMetricObjectValue(this.#elementId, 'mount_end_time', Date.now());
-          updateMetricObjectValue(this.#elementId, 'events', 'MOUNTED');
         }
         this.#isMounted = true;
         if (Object.prototype.hasOwnProperty.call(this.#recordData, 'skyflowID')) {
@@ -178,7 +166,6 @@ class RevealElement extends SkyflowElement {
           bus
             .target(properties.IFRAME_SECURE_ORGIN)
             .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
-          updateMetricObjectValue(this.#elementId, 'mount_start_time', Date.now());
         }
       });
     } else if (this.#recordData.skyflowID) {
