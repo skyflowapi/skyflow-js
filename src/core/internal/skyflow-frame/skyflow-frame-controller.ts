@@ -219,7 +219,7 @@ class SkyflowFrameController {
       .on(
         ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT,
         (data: any) => {
-          this.pushData(data.event)
+          this.pushEvent(data.event)
             .then((result) => {
               // eslint-disable-next-line no-console
               console.log(result);
@@ -228,7 +228,7 @@ class SkyflowFrameController {
               // eslint-disable-next-line no-console
               console.log(error);
             });
-        }
+        },
       );
   }
 
