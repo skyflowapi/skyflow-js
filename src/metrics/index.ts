@@ -5,7 +5,7 @@ import { getMetaObject } from '../utils/helpers';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   EVENT_TYPES,
-  METRIC_TYPES
+  METRIC_TYPES,
 } from '../core/constants';
 
 export const METRIC_OBJECT: SharedMeticsObjectType = { records: [] };
