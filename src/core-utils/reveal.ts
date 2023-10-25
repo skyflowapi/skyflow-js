@@ -23,7 +23,8 @@ interface IApiSuccessResponse {
 
 const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
   const currentResponseRecords = response.records;
-  return currentResponseRecords.map((record) => ({ token: record.token, value: record.value }));
+  return currentResponseRecords.map((record) => (
+    { token: record.token, value: record.value, valueType: record.valueType }));
 };
 
 const formatForPureJsFailure = (cause, tokenId:string) => ({
@@ -184,6 +185,7 @@ export const formatRecordsForClient = (response: IRevealResponseType) => {
   if (response.records) {
     const successRecords = response.records.map((record) => ({
       token: record.token,
+      valueType: record.valueType,
     }));
     if (response.errors) return { success: successRecords, errors: response.errors };
     return { success: successRecords };

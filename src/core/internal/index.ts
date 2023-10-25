@@ -31,7 +31,7 @@ import {
   CUSTOM_ROW_ID_ATTRIBUTE,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iframe-form';
-import getCssClassesFromJss from '../../libs/jss-styles';
+import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-styles';
 import { parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
@@ -175,7 +175,8 @@ export class FrameElement {
     if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
       && this.options.enableCardIcon) {
       this.domImg = document.createElement('img');
-      this.domImg.src = CARD_ENCODED_ICONS.DEFAULT;
+      this.domImg.src = CARD_ENCODED_ICONS[this.iFrameFormElement?.cardType]
+        || CARD_ENCODED_ICONS.DEFAULT;
       this.domImg.setAttribute('style', this.options?.inputStyles?.cardIcon ? styleToString(this.options.inputStyles.cardIcon) : INPUT_ICON_STYLES);
       this.inputParent.append(this.domImg);
     }
@@ -206,7 +207,7 @@ export class FrameElement {
     if (this.options.required && this.domError) {
       this.isRequiredLabel = document.createElement('label');
       this.isRequiredLabel.textContent = ' *';
-      this.isRequiredLabel.setAttribute('style', 'display:inline ; color:red');
+      this.isRequiredLabel.className = `SkyflowElement-label-${this.options.elementName}-${STYLE_TYPE.REQUIRED_ASTERISK}`;
       this.labelDiv.append(this.isRequiredLabel);
     }
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, (state) => {
@@ -274,9 +275,12 @@ export class FrameElement {
       }
       if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
         const cardType = detectCardType(state.value);
-        if (this.options.enableCardIcon) {
-          if (this.domImg) {
-            this.domImg.src = CARD_ENCODED_ICONS[cardType] || 'none';
+        if (cardType !== this.iFrameFormElement.cardType) {
+          if (this.options.enableCardIcon) {
+            if (this.domImg) {
+              this.domImg.src = CARD_ENCODED_ICONS[cardType] || 'none';
+              this.iFrameFormElement.cardType = cardType;
+            }
           }
         }
         const cardNumberMask = addSeperatorToCardNumberMask(
@@ -297,10 +301,14 @@ export class FrameElement {
         const fieldTypeCheck = ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES
           .includes(elementType as ElementType);
         if (state.value && state.isComplete && state.isValid && fieldTypeCheck) {
-          const elementList = document.getElementsByTagName('input') as any;
+          const inputElements = document.getElementsByTagName('input') as any;
+          let elementList = [];
+          if (inputElements) {
+            elementList = Array.from(inputElements);
+          }
 
           let nextIndex;
-          elementList.forEach((element:HTMLInputElement, index) => {
+          elementList?.forEach((element:HTMLInputElement, index) => {
             if (element.id === this.iFrameFormElement.iFrameName
             && (index + 1) !== elementList.length) { nextIndex = index + 1; }
           });
@@ -383,6 +391,11 @@ export class FrameElement {
 
     this.updateParentDiv(this.htmlDivElement);
 
+    bus
+      .emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED, {
+        name: this.iFrameFormElement.iFrameName,
+      });
+
     this.updateStyleClasses(this.iFrameFormElement.getStatus());
   };
 
@@ -393,6 +406,7 @@ export class FrameElement {
       name: this.iFrameFormElement.fieldName,
       id: this.iFrameFormElement.iFrameName,
       placeholder: this.options.placeholder,
+      accept: this.options.accept,
       disabled: this.options.disabled ? true : undefined,
       readOnly: this.options.readOnly ? true : undefined,
       required: this.options.required ? true : undefined,
@@ -466,7 +480,7 @@ export class FrameElement {
 
   updateParentDiv = (newDiv: HTMLDivElement) => {
     this.htmlDivElement = newDiv;
-    if (Object.prototype.hasOwnProperty.call(this.options, 'label')) this.htmlDivElement.append(this.labelDiv || '');
+    if (Object.prototype.hasOwnProperty.call(this.options, 'label') && this.options.label) this.htmlDivElement.append(this.labelDiv || '');
     this.htmlDivElement.append(this.inputParent || '');
     if (this.iFrameFormElement.containerType === ContainerType.COLLECT) { this.htmlDivElement.append(this.domError || ''); }
   };
@@ -495,7 +509,11 @@ export class FrameElement {
   };
 
   findPreviousElement = (currentInput) => {
-    const elementList = document.getElementById(currentInput.getAttribute(CUSTOM_ROW_ID_ATTRIBUTE) || '')?.getElementsByTagName('input') as any;
+    let elementList = [];
+    const inputElements = document.getElementById(currentInput.getAttribute(CUSTOM_ROW_ID_ATTRIBUTE) || '')?.getElementsByTagName('input') as any;
+    if (inputElements) {
+      elementList = Array.from(inputElements);
+    }
     let prevIndex;
     elementList.forEach((element:HTMLInputElement, index) => {
       if (element.id === this.iFrameFormElement.iFrameName
@@ -505,7 +523,11 @@ export class FrameElement {
   };
 
   findNextElement = (currentInput) => {
-    const elementList = document.getElementById(currentInput.getAttribute(CUSTOM_ROW_ID_ATTRIBUTE) || '')?.getElementsByTagName('input') as any;
+    let elementList = [];
+    const inputElements = document.getElementById(currentInput.getAttribute(CUSTOM_ROW_ID_ATTRIBUTE) || '')?.getElementsByTagName('input') as any;
+    if (inputElements) {
+      elementList = Array.from(inputElements);
+    }
     let nextIndex;
     elementList.forEach((element:HTMLInputElement, index) => {
       if (element.id === this.iFrameFormElement.iFrameName
@@ -577,7 +599,11 @@ export class FrameElement {
   injectInputStyles(styles, preText: string = '') {
     const customStyles: Record<string, any> = {};
     Object.values(STYLE_TYPE).forEach((type) => {
-      if (Object.prototype.hasOwnProperty.call(styles, type)) {
+      if (type === STYLE_TYPE.GLOBAL) {
+        if (styles && styles[type]) {
+          generateCssWithoutClass(styles[type]);
+        }
+      } else if (Object.prototype.hasOwnProperty.call(styles, type)) {
         customStyles[type] = styles[type];
       }
     });
@@ -667,6 +693,9 @@ export class FrameElement {
         labelStyles[STYLE_TYPE.BASE] = {
           ...COLLECT_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.BASE],
         };
+        labelStyles[STYLE_TYPE.REQUIRED_ASTERISK] = {
+          ...COLLECT_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.REQUIRED_ASTERISK],
+        };
         if (options.labelStyles?.[STYLE_TYPE.BASE]) {
           labelStyles[STYLE_TYPE.BASE] = {
             ...labelStyles[STYLE_TYPE.BASE],
@@ -676,6 +705,17 @@ export class FrameElement {
         if (options.labelStyles?.[STYLE_TYPE.FOCUS]) {
           labelStyles[STYLE_TYPE.FOCUS] = {
             ...options.labelStyles[STYLE_TYPE.FOCUS],
+          };
+        }
+        if (options.labelStyles?.[STYLE_TYPE.REQUIRED_ASTERISK]) {
+          labelStyles[STYLE_TYPE.REQUIRED_ASTERISK] = {
+            ...labelStyles[STYLE_TYPE.REQUIRED_ASTERISK],
+            ...options.labelStyles[STYLE_TYPE.REQUIRED_ASTERISK],
+          };
+        }
+        if (options.labelStyles?.[STYLE_TYPE.GLOBAL]) {
+          labelStyles[STYLE_TYPE.GLOBAL] = {
+            ...options.labelStyles[STYLE_TYPE.GLOBAL],
           };
         }
         this.injectInputStyles(labelStyles, 'label');
@@ -693,6 +733,13 @@ export class FrameElement {
           ...options.errorTextStyles[STYLE_TYPE.BASE],
         },
       };
+
+      if (options?.errorTextStyles?.[STYLE_TYPE.GLOBAL]) {
+        errorStyles[STYLE_TYPE.GLOBAL] = {
+          ...options?.errorTextStyles?.[STYLE_TYPE.GLOBAL],
+        };
+      }
+
       this.injectInputStyles(errorStyles, 'error');
     } else {
       const errorStyles = {

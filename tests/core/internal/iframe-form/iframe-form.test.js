@@ -2,13 +2,14 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME } from '../../../../src/core/constants';
+import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS } from '../../../../src/core/constants';
 import { Env, LogLevel, ValidationRuleType } from '../../../../src/utils/common';
 import { IFrameForm, IFrameFormElement } from '../../../../src/core/internal/iframe-form'
 import * as busEvents from '../../../../src/utils/bus-events';
 import SkyflowError from '../../../../src/libs/skyflow-error';
 import logs from '../../../../src/utils/logs';
 import { ContainerType } from '../../../../src/skyflow';
+import { formatOptions } from '../../../../src/libs/element-options';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
 
 const tableCol = btoa('1234')
@@ -788,6 +789,43 @@ describe('test file Upload method', () => {
             expect(cb3.mock.calls[0][0].records.length).toBe(1);
             done()
         }, 1000)
-    })
-
+    });
+    test('validate for file input - valid allowedFileType array', () => {
+        const elementType = ELEMENTS.FILE_INPUT.name;
+        const options = { allowedFileType: [".pdf", ".png"] };
+        const logLevel = LogLevel.ERROR;
+      
+        expect(() => {
+          const formattedOptions = formatOptions(elementType, options, logLevel);
+        }).not.toThrow();
+      });
+      
+    test('validate for file input - invalid file types in allowedFileType array', () => {
+        const elementType = ELEMENTS.FILE_INPUT.name;
+        const options = { allowedFileType: [".pdf", 42] };
+        const logLevel = LogLevel.ERROR;
+      
+        expect(() => {
+          const formattedOptions = formatOptions(elementType, options, logLevel);
+        }).toThrowError(logs.errorLogs.INVALID_ALLOWED_FILETYPE_ARRAY);
+      });
+    test('validate for file input - invalid allowedFileType (not an array)', () => {
+        const elementType = ELEMENTS.FILE_INPUT.name;
+        const options = { allowedFileType: 'invalidFileType' };
+        const logLevel = LogLevel.ERROR;
+      
+        expect(() => {
+          const formattedOptions = formatOptions(elementType, options, logLevel);
+        }).toThrowError(logs.errorLogs.INVALID_ALLOWED_OPTIONS);
+      });
+    test('validate for file input - empty allowedFileType array', () => {
+        const elementType = ELEMENTS.FILE_INPUT.name;
+        const options = { allowedFileType: [] };
+        const logLevel = LogLevel.ERROR;
+      
+        expect(() => {
+          const formattedOptions = formatOptions(elementType, options, logLevel);
+        }).toThrowError(logs.errorLogs.EMPTY_ALLOWED_OPTIONS_ARRAY);
+      });
+      
 })

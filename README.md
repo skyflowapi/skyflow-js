@@ -8,11 +8,12 @@ Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal
 [![License](https://img.shields.io/github/license/skyflowapi/skyflow-android)](https://github.com/skyflowapi/skyflow-js/blob/master/LICENSE)
 
 # Table of Contents
-- [**Including Skyflow.js**](#Including-Skyflowjs) 
-- [**Initializing Skyflow.js**](#Initializing-Skyflowjs)
-- [**Securely collecting data client-side**](#Securely-collecting-data-client-side)
-- [**Securely collecting data client-side using Composable Elements**](#Securely-collecting-data-client-side-using-Composable-Elements)
-- [**Securely revealing data client-side**](#Securely-revealing-data-client-side)
+- [**Including Skyflow.js**](#including-skyflowjs) 
+- [**Initializing Skyflow.js**](#initializing-skyflowjs)
+- [**Securely collecting data client-side**](#securely-collecting-data-client-side)
+- [**Securely collecting data client-side using Composable Elements**](#securely-collecting-data-client-side-using-composable-elements)
+- [**Securely revealing data client-side**](#securely-revealing-data-client-side)
+- [**Securely deleting data client-side**](#securely-deleting-data-client-side)
 
 ---
 
@@ -239,6 +240,7 @@ The `inputStyles` field accepts a style object which consists of CSS properties 
 * `invalid`: applied when the Element has invalid input
 * `cardIcon`: applied to the card type icon in CARD_NUMBER Element
 * `copyIcon`: applied to copy icon in Elements when enableCopy option is true
+* `global`: used for global styles like font-family.
 
 Styles are specified with [JSS](https://cssinjs.org/?v=v10.7.1). 
 
@@ -253,6 +255,7 @@ inputStyles: {
     '&:hover': {    // Hover styles.
         borderColor: 'green'
     },
+    fontFamily: '"Roboto", sans-serif'
   },
   complete: {
     color: '#4caf50',
@@ -271,9 +274,13 @@ inputStyles: {
     position: 'absolute',
     right: '8px',
   },
+  global: {   
+    '@import': 'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 },
 ```
-The states that are available for `labelStyles` are `base` and `focus`.
+The states that are available for `labelStyles` are `base`, `focus`, `global` and `requiredAsterisk`.
+* `requiredAsterisk`: styles applied for the Asterisk symbol in the label.
 
 An example of a labelStyles object:
 
@@ -282,14 +289,21 @@ labelStyles: {
   base: {
     fontSize: '12px',
     fontWeight: 'bold',
+    fontFamily: '"Roboto", sans-serif'
   },
   focus: {
     color: '#1d1d1d',
   },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  },
+  requiredAsterisk:{
+    color: 'red'
+  }
 },
 ```
 
-The state that is available for `errorTextStyles` is only the `base` state, it shows up when there is some error in the collect element.
+The state that is available for `errorTextStyles` are `base` and `global`, it shows up when there is some error in the collect element.
 
 An example of a errorTextStyles object:
 
@@ -297,7 +311,11 @@ An example of a errorTextStyles object:
 errorTextStyles: {
   base: {
     color: '#f44336',
+    fontFamily: '"Roboto", sans-serif'
   },
+  global: {
+    '@import': 'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 },
 ```
 
@@ -320,31 +338,62 @@ Along with CollectElement we can define other options which takes a object of op
 ```javascript
 const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
-  enableCardIcon: true, // Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType).
-  format: String,       // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
-  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+  enableCardIcon: true, // Optional, indicates whether a card icon should be enabled (only applicable for CARD_NUMBER ElementType).
+  enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false').
+  format: String,       // Optional, format for the element 
+  translation: {}      // Optional, indicates the allowed data type value for format. 
 };
 ```
 
-`required` parameter indicates whether the field is marked as required or not. If not provided, it defaults to false
+`required`: Indicates whether the field is marked as required or not. If not provided, it defaults to false.
 
-`enableCardIcon` parameter indicates whether the icon is visible for the CARD_NUMBER element, defaults to true
+`enableCardIcon` : Indicates whether the icon is visible for the CARD_NUMBER element. Defaults to true.
 
-`format` parameter takes string value and indicates the format pattern applicable to the element type, It's currently only applicable to `EXPIRATION_DATE` and `EXPIRATION_YEAR` element types.
+`enableCopy` : Indicates whether the copy icon is visible in collect and reveal elements.
 
-`enableCopy` parameter indicates whether the copy icon is visible in collect and reveal elements.
+`format`: A string value that indicates the format pattern applicable to the element type.
+Only applicable to EXPIRATION_DATE, CARD_NUMBER, EXPIRATION_YEAR, and INPUT_FIELD elements.
+  - For INPUT_FIELD elements,
+    - the length of `format` determines the expected length of the user input.
+    - if `translation` isn't specified, the `format` value is considered a string literal.
 
-The values that are accepted for `EXPIRATION_DATE` are
-  - `MM/YY` (default)
-  - `MM/YYYY`
-  - `YY/MM`
-  - `YYYY/MM`
+`translation`: An object of key value pairs, where the key is a character that appears in `format` and the value is a simple regex pattern of acceptable inputs for that character. Each key can only appear once. Only applicable for INPUT_FIELD elements.
 
-The values that are accepted for `EXPIRATION_YEAR` are
-  - `YY` (default)
-  - `YYYY`
+Accepted values by element type:
 
-`NOTE`: If not specified or invalid value is passed to the `format` then it takes default value.
+| Element type    | `format`and `translation` values                                                                                                                                                             | Examples                                                                                                                                   |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| EXPIRATION_DATE | <li>`format`</li> <ul><li>`mm/yy` (default)</li><li>`mm/yyyy`</li><li>`yy/mm`</li><li>`yyyy/mm`</li></ul>                                                                                    | <ul><li>12/27</li><li>12/2027</li> <li>27/12</li> <li> 2027/12</li></ul></ul>                                                              |
+| EXPIRATION_YEAR | <li>`format`</li> <ul><li>`yy` (default)</li><li>`yyyy`</li></ul>                                                                                                                            | <ul><li>27</li><li>2027</li></ul>                                                                                                          |
+| CARD_NUMBER     | <li>`format`</li> <ul><li>`XXXX XXXX XXXX XXXX` (default)</li><li>`XXXX-XXXX-XXXX-XXXX`</li></ul>                                                                                            | <ul><li>1234 5678 9012 3456</li><li>1234-5678-9012-3456</li></ul>                                                                          |
+| INPUT_FIELD     | <li>`format`: A string that matches the desired output, with placeholder characters of your choice.</li><li>`translation`: An object of key/value pairs. Defaults to `{"X": "[0-9]"}`</li>   | With a `format` of `+91 XXXX-XX-XXXX` and a `translation` of `[ "X": "[0-9]"]`, user input of "1234121234" displays as "+91 1234-12-1234". |
+
+**Collect Element Options examples for INPUT_FIELD**
+Example 1
+```js
+const options = {
+  required: true, 
+  enableCardIcon: true,
+  format:'+91 XXXX-XX-XXXX',
+  translation: { 'X': '[0-9]' } 
+}
+```
+
+User input: "1234121234"
+Value displayed in INPUT_FIELD: "+91 1234-12-1234"
+
+Example 2
+```js
+const options = {
+  required: true, 
+  enableCardIcon: true,
+  format: 'AY XX-XXX-XXXX',
+  translation: { 'X': '[0-9]',  'Y': '[A-Z]' } 
+}
+```
+
+User input: "B1234121234"
+Value displayed in INPUT_FIELD: "AB 12-341-2123"
 
 Once the Element object and options has been defined, add it to the container using the `create(element, options)` method as shown below. The `element` param takes a Skyflow Element object and options as defined above:
 
@@ -365,8 +414,9 @@ const collectElement = {
 const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
   enableCardIcon: true, // Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType).
-  format: String,       // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
   enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+  format: String,       // Optional, format for the element
+  translation: {},      // Optional, indicates the allowed data type value for format.
 };
 
 const element = container.create(collectElement, options);
@@ -637,8 +687,9 @@ const collectElement = {
 const options = {
  required: false,             // Optional, indicates whether the field is marked as required. Defaults to 'false'.
  enableCardIcon: true,        // Optional, indicates whether  the element needs a card icon (only applicable for CARD_NUMBER ElementType).
- format: String,              // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
  enableCopy: false,           // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+ format: String,              // Optional, format for the element
+ translation: {},             // Optional, indicates the allowed data type value for format.
 };
 const element = container.create(collectElement, options);
 ```
@@ -1142,7 +1193,11 @@ const options = {
     errorTextStyles: {                       // Optional
         base: {
             color: 'red',
+            fontFamily: '"Roboto", sans-serif'
         },
+        global: {
+            '@import': 'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+        }        
     },
 };
 ```
@@ -1179,6 +1234,7 @@ The `inputStyles` field accepts an object of CSS properties to apply to the form
 * `invalid`: applied when the Element has invalid input
 * `cardIcon`: applied to the card type icon in CARD_NUMBER Element
 * `copyIcon`: applied to copy icon in Elements when enableCopy option is true
+* `global`: used for global styles like font-family.
 
 An example of an `inputStyles` object:
 
@@ -1189,6 +1245,7 @@ inputStyles: {
     padding: '10px 16px',
     borderRadius: '4px',
     color: '#1d1d1d',
+    fontFamily: '"Roboto", sans-serif'
   },
   complete: {
     color: '#4caf50',
@@ -1207,9 +1264,13 @@ inputStyles: {
     position: 'absolute',
     right: '8px',
   },
+  global: {   
+    '@import': 'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 }
 ```
-The `labelStyles` field supports the `base` and `focus` states.
+The states that are available for `labelStyles` are `base`, `focus`, `global`.
+* requiredAsterisk: styles applied for the Asterisk symbol in the label.
 
 An example `labelStyles` object:
 
@@ -1217,24 +1278,18 @@ An example `labelStyles` object:
 labelStyles: {
   base: {
     fontSize: '12px',
-      fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontFamily: '"Roboto", sans-serif'
   },
   focus: {
     color: '#1d1d1d'
+  },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
   }
 }
 ```
-The `errorTextStyles` field only supports the `base` state, which appears when there is an error in the composable element.
 
-An example `errorTextStyles` object:
-
-```javascript
-errorTextStyles: {
-  base: {
-    color: '#f44336'
-  }
-}
-```
 The JS SDK supports the following composable elements:
 
 - `CARDHOLDER_NAME`
@@ -1742,10 +1797,12 @@ The sample response:
     {
       "token": "131e70dc-6f76-4319-bdd3-96281e051051",
       "value": "1990-01-01",
+      "valueType": "STRING"
     },
     {
      "token": "1r434532-6f76-4319-bdd3-96281e051051",
      "value": "xxxxxxer",
+     "valueType": "STRING"
    }
   ]
 }
@@ -1911,7 +1968,7 @@ const revealElement = {
 
 Note: If you don't provide a redaction type, RedactionType.PLAIN_TEXT will apply by default.
 
-The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant and `copyIcon` style object. 
+The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant, `copyIcon` and `global` style objects. 
 
 An example of a inputStyles object:
 
@@ -1925,6 +1982,9 @@ inputStyles: {
     right: '8px',
     top: 'calc(50% - 10px)',
   },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 },
 ```
 
@@ -1936,6 +1996,9 @@ labelStyles: {
     fontSize: '12px',
     fontWeight: 'bold',
   },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 },
 ```
 
@@ -1946,8 +2009,59 @@ errorTextStyles: {
   base: {
     color: '#f44336',
   },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
 },
 ```
+
+Along with RevealElementInput, you can define other options in the RevealElementOptions object as described below: 
+```js
+const options = {
+  enableCopy: false,    // Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false').
+ format: String,        // Optional, format for the element 
+ translation: {}        // Optional, indicates the allowed data type value for format. 
+}
+```
+
+`format`: A string value that indicates how the reveal element should display the value, including placeholder characters that map to keys `translation` If `translation` isn't specified to any character in the `format` value is considered as a string literal.
+
+`translation`: An object of key value pairs, where the key is a character that appears in `format` and the value is a simple regex pattern of acceptable inputs for that character. Each key can only appear once. Defaults to `{ ‘X’: ‘[0-9]’ }`.
+
+**Reveal Element Options examples:**
+Example 1
+```js
+const revealElementInput = {
+ token: '<token>' 
+};
+
+const options = {
+  format: '(XXX) XXX-XXXX',
+  translation: { 'X': '[0-9]'} 
+};
+
+const revealElement = revealContainer.create(revealElementInput,options);
+```
+
+Value from vault: "1234121234"
+Revealed Value displayed in element: "(123) 412-1234"
+
+Example 2:
+```js
+const revealElementInput = {
+ token: '<token>' 
+};
+
+const options = {
+  format: 'XXXX-XXXXXX-XXXXX',
+  translation: { 'X': '[0-9]' } 
+};
+
+const revealElement = revealContainer.create(revealElementInput,options);
+```
+
+Value from vault: "374200000000004"
+Revealed Value displayed in element: "3742-000000-00004"
 
 Once you've defined a Skyflow Element, you can use the `create(element)` method of the container to create the Element as shown below: 
 
@@ -2052,10 +2166,12 @@ The response below shows that some tokens assigned to the reveal elements get re
      {
      "token": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
      "value": "xxxxxxxxx4163"
+     "valueType": "STRING"
    },
    {
      "token": "a4b24714-6a26-4256-b9d4-55ad69aa4047",
      "value": "12/2098"
+     "valueType": "STRING"
    }
   ],
  "errors": [
@@ -2246,6 +2362,106 @@ container.uploadFiles();
     ]
 }
 ```
+### File upload with options:
+
+Along with fileElementInput, you can define other options in the Options object as described below: 
+```js
+const options = {
+ allowedFileType: String[],  // Optional, indicates the allowed file types for upload
+}
+```
+`allowedFileType`: An array of string value that indicates the allowedFileTypes to be uploaded.
+
+#### File upload with options example
+
+```javascript
+// Create collect Container.
+const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+
+// Create collect elements.
+const cardNumberElement = collectContainer.create({
+  table: 'newTable',
+  column: 'card_number',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  placeholder: 'card number',
+  label: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+const options = { 
+    allowedFileType: [".pdf",".png"];
+};
+const fileElement = collectContainer.create({
+  table: 'newTable',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.FILE_INPUT,
+},
+  options
+);
+
+// Mount the elements.
+cardNumberElement.mount('#collectCardNumber');
+fileElement.mount('#collectFile');
+
+// Collect and upload methods.
+collectContainer.collect({});
+collectContainer.uploadFiles();
+
+```
+**Sample Response for collect():**
+```javascript
+{
+  "records": [
+    {
+      "table": "newTable",
+      "fields": {
+        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+      }
+    }
+  ]
+}
+```
+**Sample Response for file uploadFiles() :**
+```javascript
+{
+    "fileUploadResponse": [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
 #### File upload with additional elements
 
 ```javascript
@@ -2330,6 +2546,62 @@ collectContainer.uploadFiles();
             "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
         }
     ]
+}
+```
+
+---
+# Securely deleting data client-side
+-  [**Deleting data from the vault**](#deleting-data-from-the-vault)
+
+## Deleting data from the vault
+
+To delete data from the vault, use the `delete(records, options?)` method of the Skyflow client. The `records` parameter takes an array of records to delete in the following format. The `options` parameter is optional and takes an object of deletion parameters. Currently, there are no supported deletion parameters.
+
+```javascript
+const records = [
+  {
+    id: "<SKYFLOW_ID_1>", // skyflow id of the record to delete
+    table: "<TABLE_NAME>" // Table from which the record is to be deleted
+  },
+  {
+    // ...additional records here
+  },
+],
+
+skyflowClient.delete(records);
+```
+
+An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/delete-pure-js.html) of delete call:
+
+```javascript
+skyflowClient.delete({
+  records: [
+    {
+      id: "29ebda8d-5272-4063-af58-15cc674e332b",
+      table: "cards",
+    },
+    {
+      id: "d5f4b926-7b1a-41df-8fac-7950d2cbd923",
+      table: "cards",
+    }
+  ],
+});
+```
+
+A sample response:
+
+```json
+{
+  "records": [
+    {
+     "skyflow_id": "29ebda8d-5272-4063-af58-15cc674e332b",
+     "deleted": true,
+    },
+    {
+     "skyflow_id": "29ebda8d-5272-4063-af58-15cc674e332b",
+     "deleted": true,
+    }
+  ]
 }
 ```
 

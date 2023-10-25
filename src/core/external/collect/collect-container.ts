@@ -5,7 +5,9 @@ import bus from 'framebus';
 import { IUpsertOptions } from '../../../core-utils/collect';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
-import { formatValidations, formatOptions, validateElementOptions } from '../../../libs/element-options';
+import {
+  formatValidations, formatOptions, validateElementOptions,
+} from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
@@ -17,17 +19,19 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import {
-  validateCollectElementInput, validateInitConfig, validateAdditionalFieldsInCollect,
+  validateCollectElementInput, validateInitConfig,
+  validateAdditionalFieldsInCollect,
   validateUpsertOptions,
   validateBooleanOptions,
 } from '../../../utils/validators';
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CONTAINER,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
+import EventEmitter from '../../../event-emitter';
 
 export interface CollectElementInput {
   table?: string;
@@ -62,12 +66,18 @@ class CollectContainer extends Container {
 
   type:string = ContainerType.COLLECT;
 
+  #eventEmitter: EventEmitter;
+
+  #isMounted: boolean = false;
+
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
     this.#metaData = metaData;
     this.#skyflowElements = skyflowElements;
     this.#context = context;
+    this.#eventEmitter = new EventEmitter();
+
     const iframe = iframer({
       name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}`,
     });
@@ -91,6 +101,14 @@ class CollectContainer extends Container {
           },
           context,
         });
+
+        this.#isMounted = true;
+        // eslint-disable-next-line no-underscore-dangle
+        this.#eventEmitter._emit(
+          ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED,
+          { containerId: this.#containerId },
+        );
+
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
@@ -115,6 +133,7 @@ class CollectContainer extends Container {
             {
               elementType: input.type,
               name: input.column,
+              accept: options.allowedFileType,
               ...input,
               ...formattedOptions,
               validations,
@@ -146,6 +165,8 @@ class CollectContainer extends Container {
         // options.elementName = (options.table && options.name) ? `${options.elementType}:${btoa(
         //   options.elementName,
         // )}` : `${options.elementType}:${btoa(uuid())}`;
+
+        options.isMounted = false;
 
         if (
           options.elementType === ELEMENTS.radio.name
@@ -187,11 +208,16 @@ class CollectContainer extends Container {
         elementId,
         tempElements,
         this.#metaData,
-        this.#containerId,
+        {
+          containerId: this.#containerId,
+          isMounted: this.#isMounted,
+          type: this.type,
+        },
         isSingleElementAPI,
         this.#destroyCallback,
         this.#updateCallback,
         this.#context,
+        this.#eventEmitter,
       );
       this.#elements[tempElements.elementName] = element;
       this.#skyflowElements[elementId] = element;
@@ -283,7 +309,7 @@ class CollectContainer extends Container {
       printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
         CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
       MessageType.LOG, this.#context.logLevel);
-    } catch (err) {
+    } catch (err:any) {
       printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
       reject(err);
     }
@@ -322,7 +348,7 @@ class CollectContainer extends Container {
       printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
         CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
       MessageType.LOG, this.#context.logLevel);
-    } catch (err) {
+    } catch (err:any) {
       printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
       reject(err);
     }

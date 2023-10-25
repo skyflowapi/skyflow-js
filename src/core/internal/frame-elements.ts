@@ -19,7 +19,7 @@ import { getFlexGridStyles } from '../../libs/styles';
 import { getElementName, parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { LogLevel, MessageType } from '../../utils/common';
-import getCssClassesFromJss from '../../libs/jss-styles';
+import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-styles';
 import { ContainerType } from '../../skyflow';
 import { getContainerType } from '../../utils/helpers';
 
@@ -187,6 +187,9 @@ export default class FrameElements {
           },
         };
         getCssClassesFromJss(errorStyles, 'row-error');
+        if (errorTextStyles && errorTextStyles[STYLE_TYPE.GLOBAL]) {
+          generateCssWithoutClass(errorTextStyles[STYLE_TYPE.GLOBAL]);
+        }
       } else {
         rowDiv.className = `row-${rowIndex}`;
         injectStylesheet.injectWithAllowlist(
@@ -247,6 +250,9 @@ export default class FrameElements {
       this.#domForm.append(rootDiv);
       document.body.append(this.#domForm);
     }
+    bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (data, callback) => {
+      callback({ height: rootDiv.scrollHeight, name: this.#name });
+    });
   };
 
   #updateCombinedErrorText = (elementId, errorMessages) => {

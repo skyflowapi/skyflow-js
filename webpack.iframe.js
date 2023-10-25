@@ -26,7 +26,6 @@ module.exports = () => merge(common, {
 
   entry: {
     index: [
-      'core-js/stable',
       path.resolve(__dirname, 'src/index-internal.ts'),
     ],
   },

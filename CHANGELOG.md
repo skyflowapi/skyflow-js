@@ -1,7 +1,57 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.31.1] - 2023-10-17
+### Fixed
+- Expiration-year max-length based on format.
+- Card icon render with  setValue method.
 
+## [1.31.0] - 2023-10-06
+### Added
+- `allowedFileType` option for file input element.
+- `valueType` in detokenize and reveal response.
+
+### Fixed
+- iFrame height resize.
+## [1.30.3] - 2023-09-29
+### Fixed
+- removed assets from build and updated build config for core-js.
+## [1.30.2] - 2023-09-26
+### Fixed
+- updated internal imports and removed unused dependencies.
+## [1.30.1] - 2023-08-14
+### Added
+- Add requiredAsterisk style and global styles.
+
+## [1.30.0] - 2023-08-01
+### Added
+- Add numeric keyboard support.
+
+## [1.29.5] - 2023-07-26
+### Fixed
+- fix conditions for element mount. 
+
+## [1.29.4] - 2023-07-20
+### Fixed 
+- fix reveal elements iframe race condition.    
+
+## [1.29.3] - 2023-07-07
+### Fixed 
+- patch fix for previous version. 
+
+## [1.29.2] - 2023-07-07
+### Fixed
+- fix iframe race condition between collect element and container.
+
+## [1.29.1] - 2023-06-22
+### Fixed
+- Patch fix for autofill and iframe loading issue
+
+## [1.29.0] - 2023-06-22
+### Added
+- Added new `delete` interface
+- Added input formatting for collect and reveal elements
+    
 ## [1.28.0] - 2023-03-29
 ### Added
 -  Update data through collect element using skyflow id

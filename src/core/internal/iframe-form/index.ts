@@ -15,6 +15,7 @@ import {
   FRAME_ELEMENT,
   DEFAULT_ERROR_TEXT_ELEMENT_TYPES,
   DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES,
+  CardType,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -106,6 +107,8 @@ export class IFrameFormElement extends EventEmitter {
   skyflowID?: string;
 
   containerType: string;
+
+  cardType: string = CardType.DEFAULT;
 
   constructor(name: string, label: string, metaData, context: Context, skyflowID?: string) {
     super();
@@ -591,6 +594,12 @@ export class IFrameFormElement extends EventEmitter {
         event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
         value: this.getStatus(),
       });
+    } else if (!this.state.isEmpty) {
+      bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+        name: this.iFrameName,
+        event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+        value: this.getStatus(),
+      });
     }
 
     this._emit(ELEMENT_EVENTS_TO_CLIENT.CHANGE, {
@@ -1012,7 +1021,7 @@ export class IFrameForm {
         insertResponseObject, updateResponseObject, options,
       );
       finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
-    } catch (error) {
+    } catch (error:any) {
       return Promise.reject({
         error: error?.message,
       });

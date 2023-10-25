@@ -15,6 +15,8 @@ import copyIcon from '../../assets/copyIcon.svg';
 import successIcon from '../../assets/path.svg';
 import logs from '../utils/logs';
 
+export const SKY_METADATA_HEADER = 'sky-metadata';
+export const SDK_VERSION = 'sdkVersion';
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';
 export const SKYFLOW_FRAME_CONTROLLER = 'skyflow_controller';
@@ -40,6 +42,9 @@ export const ELEMENT_EVENTS_TO_CLIENT = {
   ERROR: 'ERROR',
   SUCCESS: 'SUCCESS',
   SUBMIT: 'SUBMIT',
+  CREATED: 'CREATED',
+  MOUNTED: 'MOUNTED',
+  HEIGHT: 'HEIGHT',
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {
@@ -76,6 +81,9 @@ export const REVEAL_ELEMENT_OPTIONS_TYPES = {
 export const ELEMENT_EVENTS_TO_CONTAINER = {
   ELEMENT_MOUNTED: 'ELEMENT_MOUNTED',
   ALL_ELEMENTS_MOUNTED: 'ALL_ELEMENTS_MOUNTED',
+  COMPOSABLE_CONTAINER_MOUNTED: 'COMPOSABLE_CONTAINER_MOUNTED',
+  COLLECT_CONTAINER_MOUNTED: 'COLLECT_CONTAINER_MOUNTED',
+  REVEAL_CONTAINER_MOUNTED: 'REVEAL_CONTAINER_MOUNTED',
 };
 
 export enum ElementType {
@@ -161,6 +169,7 @@ export const ELEMENTS = {
     attributes: {
       type: 'text',
       autocomplete: 'cc-number',
+      inputmode: 'numeric',
     },
     sensitive: true,
     mask: CARD_NUMBER_MASK[CardType.DEFAULT],
@@ -171,6 +180,7 @@ export const ELEMENTS = {
     attributes: {
       type: 'text',
       autocomplete: 'cc-exp',
+      inputmode: 'numeric',
     },
     sensitive: true,
     // mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
@@ -181,6 +191,7 @@ export const ELEMENTS = {
     attributes: {
       maxLength: 2,
       type: 'text',
+      inputmode: 'numeric',
       autocomplete: 'cc-exp-month',
     },
     sensitive: true,
@@ -189,8 +200,9 @@ export const ELEMENTS = {
   [ElementType.EXPIRATION_YEAR]: {
     name: 'EXPIRATION_YEAR',
     attributes: {
-      maxLength: 4,
+      // maxLength: 4,
       type: 'text',
+      inputmode: 'numeric',
       autocomplete: 'cc-exp-year',
     },
     sensitive: true,
@@ -199,6 +211,7 @@ export const ELEMENTS = {
     name: 'CVV',
     attributes: {
       type: 'text',
+      inputmode: 'numeric',
       maxLength: 4,
     },
     sensitive: true,
@@ -215,6 +228,7 @@ export const ELEMENTS = {
     name: 'PIN',
     attributes: {
       type: 'text',
+      inputmode: 'numeric',
       maxLength: 12,
       minLength: 4,
     },
@@ -293,6 +307,7 @@ export const ALLOWED_ATTRIBUTES = {
   'aria-required': 'boolean',
   disabled: 'boolean',
   placeholder: 'string',
+  accept: 'string',
 };
 
 export const ALLOWED_STYLES = [
@@ -341,6 +356,7 @@ export const ALLOWED_PSEUDO_STYLES = [
   ':hover',
   ':focus',
   '::placeholder',
+  '::accept',
   '::selection',
   ':disabled',
   ':-webkit-autofill',
@@ -367,6 +383,8 @@ export const STYLE_TYPE = {
   COMPLETE: 'complete',
   EMPTY: 'empty',
   INVALID: 'invalid',
+  GLOBAL: 'global',
+  REQUIRED_ASTERISK: 'requiredAsterisk',
 };
 export const REVEAL_ELEMENT_DIV_STYLE = {
   container: {
@@ -393,6 +411,10 @@ export const REVEAL_ELEMENT_ERROR_TEXT = 'Invalid Token';
 export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
   [STYLE_TYPE.BASE]: {
     marginBottom: '4px',
+  },
+  [STYLE_TYPE.REQUIRED_ASTERISK]: {
+    display: 'inline',
+    color: 'red',
   },
 };
 

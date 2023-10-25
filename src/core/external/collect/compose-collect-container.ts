@@ -1,15 +1,17 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /*
-Copyright (c) 2022 Skyflow, Inc.
+Copyright (c) 2023 Skyflow, Inc.
 */
 import bus from 'framebus';
-import _ from 'lodash';
+import sum from 'lodash/sum';
 import { IUpsertOptions } from '../../../core-utils/collect';
 import EventEmitter from '../../../event-emitter';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
-import { formatValidations, formatOptions, validateElementOptions } from '../../../libs/element-options';
+import {
+  formatValidations, formatOptions, validateElementOptions, getElements,
+} from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
@@ -27,7 +29,7 @@ import {
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
@@ -78,6 +80,10 @@ class ComposableContainer extends Container {
 
   type:string = ContainerType.COMPOSABLE;
 
+  #containerMounted: boolean = false;
+
+  #tempElements: any = {};
+
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -110,6 +116,13 @@ class ComposableContainer extends Container {
           },
           context,
         });
+        this.#containerMounted = true;
+        // eslint-disable-next-line no-underscore-dangle
+        this.#eventEmitter._emit(
+          ELEMENT_EVENTS_TO_CONTAINER.COMPOSABLE_CONTAINER_MOUNTED + this.#containerId,
+          { containerId: this.#containerId },
+        );
+
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
@@ -152,8 +165,8 @@ class ComposableContainer extends Container {
     isSingleElementAPI: boolean = false,
   ) => {
     const elements: any[] = [];
-    const tempElements = deepClone(multipleElements);
-    tempElements.rows.forEach((row) => {
+    this.#tempElements = deepClone(multipleElements);
+    this.#tempElements.rows.forEach((row) => {
       row.elements.forEach((element) => {
         const options = element;
         const { elementType } = options;
@@ -163,6 +176,8 @@ class ComposableContainer extends Container {
         options.replacePattern = options.replacePattern || ELEMENTS[elementType].replacePattern;
         options.mask = options.mask || ELEMENTS[elementType].mask;
 
+        options.isMounted = false;
+
         options.label = element.label;
         options.skyflowID = element.skyflowID;
 
@@ -170,9 +185,9 @@ class ComposableContainer extends Container {
       });
     });
 
-    tempElements.elementName = isSingleElementAPI
+    this.#tempElements.elementName = isSingleElementAPI
       ? elements[0].elementName
-      : `${FRAME_ELEMENT}:group:${btoa(tempElements.name)}`;
+      : `${FRAME_ELEMENT}:group:${btoa(this.#tempElements.name)}`;
 
     if (
       isSingleElementAPI
@@ -182,27 +197,31 @@ class ComposableContainer extends Container {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [`${elements[0].name}`], true);
     }
 
-    let element = this.#elements[tempElements.elementName];
+    let element = this.#elements[this.#tempElements.elementName];
     if (element) {
       if (isSingleElementAPI) {
         element.update(elements[0]);
       } else {
-        element.update(tempElements);
+        element.update(this.#tempElements);
       }
     } else {
       const elementId = uuid();
       element = new CollectElement(
         elementId,
-        tempElements,
+        this.#tempElements,
         this.#metaData,
-        this.#containerId,
+        {
+          containerId: this.#containerId,
+          isMounted: this.#containerMounted,
+          type: this.type,
+        },
         true,
         this.#destroyCallback,
         this.#updateCallback,
         this.#context,
         this.#eventEmitter,
       );
-      this.#elements[tempElements.elementName] = element;
+      this.#elements[this.#tempElements.elementName] = element;
       this.#skyflowElements[elementId] = element;
     }
     return element;
@@ -273,7 +292,7 @@ class ComposableContainer extends Container {
     }
 
     const { layout } = this.#options;
-    if (_.sum(layout) !== this.#elementsList.length) {
+    if (sum(layout) !== this.#elementsList.length) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.MISMATCH_ELEMENT_COUNT_LAYOUT_SUM, [], true);
     }
     let count = 0;
@@ -300,9 +319,21 @@ class ComposableContainer extends Container {
       };
     }
 
-    this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
-    this.#containerElement.mount(domElement);
-    this.#isMounted = true;
+    if (this.#containerMounted) {
+      this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
+      this.#containerElement.mount(domElement);
+      this.#isMounted = true;
+      return;
+    }
+
+    this.#eventEmitter.on(
+      ELEMENT_EVENTS_TO_CONTAINER.COMPOSABLE_CONTAINER_MOUNTED + this.#containerId,
+      () => {
+        this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
+        this.#containerElement.mount(domElement);
+        this.#isMounted = true;
+      },
+    );
   };
 
   unmount = () => {
@@ -315,13 +346,19 @@ class ComposableContainer extends Container {
       if (!this.#isMounted) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED, [], true);
       }
-      const collectElements = Object.values(this.#elements);
-      collectElements.forEach((element) => {
-        if (!element.isMounted()) {
+
+      const containerElements = getElements(this.#tempElements);
+      containerElements.forEach((element:any) => {
+        if (!element?.isMounted) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
         }
+      });
+
+      const collectElements = Object.values(this.#elements);
+      collectElements.forEach((element) => {
         element.isValidElement();
       });
+
       if (options && options.tokens && typeof options.tokens !== 'boolean') {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
       }
@@ -355,7 +392,7 @@ class ComposableContainer extends Container {
       printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
         CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
       MessageType.LOG, this.#context.logLevel);
-    } catch (err) {
+    } catch (err:any) {
       printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
       reject(err);
     }

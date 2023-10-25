@@ -106,7 +106,7 @@ class SkyflowContainer {
           printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
             PUREJS_TYPES.DETOKENIZE),
           MessageType.LOG, this.#context.logLevel);
-        } catch (e) {
+        } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
           reject(e);
         }
@@ -138,7 +138,7 @@ class SkyflowContainer {
         printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
           PUREJS_TYPES.DETOKENIZE),
         MessageType.LOG, this.#context.logLevel);
-      } catch (e) {
+      } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);
       }
@@ -182,7 +182,7 @@ class SkyflowContainer {
           printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
             PUREJS_TYPES.INSERT),
           MessageType.LOG, this.#context.logLevel);
-        } catch (e) {
+        } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
           reject(e);
@@ -227,7 +227,7 @@ class SkyflowContainer {
         printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
           PUREJS_TYPES.INSERT),
         MessageType.LOG, this.#context.logLevel);
-      } catch (e) {
+      } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);
       }
@@ -261,7 +261,7 @@ class SkyflowContainer {
           printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
             CLASS_NAME, PUREJS_TYPES.GET_BY_SKYFLOWID),
           MessageType.LOG, this.#context.logLevel);
-        } catch (e) {
+        } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
           reject(e);
@@ -294,7 +294,7 @@ class SkyflowContainer {
         printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
           CLASS_NAME, PUREJS_TYPES.GET_BY_SKYFLOWID),
         MessageType.LOG, this.#context.logLevel);
-      } catch (e) {
+      } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
         reject(e);
@@ -328,7 +328,7 @@ class SkyflowContainer {
           printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
             CLASS_NAME, PUREJS_TYPES.GET),
           MessageType.LOG, this.#context.logLevel);
-        } catch (e) {
+        } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
           reject(e);
@@ -362,7 +362,7 @@ class SkyflowContainer {
         printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
           CLASS_NAME, PUREJS_TYPES.GET),
         MessageType.LOG, this.#context.logLevel);
-      } catch (e) {
+      } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
         reject(e);
@@ -402,7 +402,7 @@ class SkyflowContainer {
           printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
             PUREJS_TYPES.DELETE),
           MessageType.LOG, this.#context.logLevel);
-        } catch (e) {
+        } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
           reject(e);
@@ -437,7 +437,7 @@ class SkyflowContainer {
         printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
           PUREJS_TYPES.DELETE),
         MessageType.LOG, this.#context.logLevel);
-      } catch (e) {
+      } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);
       }

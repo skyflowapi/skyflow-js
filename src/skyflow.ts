@@ -6,6 +6,7 @@ import uuid from './libs/uuid';
 import {
   ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
+  SDK_VERSION,
 } from './core/constants';
 import Client from './client';
 import RevealContainer from './core/external/reveal/reveal-container';
@@ -35,7 +36,7 @@ import {
   IDeleteOptions,
   IGetOptions,
 } from './utils/common';
-import { formatVaultURL } from './utils/helpers';
+import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
 
@@ -74,6 +75,8 @@ class Skyflow {
   #skyflowElements: any;
 
   constructor(config: ISkyflow) {
+    const localSDKversion = localStorage.getItem('sdk_version') || '';
+    this.#metadata[SDK_VERSION] = localSDKversion;
     this.#client = new Client(
       {
         ...config,
@@ -134,6 +137,7 @@ class Skyflow {
 
   static init(config: ISkyflow): Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
+    checkAndSetForCustomUrl(config);
     printLog(parameterizedString(logs.infoLogs.INITIALIZE_CLIENT, CLASS_NAME), MessageType.LOG,
       logLevel);
 

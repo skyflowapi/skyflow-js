@@ -60,7 +60,16 @@ const element = {
                 ...stylesOptions
             }
         ]
-    }]
+    }],
+    errorTextStyles:{
+      base: {
+        color: "#f44336",
+        fontFamily:'Inter',
+      },
+      global:{
+        '@import':'https://font-url.com/Inter'
+      }
+    }
 }
 describe('test frame elements', () => {
     let emitSpy;
@@ -74,6 +83,8 @@ describe('test frame elements', () => {
         emitSpy = jest.spyOn(bus, 'emit');
     })
     test('FrameElements constructor', () => {
+      const onSpy = jest.spyOn(bus, 'on');
+
         FrameElements.start()
 
         const emitEventName = emitSpy.mock.calls[0][0];
@@ -96,7 +107,12 @@ describe('test frame elements', () => {
             }
         })
         const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
-        // console.log(frameElement.)
+        const heigtEvent = onSpy.mock.calls[0][1];
+        const cb = jest.fn();
+        heigtEvent({},cb);
+        cb();
+
+
     })
 
 })

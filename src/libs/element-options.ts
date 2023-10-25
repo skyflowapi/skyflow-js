@@ -341,6 +341,19 @@ export const formatOptions = (elementType, options, logLevel) => {
   if (Object.prototype.hasOwnProperty.call(formattedOptions, 'required') && !validateBooleanOptions(formattedOptions.required)) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['required'], true);
   }
+  if (elementType === ELEMENTS.FILE_INPUT.name) {
+    if (options.allowedFileType) {
+      if (!Array.isArray(options.allowedFileType)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_OPTIONS, [], true);
+      }
+      if (options.allowedFileType.length <= 0) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ALLOWED_OPTIONS_ARRAY, [], true);
+      }
+      if (!options.allowedFileType.every((item) => typeof item === 'string')) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_FILETYPE_ARRAY, [], true);
+      }
+    }
+  }
 
   return formattedOptions;
 };

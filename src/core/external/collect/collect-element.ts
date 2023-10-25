@@ -4,6 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 /* eslint-disable no-underscore-dangle */
 import {
   ELEMENT_EVENTS_TO_CLIENT,
+  ELEMENT_EVENTS_TO_CONTAINER,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
 } from '../../constants';
@@ -69,11 +70,13 @@ class CollectElement extends SkyflowElement {
 
   #doesReturnValue:boolean;
 
+  #readyToMount: boolean = false;
+
   constructor(
     elementId: string,
     elementGroup: any,
     metaData: any,
-    containerId: string,
+    container: any,
     isSingleElementAPI: boolean = false,
     destroyCallback: Function,
     updateCallback: Function,
@@ -82,7 +85,7 @@ class CollectElement extends SkyflowElement {
   ) {
     super();
 
-    this.containerId = containerId;
+    this.containerId = container.containerId;
     this.#elementId = elementId;
     this.#context = context;
     this.#group = validateAndSetupGroupOptions(elementGroup);
@@ -126,6 +129,30 @@ class CollectElement extends SkyflowElement {
     printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT,
       CLASS_NAME, getElementName(this.#iframe.name)), MessageType.LOG,
     this.#context.logLevel);
+
+    this.#readyToMount = container.isMounted;
+
+    this.#groupEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED, (data) => {
+      if (data?.containerId === this.containerId) { this.#readyToMount = true; }
+    });
+
+    this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED, (data) => {
+      if (container.type === ContainerType.COMPOSABLE) {
+        this.#elements.forEach((element) => {
+          if (data.name === element.elementName) {
+            element.isMounted = true;
+            this.#mounted = true;
+          }
+        });
+      } else if (data.name === this.#elements[0].elementName) {
+        this.#elements[0].isMounted = true;
+        this.#mounted = true;
+      }
+      this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+        {}, (payload:any) => {
+          this.#iframe.setIframeHeight(payload.height);
+        });
+    });
   }
 
   getID = () => this.#elementId;
@@ -134,7 +161,6 @@ class CollectElement extends SkyflowElement {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
     }
-    this.#iframe.mount(domElement);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
@@ -160,14 +186,31 @@ class CollectElement extends SkyflowElement {
           ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId,
           sub,
         );
-        this.#mounted = true;
+        // this.#mounted = true;
         printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, CLASS_NAME, getElementName(this.#iframe.name))} `, MessageType.LOG,
           this.#context.logLevel);
         this.#updateCallbacks.forEach((func) => func());
         this.#updateCallbacks = [];
       }
     };
-    this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
+
+    const isComposable = this.#elements.length > 1;
+    if (isComposable) {
+      this.#iframe.mount(domElement);
+      this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
+    } else {
+      if (this.#readyToMount) {
+        this.#iframe.mount(domElement);
+        this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
+        return;
+      }
+      this.#groupEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED, (data) => {
+        if (data?.containerId === this.containerId) {
+          this.#iframe.mount(domElement);
+          this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
+        }
+      });
+    }
   };
 
   unmount = () => {
@@ -368,6 +411,9 @@ class CollectElement extends SkyflowElement {
               case ELEMENT_EVENTS_TO_CLIENT.SUBMIT:
                 this.#groupEmitter?._emit(ELEMENT_EVENTS_TO_CLIENT.SUBMIT);
                 return;
+                // case ELEMENT_EVENTS_TO_CLIENT.CREATED:
+                //   this.#mounted = true;
+                //   return;
                 // todo: need to implement the below events
                 // case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
                 //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
@@ -392,6 +438,11 @@ class CollectElement extends SkyflowElement {
             else this.#states[index].value = undefined;
 
             emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
+            this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+              {}, (payload:any) => {
+                this.#iframe.setIframeHeight(payload.height);
+              });
+
             this.#updateState();
             const emitData = {
               ...this.#states[index],

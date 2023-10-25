@@ -219,6 +219,46 @@ describe('test frame controller', () => {
     element.setupInputField();
   });
 
+  test('card element FrameElement with card type', () => {
+
+    const cardElement = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(cardElement, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      enableCardIcon: true,
+    }, div);
+  })
+
+  test('card element FrameElement without default card type', () => {
+
+    const cardElement = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(cardElement, {}, context);
+    const element = new FrameElement({
+      resetEvents: jest.fn(),
+      on: jest.fn(),
+      getStatus: jest.fn(()=>({
+          isFocused: false,
+          isValid: false,
+          isEmpty: true,
+          isComplete: false,
+      })),
+      fieldType: 'CARD_NUMBER',
+      state:{name:''}
+  }, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      enableCardIcon: true,
+    }, div);
+  })
 
 
   test('expiration_month FrameElement', () => {
@@ -365,7 +405,6 @@ describe('test frame controller', () => {
     testDiv.appendChild(document.createElement('input'));
     testDiv.appendChild(document.createElement('input'));
     testDiv.appendChild(div);
-    console.log(testDiv.getElementsByTagName('input').length);
     jest.spyOn(document,'getElementById').mockImplementation(()=>(testDiv));
     
     const testInput = document.createElement('input');
@@ -527,6 +566,53 @@ describe('test frame controller', () => {
 
     changeCb[0][1](state);
   })
+
+
+  test('expiration_date FrameElement with required', () => {
+
+    const date_element = `element:EXPIRATION_DATE:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(date_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      required:true,
+      inputStyles,
+      labelStyles:{...labelStyles,requiredAsterisk:{ color:'green'}},
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+  })
+
+  test('expiration_date FrameElement with global styles', () => {
+
+    const date_element = `element:EXPIRATION_DATE:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(date_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles:{...inputStyles,global:{'@import':'https://font-url.com'}},
+      labelStyles:{...labelStyles,global:{'@import':'https://font-url.com'}},
+      errorTextStyles:{...errorTextStyles,global:{'@import':'https://font-url.com'}},
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+  })
+
 
   test('copy feature in FrameElements', () => {
 

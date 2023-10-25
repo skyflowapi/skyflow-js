@@ -57,6 +57,8 @@ class RevealContainer extends Container {
 
   #skyflowElements: any;
 
+  #isMounted:any;
+
   type:string = ContainerType.REVEAL;
 
   constructor(metaData, skyflowElements, context) {
@@ -89,6 +91,14 @@ class RevealContainer extends Container {
             context,
           },
         });
+
+        this.#isMounted = true;
+        // eslint-disable-next-line no-underscore-dangle
+        this.#eventEmmiter._emit(
+          ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED,
+          { containerId: this.#containerId },
+        );
+
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .off(
@@ -130,7 +140,11 @@ class RevealContainer extends Container {
     const elementId = uuid();
     validateInputFormatOptions(options);
     const revealElement = new RevealElement(record, options, this.#metaData,
-      this.#containerId, elementId, this.#context);
+      {
+        containerId: this.#containerId,
+        isMounted: this.#isMounted,
+        eventEmitter: this.#eventEmmiter,
+      }, elementId, this.#context);
     this.#revealElements.push(revealElement);
     this.#skyflowElements[elementId] = revealElement;
     return revealElement;
@@ -178,7 +192,7 @@ class RevealContainer extends Container {
           printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
           MessageType.LOG, this.#context.logLevel);
-        } catch (err) {
+        } catch (err:any) {
           printLog(`Error: ${err.message}`, MessageType.ERROR,
             this.#context.logLevel);
           reject(err);
@@ -233,7 +247,7 @@ class RevealContainer extends Container {
               );
           },
         );
-      } catch (err) {
+      } catch (err:any) {
         printLog(err.message, MessageType.ERROR,
           this.#context.logLevel);
 
