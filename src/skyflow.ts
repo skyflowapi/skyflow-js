@@ -34,6 +34,7 @@ import {
   IInsertOptions,
   IDeleteRecordInput,
   IDeleteOptions,
+  IGetOptions,
 } from './utils/common';
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
@@ -221,10 +222,10 @@ class Skyflow {
     return this.#skyflowContainer.getById(getByIdInput);
   }
 
-  get(getInput: IGetInput) {
+  get(getInput: IGetInput, options?: IGetOptions) {
     printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
-    return this.#skyflowContainer.get(getInput);
+    return this.#skyflowContainer.get(getInput, options);
   }
 
   delete(records: IDeleteRecordInput, options: IDeleteOptions) {

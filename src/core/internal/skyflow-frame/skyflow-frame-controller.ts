@@ -23,6 +23,7 @@ import {
   Context,
   ISkyflowIdRecord,
   IDeleteRecord,
+  IGetOptions,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 
@@ -103,7 +104,9 @@ class SkyflowFrameController {
                 callback({ error });
               });
           } else if (data.type === PUREJS_TYPES.GET) {
-            fetchRecordsGET(data.records as IGetRecord[], this.#client).then(
+            fetchRecordsGET(
+              data.records as IGetRecord[], this.#client, data.options as IGetOptions,
+            ).then(
               (resolvedResult) => {
                 printLog(
                   parameterizedString(logs.infoLogs.GET_RESOLVED, CLASS_NAME),

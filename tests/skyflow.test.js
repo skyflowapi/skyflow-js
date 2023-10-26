@@ -475,6 +475,13 @@ const getByIdInput = {
   }],
 };
 
+const getByIdInputWithoutRedaction = {
+  records: [{
+    ids: ['skyflowId1'],
+    table: 'pii_fields',
+  }],
+}
+
 const getByIdRes = {
   records: [
     {
@@ -485,6 +492,7 @@ const getByIdRes = {
     },
   ],
 };
+
 const getInput = {
   records: [{
     columnName: 'cvv',
@@ -493,6 +501,9 @@ const getInput = {
     redaction: Skyflow.RedactionType.PLAIN_TEXT,
   }],
 };
+
+const getOptionsTrue = { tokens: true };
+const getOptionsFalse = { tokens: false };
 
 const getRes = {
   records: [
@@ -1145,6 +1156,135 @@ describe('skyflow get', () => {
       expect(err.message).toBe(undefined)
     });
   });
+});
+
+describe('skyflow get with options', () => {
+  let emitSpy;
+  let targetSpy;
+  let skyflow;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+
+    skyflow = Skyflow.init({
+      vaultID: 'vault123',
+      vaultURL: 'https://vaulturl.com',
+      getBearerToken: jest.fn(),
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('get method success when tokens flag is true', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.get(getByIdInputWithoutRedaction, getOptionsTrue);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+      done(err);
+    }
+  })
+
+  test('get method success else when tokens flag is true', (done) => {
+    try {
+      const res = skyflow.get(getByIdInputWithoutRedaction, getOptionsTrue);
+      const frameReayEvent = on.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+      const frameReadyCb2 = frameReayEvent[1][1];
+      frameReadyCb2();
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+      done(err);
+    }
+  })
+ 
+  test('get method success when tokens flag is false', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.get(getByIdInput, getOptionsFalse);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+      done(err);
+    }
+  })
+
+  test('get method success else when tokens flag is false', (done) => {
+    try {
+      const res = skyflow.get(getByIdInput, getOptionsFalse);
+      const frameReayEvent = on.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+      const frameReadyCb2 = frameReayEvent[1][1];
+      frameReadyCb2();
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(getByIdRes);
+
+      let data;
+      res.then((res) => data = res);
+
+      setTimeout(() => {
+        expect(data.records.length).toBe(1);
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {
+      done(err);
+    }
+  })
 });
 
 describe('Skyflow Enums', () => {
