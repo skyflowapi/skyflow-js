@@ -14,6 +14,6 @@
   },
   "dependencies": {
     "ts-node": "^10.9.1",
-    "skyflow-js": "^1.25.0"
+    "skyflow-js": "^1.32.0"
   }
 }
