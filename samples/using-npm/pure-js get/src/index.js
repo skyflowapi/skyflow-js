@@ -65,6 +65,40 @@ try {
         });
     });
   }
+
+  const getTokensButton = document.getElementById('getTokens');
+  if (getTokensButton) {
+    getTokensButton.addEventListener('click', () => {
+      const response = skyflow.get(
+        {
+          records: [
+            {
+              ids: ['<SKYFLOW_ID1>', '<SKYFLOW_ID2>'],
+              table: '<TABLE_NAME>'
+            },
+          ],
+        },
+        { tokens: true }
+      );
+
+      response
+        .then((res) => {
+          document.getElementById('getResponse').innerHTML = JSON.stringify(
+            res,
+            null,
+            2
+          );
+        })
+        .catch((err) => {
+          document.getElementById('getResponse').innerHTML = JSON.stringify(
+            err,
+            null,
+            2
+          );
+          console.log(err);
+        });
+    });
+  }
 } catch (err) {
   console.log(err);
 }
