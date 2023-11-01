@@ -17,11 +17,19 @@ export default class IFrame {
 
   container?: Element;
 
-  constructor(name, metadata, containerId, logLevel) {
+  recordData? :any;
+
+  constructor(name, metadata, containerId, logLevel, recordData) {
     this.name = `${name}:${containerId}:${logLevel}`;
     this.metadata = metadata;
     this.iframe = iframer({ name: this.name });
+    this.recordData = recordData;
   }
+
+  setAttributess = (responseValue) => {
+    setAttributes(this.iframe, { src: responseValue });
+    this.iframe.setAttribute('height', '400px'); // height demo
+  };
 
   mount = (domElement) => {
     this.unmount();
@@ -43,6 +51,7 @@ export default class IFrame {
     }
 
     setAttributes(this.iframe, { src: getIframeSrc() });
+
     this.container?.appendChild(this.iframe);
   };
 

@@ -19,6 +19,10 @@ const SKYFLOW_ERROR_CODE = {
   UNIQUE_ELEMENT_NAME: { code: 400, description: logs.errorLogs.UNIQUE_ELEMENT_NAME },
   ELEMENTS_NOT_MOUNTED: { code: 400, description: logs.errorLogs.ELEMENTS_NOT_MOUNTED },
   MISSING_TABLE_IN_COLLECT: { code: 400, description: logs.errorLogs.MISSING_TABLE_IN_COLLECT },
+  MISSING_SKYFLOWID_KEY_REVEAL: {
+    code: 400,
+    description: logs.errorLogs.MISSING_SKYFLOWID_KEY_REVEAL,
+  },
   EMPTY_TABLE_IN_COLLECT: { code: 400, description: logs.errorLogs.EMPTY_TABLE_IN_COLLECT },
   EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS: {
     code: 400,
@@ -361,6 +365,34 @@ const SKYFLOW_ERROR_CODE = {
   },
   SKYFLOW_IDS_AND_COLUMN_NAME_BOTH_SPECIFIED: {
     code: 400, description: logs.errorLogs.SKYFLOW_IDS_AND_COLUMN_NAME_BOTH_SPECIFIED,
+  },
+  SKYFLOW_IDS_AND_TOKEN_BOTH_SPECIFIED: {
+    code: 400, description: logs.errorLogs.SKYFLOW_IDS_AND_TOKEN_BOTH_SPECIFIED,
+  },
+  MISSING_TABLE_KEY_REVEAL: {
+    code: 400, description: logs.errorLogs.MISSING_TABLE_KEY_REVEAL,
+  },
+  MISSING_COLUMN_KEY_REVEAL: {
+    code: 400, description: logs.errorLogs.MISSING_COLUMN_KEY_REVEAL,
+  },
+  INVALID_SKYFLOW_ID_REVEAL: {
+    code: 400, description: logs.errorLogs.INVALID_SKYFLOW_ID_REVEAL,
+  },
+
+  INVALID_TABLE_REVEAL: {
+    code: 400, description: logs.errorLogs.INVALID_TABLE_REVEAL,
+  },
+  INVALID_COLUMN_NAME_REVEAL: {
+    code: 400, description: logs.errorLogs.INVALID_COLUMN_NAME_REVEAL,
+  },
+  EMPTY_SKYFLOW_ID_REVEAL: {
+    code: 400, description: logs.errorLogs.EMPTY_SKYFLOW_ID_REVEAL,
+  },
+  EMPTY_TABLE_REVEAL: {
+    code: 400, description: logs.errorLogs.EMPTY_TABLE_REVEAL,
+  },
+  EMPTY_COLUMN_NAME_REVEAL: {
+    code: 400, description: logs.errorLogs.EMPTY_COLUMN_NAME_REVEAL,
   },
   RECORDS_KEY_NOT_FOUND_GETBYID: {
     code: 400,
