@@ -173,6 +173,7 @@ const logs = {
     INVALID_FORMAT_VALUE_REVEAL: 'Interface: RevealElement - Invalid format value provided.',
     INVALID_REDACTION_TYPE_REVEAL: 'Interface: RevealElement - Invalid Redaction type.',
     ELEMENTS_NOT_MOUNTED_REVEAL: 'Interface: reveal container - Cannot invoke reveal before mounting the elements',
+    ELEMENT_NOT_MOUNTED_RENDER: 'Interface: render container - Cannot invoke renderFile before mounting the elements',
     EMPTY_TABLE_IN_ADDITIONAL_FIELDS: 'Interface: collect container - table cannot be empty in additionalFields at index %s1',
     EMPTY_FIELDS_IN_ADDITIONAL_FIELDS: 'Interface: collect container - fields cannot be empty in additionalFields at index %s1',
     EMPTY_TOKEN_IN_DETOKENIZE: 'Interface: client detokenize - token cannot be empty in records array at index %s1',

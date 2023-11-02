@@ -159,7 +159,7 @@ class RevealFrame {
         //     ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
         //     sub,
         //   );
-      } else if (Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
+      } else {
         this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
       }
       // this.updateDataView();

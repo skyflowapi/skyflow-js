@@ -120,7 +120,6 @@ class CollectElement extends SkyflowElement {
       metaData,
       this.containerId,
       this.#context.logLevel,
-      {},
     );
 
     this.#registerIFrameBusListener();

@@ -130,20 +130,18 @@ const getTokenRecordsFromVault = (
   });
 };
 
-const getFileURLForRender = (
-  skyflowID: string,
+export const getFileURLForRender = (
+  skyflowIdRecord: IRevealRecord,
   client: Client,
-  table: string,
-  column: string,
   authToken: string,
 ): Promise<any> => {
   let paramList: string = '';
 
-  paramList += `${skyflowID}?`;
+  paramList += `${skyflowIdRecord.skyflowID}?`;
 
-  paramList += `fields=${column}&${FILE_DOWNLOAD_URL_PARAM}`;
+  paramList += `fields=${skyflowIdRecord.column}&${FILE_DOWNLOAD_URL_PARAM}`;
 
-  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${table}/${paramList}`;
+  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}/${paramList}`;
   return client.request({
     requestMethod: 'GET',
     url: vaultEndPointurl,
@@ -162,9 +160,7 @@ export const getFileURLFromVaultBySkyflowID = (
     const clientId = client.toJSON().metaData.uuid || '';
     getAccessToken(clientId).then((authToken) => {
       getFileURLForRender(
-        skyflowIdRecord.skyflowID as string,
-        client, skyflowIdRecord.table as string,
-        skyflowIdRecord.column as string, authToken as string,
+        skyflowIdRecord, client, authToken as string,
       ).then((resolvedResult: IRenderResponseType) => {
         rootResolve(resolvedResult);
       }).catch((err: any) => {
