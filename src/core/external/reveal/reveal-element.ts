@@ -19,6 +19,8 @@ import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
+import Client from '../../../client';
+import { formatForRenderClient, formatRecordsForRender } from '../../../core-utils/reveal';
 
 const CLASS_NAME = 'RevealElement';
 
@@ -43,6 +45,8 @@ class RevealElement extends SkyflowElement {
 
   #eventEmitter:any;
 
+  #isFrameReady: boolean;
+
   renderFileAltText : HTMLSpanElement;
 
   renderFileErrorText: HTMLSpanElement;
@@ -55,12 +59,15 @@ class RevealElement extends SkyflowElement {
 
   #errorTextStyles!: object;
 
+  #clientId: string;
+
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
     metaData: any, container: any, elementId: string, context: Context) {
     super();
     this.#elementId = elementId;
     this.#metaData = metaData;
+    this.#clientId = this.#metaData.uuid;
     this.#recordData = {
       ...record,
       ...formatRevealElementOptions(options),
@@ -80,33 +87,24 @@ class RevealElement extends SkyflowElement {
     this.renderFileAltText = document.createElement('span');
     this.renderFileErrorText = document.createElement('span');
     this.domSelecter = '';
+    this.#isFrameReady = false;
     if (!this.#readyToMount) {
       this.#eventEmitter.on(ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED, (data) => {
         if (data?.containerId === this.#containerId) { this.#readyToMount = true; }
       });
     }
-    const sub2 = (data) => {
-      if (data.skyflowID === this.#recordData.skyflowID
-        && data.column === this.#recordData.column && data.url !== '') {
-        this.isRenderFileCalled = true;
-        const responseValue = data.url as string;
-        printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
-          CLASS_NAME, this.#recordData.skyflowID), MessageType.LOG, this.#context.logLevel);
-        this.removeFilePreElement(responseValue);
-      } else if (data.url === '') {
-        this.isRenderFileCalled = true;
-        setTimeout(() => {
-          this.updateFileRenderAltText(this.#recordData.altText);
-          this.updateErrorText(DEFAULT_FILE_RENDER_ERROR);
-        }, 1000);
-      }
-    };
     bus
-      // .target(window.location.origin)
-      .on(
-        ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#containerId,
-        sub2,
-      );
+      // .target(properties.IFRAME_SECURE_ORGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#clientId, (data, callback) => {
+        printLog(parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
+          MessageType.LOG,
+          this.#context.logLevel);
+        callback({
+          client: Client.fromJSON(this.#metaData.clientJSON),
+          context,
+        });
+        this.#isFrameReady = true;
+      });
   }
 
   getID() {
@@ -225,24 +223,20 @@ class RevealElement extends SkyflowElement {
   }
 
   renderFile() {
-    // this.mount(this.#iframe);
     this.updateFileRenderAltText('loading...');
     this.updateErrorText('');
-    if (this.#isMounted) {
+    if (this.#isFrameReady) {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#metaData.clientJSON.config);
           printLog(parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
             MessageType.LOG,
             this.#context.logLevel);
-          // validateRenderElementRecord(this.#recordData);
-          // bus
-          // // .target
-          //   .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, (data, callback) => {
+          validateRenderElementRecord(this.#recordData);
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#containerId,
+              ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#clientId,
               {
                 records: this.#recordData,
                 metaData: this.#metaData.clientJSON,
@@ -251,12 +245,26 @@ class RevealElement extends SkyflowElement {
                 if (revealData.errors) {
                   printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                     this.#context.logLevel);
-                  reject(revealData);
+                  this.isRenderFileCalled = true;
+                  this.updateFileRenderAltText(this.#recordData.altText);
+                  this.updateErrorText(DEFAULT_FILE_RENDER_ERROR);
+                  reject(formatForRenderClient(revealData, this.#recordData.column as string));
                 } else {
                   printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
                     this.#context.logLevel);
-                  resolve(revealData);
+                  this.isRenderFileCalled = true;
+                  const formattedResult = formatRecordsForRender(
+                    revealData,
+                    this.#recordData.column,
+                    this.#recordData.skyflowID,
+                  );
+                  const responseValue = formattedResult.url as string;
+                  printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
+                    CLASS_NAME, this.#recordData.skyflowID),
+                  MessageType.LOG, this.#context.logLevel);
+                  this.removeFilePreElement(responseValue);
+                  resolve(formatForRenderClient(revealData, this.#recordData.column as string));
                 }
               },
             );
@@ -278,27 +286,47 @@ class RevealElement extends SkyflowElement {
           MessageType.LOG,
           this.#context.logLevel);
         validateRenderElementRecord(this.#recordData);
+        this.#isFrameReady = true;
         bus
         // .target(properties.IFRAME_SECURE_ORGIN)
-          .emit(
-            ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#containerId,
-            {
-              records: this.#recordData,
-              metaData: this.#metaData.clientJSON,
-            },
-            (revealData: any) => {
-              if (revealData.errors) {
-                printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
-                  this.#context.logLevel);
-                reject(revealData);
-              } else {
-                printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
-                  MessageType.LOG,
-                  this.#context.logLevel);
-                resolve(revealData);
-              }
-            },
-          );
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#clientId, () => {
+            this.#isFrameReady = true;
+            bus
+              // .target(properties.IFRAME_SECURE_ORGIN)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#clientId,
+                {
+                  records: this.#recordData,
+                  metaData: this.#metaData.clientJSON,
+                },
+                (revealData: any) => {
+                  if (revealData.errors) {
+                    printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
+                      this.#context.logLevel);
+                    this.isRenderFileCalled = true;
+                    this.updateFileRenderAltText(this.#recordData.altText);
+                    this.updateErrorText(DEFAULT_FILE_RENDER_ERROR);
+                    reject(formatForRenderClient(revealData, this.#recordData.column as string));
+                  } else {
+                    printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
+                      MessageType.LOG,
+                      this.#context.logLevel);
+                    this.isRenderFileCalled = true;
+                    const formattedResult = formatRecordsForRender(
+                      revealData,
+                      this.#recordData.column,
+                      this.#recordData.skyflowID,
+                    );
+                    const responseValue = formattedResult.url as string;
+                    printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
+                      CLASS_NAME, this.#recordData.skyflowID),
+                    MessageType.LOG, this.#context.logLevel);
+                    this.removeFilePreElement(responseValue);
+                    resolve(formatForRenderClient(revealData, this.#recordData.column as string));
+                  }
+                },
+              );
+          });
         printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
           CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
         MessageType.LOG, this.#context.logLevel);

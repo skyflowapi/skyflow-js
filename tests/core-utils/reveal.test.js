@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import Skyflow from '../../src/skyflow';
-import {formatRecordsForClient,formatRecordsForIframe} from "../../src/core-utils/reveal";
+import {formatRecordsForClient,formatRecordsForIframe, formatRecordsForRender, formatForRenderClient} from "../../src/core-utils/reveal";
 const testTokenId = '1677f7bd-c087-4645-b7da-80a6fd1a81a4';
 const testInvalidTokenId = '80a6fd1a81a4-b7da-c087-4645';
 
@@ -114,5 +114,44 @@ describe("formatRecordsForIframe fn test",()=>{
     const testInput = {"records":[{token:"7823-323-242-2232",value:"token_value","valueType" : "STRING"}]};
     const fnResponse = formatRecordsForIframe(testInput);
     expect(fnResponse).toStrictEqual({"7823-323-242-2232":"token_value"});
+  });
+});
+
+describe("formatRecordsForRender fn test",()=>{
+  test("no records should return empty object",()=>{
+    const testInput = {};
+    const fnResponse = formatRecordsForRender(testInput, 'col', 'id');
+    expect(fnResponse).toStrictEqual({
+        "column": "col",
+        "skyflowID": "id",
+        "url": "",
+      });
+  });
+  test("with records should return token value object",()=>{
+    const testInput = {"fields": {
+      "col" : "http://dummy.com",
+      "skyflow_id": "id",
+    }};
+    const fnResponse = formatRecordsForRender(testInput, 'col', 'id');
+    expect(fnResponse).toStrictEqual({"column": "col",
+      "skyflowID": "id",
+      "url": "http://dummy.com",});
+  });
+});
+describe("formatRecordsForIframe fn test",()=>{
+  test("no records should return empty object",()=>{
+    const testInput = {};
+    const fnResponse = formatForRenderClient(testInput, 'col');
+    expect(fnResponse).toStrictEqual({});
+  });
+  test("with records should return token value object",()=>{
+    const testInput = {"fields": {
+      "col" : "http://dummy.com",
+      "skyflow_id": "id",
+    }};
+    const fnResponse = formatForRenderClient(testInput, 'col');
+    expect(fnResponse).toStrictEqual({ success :{"column": "col",
+      "skyflow_id": "id",
+    }});
   });
 });

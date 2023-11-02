@@ -5,6 +5,9 @@ import { LogLevel,Env } from "../../../../src/utils/common";
 import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL } from "../../../../src/core/constants";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import bus from "framebus";
+import RevealContainer from "../../../../src/core/external/reveal/reveal-container";
+
+
 const mockUuid = '1234'; 
 const elementId = 'id';
 jest.mock('../../../../src/libs/uuid',()=>({
@@ -44,11 +47,36 @@ const metaData = {
     clientDomain: "http://abc.com",
   },
 };
+const skyflowConfig = {
+  vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
+  vaultURL: 'https://testurl.com',
+  getBearerToken: jest.fn(),
+};
+
+const clientData = {
+  client: {
+    config: { ...skyflowConfig },
+    metadata: {},
+  },
+  clientJSON:{
+    context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+    config:{
+      ...skyflowConfig,
+      getBearerToken:jest.fn().toString()
+    }
+  } 
+}
+
 const testRecord = {
   token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
   // redaction: RedactionType.PLAIN_TEXT,
 };
-
+const testRecord2 = {
+  token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+  SkyflowID: 'id',
+  column: 'column',
+  table: 'table'
+};
 const on = jest.fn();
 const off = jest.fn();
 describe("Reveal Element Class", () => {
@@ -177,6 +205,5 @@ describe("Reveal Element Methods",()=>{
     const testRecordData = testRevealElement.getRecordData();
     expect(testRecordData).toStrictEqual({token:"testToken"})
   });
-
 
 });

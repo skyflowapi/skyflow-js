@@ -11,6 +11,7 @@ import {
   fetchRecordsGET,
   fetchRecordsByTokenId,
   fetchRecordsBySkyflowID,
+  getFileURLFromVaultBySkyflowID,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
 import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../constants';
@@ -183,7 +184,24 @@ class SkyflowFrameController {
           }
         },
       );
-
+    const sub2 = (data, callback) => {
+      printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+        CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
+      MessageType.LOG, this.#context.logLevel);
+      this.renderFile(data.records).then(
+        (resolvedResult) => {
+          callback(
+            resolvedResult,
+          );
+        },
+        (rejectedResult) => {
+          callback({ errors: rejectedResult });
+        },
+      );
+    };
+    bus
+    // .target(window.location.origin)
+      .on(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#clientId, sub2);
     bus
       // .target(this.#clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#clientId, {}, (data: any) => {
@@ -234,6 +252,22 @@ class SkyflowFrameController {
       }).catch((err) => {
         rootReject(err);
       });
+    });
+  }
+
+  renderFile(data: IRevealRecord) {
+    return new Promise((resolve, reject) => {
+      try {
+        getFileURLFromVaultBySkyflowID(data, this.#client)
+          .then((resolvedResult) => {
+            resolve(resolvedResult);
+          },
+          (rejectedResult) => {
+            reject(rejectedResult);
+          });
+      } catch (err) {
+        reject(err);
+      }
     });
   }
 }
