@@ -604,6 +604,87 @@ describe('get input validation for fetching unique column values',() => {
   })
 })
 
+describe('get options validation', () => {
+  test('string value passed in options tokens', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: RedactionType.DEFAULT }] }, { tokens: "true" })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_GET.description, 0))
+    }
+  })
+  
+  test('integer value passed in options tokens', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: RedactionType.DEFAULT }] }, { tokens: 123 })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_GET.description, 0))
+    }
+  })
+  
+  test('undefined passed in options tokens', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: RedactionType.DEFAULT }] }, { tokens: undefined })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_GET.description, 0))
+    }
+  })
+  
+  test('null passed in options tokens', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: RedactionType.DEFAULT }] }, { tokens: null })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_GET.description, 0))
+    }
+  })
+  
+  test('valid redaction is passed along with valid options tokens', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: RedactionType.DEFAULT }] }, { tokens: true })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.REDACTION_WITH_TOKENS_NOT_SUPPORTED.description, 0))
+    }
+  })
+  
+  test('undefined redaction is passed along with valid options tokens', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: undefined }] }, { tokens: true })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.REDACTION_WITH_TOKENS_NOT_SUPPORTED.description, 0))
+    }
+  })
+  
+  test('redaction is not passed with options tokens as false', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test'}] }, { tokens: false })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_REDACTION_IN_GET.description, 0))
+    }
+  })
+  
+  test('undefined redaction is passed with options tokens as false', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: undefined }] }, { tokens: false })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_REDACTION_TYPE_IN_GET.description, 0))
+    }
+  })
+  
+  test('null redaction is passed with options tokens as false', () => {
+    try {
+      validateGetInput({ records: [{ ids: ['123'], table: 'test', redaction: null }] }, { tokens: false })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_REDACTION_TYPE_IN_GET.description, 0))
+    }
+  })
+  
+  test('column details are passed along with valid options tokens', () => {
+    try {
+      validateGetInput({ records: [{ columnName: 'columnName', columnValues: ['columnValue'], table: 'test' }] }, { tokens: true })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.TOKENS_GET_COLUMN_NOT_SUPPORTED.description, 0))
+    }
+  })
+})
 
 describe('skyflow init validation', () => {
 

@@ -1809,12 +1809,19 @@ The sample response:
 ```
 
 - ### Using Skyflow ID's or Unique Column Values
-    You can retrieve data from the vault with the get(records) method using either Skyflow IDs or unique column values.
+    You can retrieve data from the vault with the `get(records, options)` method using either Skyflow IDs or unique column values.
 
     The records parameter accepts a JSON object that contains an array of either Skyflow IDs or unique column names and values.
 
-    Note: You can use either Skyflow IDs  or unique values to retrieve records. You can't use both at the same time.
+    The options is an optional `IGetOptions` object that retrieves the tokens for SkyflowIDs.
+ 
+    Notes:
 
+    - You can use either Skyflow IDs or unique values to retrieve records. You can't use both at the same time.
+    - `options` parameter is applicable only for retrieving tokens using Skyflow ID.
+    - You can't pass options along with the redaction type.
+    - `tokens` defaults to false.
+    
     Skyflow.RedactionTypes accepts four values:
     - `PLAIN_TEXT`
     - `MASKED`
@@ -1936,6 +1943,46 @@ Sample response:
            "table": "cards"
        }
    ]
+}
+```
+
+[Example usage (Fetch tokens using Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/get-pure-js.html)
+```javascript
+skyflow.get({
+ records: [
+   {
+     ids: [
+      "f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9",
+      "da26de53-95d5-4bdb-99db-8d8c66a35ff9"
+    ],
+     table: "cards",
+   },
+ ],
+}, { tokens: true });
+```
+Sample response: 
+```javascript
+{
+  "records": [
+    {
+      "fields": {
+        "card_id": "f689e421-4cf8-4438-8dbd-cc8e7654b7d9",
+        "expiry_date": "d9ef1cb8-5c22-48b0-b769-64ac20ccee01",
+        "fullname": "37480f82-d237-4efc-a06a-ebe57121be06",
+        "id": "f8d2-b557-4c6b-a12c-c5ebfd9"
+      },
+      "table": "cards"
+    },
+    {
+      "fields": {
+        "card_id": "d794b64c-e283-4fb8-8eef-9f6710730b69",
+        "expiry_date": "ff848fc3-a093-4ed4-9414-877b74a33111",
+        "fullname": "dfb6c247-3ee6-4fd2-8d1e-19d8e11c25ce",
+        "id": "da53-95d5-4bdb-99db-8d8c5ff9"
+      },
+      "table": "cards"
+    }
+  ]
 }
 ```
 
@@ -2356,6 +2403,106 @@ container.uploadFiles();
 ```javascript
 {
     fileUploadResponse: [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
+### File upload with options:
+
+Along with fileElementInput, you can define other options in the Options object as described below: 
+```js
+const options = {
+ allowedFileType: String[],  // Optional, indicates the allowed file types for upload
+}
+```
+`allowedFileType`: An array of string value that indicates the allowedFileTypes to be uploaded.
+
+#### File upload with options example
+
+```javascript
+// Create collect Container.
+const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+
+// Create collect elements.
+const cardNumberElement = collectContainer.create({
+  table: 'newTable',
+  column: 'card_number',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  placeholder: 'card number',
+  label: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+const options = { 
+    allowedFileType: [".pdf",".png"];
+};
+const fileElement = collectContainer.create({
+  table: 'newTable',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.FILE_INPUT,
+},
+  options
+);
+
+// Mount the elements.
+cardNumberElement.mount('#collectCardNumber');
+fileElement.mount('#collectFile');
+
+// Collect and upload methods.
+collectContainer.collect({});
+collectContainer.uploadFiles();
+
+```
+**Sample Response for collect():**
+```javascript
+{
+  "records": [
+    {
+      "table": "newTable",
+      "fields": {
+        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+      }
+    }
+  ]
+}
+```
+**Sample Response for file uploadFiles() :**
+```javascript
+{
+    "fileUploadResponse": [
         {
             "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
         }

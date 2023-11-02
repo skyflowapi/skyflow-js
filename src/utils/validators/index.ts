@@ -21,6 +21,7 @@ import {
   MessageType,
   IGetByIdInput,
   IDeleteRecordInput,
+  IGetOptions,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { appendZeroToOne } from '../helpers';
@@ -224,7 +225,7 @@ export const validateDetokenizeInput = (detokenizeInput: IDetokenizeInput) => {
   });
 };
 
-export const validateGetInput = (getInput: IGetInput) => {
+export const validateGetInput = (getInput: IGetInput, options?: IGetOptions) => {
   if (!(getInput && Object.prototype.hasOwnProperty.call(getInput, 'records'))) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_GET);
   }
@@ -233,6 +234,11 @@ export const validateGetInput = (getInput: IGetInput) => {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_GET, []);
   }
   if (records.length === 0) throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_GET);
+
+  if (options && Object.prototype.hasOwnProperty.call(options, 'tokens') && (typeof options?.tokens !== 'boolean')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_GET);
+  }
+
   records.forEach((record: any, index: number) => {
     if (Object.keys(record).length === 0) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_GET);
@@ -260,15 +266,20 @@ export const validateGetInput = (getInput: IGetInput) => {
     if (!(typeof record.table === 'string' || record.table instanceof String)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_GET, [`${index}`]);
     }
-    if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION_IN_GET, [`${index}`]);
+
+    if (!(options && Object.prototype.hasOwnProperty.call(options, 'tokens') && options?.tokens === true)) {
+      if (!Object.prototype.hasOwnProperty.call(record, 'redaction')) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REDACTION_IN_GET, [`${index}`]);
+      }
+      const recordRedaction = record.redaction;
+      if (!recordRedaction) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_REDACTION_TYPE_IN_GET, [`${index}`]);
+      }
+      if (!Object.values(RedactionType).includes(record.redaction)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_GET, [`${index}`]);
+      }
     }
-    if (!record.redaction) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_REDACTION_TYPE_IN_GET, [`${index}`]);
-    }
-    if (!Object.values(RedactionType).includes(record.redaction)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_IN_GET, [`${index}`]);
-    }
+
     if ((Object.prototype.hasOwnProperty.call(record, 'ids') === true && Object.prototype.hasOwnProperty.call(record, 'columnName') === true)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.SKYFLOW_IDS_AND_COLUMN_NAME_BOTH_SPECIFIED, [`${index}`]);
     }
@@ -309,6 +320,15 @@ export const validateGetInput = (getInput: IGetInput) => {
         if (eachColumnValue === '' || eachColumnValue === null) throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_COLUMN_VALUE, [`${index}`]);
         if (typeof eachColumnValue !== 'string') throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORD_COLUMN_VALUE_TYPE, [`${index}`]);
       });
+    }
+
+    if (options && Object.prototype.hasOwnProperty.call(options, 'tokens') && options?.tokens === true) {
+      if (columnName || columnValues) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.TOKENS_GET_COLUMN_NOT_SUPPORTED);
+      }
+      if (record.redaction) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.REDACTION_WITH_TOKENS_NOT_SUPPORTED);
+      }
     }
   });
 };

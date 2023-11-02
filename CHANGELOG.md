@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.32.0] - 2023-10-26
+### Added
+- `tokens` support in Get interface
+
+## [1.31.1] - 2023-10-17
+### Fixed
+- Expiration-year max-length based on format.
+- Card icon render with  setValue method.
+
 ## [1.31.0] - 2023-10-06
 ### Added
 - `allowedFileType` option for file input element.
