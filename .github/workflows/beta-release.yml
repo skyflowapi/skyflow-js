@@ -16,7 +16,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           token: ${{ secrets.PAT_ACTIONS }}
-          ref: master
           fetch-depth: 0
 
       - uses: actions/setup-node@v2
