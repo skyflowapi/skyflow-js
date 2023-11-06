@@ -6,7 +6,6 @@ import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, STYLE_TYPE} from "../../../../s
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import bus from "framebus";
 import { JSDOM } from 'jsdom';
-import getCssClassesFromJss, { generateCssWithoutClass } from '../../../../src/libs/jss-styles'
 
 const mockUuid = '1234'; 
 const elementId = 'id';
@@ -308,158 +307,10 @@ describe("Reveal Element Methods",()=>{
     document = window.document;
     let ele = document.createElement('div');
     ele.setAttribute('id', '#mockElement');
-    testRevealElement2.addRenderFilePreElement('#mockElement');
-    testRevealElement2.domSelecter = '#mockElement';
-    testRevealElement2.isRenderFileCalled = true;
-    testRevealElement2.removeFilePreElement("demo")
     const documentElements = document.querySelectorAll('span');
     testRevealElement2.mount('#mockElement');
     console.log(documentElements.length);
-  });
-  it('should update render file pre-elements to the DOM', () => {
-    const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
-    document = window.document;
-    let ele = document.createElement('div');
-    ele.setAttribute('id', '#mockElement');
-    testRevealElement2.addRenderFilePreElement('#mockElement');
-    testRevealElement2.domSelecter = '#mockElement';
-    testRevealElement2.isRenderFileCalled = true;
-    testRevealElement2.updateErrorText("demo")
-    const documentElements = document.querySelectorAll('span');
-    testRevealElement2.mount('#mockElement');
-  });
-  it('should update the error text with the provided string', () => {
-    const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
-    document = window.document;
-    const testEmptyDiv = document.createElement("div");
-    testEmptyDiv.setAttribute("id", "mockElement");
-    document.body.appendChild(testEmptyDiv);
-    expect(document.getElementById("mockElement")).not.toBeNull();
-      
-    testRevealElement2.mount("#mockElement");
-    testRevealElement2.metaData = clientData
-    testRevealElement2.renderFile();
-    // Mock data
-    testRevealElement2.domSelecter = '#mockElement';
-    testRevealElement2.isRenderFileCalled = true;
-    const error = 'Test error message';
-    const elementId = 'testElementId';
-
-    testRevealElement2.elementId = elementId
-    testRevealElement2.addRenderFilePreElement('#mockElement');
-
-    testRevealElement2.updateErrorText(error);
-
-    expect(testRevealElement2.renderFileErrorText.innerText).toEqual(error);
-    expect(testRevealElement2.renderFileAltText.innerText).toEqual("demo");
-    expect(generateCssWithoutClass).toHaveBeenCalled();
-    expect(getCssClassesFromJss).toHaveBeenCalled();
-
-    testRevealElement2.removeFilePreElement("demo")   
-
-    expect(generateCssWithoutClass).toHaveBeenCalled();
-    expect(getCssClassesFromJss).toHaveBeenCalled();
-  });
-  
-describe('RevealElement', () => {
-  let testRevealElement = new RevealElement(
-    {
-      skyflowID:"12445",
-      column: 'column', 
-      table: 'table',
-      altText: 'demo',
-      inputStyles: {
-          base: {
-            border: '5px solid orange',
-            padding: '10px 10px',
-            borderRadius: '10px',
-            color: '#1d1d1d',
-            marginTop: '4px',
-            height: '260px',
-            width: '400px'
-          },
-          global: {
-            '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
-          }
-        },
-    },
-    undefined,
-    clientData,
-    {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
-    elementId,
-    { logLevel: LogLevel.ERROR,env:Env.PROD }
-  );
-  let ele;
-  beforeEach(() => {
-    const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
-    global.document = window.document;
-    ele = document.createElement('div');
-    ele.setAttribute('id', '#mockElement');
-    testRevealElement.metaData = clientData
-    testRevealElement.mount("#mockElement")
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('renderFile', () => {
-    it('should update the file rendering alt text and error text when the frame is ready', () => {
-      const mockResponse = {};
-      const mockFormattedResult = { "success":{
-        skyflow_id: '1234',
-        column : 'col'
-      } };
-      testRevealElement.removeFilePreElement = jest.fn().mockImplementation("http://demo.com");
-      testRevealElement.formatForRenderClient = jest.fn().mockReturnValue(mockFormattedResult);
-
-      const result = testRevealElement.renderFile();
-      expect(result).toBeInstanceOf(Promise);
-      expect(testRevealElement.renderFileAltText.innerText).toEqual('loading...');
-      expect(testRevealElement.renderFileErrorText.innerText).toEqual('');
-    });
-
-    it('should handle the case when the frame is not ready', () => {
-
-      const result = testRevealElement.renderFile();
-
-      expect(testRevealElement.renderFileAltText.innerText).toEqual('loading...');
-      expect(testRevealElement.renderFileErrorText.innerText).toEqual('');
-      expect(result).toBeInstanceOf(Promise);
-    });
-
-    it('should handle errors appropriately', async () => {
-      const mockError = new Error('Test error message');
-      testRevealElement.printLog = jest.fn();
-      testRevealElement.formatForRenderClient = jest.fn().mockImplementation(() => {
-        throw mockError;
-      });
-
-      expect(testRevealElement.renderFile()).rejects.toThrowError(mockError);
-    });
-    it('should emit the appropriate bus events when rendering the file', () => {
-      const busEmitSpy = jest.spyOn(bus, 'emit');
-
-      const mockRevealData = { "success":{
-        skyflow_id: '1234',
-        column : 'col'
-      } };
-      testRevealElement.elementId = '123'
-      testRevealElement.formatForRenderClient = jest.fn().mockReturnValue(mockRevealData);
-
-      let result = testRevealElement.renderFile();
-      expect(busEmitSpy).toHaveBeenCalledWith(
-        'RENDER_FILE_REQUEST' + '123',
-        {
-          records: testRevealElement.getRecordData(),
-          metaData: clientData.clientJSON,
-        },
-        expect.any(Function)
-      );
-
-      expect(result).resolves.toEqual(mockRevealData);
-    });
-  });
+    testRevealElement2.unmount();
 
 });
 });

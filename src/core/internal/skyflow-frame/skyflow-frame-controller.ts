@@ -200,7 +200,7 @@ class SkyflowFrameController {
       );
     };
     bus
-    // .target(window.location.origin)
+      .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#clientId, sub2);
     bus
       // .target(this.#clientDomain)

@@ -8,10 +8,9 @@ import * as busEvents from '../../../../src/utils/bus-events';
 import { LogLevel, Env, RedactionType } from '../../../../src/utils/common';
 import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
 
-
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();
-
+const mockUuid = '1244'
 const skyflowConfig = {
   vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
   vaultURL: 'https://testurl.com',
@@ -92,6 +91,11 @@ const errorResponse = {
     message: 'RBAC: access denied',
   },
 };
+const renderResponse = {
+  fields : {
+    skyflow_id: '1234'
+  }
+}
 
 describe('Inserting records into the vault', () => {
   let emitSpy;
@@ -845,3 +849,56 @@ describe('getAcessToken error delete', () => {
     }, 1000);
   });
 });
+
+describe('test render file request', () => { 
+
+  let emitSpy;
+  let targetSpy;
+  let onSpy;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mock("../../../../src/core-utils/reveal",()=>({
+      __esModule: true,
+      getFileURLFromVaultBySkyflowID: jest.fn()
+    }));
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+    onSpy = jest.spyOn(bus, 'on');
+
+    busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
+
+  });
+
+  test("render files",()=>{
+    const clientReq = jest.fn(() => Promise.reject({
+      errors:[{skyflowID:"1815-6223-1073-1425","error":{"code":404,"description":"id not found"}}]
+    }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq })); 
+    SkyflowFrameController.init(); 
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    console.log(emitSpy.mock.calls)
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+  
+    const revelRequestEventName = ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST;
+    const data = {
+      "records":[
+        {
+          skyflowID: "1815-6223-1073-1425",
+        }
+      ]
+    }
+    console.log(onSpy.mock.calls)
+    const emitterCb = jest.fn();
+    bus.emit(revelRequestEventName,data,emitterCb);
+    const onCbName = onSpy.mock.calls[0][0];
+    expect(onCbName).toBe(revelRequestEventName);
+    const onCb =  onSpy.mock.calls[0][1];
+    onCb(data,emitterCb);
+  });
+})

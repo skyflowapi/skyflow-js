@@ -157,21 +157,21 @@ class RevealElement extends SkyflowElement {
       });
     } else if (this.#recordData.skyflowID) {
       this.#isMounted = true;
-      this.addRenderFilePreElement(domElementSelector);
+      this.#addRenderFilePreElement(domElementSelector);
     }
   }
 
-  addRenderFilePreElement(domElementSelector) {
+  #addRenderFilePreElement(domElementSelector) {
     this.renderFileAltText.className = `SkyflowElement-${this.#elementId}-${STYLE_TYPE.BASE}`;
     this.renderFileErrorText.className = `SkyflowElement-${this.#elementId}error-${STYLE_TYPE.BASE}`;
-    this.updateFileRenderAltText(this.#recordData.altText);
-    this.updateErrorText('');
+    this.#updateFileRenderAltText(this.#recordData.altText);
+    this.#updateErrorText('');
     this.#iframe.container = document.querySelector(domElementSelector);
     this.#iframe.container?.appendChild(this.renderFileAltText);
     this.#iframe.container?.appendChild(this.renderFileErrorText);
   }
 
-  updateErrorText(error: string) {
+  #updateErrorText(error: string) {
     getCssClassesFromJss(REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES, `${this.#elementId}error`);
     this.renderFileErrorText.innerText = error;
     if (
@@ -195,7 +195,7 @@ class RevealElement extends SkyflowElement {
     }
   }
 
-  updateFileRenderAltText(altText: string) {
+  #updateFileRenderAltText(altText: string) {
     getCssClassesFromJss(RENDER_FILE_ELEMENT_ALT_TEXT_DEFAULT_STYLES, this.#elementId);
     this.renderFileAltText.innerText = altText;
     if (Object.prototype.hasOwnProperty.call(this.#recordData, 'inputStyles')) {
@@ -210,7 +210,7 @@ class RevealElement extends SkyflowElement {
     }
   }
 
-  removeFilePreElement(responseValue) {
+  #removeFilePreElement(responseValue) {
     if (this.#iframe.container?.hasChildNodes()) {
       const nodeExists = this.#iframe.container?.querySelector('span');
 
@@ -231,8 +231,8 @@ class RevealElement extends SkyflowElement {
   }
 
   renderFile() {
-    this.updateFileRenderAltText('loading...');
-    this.updateErrorText('');
+    this.#updateFileRenderAltText('loading...');
+    this.#updateErrorText('');
     if (this.#isFrameReady && this.#isMounted) {
       return new Promise((resolve, reject) => {
         try {
@@ -254,8 +254,8 @@ class RevealElement extends SkyflowElement {
                   printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                     this.#context.logLevel);
                   this.isRenderFileCalled = true;
-                  this.updateFileRenderAltText(this.#recordData.altText);
-                  this.updateErrorText(DEFAULT_FILE_RENDER_ERROR);
+                  this.#updateFileRenderAltText(this.#recordData.altText);
+                  this.#updateErrorText(DEFAULT_FILE_RENDER_ERROR);
                   reject(formatForRenderClient(revealData, this.#recordData.column as string));
                 } else {
                   printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
@@ -271,7 +271,7 @@ class RevealElement extends SkyflowElement {
                   printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
                     CLASS_NAME, this.#recordData.skyflowID),
                   MessageType.LOG, this.#context.logLevel);
-                  this.removeFilePreElement(responseValue);
+                  this.#removeFilePreElement(responseValue);
                   resolve(formatForRenderClient(revealData, this.#recordData.column as string));
                 }
               },
@@ -313,8 +313,8 @@ class RevealElement extends SkyflowElement {
                       printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                         this.#context.logLevel);
                       this.isRenderFileCalled = true;
-                      this.updateFileRenderAltText(this.#recordData.altText);
-                      this.updateErrorText(DEFAULT_FILE_RENDER_ERROR);
+                      this.#updateFileRenderAltText(this.#recordData.altText);
+                      this.#updateErrorText(DEFAULT_FILE_RENDER_ERROR);
                       reject(formatForRenderClient(revealData, this.#recordData.column as string));
                     } else {
                       printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
@@ -330,7 +330,7 @@ class RevealElement extends SkyflowElement {
                       printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
                         CLASS_NAME, this.#recordData.skyflowID),
                       MessageType.LOG, this.#context.logLevel);
-                      this.removeFilePreElement(responseValue);
+                      this.#removeFilePreElement(responseValue);
                       resolve(formatForRenderClient(revealData, this.#recordData.column as string));
                     }
                   },
