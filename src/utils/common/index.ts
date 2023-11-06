@@ -61,6 +61,9 @@ export interface IInsertRecord {
 export interface IRevealRecord {
   token: string;
   redaction?: RedactionType;
+  column?: string;
+  skyflowID?: string;
+  table?: string;
 }
 
 export interface IInsertResponse {
@@ -74,6 +77,10 @@ export interface IInsertResponseReocrds {
 export interface IRevealResponseType {
   records?: Record<string, string>[];
   errors?: Record<string, any>[];
+}
+export interface IRenderResponseType {
+  fields?: Record<string, any>
+  errors?: Record<string, any>
 }
 
 export interface IDetokenizeInput {

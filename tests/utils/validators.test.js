@@ -22,7 +22,8 @@ import {
   validateGetByIdInput,
   validateComposableContainerOptions,
   validateDeleteRecords,
-  validateInputFormatOptions
+  validateInputFormatOptions,
+  validateRenderElementRecord
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logs-helper';
 import { RedactionType } from '../../src/utils/common';
@@ -822,6 +823,86 @@ describe("validate reveal element input", () => {
       validateRevealElementRecords([{ token: '123', redaction: 'invalid' }])
     } catch (err) {
       expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL.description)
+    }
+  })
+
+})
+
+describe("validate file render element input", () => {
+  test("missing skyflow id", () => {
+    try {
+      validateRenderElementRecord({})
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_KEY_REVEAL.description)
+    }
+  })
+
+  test("empty skyflow id type", () => {
+    try {
+      validateRenderElementRecord({ skyflowID: undefined })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_REVEAL.description)
+    }
+  })
+  test("invalid skyflow id type", () => {
+    try {
+      validateRenderElementRecord({ skyflowID: {} })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SKYFLOW_ID_REVEAL.description)
+    }
+  })
+
+  test("invalid column type", () => {
+    try {
+      validateRenderElementRecord({ skyflowID: '123', column: {} })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COLUMN_NAME_REVEAL.description)
+    }
+  })
+
+  test("EMPTY_COLUMN_NAME_REVEAL ", () => {
+    try {
+      validateRenderElementRecord({ skyflowID: '123', column: null })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_COLUMN_NAME_REVEAL.description)
+    }
+  })
+
+  test("invalid MISSING_COLUMN_KEY_REVEAL", () => {
+    try {
+      validateRenderElementRecord({ skyflowID: '123', table: 'table' })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_COLUMN_KEY_REVEAL.description)
+    }
+  })
+  test("invalid TABLE type", () => {
+    try {
+      validateRenderElementRecord({ skyflowID: '123', column: 'COLUMN', table: {} })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_TABLE_REVEAL.description)
+    }
+  })
+
+  test("EMPTY TABLE REVEAL ", () => {
+    try {
+      validateRenderElementRecord({ skyflowID: '123', column: 'column', table: null })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_TABLE_REVEAL.description)
+    }
+  })
+
+  test("MISSING TABLE REVEAL", () => {
+    try {
+      validateRenderElementRecord({ skyflowID: '123', column: 'col' })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_TABLE_KEY_REVEAL.description)
+    }
+  })
+  test("ID and token both specified", () => {
+    try {
+      validateRenderElementRecord({ skyflowID: '123', token: 'token' })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.SKYFLOW_IDS_AND_TOKEN_BOTH_SPECIFIED.description)
     }
   })
 

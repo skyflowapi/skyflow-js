@@ -8,6 +8,8 @@ import { LogLevel,Env } from "../../../../src/utils/common";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
+// import { JSDOM } from 'jsdom';
+
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 const mockUuid = '1234'; 
@@ -301,4 +303,47 @@ describe("Reveal Container Class", () => {
     expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST+mockUuid);
     emitCb({"success":[{token:"1815-6223-1073-1425"}]});
   });
+  // test("file render call",async ()=>{
+  //   const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+  //   const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
+  //   global.document = window.document;
+  //   let ele = document.createElement('div');
+  //   ele.setAttribute('id', '#mockElement');
+
+  //   let element = testRevealContainer.create({
+  //     skyflowID: "1244",
+  //     column: 'column', 
+  //     table: 'table'
+  //   },);
+  //   const data = {
+  //     skyflowID: "1244",
+  //     column: 'column', 
+  //     table: 'table',      
+  //     containerId:mockUuid
+  //   }
+  //   element.mount("#mockElement")
+  //   try {
+  //     const result  = await element.renderFile().then((data) => {
+  //       console.log('data is here', data);
+  //     }).catch(error => console.log('error is here', error));
+  //   } catch(error) {
+  //     console.log(error);
+  //   }
+  //   expect(result).toBeInstanceOf(Promise);
+  //   element.metaData = clientData
+  //   const eventName = ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY  + mockUuid
+  //   bus.emit(eventName,data);
+  //   const onCbName = on.mock.calls[1][0];
+  //   expect(onCbName).toBe(eventName);
+  //   const onCb = on.mock.calls[1][1];
+  //   onCb(data);
+
+
+
+  //   const emitEventName = emitSpy.mock.calls[1][0];
+  //   const emitCb = emitSpy.mock.calls[1][2];
+  //   expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST+mockUuid);
+  //   emitCb({"success":[{skyflow_id:"1244"}]});
+  // });
+
 });

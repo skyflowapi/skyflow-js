@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
@@ -7,9 +8,11 @@ import SkyflowError from '../libs/skyflow-error';
 import {
   IRevealRecord, IRevealResponseType, MessageType, LogLevel, IGetRecord, ISkyflowIdRecord,
   RedactionType,
+  IRenderResponseType,
   IGetOptions,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
+import { FILE_DOWNLOAD_URL_PARAM } from '../core/constants';
 
 interface IApiSuccessResponse {
   records: [
@@ -33,6 +36,14 @@ const formatForPureJsFailure = (cause, tokenId:string) => ({
     code: cause?.error?.code,
     description: cause?.error?.description,
   }, [], true),
+});
+const formatForRenderFileFailure = (cause, skyflowID:string, column: string) => ({
+  skyflowId: skyflowID,
+  column,
+  error: {
+    code: cause?.error?.code,
+    description: cause?.error?.description,
+  },
 });
 
 const getRecordsFromVault = (
@@ -119,6 +130,52 @@ const getTokenRecordsFromVault = (
   });
 };
 
+export const getFileURLForRender = (
+  skyflowIdRecord: IRevealRecord,
+  client: Client,
+  authToken: string,
+): Promise<any> => {
+  let paramList: string = '';
+
+  paramList += `${skyflowIdRecord.skyflowID}?`;
+
+  paramList += `fields=${skyflowIdRecord.column}&${FILE_DOWNLOAD_URL_PARAM}`;
+
+  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}/${paramList}`;
+  return client.request({
+    requestMethod: 'GET',
+    url: vaultEndPointurl,
+    headers: {
+      authorization: `Bearer ${authToken}`,
+      'content-type': 'application/json',
+    },
+  });
+};
+
+export const getFileURLFromVaultBySkyflowID = (
+  skyflowIdRecord: IRevealRecord,
+  client: Client,
+): Promise<IRenderResponseType> => new Promise((rootResolve, rootReject) => {
+  try {
+    const clientId = client.toJSON().metaData.uuid || '';
+    getAccessToken(clientId).then((authToken) => {
+      getFileURLForRender(
+        skyflowIdRecord, client, authToken as string,
+      ).then((resolvedResult: IRenderResponseType) => {
+        rootResolve(resolvedResult);
+      }).catch((err: any) => {
+        const errorData = formatForRenderFileFailure(err, skyflowIdRecord.skyflowID as string,
+          skyflowIdRecord.column as string);
+        printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
+        rootReject(errorData);
+      });
+    }).catch((err) => {
+      rootReject(err);
+    });
+  } catch (err) {
+    rootReject(err);
+  }
+});
 export const fetchRecordsByTokenId = (
   tokenIdRecords: IRevealRecord[],
   client: Client,
@@ -179,6 +236,29 @@ export const formatRecordsForIframe = (response: IRevealResponseType) => {
     });
   }
   return result;
+};
+export const formatRecordsForRender = (response : IRenderResponseType, column, skyflowID) => {
+  let url = '';
+  if (response.fields) {
+    url = response.fields[column];
+  }
+  return {
+    column,
+    skyflowID,
+    url,
+  };
+};
+
+// eslint-disable-next-line consistent-return
+export const formatForRenderClient = (response: IRenderResponseType, column: string) => {
+  if (response.fields) {
+    const successRecord = {
+      skyflow_id: response.fields.skyflow_id,
+      column,
+    };
+    return { success: successRecord };
+  }
+  return response;
 };
 
 export const formatRecordsForClient = (response: IRevealResponseType) => {

@@ -21,6 +21,9 @@ import RevealElement from './reveal-element';
 
 export interface IRevealElementInput {
   token?: string;
+  skyflowID?: string;
+  table?: string;
+  column?: string;
   redaction?: RedactionType;
   inputStyles?: object;
   label?: string;
@@ -118,9 +121,15 @@ class RevealContainer extends Container {
         ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
         (data) => {
           this.#mountedRecords.push(data as any);
+          let revealElementLength = 0;
+          this.#revealElements.forEach((currentElement) => {
+            if (!currentElement.getRecordData().skyflowID) {
+              revealElementLength += 1;
+            }
+          });
 
-          this.#isElementsMounted = this.#mountedRecords.length === this.#revealElements.length;
-
+          this.#isElementsMounted = this.#mountedRecords.length === revealElementLength;
+          // this.#mountedRecords.length === this.#revealElements.length;
           if (this.#isRevealCalled && this.#isElementsMounted) {
             // eslint-disable-next-line no-underscore-dangle
             this.#eventEmmiter._emit(
@@ -163,7 +172,9 @@ class RevealContainer extends Container {
             if (currentElement.isClientSetError()) {
               throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
             }
-            this.#revealRecords.push(currentElement.getRecordData());
+            if (!currentElement.getRecordData().skyflowID) {
+              this.#revealRecords.push(currentElement.getRecordData());
+            }
           });
           validateRevealElementRecords(this.#revealRecords);
           bus
@@ -215,7 +226,9 @@ class RevealContainer extends Container {
             clearTimeout(elementMountTimeOut);
             throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
           }
-          this.#revealRecords.push(currentElement.getRecordData());
+          if (!currentElement.getRecordData().skyflowID) {
+            this.#revealRecords.push(currentElement.getRecordData());
+          }
         });
         validateRevealElementRecords(this.#revealRecords);
         this.#eventEmmiter.on(

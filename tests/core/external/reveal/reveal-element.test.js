@@ -2,9 +2,11 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import { LogLevel,Env } from "../../../../src/utils/common";
-import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL } from "../../../../src/core/constants";
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, STYLE_TYPE} from "../../../../src/core/constants";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import bus from "framebus";
+import { JSDOM } from 'jsdom';
+
 const mockUuid = '1234'; 
 const elementId = 'id';
 jest.mock('../../../../src/libs/uuid',()=>({
@@ -24,6 +26,17 @@ const groupEmiitter = {
     groupOnCb = cb;
   })
 }
+jest.mock('../../../../src/libs/jss-styles', () => {
+  return {
+    __esModule: true,
+    default: jest.fn(),
+    generateCssWithoutClass: jest.fn(),
+    getCssClassesFromJss: jest.fn().mockReturnValue({
+      base: { color: 'red' },
+      global: { backgroundColor: 'black' }
+    })
+  };
+});
 // bus.on = _on;
 // bus.target = jest.fn().mockReturnValue({
 //   on: _on,
@@ -44,11 +57,37 @@ const metaData = {
     clientDomain: "http://abc.com",
   },
 };
+const skyflowConfig = {
+  vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
+  vaultURL: 'https://testurl.com',
+  getBearerToken: jest.fn(),
+};
+
+const clientData = {
+  uuid: '123',
+  client: {
+    config: { ...skyflowConfig },
+    metadata: { uuid :'123'},
+  },
+  clientJSON:{
+    context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+    config:{
+      ...skyflowConfig,
+      getBearerToken:jest.fn().toString()
+    }
+  } 
+}
+
 const testRecord = {
   token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
   // redaction: RedactionType.PLAIN_TEXT,
 };
-
+const testRecord2 = {
+  token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+  SkyflowID: 'id',
+  column: 'column',
+  table: 'table'
+};
 const on = jest.fn();
 const off = jest.fn();
 describe("Reveal Element Class", () => {
@@ -112,6 +151,42 @@ describe("Reveal Element Class", () => {
     expect(testRevealElement.iframeName()).toBe(testIframeName);
     expect(testRevealElement.hasToken()).toBe(true);
   });
+  test("Mount Method for file render", () => {
+    const testRevealElement = new RevealElement(
+      {
+        skyflowID: "1244",
+        column: 'column', 
+        table: 'table'
+      },
+      undefined,
+      clientData,
+      {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+      elementId,
+      { logLevel: LogLevel.ERROR,env:Env.PROD }
+    );
+    const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
+    document = window.document;
+    const data =  testRevealElement.getRecordData()
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    document.body.appendChild(testEmptyDiv);
+    expect(document.getElementById("testDiv")).not.toBeNull();
+      
+    expect(testRevealElement.isMounted()).toBe(false);
+
+    testRevealElement.mount("#testDiv");
+    
+
+    expect(document.querySelector("span")).toBeTruthy();
+    testRevealElement.renderFile();
+    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR`;
+    expect(document.querySelector("iframe")?.name).toBe(testIframeName);
+    expect(testRevealElement.isMounted()).toBe(true);
+    expect(testRevealElement.iframeName()).toBe(testIframeName);
+    testRevealElement.unmount();
+    expect(testRevealElement.isMounted()).toBe(false); 
+    expect(document.querySelector("span")).toBeFalsy(); 
+  });
   test("has token should return false, without token",()=>{
     const testRevealElement = new RevealElement(
       {},
@@ -124,6 +199,7 @@ describe("Reveal Element Class", () => {
     expect(testRevealElement.hasToken()).toBe(false);
   });
 });
+
 describe("Reveal Element Methods",()=>{
   const containerId = mockUuid;
   const testRevealElement = new RevealElement(
@@ -136,17 +212,57 @@ describe("Reveal Element Methods",()=>{
     elementId,
     { logLevel: LogLevel.ERROR,env:Env.PROD }
   );
+  const testRevealElement2 = new RevealElement(
+    {
+      skyflowID:"1244",
+      column: 'column', 
+      table: 'table',
+      altText: 'demo',
+      inputStyles: {
+          base: {
+            border: '5px solid orange',
+            padding: '10px 10px',
+            borderRadius: '10px',
+            color: '#1d1d1d',
+            marginTop: '4px',
+            height: '260px',
+            width: '400px'
+          },
+          global: {
+            '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+          }
+        },
+    errorTextStyles: {
+      base: {
+        border: '5px solid orange',
+        padding: '10px 10px',
+        borderRadius: '10px',
+        color: '#1d1d1d',
+        marginTop: '4px',
+        height: '260px',
+        width: '400px'
+      },
+      global: {
+        '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+      }
+    }
+    },
+    undefined,
+    clientData,
+    {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+    elementId,
+    { logLevel: LogLevel.ERROR,env:Env.PROD }
+  );
   it("mount with invalid div",()=>{
     try{
       testRevealElement.mount(null);
     }catch(err){
       expect(err).toBeDefined();
-    }
-    
-      
+    }   
   });
   it("unmount method",()=>{
       testRevealElement.unmount();
+      testRevealElement2.unmount();
   });
   it("check for isSetError False",()=>{
     expect(testRevealElement.isClientSetError()).toBe(false);
@@ -177,6 +293,24 @@ describe("Reveal Element Methods",()=>{
     const testRecordData = testRevealElement.getRecordData();
     expect(testRecordData).toStrictEqual({token:"testToken"})
   });
+  it('should add render file pre-elements to the DOM', () => {
+    const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
+    document = window.document;
+    testRevealElement2.metaData = clientData
+    testRevealElement2.mount("#mockElement")
+    testRevealElement2.renderFile();
+    const documentElements = document.querySelectorAll('*');
+    const elementsArray = Array.from(documentElements);
+  });
+  it('should add render file pre-elements to the DOM', () => {
+    const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
+    document = window.document;
+    let ele = document.createElement('div');
+    ele.setAttribute('id', '#mockElement');
+    const documentElements = document.querySelectorAll('span');
+    testRevealElement2.mount('#mockElement');
+    console.log(documentElements.length);
+    testRevealElement2.unmount();
 
-
+});
 });
