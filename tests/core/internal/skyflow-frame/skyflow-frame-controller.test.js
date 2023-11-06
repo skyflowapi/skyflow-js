@@ -896,9 +896,9 @@ describe('test render file request', () => {
     console.log(onSpy.mock.calls)
     const emitterCb = jest.fn();
     bus.emit(revelRequestEventName,data,emitterCb);
-    const onCbName = onSpy.mock.calls[0][0];
+    const onCbName = on.mock.calls[1][0];
     expect(onCbName).toBe(revelRequestEventName);
-    const onCb =  onSpy.mock.calls[0][1];
+    const onCb =  on.mock.calls[1][1];
     onCb(data,emitterCb);
   });
 })

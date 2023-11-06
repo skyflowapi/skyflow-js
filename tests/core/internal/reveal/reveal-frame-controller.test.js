@@ -178,11 +178,12 @@ describe('test render file request', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     emitSpy = jest.spyOn(bus, 'emit');
+    onSpy = jest.spyOn(bus, 'on');
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit
     });
-    onSpy = jest.spyOn(bus, 'on');
 
     busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 
@@ -209,10 +210,10 @@ describe('test render file request', () => {
       ]
     }
     const emitterCb = jest.fn();
-    bus.emit(revelRequestEventName,data,emitterCb);
-    const onCbName = onSpy.mock.calls[0][0];
+    bus.emit(revelRequestEventName, data, emitterCb);
+    const onCbName = on.mock.calls[1][0];
     expect(onCbName).toBe(revelRequestEventName);
-    const onCb =  onSpy.mock.calls[0][1];
+    const onCb =  on.mock.calls[1][1];
     onCb(data,emitterCb);
   });
 
@@ -245,10 +246,10 @@ describe('test render file request', () => {
       ]
     }
     const emitterCb = jest.fn();
-    bus.emit(revelRequestEventName,data,emitterCb);
-    const onCbName = onSpy.mock.calls[0][0];
+    bus.emit(revelRequestEventName, data, emitterCb);
+    const onCbName = on.mock.calls[1][0];
     expect(onCbName).toBe(revelRequestEventName);
-    const onCb =  onSpy.mock.calls[0][1];
+    const onCb =  on.mock.calls[1][1];
     onCb(data,emitterCb);
   });
 
@@ -284,10 +285,10 @@ describe('test render file request', () => {
       ]
     }
     const emitterCb = jest.fn();
-    bus.emit(revelRequestEventName,data,emitterCb);
-    const onCbName = onSpy.mock.calls[0][0];
+    bus.emit(revelRequestEventName, data, emitterCb);
+    const onCbName = on.mock.calls[1][0];
     expect(onCbName).toBe(revelRequestEventName);
-    const onCb =  onSpy.mock.calls[0][1];
+    const onCb =  on.mock.calls[1][1];
     onCb(data,emitterCb);
   });
   test("render files success",()=>{
@@ -321,10 +322,10 @@ describe('test render file request', () => {
       ]
     }
     const emitterCb = jest.fn();
-    bus.emit(revelRequestEventName,data,emitterCb);
-    const onCbName = onSpy.mock.calls[0][0];
+    bus.emit(revelRequestEventName, data, emitterCb);
+    const onCbName = on.mock.calls[1][0];
     expect(onCbName).toBe(revelRequestEventName);
-    const onCb =  onSpy.mock.calls[0][1];
+    const onCb =  on.mock.calls[1][1];
     onCb(data,emitterCb);
   });
 test("render request success",()=>{
@@ -344,11 +345,6 @@ test("render request success",()=>{
   formatRecordsForRender.mockImplementation(()=>{
     return {fields: { skyflow_id: "1815-6223-1073-1425",
     url: "column",
-    column: "column",
-    table: "table"}}
-  });
-  formatRecordsForRender.mockImplementation(()=>{
-    return {"success": { skyflow_id: "1815-6223-1073-1425",
     column: "column",
     table: "table"}}
   });
