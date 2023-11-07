@@ -207,6 +207,7 @@ const SKYFLOW_ERROR_CODE = {
   INVALID_TOKEN_ID_REVEAL: { code: 400, description: logs.errorLogs.INVALID_TOKEN_ID_REVEAL },
   INVALID_LABEL_REVEAL: { code: 400, description: logs.errorLogs.INVALID_LABEL_REVEAL },
   INVALID_ALT_TEXT_REVEAL: { code: 400, description: logs.errorLogs.INVALID_ALT_TEXT_REVEAL },
+  INVALID_ALT_TEXT_RENDER: { code: 400, description: logs.errorLogs.INVALID_ALT_TEXT_RENDER },
   INVALID_FORMAT_REVEAL: { code: 400, description: logs.errorLogs.INVALID_FORMAT_REVEAL },
   EMPTY_FORMAT_REVEAL: { code: 400, description: logs.errorLogs.EMPTY_FORMAT_REVEAL },
   INVALID_FORMAT_VALUE_REVEAL: {

@@ -59,7 +59,7 @@ export interface IInsertRecord {
 }
 
 export interface IRevealRecord {
-  token: string;
+  token?: string;
   redaction?: RedactionType;
   column?: string;
   skyflowID?: string;

@@ -187,14 +187,15 @@ export const fetchRecordsByTokenId = (
         const apiResponse: any = [];
         const redaction: RedactionType = tokenRecord.redaction ? tokenRecord.redaction
           : RedactionType.PLAIN_TEXT;
-        getTokenRecordsFromVault(tokenRecord.token, redaction, client, authToken as string)
+        // eslint-disable-next-line max-len
+        getTokenRecordsFromVault(tokenRecord.token as string, redaction, client, authToken as string)
           .then(
             (response: IApiSuccessResponse) => {
               const fieldsData = formatForPureJsSuccess(response);
               apiResponse.push(...fieldsData);
             },
             (cause: any) => {
-              const errorData = formatForPureJsFailure(cause, tokenRecord.token);
+              const errorData = formatForPureJsFailure(cause, tokenRecord.token as string);
               printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
               apiResponse.push(errorData);
             },
