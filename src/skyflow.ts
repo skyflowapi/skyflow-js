@@ -202,7 +202,7 @@ class Skyflow {
 
   insert(
     records: IInsertRecordInput,
-    options: IInsertOptions,
+    options?: IInsertOptions,
   ) {
     printLog(parameterizedString(logs.infoLogs.INSERT_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
@@ -228,7 +228,7 @@ class Skyflow {
     return this.#skyflowContainer.get(getInput, options);
   }
 
-  delete(records: IDeleteRecordInput, options: IDeleteOptions) {
+  delete(records: IDeleteRecordInput, options?: IDeleteOptions) {
     printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
     return this.#skyflowContainer.delete(records, options);
