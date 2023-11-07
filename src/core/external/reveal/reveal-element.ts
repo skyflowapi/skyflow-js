@@ -48,13 +48,13 @@ class RevealElement extends SkyflowElement {
 
   #isFrameReady: boolean;
 
-  renderFileAltText : HTMLSpanElement;
+  #renderFileAltText : HTMLSpanElement;
 
-  renderFileErrorText: HTMLSpanElement;
+  #renderFileErrorText: HTMLSpanElement;
 
-  domSelecter: string;
+  #domSelecter: string;
 
-  isRenderFileCalled: boolean;
+  #isRenderFileCalled: boolean;
 
   #inputStyles!: object;
 
@@ -83,10 +83,10 @@ class RevealElement extends SkyflowElement {
       this.#containerId,
       this.#context.logLevel,
     );
-    this.isRenderFileCalled = false;
-    this.renderFileAltText = document.createElement('span');
-    this.renderFileErrorText = document.createElement('span');
-    this.domSelecter = '';
+    this.#isRenderFileCalled = false;
+    this.#renderFileAltText = document.createElement('span');
+    this.#renderFileErrorText = document.createElement('span');
+    this.#domSelecter = '';
     this.#isFrameReady = false;
     if (!this.#readyToMount) {
       this.#eventEmitter.on(ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED, (data) => {
@@ -112,11 +112,11 @@ class RevealElement extends SkyflowElement {
   }
 
   mount(domElementSelector) {
-    this.domSelecter = domElementSelector;
+    this.#domSelecter = domElementSelector;
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
-    if (!this.#recordData.skyflowID || this.isRenderFileCalled) {
+    if (!this.#recordData.skyflowID || this.#isRenderFileCalled) {
       const sub = (data, callback) => {
         if (data.name === this.#iframe.name) {
           callback({
@@ -162,18 +162,18 @@ class RevealElement extends SkyflowElement {
   }
 
   #addRenderFilePreElement(domElementSelector) {
-    this.renderFileAltText.className = `SkyflowElement-${this.#elementId}-${STYLE_TYPE.BASE}`;
-    this.renderFileErrorText.className = `SkyflowElement-${this.#elementId}error-${STYLE_TYPE.BASE}`;
+    this.#renderFileAltText.className = `SkyflowElement-${this.#elementId}-${STYLE_TYPE.BASE}`;
+    this.#renderFileErrorText.className = `SkyflowElement-${this.#elementId}error-${STYLE_TYPE.BASE}`;
     this.#updateFileRenderAltText(this.#recordData.altText);
     this.#updateErrorText('');
     this.#iframe.container = document.querySelector(domElementSelector);
-    this.#iframe.container?.appendChild(this.renderFileAltText);
-    this.#iframe.container?.appendChild(this.renderFileErrorText);
+    this.#iframe.container?.appendChild(this.#renderFileAltText);
+    this.#iframe.container?.appendChild(this.#renderFileErrorText);
   }
 
   #updateErrorText(error: string) {
     getCssClassesFromJss(REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES, `${this.#elementId}error`);
-    this.renderFileErrorText.innerText = error;
+    this.#renderFileErrorText.innerText = error;
     if (
       Object.prototype.hasOwnProperty.call(this.#recordData, 'errorTextStyles')
       && Object.prototype.hasOwnProperty.call(this.#recordData.errorTextStyles, STYLE_TYPE.BASE)
@@ -197,7 +197,7 @@ class RevealElement extends SkyflowElement {
 
   #updateFileRenderAltText(altText: string) {
     getCssClassesFromJss(RENDER_FILE_ELEMENT_ALT_TEXT_DEFAULT_STYLES, this.#elementId);
-    this.renderFileAltText.innerText = altText;
+    this.#renderFileAltText.innerText = altText;
     if (Object.prototype.hasOwnProperty.call(this.#recordData, 'inputStyles')) {
       this.#inputStyles = {};
       this.#inputStyles[STYLE_TYPE.BASE] = {
@@ -215,9 +215,9 @@ class RevealElement extends SkyflowElement {
       const nodeExists = this.#iframe.container?.querySelector('span');
 
       if (nodeExists) {
-        this.#iframe.container?.removeChild(this.renderFileAltText);
-        this.#iframe.container?.removeChild(this.renderFileErrorText);
-        this.mount(this.domSelecter);
+        this.#iframe.container?.removeChild(this.#renderFileAltText);
+        this.#iframe.container?.removeChild(this.#renderFileErrorText);
+        this.mount(this.#domSelecter);
         if (Object.prototype.hasOwnProperty.call(this.#recordData, 'inputStyles')) {
           this.#inputStyles = {};
           this.#inputStyles[STYLE_TYPE.BASE] = {
@@ -253,7 +253,7 @@ class RevealElement extends SkyflowElement {
                 if (revealData.errors) {
                   printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                     this.#context.logLevel);
-                  this.isRenderFileCalled = true;
+                  this.#isRenderFileCalled = true;
                   this.#updateFileRenderAltText(this.#recordData.altText);
                   this.#updateErrorText(DEFAULT_FILE_RENDER_ERROR);
                   reject(formatForRenderClient(revealData, this.#recordData.column as string));
@@ -261,7 +261,7 @@ class RevealElement extends SkyflowElement {
                   printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
                     this.#context.logLevel);
-                  this.isRenderFileCalled = true;
+                  this.#isRenderFileCalled = true;
                   const formattedResult = formatRecordsForRender(
                     revealData,
                     this.#recordData.column,
@@ -312,7 +312,7 @@ class RevealElement extends SkyflowElement {
                     if (revealData.errors) {
                       printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                         this.#context.logLevel);
-                      this.isRenderFileCalled = true;
+                      this.#isRenderFileCalled = true;
                       this.#updateFileRenderAltText(this.#recordData.altText);
                       this.#updateErrorText(DEFAULT_FILE_RENDER_ERROR);
                       reject(formatForRenderClient(revealData, this.#recordData.column as string));
@@ -320,7 +320,7 @@ class RevealElement extends SkyflowElement {
                       printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
                         MessageType.LOG,
                         this.#context.logLevel);
-                      this.isRenderFileCalled = true;
+                      this.#isRenderFileCalled = true;
                       const formattedResult = formatRecordsForRender(
                         revealData,
                         this.#recordData.column,
