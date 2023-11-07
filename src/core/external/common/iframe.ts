@@ -23,6 +23,10 @@ export default class IFrame {
     this.iframe = iframer({ name: this.name });
   }
 
+  setAttributess = (responseValue) => {
+    setAttributes(this.iframe, { src: responseValue });
+  };
+
   mount = (domElement) => {
     this.unmount();
     try {
@@ -43,6 +47,7 @@ export default class IFrame {
     }
 
     setAttributes(this.iframe, { src: getIframeSrc() });
+
     this.container?.appendChild(this.iframe);
   };
 

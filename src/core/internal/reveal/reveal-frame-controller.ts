@@ -15,7 +15,9 @@ import {
 } from '../../constants';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
-import { Context, IRevealRecord, MessageType } from '../../../utils/common';
+import {
+  Context, IRevealRecord, MessageType,
+} from '../../../utils/common';
 
 const CLASS_NAME = 'RevealFrameController';
 class RevealFrameController {
@@ -102,4 +104,5 @@ class RevealFrameController {
     });
   }
 }
+
 export default RevealFrameController;

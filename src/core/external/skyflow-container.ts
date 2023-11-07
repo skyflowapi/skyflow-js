@@ -145,7 +145,7 @@ class SkyflowContainer {
     });
   }
 
-  insert(records, options:IInsertOptions): Promise<any> {
+  insert(records, options?:IInsertOptions): Promise<any> {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
@@ -370,7 +370,7 @@ class SkyflowContainer {
     });
   }
 
-  delete(records: IDeleteRecordInput, options: IDeleteOptions) {
+  delete(records: IDeleteRecordInput, options?: IDeleteOptions) {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
