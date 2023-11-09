@@ -508,7 +508,17 @@ export class FrameElement {
       this.focusChange(true);
     } else {
       const target = event.target as HTMLInputElement;
-      this.iFrameFormElement.setValue(target.value, target.checkValidity());
+      const { mask } = this.iFrameFormElement;
+      if (mask) {
+        const translation = {};
+        Object.keys(mask[2]).forEach((key) => {
+          translation[key] = { pattern: mask[2][key] };
+        });
+        const output = getMaskedOutput(target.value, mask[0], translation);
+        this.iFrameFormElement.setValue(output, target.checkValidity());
+      } else {
+        this.iFrameFormElement.setValue(target.value, target.checkValidity());
+      }
     }
   };
 
@@ -815,7 +825,8 @@ export class FrameElement {
           if (!this.domInput.getAttribute('maxlength')) { this.domInput.setAttribute('maxlength', mask[0].length); }
         }
         if (output !== this.iFrameFormElement.getValue()) {
-          this.iFrameFormElement.setValue(output);
+          this.copyText = output;
+          this.iFrameFormElement.setValue(output, undefined, true);
         }
       } catch (err) {
         printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
