@@ -509,13 +509,18 @@ export class FrameElement {
     } else {
       const target = event.target as HTMLInputElement;
       const { mask } = this.iFrameFormElement;
+      const value = this.domInput?.value || this.iFrameFormElement.getValue();
       if (mask) {
         const translation = {};
         Object.keys(mask[2]).forEach((key) => {
           translation[key] = { pattern: mask[2][key] };
         });
         const output = getMaskedOutput(target.value, mask[0], translation);
-        this.iFrameFormElement.setValue(output, target.checkValidity());
+        if (output.length >= value.length) {
+          this.iFrameFormElement.setValue(output, target.checkValidity());
+        } else {
+          target.value = output;
+        }
       } else {
         this.iFrameFormElement.setValue(target.value, target.checkValidity());
       }
