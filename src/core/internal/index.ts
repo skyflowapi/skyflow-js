@@ -518,6 +518,8 @@ export class FrameElement {
         const output = getMaskedOutput(target.value, mask[0], translation);
         if (output.length >= value.length) {
           this.iFrameFormElement.setValue(output, target.checkValidity());
+        } else if (output === '' && target.value === '') {
+          this.iFrameFormElement.setValue(target.value, target.checkValidity());
         } else {
           target.value = output;
         }

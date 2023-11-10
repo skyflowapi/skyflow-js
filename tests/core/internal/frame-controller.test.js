@@ -568,6 +568,34 @@ describe('test frame controller', () => {
     // expect(formElement.getValue()).toBe('')
   })
 
+  test('card_number Input With mask empty state FrameElement', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      "target": {
+        checkValidity: jest.fn(),
+        "value": ""
+      }
+    }
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setMask([
+      "XXXX XXXX XXXX XXXX XXX",
+      {
+        "X": {}
+      }
+    ]);
+    formElement.setValue("4");
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    element.onInputChange(inputEvent);
+    // expect(formElement.getValue()).toBe('')
+  })
+
   test('card_number Input With mask FrameElement', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
