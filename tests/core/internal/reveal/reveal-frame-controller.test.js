@@ -476,18 +476,6 @@ test("render request success case 2",()=>{
     accessToken: "access token"
   }));
   jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq })); 
-  getFileURLFromVaultBySkyflowID.mockImplementation(()=>{
-    return new Promise((_,reject)=>{
-      reject({
-        errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"token not found"}}]
-      })
-    });
-  });
-  formatRecordsForRender.mockImplementation(()=>{
-    return {
-      errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"token not found"}}]
-    }
-  });
   const emitEventName1 = on.mock.calls[0][0];
   const emitCb2 = on.mock.calls[0][1];
   expect(emitEventName1).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY+ mockUuid);
@@ -532,18 +520,6 @@ test("render request error case 2",()=>{
     table: "table",
     containerId:mockUuid
   }
-  getFileURLFromVaultBySkyflowID.mockImplementation(()=>{
-    return new Promise((_,reject)=>{
-      reject({
-        errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"token not found"}}]
-      })
-    });
-  });
-  formatRecordsForRender.mockImplementation(()=>{
-    return {
-      errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"token not found"}}]
-    }
-  });
 
   const emitEventName1 = on.mock.calls[0][0];
   const emitCb2 = on.mock.calls[0][1];
@@ -561,6 +537,28 @@ test("render request error case 2",()=>{
   emitCb({
     errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"token not found"}}]
   });
+});
+test("render request error case2",()=>{
+  const clientReq = jest.fn(() => Promise.resolve({
+    accessToken: "access token"
+  }));
+  jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq })); 
+  let controller = new SkyflowContainer(client, {
+    logLevel:LogLevel.DEBUG,
+    env:Env.DEV
+  });
+  const emitEventName1 = on.mock.calls[0][0];
+  const emitCb2 = on.mock.calls[0][1];
+  expect(emitEventName1).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY+ mockUuid);
+  emitCb2(clientData, jest.fn());
+  try{
+    controller.renderFile({
+      column: "column",
+      table: "table"
+    }, clientData).then((data) => console.log('--', data)).catch((error) => console.log('--', error));
+    } catch(err) {
+      expect(err).toBeDefined();
+  }
 });
 })
 })

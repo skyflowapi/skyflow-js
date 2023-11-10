@@ -458,7 +458,7 @@ class SkyflowContainer {
           bus
           // .target(properties.IFRAME_SECURE_ORGIN)
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + metaData.uuid,
+              ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#containerId,
               {
                 records: recordData,
               },
@@ -489,11 +489,11 @@ class SkyflowContainer {
         validateRenderElementRecord(recordData);
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + metaData.uuid, () => {
+          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus
               // .target(properties.IFRAME_SECURE_ORGIN)
               .emit(
-                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + metaData.uuid,
+                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#containerId,
                 {
                   records: recordData,
                   metaData: metaData.clientJSON,
