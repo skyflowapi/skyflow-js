@@ -546,6 +546,85 @@ describe('test frame controller', () => {
     expect(formElement.getValue()).toBe('')
   })
 
+  test('card_number Input FrameElement', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      "target": {
+        checkValidity: jest.fn(),
+        "value": "4111111111111111"
+      }
+    }
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setValue("4111111111111111");
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    element.onInputChange(inputEvent);
+    // expect(formElement.getValue()).toBe('')
+  })
+
+  test('card_number Input With mask FrameElement', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      "target": {
+        checkValidity: jest.fn(),
+        "value": "4111111111111111"
+      }
+    }
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setMask([
+      "XXXX XXXX XXXX XXXX XXX",
+      {
+        "X": {}
+      }
+    ]);
+    formElement.setValue("4111111111111111");
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    element.onInputChange(inputEvent);
+    // expect(formElement.getValue()).toBe('')
+  })
+
+
+  test('card_number Input With mask sucess caseFrameElement', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      "target": {
+        checkValidity: jest.fn(),
+        "value": "41111111111111119"
+      }
+    }
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setMask([
+      "XXXX XXXX XXXX XXXX XXX",
+      {
+        "X": {}
+      }
+    ]);
+    formElement.setValue("4");
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    element.onInputChange(inputEvent);
+    // expect(formElement.getValue()).toBe('')
+  })
+
   test('card_number extra input on FrameElement', () => {
 
     const card_element = `element:CARD_NUMBER:${tableCol}`;
