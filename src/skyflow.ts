@@ -169,6 +169,7 @@ class Skyflow {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
           containerType: type,
+          skyflowContainer: this.#skyflowContainer,
         },
         this.#skyflowElements,
         { logLevel: this.#logLevel });

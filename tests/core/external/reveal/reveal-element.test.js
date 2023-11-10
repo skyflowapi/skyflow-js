@@ -4,6 +4,9 @@ Copyright (c) 2022 Skyflow, Inc.
 import { LogLevel,Env } from "../../../../src/utils/common";
 import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, STYLE_TYPE} from "../../../../src/core/constants";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
+import SkyflowContainer,{renderFile} from '../../../../src/core/external/skyflow-container';
+import Client from '../../../../src/client';
+
 import bus from "framebus";
 import { JSDOM } from 'jsdom';
 
@@ -37,6 +40,14 @@ jest.mock('../../../../src/libs/jss-styles', () => {
     })
   };
 });
+jest.mock('../../../../src/core/external/skyflow-container', () => {
+  return {
+    __esModule: true,
+    default: jest.fn(),
+    renderFile: jest.fn(),
+  }
+})
+
 // bus.on = _on;
 // bus.target = jest.fn().mockReturnValue({
 //   on: _on,
@@ -62,12 +73,18 @@ const skyflowConfig = {
   vaultURL: 'https://testurl.com',
   getBearerToken: jest.fn(),
 };
+let controller = new SkyflowContainer(client,{
+  logLevel:LogLevel.DEBUG,
+  env:Env.DEV
+});
 
 const clientData = {
   uuid: '123',
   client: {
     config: { ...skyflowConfig },
-    metadata: { uuid :'123'},
+    metadata: { uuid :'123',
+    skyflowContainer: controller,
+  },
   },
   clientJSON:{
     context: { logLevel: LogLevel.ERROR,env:Env.PROD},
@@ -75,8 +92,12 @@ const clientData = {
       ...skyflowConfig,
       getBearerToken:jest.fn().toString()
     }
-  } 
+  },
+  skyflowContainer: {
+    renderFile : renderFile
+  }
 }
+const client = new Client(clientData.client.config, clientData);
 
 const testRecord = {
   token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
@@ -178,7 +199,17 @@ describe("Reveal Element Class", () => {
     
 
     expect(document.querySelector("span")).toBeTruthy();
-    testRevealElement.renderFile();
+    renderFile.mockImplementation(()=>{
+      return new Promise((resolve,_)=>{
+        resolve({
+          fields: {
+            file: '123',
+            skyflow_id: '1234'
+          }
+        })
+      });
+    });
+    testRevealElement.renderFile().then(console.log("data")).catch(console.log('error'));
     const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     expect(testRevealElement.isMounted()).toBe(true);
@@ -298,7 +329,73 @@ describe("Reveal Element Methods",()=>{
     document = window.document;
     testRevealElement2.metaData = clientData
     testRevealElement2.mount("#mockElement")
+    let controller = new SkyflowContainer(client,{
+      logLevel:LogLevel.DEBUG,
+      env:Env.DEV
+    });
+    renderFile.mockImplementation(()=>{
+      return new Promise((resolve,_)=>{
+        resolve({
+          fields: {
+            file: '123',
+            skyflow_id: '1234'
+          }
+        })
+      });
+    });
+    
     testRevealElement2.renderFile();
+    const documentElements = document.querySelectorAll('*');
+    const elementsArray = Array.from(documentElements);
+  });
+  it('should add render file pre-elements to the DOM', () => {
+    const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
+    document = window.document;
+    testRevealElement2.metaData = clientData
+    testRevealElement2.mount("#mockElement")
+    let controller = new SkyflowContainer(client,{
+      logLevel:LogLevel.DEBUG,
+      env:Env.DEV
+    });
+    renderFile.mockImplementation(()=>{
+      return new Promise((_,reject)=>{
+        reject({
+          errors: [{
+            file: '123',
+            skyflow_id: '1234'
+          }],
+        })
+      });
+    });
+    
+    testRevealElement2.renderFile().catch((error)=>{
+      console.log('error', error);
+    });
+    const documentElements = document.querySelectorAll('*');
+    const elementsArray = Array.from(documentElements);
+  });
+  it('Render should throw error when element is not mounted', () => {
+    const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
+    document = window.document;
+    testRevealElement.metaData = clientData
+    let controller = new SkyflowContainer(client,{
+      logLevel:LogLevel.DEBUG,
+      env:Env.DEV
+    });
+    renderFile.mockImplementation(()=>{
+      return new Promise((_,reject)=>{
+        reject({
+          errors: [{
+            file: '123',
+            skyflow_id: '1234'
+          }],
+        })
+      });
+    });
+    
+    testRevealElement.renderFile().catch((error)=>{
+      console.log('error', error);
+    });
     const documentElements = document.querySelectorAll('*');
     const elementsArray = Array.from(documentElements);
   });
@@ -309,8 +406,6 @@ describe("Reveal Element Methods",()=>{
     ele.setAttribute('id', '#mockElement');
     const documentElements = document.querySelectorAll('span');
     testRevealElement2.mount('#mockElement');
-    console.log(documentElements.length);
     testRevealElement2.unmount();
-
 });
 });
