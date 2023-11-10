@@ -488,10 +488,10 @@ class SkyflowContainer {
           this.#context.logLevel);
         validateRenderElementRecord(recordData);
         bus
-          // .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + metaData.uuid, () => {
             bus
-              .target(properties.IFRAME_SECURE_ORGIN)
+              // .target(properties.IFRAME_SECURE_ORGIN)
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + metaData.uuid,
                 {
