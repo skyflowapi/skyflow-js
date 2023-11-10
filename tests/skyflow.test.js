@@ -9,6 +9,8 @@ import * as iframerUtils from '../src/iframe-libs/iframer';
 import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '../src/core/constants';
 import { Env, EventName, LogLevel, RedactionType, RequestMethod, ValidationRuleType } from '../src/utils/common';
 import ComposableContainer from '../src/core/external/collect/compose-collect-container';
+import SkyflowContainer from '../src/core/external/skyflow-container';
+import Client from '../src/client'
 
 jest.mock('../src/utils/jwt-utils', () => ({
   __esModule: true,
@@ -1634,3 +1636,117 @@ describe('Skyflow delete tests', () => {
     });
   });
 });
+describe('render file elements',()=>{
+  let emitSpy;
+  let targetSpy;
+  let skyflowContainer;
+  let client;
+  const on = jest.fn();
+  const emit = jest.fn();
+  const skyflowConfig = {
+    vaultID: 'e20afc3ae1b54f0199f24130e51e0c',
+    vaultURL: 'https://testurl.com',
+    getBearerToken: jest.fn(),
+  };
+  const clientData = {
+    client: {
+      config: { ...skyflowConfig },
+      metadata: {
+        uuid: 1234,
+      },
+    },
+    clientJSON: {
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+      config: {
+        ...skyflowConfig,
+        getBearerToken: jest.fn().toString()
+      }
+    },
+    uuid: 1234,
+    context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+  }
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+      emit
+    });
+    const client = new Client(clientData.client.config, clientData);
+    skyflowContainer = new SkyflowContainer(client, { logLevel: LogLevel.DEBUG, env: Env.PROD });
+
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('render file request success case', (done) => {
+    try {
+      const ed = 
+      {
+            skyflowID: "1815-6223-1073-1425",
+            column: "column",
+            table: "table"
+        }
+      const res = skyflowContainer.renderFile(ed, clientData);
+      const frameReayEvent = on.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+      const frameReadyCb = frameReayEvent[1][1];
+  
+      frameReadyCb();
+      const emitEvent = emitSpy.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb({
+        success: {
+          skyflow_id: "1815-6223-1073-1425",
+          url: "column",
+          column: "column",
+          table: "table"
+        }
+      });
+      
+      done();
+    } catch (err) {
+      done(err);
+    }
+  });
+  test('render file request error case', (done) => {
+    try {
+      const ed = 
+      {
+            column: "column",
+            table: "table"
+        }
+      const res = skyflowContainer.renderFile(ed, clientData).then((data) => console.log(data, 'sucesss')).catch((err) => {
+        expect(err).toBeDefined();
+      });
+      
+      done();
+    } catch (err) {
+      expect(err).toBeDefined();
+      done(err);
+    }
+  });
+  test('render file request error case', (done) => {
+    const client = new Client(clientData.client.config, clientData);
+    skyflowContainer = new SkyflowContainer(client, { logLevel: LogLevel.DEBUG, env: Env.PROD });
+
+    try {
+      const ed = 
+      {
+            column: "column",
+            table: "table"
+        }
+      const res = skyflowContainer.renderFile(ed, clientData).then((data) => console.log(data, 'sucesss')).catch((err) => {
+        expect(err).toBeDefined();
+      });
+      
+      done();
+    } catch (err) {
+      expect(err).toBeDefined();
+      done(err);
+    }
+  });
+})
