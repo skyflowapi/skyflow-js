@@ -2615,9 +2615,9 @@ const fileElement = {
   inputStyles: {},     // Optional, styles to be applied to the element.
   errorTextStyles: {}, // Optional, styles that will be applied to the errorText of the render element.
   altText: 'string',   // Optional, string that is shown before file render call
-  skyflowID: 'string', // Optional, skyflow id of the file to be render
-  column: 'string',    // Optional, column name of the file to be render
-  table: 'string',     // Optional, table name of the file to be render
+  skyflowID: 'string', // Required, skyflow id of the file to be render
+  column: 'string',    // Required, column name of the file to be render
+  table: 'string',     // Required, table name of the file to be render
 };
 ```
 The inputStyles and errorTextStyles parameters accept a styles object as described in the [previous section](https://github.com/skyflowapi/skyflow-js#step-2-create-a-collect-element) for collecting data. But for render file elements, inputStyles accepts only base variant, global style objects.
@@ -2707,6 +2707,7 @@ fileElement
      "skyflow_id": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
      "column": "file"
    },
+  ]
 }
 ```
 
