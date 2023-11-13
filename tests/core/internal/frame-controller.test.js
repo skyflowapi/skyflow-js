@@ -593,7 +593,7 @@ describe('test frame controller', () => {
     }, div);
 
     element.onInputChange(inputEvent);
-    // expect(formElement.getValue()).toBe('')
+    expect(formElement.getValue()).toBe('')
   })
 
   test('card_number Input With mask FrameElement', () => {
@@ -621,7 +621,7 @@ describe('test frame controller', () => {
     }, div);
 
     element.onInputChange(inputEvent);
-    // expect(formElement.getValue()).toBe('')
+    expect(formElement.getValue()).toBe('4111111111111111')
   })
 
 
@@ -650,7 +650,7 @@ describe('test frame controller', () => {
     }, div);
 
     element.onInputChange(inputEvent);
-    // expect(formElement.getValue()).toBe('')
+    expect(formElement.getValue()).toBe("   ");
   })
 
   test('card_number extra input on FrameElement', () => {
