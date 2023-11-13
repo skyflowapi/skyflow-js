@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.33.1] - 2023-11-10
+### Added
+-  file render internal code change
+
+## [1.33.0] - 2023-11-07
+### Added
+- Added file render elements
+
 ## [1.32.0] - 2023-10-26
 ### Added
 - `tokens` support in Get interface
