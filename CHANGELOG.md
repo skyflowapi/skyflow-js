@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.33.2] - 2023-11-13
+## Changed
+- Replace internal jQuery dependency with custom implementation.
+
 ## [1.33.1] - 2023-11-10
 ### Added
 -  file render internal code change

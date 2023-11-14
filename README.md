@@ -2627,8 +2627,8 @@ An example of a inputStyles object:
 ```javascript
 inputStyles: {
   base: {
-      height: ‘400px’,
-      width: ‘300px’,
+      height: '400px',
+      width: '300px',
   },
   global: {
     '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
@@ -2674,8 +2674,8 @@ const fileElement = container.create({
   table: 'table',
   inputStyles: {
     base: {
-      height: ‘400px’,
-      width: ‘300px’,
+      height: '400px',
+      width: '300px',
     },
   },
   errorTextStyles: {
