@@ -103,12 +103,7 @@ describe('test frame elements', () => {
                     isComplete: false,
                 })),
                 fieldType: 'CARD_NUMBER',
-                state:{name:''},
-                setValidation:jest.fn(),
-                setReplacePattern: jest.fn(),
-                setMask:jest.fn(),
-                getValue: jest.fn(),
-                setValue: jest.fn(),
+                state:{name:''}
             }
         })
         const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
@@ -159,12 +154,7 @@ describe('test composable frame elements', () => {
                   isComplete: false,
               })),
               fieldType: 'CARD_NUMBER',
-              state:{name:''},
-              setValidation:jest.fn(),
-              setReplacePattern: jest.fn(),
-              setMask:jest.fn(),
-              getValue: jest.fn(),
-              setValue: jest.fn(),
+              state:{name:''}
 
           }
       })
@@ -191,12 +181,7 @@ describe('test composable frame elements', () => {
                 isComplete: false,
             })),
             fieldType: 'CARD_NUMBER',
-            state:{name:''},
-            setValidation:jest.fn(),
-            setReplacePattern: jest.fn(),
-            setMask:jest.fn(),
-            getValue: jest.fn(),
-            setValue: jest.fn(),
+            state:{name:''}
         }
     })
     const frameElement = FrameElements.init(mockCreateElement, {}, 'ERROR')

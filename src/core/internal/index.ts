@@ -2,9 +2,11 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import $ from 'jquery';
 import Client from '../../client';
 import { setAttributes } from '../../iframe-libs/iframer';
 import { validateElementOptions } from '../../libs/element-options';
+import 'jquery-mask-plugin/dist/jquery.mask.min';
 import {
   ELEMENTS,
   ELEMENT_EVENTS_TO_CLIENT,
@@ -38,7 +40,7 @@ import {
   addSeperatorToCardNumberMask,
   appendMonthFourDigitYears,
   appendMonthTwoDigitYears,
-  appendZeroToOne, domReady, getMaskedOutput, handleCopyIconClick, styleToString,
+  appendZeroToOne, handleCopyIconClick, styleToString,
 } from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
 
@@ -286,6 +288,7 @@ export class FrameElement {
           this.options?.cardSeperator,
         );
         this.iFrameFormElement.setMask(cardNumberMask as string[]);
+        this.applyMask();
       } else if (this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name
         || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_DATE.name) {
         if (this.domInput) {
@@ -322,9 +325,6 @@ export class FrameElement {
           || this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name)
       ) {
         this.updateStyleClasses(state);
-      }
-      if (this.iFrameFormElement.mask) {
-        this.applyMask();
       }
     });
 
@@ -466,12 +466,8 @@ export class FrameElement {
         this.iFrameFormElement.mask
         || this.iFrameFormElement.replacePattern
       ) {
-        domReady(() => {
-          const domInput = this.domInput;
-          if (domInput) {
-            const inputEvent = new Event('input', { bubbles: true, cancelable: true });
-            domInput.dispatchEvent(inputEvent);
-          }
+        $(document).ready(() => {
+          $(this.domInput as any).trigger('input');
         });
       }
     }
@@ -508,24 +504,7 @@ export class FrameElement {
       this.focusChange(true);
     } else {
       const target = event.target as HTMLInputElement;
-      const { mask } = this.iFrameFormElement;
-      const value = this.domInput?.value || this.iFrameFormElement.getValue();
-      if (mask) {
-        const translation = {};
-        Object.keys(mask[2]).forEach((key) => {
-          translation[key] = { pattern: mask[2][key] };
-        });
-        const output = getMaskedOutput(target.value, mask[0], translation);
-        if (output.length >= value.length) {
-          this.iFrameFormElement.setValue(output, target.checkValidity());
-        } else if (output === '' && target.value === '') {
-          this.iFrameFormElement.setValue(target.value, target.checkValidity());
-        } else {
-          target.value = output;
-        }
-      } else {
-        this.iFrameFormElement.setValue(target.value, target.checkValidity());
-      }
+      this.iFrameFormElement.setValue(target.value, target.checkValidity());
     }
   };
 
@@ -565,9 +544,10 @@ export class FrameElement {
       });
   };
 
-  onArrowKeys = (keyBoardEvent: KeyboardEvent) => {
+  onArrowKeys = (event:JQuery.TriggeredEvent) => {
+    const keyBoardEvent = event.originalEvent as KeyboardEvent;
     const currentInput = keyBoardEvent?.target as HTMLInputElement;
-    const cursorPosition = currentInput.selectionEnd;
+    const cursorPosition = event.target.selectionEnd;
 
     switch (keyBoardEvent?.key) {
       case INPUT_KEYBOARD_EVENTS.RIGHT_ARROW:
@@ -772,8 +752,9 @@ export class FrameElement {
 
     if (this.domLabel) this.domLabel.textContent = this.options.label;
 
-    domReady(() => {
-      const id: any = this.domInput;
+    $(document).ready(() => {
+      const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
+
       this.iFrameFormElement.setValidation(this.options.validations);
       this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
       if (options.elementType === ElementType.EXPIRATION_DATE) {
@@ -787,16 +768,17 @@ export class FrameElement {
       }
 
       // const { mask } = this.iFrameFormElement;
+      $(id).off('input');
+      (<any>$).jMaskGlobals.translation = {};
+      (<any>$).jMaskGlobals.clearIfNotMatch = true;
 
-      // $(id).off('input');
-
-      // $(id).unmask();
+      $(id).unmask();
       this.applyMask();
 
       if (this.domInput) {
         const { replacePattern } = this.iFrameFormElement;
         if (replacePattern) {
-          id.addEventListener('input', (event) => {
+          $(id).on('input', (event) => {
             event.target.value = event.target.value.replace(
               replacePattern[0],
               replacePattern[1],
@@ -804,8 +786,8 @@ export class FrameElement {
           });
         }
 
-        id.addEventListener('input', this.onInputChange);
-        id.addEventListener('keydown', this.onArrowKeys);
+        $(id).on('input', this.onInputChange);
+        $(id).on('keydown', this.onArrowKeys);
       }
 
       this.setupInputField(
@@ -817,24 +799,17 @@ export class FrameElement {
   }
 
   private applyMask() {
+    const id: any = this.domInput || `#${this.iFrameFormElement.iFrameName}`;
     const { mask } = this.iFrameFormElement;
-    let output = '';
     if (mask) {
       const translation = {};
       Object.keys(mask[2]).forEach((key) => {
         translation[key] = { pattern: mask[2][key] };
       });
       try {
-        const value = this.domInput?.value || this.iFrameFormElement.getValue();
-        output = getMaskedOutput(value, mask[0], translation);
-        if (this.domInput) {
-          this.domInput.value = output;
-          if (!this.domInput.getAttribute('maxlength')) { this.domInput.setAttribute('maxlength', mask[0].length); }
-        }
-        if (output !== this.iFrameFormElement.getValue()) {
-          this.copyText = output;
-          this.iFrameFormElement.setValue(output, undefined, true);
-        }
+        $(id).mask(mask[0], {
+          translation,
+        });
       } catch (err) {
         printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
           this.iFrameFormElement.fieldType), MessageType.WARN,

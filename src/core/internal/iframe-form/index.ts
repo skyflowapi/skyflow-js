@@ -232,7 +232,7 @@ export class IFrameFormElement extends EventEmitter {
   }
 
   // todo: send error message of the field
-  setValue = (value: any = '', valid: boolean = true, isReset: boolean = false) => {
+  setValue = (value: any = '', valid: boolean = true) => {
     if (this.fieldType === ELEMENTS.checkbox.name) {
       // toggle for checkbox
       if (this.state.value === value) {
@@ -329,9 +329,7 @@ export class IFrameFormElement extends EventEmitter {
         }
       }
     }
-    if (!isReset) {
-      this.sendChangeStatus(true);
-    }
+    this.sendChangeStatus(true);
   };
 
   getValue = () => {
