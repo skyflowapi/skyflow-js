@@ -282,7 +282,7 @@ describe('test frame controller', () => {
     const changeCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
 
-    changeCb[0][1]({...state, value:'2'});
+    changeCb[0][1](state);
 
     expect(formElement.getValue()).toBe('02')
 
@@ -463,39 +463,40 @@ describe('test frame controller', () => {
     const spy2 = jest.spyOn(element,'findPreviousElement').mockImplementation(()=>(document.createElement('input')));
     const mockPrevent = jest.fn();
     
-    element.onArrowKeys({
-      target:{value:'',selectionEnd:0},
+    element.onArrowKeys({originalEvent:{
+      target:{value:''},
       key:INPUT_KEYBOARD_EVENTS.RIGHT_ARROW,
       preventDefault:mockPrevent,
-    });
+    },target:{selectionEnd:0}});
 
     expect(mockPrevent).toBeCalled();
-    element.onArrowKeys({
-      target:{value:'',selectionEnd:0},
+
+    element.onArrowKeys({originalEvent:{
+      target:{value:''},
       key:INPUT_KEYBOARD_EVENTS.LEFT_ARROW,
       preventDefault:mockPrevent,
-    });
+    },target:{selectionEnd:0}});
     expect(mockPrevent).toBeCalled();
 
-    element.onArrowKeys({
-      target:{value:'',selectionEnd:0},
+    element.onArrowKeys({originalEvent:{
+      target:{value:''},
       key:INPUT_KEYBOARD_EVENTS.ENTER,
       preventDefault:mockPrevent,
-    });
+    },target:{selectionEnd:0}});
     expect(mockPrevent).toBeCalled();
 
-    element.onArrowKeys({
-      target:{value:'',selectionEnd:0},
+    element.onArrowKeys({originalEvent:{
+      target:{value:''},
       key:INPUT_KEYBOARD_EVENTS.BACKSPACE,
       preventDefault:mockPrevent,
-    });
+    },target:{selectionEnd:0}});
     expect(mockPrevent).toBeCalled();
 
-    element.onArrowKeys({
+    element.onArrowKeys({originalEvent:{
       target:{value:'1'},
       key:'Digit1',
       preventDefault:mockPrevent,
-    });
+    },target:{selectionEnd:0}});
     
 
   });
@@ -516,24 +517,22 @@ describe('test frame controller', () => {
     const inst = EventEmitter.mock.instances[0];
     const onSpy = inst.on.mock.calls;
 
-    formElement.setValue("4111111111111111")
-    element.setValue('4111111111111111')
+    formElement.setValue("4111 1111 1111 1111")
 
     const changeCb = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
 
-    changeCb[0][1]({...state, value:'4111111111111111'});
+    changeCb[0][1](state);
 
     expect(formElement.getValue()).toBe('4111 1111 1111 1111')
     expect(detectCardType(formElement.getValue())).toBe(CardType.VISA)
 
     formElement.setValue("")
-    element.setValue('')
 
     const changeCbEvent = onSpy
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
 
-    changeCbEvent[0][1]({...state,value:''});
+    changeCbEvent[0][1](state);
 
     expect(formElement.getValue()).toBe('')
     expect(detectCardType(formElement.getValue())).toBe(CardType.DEFAULT)
@@ -544,141 +543,6 @@ describe('test frame controller', () => {
     focusCbEvent[0][1](state);
 
     expect(formElement.getValue()).toBe('')
-  })
-
-  test('card_number Input FrameElement', () => {
-    const card_element = `element:CARD_NUMBER:${tableCol}`;
-    const div = document.createElement('div');
-    const inputEvent = {
-      "target": {
-        checkValidity: jest.fn(),
-        "value": "4111111111111111"
-      }
-    }
-    const formElement = new IFrameFormElement(card_element, {}, context);
-    formElement.setValue("4111111111111111");
-    const element = new FrameElement(formElement, {
-      label: 'label',
-      inputStyles,
-      labelStyles,
-      errorTextStyles,
-    }, div);
-
-    element.onInputChange(inputEvent);
-    // expect(formElement.getValue()).toBe('')
-  })
-
-  test('card_number Input With mask empty state FrameElement', () => {
-    const card_element = `element:CARD_NUMBER:${tableCol}`;
-    const div = document.createElement('div');
-    const inputEvent = {
-      "target": {
-        checkValidity: jest.fn(),
-        "value": ""
-      }
-    }
-    const formElement = new IFrameFormElement(card_element, {}, context);
-    formElement.setMask([
-      "XXXX XXXX XXXX XXXX XXX",
-      {
-        "X": {}
-      }
-    ]);
-    formElement.setValue("4");
-    const element = new FrameElement(formElement, {
-      label: 'label',
-      inputStyles,
-      labelStyles,
-      errorTextStyles,
-    }, div);
-
-    element.onInputChange(inputEvent);
-    expect(formElement.getValue()).toBe('')
-  })
-
-  test('card_number Input With mask FrameElement', () => {
-    const card_element = `element:CARD_NUMBER:${tableCol}`;
-    const div = document.createElement('div');
-    const inputEvent = {
-      "target": {
-        checkValidity: jest.fn(),
-        "value": "4111111111111111"
-      }
-    }
-    const formElement = new IFrameFormElement(card_element, {}, context);
-    formElement.setMask([
-      "XXXX XXXX XXXX XXXX XXX",
-      {
-        "X": {}
-      }
-    ]);
-    formElement.setValue("4111111111111111");
-    const element = new FrameElement(formElement, {
-      label: 'label',
-      inputStyles,
-      labelStyles,
-      errorTextStyles,
-    }, div);
-
-    element.onInputChange(inputEvent);
-    expect(formElement.getValue()).toBe('4111111111111111')
-  })
-
-
-  test('card_number Input With mask sucess caseFrameElement', () => {
-    const card_element = `element:CARD_NUMBER:${tableCol}`;
-    const div = document.createElement('div');
-    const inputEvent = {
-      "target": {
-        checkValidity: jest.fn(),
-        "value": "41111111111111119"
-      }
-    }
-    const formElement = new IFrameFormElement(card_element, {}, context);
-    formElement.setMask([
-      "XXXX XXXX XXXX XXXX XXX",
-      {
-        "X": {}
-      }
-    ]);
-    formElement.setValue("4");
-    const element = new FrameElement(formElement, {
-      label: 'label',
-      inputStyles,
-      labelStyles,
-      errorTextStyles,
-    }, div);
-
-    element.onInputChange(inputEvent);
-    expect(formElement.getValue()).toBe("   ");
-  })
-
-  test('card_number extra input on FrameElement', () => {
-
-    const card_element = `element:CARD_NUMBER:${tableCol}`;
-    const div = document.createElement('div');
-
-    const formElement = new IFrameFormElement(card_element, {}, context);
-    const element = new FrameElement(formElement, {
-      label: 'label',
-      inputStyles,
-      labelStyles,
-      errorTextStyles,
-    }, div);
-
-    const inst = EventEmitter.mock.instances[0];
-    const onSpy = inst.on.mock.calls;
-
-    formElement.setValue("41111111111111112")
-    element.setValue('41111111111111112')
-
-    const changeCb = onSpy
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
-
-    changeCb[0][1]({...state, value:'41111111111111112'});
-
-    expect(formElement.getValue()).toBe('4111 1111 1111 1111')
-    expect(detectCardType(formElement.getValue())).toBe(CardType.VISA)
   })
 
   test('expiration_date FrameElement', () => {

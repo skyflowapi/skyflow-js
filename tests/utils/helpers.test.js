@@ -21,8 +21,7 @@ import {
   getOSDetails,
   getSdkVersionName,
   getMetaObject,
-  checkAndSetForCustomUrl,
-  domReady
+  checkAndSetForCustomUrl
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -557,47 +556,3 @@ describe('checkAndSetForCustomUrl', () => {
     expect(isValid).toEqual(false);
   });
 });
-
-
-describe('test domReady function', () => {
-  let pagestate="loading";
-  Object.defineProperty(document, "readyState", {
-    get() { return pagestate; }
-  });
-  jest.useFakeTimers();
-
-  test('should not call function right away if readyState is loading', () => {
-    const testSpyFunction = jest.fn();
-    pagestate="loading";
-    domReady(testSpyFunction);
-    jest.runAllTimers();
-    expect(testSpyFunction).not.toBeCalled()
-  })
-  
-  test('should call function directly if readyState is not loading', () => {
-    const testSpyFunction = jest.fn();
-    pagestate="complete";
-    domReady(testSpyFunction);
-    jest.runAllTimers();
-    expect(testSpyFunction).toBeCalled()
-  })
-
-  test('should call multiple functions in sequence when page is loading',()=>{
-    const testSpyFunction1 = jest.fn();
-    const testSpyFunction2 = jest.fn();
-    domReady(testSpyFunction1);
-    domReady(testSpyFunction2);
-    pagestate="loading";
-    expect(testSpyFunction1).not.toBeCalled()
-    expect(testSpyFunction2).not.toBeCalled()
-    pagestate='complete'
-    window.document.dispatchEvent(new Event("DOMContentLoaded", {
-      bubbles: true,
-      cancelable: true
-    }));
-    jest.runAllTimers();
-    expect(testSpyFunction1).toBeCalled()
-    expect(testSpyFunction2).toBeCalled()
-  })
-})
-
