@@ -61,10 +61,12 @@ class RevealFrame {
       .emit(
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY,
         { name: window.name },
-        (data: any) => {
-          RevealFrame.revealFrame = new RevealFrame(data.record, data.context);
-        },
+        () => {},
       );
+    const url = window.location.href.split('?')[1];
+    const ed = decodeURIComponent(url);
+    const edt = JSON.parse(atob(ed));
+    RevealFrame.revealFrame = new RevealFrame(edt.record, edt.context);
   }
 
   constructor(record, context) {
