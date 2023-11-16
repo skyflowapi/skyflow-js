@@ -2668,11 +2668,10 @@ fileElement
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 // REPLACE with your custom implementation to fetch skyflow_id from backend service.
-
 // Sample implementation
 fetch("<BACKEND_URL>")
   .then((response) => {
-    
+
     // on successful fetch skyflow_id
     const skyflowID = response.skyflow_id;
 

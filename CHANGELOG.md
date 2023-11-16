@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.33.3] - 2023-11-15
+## Fixed
+-  Patch fix for reverting changes for internal jQuery dependency changes.
+
 ## [1.33.2] - 2023-11-13
 ## Changed
 - Replace internal jQuery dependency with custom implementation.
