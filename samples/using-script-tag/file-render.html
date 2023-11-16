@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://js.skyflow.com/v1/index.js"></script>
+    <title>File render elements</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .empty-div {
+        width: 100%;
+      }
+      .render-view {
+        margin-top: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Render File Elements</h3>
+    <h4>File Element 1</h4>
+    <div id="renderFileElement1" class="empty-div"></div>
+    <button id="renderFiles" style="height: 30px; width: 200px">
+      Render Files
+    </button>
+    <script>
+      try {
+        const skyflow = Skyflow.init({
+          vaultID: "<VAULT_ID>",
+          vaultURL: "<VAULT_URL>",
+          getBearerToken: () => {
+            return new Promise((resolve, reject) => {
+              const Http = new XMLHttpRequest();
+
+              Http.onreadystatechange = () => {
+                if (Http.readyState === 4 && Http.status === 200) {
+                  const response = JSON.parse(Http.responseText);
+                  resolve(response.accessToken);
+                }
+              };
+              const url = "<TOKEN_END_POINT_URL>";
+              Http.open("GET", url);
+              Http.send();
+            });
+          },
+        });
+
+        const renderStyleOptions = {
+          inputStyles: {
+            base: {
+              border: "2px solid #eae8ee",
+              padding: "10px 10px 10px 10px",
+              borderRadius: "10px",
+              marginTop: "2px",
+              height: "250px",
+              width: "400px",
+            },
+          },
+          errorTextStyles: {
+            base: {
+              color: "#f44336",
+            },
+          },
+        };
+
+        const renderStyleOptions2 = {
+          inputStyles: {
+            base: {
+              border: "2px solid orange",
+              padding: "10px 10px 10px 10px",
+              borderRadius: "10px",
+              color: "#1d1d1d",
+              marginTop: "4px",
+              height: "260px",
+              width: "400px",
+            },
+          },
+          errorTextStyles: {
+            base: {
+              color: "yellow",
+            },
+          },
+        };
+
+        // create container
+        const renderContainer = skyflow.container(
+              Skyflow.ContainerType.REVEAL,
+        );
+
+        
+        // REPLACE with your custom implementation to fetch skyflow_id from backend service.
+
+        // Sample implementation
+        fetch("<BACKEND_URL>")
+          .then((response) => {
+            // on successful fetch skyflow_id
+            const skyflowID = response.skyflow_id;
+
+            // step 1: create element, pass fetched skyflow id and other details here
+            const renderFileElement1 = renderContainer.create({
+              ...renderStyleOptions,
+              skyflowID: skyflowID,
+              column: "<COLUMN_NAME1>",
+              table: "<TABLE1>",
+              altText: "Alt text 1",
+            });
+
+            // step 2: mount the element
+            renderFileElement1.mount("#renderFileElement1");
+
+            const renderButton = document.getElementById("renderFiles");
+
+            if (renderButton) {
+              renderButton.addEventListener("click", () => {
+
+                // step 3: call render file 
+                renderFileElement1
+                  .renderFile()
+                  .then((res) => {
+                    console.log("response 1", res);
+                  })
+                  .catch((err) => {
+                    console.log("Error 1", err);
+                  });
+              });
+            }
+          })
+          .catch((err) => {
+            // failed to fetch skyflow_id
+            console.log(err);
+          });
+      } catch (err) {
+        console.log(err);
+      }
+    </script>
+  </body>
+</html>
