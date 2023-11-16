@@ -801,6 +801,8 @@ export class FrameElement {
 
   private applyMask() {
     // eslint-disable-next-line no-console
+    console.log('Recived context', this.iFrameFormElement.context);
+    // eslint-disable-next-line no-console
     console.log('iFrameForm element being Set as', this.iFrameFormElement, Date.now());
     const { mask } = this.iFrameFormElement;
     let output = '';

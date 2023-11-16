@@ -140,6 +140,9 @@ export class IFrameFormElement extends EventEmitter {
     this.metaData = metaData;
     this.context = context;
 
+    // eslint-disable-next-line no-console
+    console.log('In Iframe form element created', Date.now(), this.fieldType);
+
     this.collectBusEvents();
   }
 
