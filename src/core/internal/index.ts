@@ -800,6 +800,8 @@ export class FrameElement {
   }
 
   private applyMask() {
+    // eslint-disable-next-line no-console
+    console.log('iFrameForm element being Set as', this.iFrameFormElement, Date.now());
     const { mask } = this.iFrameFormElement;
     let output = '';
     if (mask) {
@@ -818,6 +820,8 @@ export class FrameElement {
           this.iFrameFormElement.setValue(output);
         }
       } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log('apply mask thrown error', err);
         printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
           this.iFrameFormElement.fieldType), MessageType.WARN,
         (this.iFrameFormElement.context.logLevel || LogLevel.ERROR));
