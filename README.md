@@ -361,12 +361,12 @@ Only applicable to EXPIRATION_DATE, CARD_NUMBER, EXPIRATION_YEAR, and INPUT_FIEL
 
 Accepted values by element type:
 
-| Element type    | `format`and `translation` values                                                                                                                                                             | Examples                                                                                                                                   |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| EXPIRATION_DATE | <li>`format`</li> <ul><li>`mm/yy` (default)</li><li>`mm/yyyy`</li><li>`yy/mm`</li><li>`yyyy/mm`</li></ul>                                                                                    | <ul><li>12/27</li><li>12/2027</li> <li>27/12</li> <li> 2027/12</li></ul></ul>                                                              |
-| EXPIRATION_YEAR | <li>`format`</li> <ul><li>`yy` (default)</li><li>`yyyy`</li></ul>                                                                                                                            | <ul><li>27</li><li>2027</li></ul>                                                                                                          |
-| CARD_NUMBER     | <li>`format`</li> <ul><li>`XXXX XXXX XXXX XXXX` (default)</li><li>`XXXX-XXXX-XXXX-XXXX`</li></ul>                                                                                            | <ul><li>1234 5678 9012 3456</li><li>1234-5678-9012-3456</li></ul>                                                                          |
-| INPUT_FIELD     | <li>`format`: A string that matches the desired output, with placeholder characters of your choice.</li><li>`translation`: An object of key/value pairs. Defaults to `{"X": "[0-9]"}`</li>   | With a `format` of `+91 XXXX-XX-XXXX` and a `translation` of `[ "X": "[0-9]"]`, user input of "1234121234" displays as "+91 1234-12-1234". |
+| Element type    | `format`and `translation` values                                                                                                                                                           | Examples                                                                                                                                   |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| EXPIRATION_DATE | <li>`format`</li> <ul><li>`mm/yy` (default)</li><li>`mm/yyyy`</li><li>`yy/mm`</li><li>`yyyy/mm`</li></ul>                                                                                  | <ul><li>12/27</li><li>12/2027</li> <li>27/12</li> <li> 2027/12</li></ul></ul>                                                              |
+| EXPIRATION_YEAR | <li>`format`</li> <ul><li>`yy` (default)</li><li>`yyyy`</li></ul>                                                                                                                          | <ul><li>27</li><li>2027</li></ul>                                                                                                          |
+| CARD_NUMBER     | <li>`format`</li> <ul><li>`XXXX XXXX XXXX XXXX` (default)</li><li>`XXXX-XXXX-XXXX-XXXX`</li></ul>                                                                                          | <ul><li>1234 5678 9012 3456</li><li>1234-5678-9012-3456</li></ul>                                                                          |
+| INPUT_FIELD     | <li>`format`: A string that matches the desired output, with placeholder characters of your choice.</li><li>`translation`: An object of key/value pairs. Defaults to `{"X": "[0-9]"}`</li> | With a `format` of `+91 XXXX-XX-XXXX` and a `translation` of `[ "X": "[0-9]"]`, user input of "1234121234" displays as "+91 1234-12-1234". |
 
 **Collect Element Options examples for INPUT_FIELD**
 Example 1
@@ -2667,36 +2667,58 @@ fileElement
 // Step 1.
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
-// Step 2.
-const fileElement = container.create({
-  skyflowID: 'b63ec4e0-bbad-4e43-96e6-6bd50f483f75',
-  column: 'file',
-  table: 'table',
-  inputStyles: {
-    base: {
-      height: '400px',
-      width: '300px',
-    },
-  },
-  errorTextStyles: {
-    base: {
-      color: '#f44336',
-    },
-  },
-  altText: 'This is an altText',
-});
-// Step 3.
-fileElement.mount('#renderFile); // Assumes there is a placeholder div with id='renderFile' on the page
+// REPLACE with your custom implementation to fetch skyflow_id from backend service.
 
-// Step 4.
-fileElement
-  .renderFile()
-  .then(data => {
-    // Handle success.
+// Sample implementation
+fetch("<BACKEND_URL>")
+  .then((response) => {
+    
+    // on successful fetch skyflow_id
+    const skyflowID = response.skyflow_id;
+
+    // Step 2.
+    const fileElement = container.create({
+      skyflowID: "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+      column: "file",
+      table: "table",
+      inputStyles: {
+        base: {
+          height: "400px",
+          width: "300px",
+        },
+      },
+      errorTextStyles: {
+        base: {
+          color: "#f44336",
+        },
+      },
+      altText: "This is an altText",
+    });
+    // Step 3.
+    fileElement.mount("#renderFile"); // Assumes there is a placeholder div with id=renderFile on the page
+
+    const renderButton = document.getElementById("renderFiles"); // button to call render file
+
+    if (renderButton) {
+      renderButton.addEventListener("click", () => {
+    
+    // Step 4.
+        fileElement
+          .renderFile()
+          .then((data) => {
+            // Handle success.
+          })
+          .catch((err) => {
+            // Handle error.
+          });
+      });
+    }
   })
-  .catch(err => {
-    // Handle error.
+  .catch((err) => {
+    // failed to fetch skyflow_id
+    console.log(err);
   });
+
 ```
 
 ## Sample Success Response
