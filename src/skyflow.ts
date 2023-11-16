@@ -45,6 +45,7 @@ export enum ContainerType {
   REVEAL = 'REVEAL',
   COMPOSABLE = 'COMPOSABLE',
 }
+
 export interface ISkyflow {
   vaultID?: string;
   vaultURL?: string;
