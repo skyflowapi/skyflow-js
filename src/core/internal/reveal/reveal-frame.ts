@@ -64,9 +64,9 @@ class RevealFrame {
         () => {},
       );
     const url = window.location.href.split('?')[1];
-    const ed = decodeURIComponent(url);
-    const edt = JSON.parse(atob(ed));
-    RevealFrame.revealFrame = new RevealFrame(edt.record, edt.context);
+    const encodedString = decodeURIComponent(url);
+    const parsedRecord = JSON.parse(atob(encodedString));
+    RevealFrame.revealFrame = new RevealFrame(parsedRecord.record, parsedRecord.context);
   }
 
   constructor(record, context) {

@@ -46,7 +46,7 @@ export default class IFrame {
       // throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
     }
 
-    setAttributes(this.iframe, { src: `${getIframeSrc()}?${btoa(data?.record)}` });
+    setAttributes(this.iframe, { src: `${getIframeSrc()}${data ? `?${btoa(data?.record)}` : ''}` });
 
     this.container?.appendChild(this.iframe);
   };

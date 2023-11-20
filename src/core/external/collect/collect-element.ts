@@ -196,17 +196,23 @@ class CollectElement extends SkyflowElement {
 
     const isComposable = this.#elements.length > 1;
     if (isComposable) {
-      this.#iframe.mount(domElement);
+      this.#iframe.mount(domElement, {
+        record: JSON.stringify({ record: this.#group }),
+      });
       this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
     } else {
       if (this.#readyToMount) {
-        this.#iframe.mount(domElement);
+        this.#iframe.mount(domElement, {
+          record: JSON.stringify({ record: this.#group }),
+        });
         this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
         return;
       }
       this.#groupEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED, (data) => {
         if (data?.containerId === this.containerId) {
-          this.#iframe.mount(domElement);
+          this.#iframe.mount(domElement, {
+            record: JSON.stringify({ record: this.#group }),
+          });
           this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
         }
       });

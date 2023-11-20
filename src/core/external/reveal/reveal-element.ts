@@ -127,7 +127,13 @@ class RevealElement extends SkyflowElement {
       };
 
       if (this.#readyToMount) {
-        this.#iframe.mount(domElementSelector);
+        this.#iframe.mount(domElementSelector, {
+          record: JSON.stringify({
+            ...this.#metaData,
+            record: this.#recordData,
+            context: this.#context,
+          }),
+        });
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);

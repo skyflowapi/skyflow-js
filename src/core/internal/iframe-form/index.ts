@@ -1151,7 +1151,7 @@ export class IFrameForm {
 
       try {
         if (
-          frame.location.href === window.location.href
+          frame.location.href.split('?')[0] === window.location.href
           && frame.name === frameGlobalName
         ) {
           frameInstance = frame;

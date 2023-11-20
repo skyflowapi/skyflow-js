@@ -63,18 +63,21 @@ export default class FrameElements {
     bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + names[3],
       { name: window.name },
-      (group: any) => {
+      () => {
         printLog(parameterizedString(logs.infoLogs.COLLECT_FRAME_READY_CB,
           CLASS_NAME, getElementName(window.name)), MessageType.LOG,
         logLevel);
-        FrameElements.group = group;
-        if (FrameElements.frameElements) {
-          printLog(parameterizedString(logs.infoLogs.SETUP_IN_START, CLASS_NAME),
-            MessageType.LOG, logLevel);
-          FrameElements.frameElements.setup(); // start the process
-        }
       },
     );
+    const url = window.location.href.split('?')[1];
+    const encodedString = decodeURIComponent(url);
+    const parsedRecord = JSON.parse(atob(encodedString));
+    FrameElements.group = parsedRecord.record;
+    if (FrameElements.frameElements) {
+      printLog(parameterizedString(logs.infoLogs.SETUP_IN_START, CLASS_NAME),
+        MessageType.LOG, logLevel);
+      FrameElements.frameElements.setup(); // start the process
+    }
   };
 
   // called by IFrameForm
