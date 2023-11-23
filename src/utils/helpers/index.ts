@@ -114,6 +114,7 @@ export function domReady(fn) {
 }
 
 export const getMaskedOutput = (input: string, format: string, translation: any): string => {
+  if (!input) { return ''; }
   const inputArray = Array.from(input);
   const formatArray = Array.from(format);
   let output = '';

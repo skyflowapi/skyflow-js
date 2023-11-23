@@ -838,7 +838,7 @@ export class FrameElement {
       } catch (err) {
         printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
           this.iFrameFormElement.fieldType), MessageType.WARN,
-        (this.iFrameFormElement.context.logLevel || LogLevel.ERROR));
+        (this.iFrameFormElement?.context?.logLevel || LogLevel.ERROR));
       }
     }
   }
