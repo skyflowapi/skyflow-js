@@ -69,7 +69,7 @@ export default class FrameElements {
         logLevel);
       },
     );
-    const url = window.location.href.split('?')[1];
+    const url = window.location?.href.split('?')[1];
     const encodedString = decodeURIComponent(url);
     const parsedRecord = JSON.parse(atob(encodedString));
     FrameElements.group = parsedRecord.record;
