@@ -9,12 +9,27 @@ import { Context, MessageType } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
   // eslint-disable-next-line max-len
-  FRAME_REVEAL, ELEMENT_EVENTS_TO_IFRAME, ELEMENT_EVENTS_TO_CONTAINER, REVEAL_ELEMENT_OPTIONS_TYPES, DEFAULT_FILE_RENDER_ERROR, STYLE_TYPE, RENDER_FILE_ELEMENT_ALT_TEXT_DEFAULT_STYLES, REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
+  FRAME_REVEAL,
+  ELEMENT_EVENTS_TO_IFRAME,
+  ELEMENT_EVENTS_TO_CONTAINER,
+  REVEAL_ELEMENT_OPTIONS_TYPES,
+  METRIC_TYPES,
+  ELEMENT_TYPES,
+  EVENT_TYPES,
+  DEFAULT_FILE_RENDER_ERROR,
+  STYLE_TYPE,
+  RENDER_FILE_ELEMENT_ALT_TEXT_DEFAULT_STYLES,
+  REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
 } from '../../constants';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import { formatRevealElementOptions } from '../../../utils/helpers';
+import {
+  initalizeMetricObject,
+  pushElementEventWithTimeout,
+  updateMetricObjectValue,
+} from '../../../metrics';
 import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
@@ -75,6 +90,8 @@ class RevealElement extends SkyflowElement {
     this.#readyToMount = container.isMounted;
     this.#eventEmitter = container.eventEmitter;
     this.#context = context;
+    initalizeMetricObject(metaData, elementId);
+    updateMetricObjectValue(this.#elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, ELEMENT_TYPES.REVEAL);
     this.#iframe = new IFrame(
       `${FRAME_REVEAL}:${btoa(uuid())}`,
       { metaData },
@@ -102,6 +119,8 @@ class RevealElement extends SkyflowElement {
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
+    updateMetricObjectValue(this.#elementId, METRIC_TYPES.DIV_ID, domElementSelector);
+    pushElementEventWithTimeout(this.#elementId);
     if (!this.#recordData.skyflowID || this.#isRenderFileCalled) {
       const sub = (data, callback) => {
         if (data.name === this.#iframe.name) {
@@ -123,22 +142,28 @@ class RevealElement extends SkyflowElement {
               },
             );
           this.#isMounted = true;
+          updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
+          updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
         }
       };
 
       if (this.#readyToMount) {
-        this.#iframe.mount(domElementSelector);
+        this.#iframe.mount(domElementSelector, this.#elementId);
         bus
           .target(properties.IFRAME_SECURE_ORGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+        updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
+        updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
         return;
       }
       this.#eventEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED, (data) => {
         if (data?.containerId === this.#containerId) {
-          this.#iframe.mount(domElementSelector);
+          this.#iframe.mount(domElementSelector, this.#elementId);
           bus
             .target(properties.IFRAME_SECURE_ORGIN)
             .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
+          updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
+          updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
         }
       });
     } else if (this.#recordData.skyflowID) {
