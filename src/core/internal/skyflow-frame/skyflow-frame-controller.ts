@@ -287,7 +287,7 @@ class SkyflowFrameController {
     });
   }
 
-  pushData(event: any) {
+  pushEvent(event: any) {
     return new Promise((resolve, reject) => {
       getAccessToken(this.#clientId).then((authToken) => {
         this.#client
