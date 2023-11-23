@@ -27,6 +27,7 @@ import {
   IGetOptions,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
+import { getVaultBeffeURL } from '../../../utils/helpers';
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -294,7 +295,7 @@ class SkyflowFrameController {
             body: event,
             requestMethod: 'POST',
             url:
-              `${event.properties.vaultURL}/sdk/sdk-metrics`,
+              `${getVaultBeffeURL(event.properties.vaultURL)}/sdk/sdk-metrics`,
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${authToken}`,

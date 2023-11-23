@@ -72,10 +72,12 @@ export function pushEventToMixpanel(elementId: string) {
       distinct_id: metricEvent.container_id,
     },
   };
-  bus
-    .emit(ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT, {
-      event,
-    });
+  if (metricEvent.vault_id !== '' && metricEvent.vault_url !== '') {
+    bus
+      .emit(ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT, {
+        event,
+      });
+  }
 }
 
 export function pushElementEventWithTimeout(elementID: string) {
