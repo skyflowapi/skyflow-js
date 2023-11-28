@@ -128,13 +128,11 @@ describe('push event', () => {
     const onCb = onSpy.mock.calls[0][1]
     const data = {
       event: {
-        properties: {
-          element_id: 'element123',
-          container_id: 'container456',
-          vaultURL: 'http://example.com',
-          status: "Error",
-          events: ["MOUNTED"]
-        },
+        element_id: 'element123',
+        container_id: 'container456',
+        vault_url: 'http://example.com',
+        status: "Error",
+        events: ["MOUNTED"]
       }
     };
     onCb(data)
@@ -181,13 +179,11 @@ describe('push event', () => {
     const onCb = onSpy.mock.calls[0][1]
     const data = {
       event: {
-        properties: {
-          element_id: 'element123',
-          container_id: 'container456',
-          vaultURL: 'http://example.com',
-          status: "Error",
-          events: ["MOUNTED"]
-        },
+        element_id: 'element123',
+        container_id: 'container456',
+        vault_url: 'http://example.com',
+        status: "Error",
+        events: ["MOUNTED"]
       }
     };
     onCb(data)

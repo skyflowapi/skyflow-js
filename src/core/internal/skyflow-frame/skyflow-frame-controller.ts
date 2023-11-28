@@ -321,7 +321,7 @@ class SkyflowFrameController {
             body: event,
             requestMethod: 'POST',
             url:
-              `${getVaultBeffeURL(event.properties.vault_url)}/sdk/sdk-metrics`,
+              `${getVaultBeffeURL(event.vault_url)}/sdk/sdk-metrics`,
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${authToken}`,
