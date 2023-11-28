@@ -65,12 +65,8 @@ export function pushEventToMixpanel(elementId: string) {
   const metricEvent = METRIC_OBJECT.records.filter((event) => event.element_id === elementId)[0];
   metricEvent.status = getEventStatus(metricEvent);
   const event = {
-    event: metricEvent.container_id,
-    properties: {
-      ...metricEvent,
-      time: Math.floor(Date.now() / 1000),
-      distinct_id: metricEvent.container_id,
-    },
+    ...metricEvent,
+    time: Math.floor(Date.now() / 1000),
   };
   if (metricEvent.vault_id !== '' && metricEvent.vault_url !== '') {
     bus
