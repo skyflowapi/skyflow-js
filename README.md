@@ -1127,14 +1127,15 @@ cardNumber.setError('custom error');
 // Reset custom error.
 cardNumber.resetError();
 ```
+<details>
+<summary><strong><a id="set-and-clear-value-for-collect-elements-dev-env-only"></a>Set and Clear value for Collect Elements (DEV ENV ONLY)</strong></summary>
 
-### Set and Clear value for Collect Elements (DEV ENV ONLY)
-
+#### Set and Clear value for Collect Elements (DEV ENV ONLY)
 `setValue(value: string)` method is used to set the value of the element. This method will override any previous value present in the element.
 
 `clearValue()` method is used to reset the value of the element.
 
-`Note:` This methods are only available in DEV env for testing/developmental purposes and MUST NOT be used in PROD env.
+`Note:` These methods are only available in DEV env for testing/developmental purposes and MUST NOT be used in PROD env.
 
 ##### Sample code snippet for setValue and clearValue
 
@@ -1147,13 +1148,14 @@ const cardNumber = container.create({
   type: Skyflow.ElementType.CARD_NUMBER,
 });
 
-// Set a value programatically.
+// Set a value programmatically.
 cardNumber.setValue('4111111111111111');
 
 // Clear the value.
 cardNumber.clearValue();
 
 ```
+</details>
 
 ---
 
