@@ -831,10 +831,6 @@ export class FrameElement {
           this.domInput.value = output;
           if (!this.domInput.getAttribute('maxlength')) { this.domInput.setAttribute('maxlength', mask[0].length); }
         }
-        if (output !== this.iFrameFormElement.getValue()) {
-          this.copyText = output;
-          this.iFrameFormElement.setValue(output, undefined, true);
-        }
       } catch (err) {
         printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
           this.iFrameFormElement.fieldType), MessageType.WARN,
