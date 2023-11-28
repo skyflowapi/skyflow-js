@@ -10,6 +10,8 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ERROR_TEXT_STYLES,
   STYLE_TYPE,
+  EVENT_TYPES,
+  METRIC_TYPES,
 } from '../constants';
 import {
   getValueAndItsUnit,
@@ -22,6 +24,7 @@ import { LogLevel, MessageType } from '../../utils/common';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-styles';
 import { ContainerType } from '../../skyflow';
 import { getContainerType } from '../../utils/helpers';
+import { updateMetricObjectValue } from '../../metrics';
 
 const CLASS_NAME = 'FrameElements';
 export default class FrameElements {
@@ -75,6 +78,10 @@ export default class FrameElements {
         }
       },
     );
+    if (names[1] && names[3]) {
+      const elementId = `${names[1]}-${names[3]}`;
+      updateMetricObjectValue(elementId, METRIC_TYPES.EVENTS_KEY, `${names[1]}_${EVENT_TYPES.READY}`);
+    }
   };
 
   // called by IFrameForm
@@ -229,6 +236,11 @@ export default class FrameElements {
           element,
           elementDiv,
         );
+        const names = window.name.split(':');
+        if (names[1] && names[3]) {
+          const elementId = `${names[1]}-${names[3]}`;
+          updateMetricObjectValue(elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, element.elementType);
+        }
 
         if (isComposableContainer && errorTextElement) {
           iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {

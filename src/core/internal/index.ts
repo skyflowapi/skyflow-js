@@ -29,6 +29,8 @@ import {
   ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES,
   INPUT_KEYBOARD_EVENTS,
   CUSTOM_ROW_ID_ATTRIBUTE,
+  METRIC_TYPES,
+  EVENT_TYPES,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iframe-form';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-styles';
@@ -43,6 +45,7 @@ import {
   appendZeroToOne, handleCopyIconClick, styleToString,
 } from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
+import { updateMetricObjectValue } from '../../metrics';
 
 export class FrameController {
   controller?: FrameController;
@@ -395,7 +398,12 @@ export class FrameElement {
       .emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED, {
         name: this.iFrameFormElement.iFrameName,
       });
-
+    const names = window.name.split(':');
+    if (names[1] && names[3]) {
+      const elementId = `${names[1]}-${names[3]}`;
+      updateMetricObjectValue(elementId, METRIC_TYPES.SDK_METRICS, this.iFrameFormElement.metaData);
+      updateMetricObjectValue(elementId, METRIC_TYPES.EVENTS_KEY, `${this.iFrameFormElement.fieldType}_${EVENT_TYPES.MOUNTED}`);
+    }
     this.updateStyleClasses(this.iFrameFormElement.getStatus());
   };
 
