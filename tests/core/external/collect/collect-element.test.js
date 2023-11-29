@@ -802,6 +802,7 @@ describe('collect element validations', () => {
 });
 
 describe('collect element methods', () => {
+  const emitSpy = jest.spyOn(bus, 'emit');
   const onSpy = jest.spyOn(bus, 'on');
   const testCollectElementProd = new CollectElement(id,
     {
@@ -900,7 +901,7 @@ describe('collect element methods', () => {
     let div = document.createElement('div')
     div.setAttribute('id', 'id1')
     testCollectElementProd.mount(div);
-
+    
     expect(ResizeObserver).toHaveBeenCalled();
     expect(testCollectElementProd.resizeObserver.observe).toHaveBeenCalledWith(
       div
@@ -910,6 +911,9 @@ describe('collect element methods', () => {
     expect(testCollectElementProd.resizeObserver.observe).toHaveBeenCalledWith(
       div
     );
+    testCollectElementProd.unmount();
+    expect(ResizeObserver).toHaveBeenCalled();
+    expect(testCollectElementProd.resizeObserver.disconnect).toHaveBeenCalled();
 
   });
   it('ResizeObserver should get disconnect when unmounted', () => {
@@ -926,9 +930,13 @@ describe('collect element methods', () => {
       { logLevel: LogLevel.ERROR, env: Env.PROD });
     let div = document.createElement('div')
     div.setAttribute('id', 'id1')
+    document.body.appendChild(div);
     testCollectElementProd.mount('#id1');
-    testCollectElementProd.unmount();
 
+    expect(ResizeObserver).toHaveBeenCalled();
+    expect(testCollectElementProd.resizeObserver.observe).toHaveBeenCalledWith(document.querySelector('#id1'))
+
+    testCollectElementProd.unmount();
     expect(ResizeObserver).toHaveBeenCalled();
     expect(testCollectElementProd.resizeObserver.disconnect).toHaveBeenCalled();
   });
