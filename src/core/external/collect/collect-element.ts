@@ -168,7 +168,6 @@ class CollectElement extends SkyflowElement {
         {}, (payload:any) => {
           this.#iframe.setIframeHeight(payload.height);
         });
-      this.#iframe.iframe.contentWindow?.postMessage({ type: 'parentResize' }, '*');
     });
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
@@ -220,14 +219,21 @@ class CollectElement extends SkyflowElement {
         }
       });
     }
-    if (!isComposable) {
-      this.resizeObserver?.observe(document.querySelector(domElement));
+    if (typeof domElement === 'string') {
+      const targetElement = document.querySelector(domElement);
+      if (targetElement) {
+        this.resizeObserver?.observe(targetElement);
+      }
+    } else if (domElement instanceof HTMLElement) {
+      this.resizeObserver?.observe(domElement);
     }
   };
 
   unmount = () => {
     this.#iframe.unmount();
-    this.resizeObserver?.disconnect();
+    if (this.resizeObserver) {
+      this.resizeObserver?.disconnect();
+    }
   };
 
   update = (group) => {
