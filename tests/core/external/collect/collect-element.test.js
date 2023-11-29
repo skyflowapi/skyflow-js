@@ -10,6 +10,31 @@ import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import { checkForElementMatchRule } from '../../../../src/core-utils/collect';
 import { ContainerType } from '../../../../src/skyflow';
 
+// jest.spyOn(window, 'ResizeObserver').mockImplementation(() => ({
+//   observe: jest.fn(),
+//   disconnect: jest.fn(),
+// }));
+// jest.mock('use-resize-observer', () => ({
+//   __esModule: true,
+//   default: jest.fn().mockImplementation(() => ({
+//     observe: jest.fn(),
+//     unobserve: jest.fn(),
+//     disconnect: jest.fn(),
+//   })),
+// }));
+// Object.defineProperty(global, "ResizeObserver", {
+//   writable: true,
+//   value: jest.fn().mockImplementation(() => ({
+//       observe: jest.fn(() => "Mocking works"),
+//       unobserve: jest.fn(),
+//       disconnect: jest.fn(),
+//   })),
+// });
+global.ResizeObserver = jest.fn(() => ({
+  observe: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
 const elementName = 'element:CVV:cGlpX2ZpZWxkcy5wcmltYXJ5X2NhcmQuY3Z2';
 const id = 'id';
 const input = {
@@ -879,4 +904,53 @@ describe('collect element methods', () => {
       console.log(err);
     }
   });
+
+  it('should create a ResizeObserver when mounted', () => {
+    const testCollectElementProd = new CollectElement(id,
+      {
+        elementName,
+        rows,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let div = document.createElement('div')
+    div.setAttribute('id', 'id1')
+    testCollectElementProd.mount('id1');
+
+    expect(ResizeObserver).toHaveBeenCalled();
+    expect(testCollectElementProd.resizeObserver.observe).toHaveBeenCalledWith(
+      document.querySelector('id1')
+    );
+    div.style.display = 'none'
+    expect(ResizeObserver).toHaveBeenCalled();
+    expect(testCollectElementProd.resizeObserver.observe).toHaveBeenCalledWith(
+      document.querySelector('id1')
+    );
+
+  });
+  it('ResizeObserver should get disconnect when unmounted', () => {
+    const testCollectElementProd = new CollectElement(id,
+      {
+        elementName,
+        rows,
+      },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let div = document.createElement('div')
+    div.setAttribute('id', 'id1')
+    testCollectElementProd.mount('id1');
+    testCollectElementProd.unmount('id1');
+
+    expect(ResizeObserver).toHaveBeenCalled();
+    expect(testCollectElementProd.resizeObserver.disconnect).toHaveBeenCalled();
+  });
+
 });
