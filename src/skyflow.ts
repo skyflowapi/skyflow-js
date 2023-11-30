@@ -40,6 +40,7 @@ import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
 
+
 export enum ContainerType {
   COLLECT = 'COLLECT',
   REVEAL = 'REVEAL',
