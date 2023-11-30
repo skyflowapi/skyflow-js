@@ -403,7 +403,7 @@ describe('collect element', () => {
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
     },0);  
-    element.update(updateElementInput);
+    element.updateElementGroup(updateElementInput);
     element.unmount();
   });
 
@@ -437,7 +437,7 @@ describe('collect element', () => {
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
     },0);  
-    element.update(updateElementInput);
+    element.updateElementGroup(updateElementInput);
     element.unmount();
   });
 
@@ -473,7 +473,7 @@ describe('collect element', () => {
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
     },0);  
-    element.update(updateElementInput);
+    element.updateElementGroup(updateElementInput);
     element.unmount();
   });
 
@@ -878,5 +878,82 @@ describe('collect element methods', () => {
     } catch (err) {
       console.log(err);
     }
+  });
+
+  it('update element in DEV environment', () => {
+    const collectElement = new CollectElement(id,
+      { elementName,rows },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD },
+    );
+
+    const emitter = jest.spyOn(bus, 'emit');
+    const testUpdateOptions = {
+      table: 'table',
+      inputStyles: {
+        base: {
+          color: 'blue'
+        }
+      }
+    };
+    expect(collectElement.isMounted()).toBe(false);
+    expect(collectElement.isUpdateCalled()).toBe(false);
+    collectElement.update(testUpdateOptions);
+
+    console.log(emitter.mock.calls);
+    console.log(onSpy.mock.calls);
+  });
+
+  it('update element in DEV environment when element is mounted', () => {
+    const collectElement = new CollectElement(id,
+      { elementName,rows },
+      {},
+      'containerId',
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD }
+    );
+
+    const testUpdateOptions = {
+      table: 'table',
+      inputStyles: {
+        base: {
+          color: 'blue'
+        }
+      }
+    };
+
+    expect(collectElement.isMounted()).toBe(false);
+    expect(collectElement.isUpdateCalled()).toBe(false);
+
+    const div = document.createElement('div');
+    collectElement.mount(div)
+    collectElement.update(testUpdateOptions);
+
+    setTimeout(() => {
+      expect(collectElement.isMounted()).toBe(true);
+      expect(collectElement.updateElement).toBeCalledTimes(1);
+      expect(collectElement.isUpdateCalled()).toBe(false);
+    }, 0);
+    collectElement.unmount()
+  });
+  
+  it('update element in PROD environment', () => {
+    const testUpdateOptions = {
+      table: 'table',
+      inputStyles: {
+        base: {
+          color: 'blue'
+        }
+      }
+    };
+    expect(testCollectElementProd.isMounted()).toBe(false);
+    expect(testCollectElementProd.isUpdateCalled()).toBe(false);
+    testCollectElementProd.update(testUpdateOptions);
   });
 });

@@ -60,6 +60,8 @@ class RevealElement extends SkyflowElement {
 
   #clientId: string;
 
+  #isUpdateCalled = false;
+
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
     metaData: any, container: any, elementId: string, context: Context) {
@@ -346,6 +348,20 @@ class RevealElement extends SkyflowElement {
       this.#iframe.container?.remove();
     }
     this.#iframe.unmount();
+  }
+
+  update(options) {
+    this.#isUpdateCalled = true;
+    this.#recordData = {
+      ...this.#recordData,
+      ...options,
+    };
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
+      name: this.#iframe.name,
+      updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
+      updatedValue: options,
+    });
+    this.#isUpdateCalled = false;
   }
 }
 

@@ -138,6 +138,26 @@ class RevealFrame {
       }
     }
 
+    if (
+      Object.prototype.hasOwnProperty.call(this.#record, 'errorTextStyles')
+      && Object.prototype.hasOwnProperty.call(this.#record.errorTextStyles, STYLE_TYPE.BASE)
+    ) {
+      this.#errorTextStyles = {};
+      this.#errorTextStyles[STYLE_TYPE.BASE] = {
+        ...REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES[STYLE_TYPE.BASE],
+        ...this.#record.errorTextStyles[STYLE_TYPE.BASE],
+      };
+      getCssClassesFromJss(this.#errorTextStyles, 'error');
+      if (this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]) {
+        generateCssWithoutClass(this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]);
+      }
+    } else {
+      getCssClassesFromJss(
+        REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
+        'error',
+      );
+    }
+
     this.#elementContainer.appendChild(this.#dataElememt);
 
     document.body.append(this.#elementContainer);
@@ -185,25 +205,6 @@ class RevealFrame {
 
   private setRevealError(errorText: string) {
     this.#errorElement.innerText = errorText;
-    if (
-      Object.prototype.hasOwnProperty.call(this.#record, 'errorTextStyles')
-      && Object.prototype.hasOwnProperty.call(this.#record.errorTextStyles, STYLE_TYPE.BASE)
-    ) {
-      this.#errorTextStyles = {};
-      this.#errorTextStyles[STYLE_TYPE.BASE] = {
-        ...REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES[STYLE_TYPE.BASE],
-        ...this.#record.errorTextStyles[STYLE_TYPE.BASE],
-      };
-      getCssClassesFromJss(this.#errorTextStyles, 'error');
-      if (this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]) {
-        generateCssWithoutClass(this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]);
-      }
-    } else {
-      getCssClassesFromJss(
-        REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
-        'error',
-      );
-    }
     this.#elementContainer.appendChild(this.#errorElement);
   }
 
@@ -227,9 +228,68 @@ class RevealFrame {
             token: data.updatedValue,
           };
           this.updateDataView();
+        } else if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS) {
+          const updatedValue = data.updatedValue as object;
+          this.#record = {
+            ...this.#record,
+            ...updatedValue,
+          };
+          this.updateElementProps();
         }
       }
     });
+  }
+
+  private updateElementProps() {
+    this.updateDataView();
+    if (Object.prototype.hasOwnProperty.call(this.#record, 'label')) {
+      this.#labelElement.innerText = this.#record.label;
+    }
+    if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
+      this.#inputStyles[STYLE_TYPE.BASE] = {
+        ...this.#inputStyles,
+        ...this.#record.inputStyles[STYLE_TYPE.BASE],
+      };
+      getCssClassesFromJss(this.#inputStyles, 'content');
+      if (this.#record.inputStyles[STYLE_TYPE.GLOBAL]) {
+        const newInputGlobalStyles = {
+          ...this.#inputStyles[STYLE_TYPE.GLOBAL],
+          ...this.#record.inputStyles[STYLE_TYPE.GLOBAL],
+        };
+        generateCssWithoutClass(newInputGlobalStyles);
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(this.#record, 'labelStyles')) {
+      this.#labelStyles[STYLE_TYPE.BASE] = {
+        ...this.#labelStyles,
+        ...REVEAL_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.BASE],
+        ...this.#record.labelStyles[STYLE_TYPE.BASE],
+      };
+      getCssClassesFromJss(this.#labelStyles, 'label');
+
+      if (this.#record.labelStyles[STYLE_TYPE.GLOBAL]) {
+        const newLabelGlobalStyles = {
+          ...this.#labelStyles[STYLE_TYPE.GLOBAL],
+          ...this.#record.labelStyles[STYLE_TYPE.GLOBAL],
+        };
+        generateCssWithoutClass(newLabelGlobalStyles);
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(this.#record, 'errorTextStyles')) {
+      this.#errorTextStyles[STYLE_TYPE.BASE] = {
+        ...REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES[STYLE_TYPE.BASE],
+        ...this.#errorTextStyles[STYLE_TYPE.BASE],
+        ...this.#record.errorTextStyles[STYLE_TYPE.BASE],
+      };
+      getCssClassesFromJss(this.#errorTextStyles, 'error');
+      if (this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]) {
+        const newErrorTextGlobalStyles = {
+          ...this.#errorTextStyles[STYLE_TYPE.GLOBAL],
+          ...this.#record.errorTextStyles[STYLE_TYPE.GLOBAL],
+        };
+        generateCssWithoutClass(newErrorTextGlobalStyles);
+      }
+    }
   }
 
   private updateDataView() {
