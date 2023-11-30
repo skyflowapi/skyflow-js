@@ -492,4 +492,76 @@ describe("Reveal Frame Class",()=>{
     emitCb(data);
   })
 
+  test('update reveal element props', () => {
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        token:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        },
+        errorTextStyles:{
+          base:{
+            color:"red"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+
+    const testUpdateOptions = {
+      label: 'Updated Label',
+      altText: 'updated alt',
+      token: 'test-token-re-1',
+      inputStyles: {
+        base: {
+          borderWitdth: '5px',
+        },
+        global: {
+          '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+        }
+      },
+      labelStyles: {
+        base: {
+          color: 'red'
+        },
+        global: {
+          '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+        }
+      },
+      errorTextStyles: {
+        base: {
+          backgroundColor: 'black'
+        },
+        global: {
+          '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+        }
+      }
+    }
+
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    const onRevealResponseName = on.mock.calls[2][0];
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS);
+    const onRevealResponseCb = on.mock.calls[2][1];
+    onRevealResponseCb({
+      name: "",
+      updateType:REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
+      updatedValue:testUpdateOptions,
+    });
+  });
+
 });
