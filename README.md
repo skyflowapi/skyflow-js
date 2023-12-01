@@ -127,14 +127,16 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 ---
 
 # Securely collecting data client-side
--  [**Insert data into the vault**](#insert-data-into-the-vault)
--  [**Using Skyflow Elements to collect data**](#using-skyflow-elements-to-collect-data)
--  [**Using Skyflow Elements to update data**](#using-skyflow-elements-to-update-data)
--  [**Using validations on Collect Elements**](#validations)
--  [**Event Listener on Collect Elements**](#event-listener-on-collect-elements)
--  [**UI Error for Collect Elements**](#ui-error-for-collect-elements)
+- [**Insert data into the vault**](#insert-data-into-the-vault)
+- [**Using Skyflow Elements to collect data**](#using-skyflow-elements-to-collect-data)
+- [**Using Skyflow Elements to update data**](#using-skyflow-elements-to-update-data)
+- [**Using validations on Collect Elements**](#validations)
+- [**Event Listener on Collect Elements**](#event-listener-on-collect-elements)
+- [**UI Error for Collect Elements**](#ui-error-for-collect-elements)
 - [**Set and Clear value for Collect Elements (DEV ENV ONLY)**](#set-and-clear-value-for-collect-elements-dev-env-only)
+- [**Update Collect Elements**](#update-collect-elements) 
 - [**Using Skyflow File Element to upload a file**](#using-skyflow-file-element-to-upload-a-file)
+
 ## Insert data into the vault
 
 To insert data into the vault, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to insert into the below format. The `options` parameter takes an object of optional parameters for the insertion. The `insert` method also supports upsert operations.
@@ -1155,6 +1157,114 @@ cardNumber.clearValue();
 
 ```
 
+### Update Collect Elements
+
+You can update collect element properties with the `update` interface.
+
+The `update` interface takes the below object:
+
+```javascript
+const updateElement = {
+  table: 'string',       // Optional. The table this data belongs to.
+  column: 'string',      // Optional. The column this data belongs to.
+  inputStyles: {},       // Optional. Styles applied to the form element.
+  labelStyles: {},       // Optional. Styles for the label of the element.
+  errorTextStyles: {},   // Optional. Styles for the errorText of element.
+  label: 'string',       // Optional. Label for the form element.
+  placeholder: 'string', // Optional. Placeholder for the form element.
+  validations: [],       // Optional. Array of validation rules.
+};
+```
+
+Only include the properties that you want to update for the specified collect element. 
+
+Properties your provided when you created the element remain the same until you explicitly update them.
+
+`Note`: You can't update the `type` property of an element.
+
+### End to end example
+```javascript
+// Create a collect container. 
+const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+
+const stylesOptions = {
+  inputStyles: {
+    base: {
+      fontFamily: 'Inter',
+      fontStyle: 'normal',
+      fontWeight: 400,
+      fontSize: '14px',
+      lineHeight: '21px',
+      width: '294px',
+    },
+  },
+  labelStyles: {},
+  errorTextStyles: {
+    base: {},
+  },
+};
+
+// Create collect elements
+const cardHolderNameElement = collectContainer.create({
+  table: 'pii_fields',
+  column: 'first_name',
+  ...stylesOptions,
+  placeholder: 'Cardholder Name',
+  type: Skyflow.ElementType.CARDHOLDER_NAME,
+});
+
+const cardNumberElement = collectContainer.create({
+  table: 'pii_fields',
+  column: 'card_number',
+  ...stylesOptions,
+  placeholder: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+const cvvElement = collectContainer.create({
+  table: 'pii_fields',
+  column: 'cvv',
+  ...stylesOptions,
+  placeholder: 'CVV',
+  type: Skyflow.ElementType.CVV,
+});
+
+// Mount the collect elements.
+collectContainer.mount('#cardHolderNameElement'); // Assumes there is a div with id='#cardHolderNameElement' in the webpage.
+collectContainer.mount('#cardNumberElement'); // Assumes there is a div with id='#cardNumberElement' in the webpage.
+collectContainer.mount('#cvvElement'); // Assumes there is a div with id='#cvvElement' in the webpage.
+
+// ...
+
+// Update validations property on cvvElement.
+cvvElement.update({
+  validations: [{
+    type: Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
+    params: {
+      max: 3,
+      error: 'cvv must be 3 digits',
+    },
+  }]
+})
+
+// Update label, placeholder properties on cardHolderNameElement.
+cardHolderNameElement.update({
+  label: 'CARDHOLDER NAME',
+  placeholder: 'Eg: John'
+});
+
+// Update table, column, inputStyles properties on cardNumberElement.
+cardNumberElement.update({
+  table:'cards',
+  column:'card_number',
+  inputStyles:{
+    base:{
+      color:'blue'
+    }
+  }
+});
+```
+
 ---
 
 # Securely collecting data client-side using Composable Elements
@@ -1752,6 +1862,7 @@ composableContainer.on(Skyflow.EventName.SUBMIT, ()=> {
 -  [**Set token for Reveal Elements**](#set-token-for-reveal-elements)
 -  [**Set and clear altText for Reveal Elements**](#set-and-clear-alttext-for-reveal-elements)
 -  [**Render a file with a File Element**](#render-a-file-with-a-file-element)
+-  [**Update Reveal Elements**](#update-reveal-elements)
 
 ## Retrieving data from the vault
 
@@ -2730,6 +2841,101 @@ fetch("<BACKEND_URL>")
    },
   ]
 }
+```
+
+### Update Reveal Elements
+
+You can update reveal element properties with the `update` interface.
+
+The `update` interface takes the below object:
+```javascript
+const updateElement = {
+  token: 'string',          // Optional, token of the data being revealed.
+  inputStyles: {},          // Optional, styles to be applied to the element.
+  labelStyles: {},          // Optional, styles to be applied to the label of the reveal element.
+  errorTextStyles: {},      // Optional, styles that will be applied to the errorText of the reveal element.
+  label: 'string',          // Optional, label for the form element.
+  altText: 'string',        // Optional, string that is shown before reveal, will show token if altText is not provided.
+  redaction: RedactionType, //Optional, Redaction Type to be applied to data.
+};
+```
+
+Only include the properties that you want to update for the specified reveal element. 
+
+Properties your provided when you created the element remain the same until you explicitly update them.
+
+### End to end example
+```javascript
+// Create a reveal container. 
+const revealContainer = skyflow.container(Skyflow.ContainerType.REVEAL);
+
+const stylesOptions = {
+  inputStyles: {
+    base: {
+      fontFamily: 'Inter',
+      fontStyle: 'normal',
+      fontWeight: 400,
+      fontSize: '14px',
+      lineHeight: '21px',
+      width: '294px',
+    },
+  },
+  labelStyles: {},
+  errorTextStyles: {
+    base: {
+      color: '#f44336'
+    },
+  },
+};
+
+// Create collect elements
+const cardHolderNameRevealElement = revealContainer.create({
+  token: 'ed5fdd1f-5009-435c-a06b-3417ce76d2c8',
+  altText: 'first name',
+  ...stylesOptions,
+  label: 'Card Holder Name',
+});
+
+const cardNumberRevealElement = revealContainer.create({
+  token: '8ee84061-7107-4faf-bb25-e044f3d191fe',
+  altText: 'xxxx',
+  ...stylesOptions,
+  label: 'Card Number',
+  redaction: 'RedactionType.CARD_NUMBER'
+});
+
+// Mount the collect elements.
+revealContainer.mount('#cardHolderNameRevealElement'); // Assumes there is a div with id='#cardHolderNameRevealElement' in the webpage.
+revealContainer.mount('#cardNumberRevealElement'); // Assumes there is a div with id='#cardNumberRevealElement' in the webpage.
+
+// ...
+
+// Update label, labelStyles properties on cardHolderNameRevealElement.
+cardHolderNameRevealElement.update({
+  label: 'CARDHOLDER NAME',
+  labelStyles: {
+    base: {
+      color: '#aa11aa'
+    }
+  }
+});
+
+// Update inputStyles, errorTextStyles properties on cardNumberRevealElement.
+cardNumberRevealElement.update({
+  inputStyles: {
+    base: {
+      color: '#fff',
+      backgroundColor: '#000',
+      borderColor: '#f00',
+      borderWidth: '5px'
+    }
+  },
+  errorTextStyles: {
+    base: {
+      backgroundColor: '#000',
+    }
+  }
+});
 ```
 
 ---
