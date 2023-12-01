@@ -169,6 +169,7 @@ class CollectElement extends SkyflowElement {
           this.#iframe.setIframeHeight(payload.height);
         });
     });
+
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
