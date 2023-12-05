@@ -262,7 +262,7 @@ export class FrameElement {
 
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
       // On CHANGE set isEmpty to false
-      state.isEmpty = false;
+      state.isEmpty = !state.value;
 
       if (
         state.value
