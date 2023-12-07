@@ -512,19 +512,21 @@ export class FrameElement {
       const value = this.domInput?.value || this.iFrameFormElement.getValue();
       if (mask) {
         const translation = {};
-        Object.keys(mask[2]).forEach((key) => {
-          translation[key] = { pattern: mask[2][key] };
-        });
-        const output = getMaskedOutput(target.value, mask[0], translation);
+        if (mask[2]) {
+          Object.keys(mask[2]).forEach((key) => {
+            translation[key] = { pattern: mask[2][key] };
+          });
+        }
+        const output = getMaskedOutput(target?.value, mask[0], translation);
         if (output.length >= value.length) {
-          this.iFrameFormElement.setValue(output, target.checkValidity());
-        } else if (output === '' && target.value === '') {
-          this.iFrameFormElement.setValue(target.value, target.checkValidity());
+          this.iFrameFormElement.setValue(output, target?.checkValidity());
+        } else if (output === '' && target?.value === '') {
+          this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
         } else {
           target.value = output;
         }
       } else {
-        this.iFrameFormElement.setValue(target.value, target.checkValidity());
+        this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
       }
     }
   };
