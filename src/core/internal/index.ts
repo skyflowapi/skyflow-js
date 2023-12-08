@@ -512,19 +512,21 @@ export class FrameElement {
       const value = this.domInput?.value || this.iFrameFormElement.getValue();
       if (mask) {
         const translation = {};
-        Object.keys(mask[2]).forEach((key) => {
-          translation[key] = { pattern: mask[2][key] };
-        });
-        const output = getMaskedOutput(target.value, mask[0], translation);
+        if (mask[2]) {
+          Object.keys(mask[2]).forEach((key) => {
+            translation[key] = { pattern: mask[2][key] };
+          });
+        }
+        const output = getMaskedOutput(target?.value, mask[0], translation);
         if (output.length >= value.length) {
-          this.iFrameFormElement.setValue(output, target.checkValidity());
-        } else if (output === '' && target.value === '') {
-          this.iFrameFormElement.setValue(target.value, target.checkValidity());
+          this.iFrameFormElement.setValue(output, target?.checkValidity());
+        } else if (output === '' && target?.value === '') {
+          this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
         } else {
           target.value = output;
         }
       } else {
-        this.iFrameFormElement.setValue(target.value, target.checkValidity());
+        this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
       }
     }
   };
@@ -831,14 +833,10 @@ export class FrameElement {
           this.domInput.value = output;
           if (!this.domInput.getAttribute('maxlength')) { this.domInput.setAttribute('maxlength', mask[0].length); }
         }
-        if (output !== this.iFrameFormElement.getValue()) {
-          this.copyText = output;
-          this.iFrameFormElement.setValue(output, undefined, true);
-        }
       } catch (err) {
         printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
           this.iFrameFormElement.fieldType), MessageType.WARN,
-        (this.iFrameFormElement.context.logLevel || LogLevel.ERROR));
+        (this.iFrameFormElement?.context?.logLevel || LogLevel.ERROR));
       }
     }
   }

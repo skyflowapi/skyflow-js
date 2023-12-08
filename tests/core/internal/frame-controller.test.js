@@ -516,7 +516,7 @@ describe('test frame controller', () => {
     const inst = EventEmitter.mock.instances[0];
     const onSpy = inst.on.mock.calls;
 
-    formElement.setValue("4111111111111111")
+    formElement.setValue("4111 1111 1111 1111")
     element.setValue('4111111111111111')
 
     const changeCb = onSpy
@@ -669,7 +669,7 @@ describe('test frame controller', () => {
     const inst = EventEmitter.mock.instances[0];
     const onSpy = inst.on.mock.calls;
 
-    formElement.setValue("41111111111111112")
+    formElement.setValue("4111 1111 1111 1111")
     element.setValue('41111111111111112')
 
     const changeCb = onSpy

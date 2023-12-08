@@ -50,7 +50,6 @@ module.exports = () => merge(common, {
       template: 'assets/iframe.html',
       chunks: ['index'],
       inject: 'head',
-      scriptLoading: 'blocking',
       minify,
     }),
     new CleanWebpackPlugin({
