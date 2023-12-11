@@ -69,10 +69,11 @@ export default class FrameElements {
         logLevel);
       },
     );
-    const url = window.location?.href.split('?')[1];
-    const encodedString = decodeURIComponent(url);
-    const parsedRecord = JSON.parse(atob(encodedString));
-    FrameElements.group = parsedRecord.record;
+    const url = window.location?.href;
+    const configIndex = url.indexOf('?');
+    const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
+    const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
+    FrameElements.group = parsedRecord?.record;
     if (FrameElements.frameElements) {
       printLog(parameterizedString(logs.infoLogs.SETUP_IN_START, CLASS_NAME),
         MessageType.LOG, logLevel);
