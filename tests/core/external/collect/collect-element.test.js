@@ -9,6 +9,7 @@ import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../../../
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import { checkForElementMatchRule } from '../../../../src/core-utils/collect';
 import { ContainerType } from '../../../../src/skyflow';
+import EventEmitter from '../../../../src/event-emitter';
 
 const elementName = 'element:CVV:cGlpX2ZpZWxkcy5wcmltYXJ5X2NhcmQuY3Z2';
 const id = 'id';
@@ -112,11 +113,15 @@ const groupEmiitter = {
   })
 }
 
+jest.mock('../../../../src/event-emitter');
+let emitterSpy;
+EventEmitter.mockImplementation(() => ({
+  on: jest.fn().mockImplementation((name, cb) => {emitterSpy = cb}),
+  _emit: jest.fn()
+}));
+
 const on = jest.fn();
 describe('collect element', () => {
-
-
-
   let emitSpy;
   let targetSpy;
   beforeEach(() => {
@@ -492,6 +497,90 @@ describe('collect element', () => {
 
     const options = element.getOptions();
     expect(options.name).toBe(input.column);
+  });
+
+  it('updates element properties when element is mounted',  () => {
+    const onSpy = jest.spyOn(bus, 'on');
+    const element = new CollectElement(id,
+      { elementName, rows },
+      {},
+      { type: ContainerType.COLLECT, containerId: 'containerId' },
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD }
+    );
+
+    const inputEvent = onSpy.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
+    const inputCb = inputEvent[0][1];
+    const cb2 = jest.fn();
+
+    const mountedEvent = onSpy.mock.calls
+      .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    const mountCb = mountedEvent[0][1];
+    const cb3 = jest.fn();
+
+    inputCb({
+      name: elementName,
+      event: ELEMENT_EVENTS_TO_CLIENT.READY,
+      value: {},
+    }, cb2);
+
+    expect(element.isMounted()).toBe(false);
+    mountCb({name: elementName}, cb3);
+    expect(element.isMounted()).toBe(true);
+    element.update({ label :'Henry' });
+  });
+
+  it('updates element properties when element is not mounted',  () => {
+    const element = new CollectElement(id,
+      { elementName, rows },
+      {},
+      { type: ContainerType.COLLECT, containerId: 'containerId' },
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD }
+    );
+    expect(element.isMounted()).toBe(false);
+    element.update({ label :'Henry' });
+    emitterSpy();
+    expect(element.isMounted()).toBe(true);
+  });
+
+  it('update element group', () => {
+    const onSpy = jest.spyOn(bus, 'on');
+    const element = new CollectElement(id,
+      { elementName, rows },
+      {},
+      { type: ContainerType.COLLECT, containerId: 'containerId' },
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD }
+    );
+
+    const inputEvent = onSpy.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
+    const inputCb = inputEvent[0][1];
+    const cb2 = jest.fn();
+
+    const mountedEvent = onSpy.mock.calls
+      .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    const mountCb = mountedEvent[0][1];
+    const cb3 = jest.fn();
+
+    inputCb({
+      name: elementName,
+      event: ELEMENT_EVENTS_TO_CLIENT.READY,
+      value: {},
+    }, cb2);
+
+    expect(element.isMounted()).toBe(false);
+    mountCb({name: elementName}, cb3);
+    expect(element.isMounted()).toBe(true);
+    element.updateElementGroup({ elementName, rows });
   });
 });
 
@@ -880,80 +969,76 @@ describe('collect element methods', () => {
     }
   });
 
-  it('update element in DEV environment', () => {
-    const collectElement = new CollectElement(id,
-      { elementName,rows },
-      {},
-      'containerId',
-      true,
-      destroyCallback,
-      updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD },
-    );
+  // it('update element in DEV environment', () => {
+  //   const collectElement = new CollectElement(id,
+  //     { elementName,rows },
+  //     {},
+  //     'containerId',
+  //     true,
+  //     destroyCallback,
+  //     updateCallback,
+  //     { logLevel: LogLevel.ERROR, env: Env.DEV },
+  //   );
 
-    const emitter = jest.spyOn(bus, 'emit');
-    const testUpdateOptions = {
-      table: 'table',
-      inputStyles: {
-        base: {
-          color: 'blue'
-        }
-      }
-    };
-    expect(collectElement.isMounted()).toBe(false);
-    expect(collectElement.isUpdateCalled()).toBe(false);
-    collectElement.update(testUpdateOptions);
+  //   const testUpdateOptions = {
+  //     table: 'table',
+  //     inputStyles: {
+  //       base: {
+  //         color: 'blue'
+  //       }
+  //     }
+  //   };
+  //   expect(collectElement.isMounted()).toBe(false);
+  //   expect(collectElement.isUpdateCalled()).toBe(false);
+  //   collectElement.update(testUpdateOptions);
+  // });
 
-    console.log(emitter.mock.calls);
-    console.log(onSpy.mock.calls);
-  });
+  // it('update element in DEV environment when element is mounted', () => {
+  //   const collectElement = new CollectElement(id,
+  //     { elementName,rows },
+  //     {},
+  //     'containerId',
+  //     true,
+  //     destroyCallback,
+  //     updateCallback,
+  //     { logLevel: LogLevel.ERROR, env: Env.PROD }
+  //   );
 
-  it('update element in DEV environment when element is mounted', () => {
-    const collectElement = new CollectElement(id,
-      { elementName,rows },
-      {},
-      'containerId',
-      true,
-      destroyCallback,
-      updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+  //   const testUpdateOptions = {
+  //     table: 'table',
+  //     inputStyles: {
+  //       base: {
+  //         color: 'blue'
+  //       }
+  //     }
+  //   };
 
-    const testUpdateOptions = {
-      table: 'table',
-      inputStyles: {
-        base: {
-          color: 'blue'
-        }
-      }
-    };
+  //   expect(collectElement.isMounted()).toBe(false);
+  //   expect(collectElement.isUpdateCalled()).toBe(false);
 
-    expect(collectElement.isMounted()).toBe(false);
-    expect(collectElement.isUpdateCalled()).toBe(false);
+  //   const div = document.createElement('div');
+  //   collectElement.mount(div)
+  //   collectElement.update(testUpdateOptions);
 
-    const div = document.createElement('div');
-    collectElement.mount(div)
-    collectElement.update(testUpdateOptions);
-
-    setTimeout(() => {
-      expect(collectElement.isMounted()).toBe(true);
-      expect(collectElement.updateElement).toBeCalledTimes(1);
-      expect(collectElement.isUpdateCalled()).toBe(false);
-    }, 0);
-    collectElement.unmount()
-  });
+  //   setTimeout(() => {
+  //     expect(collectElement.isMounted()).toBe(true);
+  //     expect(collectElement.updateElement).toBeCalledTimes(1);
+  //     expect(collectElement.isUpdateCalled()).toBe(false);
+  //   }, 0);
+  //   collectElement.unmount();
+  // });
   
-  it('update element in PROD environment', () => {
-    const testUpdateOptions = {
-      table: 'table',
-      inputStyles: {
-        base: {
-          color: 'blue'
-        }
-      }
-    };
-    expect(testCollectElementProd.isMounted()).toBe(false);
-    expect(testCollectElementProd.isUpdateCalled()).toBe(false);
-    testCollectElementProd.update(testUpdateOptions);
-  });
+  // it('update element in PROD environment', () => {
+  //   const testUpdateOptions = {
+  //     table: 'table',
+  //     inputStyles: {
+  //       base: {
+  //         color: 'blue'
+  //       }
+  //     }
+  //   };
+  //   expect(testCollectElementProd.isMounted()).toBe(false);
+  //   expect(testCollectElementProd.isUpdateCalled()).toBe(false);
+  //   testCollectElementProd.update(testUpdateOptions);
+  // });
 });
