@@ -238,7 +238,11 @@ export const formatRecordsForIframe = (response: IRevealResponseType) => {
   const result: Record<string, string> = {};
   if (response.records) {
     response.records.forEach((record) => {
-      result[record.elementId] = record.value;
+      if (Object.prototype.hasOwnProperty.call(record, 'elementId')) {
+        result[record.elementId] = record.value;
+      } else {
+        result[record.token] = record.value;
+      }
     });
   }
   return result;

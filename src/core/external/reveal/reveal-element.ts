@@ -70,6 +70,7 @@ class RevealElement extends SkyflowElement {
     this.#recordData = {
       ...record,
       ...formatRevealElementOptions(options),
+      elementId: this.#elementId,
     };
     this.#containerId = container.containerId;
     this.#readyToMount = container.isMounted;
@@ -107,7 +108,7 @@ class RevealElement extends SkyflowElement {
         if (data.name === this.#iframe.name) {
           callback({
             ...this.#metaData,
-            record: { ...this.#recordData, elementId: this.#elementId },
+            record: this.#recordData,
             context: this.#context,
           });
 
@@ -280,7 +281,7 @@ class RevealElement extends SkyflowElement {
   }
 
   getRecordData() {
-    return { ...this.#recordData, elementId: this.#elementId };
+    return this.#recordData;
   }
 
   setError(clientErrorText:string) {
