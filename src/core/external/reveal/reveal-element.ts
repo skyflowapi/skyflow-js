@@ -107,7 +107,7 @@ class RevealElement extends SkyflowElement {
         if (data.name === this.#iframe.name) {
           callback({
             ...this.#metaData,
-            record: this.#recordData,
+            record: { ...this.#recordData, elementId: this.#elementId },
             context: this.#context,
           });
 
@@ -280,7 +280,7 @@ class RevealElement extends SkyflowElement {
   }
 
   getRecordData() {
-    return this.#recordData;
+    return { ...this.#recordData, elementId: this.#elementId };
   }
 
   setError(clientErrorText:string) {

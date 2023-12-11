@@ -63,6 +63,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{
@@ -91,6 +92,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{
@@ -116,7 +118,7 @@ describe("Reveal Frame Class",()=>{
     // undefined since with jest window.name will be emptyString("") 
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+undefined);
     const onRevealResponseCb = on.mock.calls[0][1];
-    onRevealResponseCb({"1815-6223-1073-1425":"card_value"})
+    onRevealResponseCb({"5181-3226-3701-5241":"card_value"})
 
   });
 
@@ -126,6 +128,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{
@@ -152,7 +155,7 @@ describe("Reveal Frame Class",()=>{
     // undefined since with jest window.name will be emptyString("") 
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+undefined);
     const onRevealResponseCb = on.mock.calls[0][1];
-    onRevealResponseCb({"1815":"1234"})
+    onRevealResponseCb({"5181-3226-3701-5241":"1234"})
     
 
   });
@@ -162,6 +165,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{
@@ -202,6 +206,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{
@@ -248,6 +253,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{
@@ -290,6 +296,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{
@@ -331,6 +338,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{
@@ -373,6 +381,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{
@@ -415,6 +424,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{
@@ -456,6 +466,7 @@ describe("Reveal Frame Class",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
+        elementId:"5181-3226-3701-5241",
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
         inputStyles:{

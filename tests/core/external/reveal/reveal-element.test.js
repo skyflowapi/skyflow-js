@@ -315,14 +315,14 @@ describe("Reveal Element Methods",()=>{
   });
   it("getRecord Data",()=>{
     const testRecordData = testRevealElement.getRecordData();
-    expect(testRecordData).toStrictEqual({token:"1244",})
+    expect(testRecordData).toStrictEqual({token:"1244", elementId:"id"})
   });
   it("setToken method",()=>{
     testRevealElement.setToken("testToken");
   });
   it("getRecord Data",()=>{
     const testRecordData = testRevealElement.getRecordData();
-    expect(testRecordData).toStrictEqual({token:"testToken"})
+    expect(testRecordData).toStrictEqual({token:"testToken", elementId:"id"})
   });
   it('should add render file pre-elements to the DOM', () => {
     const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');

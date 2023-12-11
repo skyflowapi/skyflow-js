@@ -137,9 +137,9 @@ describe("formatRecordsForIframe fn test",()=>{
     expect(fnResponse).toStrictEqual({});
   });
   test("with records should return token value object",()=>{
-    const testInput = {"records":[{token:"7823-323-242-2232",value:"token_value","valueType" : "STRING"}]};
+    const testInput = {"records":[{token:"7823-323-242-2232",value:"token_value","valueType" : "STRING", elementId:"1234-567-981-2232"}]};
     const fnResponse = formatRecordsForIframe(testInput);
-    expect(fnResponse).toStrictEqual({"7823-323-242-2232":"token_value"});
+    expect(fnResponse).toStrictEqual({"1234-567-981-2232":"token_value"});
   });
 });
 

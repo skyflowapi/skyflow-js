@@ -24,10 +24,15 @@ interface IApiSuccessResponse {
   ];
 }
 
-const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
+const formatForPureJsSuccess = (response: IApiSuccessResponse, elementId?:string) => {
   const currentResponseRecords = response.records;
   return currentResponseRecords.map((record) => (
-    { token: record.token, value: record.value, valueType: record.valueType }));
+    {
+      token: record.token,
+      value: record.value,
+      valueType: record.valueType,
+      elementId,
+    }));
 };
 
 const formatForPureJsFailure = (cause, tokenId:string) => ({
@@ -191,7 +196,7 @@ export const fetchRecordsByTokenId = (
         getTokenRecordsFromVault(tokenRecord.token as string, redaction, client, authToken as string)
           .then(
             (response: IApiSuccessResponse) => {
-              const fieldsData = formatForPureJsSuccess(response);
+              const fieldsData = formatForPureJsSuccess(response, tokenRecord.elementId);
               apiResponse.push(...fieldsData);
             },
             (cause: any) => {
@@ -233,7 +238,7 @@ export const formatRecordsForIframe = (response: IRevealResponseType) => {
   const result: Record<string, string> = {};
   if (response.records) {
     response.records.forEach((record) => {
-      result[record.token] = record.value;
+      result[record.elementId] = record.value;
     });
   }
   return result;
