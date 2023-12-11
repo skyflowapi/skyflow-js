@@ -70,6 +70,7 @@ class RevealElement extends SkyflowElement {
     this.#recordData = {
       ...record,
       ...formatRevealElementOptions(options),
+      elementId: this.#elementId,
     };
     this.#containerId = container.containerId;
     this.#readyToMount = container.isMounted;

@@ -64,6 +64,7 @@ export interface IRevealRecord {
   column?: string;
   skyflowID?: string;
   table?: string;
+  elementId?:string
 }
 
 export interface IInsertResponse {
