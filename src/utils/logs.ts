@@ -197,7 +197,7 @@ const logs = {
     MISSING_SKYFLOWID_IN_COLLECT: 'Interface: collect element - "skyflowID" key is required in file type element',
     EMPTY_COLUMN_IN_COLLECT: 'Interface: collect element - column cannot be empty.',
     INVALID_COLUMN_IN_COLLECT: 'Interface: collect element - Invalid column. column of type string is required',
-    UNIQUE_ELEMENT_NAME: 'The element name has to unique: %s1',
+    UNIQUE_ELEMENT_NAME: 'The element name has to be unique: %s1',
     ELEMENTS_NOT_MOUNTED: 'Interface: collect container - Elements should be mounted before invoking collect',
     DUPLICATE_ELEMENT: 'Interface: collect container - Duplicate column %s1 found in %s2.',
     DUPLICATE_ELEMENT_ADDITIONAL_FIELDS: 'Interface: collect container - Duplicate column %s1 found in %s2 in additional fields',
