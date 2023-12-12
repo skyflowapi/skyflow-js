@@ -85,6 +85,67 @@ export const getReturnValue = (value: string | Blob, element: string, doesReturn
   return undefined;
 };
 
+const fns : Function[] = [];
+export function domReady(fn) {
+  (() => {
+    let listener;
+    const doc = typeof document === 'object' ? document : undefined;
+    const domContentLoaded = 'DOMContentLoaded';
+    let loaded = doc && (/^loaded|^i|^c/).test(doc.readyState);
+    if (!loaded && doc) {
+      doc.addEventListener(domContentLoaded, listener = () => {
+        doc.removeEventListener(domContentLoaded, listener);
+        loaded = true;
+        listener = fns.shift();
+        while (listener) {
+          listener();
+          listener = fns.shift();
+        }
+      });
+    }
+    return (fun): void => {
+      if (loaded) {
+        setTimeout(fun, 0);
+      } else {
+        fns.push(fun);
+      }
+    };
+  })()(fn);
+}
+
+export const getMaskedOutput = (input: string, format: string, translation: any): string => {
+  if (!input) { return ''; }
+  const inputArray = Array.from(input);
+  const formatArray = Array.from(format);
+  let output = '';
+  let j = 0;
+
+  for (let i = 0; i < inputArray.length; i += 1) {
+    if (j < i) { j = i; }
+    const character = inputArray[i];
+    if (j < formatArray.length) {
+      let formatChar = formatArray[j];
+      if (!translation[formatChar] || character === formatChar) {
+        output += formatChar;
+        j += 1;
+      }
+      formatChar = formatArray[j];
+      if (translation[formatChar]) {
+        const translationString = translation[formatChar].pattern;
+        const regex = new RegExp(translationString);
+        const characterString = character.toString();
+        if (regex.test(characterString)) {
+          output += characterString;
+          j += 1;
+        }
+      }
+    } else {
+      break;
+    }
+  }
+  return output;
+};
+
 export const copyToClipboard = (text:string) => {
   navigator.clipboard
     .writeText(text);
