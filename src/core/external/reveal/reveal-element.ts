@@ -60,8 +60,6 @@ class RevealElement extends SkyflowElement {
 
   #clientId: string;
 
-  #isUpdateCalled = false;
-
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
     metaData: any, container: any, elementId: string, context: Context) {
@@ -339,7 +337,6 @@ class RevealElement extends SkyflowElement {
   }
 
   update(options) {
-    this.#isUpdateCalled = true;
     this.#recordData = {
       ...this.#recordData,
       ...options,
@@ -349,7 +346,6 @@ class RevealElement extends SkyflowElement {
       updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
       updatedValue: options,
     });
-    this.#isUpdateCalled = false;
   }
 }
 
