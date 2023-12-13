@@ -22,7 +22,9 @@ import {
 import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
-import { Context, Env, MessageType } from '../../../utils/common';
+import {
+  Context, Env, EventName, MessageType,
+} from '../../../utils/common';
 import { formatFrameNameToId, getReturnValue } from '../../../utils/helpers';
 import SkyflowElement from '../common/skyflow-element';
 import { ContainerType } from '../../../skyflow';
@@ -73,6 +75,8 @@ class CollectElement extends SkyflowElement {
   #doesReturnValue:boolean;
 
   #readyToMount: boolean = false;
+
+  #isUpdateCalled = false;
 
   constructor(
     elementId: string,
@@ -236,7 +240,7 @@ class CollectElement extends SkyflowElement {
     }
   };
 
-  update = (group) => {
+  updateElementGroup = (group) => {
     let tempGroup = deepClone(group);
 
     const callback = () => {
@@ -308,6 +312,20 @@ class CollectElement extends SkyflowElement {
       options: elementOptions,
       isSingleElementAPI: true,
     });
+  };
+
+  update = (options) => {
+    this.#isUpdateCalled = true;
+    if (this.#mounted) {
+      this.updateElement({ elementName: this.#group.elementName, ...options });
+      this.#isUpdateCalled = false;
+    } else if (this.#isUpdateCalled) {
+      this.#eventEmitter.on(`${EventName.READY}:${this.#elementId}`, () => {
+        this.updateElement({ elementName: this.#group.elementName, ...options });
+        this.#mounted = true;
+        this.#isUpdateCalled = false;
+      });
+    }
   };
 
   #updateState = () => {
@@ -500,6 +518,10 @@ class CollectElement extends SkyflowElement {
 
   isMounted():boolean {
     return this.#mounted;
+  }
+
+  isUpdateCalled():boolean {
+    return this.#isUpdateCalled;
   }
 
   isValidElement():boolean {

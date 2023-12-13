@@ -198,9 +198,9 @@ class CollectContainer extends Container {
     let element = this.#elements[tempElements.elementName];
     if (element) {
       if (isSingleElementAPI) {
-        element.update(elements[0]);
+        element.updateElementGroup(elements[0]);
       } else {
-        element.update(tempElements);
+        element.updateElementGroup(tempElements);
       }
     } else {
       const elementId = uuid();
@@ -229,7 +229,7 @@ class CollectContainer extends Container {
         if (!this.#elements[name]) {
           this.#elements[name] = this.create(iElement.elementType, element);
         } else {
-          this.#elements[name].update(iElement);
+          this.#elements[name].updateElementGroup(iElement);
         }
       });
     }
@@ -251,7 +251,7 @@ class CollectContainer extends Container {
   #updateCallback = (elements: any[]) => {
     elements.forEach((element) => {
       if (this.#elements[element.elementName]) {
-        this.#elements[element.elementName].update(element);
+        this.#elements[element.elementName].updateElementGroup(element);
       }
     });
   };
