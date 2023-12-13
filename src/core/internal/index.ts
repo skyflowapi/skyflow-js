@@ -339,6 +339,7 @@ export class FrameElement {
           inputStyles,
           labelStyles,
           errorTextStyles,
+          skyflowID,
         } = data.options;
         if (validations) {
           this.iFrameFormElement.validations = validations;
@@ -368,6 +369,9 @@ export class FrameElement {
         }
         if (labelStyles) {
           this.injectInputStyles(labelStyles, 'label');
+        }
+        if (skyflowID) {
+          this.iFrameFormElement.skyflowID = skyflowID;
         }
       }
     });
