@@ -45,6 +45,8 @@ class CollectElement extends SkyflowElement {
 
   #elements: any[];
 
+  resizeObserver: ResizeObserver | null;
+
   #state = {
     isEmpty: true,
     isComplete: false,
@@ -95,7 +97,7 @@ class CollectElement extends SkyflowElement {
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
-
+    this.resizeObserver = null;
     if (groupEventEmitter) this.#groupEmitter = groupEventEmitter;
     // if (this.#isSingleElementAPI && this.#elements.length > 1) {
     //   throw new SkyflowError(SKYFLOW_ERROR_CODE.UNKNOWN_ERROR, [], true);
@@ -165,6 +167,12 @@ class CollectElement extends SkyflowElement {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
     }
+    this.resizeObserver = new ResizeObserver(() => {
+      this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+        {}, (payload:any) => {
+          this.#iframe.setIframeHeight(payload.height);
+        });
+    });
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
@@ -215,10 +223,21 @@ class CollectElement extends SkyflowElement {
         }
       });
     }
+    if (typeof domElement === 'string') {
+      const targetElement = document.querySelector(domElement);
+      if (targetElement) {
+        this.resizeObserver?.observe(targetElement);
+      }
+    } else if (domElement instanceof HTMLElement) {
+      this.resizeObserver?.observe(domElement);
+    }
   };
 
   unmount = () => {
     this.#iframe.unmount();
+    if (this.resizeObserver) {
+      this.resizeObserver?.disconnect();
+    }
   };
 
   updateElementGroup = (group) => {

@@ -15,6 +15,11 @@ import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common'
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import logs from '../../../../src/utils/logs';
 
+global.ResizeObserver = jest.fn(() => ({
+  observe: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
 const bus = require('framebus');
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
