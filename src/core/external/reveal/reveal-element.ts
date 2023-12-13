@@ -1,6 +1,10 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+
+/**
+ * @module RevealElement
+ */
 import bus from 'framebus';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
@@ -23,6 +27,10 @@ import { setStyles } from '../../../iframe-libs/iframer';
 
 const CLASS_NAME = 'RevealElement';
 
+/**
+  * The create method returns the type of Skyflow Reveal Elements.
+  * @class RevealElement
+  */
 class RevealElement extends SkyflowElement {
   #iframe: IFrame;
 
@@ -60,6 +68,7 @@ class RevealElement extends SkyflowElement {
 
   #clientId: string;
 
+  /** @internal */
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
     metaData: any, container: any, elementId: string, context: Context) {
@@ -93,10 +102,15 @@ class RevealElement extends SkyflowElement {
     }
   }
 
+  /** @internal */
   getID() {
     return this.#elementId;
   }
 
+  /**
+  * Mounts the Reveal Element onto the specified DOM element.
+  * @param domElementSelector The DOM element that the Reveal Element mounts onto.
+  */
   mount(domElementSelector) {
     this.#domSelecter = domElementSelector;
     if (!domElementSelector) {
@@ -262,27 +276,36 @@ class RevealElement extends SkyflowElement {
     });
   }
 
+  /** @internal */
   iframeName(): string {
     return this.#iframe.name;
   }
 
+  /** @internal */
   isMounted():boolean {
     return this.#isMounted;
   }
 
+  /** @internal */
   hasToken():boolean {
     if (this.#recordData.token) return true;
     return false;
   }
 
+  /** @internal */
   isClientSetError():boolean {
     return this.#isClientSetError;
   }
 
+  /** @internal */
   getRecordData() {
     return this.#recordData;
   }
 
+  /**
+  * Sets the error text for the element. Overrides all current errors.
+  * @param clientErrorText Error text to display.
+  */
   setError(clientErrorText:string) {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
       name: this.#iframe.name,
@@ -292,6 +315,9 @@ class RevealElement extends SkyflowElement {
     this.#isClientSetError = true;
   }
 
+  /**
+  * Clears the custom error text.
+  */
   resetError() {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
       name: this.#iframe.name,
@@ -300,6 +326,10 @@ class RevealElement extends SkyflowElement {
     this.#isClientSetError = false;
   }
 
+  /**
+  * Sets the alt text for the element.
+  * @param altText Alt text to display.
+  */
   setAltText(altText:string) {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
       name: this.#iframe.name,
@@ -308,6 +338,9 @@ class RevealElement extends SkyflowElement {
     });
   }
 
+  /**
+  * Clears the alt text and displays the token or data of the element. If the element doesn't have a token, the element becomes empty.
+  */
   clearAltText() {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
       name: this.#iframe.name,
@@ -316,6 +349,10 @@ class RevealElement extends SkyflowElement {
     });
   }
 
+  /**
+  * Sets the token of the element.
+  * @param token The token to set the element to.
+  */
   setToken(token:string) {
     this.#recordData = {
       ...this.#recordData,
@@ -328,6 +365,9 @@ class RevealElement extends SkyflowElement {
     });
   }
 
+  /**
+  *  Removes the Reveal Element from the DOM element it's mounted onto.
+  */
   unmount() {
     if (this.#recordData.skyflowID) {
       this.#isMounted = false;

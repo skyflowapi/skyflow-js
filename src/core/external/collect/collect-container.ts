@@ -1,6 +1,10 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+
+/**
+ * @module CollectContainer
+ */
 import bus from 'framebus';
 import { IUpsertOptions } from '../../../core-utils/collect';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
@@ -33,26 +37,46 @@ import Container from '../common/container';
 import CollectElement from './collect-element';
 import EventEmitter from '../../../event-emitter';
 
+/** Configuration for a Collect Element. */
 export interface CollectElementInput {
+  /** Table that the data belongs to. */
   table?: string;
+  /** Column that the data belongs to. */
   column?: string;
+  /** Styles for the element. */
   inputStyles?: object;
+  /** Label for the element. */
   label?: string;
+  /** Styles for the element's label. */
   labelStyles?: object;
+  /** Styles for the element's error text. */
   errorTextStyles?: object;
+  /** Placeholder text for the element. */
   placeholder?: string;
+  /** Type of the element. */
   type: ElementType;
+  /** Alt text for the element. */
   altText?: string;
+  /** Input validation rules for the element. */
   validations?: IValidationRule[]
+  /** Skyflow ID for the record that the data belongs to. */
   skyflowID?: string;
 }
 
-interface ICollectOptions {
+/** Options for a Collect Element. */
+export interface ICollectOptions {
+  /** If `true`, returns tokens for the collected data. Defaults to `true`. */
   tokens?: boolean;
+  /** Additional, non-sensitive data to insert into the vault. Uses the format of a [`records`](https://docs.skyflow.com/record/#RecordService_InsertRecord) object. */
   additionalFields?: IInsertRecordInput;
+  /** Upsert configuration for the element. */
   upsert?: Array<IUpsertOptions>
 }
 const CLASS_NAME = 'CollectContainer';
+
+/**
+  * @class Wraps all collect elements.
+  */
 class CollectContainer extends Container {
   #containerId: string;
 
@@ -64,12 +88,14 @@ class CollectContainer extends Container {
 
   #skyflowElements:any;
 
+  /** Type of the container. */
   type:string = ContainerType.COLLECT;
 
   #eventEmitter: EventEmitter;
 
   #isMounted: boolean = false;
 
+  /** @internal */
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -120,6 +146,12 @@ class CollectContainer extends Container {
     document.body.append(iframe);
   }
 
+  /**
+  * Creates a Collect Element.
+  * @param input Collect Element input.
+  * @param options Collect Element options.
+  * @returns Returns the Collect Element.
+  */
   create = (input: CollectElementInput, options: any = {
     required: false,
   }) => {
@@ -266,6 +298,11 @@ class CollectContainer extends Container {
     return false;
   };
 
+  /**
+  * Collects the data and sends it to the vault.
+  * @param options Collects the data and sends it to the vault.
+  * @returns Returns the inserted data or the error.
+  */
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
@@ -315,6 +352,10 @@ class CollectContainer extends Container {
     }
   });
 
+  /**
+  * Inserts file data into the vault.
+  * @returns Returns the inserted data.
+  */
   uploadFiles = (options) => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);

@@ -1,0 +1,86 @@
+name: Update references in Docsite
+
+on:
+  push:
+    branches:
+      - DEX-451/docs-ref-workflow
+
+jobs:
+  generate-js-sdk-refs:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: DEX-451/docs-ref-workflow
+        fetch-depth: 0
+        persist-credentials: false
+    
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 14.17.6
+    - run: npm install
+
+    - name: Generate JS SDK references
+      run: |
+        npm run docs-gen
+        cd ../..
+        mkdir refs
+        cp -r skyflow-js/skyflow-js/docs/* refs/
+        cd skyflow-js/skyflow-js/
+        rm -r docs/
+        echo "SHORT_SHA=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
+        git clean -df
+
+    - name: Create a branch in skyflow-docs
+      env:
+        TOKEN: ${{ secrets.PAT_ACTIONS }}
+        REPO_OWNER: skyflowapi
+        REPO_NAME: skyflow-docs
+        ACTOR: ${{ github.actor }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Create a new branch in skyflow-docs
+        cd $GITHUB_WORKSPACE
+        git remote add skyflow-docs https://${TOKEN}@github.com/${REPO_OWNER}/${REPO_NAME}.git
+        git fetch skyflow-docs main
+        BRANCH_NAME="SDK/js/${{ env.SHORT_SHA }}"
+        git remote set-url --push skyflow-docs https://${ACTOR}:${TOKEN}@github.com/${REPO_OWNER}/${REPO_NAME}.git
+        git checkout -b $BRANCH_NAME skyflow-docs/main
+        cp -r ../../refs/* src/pages/content/docs/sdks/skyflow-js/
+
+    - name: Push files and raise a PR
+      env:
+        TOKEN: ${{ secrets.PAT_ACTIONS }}
+        REPO_OWNER: skyflowapi
+        REPO_NAME: skyflow-docs
+        ACTOR: ${{ github.actor }}
+      run: |
+        git config user.name ${{ github.actor }}
+        git config user.email ${{ github.actor }}@users.noreply.github.com
+        BRANCH_NAME="SDK/js/${{ env.SHORT_SHA }}"
+        git add .
+        
+        # Check if there are changes to commit
+        if [[ -n "$(git status --porcelain)" ]]; then
+          git commit -m "SDK-${{ env.SHORT_SHA }} Updated JS SDK references"
+          git push skyflow-docs $BRANCH_NAME
+          # Raise a pull request
+          BASE_BRANCH="main"
+          BRANCH_NAME="SDK/js/${{ env.SHORT_SHA }}"
+          TITLE="SDK-${{ env.SHORT_SHA }}: Updated JS SDK references"
+          BODY="This pull request adds the latest JS SDK references. Commit id for reference: $GITHUB_SHA"
+          API_URL="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls"
+          echo "API URL: $API_URL"       
+          RESPONSE=$(curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token $TOKEN" \
+            -d "{\"title\":\"$TITLE\",\"body\":\"$BODY\",\"head\":\"${BRANCH_NAME}\",\"base\":\"$BASE_BRANCH\"}" \
+            "$API_URL")
+          echo "Response Body: $RESPONSE"
+          PR_URL=$(echo "$RESPONSE" | jq -r '.html_url')
+          echo "Pull Request URL: $PR_URL"
+        else
+          echo "No changes to commit. Skipping push files and raise a PR."
+          exit 0
+        fi       

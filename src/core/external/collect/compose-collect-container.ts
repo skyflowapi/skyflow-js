@@ -3,6 +3,10 @@
 /*
 Copyright (c) 2023 Skyflow, Inc.
 */
+
+/**
+ * @module ComposeCollectContainer
+ */
 import bus from 'framebus';
 import sum from 'lodash/sum';
 import { IUpsertOptions } from '../../../core-utils/collect';
@@ -35,6 +39,7 @@ import Container from '../common/container';
 import CollectElement from './collect-element';
 import ComposableElement from './compose-collect-element';
 
+/** @internal */
 export interface CollectElementInput {
   table?: string;
   column?: string;
@@ -55,6 +60,11 @@ interface ICollectOptions {
   upsert?: Array<IUpsertOptions>
 }
 const CLASS_NAME = 'CollectContainer';
+
+/**
+  * Container for all composable elements.
+  * @class ComposableContainer
+  */
 class ComposableContainer extends Container {
   #containerId: string;
 
@@ -77,13 +87,14 @@ class ComposableContainer extends Container {
   #options: any;
 
   #containerElement:any;
-
+  /** Type of the container. */
   type:string = ContainerType.COMPOSABLE;
 
   #containerMounted: boolean = false;
 
   #tempElements: any = {};
 
+  /** @internal */
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -135,6 +146,12 @@ class ComposableContainer extends Container {
     this.#updateListeners();
   }
 
+  /**
+  * Creates a Collect Element.
+  * @param input Collect Element input.
+  * @param options Collect Element options.
+  * @returns Returns the Collect Element.
+  */
   create = (input: CollectElementInput, options: any = {
     required: false,
   }) => {
@@ -257,6 +274,11 @@ class ComposableContainer extends Container {
     return false;
   };
 
+  /**
+  * Listens for events in the composable container.
+  * @param eventName Name of the event.
+  * @param handler Callback function to run.
+  */
   on = (eventName:string, handler:any) => {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(
@@ -285,6 +307,10 @@ class ComposableContainer extends Container {
     });
   };
 
+  /**
+  * Mounts the composable element onto the specified DOM element.
+  * @param domElement The native HTML element that mounts inside the iframe.
+  */
   mount = (domElement) => {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT,
@@ -336,10 +362,18 @@ class ComposableContainer extends Container {
     );
   };
 
+  /**
+  * Removes the composable element from the DOM element it's mounted onto.
+  */
   unmount = () => {
     this.#containerElement.unmount();
   };
 
+  /**
+  * Collects the data and sends it to the vault.
+  * @param options Collects the data and sends it to the vault.
+  * @returns Returns the inserted data or an error.
+  */
   collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
