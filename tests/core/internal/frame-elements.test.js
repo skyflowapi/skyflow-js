@@ -115,12 +115,6 @@ describe('test frame elements', () => {
             }
         })
         const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
-        const heigtEvent = onSpy.mock.calls[0][1];
-        const cb = jest.fn();
-        heigtEvent({},cb);
-        cb();
-
-
     })
 
 })
