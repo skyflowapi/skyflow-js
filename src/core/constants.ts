@@ -111,6 +111,9 @@ export const ELEMENT_EVENTS_TO_CONTAINER = {
   RENDER_FILE_REQUEST: 'RENDER_FILE_REQUEST',
 };
 
+/**
+ * Supported collect element types.
+ */
 export enum ElementType {
   CVV = 'CVV',
   EXPIRATION_DATE = 'EXPIRATION_DATE',

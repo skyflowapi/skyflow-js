@@ -354,6 +354,7 @@ class CollectContainer extends Container {
 
   /**
   * Inserts file data into the vault.
+  * @param options Indicates the allowedFileTypes.
   * @returns Returns the inserted data.
   */
   uploadFiles = (options) => new Promise((resolve, reject) => {

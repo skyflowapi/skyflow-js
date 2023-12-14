@@ -27,8 +27,11 @@ import RevealElement from './reveal-element';
 export interface IRevealElementInput {
   /** A token to retrieve the value of. */
   token?: string;
+  /** Skyflow id of the file to be render */
   skyflowID?: string;
+  /** Table name to retrieve value from */
   table?: string;
+  /** Column name to retrieve value of */
   column?: string;
   /** Redaction type of the revealed data. */
   redaction?: RedactionType;

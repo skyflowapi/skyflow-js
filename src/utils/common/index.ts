@@ -96,8 +96,11 @@ export interface IRevealRecord {
   token?: string;
   /** Redaction type applied to the data. Defaults to `RedactionType.PLAIN_TEXT`. */
   redaction?: RedactionType;
+  /** Column name to retrieve value of */
   column?: string;
+  /** SkyflowID of record to reveal its value. */
   skyflowID?: string;
+  /** Table name to retrieve value from */
   table?: string;
 }
 
@@ -124,8 +127,12 @@ export interface IRevealResponseType {
   /** Errors, if any. */
   errors?: Record<string, any>[];
 }
+
+/** Wraps the parameters required by the file render response. */
 export interface IRenderResponseType {
+  /** Files rendered, if any. */
   fields?: Record<string, any>
+  /** Errors, if any. */
   errors?: Record<string, any>
 }
 
@@ -155,7 +162,9 @@ export interface IGetInput {
   records: IGetRecord[];
 }
 
+/** Wrapper for parameters required by get options. */
 export interface IGetOptions {
+  /** If `true`, returns tokens for the retrieved data. Defaults to `false`. */
   tokens?: boolean;
 }
 

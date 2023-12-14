@@ -230,6 +230,10 @@ class RevealElement extends SkyflowElement {
     }
   }
 
+  /**
+  * Called when the sensitive file is ready to retrieve and render.
+  * @returns Returns the retrieved file and its response.
+  */
   renderFile() {
     this.#updateFileRenderAltText('loading...');
     this.#updateErrorText('');
