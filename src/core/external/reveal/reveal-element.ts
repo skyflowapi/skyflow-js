@@ -335,6 +335,18 @@ class RevealElement extends SkyflowElement {
     }
     this.#iframe.unmount();
   }
+
+  update(options) {
+    this.#recordData = {
+      ...this.#recordData,
+      ...options,
+    };
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, {
+      name: this.#iframe.name,
+      updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
+      updatedValue: options,
+    });
+  }
 }
 
 export default RevealElement;

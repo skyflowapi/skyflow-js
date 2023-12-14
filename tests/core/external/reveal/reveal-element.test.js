@@ -407,5 +407,25 @@ describe("Reveal Element Methods",()=>{
     const documentElements = document.querySelectorAll('span');
     testRevealElement2.mount('#mockElement');
     testRevealElement2.unmount();
-});
+  });
+
+  it('should update the properties of elements', () => {
+    const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
+    document = window.document;
+    const element = document.createElement('div');
+    element.setAttribute('id', '#mockElement');
+    const documentElements = document.querySelectorAll('span');
+    testRevealElement2.mount('#mockElement');
+
+    const testUpdateOptions = {
+      label: 'Updated Label',
+      inputStyles: {
+        base: {
+          borderWitdth: '5px',
+        }
+      }
+    }
+
+    testRevealElement2.update(testUpdateOptions);
+  })
 });
