@@ -139,7 +139,7 @@ export class IFrameFormElement extends EventEmitter {
 
     this.metaData = metaData;
     this.context = context;
-
+    this.state.isRequired = metaData.isRequired;
     this.collectBusEvents();
   }
 
@@ -317,8 +317,7 @@ export class IFrameFormElement extends EventEmitter {
             : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
         }
       }
-      if (!this.state.isValid && this.state.isEmpty) {
-        this.state.isRequired = true;
+      if (!this.state.isValid && this.state.isEmpty && this.state.isRequired) {
         if (this.label) {
           this.errorText = `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
             this.label)}`;
@@ -799,11 +798,13 @@ export class IFrameForm {
     this.context = context;
   }
 
-  private getOrCreateIFrameFormElement = (frameName, label, skyflowID) => {
-    this.iFrameFormElements[frameName] = this.iFrameFormElements[frameName]
-      || new IFrameFormElement(frameName, label, {
+  private getOrCreateIFrameFormElement = (frameName, label, skyflowID, isRequired) => {
+    if (!this.iFrameFormElements[frameName]) {
+      this.iFrameFormElements[frameName] = new IFrameFormElement(frameName, label, {
         ...this.clientMetaData,
+        isRequired,
       }, this.context, skyflowID);
+    }
     return this.iFrameFormElements[frameName];
   };
 
