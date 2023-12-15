@@ -29,8 +29,8 @@ jobs:
         cp -r skyflow-js/skyflow-js/docs/* refs/
         cd skyflow-js/skyflow-js/
         rm -r docs/
+        git checkout -- package-lock.json
         echo "SHORT_SHA=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
-        git clean -df
 
     - name: Create a branch in skyflow-docs
       env:
