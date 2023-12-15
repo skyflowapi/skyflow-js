@@ -17,8 +17,8 @@ jobs:
         persist-credentials: false
     
     - uses: actions/setup-node@v1
-      # with:
-      #   node-version: 14.17.6
+      with:
+        node-version: 16.14.0
     - run: npm install
 
     - name: Generate JS SDK references
