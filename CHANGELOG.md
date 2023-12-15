@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.34.0] - 2023-12-15
+### Added
+- Ability to update Collect and Reveal element properties dynamically.
+
+### Fixed
+- iFrame height resize issue
+- ExpiryMonth Element's invalid input styles issue
+
+## [1.33.4] - 2023-12-07
+## Fixed
+- jQuery dependency replacement changes.
+
 ## [1.33.3] - 2023-11-15
 ## Fixed
 -  Patch fix for reverting changes for internal jQuery dependency changes.

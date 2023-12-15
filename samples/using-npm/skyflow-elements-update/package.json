@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "skyflow-js": "^1.33.0"
+    "skyflow-js": "^1.34.0"
   }
 }
