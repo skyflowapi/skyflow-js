@@ -1173,6 +1173,7 @@ const updateElement = {
   label: 'string',       // Optional. Label for the form element.
   placeholder: 'string', // Optional. Placeholder for the form element.
   validations: [],       // Optional. Array of validation rules.
+  skyflowID: 'string'    // Optional. SkyflowID of the record.
 };
 ```
 
@@ -2856,7 +2857,10 @@ const updateElement = {
   errorTextStyles: {},      // Optional, styles that will be applied to the errorText of the reveal element.
   label: 'string',          // Optional, label for the form element.
   altText: 'string',        // Optional, string that is shown before reveal, will show token if altText is not provided.
-  redaction: RedactionType, //Optional, Redaction Type to be applied to data.
+  redaction: RedactionType, // Optional, Redaction Type to be applied to data.
+  skyflowID: 'string',      // Optional, SkyflowID of the record.
+  table: 'string',          // Optional, table from which to render the file.
+  column: 'string'          // Optional, column name from which to render the file. 
 };
 ```
 
