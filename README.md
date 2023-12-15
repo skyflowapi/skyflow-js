@@ -1231,9 +1231,9 @@ const cvvElement = collectContainer.create({
 });
 
 // Mount the collect elements.
-collectContainer.mount('#cardHolderNameElement'); // Assumes there is a div with id='#cardHolderNameElement' in the webpage.
-collectContainer.mount('#cardNumberElement'); // Assumes there is a div with id='#cardNumberElement' in the webpage.
-collectContainer.mount('#cvvElement'); // Assumes there is a div with id='#cvvElement' in the webpage.
+cardHolderNameElement.mount('#cardHolderNameElement'); // Assumes there is a div with id='#cardHolderNameElement' in the webpage.
+cardNumberElement.mount('#cardNumberElement'); // Assumes there is a div with id='#cardNumberElement' in the webpage.
+cvvElement.mount('#cvvElement'); // Assumes there is a div with id='#cvvElement' in the webpage.
 
 // ...
 
@@ -2727,9 +2727,9 @@ const fileElement = {
   inputStyles: {},     // Optional, styles to be applied to the element.
   errorTextStyles: {}, // Optional, styles that will be applied to the errorText of the render element.
   altText: 'string',   // Optional, string that is shown before file render call
-  skyflowID: 'string', // Required, skyflow id of the file to be render
-  column: 'string',    // Required, column name of the file to be render
-  table: 'string',     // Required, table name of the file to be render
+  skyflowID: 'string', // Required, skyflow id of the file to render
+  column: 'string',    // Required, column name of the file to render
+  table: 'string',     // Required, table name of the file to render
 };
 ```
 The inputStyles and errorTextStyles parameters accept a styles object as described in the [previous section](https://github.com/skyflowapi/skyflow-js#step-2-create-a-collect-element) for collecting data. But for render file elements, inputStyles accepts only base variant, global style objects.
@@ -2858,9 +2858,9 @@ const updateElement = {
   label: 'string',          // Optional, label for the form element.
   altText: 'string',        // Optional, string that is shown before reveal, will show token if altText is not provided.
   redaction: RedactionType, // Optional, Redaction Type to be applied to data.
-  skyflowID: 'string',      // Optional, SkyflowID of the record.
-  table: 'string',          // Optional, table from which to render the file.
-  column: 'string'          // Optional, column name from which to render the file. 
+  skyflowID: 'string',      // Optional, Skyflow ID of the file to render.
+  table: 'string',          // Optional, table name of the file to render.
+  column: 'string'          // Optional, column name of the file to render. 
 };
 ```
 
@@ -2892,7 +2892,7 @@ const stylesOptions = {
   },
 };
 
-// Create collect elements
+// Create reveal elements
 const cardHolderNameRevealElement = revealContainer.create({
   token: 'ed5fdd1f-5009-435c-a06b-3417ce76d2c8',
   altText: 'first name',
@@ -2908,9 +2908,9 @@ const cardNumberRevealElement = revealContainer.create({
   redaction: 'RedactionType.CARD_NUMBER'
 });
 
-// Mount the collect elements.
-revealContainer.mount('#cardHolderNameRevealElement'); // Assumes there is a div with id='#cardHolderNameRevealElement' in the webpage.
-revealContainer.mount('#cardNumberRevealElement'); // Assumes there is a div with id='#cardNumberRevealElement' in the webpage.
+// Mount the reveal elements.
+cardHolderNameRevealElement.mount('#cardHolderNameRevealElement'); // Assumes there is a div with id='#cardHolderNameRevealElement' in the webpage.
+cardNumberRevealElement.mount('#cardNumberRevealElement'); // Assumes there is a div with id='#cardNumberRevealElement' in the webpage.
 
 // ...
 
