@@ -160,8 +160,11 @@ class RevealFrame {
     document.body.append(this.#elementContainer);
 
     const sub = (data) => {
-      if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
-        const responseValue = data[this.#record.token] as string;
+      if (Object.prototype.hasOwnProperty.call(data, this.#record.elementId)
+        || Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
+        const responseValue = Object.prototype.hasOwnProperty.call(data, this.#record.elementId)
+          ? data[this.#record.elementId] as string
+          : data[this.#record.token] as string;
         this.#revealedValue = responseValue;
         this.isRevealCalled = true;
         this.#dataElememt.innerText = responseValue;
