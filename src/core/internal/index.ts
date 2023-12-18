@@ -210,7 +210,7 @@ export class FrameElement {
     }
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, (state) => {
       this.focusChange(true);
-      state.isEmpty = false;
+      state.isEmpty = !state.value;
       // On Focus the error state should be false
       if (state.error && this.domError) {
         state.isValid = true;
@@ -650,7 +650,7 @@ export class FrameElement {
       classes.push(STYLE_TYPE.FOCUS);
       labelClasses.push(STYLE_TYPE.FOCUS);
     }
-    if (this.options.required && state.value === '' && !state.isFocused) {
+    if (this.options.required && !state.isEmpty && !state.isFocused && !state.isValid) {
       classes.push(STYLE_TYPE.INVALID);
     }
 
