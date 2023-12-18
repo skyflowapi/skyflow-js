@@ -800,11 +800,17 @@ export class IFrameForm {
 
   private getOrCreateIFrameFormElement = (frameName, label, skyflowID, isRequired) => {
     if (!this.iFrameFormElements[frameName]) {
-      isRequired = isRequired !== undefined ? isRequired : false;
-      this.iFrameFormElements[frameName] = new IFrameFormElement(frameName, label, {
-        ...this.clientMetaData,
-        isRequired,
-      }, this.context, skyflowID);
+      if (isRequired) {
+        this.iFrameFormElements[frameName] = new IFrameFormElement(frameName, label, {
+          ...this.clientMetaData,
+          isRequired,
+        }, this.context, skyflowID);
+      } else {
+        this.iFrameFormElements[frameName] = new IFrameFormElement(frameName, label, {
+          ...this.clientMetaData,
+          isRequired: false,
+        }, this.context, skyflowID);
+      }
     }
     return this.iFrameFormElements[frameName];
   };
