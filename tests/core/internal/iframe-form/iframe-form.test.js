@@ -233,6 +233,27 @@ describe('test iframeFormelement', () => {
         element.setValue('');
         expect(element.errorText).toBe('cvv label is required');
     });
+    test('test error text without label composable element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COMPOSABLE}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('');
+        expect(element.errorText).toBe('Invalid cvv');
+    });
+    test('test error text without label collect element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COLLECT}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('');
+        expect(element.errorText).toBe('Invalid value');
+    });
+    test('test error text with label composable element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, 'cvv label',{containerType:ContainerType.COMPOSABLE}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('');
+        expect(element.errorText).toBe('Invalid cvv label');
+    });
     test('test card_number validations', () => {
         const element = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
         element.setValidation()

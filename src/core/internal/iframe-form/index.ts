@@ -800,6 +800,7 @@ export class IFrameForm {
 
   private getOrCreateIFrameFormElement = (frameName, label, skyflowID, isRequired) => {
     if (!this.iFrameFormElements[frameName]) {
+      isRequired = isRequired !== undefined ? isRequired : false;
       this.iFrameFormElements[frameName] = new IFrameFormElement(frameName, label, {
         ...this.clientMetaData,
         isRequired,
