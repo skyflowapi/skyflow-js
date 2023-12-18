@@ -3,7 +3,7 @@ name: Update references in Docsite
 on:
   push:
     branches:
-      - DEX-451/docs-ref-workflow
+      - master
 
 jobs:
   generate-js-sdk-refs:
@@ -12,7 +12,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-        ref: DEX-451/docs-ref-workflow
+        ref: master
         fetch-depth: 0
         persist-credentials: false
     
