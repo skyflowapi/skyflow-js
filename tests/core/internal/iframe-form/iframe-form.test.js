@@ -213,21 +213,21 @@ describe('test iframeFormelement', () => {
     });
 
     test('test error text without label composable element',()=>{
-        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COMPOSABLE}, context)
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COMPOSABLE,isRequired:true}, context)
         element.setValidation();
         element.doesClientHasError = true;
         element.setValue('');
         expect(element.errorText).toBe('cvv is required');
     });
     test('test error text without label collect element',()=>{
-        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COLLECT}, context)
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COLLECT,isRequired:true}, context)
         element.setValidation();
         element.doesClientHasError = true;
         element.setValue('');
         expect(element.errorText).toBe('Field is required');
     });
     test('test error text with label composable element',()=>{
-        const element = new IFrameFormElement(`element:CVV:${tableCol}`, 'cvv label',{containerType:ContainerType.COMPOSABLE}, context)
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, 'cvv label',{containerType:ContainerType.COMPOSABLE,isRequired:true}, context)
         element.setValidation();
         element.doesClientHasError = true;
         element.setValue('');
