@@ -212,7 +212,8 @@ describe('test frame controller', () => {
               min:2,
             }
           }
-        ]
+        ],
+        skyflowID: 'updated-skyflow-id',
       },
     });
 

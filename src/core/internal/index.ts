@@ -260,7 +260,7 @@ export class FrameElement {
 
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
       // On CHANGE set isEmpty to false
-      state.isEmpty = false;
+      state.isEmpty = !state.value;
 
       if (
         state.value
@@ -339,6 +339,7 @@ export class FrameElement {
           inputStyles,
           labelStyles,
           errorTextStyles,
+          skyflowID,
         } = data.options;
         if (validations) {
           this.iFrameFormElement.validations = validations;
@@ -368,6 +369,9 @@ export class FrameElement {
         }
         if (labelStyles) {
           this.injectInputStyles(labelStyles, 'label');
+        }
+        if (skyflowID) {
+          this.iFrameFormElement.skyflowID = skyflowID;
         }
       }
     });

@@ -99,6 +99,7 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
 export const REVEAL_ELEMENT_OPTIONS_TYPES = {
   TOKEN: 'TOKEN',
   ALT_TEXT: 'ALT_TEXT',
+  ELEMENT_PROPS: 'ELEMENT_PROPS',
 };
 
 /** @internal */
