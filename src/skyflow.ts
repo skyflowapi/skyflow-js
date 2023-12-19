@@ -278,6 +278,7 @@ class Skyflow {
   * Returns records by Skyflow IDs or column values.
   * @public
   * @param getInput Identifiers for the records.
+  * @param options Options for retrieving the records.
   * @returns Returns the specified records and any errors.
   */
   get(getInput: IGetInput, options?: IGetOptions) {
