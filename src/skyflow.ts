@@ -1,6 +1,10 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+
+/**
+ * @module Skyflow
+ */
 import bus from 'framebus';
 import uuid from './libs/uuid';
 import {
@@ -40,18 +44,32 @@ import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
 
+ /**
+ * Supported container types.
+ */
 export enum ContainerType {
   COLLECT = 'COLLECT',
   REVEAL = 'REVEAL',
   COMPOSABLE = 'COMPOSABLE',
 }
+
+/** Wraps the parameters required by Skyflow. */
 export interface ISkyflow {
+  /** ID of the vault to connect to. */
   vaultID?: string;
+  /** URL of the vault to connect to. */
   vaultURL?: string;
+  /** Function that retrieves a Skyflow bearer token from your backend. */
   getBearerToken: () => Promise<string>;
+  /** Additional configuration options. */
   options?: Record<string, any>;
 }
 const CLASS_NAME = 'Skyflow';
+
+  /**
+  * Parent Skyflow class consists of all the methods exposed to the client.
+  * @class Skyflow
+  */
 class Skyflow {
   #client: Client;
 
@@ -74,6 +92,7 @@ class Skyflow {
 
   #skyflowElements: any;
 
+  /** @internal */
   constructor(config: ISkyflow) {
     const localSDKversion = localStorage.getItem('sdk_version') || '';
     this.#metadata[SDK_VERSION] = localSDKversion;
@@ -135,6 +154,12 @@ class Skyflow {
       MessageType.LOG, this.#logLevel);
   }
 
+  /**
+  * Initializes the Skyflow client.
+  * @public
+  * @param config Configuration for the skyflow client.
+  * @returns Returns an instance of the Skyflow client.
+  */
   static init(config: ISkyflow): Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
     checkAndSetForCustomUrl(config);
@@ -149,6 +174,13 @@ class Skyflow {
     return skyflow;
   }
 
+  /**
+  * Creates a container.
+  * @public
+  * @param type Type of the container.
+  * @param options Options for the container.
+  * @returns Returns a container of the specified type.
+  */
   container(type: ContainerType, options?: Record<string, any>) {
     switch (type) {
       case ContainerType.COLLECT: {
@@ -201,6 +233,13 @@ class Skyflow {
     }
   }
 
+  /**
+  * Inserts data into the vault.
+  * @public
+  * @param records Records to insert.
+  * @param options Options for the insertion.
+  * @returns Returns the insert response.
+  */
   insert(
     records: IInsertRecordInput,
     options?: IInsertOptions,
@@ -210,12 +249,24 @@ class Skyflow {
     return this.#skyflowContainer.insert(records, options);
   }
 
+  /**
+  * Returns values that correspond to the specified tokens.
+  * @public
+  * @param detokenizeInput Tokens to return values for.
+  * @returns Tokens to return values for.
+  */
   detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
     printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.detokenize(detokenizeInput);
   }
 
+  /**
+  * Reveals records by Skyflow ID.
+  * @public
+  * @param getByIdInput Skyflow IDs.
+  * @returns Returns the specified records and any errors.
+  */
   getById(getByIdInput: IGetByIdInput) {
     printLog(logs.warnLogs.GET_BY_ID_DEPRECATED, MessageType.WARN, this.#logLevel);
     printLog(parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
@@ -223,12 +274,26 @@ class Skyflow {
     return this.#skyflowContainer.getById(getByIdInput);
   }
 
+  /**
+  * Returns records by Skyflow IDs or column values.
+  * @public
+  * @param getInput Identifiers for the records.
+  * @param options Options for retrieving the records.
+  * @returns Returns the specified records and any errors.
+  */
   get(getInput: IGetInput, options?: IGetOptions) {
     printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.get(getInput, options);
   }
 
+  /**
+  * Deletes records from the vault.
+  * @public
+  * @param records Records to delete.
+  * @param options Options for the deletion.
+  * @returns Returns the deleted records and any errors.
+  */
   delete(records: IDeleteRecordInput, options?: IDeleteOptions) {
     printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);

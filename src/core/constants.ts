@@ -1,6 +1,10 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+
+/**
+ * @module Constants
+ */
 import defaultCardIcon from '../../assets/default.svg';
 import amexIcon from '../../assets/amex.svg';
 import dinnersClubIcon from '../../assets/diners-club.svg';
@@ -15,15 +19,28 @@ import copyIcon from '../../assets/copyIcon.svg';
 import successIcon from '../../assets/path.svg';
 import logs from '../utils/logs';
 
+/** @internal */
 export const SKY_METADATA_HEADER = 'sky-metadata';
+
+/** @internal */
 export const SDK_VERSION = 'sdkVersion';
+
+/** @internal */
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
+
+/** @internal */
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';
+
+/** @internal */
 export const SKYFLOW_FRAME_CONTROLLER = 'skyflow_controller';
+
+/** @internal */
 export const FRAME_REVEAL = 'reveal';
 
+/** @internal */
 export const FRAME_ELEMENT = 'element';
 
+/** @internal */
 export const PUREJS_TYPES = {
   INSERT: 'INSERT',
   DETOKENIZE: 'DETOKENIZE',
@@ -33,6 +50,7 @@ export const PUREJS_TYPES = {
   FILE_RENDER: 'FILE_RENDER',
 };
 
+/** @internal */
 export const ELEMENT_EVENTS_TO_CLIENT = {
   CHANGE: 'CHANGE',
   READY: 'READY',
@@ -48,6 +66,7 @@ export const ELEMENT_EVENTS_TO_CLIENT = {
   HEIGHT: 'HEIGHT',
 };
 
+/** @internal */
 export const ELEMENT_EVENTS_TO_IFRAME = {
   FRAME_READY: 'FRAME_READY',
   READY_FOR_CLIENT: 'READY_FOR_CLIENT',
@@ -76,12 +95,14 @@ export const ELEMENT_EVENTS_TO_IFRAME = {
   RENDER_FILE_REQUEST: 'RENDER_FILE_REQUEST',
 };
 
+/** @internal */
 export const REVEAL_ELEMENT_OPTIONS_TYPES = {
   TOKEN: 'TOKEN',
   ALT_TEXT: 'ALT_TEXT',
   ELEMENT_PROPS: 'ELEMENT_PROPS',
 };
 
+/** @internal */
 export const ELEMENT_EVENTS_TO_CONTAINER = {
   ELEMENT_MOUNTED: 'ELEMENT_MOUNTED',
   ALL_ELEMENTS_MOUNTED: 'ALL_ELEMENTS_MOUNTED',
@@ -91,6 +112,9 @@ export const ELEMENT_EVENTS_TO_CONTAINER = {
   RENDER_FILE_REQUEST: 'RENDER_FILE_REQUEST',
 };
 
+/**
+ * Supported collect element types.
+ */
 export enum ElementType {
   CVV = 'CVV',
   EXPIRATION_DATE = 'EXPIRATION_DATE',
@@ -103,6 +127,7 @@ export enum ElementType {
   FILE_INPUT = 'FILE_INPUT',
 }
 
+/** @internal */
 export enum CardType {
   VISA = 'VISA',
   MASTERCARD = 'MASTERCARD',
@@ -117,6 +142,7 @@ export enum CardType {
   UNKNOWN = 'UNKNOWN',
 }
 
+/** @internal */
 export const CARD_NUMBER_MASK = {
   [CardType.AMEX]: ['XXXX XXXXXX XXXXX', { X: '[0-9]' }],
   [CardType.VISA]: ['XXXX XXXX XXXX XXXX', { X: '[0-9]' }],
@@ -131,6 +157,7 @@ export const CARD_NUMBER_MASK = {
   [CardType.UNKNOWN]: ['XXXX XXXX XXXX XXXX XXX', { X: '[0-9]' }],
 };
 
+/** @internal */
 export const ELEMENTS = {
   textarea: {
     name: 'textarea',
@@ -249,12 +276,14 @@ export const ELEMENTS = {
   },
 };
 
+/** @internal */
 export const CARDNUMBER_INPUT_FORMAT = {
   SPACE_FORMAT: 'XXXX XXXX XXXX XXXX',
   DASH_FORMAT: 'XXXX-XXXX-XXXX-XXXX',
   AMEX_FORMAT: 'XXXX XXXXXX XXXXX',
 };
 
+/** @internal */
 export const IFRAME_DEFAULT_STYLES = {
   height: '100%',
   width: '100%',
@@ -267,6 +296,7 @@ export const IFRAME_DEFAULT_STYLES = {
   'user-select': 'none',
 };
 
+/** @internal */
 export const CONTROLLER_STYLES = {
   position: 'absolute',
   top: 0,
@@ -277,6 +307,7 @@ export const CONTROLLER_STYLES = {
   'user-select': 'none',
 };
 
+/** @internal */
 export const INPUT_STYLES = {
   width: '100%',
   height: '100%',
@@ -286,27 +317,36 @@ export const INPUT_STYLES = {
   outline: 'none',
 };
 
+/** @internal */
 export const INPUT_WITH_ICON_STYLES = {
   'background-position': '7px 7px',
   'background-repeat': 'no-repeat',
   'text-indent': '36px',
 };
 
+/** @internal */
 export const INPUT_WITH_ICON_DEFAULT_STYLES = {
   'background-repeat': 'no-repeat',
   'text-indent': '42px',
   padding: '4px',
 };
 
+/** @internal */
 export const INPUT_ICON_STYLES = 'position: absolute; left:8px; bottom:calc(50% - 12px)';
+
+/** @internal */
 export const COLLECT_COPY_ICON_STYLES = 'position: absolute; right:8px; bottom:calc(50% - 12px); cursor:pointer;';
+
+/** @internal */
 export const REVEAL_COPY_ICON_STYLES = 'position: absolute; right:8px; top:calc(50% - 12px); cursor:pointer;';
 
+/** @internal */
 export const ERROR_TEXT_STYLES = {
   color: '#f44336',
   padding: '2px',
 };
 
+/** @internal */
 export const ALLOWED_ATTRIBUTES = {
   'aria-invalid': 'boolean',
   'aria-required': 'boolean',
@@ -315,6 +355,7 @@ export const ALLOWED_ATTRIBUTES = {
   accept: 'string',
 };
 
+/** @internal */
 export const ALLOWED_STYLES = [
   '-moz-appearance',
   '-moz-osx-font-smoothing',
@@ -357,6 +398,7 @@ export const ALLOWED_STYLES = [
   'width',
 ];
 
+/** @internal */
 export const ALLOWED_PSEUDO_STYLES = [
   ':hover',
   ':focus',
@@ -367,6 +409,7 @@ export const ALLOWED_PSEUDO_STYLES = [
   ':-webkit-autofill',
 ];
 
+/** @internal */
 export const ALLOWED_MULTIPLE_FIELDS_STYLES = [
   'height',
   'width',
@@ -381,6 +424,7 @@ export const ALLOWED_MULTIPLE_FIELDS_STYLES = [
 ];
 
 // should be in the order of applying the styles
+/** @internal */
 export const STYLE_TYPE = {
   WEBPACKAUTOFILL: '-webkit-autofill',
   BASE: 'base',
@@ -391,6 +435,8 @@ export const STYLE_TYPE = {
   GLOBAL: 'global',
   REQUIRED_ASTERISK: 'requiredAsterisk',
 };
+
+/** @internal */
 export const REVEAL_ELEMENT_DIV_STYLE = {
   container: {
     display: 'flex',
@@ -399,11 +445,14 @@ export const REVEAL_ELEMENT_DIV_STYLE = {
   },
 };
 
+/** @internal */
 export const REVEAL_ELEMENT_LABEL_DEFAULT_STYLES = {
   [STYLE_TYPE.BASE]: {
     'margin-bottom': '4px',
   },
 };
+
+/** @internal */
 export const RENDER_FILE_ELEMENT_ALT_TEXT_DEFAULT_STYLES = {
   [STYLE_TYPE.BASE]: {
     'margin-bottom': '4px',
@@ -413,14 +462,17 @@ export const RENDER_FILE_ELEMENT_ALT_TEXT_DEFAULT_STYLES = {
   },
 };
 
+/** @internal */
 export const REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES = {
   [STYLE_TYPE.BASE]: {
     marginTop: '4px',
   },
 };
 
+/** @internal */
 export const REVEAL_ELEMENT_ERROR_TEXT = 'Invalid Token';
 
+/** @internal */
 export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
   [STYLE_TYPE.BASE]: {
     marginBottom: '4px',
@@ -431,6 +483,7 @@ export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
   },
 };
 
+/** @internal */
 export const CARD_TYPE_REGEX = {
   [CardType.VISA]: {
     regex: /^4\d*/,
@@ -478,8 +531,11 @@ export const CARD_TYPE_REGEX = {
     cardLengthRange: [12, 13, 14, 15, 16, 17, 18, 19],
   },
 };
+
+/** @internal */
 export const DEFAULT_CARD_LENGTH_RANGE = [0, 12, 13, 14, 15, 16, 17, 18, 19];
 
+/** @internal */
 export const CARD_ENCODED_ICONS = {
   [CardType.DEFAULT]: defaultCardIcon,
   [CardType.AMEX]: amexIcon,
@@ -493,6 +549,7 @@ export const CARD_ENCODED_ICONS = {
   [CardType.VISA]: visaCardIcon,
 };
 
+/** @internal */
 export const COPY_UTILS = {
   copyIcon,
   successIcon,
@@ -500,17 +557,24 @@ export const COPY_UTILS = {
   copied: 'Copied to Clipboard',
 };
 
+/** @internal */
 export const EXPIRY_DATE_MASK = {
   'MM/YYYY': ['YY/YYYY', { Y: '[0-9]' }],
   'MM/YY': ['YY/YY', { Y: '[0-9]' }],
   'YYYY/MM': ['YYYY/YY', { Y: '[0-9]' }],
   'YY/MM': ['YY/YY', { Y: '[0-9]' }],
 };
+
+/** @internal */
 export const EXPIRY_YEAR_MASK = {
   YYYY: ['YYYY', { Y: '[0-9]' }],
   YY: ['YY', { Y: '[0-9]' }],
 };
+
+/** @internal */
 export const DEFAULT_EXPIRATION_DATE_FORMAT = 'MM/YY';
+
+/** @internal */
 export const ALLOWED_EXPIRY_DATE_FORMATS = [
   DEFAULT_EXPIRATION_DATE_FORMAT,
   'YYYY/MM',
@@ -518,12 +582,16 @@ export const ALLOWED_EXPIRY_DATE_FORMATS = [
   'MM/YYYY',
 ];
 
+/** @internal */
 export const DEFAULT_EXPIRATION_YEAR_FORMAT = 'YY';
+
+/** @internal */
 export const ALLOWED_EXPIRY_YEAR_FORMATS = [
   DEFAULT_EXPIRATION_YEAR_FORMAT,
   'YYYY',
 ];
 
+/** @internal */
 export enum ContentType {
   APPLICATIONORJSON = 'application/json',
   TEXTORPLAIN = 'text/plain',
@@ -532,6 +600,7 @@ export enum ContentType {
   FORMDATA = 'multipart/form-data',
 }
 
+/** @internal */
 export const ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES = [
   ElementType.CARD_NUMBER,
   ElementType.EXPIRATION_DATE,
@@ -539,6 +608,7 @@ export const ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES = [
   ElementType.EXPIRATION_YEAR,
 ];
 
+/** @internal */
 export const DEFAULT_ERROR_TEXT_ELEMENT_TYPES = {
   [ElementType.CVV]: 'Invalid cvv',
   [ElementType.EXPIRATION_DATE]: 'Invalid expiration date',
@@ -551,6 +621,7 @@ export const DEFAULT_ERROR_TEXT_ELEMENT_TYPES = {
   [ElementType.FILE_INPUT]: logs.errorLogs.INVALID_COLLECT_VALUE,
 };
 
+/** @internal */
 export const DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES = {
   [ElementType.CVV]: 'cvv is required',
   [ElementType.EXPIRATION_DATE]: 'expiration date is required',
@@ -563,6 +634,7 @@ export const DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES = {
   [ElementType.FILE_INPUT]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
 };
 
+/** @internal */
 export const INPUT_KEYBOARD_EVENTS = {
   ENTER: 'Enter',
   RIGHT_ARROW: 'ArrowRight',
@@ -570,8 +642,10 @@ export const INPUT_KEYBOARD_EVENTS = {
   BACKSPACE: 'Backspace',
 };
 
+/** @internal */
 export const CUSTOM_ROW_ID_ATTRIBUTE = 'data-row-id';
 
+/** @internal */
 export const INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES = [
   ElementType.CARDHOLDER_NAME,
   ElementType.EXPIRATION_MONTH,
@@ -580,11 +654,17 @@ export const INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES = [
   ElementType.CVV,
 ];
 
+/** @internal */
 export const DEFAULT_CARD_NUMBER_SEPERATOR = ' ';
+
+/** @internal */
 export const CARD_NUMBER_HYPEN_SEPERATOR = '-';
 
+/** @internal */
 export const DEFAULT_INPUT_FORMAT_TRANSLATION = { X: '[0-9]' };
 
+/** @internal */
 export const DEFAULT_FILE_RENDER_ERROR = 'File rendering failed. Please try again later.';
 
+/** @internal */
 export const FILE_DOWNLOAD_URL_PARAM = 'downloadURL=true&contentDisposition=INLINE';

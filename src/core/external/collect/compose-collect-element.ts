@@ -1,3 +1,6 @@
+/**
+ * @module ComposeCollectElement
+ */
 import EventEmitter from '../../../event-emitter';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
@@ -5,17 +8,22 @@ import { EventName } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../constants';
 
+/**
+  * The create method returns an instance of Skyflow Composable Elements.
+  * @class ComposableElement
+  */
 class ComposableElement {
   #elementName: string;
 
   #eventEmitter: EventEmitter;
-
+  /** Type of the container. */
   type: string = ContainerType.COMPOSABLE;
 
   #isMounted = false;
 
   #isUpdateCalled = false;
 
+  /** @internal */
   constructor(name, eventEmitter) {
     this.#elementName = name;
     this.#eventEmitter = eventEmitter;
@@ -24,6 +32,11 @@ class ComposableElement {
     });
   }
 
+  /**
+  * Listens for events in the composable element.
+  * @param eventName Name of the event.
+  * @param handler Callback function to run.
+  */
   on(eventName: string, handler: any) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(
@@ -57,6 +70,10 @@ class ComposableElement {
     });
   }
 
+  /**
+  * Updates the configuration of elements inside the composable container.
+  * @param options Options for the container update.
+  */
   update = (options) => {
     this.#isUpdateCalled = true;
     if (this.#isMounted) {

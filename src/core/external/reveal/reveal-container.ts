@@ -1,6 +1,10 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+
+/**
+ * @module RevealContainer
+ */
 import bus from 'framebus';
 import EventEmitter from '../../../event-emitter';
 import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe-libs/iframer';
@@ -19,26 +23,46 @@ import {
 import Container from '../common/container';
 import RevealElement from './reveal-element';
 
+/** Configuration for Reveal Elements. */
 export interface IRevealElementInput {
+  /** A token to retrieve the value of. */
   token?: string;
+  /** Skyflow id of the file to be render */
   skyflowID?: string;
+  /** Table name to retrieve value from */
   table?: string;
+  /** Column name to retrieve value of */
   column?: string;
+  /** Redaction type of the revealed data. */
   redaction?: RedactionType;
+  /** Input styles for the Reveal Element. */
   inputStyles?: object;
+  /** Label for the Reveal Element. */
   label?: string;
+  /** Styles for the Reveal Element's label. */
   labelStyles?: object;
+  /** Alternative text for the Reveal Element. */
   altText?: string;
+  /** Styles for the Reveal Element's error text. */
   errorTextStyles?: object;
 }
 
+/** Configuration options for a Reveal Element. */
 export interface IRevealElementOptions {
+  /** If `true` displays a copy button that copies the Reveal Element value to the clipboard. Defaults to `false`. */
   enableCopy?: boolean;
+  /** Format of the Reveal element. */
   format?: string;
+  /** Custom allowed substitutions and regex patterns for `format`. */
   translation?:Record<string, string>
 }
 
 const CLASS_NAME = 'RevealContainer';
+
+/**
+  * Wraps all Reveal Elements.
+  * @class RevealContainer
+  */
 class RevealContainer extends Container {
   #revealRecords: IRevealElementInput[] = [];
 
@@ -61,9 +85,10 @@ class RevealContainer extends Container {
   #skyflowElements: any;
 
   #isMounted:any;
-
+  /** Type of the container. */
   type:string = ContainerType.REVEAL;
 
+  /** @internal */
   constructor(metaData, skyflowElements, context) {
     super();
     this.#metaData = metaData;
@@ -144,6 +169,12 @@ class RevealContainer extends Container {
       );
   }
 
+  /**
+  * Creates a Reveal Element.
+  * @param record Input configuration for a Reveal Element.
+  * @param options Additional options for a Reveal Element.
+  * @returns Returns a Reveal element.
+  */
   create(record: IRevealElementInput, options?: IRevealElementOptions) {
     // this.#revealRecords.push(record);
     const elementId = uuid();
@@ -159,6 +190,10 @@ class RevealContainer extends Container {
     return revealElement;
   }
 
+  /**
+  * Called when the sensitive data is ready to retrieve and reveal.
+  * @returns Returns the retrieved and revealed data.
+  */
   reveal() {
     this.#isRevealCalled = true;
     if (this.#isElementsMounted) {
