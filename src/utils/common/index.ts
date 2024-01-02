@@ -149,3 +149,30 @@ export interface IDeleteResponseType {
   records?: Record<string, string>[];
   errors?: Record<string, any>[];
 }
+
+export interface MeticsObjectType {
+  element_id: string,
+  element: string,
+  element_type: string[],
+  div_id: string,
+  container_id: string,
+  session_id: string,
+  vault_id: string,
+  vault_url: string,
+  events: string[],
+  created_at: number,
+  region: string,
+  mount_start_time?: number,
+  mount_end_time?: number,
+  error?: string,
+  latency?: number,
+  status: 'SUCCESS' | 'INITIALIZED' | 'PARTIAL_RENDER' | 'FAILED' | string,
+  sdk_name_version: string,
+  sdk_client_device_model: string | undefined,
+  sdk_client_os_details: string,
+  sdk_runtime_details: string
+}
+
+export interface SharedMeticsObjectType {
+  records: MeticsObjectType[];
+}

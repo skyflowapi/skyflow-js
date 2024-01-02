@@ -21,6 +21,7 @@ import {
   parameterizedString,
   getElementName,
 } from './utils/logs-helper';
+import { initalizeMetricObject, pushEventWithTimeout } from './metrics';
 
 (function init(root: any) {
   try {
@@ -43,6 +44,11 @@ import {
       const clientId = names.length > 1 ? names[1] : '';
       SkyflowFrameController.init(clientId);
     } else if (names[0] === FRAME_ELEMENT) {
+      if (names[1] && names[3]) {
+        initalizeMetricObject(names);
+        const elementId = `${names[1]}-${names[3]}`;
+        pushEventWithTimeout(elementId);
+      }
       printLog(
         parameterizedString(
           logs.infoLogs.COLLECT_ELEMET_START,

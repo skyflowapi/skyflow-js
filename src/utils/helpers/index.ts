@@ -367,3 +367,7 @@ export function checkAndSetForCustomUrl(config: ISkyflow) {
     properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
   }
 }
+
+export function getVaultBeffeURL(vaultURL: string): string {
+  return vaultURL.replace('vault', 'vault-beffe');
+}
