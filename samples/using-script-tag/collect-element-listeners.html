@@ -63,10 +63,10 @@
             env: Skyflow.Env.DEV,
           },
         });
-      
+
         // Create collect Container.
         const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
-      
+
         // Custom styles for collect elements.
         const collectStylesOptions = {
           inputStyles: {
@@ -98,7 +98,7 @@
             },
           },
         };
-      
+
         // Create collect elements.
         const cardNumberElement = collectContainer.create({
           table: 'pii_fields',
@@ -108,7 +108,7 @@
           label: 'Card Number',
           type: Skyflow.ElementType.CARD_NUMBER,
         });
-      
+
         const cvvElement = collectContainer.create({
           table: 'pii_fields',
           column: 'primary_card.cvv',
@@ -117,7 +117,7 @@
           placeholder: 'cvv',
           type: Skyflow.ElementType.CVV,
         });
-      
+
         const expiryDateElement = collectContainer.create({
           table: 'pii_fields',
           column: 'expiry_date',
@@ -126,7 +126,7 @@
           placeholder: 'MM/YYYY',
           type: Skyflow.ElementType.EXPIRATION_DATE,
         });
-      
+
         const cardHolderNameElement = collectContainer.create({
           table: 'pii_fields',
           column: 'first_name',
@@ -135,35 +135,35 @@
           placeholder: 'cardholder name',
           type: Skyflow.ElementType.CARDHOLDER_NAME,
         });
-      
+
         // Mount the elements.
         cardNumberElement.mount('#collectCardNumber');
         cvvElement.mount('#collectCvv');
         expiryDateElement.mount('#collectExpiryDate');
         cardHolderNameElement.mount('#collectCardholderName');
-      
+
         // Add listeners to Collect Elements.
-      
+
         // Add READY EVENT Listener.
         cardNumberElement.on(Skyflow.EventName.READY, readyState => {
           console.log('Ready Event Triggered', readyState);
         });
-      
+
         // Add CHANGE EVENT Listener.
         cvvElement.on(Skyflow.EventName.CHANGE, changeState => {
           console.log('CHANGE Event Triggered', changeState);
         });
-      
+
         // Add FOCUS EVENT Listener.
         expiryDateElement.on(Skyflow.EventName.FOCUS, focusState => {
           console.log('FOCUS Event Triggered', focusState);
         });
-      
+
         // Add BLUR EVENT Listener.
         cardHolderNameElement.on(Skyflow.EventName.BLUR, blurState => {
           console.log('BLUR Event Triggered', blurState);
         });
-      
+
         // Collect all elements data.
         const collectButton = document.getElementById('collectPCIData');
         if (collectButton) {
