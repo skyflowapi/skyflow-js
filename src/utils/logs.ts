@@ -100,6 +100,7 @@ const logs = {
     INVALID_CONTAINER_TYPE: 'Interface: client  {containerType}  container - Invalid container type. Invalid container object.',
 
     INVALID_COLLECT_VALUE: 'Invalid value',
+    INVALID_FILE_NAMES: 'Invalid File Name. Only alphanumeric characters and !-_.*() are allowed.',
     INVALID_COLLECT_VALUE_WITH_LABEL: 'Invalid %s1',
     REQUIRED_COLLECT_VALUE: '%s1 is required',
     DEFAULT_REQUIRED_COLLECT_VALUE: 'Field is required',
@@ -292,6 +293,7 @@ const logs = {
     INVALID_ALLOWED_OPTIONS: 'Interface: collect element - Invalid options, allowedFileType must be of string array type.',
     EMPTY_ALLOWED_OPTIONS_ARRAY: 'Interface: collect element - Invalid options value, allowedFileType array is empty.',
     INVALID_ALLOWED_FILETYPE_ARRAY: 'Interface: collect element - Invalid options value, allowedFileType array must contain only string elements.',
+    INVALID_FILE_NAME: 'Interface: collect element - Invalid File Name. Only alphanumeric characters and !-_.*() are allowed.',
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',

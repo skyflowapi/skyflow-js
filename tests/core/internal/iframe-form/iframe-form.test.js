@@ -286,7 +286,36 @@ describe('test iframeFormelement', () => {
         const invalid = fileElement.validator(invalidFile)
         expect(invalid).toBe(false)
     })
+    test('file_input validation file name', () => {
+        const invalidFile = {
+            lastModified: '',
+            lastModifiedDate: '',
+            name: "sample 1.png",
+            size: 48848,
+            type: "image/jpeg",
+            webkitRelativePath: ""
+        }
 
+        const fileElement = new IFrameFormElement(file_element, {}, context)
+        fileElement.setValidation()
+        const invalid = fileElement.validator(invalidFile)
+        expect(invalid).toBe(false)
+    })
+    test('file_input validation file name', () => {
+        const invalidFile = {
+            lastModified: '',
+            lastModifiedDate: '',
+            name: "sample 1.png",
+            size: 48848,
+            type: "application/z",
+            webkitRelativePath: ""
+        }
+
+        const fileElement = new IFrameFormElement(file_element, {}, context)
+        fileElement.setValidation()
+        const invalid = fileElement.validator(invalidFile)
+        expect(invalid).toBe(false)
+    })
     test('invalid custom validations', () => {
         const element2 = new IFrameFormElement(`element:EXPIRATION_MONTH:${tableCol}`, {}, context)
         element2.setValidation([{type:'DEFAULT',params:{}}])
