@@ -431,7 +431,7 @@ export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
   },
 };
 
-export const ALLOWED_NAME_FOR_FILE = /^[a-zA-Z0-9!-_.*()]+$/;
+export const ALLOWED_NAME_FOR_FILE = /^[a-zA-Z0-9!\-_.*()]+$/;
 
 export const CARD_TYPE_REGEX = {
   [CardType.VISA]: {
