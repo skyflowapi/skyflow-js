@@ -388,11 +388,7 @@ export class IFrameFormElement extends EventEmitter {
       } catch (err) {
         resp = false;
       }
-      try {
-        vaildateFileNames = vaildateFileName(this.state.value.name);
-      } catch (err) {
-        vaildateFileNames = false;
-      }
+      vaildateFileNames = vaildateFileName(value.name);
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex && value) {

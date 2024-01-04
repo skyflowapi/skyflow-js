@@ -184,12 +184,7 @@ export const fileValidation = (value, required: Boolean = false) => {
   return true;
 };
 
-export const vaildateFileName = (name) => {
-  if (!ALLOWED_NAME_FOR_FILE.test(name)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true);
-  }
-  return true;
-};
+export const vaildateFileName = (name) => ALLOWED_NAME_FOR_FILE.test(name);
 
 export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
   `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`

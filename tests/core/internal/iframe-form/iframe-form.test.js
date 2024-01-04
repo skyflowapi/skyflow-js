@@ -303,16 +303,15 @@ describe('test iframeFormelement', () => {
         const invalid = fileElement.validator(invalidFile)
         expect(invalid).toBe(false)
     })
-    test('file_input validation file name', () => {
+    test('file_input validation file name invalid case', () => {
         const invalidFile = {
             lastModified: '',
             lastModifiedDate: '',
             name: "sample 1.png",
             size: 48848,
-            type: "application/z",
+            type: "image/png" ,
             webkitRelativePath: ""
         }
-
         const fileElement = new IFrameFormElement(file_element, {}, context)
         fileElement.setValidation()
         const invalid = fileElement.validator(invalidFile)
