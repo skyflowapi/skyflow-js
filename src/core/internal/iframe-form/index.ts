@@ -53,7 +53,7 @@ import {
   ValidationRuleType,
 } from '../../../utils/common';
 import {
-  fileValidation, formatFrameNameToId, getReturnValue, removeSpaces,
+  fileValidation, formatFrameNameToId, getReturnValue, removeSpaces, vaildateFileName,
 } from '../../../utils/helpers';
 import { ContainerType } from '../../../skyflow';
 
@@ -368,6 +368,8 @@ export class IFrameFormElement extends EventEmitter {
 
   validator(value: any) {
     let resp = true;
+    let vaildateFileNames = true;
+
     if (this.fieldType === ElementType.CARD_NUMBER && value) {
       if (this.regex) {
         resp = this.regex.test(value)
@@ -386,24 +388,37 @@ export class IFrameFormElement extends EventEmitter {
       } catch (err) {
         resp = false;
       }
+      try {
+        vaildateFileNames = vaildateFileName(this.state.value.name);
+      } catch (err) {
+        vaildateFileNames = false;
+      }
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex && value) {
         resp = this.regex.test(value);
       }
     }
-    if (!resp) {
-      if (this.label) {
-        this.errorText = `${parameterizedString(
-          logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
-          this.label,
-        )}`;
-      } else {
-        this.errorText = this.containerType === ContainerType.COLLECT
-          ? logs.errorLogs.INVALID_COLLECT_VALUE
-          : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
+    if (!resp || !vaildateFileNames) {
+      if (!resp) {
+        if (this.label) {
+          this.errorText = `${parameterizedString(
+            logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
+            this.label,
+          )}`;
+        } else {
+          this.errorText = this.containerType === ContainerType.COLLECT
+            ? logs.errorLogs.INVALID_COLLECT_VALUE
+            : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
+        }
+        return resp;
       }
-      return resp;
+      if (!vaildateFileNames) {
+        this.errorText = this.containerType === ContainerType.COLLECT
+          ? logs.errorLogs.INVALID_FILE_NAMES
+          : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
+        return vaildateFileNames;
+      }
     }
 
     resp = this.validateCustomValidations(value);
@@ -877,6 +892,12 @@ export class IFrameForm {
     const value: Blob = Object.values(fileUploadObject)[0] as Blob;
 
     formData.append(column, value);
+
+    const validateFileName = vaildateFileName(state.value.name);
+
+    if (!validateFileName) {
+      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true));
+    }
 
     const { client } = this;
     const sendRequest = () => new Promise((rootResolve, rootReject) => {

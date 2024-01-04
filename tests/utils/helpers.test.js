@@ -22,7 +22,8 @@ import {
   getSdkVersionName,
   getMetaObject,
   checkAndSetForCustomUrl,
-  domReady
+  domReady,
+  vaildateFileName
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -107,6 +108,47 @@ describe('test copy feature', () => {
 
   })
 })
+
+describe('test file name validation', () => {
+
+  test('invalid file name', () => {
+    const invalidFileName = [      {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample .zip",
+      size: 48848,
+      type: "application/zip",
+      webkitRelativePath: ""
+    },{
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample%.deb",
+      size: 48848,
+      type: "application/vnd.debian.binary-package",
+      webkitRelativePath: ""
+    }
+  ]
+    invalidFileName.forEach(invalidFile => {
+      try {
+        vaildateFileName(invalidFile)
+      } catch(err) {
+        expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME.description)
+      }      
+    })
+  })
+  test('valid file name', () => {
+    const file = {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.jpg",
+      size: 48848,
+      type: "image/jpeg",
+      webkitRelativePath: ""
+    }
+    expect(vaildateFileName(file.name)).toBe(true);
+  })
+  
+  });
 
 describe('test file validation', () => {
   test('invalid file type', () => {

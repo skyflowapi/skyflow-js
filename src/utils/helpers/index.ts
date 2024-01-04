@@ -3,6 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import { SdkInfo } from '../../client';
 import {
+  ALLOWED_NAME_FOR_FILE,
   CardType,
   COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType,
 } from '../../core/constants';
@@ -180,6 +181,13 @@ export const fileValidation = (value, required: Boolean = false) => {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
   }
 
+  return true;
+};
+
+export const vaildateFileName = (name) => {
+  if (!ALLOWED_NAME_FOR_FILE.test(name)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true);
+  }
   return true;
 };
 
