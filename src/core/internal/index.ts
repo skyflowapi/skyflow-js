@@ -651,7 +651,7 @@ export class FrameElement {
       classes.push(STYLE_TYPE.FOCUS);
       labelClasses.push(STYLE_TYPE.FOCUS);
     }
-    if (!state.isTouched && !state.isFocused && !state.isValid) {
+    if (state.isTouched && !state.isFocused && !state.isValid) {
       classes.push(STYLE_TYPE.INVALID);
     }
 

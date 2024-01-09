@@ -70,7 +70,7 @@ export class IFrameFormElement extends EventEmitter {
     isComplete: false,
     name: '',
     isRequired: false,
-    isTouched: true,
+    isTouched: false,
   };
 
   readonly fieldType: string;
@@ -171,7 +171,7 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   changeFocus = (focus: boolean) => {
-    this.state.isTouched = false;
+    this.state.isTouched = true;
     this.state.isFocused = focus;
     // this.sendChangeStatus();
     // this.setValue(this.state.value, true);
@@ -630,7 +630,7 @@ export class IFrameFormElement extends EventEmitter {
       isComplete: false,
       name: '',
       isRequired: false,
-      isTouched: true,
+      isTouched: false,
     };
   }
 
