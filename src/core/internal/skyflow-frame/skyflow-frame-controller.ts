@@ -234,6 +234,7 @@ class SkyflowFrameController {
               this.#client.config.vaultID}`,
             headers: {
               Authorization: `Bearer ${authToken}`,
+              'content-type': 'application/json',
             },
 
           })

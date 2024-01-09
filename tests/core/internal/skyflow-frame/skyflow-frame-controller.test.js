@@ -47,30 +47,31 @@ const options = {
   }]
 };
 
-const insertResponse = {
-  vaultID: 'vault123',
-  responses: [
-    {
-      table: 'table1',
-      records: [
-        {
-          skyflow_id: 'testId',
-        },
-      ],
-    },
-    {
-      table: 'table1',
-      fields: {
-        '*': 'testId',
-        first_name: 'token1',
-        primary_card: {
-          card_number: 'token2',
-          cvv: 'token3',
-        },
-      },
-    },
-  ],
-};
+// const insertResponse = {
+//   vaultID: 'vault123',
+//   responses: [
+//     {
+//       table: 'table1',
+//       records: [
+//         {
+//           skyflow_id: 'testId',
+//         },
+//       ],
+//     },
+//     {
+//       table: 'table1',
+//       fields: {
+//         '*': 'testId',
+//         first_name: 'token1',
+//         primary_card: {
+//           card_number: 'token2',
+//           cvv: 'token3',
+//         },
+//       },
+//     },
+//   ],
+// };
+const insertResponse = {"vaultID":"<VaultID>","responses":[{"records":[{"skyflow_id":"id","tokens":{"card_number":"token","cvv":"token","expiry_date":"token","fullname":"token"}}]}]}
 
 const insertResponseWithoutTokens = {
   vaultID: 'vault123',
