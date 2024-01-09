@@ -642,6 +642,7 @@ export class FrameElement {
     isEmpty: boolean;
     isComplete: boolean;
     value: string | Blob | undefined;
+    isTouched: boolean;
   }) {
     const classes: string[] = [];
     const labelClasses: string[] = [];
@@ -650,7 +651,7 @@ export class FrameElement {
       classes.push(STYLE_TYPE.FOCUS);
       labelClasses.push(STYLE_TYPE.FOCUS);
     }
-    if (this.options.required && !state.isEmpty && !state.isFocused && !state.isValid) {
+    if (!state.isTouched && !state.isFocused && !state.isValid) {
       classes.push(STYLE_TYPE.INVALID);
     }
 

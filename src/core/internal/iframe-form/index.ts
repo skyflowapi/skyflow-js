@@ -70,6 +70,7 @@ export class IFrameFormElement extends EventEmitter {
     isComplete: false,
     name: '',
     isRequired: false,
+    isTouched: true,
   };
 
   readonly fieldType: string;
@@ -170,6 +171,7 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   changeFocus = (focus: boolean) => {
+    this.state.isTouched = false;
     this.state.isFocused = focus;
     // this.sendChangeStatus();
     // this.setValue(this.state.value, true);
@@ -359,6 +361,7 @@ export class IFrameFormElement extends EventEmitter {
     isEmpty: this.state.isEmpty,
     isComplete: this.state.isComplete,
     isRequired: this.state.isRequired,
+    isTouched: this.state.isTouched,
     // Card Number should return 8 digit bin data
     value: this.state.value
       && getReturnValue(this.state.value, this.fieldType,
@@ -627,6 +630,7 @@ export class IFrameFormElement extends EventEmitter {
       isComplete: false,
       name: '',
       isRequired: false,
+      isTouched: true,
     };
   }
 
