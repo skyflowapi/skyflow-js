@@ -87,6 +87,8 @@ const logs = {
     VALIDATE_GET_BY_ID_INPUT: '%s1 - Validating getByID input.',
   },
   errorLogs: {
+    INVALID_FILE_NAMES: 'Invalid File Name. Only alphanumeric characters and !-_.*() are allowed.',
+    INVALID_FILE_NAME: 'Interface: collect element - Invalid File Name. Only alphanumeric characters and !-_.*() are allowed.',
     CLIENT_CONNECTION: 'Interface: collect container - client connection not established. client info has not reached iframes',
     INVALID_BEARER_TOKEN: 'Interface: init - Invalid token is generated from getBearerToken callback',
     BEARER_TOKEN_REJECTED: 'Interface: init - GetBearerToken promise got rejected.',

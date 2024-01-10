@@ -223,6 +223,7 @@ export default class FrameElements {
           element.elementName,
           element.label,
           element.skyflowID,
+          element.required,
         );
         elements[element.elementName] = new FrameElement(
           iFrameFormElement,

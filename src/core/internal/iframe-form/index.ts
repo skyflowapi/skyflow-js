@@ -53,7 +53,7 @@ import {
   ValidationRuleType,
 } from '../../../utils/common';
 import {
-  fileValidation, formatFrameNameToId, getReturnValue, removeSpaces,
+  fileValidation, formatFrameNameToId, getReturnValue, removeSpaces, vaildateFileName,
 } from '../../../utils/helpers';
 import { ContainerType } from '../../../skyflow';
 
@@ -70,6 +70,7 @@ export class IFrameFormElement extends EventEmitter {
     isComplete: false,
     name: '',
     isRequired: false,
+    isTouched: false,
   };
 
   readonly fieldType: string;
@@ -139,7 +140,7 @@ export class IFrameFormElement extends EventEmitter {
 
     this.metaData = metaData;
     this.context = context;
-
+    this.state.isRequired = metaData.isRequired;
     this.collectBusEvents();
   }
 
@@ -170,6 +171,7 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   changeFocus = (focus: boolean) => {
+    this.state.isTouched = true;
     this.state.isFocused = focus;
     // this.sendChangeStatus();
     // this.setValue(this.state.value, true);
@@ -317,8 +319,7 @@ export class IFrameFormElement extends EventEmitter {
             : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
         }
       }
-      if (!this.state.isValid && this.state.isEmpty) {
-        this.state.isRequired = true;
+      if (!this.state.isValid && this.state.isEmpty && this.state.isRequired) {
         if (this.label) {
           this.errorText = `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
             this.label)}`;
@@ -360,6 +361,7 @@ export class IFrameFormElement extends EventEmitter {
     isEmpty: this.state.isEmpty,
     isComplete: this.state.isComplete,
     isRequired: this.state.isRequired,
+    isTouched: this.state.isTouched,
     // Card Number should return 8 digit bin data
     value: this.state.value
       && getReturnValue(this.state.value, this.fieldType,
@@ -368,6 +370,8 @@ export class IFrameFormElement extends EventEmitter {
 
   validator(value: any) {
     let resp = true;
+    let vaildateFileNames = true;
+
     if (this.fieldType === ElementType.CARD_NUMBER && value) {
       if (this.regex) {
         resp = this.regex.test(value)
@@ -386,24 +390,33 @@ export class IFrameFormElement extends EventEmitter {
       } catch (err) {
         resp = false;
       }
+      vaildateFileNames = vaildateFileName(value.name);
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex && value) {
         resp = this.regex.test(value);
       }
     }
-    if (!resp) {
-      if (this.label) {
-        this.errorText = `${parameterizedString(
-          logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
-          this.label,
-        )}`;
-      } else {
-        this.errorText = this.containerType === ContainerType.COLLECT
-          ? logs.errorLogs.INVALID_COLLECT_VALUE
-          : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
+    if (!resp || !vaildateFileNames) {
+      if (!resp) {
+        if (this.label) {
+          this.errorText = `${parameterizedString(
+            logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
+            this.label,
+          )}`;
+        } else {
+          this.errorText = this.containerType === ContainerType.COLLECT
+            ? logs.errorLogs.INVALID_COLLECT_VALUE
+            : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
+        }
+        return resp;
       }
-      return resp;
+      if (!vaildateFileNames) {
+        this.errorText = this.containerType === ContainerType.COLLECT
+          ? logs.errorLogs.INVALID_FILE_NAMES
+          : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
+        return vaildateFileNames;
+      }
     }
 
     resp = this.validateCustomValidations(value);
@@ -628,6 +641,7 @@ export class IFrameFormElement extends EventEmitter {
       isComplete: false,
       name: '',
       isRequired: false,
+      isTouched: false,
     };
   }
 
@@ -799,11 +813,20 @@ export class IFrameForm {
     this.context = context;
   }
 
-  private getOrCreateIFrameFormElement = (frameName, label, skyflowID) => {
-    this.iFrameFormElements[frameName] = this.iFrameFormElements[frameName]
-      || new IFrameFormElement(frameName, label, {
-        ...this.clientMetaData,
-      }, this.context, skyflowID);
+  private getOrCreateIFrameFormElement = (frameName, label, skyflowID, isRequired) => {
+    if (!this.iFrameFormElements[frameName]) {
+      if (isRequired) {
+        this.iFrameFormElements[frameName] = new IFrameFormElement(frameName, label, {
+          ...this.clientMetaData,
+          isRequired,
+        }, this.context, skyflowID);
+      } else {
+        this.iFrameFormElements[frameName] = new IFrameFormElement(frameName, label, {
+          ...this.clientMetaData,
+          isRequired: false,
+        }, this.context, skyflowID);
+      }
+    }
     return this.iFrameFormElements[frameName];
   };
 
@@ -878,6 +901,12 @@ export class IFrameForm {
 
     formData.append(column, value);
 
+    const validateFileName = vaildateFileName(state.value.name);
+
+    if (!validateFileName) {
+      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true));
+    }
+
     const { client } = this;
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
       const clientId = client.toJSON()?.metaData?.uuid || '';
@@ -927,7 +956,7 @@ export class IFrameForm {
           state, doesClientHasError, clientErrorText, errorText, onFocusChange,
         } = this.iFrameFormElements[formElements[i]];
 
-        if (state.isRequired) {
+        if (state.isRequired || !state.isValid) {
           onFocusChange(false);
         }
 
