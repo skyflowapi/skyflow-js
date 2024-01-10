@@ -70,6 +70,7 @@ export class IFrameFormElement extends EventEmitter {
     isComplete: false,
     name: '',
     isRequired: false,
+    isTouched: false,
   };
 
   readonly fieldType: string;
@@ -139,7 +140,7 @@ export class IFrameFormElement extends EventEmitter {
 
     this.metaData = metaData;
     this.context = context;
-
+    this.state.isRequired = metaData.isRequired;
     this.collectBusEvents();
   }
 
@@ -170,6 +171,7 @@ export class IFrameFormElement extends EventEmitter {
   };
 
   changeFocus = (focus: boolean) => {
+    this.state.isTouched = true;
     this.state.isFocused = focus;
     // this.sendChangeStatus();
     // this.setValue(this.state.value, true);
@@ -317,8 +319,7 @@ export class IFrameFormElement extends EventEmitter {
             : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
         }
       }
-      if (!this.state.isValid && this.state.isEmpty) {
-        this.state.isRequired = true;
+      if (!this.state.isValid && this.state.isEmpty && this.state.isRequired) {
         if (this.label) {
           this.errorText = `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
             this.label)}`;
@@ -360,6 +361,7 @@ export class IFrameFormElement extends EventEmitter {
     isEmpty: this.state.isEmpty,
     isComplete: this.state.isComplete,
     isRequired: this.state.isRequired,
+    isTouched: this.state.isTouched,
     // Card Number should return 8 digit bin data
     value: this.state.value
       && getReturnValue(this.state.value, this.fieldType,
@@ -639,6 +641,7 @@ export class IFrameFormElement extends EventEmitter {
       isComplete: false,
       name: '',
       isRequired: false,
+      isTouched: false,
     };
   }
 
@@ -810,11 +813,20 @@ export class IFrameForm {
     this.context = context;
   }
 
-  private getOrCreateIFrameFormElement = (frameName, label, skyflowID) => {
-    this.iFrameFormElements[frameName] = this.iFrameFormElements[frameName]
-      || new IFrameFormElement(frameName, label, {
-        ...this.clientMetaData,
-      }, this.context, skyflowID);
+  private getOrCreateIFrameFormElement = (frameName, label, skyflowID, isRequired) => {
+    if (!this.iFrameFormElements[frameName]) {
+      if (isRequired) {
+        this.iFrameFormElements[frameName] = new IFrameFormElement(frameName, label, {
+          ...this.clientMetaData,
+          isRequired,
+        }, this.context, skyflowID);
+      } else {
+        this.iFrameFormElements[frameName] = new IFrameFormElement(frameName, label, {
+          ...this.clientMetaData,
+          isRequired: false,
+        }, this.context, skyflowID);
+      }
+    }
     return this.iFrameFormElements[frameName];
   };
 
@@ -944,7 +956,7 @@ export class IFrameForm {
           state, doesClientHasError, clientErrorText, errorText, onFocusChange,
         } = this.iFrameFormElements[formElements[i]];
 
-        if (state.isRequired) {
+        if (state.isRequired || !state.isValid) {
           onFocusChange(false);
         }
 

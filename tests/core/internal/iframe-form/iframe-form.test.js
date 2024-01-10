@@ -214,25 +214,46 @@ describe('test iframeFormelement', () => {
     });
 
     test('test error text without label composable element',()=>{
-        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COMPOSABLE}, context)
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COMPOSABLE,isRequired:true}, context)
         element.setValidation();
         element.doesClientHasError = true;
         element.setValue('');
         expect(element.errorText).toBe('cvv is required');
     });
     test('test error text without label collect element',()=>{
-        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COLLECT}, context)
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COLLECT,isRequired:true}, context)
         element.setValidation();
         element.doesClientHasError = true;
         element.setValue('');
         expect(element.errorText).toBe('Field is required');
     });
     test('test error text with label composable element',()=>{
-        const element = new IFrameFormElement(`element:CVV:${tableCol}`, 'cvv label',{containerType:ContainerType.COMPOSABLE}, context)
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, 'cvv label',{containerType:ContainerType.COMPOSABLE,isRequired:true}, context)
         element.setValidation();
         element.doesClientHasError = true;
         element.setValue('');
         expect(element.errorText).toBe('cvv label is required');
+    });
+    test('test error text without label composable element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COMPOSABLE}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('');
+        expect(element.errorText).toBe('Invalid cvv');
+    });
+    test('test error text without label collect element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, '',{containerType:ContainerType.COLLECT}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('');
+        expect(element.errorText).toBe('Invalid value');
+    });
+    test('test error text with label composable element',()=>{
+        const element = new IFrameFormElement(`element:CVV:${tableCol}`, 'cvv label',{containerType:ContainerType.COMPOSABLE}, context)
+        element.setValidation();
+        element.doesClientHasError = true;
+        element.setValue('');
+        expect(element.errorText).toBe('Invalid cvv label');
     });
     test('test card_number validations', () => {
         const element = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
@@ -541,6 +562,87 @@ describe('test iframeForm collect method', () => {
     });
 
     test('initialize iframeform and submit collect with invalid input', (done) => {
+        const form = new IFrameForm("controllerId", "", "ERROR");
+        form.setClient(clientObj)
+        form.setClientMetadata(metaData)
+        form.setContext(context)
+
+        const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
+        const frameReadyCb = frameReadyEvent[0][1];
+
+        expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
+
+        frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
+
+        expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
+        const skyflowInit = jest.fn();
+        let windowSpy = jest.spyOn(global, 'window', 'get');
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+
+        frameReadyCb({ name:collect_element})
+
+        const createFormElement = skyflowInit.mock.calls[0][0]
+        const element = createFormElement(collect_element,undefined,undefined,true)
+
+        const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
+        const tokenizationCb = tokenizationEvent[0][1];
+        const cb2 = jest.fn();
+        tokenizationCb(data, cb2)
+
+        setTimeout(() => {
+            expect(cb2.mock.calls[0][0].error.message).toBeDefined()
+        }, 1000)
+
+        element.setValue('123')
+        const cb3 = jest.fn()
+        tokenizationCb(data, cb3)
+
+        setTimeout(() => {
+            expect(cb3.mock.calls[0][0].records.length).toBe(2);
+        }, 1000)
+
+        element.fieldName = 'col';
+        element.tableName = 'table';
+        element.state.name = 'col';
+        
+        const cb4 = jest.fn()
+        tokenizationCb({
+            ...data,
+            additionalFields: {
+                ...data.additionalFields,
+                records: [{
+                    table: 'table',
+                    fields: {
+                        col: '123'
+                    }
+                }]
+            }
+        }, cb4)
+
+        setTimeout(() => {
+            expect(cb4.mock.calls[0][0].error).toBeDefined()
+            done()
+        }, 1000)
+
+
+    })
+
+    test('initialize iframeform and submit collect with invalid input and not required field', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
         form.setClient(clientObj)
         form.setClientMetadata(metaData)
