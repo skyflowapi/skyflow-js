@@ -4,6 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import logs from './logs';
 
 const SKYFLOW_ERROR_CODE = {
+  INVALID_FILE_NAME: { code: 400, description: logs.errorLogs.INVALID_FILE_NAME },
   INVALID_FIELD: { code: 400, description: logs.errorLogs.INVALID_FIELD },
   VAULTID_IS_REQUIRED: { code: 400, description: logs.errorLogs.VAULTID_IS_REQUIRED },
   EMPTY_VAULTID_IN_INIT: { code: 400, description: logs.errorLogs.EMPTY_VAULTID_IN_INIT },

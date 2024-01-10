@@ -113,12 +113,12 @@ class CollectElement extends SkyflowElement {
       this.#states.push({
         isEmpty: true,
         isComplete: false,
-        isValid: false,
+        isValid: (!element.required && this.#state.isEmpty),
         isFocused: false,
         value: this.#doesReturnValue ? '' : undefined,
         elementType: element.elementType,
         name: element.elementName,
-        isRequired: false,
+        isRequired: element.required,
       });
     });
     this.#iframe = new IFrame(

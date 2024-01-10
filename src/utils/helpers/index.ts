@@ -3,6 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import { SdkInfo } from '../../client';
 import {
+  ALLOWED_NAME_FOR_FILE,
   CardType,
   COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType,
 } from '../../core/constants';
@@ -182,6 +183,8 @@ export const fileValidation = (value, required: Boolean = false) => {
 
   return true;
 };
+
+export const vaildateFileName = (name) => ALLOWED_NAME_FOR_FILE.test(name);
 
 export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
   `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`
