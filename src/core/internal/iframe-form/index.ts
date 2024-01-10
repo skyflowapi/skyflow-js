@@ -939,7 +939,7 @@ export class IFrameForm {
           state, doesClientHasError, clientErrorText, errorText, onFocusChange,
         } = this.iFrameFormElements[formElements[i]];
 
-        if (state.isRequired) {
+        if (state.isRequired || !state.isValid) {
           onFocusChange(false);
         }
 
