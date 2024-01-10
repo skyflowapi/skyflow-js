@@ -75,6 +75,7 @@ describe('test iframeFormelement', () => {
         windowSpy.mockRestore();
       });
 
+      
     test('iframeFormelement constructor', () => {
         const element = new IFrameFormElement(collect_element, {}, context)
         expect(element.state.isFocused).toBe(false)
