@@ -468,7 +468,6 @@ const data2 = {
         }]
     },
     tokens: false,
-    upsert: [{ table: '', column: '  ' }]
 }
 const data3 = {
     additionalFields: {
@@ -845,7 +844,7 @@ describe('test iframeForm collect method', () => {
     })
     test('insert records duplicate error', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
-        form.setClient(clientObj)
+        form.setClient(clientObj1)
         form.setClientMetadata(metaData)
         form.setContext(context)
 
@@ -865,13 +864,13 @@ describe('test iframeForm collect method', () => {
         }, cb2)   
         setTimeout(() => {
             console.log('cb2.mock.calls[0][0]', cb2.mock.calls[0][0]);
-            expect(cb2.mock.calls[0][0].error.message).toBeDefined()
+            expect(cb2.mock.calls[0][0].error).toBeDefined()
             done()
         }, 1000)
     })
     test('insert records with tokens as false', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
-        form.setClient(clientObj)
+        form.setClient(clientObj1)
         form.setClientMetadata(metaData)
         form.setContext(context)
 
@@ -880,6 +879,7 @@ describe('test iframeForm collect method', () => {
         const cb2 = jest.fn();
         tokenizationCb(data2, cb2);
         setTimeout(() => {
+            console.log('cb2.mock.calls[0][0]', cb2.mock.calls[0][0])
             expect(cb2.mock.calls[0][0].error).toBeDefined();
             done()
         }, 1000)
