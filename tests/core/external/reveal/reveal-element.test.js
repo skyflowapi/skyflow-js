@@ -366,6 +366,33 @@ describe("Reveal Element Class", () => {
     expect(testRevealElement.iframeName()).toBe(testIframeName);
     expect(testRevealElement.hasToken()).toBe(true);
   });
+
+  test("Mount Method with ready to mount false", () => {
+    const testRevealElement = new RevealElement(
+      testRecord,
+      undefined,
+      metaData,
+      {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+      elementId,
+      { logLevel: LogLevel.ERROR,env:Env.PROD }
+    );
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    document.body.appendChild(testEmptyDiv);
+    expect(document.getElementById("testDiv")).not.toBeNull();
+      
+    expect(testRevealElement.isMounted()).toBe(false);
+
+    testRevealElement.mount("#testDiv");
+    
+    groupOnCb({containerId});
+    expect(document.querySelector("iframe")).toBeTruthy();
+    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR`;
+    expect(document.querySelector("iframe")?.name).toBe(testIframeName);
+    
+    expect(testRevealElement.iframeName()).toBe(testIframeName);
+    expect(testRevealElement.hasToken()).toBe(true);
+  });
   
   test("has token should return false, without token",()=>{
     const testRevealElement = new RevealElement(

@@ -68,7 +68,7 @@ export function pushEventToMixpanel(elementId: string) {
     ...metricEvent,
     time: Math.floor(Date.now() / 1000),
   };
-  if (metricEvent.vault_id && metricEvent.vault_url && metricEvent.container_id) {
+  if (metricEvent.vault_id !== '' && metricEvent.vault_url !== '') {
     bus
       .emit(ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + metricEvent.container_id, {
         event,
