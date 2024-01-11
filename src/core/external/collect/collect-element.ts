@@ -7,6 +7,8 @@ import {
   ELEMENT_EVENTS_TO_CONTAINER,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
+  EVENT_TYPES,
+  METRIC_TYPES,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import Bus from '../../../libs/bus';
@@ -25,9 +27,17 @@ import logs from '../../../utils/logs';
 import {
   Context, Env, EventName, MessageType,
 } from '../../../utils/common';
-import { formatFrameNameToId, getReturnValue } from '../../../utils/helpers';
+import {
+  formatFrameNameToId,
+  getReturnValue,
+} from '../../../utils/helpers';
 import SkyflowElement from '../common/skyflow-element';
 import { ContainerType } from '../../../skyflow';
+import {
+  initalizeMetricObject,
+  pushElementEventWithTimeout,
+  updateMetricObjectValue,
+} from '../../../metrics';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
@@ -108,8 +118,13 @@ class CollectElement extends SkyflowElement {
       ? this.#elements[0].elementType
       : 'group';
 
+    initalizeMetricObject(metaData, elementId);
+    if (!this.#isSingleElementAPI) {
+      updateMetricObjectValue(this.#elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, this.elementType);
+    }
     this.#states = [];
     this.#elements.forEach((element) => {
+      updateMetricObjectValue(this.#elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, element.elementType);
       this.#states.push({
         isEmpty: true,
         isComplete: false,
@@ -144,13 +159,17 @@ class CollectElement extends SkyflowElement {
 
     this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED, (data) => {
       if (container.type === ContainerType.COMPOSABLE) {
+        updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
         this.#elements.forEach((element) => {
           if (data.name === element.elementName) {
+            updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, `${element.elementType}_${METRIC_TYPES.EVENTS.MOUNTED}`);
             element.isMounted = true;
             this.#mounted = true;
           }
         });
       } else if (data.name === this.#elements[0].elementName) {
+        updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
+        updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
         this.#elements[0].isMounted = true;
         this.#mounted = true;
       }
@@ -173,6 +192,8 @@ class CollectElement extends SkyflowElement {
           this.#iframe.setIframeHeight(payload.height);
         });
     });
+    updateMetricObjectValue(this.#elementId, METRIC_TYPES.DIV_ID, domElement);
+    pushElementEventWithTimeout(this.#elementId);
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback(this.#group);
@@ -186,12 +207,14 @@ class CollectElement extends SkyflowElement {
                 ...this.#states[index],
                 elementType: element.elementType,
               });
+              updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, `${element.elementType}_${METRIC_TYPES.EVENTS.READY}`);
             }
           });
         } else {
           this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY, {
             ...elementState,
           });
+          updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
         }
 
         this.#bus.off(
@@ -208,17 +231,20 @@ class CollectElement extends SkyflowElement {
 
     const isComposable = this.#elements.length > 1;
     if (isComposable) {
-      this.#iframe.mount(domElement);
+      this.#iframe.mount(domElement, this.#elementId);
       this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
+      updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
     } else {
       if (this.#readyToMount) {
-        this.#iframe.mount(domElement);
+        this.#iframe.mount(domElement, this.#elementId);
         this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
+        updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
         return;
       }
       this.#groupEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED, (data) => {
         if (data?.containerId === this.containerId) {
-          this.#iframe.mount(domElement);
+          updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
+          this.#iframe.mount(domElement, this.#elementId);
           this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
         }
       });

@@ -27,6 +27,7 @@ import {
   IGetOptions,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
+import { getVaultBeffeURL } from '../../../utils/helpers';
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -215,6 +216,21 @@ class SkyflowFrameController {
             CLASS_NAME, PUREJS_TYPES[key]), MessageType.LOG, this.#context.logLevel);
         });
       });
+    bus
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT,
+        (data: any) => {
+          this.pushEvent(data.event)
+            .then((result) => {
+              // eslint-disable-next-line no-console
+              console.log(result);
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.log(error);
+            });
+        },
+      );
   }
 
   static init(clientId) {
@@ -268,6 +284,33 @@ class SkyflowFrameController {
       } catch (err) {
         reject(err);
       }
+    });
+  }
+
+  pushEvent(event: any) {
+    return new Promise((resolve, reject) => {
+      getAccessToken(this.#clientId).then((authToken) => {
+        this.#client
+          .request({
+            body: event,
+            requestMethod: 'POST',
+            url:
+              `${getVaultBeffeURL(event.vault_url)}/sdk/sdk-metrics`,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authToken}`,
+            },
+
+          })
+          .then((response: any) => {
+            resolve(response);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      }).catch((err) => {
+        reject(err);
+      });
     });
   }
 }

@@ -23,7 +23,8 @@ import {
   getMetaObject,
   checkAndSetForCustomUrl,
   domReady,
-  vaildateFileName
+  vaildateFileName,
+  getVaultBeffeURL,
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -643,3 +644,11 @@ describe('test domReady function', () => {
   })
 })
 
+describe('test vault beffe url helper', () => {
+  test("test with vault string in vault url", () => {
+    expect(getVaultBeffeURL("test.vault.com")).toBe("test.vault-beffe.com")
+  })
+  test("test without vault string in vault url", () => {
+    expect(getVaultBeffeURL("test.com")).toBe("test.com")
+  })
+})
