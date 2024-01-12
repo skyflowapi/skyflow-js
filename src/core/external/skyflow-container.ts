@@ -155,10 +155,16 @@ class SkyflowContainer {
           printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
             this.#context.logLevel);
           if (options) {
-            options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
+            options = {
+              ...options,
+              tokens: options?.tokens !== undefined ? options.tokens : true,
+              continueOnError: options.continueOnError !== undefined
+                ? options.continueOnError : true,
+            };
           } else {
             options = {
               tokens: true,
+              continueOnError: true,
             };
           }
           if (options?.upsert) {

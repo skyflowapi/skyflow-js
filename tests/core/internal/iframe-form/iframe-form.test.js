@@ -39,7 +39,7 @@ const records = {
 
 const clientObj1 = {
     config: {},
-    request: jest.fn(() => Promise.reject({"error": 'not foound'})),
+    request: jest.fn(() => Promise.reject({errors:[{ error : {code:404,description:"Not Found"}}]})),
     toJSON: jest.fn(() => ({
         config: {},
         metaData: {
@@ -155,7 +155,7 @@ describe('test iframeFormelement', () => {
         // }
         // console.log('form.tokenize()',form.tokenize());
         // expect(form.tokenize).rejects.toThrow(SkyflowError);
-        expect(form.tokenize()).rejects.toEqual({ error: 'not foound' });
+        expect(form.tokenize()).rejects.toEqual({errors:[{ error : {code:404,description:"Not Found"}}]});
     })
 
     test('test setValue for expiration_date', () => {
@@ -455,7 +455,8 @@ const data = {
         }]
     },
     tokens: true,
-    upsert: [{ table: '', column: '  ' }]
+    upsert: [{ table: '', column: '  ' }],
+    continueOnError: false 
 }
 const data2 = {
     additionalFields: {
@@ -468,6 +469,7 @@ const data2 = {
         }]
     },
     tokens: false,
+    continueOnError: false
 }
 const data3 = {
     additionalFields: {
@@ -643,7 +645,7 @@ describe('test iframeForm collect method', () => {
         tokenizationCb(data, cb3)
 
         setTimeout(() => {
-            expect(cb3.mock.calls[0][0].records.length).toBe(2);
+            expect(cb3.mock.calls[0][0].records.length).toBe(1);
         }, 1000)
 
         element.fieldName = 'col';
@@ -724,7 +726,7 @@ describe('test iframeForm collect method', () => {
         tokenizationCb(data, cb3)
 
         setTimeout(() => {
-            expect(cb3.mock.calls[0][0].records.length).toBe(2);
+            expect(cb3.mock.calls[0][0].records.length).toBe(1);
         }, 1000)
 
         element.fieldName = 'col';
@@ -777,7 +779,7 @@ describe('test iframeForm collect method', () => {
         const form = new IFrameForm("controllerId", "", "ERROR");
         form.setContext(context)
         form.setClient(clientObj1)
-        expect(form.tokenize(records)).rejects.toMatchObject({"error": {"code": 404, "description": "Not Found"}});
+        expect(form.tokenize(records)).rejects.toMatchObject({errors:[{ error : {code:404,description:"Not Found"}}]});
     })
     test('insert records with tokens as true', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
@@ -790,7 +792,7 @@ describe('test iframeForm collect method', () => {
         const cb2 = jest.fn();
         tokenizationCb(data, cb2);
         setTimeout(() => {
-            expect(cb2.mock.calls[0][0].records.length).toBe(2);
+            expect(cb2.mock.calls[0][0].records.length).toBe(1);
             expect(cb2.mock.calls[0][0].records[0].table).toBe('table');
             expect(Object.keys(cb2.mock.calls[0][0].records[0].fields).length).toBe(5);
             done()
@@ -798,7 +800,7 @@ describe('test iframeForm collect method', () => {
     })
     let clientObj1 = {
         config: {},
-        request: jest.fn(() => Promise.reject({error:{code:404,description:"Not Found"}})),
+        request: jest.fn(() => Promise.reject({errors:[{ error : {code:404,description:"Not Found"}}]})),
         toJSON: jest.fn(() => ({
             config: {},
             metaData: {
@@ -860,10 +862,9 @@ describe('test iframeForm collect method', () => {
                         col: '123',
                     }
                 }]
-            }
+            }, continueOnError: false,
         }, cb2)   
         setTimeout(() => {
-            console.log('cb2.mock.calls[0][0]', cb2.mock.calls[0][0]);
             expect(cb2.mock.calls[0][0].error).toBeDefined()
             done()
         }, 1000)

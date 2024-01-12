@@ -69,6 +69,10 @@ export interface IRevealRecord {
 export interface IInsertResponse {
   records: IInsertResponseReocrds[];
 }
+export interface IInsertCollectResponse {
+  records?: IInsertResponseReocrds[];
+  errors?: Record<string, any>[];
+}
 export interface IInsertResponseReocrds {
   table: string;
   fields?: Record<string, any>;
@@ -131,6 +135,7 @@ export interface IUpsertOption {
 export interface IInsertOptions{
   tokens?: boolean;
   upsert?: IUpsertOption[];
+  continueOnError?: boolean;
 }
 
 export interface IDeleteRecord {

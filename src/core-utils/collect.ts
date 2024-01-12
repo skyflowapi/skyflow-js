@@ -35,7 +35,7 @@ export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
   options: Record<string, any> = { tokens: true },
 ) => {
-  const requestBody: any = [];
+  let requestBody: any = [];
   records.records.forEach((record) => {
     const upsertColumn = getUpsertColumn(record.table, options.upsert);
     requestBody.push({
@@ -47,15 +47,16 @@ export const constructInsertRecordRequest = (
       ...(options?.tokens ? { tokenization: true } : {}),
     });
   });
+  requestBody = { records: requestBody, continueOnError: options.continueOnError };
   return requestBody;
 };
 
 export const constructInsertRecordResponse = (
   responseBody: any,
-  tokens: boolean,
+  options: Record<string, any> = { tokens: true },
   records: IInsertRecord[],
 ) => {
-  if (tokens) {
+  if (options.tokens) {
     return {
       records: responseBody.responses
         .map((res, index) => {
