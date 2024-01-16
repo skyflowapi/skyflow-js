@@ -106,7 +106,8 @@ export class FrameElement {
 
   private domLabel?: HTMLLabelElement;
 
-  private domInput?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLFormElement;
+  private domInput?: (HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLFormElement)
+  & { state:ElementState };
 
   public domError?: HTMLSpanElement;
 
@@ -167,6 +168,9 @@ export class FrameElement {
 
     const inputElement = document.createElement(type);
     this.domInput = inputElement;
+    if (this.domInput) {
+      this.domInput.state = this.iFrameFormElement.state;
+    }
     inputElement.setAttribute(CUSTOM_ROW_ID_ATTRIBUTE, this.htmlDivElement?.id?.split(':')[0] || '');
     this.inputParent.append(inputElement);
 

@@ -149,3 +149,13 @@ export interface IDeleteResponseType {
   records?: Record<string, string>[];
   errors?: Record<string, any>[];
 }
+
+export interface ElementState {
+  value: any | string | undefined;
+  isFocused: boolean,
+  isValid: boolean,
+  isEmpty: boolean,
+  isComplete: boolean,
+  name: string,
+  isRequired: boolean,
+}
