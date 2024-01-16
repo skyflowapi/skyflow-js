@@ -33,7 +33,7 @@ import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-st
 import { parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
-import { LogLevel, MessageType } from '../../utils/common';
+import { LogLevel, MessageType, ElementState } from '../../utils/common';
 import {
   addSeperatorToCardNumberMask,
   appendMonthFourDigitYears,
