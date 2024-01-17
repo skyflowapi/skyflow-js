@@ -22,12 +22,12 @@ export function initalizeMetricObject(metadata: any, elementId: string) {
     vault_url: metadata?.clientJSON?.config?.vaultURL || '',
     events: [],
     created_at: Date.now(),
-    region: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    region: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone || '',
     status: METRIC_TYPES.STATUS.INITIALIZED,
     sdk_name_version: metaDataObject.sdk_name_version,
-    sdk_client_device_model: metaDataObject.sdk_client_device_model,
-    sdk_client_os_details: metaDataObject.sdk_os_version,
-    sdk_runtime_details: metaDataObject.sdk_runtime_details,
+    sdk_client_device_model: metaDataObject.sdk_client_device_model || '',
+    sdk_client_os_details: metaDataObject.sdk_os_version || '',
+    sdk_runtime_details: metaDataObject.sdk_runtime_details || '',
   };
   METRIC_OBJECT.records.push(
     elementMetricObject,
@@ -68,9 +68,9 @@ export function pushEventToMixpanel(elementId: string) {
     ...metricEvent,
     time: Math.floor(Date.now() / 1000),
   };
-  if (metricEvent.vault_id !== '' && metricEvent.vault_url !== '') {
+  if (metricEvent.vault_id && metricEvent.vault_url && metricEvent.container_id) {
     bus
-      .emit(ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT, {
+      .emit(ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + metricEvent.container_id, {
         event,
       });
   }

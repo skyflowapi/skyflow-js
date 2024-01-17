@@ -218,16 +218,22 @@ class SkyflowFrameController {
       });
     bus
       .on(
-        ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT,
+        ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + this.#clientId,
         (data: any) => {
           this.pushEvent(data.event)
-            .then((result) => {
-              // eslint-disable-next-line no-console
-              console.log(result);
+            .then((result: any) => {
+              if (result) {
+                printLog(parameterizedString(logs.infoLogs.METRIC_CAPTURE_EVENT),
+                  MessageType.LOG, this.#context.logLevel);
+              } else {
+                printLog(parameterizedString(logs.infoLogs.UNKNOWN_RESPONSE_FROM_METRIC_EVENT),
+                  MessageType.LOG, this.#context.logLevel);
+              }
             })
             .catch((error) => {
-              // eslint-disable-next-line no-console
-              console.log(error);
+              printLog(parameterizedString(logs.infoLogs.UNKNOWN_METRIC_CAPTURE_EVENT,
+                error.toString()),
+              MessageType.ERROR, this.#context.logLevel);
             });
         },
       );
