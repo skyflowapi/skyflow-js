@@ -286,7 +286,16 @@ export const insertDataInCollect = async (
         rootResolve(insertResponse);
       },
       (rejectedResult) => {
-        rootReject(rejectedResult);
+        rootReject({
+          errors: [
+            {
+              error: {
+                code: rejectedResult?.error?.code,
+                description: rejectedResult?.error?.description,
+              },
+            },
+          ],
+        });
       }).catch((err) => {
         rootReject(err);
       });
@@ -341,7 +350,7 @@ export const updateRecordsBySkyflowID = async (
       });
 
       if (errorsResponse.length === 0) {
-        rootResolve(recordsResponse);
+        rootResolve({ records: recordsResponse });
       } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
       else rootReject({ records: recordsResponse, errors: errorsResponse });
     });
