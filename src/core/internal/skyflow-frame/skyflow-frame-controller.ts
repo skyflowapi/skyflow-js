@@ -234,7 +234,7 @@ class SkyflowFrameController {
             .catch((error) => {
               printLog(parameterizedString(logs.infoLogs.UNKNOWN_METRIC_CAPTURE_EVENT,
                 error.toString()),
-              MessageType.ERROR, this.#context.logLevel);
+              MessageType.LOG, this.#context.logLevel);
             });
         },
       );
