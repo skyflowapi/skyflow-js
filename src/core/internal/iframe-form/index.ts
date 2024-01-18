@@ -46,6 +46,7 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import {
   Context,
+  IInsertCollectResponse,
   IValidationRule,
   LogLevel,
   MessageType,
@@ -1067,25 +1068,26 @@ export class IFrameForm {
       Promise.allSettled(insertPromiseSet).then((resultSet: any) => {
         const recordsResponse: any[] = [];
         const errorsResponse: any[] = [];
-        resultSet.forEach((result: { status: string; value: any; reason?: any; }) => {
+        resultSet.forEach((result:
+        { status: string; value: IInsertCollectResponse; reason?: IInsertCollectResponse; }) => {
           if (result.status === 'fulfilled') {
-            if (result.value.records) {
+            if (result.value.records !== undefined && Array.isArray(result.value.records)) {
               result.value.records.forEach((record) => {
                 recordsResponse.push(record);
               });
             }
-            if (result.value.errors) {
+            if (result.value.errors !== undefined && Array.isArray(result.value.errors)) {
               result.value.errors.forEach((error) => {
                 errorsResponse.push(error);
               });
             }
           } else {
-            if (result.reason.records) {
+            if (result.reason?.records !== undefined && Array.isArray(result.reason?.records)) {
               result.reason.records.forEach((record) => {
                 recordsResponse.push(record);
               });
             }
-            if (result.reason.errors) {
+            if (result.reason?.errors !== undefined && Array.isArray(result.reason?.errors)) {
               result.reason.errors.forEach((error) => {
                 errorsResponse.push(error);
               });
@@ -1093,7 +1095,7 @@ export class IFrameForm {
           }
         });
         if (errorsResponse.length === 0) {
-          rootResolve(recordsResponse);
+          rootResolve({ records: recordsResponse });
         } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
         else rootReject({ records: recordsResponse, errors: errorsResponse });
       });

@@ -9,7 +9,7 @@ import SkyflowError from '../libs/skyflow-error';
 import { getAccessToken } from '../utils/bus-events';
 import {
   IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
-  MessageType, LogLevel,
+  MessageType, LogLevel, IInsertCollectResponse, IInsertOptions,
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
@@ -33,7 +33,7 @@ export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions>
 };
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
-  options: Record<string, any> = { tokens: true },
+  options: IInsertOptions = { tokens: true, continueOnError: true },
 ) => {
   let requestBody: any = [];
   records.records.forEach((record) => {
@@ -51,13 +51,14 @@ export const constructInsertRecordRequest = (
   return requestBody;
 };
 
-export const constructInsertRecordResponse = (
+export const constructInsertRecordResponseWithoutContinueOnError = (
   responseBody: any,
   options: Record<string, any> = { tokens: true },
   records: IInsertRecord[],
 ) => {
+  let finalResponse: IInsertCollectResponse = {};
   if (options.tokens) {
-    return {
+    finalResponse = {
       records: responseBody.responses
         .map((res, index) => {
           const skyflowId = responseBody.responses[index].records[0].skyflow_id;
@@ -67,16 +68,66 @@ export const constructInsertRecordResponse = (
               skyflow_id: skyflowId,
               ...res.records[0].tokens,
             },
+            request_index: index,
           };
         }),
     };
+  } else {
+    finalResponse = {
+      records: responseBody.responses.map((res, index) => ({
+        table: records[index].table,
+        skyflow_id: responseBody.responses[index].records[0].skyflow_id,
+        request_index: index,
+      })),
+    };
   }
-  return {
-    records: responseBody.responses.map((res, index) => ({
-      table: records[index].table,
-      skyflow_id: res.records[0].skyflow_id,
-    })),
-  };
+  return finalResponse;
+};
+
+export const constructInsertRecordResponseWithContinueOnError = (responseBody: any,
+  options: Record<string, any> = { tokens: true },
+  records: IInsertRecord[]) => {
+  const successRecord:any = [];
+  const failedRecord:any = [];
+  responseBody.responses
+    .forEach((response, index) => {
+      const body = response.Body;
+      const status = response.Status;
+      if ('records' in body) {
+        const record = body.records[0];
+        if (options.tokens) {
+          successRecord.push({
+            table: records[index].table,
+            fields: {
+              skyflow_id: record.skyflow_id,
+              ...record.tokens,
+            },
+            request_index: index,
+          });
+        } else {
+          successRecord.push({
+            table: records[index].table,
+            skyflow_id: record.skyflow_id,
+            request_index: index,
+          });
+        }
+      } else {
+        failedRecord.push({
+          code: status,
+          description: `${body.error} - requestId: ${responseBody.requestId}`,
+          request_index: index,
+        });
+      }
+    });
+  const finalResponse: IInsertCollectResponse = {};
+
+  if (successRecord.length > 0) {
+    finalResponse.records = successRecord;
+  }
+  if (failedRecord.length > 0) {
+    finalResponse.errors = failedRecord;
+  }
+  return finalResponse;
 };
 
 export const constructFinalUpdateRecordResponse = (
@@ -198,6 +249,51 @@ const updateRecordsInVault = (
     },
   });
 };
+
+export const insertDataInCollect = async (
+  records,
+  client: Client,
+  options,
+  finalInsertRecords,
+) => new Promise((rootResolve, rootReject) => {
+  let insertResponse;
+  const clientId = client.toJSON()?.metaData?.uuid || '';
+  getAccessToken(clientId).then((authToken) => {
+    client
+      .request({
+        body: { ...records },
+        requestMethod: 'POST',
+        url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+        headers: {
+          authorization: `Bearer ${authToken}`,
+          'content-type': 'application/json',
+        },
+      })
+      .then((response: any) => {
+        if (!options.continueOnError) {
+          insertResponse = constructInsertRecordResponseWithoutContinueOnError(
+            response,
+            options,
+            finalInsertRecords.records,
+          );
+        } else {
+          insertResponse = constructInsertRecordResponseWithContinueOnError(
+            response,
+            options,
+            finalInsertRecords.records,
+          );
+        }
+        rootResolve(insertResponse);
+      },
+      (rejectedResult) => {
+        rootReject(rejectedResult);
+      }).catch((err) => {
+        rootReject(err);
+      });
+  }).catch((err) => {
+    rootReject(err);
+  });
+});
 
 export const updateRecordsBySkyflowID = async (
   skyflowIdRecords,
