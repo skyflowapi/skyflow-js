@@ -945,17 +945,16 @@ export class IFrameForm {
     if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const insertResponseObject: any = {};
     const updateResponseObject: any = {};
-    const formElements = Object.keys(this.iFrameFormElements);
     let errorMessage = '';
-    for (let i = 0; i < formElements.length; i += 1) {
-      if (
-        this.iFrameFormElements[formElements[i]].fieldType
-        !== ELEMENTS.FILE_INPUT.name
-      ) {
-        const Frame = window.parent.frames[`${this.iFrameFormElements[formElements[i]].iFrameName}:${this.controllerId}:${this.logLevel}`];
-        const inputElement = Frame.document
-          .getElementById(this.iFrameFormElements[formElements[i]].iFrameName);
-        if (inputElement) {
+    for (let i = 0; i < options.elementIds.length; i += 1) {
+      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${this.controllerId}:${this.logLevel}`];
+      const inputElement = Frame.document
+        .getElementById(options.elementIds[i].elementId);
+      if (inputElement) {
+        if (
+          inputElement.iFrameFormElement.fieldType
+          !== ELEMENTS.FILE_INPUT.name
+        ) {
           const {
             state, doesClientHasError, clientErrorText, errorText, onFocusChange,
           } = inputElement.iFrameFormElement;
@@ -975,21 +974,21 @@ export class IFrameForm {
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
     }
 
-    for (let i = 0; i < formElements.length; i += 1) {
-      const Frame = window.parent.frames[`${this.iFrameFormElements[formElements[i]].iFrameName}:${this.controllerId}:${this.logLevel}`];
+    for (let i = 0; i < options.elementIds.length; i += 1) {
+      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${this.controllerId}:${this.logLevel}`];
       const inputElement = Frame.document
-        .getElementById(this.iFrameFormElements[formElements[i]].iFrameName);
+        .getElementById(options.elementIds[i].elementId);
       if (inputElement) {
         const {
           state, tableName, validations, skyflowID,
         } = inputElement.iFrameFormElement;
         if (tableName) {
           if (
-            this.iFrameFormElements[formElements[i]].fieldType
+            inputElement.iFrameFormElement.fieldType
         !== ELEMENTS.FILE_INPUT.name
           ) {
             if (
-              this.iFrameFormElements[formElements[i]].fieldType
+              inputElement.iFrameFormElement.fieldType
           === ELEMENTS.checkbox.name
             ) {
               if (insertResponseObject[state.name]) {
@@ -1007,7 +1006,7 @@ export class IFrameForm {
               set(
                 insertResponseObject[tableName],
                 state.name,
-                this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+                inputElement.iFrameFormElement.getUnformattedValue(),
               );
             } else if (skyflowID || skyflowID === '') {
               if (skyflowID === '' || skyflowID === null) {
@@ -1019,14 +1018,14 @@ export class IFrameForm {
                 set(
                   updateResponseObject[skyflowID],
                   state.name,
-                  this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+                  inputElement.iFrameFormElement.getUnformattedValue(),
                 );
               } else {
                 updateResponseObject[skyflowID] = {};
                 set(
                   updateResponseObject[skyflowID],
                   state.name,
-                  this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+                  inputElement.iFrameFormElement.getUnformattedValue(),
                 );
                 set(
                   updateResponseObject[skyflowID],
@@ -1039,7 +1038,7 @@ export class IFrameForm {
               set(
                 insertResponseObject[tableName],
                 state.name,
-                this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+                inputElement.iFrameFormElement.getUnformattedValue(),
               );
             }
           }

@@ -353,7 +353,7 @@ class ComposableContainer extends Container {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
         }
       });
-
+      const elementIds:{ frameId:string, elementId:string }[] = [];
       const collectElements = Object.values(this.#elements);
       collectElements.forEach((element) => {
         element.isValidElement();
@@ -368,6 +368,12 @@ class ComposableContainer extends Container {
       if (options?.upsert) {
         validateUpsertOptions(options?.upsert);
       }
+      this.#elementsList.forEach((element) => {
+        elementIds.push({
+          frameId: this.#tempElements.elementName,
+          elementId: element.elementName,
+        });
+      });
       bus
       // .target(properties.IFRAME_SECURE_ORGIN)
         .emit(
@@ -375,6 +381,7 @@ class ComposableContainer extends Container {
           {
             ...options,
             tokens: options?.tokens !== undefined ? options.tokens : true,
+            elementIds,
           },
           (data: any) => {
             if (!data || data?.error) {
