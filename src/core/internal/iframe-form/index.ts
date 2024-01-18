@@ -51,7 +51,6 @@ import {
   LogLevel,
   MessageType,
   ValidationRuleType,
-  ElementState,
 } from '../../../utils/common';
 import {
   fileValidation, formatFrameNameToId, getReturnValue, removeSpaces, vaildateFileName,
@@ -957,10 +956,9 @@ export class IFrameForm {
         const inputElement = Frame.document
           .getElementById(this.iFrameFormElements[formElements[i]].iFrameName);
         if (inputElement) {
-          const state = inputElement.state;
           const {
-            doesClientHasError, clientErrorText, errorText, onFocusChange,
-          } = this.iFrameFormElements[formElements[i]];
+            state, doesClientHasError, clientErrorText, errorText, onFocusChange,
+          } = inputElement.iFrameFormElement;
           if (state.isRequired) {
             onFocusChange(false);
           }
@@ -980,13 +978,11 @@ export class IFrameForm {
     for (let i = 0; i < formElements.length; i += 1) {
       const Frame = window.parent.frames[`${this.iFrameFormElements[formElements[i]].iFrameName}:${this.controllerId}:${this.logLevel}`];
       const inputElement = Frame.document
-        .getElementById(this.iFrameFormElements[formElements[i]].iFrameName) as HTMLElement
-      & { state : ElementState };
+        .getElementById(this.iFrameFormElements[formElements[i]].iFrameName);
       if (inputElement) {
-        const state = inputElement.state;
         const {
-          tableName, validations, skyflowID,
-        } = this.iFrameFormElements[formElements[i]];
+          state, tableName, validations, skyflowID,
+        } = inputElement.iFrameFormElement;
         if (tableName) {
           if (
             this.iFrameFormElements[formElements[i]].fieldType

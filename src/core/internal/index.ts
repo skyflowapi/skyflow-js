@@ -33,7 +33,7 @@ import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-st
 import { parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
-import { LogLevel, MessageType, ElementState } from '../../utils/common';
+import { LogLevel, MessageType } from '../../utils/common';
 import {
   addSeperatorToCardNumberMask,
   appendMonthFourDigitYears,
@@ -107,7 +107,7 @@ export class FrameElement {
   private domLabel?: HTMLLabelElement;
 
   private domInput?: (HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLFormElement)
-  & { state:ElementState };
+  & { iFrameFormElement : IFrameFormElement };
 
   public domError?: HTMLSpanElement;
 
@@ -169,7 +169,7 @@ export class FrameElement {
     const inputElement = document.createElement(type);
     this.domInput = inputElement;
     if (this.domInput) {
-      this.domInput.state = this.iFrameFormElement.state;
+      this.domInput.iFrameFormElement = this.iFrameFormElement;
     }
     inputElement.setAttribute(CUSTOM_ROW_ID_ATTRIBUTE, this.htmlDivElement?.id?.split(':')[0] || '');
     this.inputParent.append(inputElement);
