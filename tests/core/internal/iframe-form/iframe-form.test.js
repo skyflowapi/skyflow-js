@@ -144,11 +144,22 @@ describe('test iframeFormelement', () => {
     })
     test('test tokenize error case', () => {
         const element = new IFrameFormElement(`element:EXPIRATION_MONTH:${tableCol}`, {}, context)
-        const form = new IFrameForm(element)
+        const form = new IFrameForm("controllerId","",'ERROR')
+        jest.spyOn(window,'parent','get').mockImplementation(()=>({
+            frames:{
+                [`element:EXPIRATION_MONTH:${tableCol}:controllerId:ERROR`]:{
+                    document:{
+                        getElementById:()=>({
+                            iFrameFormElement:element
+                        })
+                    }
+                }
+            }
+        }))
         form.setClient(clientObj1)
         form.setClientMetadata(metaData)
         form.setContext(context)
-        expect(form.tokenize()).rejects.toThrow(SkyflowError)
+        expect(form.tokenize({elementIds:[{elemenId:`element:EXPIRATION_MONTH:${tableCol}`,frameId:`element:EXPIRATION_MONTH:${tableCol}`}]})).rejects.toThrow(SkyflowError)
     })
 
     test('test setValue for expiration_date', () => {
@@ -602,7 +613,23 @@ describe('test iframeForm collect method', () => {
         const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
         const tokenizationCb = tokenizationEvent[0][1];
         const cb2 = jest.fn();
-        tokenizationCb(data, cb2)
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: {
+                    [`${collect_element}:controllerId:ERROR`]:{
+                        document:{
+                            getElementById:()=>({
+                                iFrameFormElement:element
+                            })
+                        }
+                    }
+                }
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+        tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2)
 
         setTimeout(() => {
             expect(cb2.mock.calls[0][0].error.message).toBeDefined()
@@ -610,7 +637,7 @@ describe('test iframeForm collect method', () => {
 
         element.setValue('123')
         const cb3 = jest.fn()
-        tokenizationCb(data, cb3)
+        tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb3)
 
         setTimeout(() => {
             expect(cb3.mock.calls[0][0].records.length).toBe(2);
@@ -631,7 +658,8 @@ describe('test iframeForm collect method', () => {
                         col: '123'
                     }
                 }]
-            }
+            },
+            elementIds:[{elementId:collect_element,frameId:collect_element}]
         }, cb4)
 
         setTimeout(() => {
@@ -639,6 +667,22 @@ describe('test iframeForm collect method', () => {
             done()
         }, 1000)
 
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
 
     })
 
@@ -683,7 +727,23 @@ describe('test iframeForm collect method', () => {
         const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
         const tokenizationCb = tokenizationEvent[0][1];
         const cb2 = jest.fn();
-        tokenizationCb(data, cb2)
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: {
+                    [`${collect_element}:controllerId:ERROR`]:{
+                        document:{
+                            getElementById:()=>({
+                                iFrameFormElement:element
+                            })
+                        }
+                    }
+                }
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+        tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2)
 
         setTimeout(() => {
             expect(cb2.mock.calls[0][0].error.message).toBeDefined()
@@ -691,7 +751,7 @@ describe('test iframeForm collect method', () => {
 
         element.setValue('123')
         const cb3 = jest.fn()
-        tokenizationCb(data, cb3)
+        tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb3)
 
         setTimeout(() => {
             expect(cb3.mock.calls[0][0].records.length).toBe(2);
@@ -712,7 +772,8 @@ describe('test iframeForm collect method', () => {
                         col: '123'
                     }
                 }]
-            }
+            },
+            elementIds:[{elementId:collect_element,frameId:collect_element}]
         }, cb4)
 
         setTimeout(() => {
@@ -721,6 +782,22 @@ describe('test iframeForm collect method', () => {
         }, 1000)
 
 
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
     })
 
     test('collect submit without client initializatiob', () => {
@@ -745,26 +822,96 @@ describe('test iframeForm collect method', () => {
     })
     test('collect error second case', () => {
         const form = new IFrameForm("controllerId", "", "ERROR");
+        const element =  new IFrameFormElement(collect_element,"",{},context)
+        element.setValue("123")
+        let windowSpy = jest.spyOn(global, 'window', 'get');
+        const skyflowInit = jest.fn();
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: {
+                    [`${collect_element}:controllerId:ERROR`]:{
+                        document:{
+                            getElementById:()=>({
+                                iFrameFormElement:element
+                            })
+                        }
+                    }
+                }
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
         form.setContext(context)
         form.setClient(clientObj1)
-        expect(form.tokenize(records)).rejects.toMatchObject({"error": {"code": 404, "description": "Not Found"}});
-    })
+        expect(form.tokenize({...records,elementIds:[{elementId:collect_element,frameId:collect_element}]})).rejects.toMatchObject({"error": {"code": 404, "description": "Not Found"}});
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));})
     test('insert records with tokens as true', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
+        const element =  new IFrameFormElement(collect_element,"",{},context)
         form.setClient(clientObj)
         form.setClientMetadata(metaData)
         form.setContext(context)
-
+        element.setValue("123")
+        const skyflowInit = jest.fn();
+        let windowSpy = jest.spyOn(global, 'window', 'get');
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: {
+                    [`${collect_element}:controllerId:ERROR`]:{
+                        document:{
+                            getElementById:()=>({
+                                iFrameFormElement:element
+                            })
+                        }
+                    }
+                }
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
         const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
         const tokenizationCb = tokenizationEvent[0][1];
         const cb2 = jest.fn();
-        tokenizationCb(data, cb2);
+        tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2);
         setTimeout(() => {
             expect(cb2.mock.calls[0][0].records.length).toBe(2);
             expect(cb2.mock.calls[0][0].records[0].table).toBe('table');
             expect(Object.keys(cb2.mock.calls[0][0].records[0].fields).length).toBe(2);
             done()
         }, 1000)
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
     })
     let clientObj1 = {
         config: {},
@@ -778,24 +925,83 @@ describe('test iframeForm collect method', () => {
     }
     test('ererr', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
+        const element =  new IFrameFormElement(collect_element,"",{},context)
         form.setClient(clientObj1)
         form.setClientMetadata(metaData)
         form.setContext(context)
 
+        element.setValue("123")
+        const skyflowInit = jest.fn();
+        let windowSpy = jest.spyOn(global, 'window', 'get');
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: {
+                    [`${collect_element}:controllerId:ERROR`]:{
+                        document:{
+                            getElementById:()=>({
+                                iFrameFormElement:element
+                            })
+                        }
+                    }
+                }
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+
         const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
         const tokenizationCb = tokenizationEvent[0][1];
         const cb2 = jest.fn();
-        tokenizationCb(data, cb2);
+        tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2);
         setTimeout(() => {
             expect(cb2.mock.calls[0][0].error).toBeDefined();
             done()
         }, 1000)
-        form.tokenize(data).then().catch( err => {
+        form.tokenize({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}).then().catch( err => {
             expect(err).toBeDefined();
         })
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
     })
     test('success', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
+        const element =  new IFrameFormElement(collect_element,"",{},context)
+
+        element.setValue("123")
+        const skyflowInit = jest.fn();
+        let windowSpy = jest.spyOn(global, 'window', 'get');
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: {
+                    [`${collect_element}:controllerId:ERROR`]:{
+                        document:{
+                            getElementById:()=>({
+                                iFrameFormElement:element
+                            })
+                        }
+                    }
+                }
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+
         form.setClient(clientObj1)
         form.setClientMetadata(metaData)
         form.setContext(context)
@@ -803,14 +1009,30 @@ describe('test iframeForm collect method', () => {
         const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
         const tokenizationCb = tokenizationEvent[0][1];
         const cb2 = jest.fn();
-        tokenizationCb(data, cb2);
+        tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2);
         setTimeout(() => {
             expect(cb2.mock.calls[0][0].error).toBeDefined();
             done()
         }, 1000)
-        form.tokenize(data).then().catch( err => {
+        form.tokenize({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}).then().catch( err => {
             expect(err).toBeDefined();
         })
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
     })
     test('insert records duplicate error', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
@@ -818,6 +1040,27 @@ describe('test iframeForm collect method', () => {
         form.setClientMetadata(metaData)
         form.setContext(context)
 
+        const element =  new IFrameFormElement(collect_element,"",{},context)
+
+        element.setValue("123")
+        const skyflowInit = jest.fn();
+        let windowSpy = jest.spyOn(global, 'window', 'get');
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: {
+                    [`${collect_element}:controllerId:ERROR`]:{
+                        document:{
+                            getElementById:()=>({
+                                iFrameFormElement:element
+                            })
+                        }
+                    }
+                }
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
         const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
         const tokenizationCb = tokenizationEvent[0][1];
         const cb2 = jest.fn();
@@ -830,12 +1073,29 @@ describe('test iframeForm collect method', () => {
                         col: '123',
                     }
                 }]
-            }
+            },
+            elementIds:[{elementId:collect_element,frameId:collect_element}]
         }, cb2)   
         setTimeout(() => {
             expect(cb2.mock.calls[0][0].error.message).toBeDefined()
             done()
         }, 1000)
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
     })
     test('insert records with tokens as false', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
@@ -843,15 +1103,55 @@ describe('test iframeForm collect method', () => {
         form.setClientMetadata(metaData)
         form.setContext(context)
 
+        const element =  new IFrameFormElement(collect_element,"",{},context)
+
+        element.setValue("123")
+        const skyflowInit = jest.fn();
+        let windowSpy = jest.spyOn(global, 'window', 'get');
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: {
+                    [`${collect_element}:controllerId:ERROR`]:{
+                        document:{
+                            getElementById:()=>({
+                                iFrameFormElement:element
+                            })
+                        }
+                    }
+                }
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+
         const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
         const tokenizationCb = tokenizationEvent[0][1];
         const cb2 = jest.fn();
-        tokenizationCb(data2, cb2);
+        tokenizationCb({...data2,
+            elementIds:[{elementId:collect_element,frameId:collect_element}]
+        }, cb2);
         setTimeout(() => {
             expect(cb2.mock.calls[0][0].records[0].table).toBe('pii_fields');
             expect(Object.keys(cb2.mock.calls[0][0].records[0]).length).toBe(2);
             done()
         }, 1000)
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
     })
 
 })
