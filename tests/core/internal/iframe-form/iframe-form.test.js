@@ -541,24 +541,6 @@ const fileDataInvalid = {
 }
 
 
-// export const insertResponse = {
-//     vaultID: 'vault123',
-//     responses: [
-//         {
-//             records: [
-//                 {
-//                     skyflow_id: 'testId',
-//                 },
-//             ],
-//         },
-//         {
-//             fields: {
-//                 '*': 'testId',
-//                 cvv: 'cvvToken'
-//             },
-//         },
-//     ],
-// };
 const insertResponse = {
     "vaultID": "<VaultID>",
     "responses": [

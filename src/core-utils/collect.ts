@@ -33,8 +33,14 @@ export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions>
 };
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
-  options: IInsertOptions = { tokens: true, continueOnError: true },
+  options: IInsertOptions = { continueOnError: false, tokens: true },
 ) => {
+  if (options.continueOnError === undefined) {
+    options = {
+      ...options,
+      continueOnError: false,
+    };
+  }
   let requestBody: any = [];
   records.records.forEach((record) => {
     const upsertColumn = getUpsertColumn(record.table, options.upsert);
@@ -113,9 +119,11 @@ export const constructInsertRecordResponseWithContinueOnError = (responseBody: a
         }
       } else {
         failedRecord.push({
-          code: status,
-          description: `${body.error} - requestId: ${responseBody.requestId}`,
-          request_index: index,
+          error: {
+            code: status,
+            description: `${body.error} - requestId: ${responseBody.requestId}`,
+            request_index: index,
+          },
         });
       }
     });
@@ -276,12 +284,27 @@ export const insertDataInCollect = async (
             options,
             finalInsertRecords.records,
           );
+          if (insertResponse.records) {
+            insertResponse.records.forEach((record) => {
+              delete record.request_index;
+            });
+          }
         } else {
           insertResponse = constructInsertRecordResponseWithContinueOnError(
             response,
             options,
             finalInsertRecords.records,
           );
+          if (insertResponse.records) {
+            insertResponse.records.forEach((record) => {
+              delete record.request_index;
+            });
+          }
+          if (insertResponse.errors) {
+            insertResponse.errors.forEach((errors) => {
+              delete errors.error.request_index;
+            });
+          }
         }
         rootResolve(insertResponse);
       },

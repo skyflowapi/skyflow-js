@@ -214,7 +214,7 @@ describe('skyflow insert', () => {
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
     try {
-      const res = skyflow.insert(records);
+      const res = skyflow.insert(records, options);
 
       const emitEvent = emitSpy.mock.calls
         .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
@@ -246,6 +246,30 @@ describe('skyflow insert', () => {
         .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
       const emitCb = emitEvent[0][2];
       emitCb({ error: { message: "resource doesn't exist", code: 404 } });
+
+      let error;
+      res.catch((err) => error = err);
+
+      setTimeout(() => {
+        expect(error).toBeDefined();
+        done();
+      }, 1000);
+    } catch (err) {
+    }
+  });
+  test('insert error 2', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    try {
+      const res = skyflow.insert(records, {tokens: true, continueOnError: true});
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb({errors: { error: { message: "resource doesn't exist", code: 404 } }});
 
       let error;
       res.catch((err) => error = err);

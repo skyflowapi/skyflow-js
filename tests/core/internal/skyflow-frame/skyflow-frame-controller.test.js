@@ -46,33 +46,45 @@ const options = {
     column: '',
   }]
 };
+const optionsWithContinueOnError = {
+  tokens: true,
+  upsert: [{
+    table: '',
+    column: '',
+  }],
+  continueOnError: true,
+};
 
-// const insertResponse = {
-//   vaultID: 'vault123',
-//   responses: [
-//     {
-//       table: 'table1',
-//       records: [
-//         {
-//           skyflow_id: 'testId',
-//         },
-//       ],
-//     },
-//     {
-//       table: 'table1',
-//       fields: {
-//         '*': 'testId',
-//         first_name: 'token1',
-//         primary_card: {
-//           card_number: 'token2',
-//           cvv: 'token3',
-//         },
-//       },
-//     },
-//   ],
-// };
 const insertResponse = {"vaultID":"<VaultID>","responses":[{"records":[{"skyflow_id":"id","tokens":{"card_number":"token","cvv":"token","expiry_date":"token","fullname":"token"}}]}]}
 
+
+const insertResponseContinueOnError = {
+  "vaultID": "<VaultID>",
+  "responses": [
+    {    
+      "Body": {    
+      "records": [
+        {
+          "skyflow_id": "ghgjhjh2",
+          "tokens": {
+            "card_number": "token",
+            "cvv": "token",
+            "expiry_date": "token",
+            "name": "token",
+          }
+        },
+      ]
+  },
+  "Status": 200,
+    },
+    {
+      "Body": {
+          "error": "Invalid field present in JSON card_numbe"
+      },
+      "Status": 400
+  },
+  ]
+}
 const insertResponseWithoutTokens = {
   vaultID: 'vault123',
   responses: [
@@ -136,6 +148,35 @@ describe('Inserting records into the vault', () => {
       done();
     }, 1000);
   });
+  test('insert records with tokens as true when ContinueOnError is true', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(insertResponseContinueOnError));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.INSERT,
+      records,
+      options : { ...optionsWithContinueOnError },
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].records.length).toBe(1);
+      expect(cb2.mock.calls[0][0].records[0].fields).toBeDefined();
+      expect(cb2.mock.calls[0][0].records[0].request_index).toBeDefined();
+      expect(cb2.mock.calls[0][0].errors.length).toBe(1);
+      expect(cb2.mock.calls[0][0].errors[0].error).toBeDefined();
+      expect(cb2.mock.calls[0][0].errors[0].error.request_index).toBeDefined();
+      done();
+    }, 1000);
+  });
 
   test('insert records with tokens as false', (done) => {
     const clientReq = jest.fn(() => Promise.resolve(insertResponseWithoutTokens));
@@ -161,6 +202,31 @@ describe('Inserting records into the vault', () => {
       expect(cb2.mock.calls[0][0].records.length).toBe(1);
       expect(cb2.mock.calls[0][0].records[0].fields).toBeUndefined();
       expect(cb2.mock.calls[0][0].error).toBeUndefined();
+      done();
+    }, 1000);
+  });
+  test('insert records with tokens as false error', (done) => {
+    const clientReq = jest.fn(() => Promise.reject(errorResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.INSERT,
+      records,
+      options: { tokens: true, upsert: [{ table: '', column: '  ' }] },
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].error).toBeDefined();
       done();
     }, 1000);
   });
