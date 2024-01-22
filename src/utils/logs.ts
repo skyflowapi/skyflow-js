@@ -127,6 +127,7 @@ const logs = {
     INVALID_ID_IN_DELETE: 'Interface: client delete - id of type string is required at index %s1 in records array.',
     DELETE_RECORDS_REJECTED: 'Interface: client delete - delete request is rejected.',
     INVALID_TOKENS_IN_COLLECT: 'Interface: collect container - Invalid tokens. tokens of type boolean is required.',
+    INVALID_CONTINUE_ON_ERROR_IN_COLLECT: 'Interface: collect container - Invalid continueOnError. continueOnError of type boolean is required.',
     RECORDS_KEY_NOT_FOUND_IN_ADDITIONAL_FIELDS: 'Interface: collect container - "records" key not found in additionalFields',
     INVALID_RECORDS_IN_ADDITIONAL_FIELDS: 'Interface: collect container - records should be an array inside additionalFields',
     EMPTY_RECORDS_IN_ADDITIONAL_FIELDS: 'Interface: collect container - records object cannot be empty in additionalFields',

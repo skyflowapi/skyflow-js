@@ -154,6 +154,9 @@ export const validateInsertRecords = (recordObj: IInsertRecordInput, options: an
   if (options && options.tokens && typeof options.tokens !== 'boolean') {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_INSERT, [], true);
   }
+  if (options && options.continueOnError && typeof options.continueOnError !== 'boolean') {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTINUE_ON_ERROR_IN_COLLECT, [], true);
+  }
 };
 
 export const validateAdditionalFieldsInCollect = (recordObj: IInsertRecordInput) => {

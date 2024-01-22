@@ -55,6 +55,7 @@ export const deleteData = async (
             deleteRecordsFromVault(record, authToken as String, client)
               .then(
                 (response: any) => {
+                  delete response.requestId;
                   apiResponse.push(response);
                 },
                 (cause: any) => {

@@ -149,13 +149,6 @@ describe('test iframeFormelement', () => {
         form.setClient(clientObj1)
         form.setClientMetadata(metaData)
         form.setContext(context)
-        // try {
-        //     form.tokenize().then(data => console.log("data", data)).catch(error => console.log("error", error));
-        // } catch(error) {
-        //     console.log('eeror', error);
-        // }
-        // console.log('form.tokenize()',form.tokenize());
-        // expect(form.tokenize).rejects.toThrow(SkyflowError);
         expect(form.tokenize()).rejects.toEqual({errors:[{ error : {code:404,description:"Not Found"}}]});
     })
 

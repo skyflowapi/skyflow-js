@@ -159,6 +159,10 @@ const SKYFLOW_ERROR_CODE = {
     code: 404,
     description: logs.errorLogs.INVALID_TOKENS_IN_COLLECT,
   },
+  INVALID_CONTINUE_ON_ERROR_IN_COLLECT: {
+    code: 404,
+    description: logs.errorLogs.INVALID_CONTINUE_ON_ERROR_IN_COLLECT,
+  },
   RECORDS_KEY_NOT_FOUND_IN_ADDITIONAL_FIELDS: {
     code: 404,
     description: logs.errorLogs.RECORDS_KEY_NOT_FOUND_IN_ADDITIONAL_FIELDS,
