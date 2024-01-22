@@ -155,10 +155,16 @@ class SkyflowContainer {
           printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
             this.#context.logLevel);
           if (options) {
-            options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
+            options = {
+              ...options,
+              tokens: options?.tokens !== undefined ? options.tokens : true,
+              continueOnError: options.continueOnError !== undefined
+                ? options.continueOnError : false,
+            };
           } else {
             options = {
               tokens: true,
+              continueOnError: false,
             };
           }
           if (options?.upsert) {
@@ -178,6 +184,9 @@ class SkyflowContainer {
                 if (insertedData.error) {
                   printLog(`${JSON.stringify(insertedData.error)}`, MessageType.ERROR, this.#context.logLevel);
                   reject(insertedData.error);
+                } else if (insertedData.errors) {
+                  printLog(`${JSON.stringify(insertedData.errors)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(insertedData);
                 } else resolve(insertedData);
               },
             );
@@ -222,6 +231,9 @@ class SkyflowContainer {
                 if (insertedData.error) {
                   printLog(`${JSON.stringify(insertedData.error)}`, MessageType.ERROR, this.#context.logLevel);
                   reject(insertedData.error);
+                } else if (insertedData.errors) {
+                  printLog(`${JSON.stringify(insertedData.errors)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(insertedData);
                 } else resolve(insertedData);
               },
             );

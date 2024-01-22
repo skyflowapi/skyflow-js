@@ -5,7 +5,8 @@ import bus from 'framebus';
 import Client from '../../../client';
 import {
   constructInsertRecordRequest,
-  constructInsertRecordResponse,
+  constructInsertRecordResponseWithContinueOnError,
+  constructInsertRecordResponseWithoutContinueOnError,
 } from '../../../core-utils/collect';
 import {
   fetchRecordsGET,
@@ -227,24 +228,35 @@ class SkyflowFrameController {
       getAccessToken(this.#clientId).then((authToken) => {
         this.#client
           .request({
-            body: { records: requestBody },
+            body: { ...requestBody },
             requestMethod: 'POST',
             url:
             `${this.#client.config.vaultURL}/v1/vaults/${
               this.#client.config.vaultID}`,
             headers: {
               Authorization: `Bearer ${authToken}`,
+              'content-type': 'application/json',
             },
 
           })
           .then((response: any) => {
-            rootResolve(
-              constructInsertRecordResponse(
-                response,
-                options?.tokens,
-                records?.records,
-              ),
-            );
+            if (options.continueOnError) {
+              rootResolve(
+                constructInsertRecordResponseWithContinueOnError(
+                  response,
+                  options,
+                  records?.records,
+                ),
+              );
+            } else {
+              rootResolve(
+                constructInsertRecordResponseWithoutContinueOnError(
+                  response,
+                  options,
+                  records?.records,
+                ),
+              );
+            }
           })
           .catch((error) => {
             rootReject(error);

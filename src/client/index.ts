@@ -113,7 +113,12 @@ class Client {
         }
       }
       if (contentType && contentType.includes('application/json')) {
-        resolve(JSON.parse(httpRequest.response));
+        let res = JSON.parse(httpRequest.response);
+        res = {
+          ...res,
+          requestId,
+        };
+        resolve(res);
       }
       resolve(httpRequest.response);
     };

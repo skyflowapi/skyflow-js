@@ -151,12 +151,33 @@ describe('insert records validation', () => {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FIELDS_IN_INSERT.description, 0))
     }
   })
+  test('missing Table', () => {
+    try {
+      validateInsertRecords({ records: [{}] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_INSERT.description, 0))
+    }
+  })
+  test('missing fields', () => {
+    try {
+      validateInsertRecords({ records: [{ table: 'abc'}] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_FIELDS_IN_INSERT.description, 0))
+    }
+  })
 
   test('invalid options', () => {
     try {
       validateInsertRecords({ records: [{ table: 'abc', fields: {} }] }, { tokens: '123' })
     } catch (err) {
       expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_INSERT.description)
+    }
+  })
+  test('invalid continueOnError', () => {
+    try {
+      validateInsertRecords({ records: [{ table: 'abc', fields: {} }] }, { continueOnError: '123' })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_CONTINUE_ON_ERROR_IN_COLLECT.description)
     }
   })
 })

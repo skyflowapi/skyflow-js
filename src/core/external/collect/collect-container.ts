@@ -50,7 +50,8 @@ export interface CollectElementInput {
 interface ICollectOptions {
   tokens?: boolean;
   additionalFields?: IInsertRecordInput;
-  upsert?: Array<IUpsertOptions>
+  upsert?: Array<IUpsertOptions>;
+  continueOnError?: boolean;
 }
 const CLASS_NAME = 'CollectContainer';
 class CollectContainer extends Container {
@@ -266,7 +267,8 @@ class CollectContainer extends Container {
     return false;
   };
 
-  collect = (options: ICollectOptions = { tokens: true }) => new Promise((resolve, reject) => {
+  collect = (options: ICollectOptions =
+  { tokens: true, continueOnError: false }) => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
       const collectElements = Object.values(this.#elements);
@@ -278,6 +280,9 @@ class CollectContainer extends Container {
       });
       if (Object.prototype.hasOwnProperty.call(options, 'tokens') && !validateBooleanOptions(options.tokens)) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
+      }
+      if (Object.prototype.hasOwnProperty.call(options, 'continueOnError') && !validateBooleanOptions(options.continueOnError)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTINUE_ON_ERROR_IN_COLLECT, [], true);
       }
       if (options?.additionalFields) {
         validateAdditionalFieldsInCollect(options.additionalFields);

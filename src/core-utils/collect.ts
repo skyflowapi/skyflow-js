@@ -9,7 +9,7 @@ import SkyflowError from '../libs/skyflow-error';
 import { getAccessToken } from '../utils/bus-events';
 import {
   IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
-  MessageType, LogLevel,
+  MessageType, LogLevel, IInsertCollectResponse, IInsertOptions,
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
@@ -33,72 +33,109 @@ export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions>
 };
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
-  options: Record<string, any> = { tokens: true },
+  options: IInsertOptions = { continueOnError: false, tokens: true },
 ) => {
-  const requestBody: any = [];
-  if (options?.tokens || options === null) {
-    records.records.forEach((record, index) => {
-      const upsertColumn = getUpsertColumn(record.table, options.upsert);
-      requestBody.push({
-        method: 'POST',
-        quorum: true,
-        tableName: record.table,
-        fields: record.fields,
-        ...(options?.upsert ? { upsert: upsertColumn } : {}),
-      });
-      requestBody.push({
-        method: 'GET',
-        tableName: record.table,
-        ID: `$responses.${2 * index}.records.0.skyflow_id`,
-        tokenization: true,
-      });
-    });
-  } else {
-    records.records.forEach((record) => {
-      const elseUpsertColumn = getUpsertColumn(record.table, options.upsert);
-
-      requestBody.push({
-        method: 'POST',
-        quorum: true,
-        tableName: record.table,
-        fields: record.fields,
-        ...(options?.upsert ? { upsert: elseUpsertColumn } : {}),
-      });
-    });
+  if (options.continueOnError === undefined) {
+    options = {
+      ...options,
+      continueOnError: false,
+    };
   }
+  let requestBody: any = [];
+  records.records.forEach((record) => {
+    const upsertColumn = getUpsertColumn(record.table, options.upsert);
+    requestBody.push({
+      method: 'POST',
+      quorum: true,
+      tableName: record.table,
+      fields: record.fields,
+      ...(options?.upsert ? { upsert: upsertColumn } : {}),
+      ...(options?.tokens ? { tokenization: true } : {}),
+    });
+  });
+  requestBody = { records: requestBody, continueOnError: options.continueOnError };
   return requestBody;
 };
 
-export const constructInsertRecordResponse = (
+export const constructInsertRecordResponseWithoutContinueOnError = (
   responseBody: any,
-  tokens: boolean,
+  options: Record<string, any> = { tokens: true },
   records: IInsertRecord[],
 ) => {
-  if (tokens) {
-    return {
+  let finalResponse: IInsertCollectResponse = {};
+  if (options.tokens) {
+    finalResponse = {
       records: responseBody.responses
         .map((res, index) => {
-          if (index % 2 !== 0) {
-            const skyflowId = responseBody.responses[index - 1].records[0].skyflow_id;
-            delete res.fields['*'];
-            return {
-              table: records[Math.floor(index / 2)].table,
-              fields: {
-                skyflow_id: skyflowId,
-                ...res.fields,
-              },
-            };
-          }
-          return res;
-        }).filter((res, index) => index % 2 !== 0),
+          const skyflowId = responseBody.responses[index].records[0].skyflow_id;
+          return {
+            table: records[index].table,
+            fields: {
+              skyflow_id: skyflowId,
+              ...res.records[0].tokens,
+            },
+            request_index: index,
+          };
+        }),
+    };
+  } else {
+    finalResponse = {
+      records: responseBody.responses.map((res, index) => ({
+        table: records[index].table,
+        skyflow_id: responseBody.responses[index].records[0].skyflow_id,
+        request_index: index,
+      })),
     };
   }
-  return {
-    records: responseBody.responses.map((res, index) => ({
-      table: records[index].table,
-      skyflow_id: res.records[0].skyflow_id,
-    })),
-  };
+  return finalResponse;
+};
+
+export const constructInsertRecordResponseWithContinueOnError = (responseBody: any,
+  options: Record<string, any> = { tokens: true },
+  records: IInsertRecord[]) => {
+  const successRecord:any = [];
+  const failedRecord:any = [];
+  responseBody.responses
+    .forEach((response, index) => {
+      const body = response.Body;
+      const status = response.Status;
+      if ('records' in body) {
+        const record = body.records[0];
+        if (options.tokens) {
+          successRecord.push({
+            table: records[index].table,
+            fields: {
+              skyflow_id: record.skyflow_id,
+              ...record.tokens,
+            },
+            request_index: index,
+          });
+        } else {
+          successRecord.push({
+            table: records[index].table,
+            skyflow_id: record.skyflow_id,
+            request_index: index,
+          });
+        }
+      } else {
+        failedRecord.push({
+          error: {
+            code: status,
+            description: `${body.error} - requestId: ${responseBody.requestId}`,
+            request_index: index,
+          },
+        });
+      }
+    });
+  const finalResponse: IInsertCollectResponse = {};
+
+  if (successRecord.length > 0) {
+    finalResponse.records = successRecord;
+  }
+  if (failedRecord.length > 0) {
+    finalResponse.errors = failedRecord;
+  }
+  return finalResponse;
 };
 
 export const constructFinalUpdateRecordResponse = (
@@ -221,6 +258,75 @@ const updateRecordsInVault = (
   });
 };
 
+export const insertDataInCollect = async (
+  records,
+  client: Client,
+  options,
+  finalInsertRecords,
+) => new Promise((rootResolve, rootReject) => {
+  let insertResponse;
+  const clientId = client.toJSON()?.metaData?.uuid || '';
+  getAccessToken(clientId).then((authToken) => {
+    client
+      .request({
+        body: { ...records },
+        requestMethod: 'POST',
+        url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+        headers: {
+          authorization: `Bearer ${authToken}`,
+          'content-type': 'application/json',
+        },
+      })
+      .then((response: any) => {
+        if (!options.continueOnError) {
+          insertResponse = constructInsertRecordResponseWithoutContinueOnError(
+            response,
+            options,
+            finalInsertRecords.records,
+          );
+          if (insertResponse.records) {
+            insertResponse.records.forEach((record) => {
+              delete record.request_index;
+            });
+          }
+        } else {
+          insertResponse = constructInsertRecordResponseWithContinueOnError(
+            response,
+            options,
+            finalInsertRecords.records,
+          );
+          if (insertResponse.records) {
+            insertResponse.records.forEach((record) => {
+              delete record.request_index;
+            });
+          }
+          if (insertResponse.errors) {
+            insertResponse.errors.forEach((errors) => {
+              delete errors.error.request_index;
+            });
+          }
+        }
+        rootResolve(insertResponse);
+      },
+      (rejectedResult) => {
+        rootReject({
+          errors: [
+            {
+              error: {
+                code: rejectedResult?.error?.code,
+                description: rejectedResult?.error?.description,
+              },
+            },
+          ],
+        });
+      }).catch((err) => {
+        rootReject(err);
+      });
+  }).catch((err) => {
+    rootReject(err);
+  });
+});
+
 export const updateRecordsBySkyflowID = async (
   skyflowIdRecords,
   client: Client,
@@ -267,7 +373,7 @@ export const updateRecordsBySkyflowID = async (
       });
 
       if (errorsResponse.length === 0) {
-        rootResolve(recordsResponse);
+        rootResolve({ records: recordsResponse });
       } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
       else rootReject({ records: recordsResponse, errors: errorsResponse });
     });

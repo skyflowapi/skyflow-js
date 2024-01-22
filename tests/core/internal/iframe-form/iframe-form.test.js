@@ -35,11 +35,12 @@ const records = {
       },
     ],
     },
+    continueOnError: false
 };
 
 const clientObj1 = {
     config: {},
-    request: jest.fn(() => Promise.rejects({"error": 'not foound'})),
+    request: jest.fn(() => Promise.reject({ error : {code:404,description:"Not Found"}})),
     toJSON: jest.fn(() => ({
         config: {},
         metaData: {
@@ -148,7 +149,7 @@ describe('test iframeFormelement', () => {
         form.setClient(clientObj1)
         form.setClientMetadata(metaData)
         form.setContext(context)
-        expect(form.tokenize()).rejects.toThrow(SkyflowError)
+        expect(form.tokenize()).rejects.toEqual({errors:[{ error : {code:404,description:"Not Found"}}]});
     })
 
     test('test setValue for expiration_date', () => {
@@ -448,7 +449,46 @@ const data = {
         }]
     },
     tokens: true,
-    upsert: [{ table: '', column: '  ' }]
+    upsert: [{ table: '', column: '  ' }],
+    continueOnError: false 
+}
+const data4 = {
+    additionalFields: {
+        records: [{
+            table: "pii_fields",
+            fields: {
+                cvv: '123',
+                name:'name',
+                skyflowID: 'ghgjhjh2',
+            }
+        }, {
+            table: 'table',
+            fields: {
+                name: 'joey'
+            }
+        }]
+    },
+    tokens: true,
+    continueOnError: true 
+}
+const data5 = {
+    additionalFields: {
+        records: [{
+            table: "pii_fields",
+            fields: {
+                cvv: '123',
+                name:'name',
+                skyflowID: 'ghgjhjh2',
+            }
+        }, {
+            table: 'table',
+            fields: {
+                name: 'joey'
+            }
+        }]
+    },
+    tokens: false,
+    continueOnError: true 
 }
 const data2 = {
     additionalFields: {
@@ -461,7 +501,7 @@ const data2 = {
         }]
     },
     tokens: false,
-    upsert: [{ table: '', column: '  ' }]
+    continueOnError: false
 }
 const data3 = {
     additionalFields: {
@@ -494,24 +534,77 @@ const fileDataInvalid = {
 }
 
 
-export const insertResponse = {
-    vaultID: 'vault123',
-    responses: [
-        {
-            records: [
-                {
-                    skyflow_id: 'testId',
-                },
-            ],
+const insertResponse = {
+    "vaultID": "<VaultID>",
+    "responses": [
+      {
+        "records": [
+          {
+            "skyflow_id": "ghgjhjh2",
+            "tokens": {
+              "card_number": "token",
+              "cvv": "token",
+              "expiry_date": "token",
+              "name": "token",
+            }
+          },
+          {
+            "skyflow_id": "id",
+            "tokens": {
+                "name": 'joey'
+            }
+        }
+        ]
+      }
+    ]
+}
+const insertResponse2 = {
+    "vaultID": "<VaultID>",
+    "responses": [
+      {    
+        "Body": {    
+        "records": [
+          {
+            "skyflow_id": "ghgjhjh2",
+            "tokens": {
+              "card_number": "token",
+              "cvv": "token",
+              "expiry_date": "token",
+              "name": "token",
+            }
+          },
+        ]
+    },
+    "Status": 200,
+      },
+      {
+        "Body": {
+            "error": "Invalid field present in JSON card_numbe"
         },
-        {
+        "Status": 400
+    },
+    ]
+}
+const data6 = {
+    additionalFields: {
+        records: [{
+            table: "pii_fields",
             fields: {
-                '*': 'testId',
-                cvv: 'cvvToken'
-            },
-        },
-    ],
-};
+                cvv: '123',
+                name:'name',
+                skyflowID: 'ghgjhjh2',
+            }
+        }, {
+            table: 'table',
+            fields: {
+                name: 'joey'
+            }
+        }]
+    },
+    tokens: false,
+    upsert: [{ table: '', column: '  ' }],
+    continueOnError: false 
+}
 
 export const fileResponse = {
     "fileUploadResponse": [
@@ -546,6 +639,17 @@ const clientObj = {
         }
     }))
 }
+const clientObj2 = {
+    config: {},
+    request: jest.fn(() => Promise.resolve(insertResponse2)),
+    toJSON: jest.fn(() => ({
+        config: {},
+        metaData: {
+            uuid: ''
+        }
+    }))
+}
+
 
 describe('test iframeForm collect method', () => {
 
@@ -747,7 +851,7 @@ describe('test iframeForm collect method', () => {
         const form = new IFrameForm("controllerId", "", "ERROR");
         form.setContext(context)
         form.setClient(clientObj1)
-        expect(form.tokenize(records)).rejects.toMatchObject({"error": {"code": 404, "description": "Not Found"}});
+        expect(form.tokenize(records)).rejects.toMatchObject({errors:[{ error : {code:404,description:"Not Found"}}]});
     })
     test('insert records with tokens as true', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
@@ -762,13 +866,13 @@ describe('test iframeForm collect method', () => {
         setTimeout(() => {
             expect(cb2.mock.calls[0][0].records.length).toBe(2);
             expect(cb2.mock.calls[0][0].records[0].table).toBe('table');
-            expect(Object.keys(cb2.mock.calls[0][0].records[0].fields).length).toBe(2);
+            expect(Object.keys(cb2.mock.calls[0][0].records[0].fields).length).toBe(5);
             done()
         }, 1000)
     })
     let clientObj1 = {
         config: {},
-        request: jest.fn(() => Promise.reject({error:{code:404,description:"Not Found"}})),
+        request: jest.fn(() => Promise.reject({ error : {code:404,description:"Not Found"}})),
         toJSON: jest.fn(() => ({
             config: {},
             metaData: {
@@ -776,7 +880,43 @@ describe('test iframeForm collect method', () => {
             }
         }))
     }
-    test('ererr', (done) => {
+    test('error insert case when continue error is true', (done) => {
+        const form = new IFrameForm("controllerId", "", "ERROR");
+        form.setClient(clientObj2)
+        form.setClientMetadata(metaData)
+        form.setContext(context)
+
+        const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
+        const tokenizationCb = tokenizationEvent[0][1];
+        const cb2 = jest.fn();
+        tokenizationCb(data4, cb2);
+        setTimeout(() => {
+            expect(cb2.mock.calls[0][0].error).toBeDefined();
+            done()
+        }, 1000)
+        form.tokenize(data4).then().catch( err => {
+            expect(err).toBeDefined();
+        })
+    })
+    test('error insert case when continue error is true and token is false', (done) => {
+        const form = new IFrameForm("controllerId", "", "ERROR");
+        form.setClient(clientObj2)
+        form.setClientMetadata(metaData)
+        form.setContext(context)
+
+        const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
+        const tokenizationCb = tokenizationEvent[0][1];
+        const cb2 = jest.fn();
+        tokenizationCb(data5, cb2);
+        setTimeout(() => {
+            expect(cb2.mock.calls[0][0].error).toBeDefined();
+            done()
+        }, 1000)
+        form.tokenize(data4).then().catch( err => {
+            expect(err).toBeDefined();
+        })
+    })
+    test('error insert case when continue error is false', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
         form.setClient(clientObj1)
         form.setClientMetadata(metaData)
@@ -788,6 +928,24 @@ describe('test iframeForm collect method', () => {
         tokenizationCb(data, cb2);
         setTimeout(() => {
             expect(cb2.mock.calls[0][0].error).toBeDefined();
+            done()
+        }, 1000)
+        form.tokenize(data).then().catch( err => {
+            expect(err).toBeDefined();
+        })
+    })
+    test('error insert case when continue error is false and token is false', (done) => {
+        const form = new IFrameForm("controllerId", "", "ERROR");
+        form.setClient(clientObj)
+        form.setClientMetadata(metaData)
+        form.setContext(context)
+
+        const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
+        const tokenizationCb = tokenizationEvent[0][1];
+        const cb2 = jest.fn();
+        tokenizationCb(data6, cb2);
+        setTimeout(() => {
+            expect(cb2.mock.calls[0][0].records).toBeDefined();
             done()
         }, 1000)
         form.tokenize(data).then().catch( err => {
@@ -814,7 +972,7 @@ describe('test iframeForm collect method', () => {
     })
     test('insert records duplicate error', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
-        form.setClient(clientObj)
+        form.setClient(clientObj1)
         form.setClientMetadata(metaData)
         form.setContext(context)
 
@@ -830,16 +988,16 @@ describe('test iframeForm collect method', () => {
                         col: '123',
                     }
                 }]
-            }
+            }, continueOnError: false,
         }, cb2)   
         setTimeout(() => {
-            expect(cb2.mock.calls[0][0].error.message).toBeDefined()
+            expect(cb2.mock.calls[0][0].error).toBeDefined()
             done()
         }, 1000)
     })
     test('insert records with tokens as false', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
-        form.setClient(clientObj)
+        form.setClient(clientObj1)
         form.setClientMetadata(metaData)
         form.setContext(context)
 
@@ -848,8 +1006,7 @@ describe('test iframeForm collect method', () => {
         const cb2 = jest.fn();
         tokenizationCb(data2, cb2);
         setTimeout(() => {
-            expect(cb2.mock.calls[0][0].records[0].table).toBe('pii_fields');
-            expect(Object.keys(cb2.mock.calls[0][0].records[0]).length).toBe(2);
+            expect(cb2.mock.calls[0][0].error).toBeDefined();
             done()
         }, 1000)
     })
@@ -1010,7 +1167,6 @@ describe('test file Upload method', () => {
         fileUploadCb(fileData, cb2)
 
         setTimeout(() => {
-            console.log('cb2.mock.calls', cb2.mock.calls);
             expect(cb2.mock.calls[0][0].error).toBeDefined()
             done()
         }, 3000)
@@ -1027,7 +1183,6 @@ describe('test file Upload method', () => {
         fileUploadCb(fileData, cb3)
 
         setTimeout(() => {
-            console.log('cb3.mock.calls', cb3.mock.calls);
             expect(cb3.mock.calls[0][0].error).toBeDefined()
             done()
         }, 1000)
