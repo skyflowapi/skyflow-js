@@ -107,7 +107,7 @@ export class FrameElement {
   private domLabel?: HTMLLabelElement;
 
   private domInput?: (HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLFormElement)
-  & { iFrameFormElement : IFrameFormElement };
+  & { iFrameFormElement? : IFrameFormElement };
 
   public domError?: HTMLSpanElement;
 
@@ -154,7 +154,7 @@ export class FrameElement {
 
     this.domError = document.createElement('span');
 
-    let type;
+    let type:'select' | 'textarea' | 'input' = 'input';
     if (this.iFrameFormElement?.fieldType === ELEMENTS.dropdown.name) {
       type = 'select';
     } else if (this.iFrameFormElement?.fieldType === ELEMENTS.textarea.name) {
@@ -168,9 +168,7 @@ export class FrameElement {
 
     const inputElement = document.createElement(type);
     this.domInput = inputElement;
-    if (this.domInput) {
-      this.domInput.iFrameFormElement = this.iFrameFormElement;
-    }
+    this.domInput.iFrameFormElement = this.iFrameFormElement;
     inputElement.setAttribute(CUSTOM_ROW_ID_ATTRIBUTE, this.htmlDivElement?.id?.split(':')[0] || '');
     this.inputParent.append(inputElement);
 
