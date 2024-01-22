@@ -978,6 +978,59 @@ describe('test iframeForm collect method', () => {
             }
         }));
     })
+    test('inputElementNotFound', (done) => {
+        const form = new IFrameForm("controllerId", "", "ERROR");
+        const element =  new IFrameFormElement(collect_element,"",{},context)
+        form.setClient(clientObj1)
+        form.setClientMetadata(metaData)
+        form.setContext(context)
+
+        element.setValue("123")
+        const skyflowInit = jest.fn();
+        let windowSpy = jest.spyOn(global, 'window', 'get');
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: {
+                    [`${collect_element}:controllerId:ERROR`]:{
+                        document:{
+                            getElementById:()=>(undefined)
+                        }
+                    }
+                }
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+
+        const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
+        const tokenizationCb = tokenizationEvent[0][1];
+        const cb2 = jest.fn();
+        tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2);
+        setTimeout(() => {
+            expect(cb2.mock.calls[0][0].error).toBeDefined();
+            done()
+        }, 1000)
+        form.tokenize({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}).then().catch( err => {
+            expect(err).toBeDefined();
+        })
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+    })
     test('success', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");
         const element =  new IFrameFormElement(collect_element,"",{},context)
