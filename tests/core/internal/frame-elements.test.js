@@ -78,6 +78,9 @@ describe('test frame elements', () => {
         windowSpy = jest.spyOn(global, 'window', 'get');
         windowSpy.mockImplementation(() => ({
             name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR`,
+            location: {
+              href: `http://localhost/?${btoa(JSON.stringify(element))}`,
+            }
         }));
 
         emitSpy = jest.spyOn(bus, 'emit');
@@ -112,12 +115,6 @@ describe('test frame elements', () => {
             }
         })
         const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
-        const heigtEvent = onSpy.mock.calls[0][1];
-        const cb = jest.fn();
-        heigtEvent({},cb);
-        cb();
-
-
     })
 
 })
@@ -129,6 +126,9 @@ describe('test composable frame elements', () => {
       windowSpy = jest.spyOn(global, 'window', 'get');
       windowSpy.mockImplementation(() => ({
           name: `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR`,
+          location: {
+            href: `http://localhost/?${btoa(JSON.stringify(element))}`,
+          }
       }));
 
       emitSpy = jest.spyOn(bus, 'emit');
