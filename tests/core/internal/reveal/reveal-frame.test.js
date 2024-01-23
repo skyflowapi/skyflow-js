@@ -67,6 +67,34 @@ describe("Reveal Frame Class",()=>{
     });
   });
 
+
+  test("init callback before reveal : without path",()=>{
+    const data = {
+      record:{
+        token:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    defineUrl('http://localhost');
+    try{
+      RevealFrame.init()
+    }catch(e){
+      expect(e).toBeDefined()
+    }
+  });
+
   test("init callback before reveal",()=>{
     const data = {
       record:{
