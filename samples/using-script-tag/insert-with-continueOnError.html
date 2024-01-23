@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pure Js Insert with continueOnError</title>
+    <script src="https://js.skyflow.com/v1/index.js"></script>
+    <style>
+      .field {
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h3>Insert</h3>
+      <form>
+        <div id="cardNumberContainer" class="field">
+          <label for="cardNumber">Card Number</label>
+          <br />
+          <input
+            id="cardNumber"
+            type="text"
+            placeholder="card number"
+            name="cardNumber"
+          />
+        </div>
+        <div id="cardCvvContainer" class="field">
+          <label for="cardCvv">CVV</label>
+          <br />
+          <input id="cardCvv" type="text" placeholder="cvv" minlength="4" />
+        </div>
+        <div id="cardExpiryDateContainer" class="field">
+          <label>Expiry Date</label>
+          <br />
+          <input id="cardExpiry" type="text" placeholder="MM/YYYY" />
+        </div>
+        <div id="cardHolderNameContainer" class="field">
+          <label>Card Holder Name</label>
+          <br />
+          <input
+            id="cardHolderName"
+            type="text"
+            placeholder="card holder name"
+          />
+        </div>
+        <br />
+        <br />
+        <button id="insertButton" type="button">Insert</button>
+      </form>
+      <div>
+        <h3>Insert Response</h3>
+        <pre id="insertResponse"></pre>
+      </div>
+    </div>
+    <br />
+    <script>
+      try {
+        const revealView = document.getElementById('revealView');
+        revealView.style.visibility = 'hidden';
+    
+        const skyflow = Skyflow.init({
+          vaultID: '<VAULT_ID>',
+          vaultURL: '<VAULT_URL>',
+          getBearerToken: () => {
+            return new Promise((resolve, reject) => {
+              const Http = new XMLHttpRequest();
+    
+              Http.onreadystatechange = () => {
+                if (Http.readyState === 4 && Http.status === 200) {
+                  const response = JSON.parse(Http.responseText);
+                  resolve(response.accessToken);
+                }
+              };
+              const url = '<TOKEN_END_POINT_URL>';
+              Http.open('GET', url);
+              Http.send();
+            });
+          },
+        });
+    
+        // form insert request
+    
+        const insertButton = document.getElementById('insertButton');
+        if (insertButton) {
+          insertButton.addEventListener('click', () => {
+            const cardNumberData = document.getElementById('cardNumber').value;
+            const cardCvvData = document.getElementById('cardCvv').value;
+            const cardExpiryData = document.getElementById('cardExpiry').value;
+            const cardholderNameData =
+              document.getElementById('cardHolderName').value;
+            const response = skyflow.insert({
+              records: [
+                {
+                  fields: {
+                    primary_card: {
+                      cvv: cardCvvData,
+                      card_number: cardNumberData,
+                      expiry_date: cardExpiryData,
+                    },
+                    first_name: cardholderNameData,
+                  },
+                  table: 'pii_fields',
+                },
+              ],
+            }, {
+                continueOnError: true
+            });
+            response
+              .then(
+                res => {
+                    document.getElementById('insertResponse').innerHTML =
+                    JSON.stringify(res, null, 2);                },
+                err => {
+                  document.getElementById('insertResponse').innerHTML =
+                    JSON.stringify(err, null, 2);
+                }
+              )
+              .catch(err => {
+                document.getElementById('insertResponse').innerHTML =
+                  JSON.stringify(err, null, 2);
+              });
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    </script>
+  </body>
+</html>
