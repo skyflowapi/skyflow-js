@@ -2708,6 +2708,8 @@ collectContainer.uploadFiles();
 }
 ```
 
+Note: File name should contain only alphanumeric characters and !-_.*()
+
 ## Render a file with a File Element
 
 You can render files using the Skyflow File Element. Use the following steps to securely render a file.

@@ -958,7 +958,7 @@ export class IFrameForm {
           const {
             state, doesClientHasError, clientErrorText, errorText, onFocusChange,
           } = inputElement.iFrameFormElement;
-          if (state.isRequired) {
+          if (state.isRequired || !state.isValid) {
             onFocusChange(false);
           }
           if (!state.isValid || !state.isComplete) {

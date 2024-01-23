@@ -162,7 +162,7 @@ This sample shows you how to use event listeners with Skyflow Elements.
         cd using-npm/collect-element-listeners
         npm i
 #### Configure
-1. open [`index.js`](using-npm/collect-element-listeners/index.js)
+1. open [`index.js`](using-npm/collect-element-listeners/src/index.js)
 2. Replace **<VAULT_ID>** and **VAULT URL** with your vault-specific values.
 3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
 Run the following command.
@@ -179,7 +179,7 @@ This sample shows you how to collect and reveal data with Skyflow Elements.
         cd using-npm/custom-validations
         npm i
 #### Configure
-1. open [`index.js`](using-npm/collect-element-listeners/index.js)
+1. open [`index.js`](using-npm/skyflow-elements/src/index.js)
 2. Replace **<VAULT_ID>** and **VAULT URL** with your vault-specific values.
 3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
 #### Run the following command.
@@ -196,7 +196,7 @@ This sample shows you how to create custom validation when using Skyflow Element
         cd using-npm/pure-js
         npm i
 #### Configure
-1. open [`index.js`](using-npm/collect-element-listeners/index.js)
+1. open [`index.js`](using-npm/custom-validations/src/index.js)
 2. Replace **<VAULT_ID>** and **VAULT URL** with your vault-specific values.
 3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
 #### Run the following command.
@@ -213,7 +213,7 @@ This sample shows you how to insert data into your vault.
             cd using-npm/pure-js
             npm i
 #### Configure
-1. open [`index.js`](using-npm/collect-element-listeners/index.js)
+1. open [`index.js`](using-npm/collect-element-listeners/src/index.js)
 2. Replace **<VAULT_ID>** and **VAULT URL** with your vault-specific values.
 3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
 

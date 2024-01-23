@@ -549,6 +549,7 @@ describe('collect element', () => {
       { logLevel: LogLevel.ERROR, env: Env.PROD }
     );
     expect(element.isMounted()).toBe(false);
+    expect(element.isUpdateCalled()).toBe(false);
     element.update({ label :'Henry' });
     emitterSpy();
     expect(element.isMounted()).toBe(true);
