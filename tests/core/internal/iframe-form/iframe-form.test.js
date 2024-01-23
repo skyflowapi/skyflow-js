@@ -613,7 +613,24 @@ describe('test iframeForm collect method', () => {
         const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
         const tokenizationCb = tokenizationEvent[0][1];
         const cb2 = jest.fn();
-        tokenizationCb(data, cb2)
+
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: {
+                    [`${collect_element}:controllerId:ERROR`]:{
+                        document:{
+                            getElementById:()=>({
+                                iFrameFormElement:element
+                            })
+                        }
+                    }
+                }
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+        tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2)
 
         setTimeout(() => {
             expect(cb2.mock.calls[0][0].error.message).toBeDefined()
@@ -621,7 +638,7 @@ describe('test iframeForm collect method', () => {
 
         element.setValue('123')
         const cb3 = jest.fn()
-        tokenizationCb(data, cb3)
+        tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb3)
 
         setTimeout(() => {
             expect(cb3.mock.calls[0][0].records.length).toBe(2);
@@ -642,7 +659,8 @@ describe('test iframeForm collect method', () => {
                         col: '123'
                     }
                 }]
-            }
+            },
+            elementIds:[{elementId:collect_element,frameId:collect_element}]
         }, cb4)
 
         setTimeout(() => {
@@ -650,7 +668,22 @@ describe('test iframeForm collect method', () => {
             done()
         }, 1000)
 
-
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
     })
 
     test('initialize iframeform and submit collect with invalid input and not required field', (done) => {
