@@ -58,8 +58,8 @@ const getRecordsFromVault = (
     paramList += `skyflow_ids=${skyflowId}&`;
   });
 
-  skyflowIdRecord.columnValues?.forEach((column) => {
-    paramList += `column_name=${skyflowIdRecord.columnName}&column_values=${column}&`;
+  skyflowIdRecord.columnValues?.forEach((column, index) => {
+    paramList += `${(index === 0) ? `column_name=${skyflowIdRecord.columnName}&` : ''}column_values=${column}&`;
   });
 
   if (options && Object.prototype.hasOwnProperty.call(options, 'tokens')) {

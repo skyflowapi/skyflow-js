@@ -371,7 +371,7 @@ const getOptionsTrue = { tokens: true };
 const getOptionsFalse = { tokens: false };
 
 const getByColumnReq = [{
-  columnValues: ['id1'],
+  columnValues: ['id1','id2','id3'],
   columnName: 'column1',
   redaction: 'PLAIN_TEXT',
   table: 'table1',
@@ -508,6 +508,41 @@ describe('Retrieving data using get', () => {
     setTimeout(() => {
       expect(cb2.mock.calls[0][0].records.length).toBe(1);
       done();
+    }, 1000);
+  });
+
+  test('get success case should have single column_name for multiple column values ', (done) => {
+
+    let reqArg;
+    const clientReq = jest.fn((arg) =>{ 
+      console.log(arg)
+      reqArg = arg;
+      return Promise.resolve(getByIdRes)});
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.GET,
+      records: getByColumnReq,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      try{
+       expect(cb2.mock.calls[0][0].records.length).toBe(1);
+       expect((reqArg.url).match(/column_name=column1/gi)?.length).toBe(1);
+        done();
+      }catch(err){
+        done(err)
+      }
     }, 1000);
   });
 
