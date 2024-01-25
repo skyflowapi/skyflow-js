@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.34.2] - 2024-01-25
+### Fixed
+- Fixed multiple column names error with unique column values in `get` interface.
+
+
 ## [1.34.1] - 2024-01-10
 ### Added
 - File name validations in file upload
