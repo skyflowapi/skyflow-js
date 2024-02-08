@@ -9,7 +9,7 @@ const terserWebpackPlugin = require('terser-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const common = require('./webpack.common.js');
-
+const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
 const minify = {
   collapseWhitespace: true,
   removeComments: true,
@@ -32,6 +32,7 @@ module.exports = () => merge(common, {
 
   output: {
     filename: '[name].js',
+    crossOriginLoading: 'anonymous',
     path: path.resolve(__dirname, 'dist/v1/elements'),
   },
 
@@ -51,6 +52,10 @@ module.exports = () => merge(common, {
       chunks: ['index'],
       inject: 'head',
       minify,
+    }),
+    new SubresourceIntegrityPlugin({ 
+      hashFuncNames: ['sha256'],
+      enabled: true,
     }),
     new CleanWebpackPlugin({
       verbose: true,
