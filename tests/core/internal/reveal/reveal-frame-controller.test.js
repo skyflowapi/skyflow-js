@@ -14,6 +14,10 @@ import { JSDOM } from 'jsdom';
 import SkyflowContainer from '../../../../src/core/external/skyflow-container';
 import Client from '../../../../src/client';
 
+// global.ResizeObserver = jest.fn(() => ({
+//   observe: jest.fn(),
+//   disconnect: jest.fn(),
+// }));
 
 const containerId = '1234'; 
 const elementId = '1234'; 

@@ -2,6 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import mime from 'mime';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
@@ -12,6 +13,8 @@ import {
   REVEAL_ELEMENT_OPTIONS_TYPES,
   COPY_UTILS,
   REVEAL_COPY_ICON_STYLES,
+  RENDER_ELEMENT_IMAGE_STYLES,
+  DEFAULT_FILE_RENDER_ERROR,
 } from '../../constants';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import {
@@ -103,7 +106,10 @@ class RevealFrame {
         }
       };
     }
-
+    // bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (data, callback) => {
+    //   console.log("====listen", this.#name, this.#elementContainer.scrollHeight)
+    //   callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
+    // });
     if (Object.prototype.hasOwnProperty.call(this.#record, 'label')) {
       this.#labelElement.innerText = this.#record.label;
       this.#elementContainer.append(this.#labelElement);
@@ -198,6 +204,64 @@ class RevealFrame {
       }
     });
     this.updateRevealElementOptions();
+
+    const sub2 = (responseUrl) => {
+      if (responseUrl === DEFAULT_FILE_RENDER_ERROR) {
+        this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
+      } else {
+        const ext = this.getExtension(responseUrl);
+        this.addFileRender(responseUrl, ext);
+      }
+    };
+    bus
+      // .target(window.location.origin)
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#containerId,
+        sub2,
+      );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private getExtension(url) {
+    const params = new URL(url).searchParams;
+    const name = params.get('response-content-disposition');
+    if (name) {
+      const ext = mime.getType(name);
+      return ext;
+    }
+    return '';
+  }
+
+  private addFileRender(responseUrl, ext) {
+    let tag = '';
+    if (typeof ext === 'string' && ext.includes('image')) {
+      tag = 'img';
+    } else {
+      tag = 'embed';
+    }
+    const fileElement = document.createElement(tag);
+    fileElement.className = `SkyflowElement-${tag}-${STYLE_TYPE.BASE}`;
+    if (tag === 'embed' && typeof ext === 'string') {
+      fileElement.setAttribute('type', ext);
+    }
+    fileElement.setAttribute('src', responseUrl);
+
+    if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
+      this.#inputStyles = {};
+      this.#inputStyles[STYLE_TYPE.BASE] = {
+        ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
+        ...this.#record.inputStyles[STYLE_TYPE.BASE],
+      };
+      getCssClassesFromJss(this.#inputStyles, tag);
+    } else {
+      getCssClassesFromJss(RENDER_ELEMENT_IMAGE_STYLES, tag);
+    }
+    if (this.#elementContainer.childNodes[0] !== undefined) {
+      this.#elementContainer.childNodes[0].remove();
+      this.#elementContainer.appendChild(fileElement);
+    } else {
+      this.#elementContainer.appendChild(fileElement);
+    }
   }
 
   private setRevealError(errorText: string) {

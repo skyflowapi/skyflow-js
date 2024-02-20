@@ -10,6 +10,11 @@ import Client from '../../../../src/client';
 import bus from "framebus";
 import { JSDOM } from 'jsdom';
 
+// global.ResizeObserver = jest.fn(() => ({
+//   observe: jest.fn(),
+//   disconnect: jest.fn(),
+// }));
+
 const mockUuid = '1234'; 
 const elementId = 'id';
 jest.mock('../../../../src/libs/uuid',()=>({
@@ -180,43 +185,36 @@ describe("Reveal Element Class", () => {
         table: 'table'
       },
       undefined,
-      clientData,
-      {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+      metaData,
+      {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
-    const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
-    document = window.document;
-    const data =  testRevealElement.getRecordData()
     const testEmptyDiv = document.createElement("div");
     testEmptyDiv.setAttribute("id", "testDiv");
     document.body.appendChild(testEmptyDiv);
     expect(document.getElementById("testDiv")).not.toBeNull();
-      
+    
     expect(testRevealElement.isMounted()).toBe(false);
 
     testRevealElement.mount("#testDiv");
     
 
-    expect(document.querySelector("span")).toBeTruthy();
-    renderFile.mockImplementation(()=>{
-      return new Promise((resolve,_)=>{
-        resolve({
-          fields: {
-            file: '123',
-            skyflow_id: '1234'
-          }
-        })
-      });
-    });
-    testRevealElement.renderFile().then(console.log("data")).catch(console.log('error'));
+    expect(document.querySelector("iframe")).toBeTruthy();
     const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
+    
+    const eventListenerName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY;
+    const onCbName = on.mock.calls[0][0];
+    expect(onCbName).toBe(eventListenerName);
+    const onCb = on.mock.calls[0][1];
+    const emitterCb = jest.fn();
+    onCb({
+      name:testIframeName,
+    },emitterCb);
+    expect(emitterCb).toBeCalled();
     expect(testRevealElement.isMounted()).toBe(true);
     expect(testRevealElement.iframeName()).toBe(testIframeName);
-    testRevealElement.unmount();
-    expect(testRevealElement.isMounted()).toBe(false); 
-    expect(document.querySelector("span")).toBeFalsy(); 
   });
   test("has token should return false, without token",()=>{
     const testRevealElement = new RevealElement(

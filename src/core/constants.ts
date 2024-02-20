@@ -398,6 +398,12 @@ export const REVEAL_ELEMENT_DIV_STYLE = {
     justifyContent: 'space-between',
   },
 };
+export const RENDER_ELEMENT_IMAGE_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    maxHeight: '100%',
+    maxWidth: '100%',
+  },
+};
 
 export const REVEAL_ELEMENT_LABEL_DEFAULT_STYLES = {
   [STYLE_TYPE.BASE]: {

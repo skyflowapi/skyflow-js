@@ -446,7 +446,7 @@ class SkyflowContainer {
     });
   }
 
-  renderFile(recordData, metaData) {
+  renderFile(recordData, metaData, containerId) {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
@@ -461,6 +461,7 @@ class SkyflowContainer {
               ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#containerId,
               {
                 records: recordData,
+                containerId,
               },
               (revealData: any) => {
                 if (revealData.errors) {
@@ -496,7 +497,7 @@ class SkyflowContainer {
                 ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#containerId,
                 {
                   records: recordData,
-                  metaData: metaData.clientJSON,
+                  containerId,
                 },
                 (revealData: any) => {
                   if (revealData.errors) {
