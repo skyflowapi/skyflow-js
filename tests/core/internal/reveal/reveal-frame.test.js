@@ -3,7 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
-import { COPY_UTILS, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from "../../../../src/core/constants";
+import { COPY_UTILS, DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from "../../../../src/core/constants";
 import { Env, LogLevel } from "../../../../src/utils/common";
 
 const testRecord = {
@@ -153,8 +153,6 @@ describe("Reveal Frame Class",()=>{
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+undefined);
     const onRevealResponseCb = on.mock.calls[0][1];
     onRevealResponseCb({"1815":"1234"})
-    
-
   });
   test("init callback after reveal without value",()=>{
     const testFrame = RevealFrame.init();
@@ -563,5 +561,162 @@ describe("Reveal Frame Class",()=>{
       updatedValue:testUpdateOptions,
     });
   });
+  test('render success response event for img tag', () => {
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        skyflowID:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    const eventRenderResponse = on.mock.calls[3][0];
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
+    const callback = on.mock.calls[3][1];
+    callback(
+      "https://sandbox.242f791-4f38-a082-dd9c514f43f3/971c419dd609331343dee105fffd0f4608dc0bf2?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631"
+    );
+  })
+  test('render success response event for embed tag', () => {
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        skyflowID:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    const eventRenderResponse = on.mock.calls[3][0];
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
+    const callback = on.mock.calls[3][1];
+    callback(
+      "https://sandbox.242f791-4f38-a082-dd9c514f43f3/971c419dd609331343dee105fffd0f4608dc0bf2?response-content-disposition=inline%3B%20filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631"
+    );
+  })
+  test('render success response event for img tag when input style not passed', () => {
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        skyflowID:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    const eventRenderResponse = on.mock.calls[3][0];
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
+    const callback = on.mock.calls[3][1];
+    callback(
+      "https://sandbox.242f791-4f38-a082-dd9c514f43f3/971c419dd609331343dee105fffd0f4608dc0bf2?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631"
+    );
+  })
+  test('render success response event for embed tag', () => {
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        skyflowID:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    const eventRenderResponse = on.mock.calls[3][0];
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
+    const callback = on.mock.calls[3][1];
+    callback(
+      "https://sandbox.242f791-4f38-a082-dd9c514f43f3/971c419dd609331343dee105fffd0f4608dc0bf2?filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631"
+    );
+  })
+
+  test('render error response event', () => {
+    const testFrame = RevealFrame.init();
+    // const onCb = jest.fn();
+    const data = {
+      record:{
+        skyflowID:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
+    emitCb(data);
+
+    const eventRenderResponse = on.mock.calls[3][0];
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
+    const callback = on.mock.calls[3][1];
+    callback(
+      DEFAULT_FILE_RENDER_ERROR
+    );
+  })
+  
 
 });

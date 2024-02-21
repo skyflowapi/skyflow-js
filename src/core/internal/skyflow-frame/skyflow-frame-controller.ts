@@ -27,6 +27,7 @@ import {
   IGetOptions,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
+import properties from '../../../properties';
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -265,7 +266,7 @@ class SkyflowFrameController {
               url = resolvedResult.fields[data.column];
             }
             bus
-            // .target(properties.IFRAME_SECURE_SITE)
+              .target(properties.IFRAME_SECURE_SITE)
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
                 + containerId,
@@ -276,7 +277,7 @@ class SkyflowFrameController {
           },
           (rejectedResult) => {
             bus
-            // .target(properties.IFRAME_SECURE_SITE)
+              .target(properties.IFRAME_SECURE_SITE)
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
                 + containerId,

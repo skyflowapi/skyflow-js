@@ -46,8 +46,6 @@ class RevealElement extends SkyflowElement {
 
   #domSelecter: string;
 
-  #isRenderFileCalled: boolean;
-
   #clientId: string;
 
   // resizeObserver: ResizeObserver | null;
@@ -73,7 +71,6 @@ class RevealElement extends SkyflowElement {
       this.#containerId,
       this.#context.logLevel,
     );
-    this.#isRenderFileCalled = false;
     this.#domSelecter = '';
     this.#isFrameReady = false;
     // this.resizeObserver = null;
@@ -96,7 +93,6 @@ class RevealElement extends SkyflowElement {
     // this.resizeObserver = new ResizeObserver(() => {
     //   bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
     //     {}, (payload:any) => {
-    //       // console.log("---------called", payload);
     //       this.#iframe.setIframeHeight(payload.height);
     //     });
     // });
@@ -160,7 +156,6 @@ class RevealElement extends SkyflowElement {
               printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
                 MessageType.LOG,
                 this.#context.logLevel);
-              this.#isRenderFileCalled = true;
               printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
                 CLASS_NAME, this.#recordData.skyflowID),
               MessageType.LOG, this.#context.logLevel);
@@ -169,7 +164,6 @@ class RevealElement extends SkyflowElement {
             (rejectedResult) => {
               printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                 this.#context.logLevel);
-              this.#isRenderFileCalled = true;
               reject(rejectedResult);
             },
           );
@@ -193,7 +187,6 @@ class RevealElement extends SkyflowElement {
                   printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
                     this.#context.logLevel);
-                  this.#isRenderFileCalled = true;
                   printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
                     CLASS_NAME, this.#recordData.skyflowID),
                   MessageType.LOG, this.#context.logLevel);
@@ -202,7 +195,6 @@ class RevealElement extends SkyflowElement {
                 (rejectedResult) => {
                   printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                     this.#context.logLevel);
-                  this.#isRenderFileCalled = true;
                   reject(rejectedResult);
                 },
               );

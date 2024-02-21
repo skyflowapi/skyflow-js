@@ -107,7 +107,6 @@ class RevealFrame {
       };
     }
     // bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (data, callback) => {
-    //   console.log("====listen", this.#name, this.#elementContainer.scrollHeight)
     //   callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
     // });
     if (Object.prototype.hasOwnProperty.call(this.#record, 'label')) {
@@ -214,7 +213,7 @@ class RevealFrame {
       }
     };
     bus
-      // .target(window.location.origin)
+      .target(window.location.origin)
       .on(
         ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#containerId,
         sub2,
