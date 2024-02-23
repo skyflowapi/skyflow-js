@@ -104,21 +104,32 @@ class RevealElement extends SkyflowElement {
         });
 
         bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
-
+        if (this.#recordData.skyflowID) {
+          bus
+          // .target(location.origin)
+            .emit(
+              ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
+              {
+                skyflowID: this.#recordData.skyflowID,
+                containerId: this.#containerId,
+              },
+            );
+        } else {
+          bus
+          // .target(location.origin)
+            .emit(
+              ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
+              {
+                id: this.#recordData.token,
+                containerId: this.#containerId,
+              },
+            );
+        }
+        this.#isMounted = true;
         bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
           {}, (payload:any) => {
             this.#iframe.setIframeHeight(payload.height);
           });
-        bus
-        // .target(location.origin)
-          .emit(
-            ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
-            {
-              id: this.#recordData.token,
-              containerId: this.#containerId,
-            },
-          );
-        this.#isMounted = true;
       }
     };
 
@@ -148,12 +159,16 @@ class RevealElement extends SkyflowElement {
   }
 
   renderFile() {
+    let altText = '';
+    if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
+      altText = this.#recordData.altText;
+    }
     this.setAltText('loading...');
     if (this.#isMounted) {
       return new Promise((resolve, reject) => {
         try {
           this.#metaData.skyflowContainer.renderFile(
-            this.#recordData, this.#metaData, this.#containerId,
+            this.#recordData, this.#metaData, this.#containerId, this.#iframe.name,
           ).then(
             (resolvedResult) => {
               printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
@@ -167,6 +182,9 @@ class RevealElement extends SkyflowElement {
             (rejectedResult) => {
               printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                 this.#context.logLevel);
+              if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
+                this.setAltText(altText);
+              }
               reject(rejectedResult);
             },
           );
@@ -198,6 +216,9 @@ class RevealElement extends SkyflowElement {
                 (rejectedResult) => {
                   printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                     this.#context.logLevel);
+                  if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
+                    this.setAltText(altText);
+                  }
                   reject(rejectedResult);
                 },
               );

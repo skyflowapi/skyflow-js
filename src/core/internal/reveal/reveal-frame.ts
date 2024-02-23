@@ -187,7 +187,10 @@ class RevealFrame {
         //     sub,
         //   );
       } else {
-        this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
+        // eslint-disable-next-line no-lonely-if
+        if (Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
+          this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
+        }
       }
       // this.updateDataView();
     };
@@ -207,11 +210,16 @@ class RevealFrame {
     this.updateRevealElementOptions();
 
     const sub2 = (responseUrl) => {
-      if (responseUrl === DEFAULT_FILE_RENDER_ERROR) {
-        this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
-      } else {
-        const ext = this.getExtension(responseUrl);
-        this.addFileRender(responseUrl, ext);
+      if (responseUrl.iframeName === this.#name) {
+        if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
+          this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
+          if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
+            this.#dataElememt.innerText = this.#record.altText;
+          }
+        } else {
+          const ext = this.getExtension(responseUrl.url);
+          this.addFileRender(responseUrl.url, ext);
+        }
       }
     };
     bus
@@ -220,6 +228,10 @@ class RevealFrame {
         ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#containerId,
         sub2,
       );
+    bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (_, callback) => {
+      // eslint-disable-next-line max-len
+      callback({ height: this.#elementContainer.scrollHeight + this.#errorElement.scrollHeight, name: this.#name });
+    });
   }
 
   // eslint-disable-next-line class-methods-use-this

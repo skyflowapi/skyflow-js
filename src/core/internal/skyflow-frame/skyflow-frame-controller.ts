@@ -189,7 +189,7 @@ class SkyflowFrameController {
       printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
         CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
       MessageType.LOG, this.#context.logLevel);
-      this.renderFile(data.records, data.containerId).then(
+      this.renderFile(data.records, data.containerId, data.iframeName).then(
         (resolvedResult) => {
           callback(
             resolvedResult,
@@ -256,7 +256,7 @@ class SkyflowFrameController {
     });
   }
 
-  renderFile(data: IRevealRecord, containerId) {
+  renderFile(data: IRevealRecord, containerId, iframeName) {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowID(data, this.#client)
@@ -270,7 +270,10 @@ class SkyflowFrameController {
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
                 + containerId,
-                url as any,
+                {
+                  url,
+                  iframeName,
+                },
               );
 
             resolve(resolvedResult);
@@ -281,7 +284,10 @@ class SkyflowFrameController {
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
                 + containerId,
-                DEFAULT_FILE_RENDER_ERROR as any,
+                {
+                  error: DEFAULT_FILE_RENDER_ERROR,
+                  iframeName,
+                },
               );
             reject(rejectedResult);
           });
