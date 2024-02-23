@@ -9,7 +9,7 @@ import { Context, MessageType } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
   // eslint-disable-next-line max-len
-  FRAME_REVEAL, ELEMENT_EVENTS_TO_IFRAME, ELEMENT_EVENTS_TO_CONTAINER, REVEAL_ELEMENT_OPTIONS_TYPES,
+  FRAME_REVEAL, ELEMENT_EVENTS_TO_IFRAME, ELEMENT_EVENTS_TO_CONTAINER, REVEAL_ELEMENT_OPTIONS_TYPES, ELEMENT_EVENTS_TO_CLIENT,
 } from '../../constants';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
@@ -48,7 +48,7 @@ class RevealElement extends SkyflowElement {
 
   #clientId: string;
 
-  // resizeObserver: ResizeObserver | null;
+  resizeObserver: ResizeObserver | null;
 
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
@@ -73,12 +73,18 @@ class RevealElement extends SkyflowElement {
     );
     this.#domSelecter = '';
     this.#isFrameReady = false;
-    // this.resizeObserver = null;
+    this.resizeObserver = null;
     if (!this.#readyToMount) {
       this.#eventEmitter.on(ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED, (data) => {
         if (data?.containerId === this.#containerId) { this.#readyToMount = true; }
       });
     }
+    this.resizeObserver = new ResizeObserver(() => {
+      bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+        {}, (payload:any) => {
+          this.#iframe.setIframeHeight(payload.height);
+        });
+    });
   }
 
   getID() {
@@ -89,13 +95,6 @@ class RevealElement extends SkyflowElement {
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
-
-    // this.resizeObserver = new ResizeObserver(() => {
-    //   bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-    //     {}, (payload:any) => {
-    //       this.#iframe.setIframeHeight(payload.height);
-    //     });
-    // });
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback({
@@ -106,6 +105,10 @@ class RevealElement extends SkyflowElement {
 
         bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
 
+        bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+          {}, (payload:any) => {
+            this.#iframe.setIframeHeight(payload.height);
+          });
         bus
         // .target(location.origin)
           .emit(
@@ -134,14 +137,14 @@ class RevealElement extends SkyflowElement {
           .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
       }
     });
-    // if (typeof domElementSelector === 'string') {
-    //   const targetElement = document.querySelector(domElementSelector);
-    //   if (targetElement) {
-    //     this.resizeObserver?.observe(targetElement);
-    //   }
-    // } else if (domElementSelector instanceof HTMLElement) {
-    //   this.resizeObserver?.observe(domElementSelector);
-    // }
+    if (typeof domElementSelector === 'string') {
+      const targetElement = document.querySelector(domElementSelector);
+      if (targetElement) {
+        this.resizeObserver?.observe(targetElement);
+      }
+    } else if (domElementSelector instanceof HTMLElement) {
+      this.resizeObserver?.observe(domElementSelector);
+    }
   }
 
   renderFile() {
@@ -280,9 +283,9 @@ class RevealElement extends SkyflowElement {
       this.#iframe.container?.remove();
     }
     this.#iframe.unmount();
-    // if (this.resizeObserver) {
-    //   this.resizeObserver?.disconnect();
-    // }
+    if (this.resizeObserver) {
+      this.resizeObserver?.disconnect();
+    }
   }
 
   update(options) {

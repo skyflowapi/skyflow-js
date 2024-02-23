@@ -15,6 +15,7 @@ import {
   REVEAL_COPY_ICON_STYLES,
   RENDER_ELEMENT_IMAGE_STYLES,
   DEFAULT_FILE_RENDER_ERROR,
+  ELEMENT_EVENTS_TO_CLIENT,
 } from '../../constants';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import {
@@ -106,10 +107,7 @@ class RevealFrame {
         }
       };
     }
-    // bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (data, callback) => {
-    //   callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
-    // });
-    if (Object.prototype.hasOwnProperty.call(this.#record, 'label')) {
+    if (Object.prototype.hasOwnProperty.call(this.#record, 'label') && !Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
       this.#labelElement.innerText = this.#record.label;
       this.#elementContainer.append(this.#labelElement);
 
@@ -163,6 +161,10 @@ class RevealFrame {
     this.#elementContainer.appendChild(this.#dataElememt);
 
     document.body.append(this.#elementContainer);
+
+    bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (_, callback) => {
+      callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
+    });
 
     const sub = (data) => {
       if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
@@ -252,8 +254,6 @@ class RevealFrame {
         ...this.#record.inputStyles[STYLE_TYPE.BASE],
       };
       getCssClassesFromJss(this.#inputStyles, tag);
-    } else {
-      getCssClassesFromJss(RENDER_ELEMENT_IMAGE_STYLES, tag);
     }
     if (this.#elementContainer.childNodes[0] !== undefined) {
       this.#elementContainer.childNodes[0].remove();

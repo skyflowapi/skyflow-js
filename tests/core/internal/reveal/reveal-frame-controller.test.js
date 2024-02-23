@@ -15,10 +15,10 @@ import SkyflowContainer from '../../../../src/core/external/skyflow-container';
 import Client from '../../../../src/client';
 import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
 
-// global.ResizeObserver = jest.fn(() => ({
-//   observe: jest.fn(),
-//   disconnect: jest.fn(),
-// }));
+global.ResizeObserver = jest.fn(() => ({
+  observe: jest.fn(),
+  disconnect: jest.fn(),
+}));
 
 const containerId = '1234'; 
 const elementId = '1234'; 

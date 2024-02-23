@@ -12,10 +12,10 @@ import RevealFrameController from '../../../../src/core/internal/reveal/reveal-f
 import bus from "framebus";
 import { JSDOM } from 'jsdom';
 
-// global.ResizeObserver = jest.fn(() => ({
-//   observe: jest.fn(),
-//   disconnect: jest.fn(),
-// }));
+global.ResizeObserver = jest.fn(() => ({
+  observe: jest.fn(),
+  disconnect: jest.fn(),
+}));
 
 const mockUuid = '1234'; 
 const elementId = 'id';
