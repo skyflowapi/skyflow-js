@@ -916,10 +916,8 @@ describe('test render file request', () => {
 
     const emitEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    console.log(emitSpy.mock.calls)
     expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
     emitCb(clientData);
-  
     const revelRequestEventName = ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST;
     const data = {
       "records":[
@@ -928,7 +926,6 @@ describe('test render file request', () => {
         }
       ]
     }
-    console.log(onSpy.mock.calls)
     const emitterCb = jest.fn();
     bus.emit(revelRequestEventName,data,emitterCb);
     const onCbName = on.mock.calls[1][0];

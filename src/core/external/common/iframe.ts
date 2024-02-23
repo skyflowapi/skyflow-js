@@ -23,10 +23,6 @@ export default class IFrame {
     this.iframe = iframer({ name: this.name });
   }
 
-  setAttributess = (responseValue) => {
-    setAttributes(this.iframe, { src: responseValue });
-  };
-
   mount = (domElement) => {
     this.unmount();
     try {
