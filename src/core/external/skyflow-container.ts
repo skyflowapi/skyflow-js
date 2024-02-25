@@ -446,7 +446,7 @@ class SkyflowContainer {
     });
   }
 
-  renderFile(recordData, metaData, containerId) {
+  renderFile(recordData, metaData, containerId, iframeName) {
     if (this.#isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
@@ -462,6 +462,7 @@ class SkyflowContainer {
               {
                 records: recordData,
                 containerId,
+                iframeName,
               },
               (revealData: any) => {
                 if (revealData.errors) {

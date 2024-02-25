@@ -120,7 +120,9 @@ class RevealContainer extends Container {
       .on(
         ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
         (data) => {
-          this.#mountedRecords.push(data as any);
+          if (!data.skyflowID) {
+            this.#mountedRecords.push(data as any);
+          }
           let revealElementLength = 0;
           this.#revealElements.forEach((currentElement) => {
             if (!currentElement.getRecordData().skyflowID) {
