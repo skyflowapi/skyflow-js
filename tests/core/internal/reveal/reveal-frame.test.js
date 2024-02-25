@@ -595,8 +595,9 @@ describe("Reveal Frame Class",()=>{
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
     const callback = on.mock.calls[3][1];
     callback(
-      "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631"
-    );
+      { url: "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
+      iframeName: '',
+  });
   })
   test('render success response event for embed tag', () => {
     const testFrame = RevealFrame.init();
@@ -627,9 +628,10 @@ describe("Reveal Frame Class",()=>{
     const eventRenderResponse = on.mock.calls[3][0];
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
     const callback = on.mock.calls[3][1];
-    callback(
-      "https://url?response-content-disposition=inline%3B%20filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631"
-    );
+    callback({
+      url:  "https://url?response-content-disposition=inline%3B%20filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
+      iframeName: '',
+  });
   })
   test('render success response event for img tag when input style not passed', () => {
     const testFrame = RevealFrame.init();
@@ -650,9 +652,10 @@ describe("Reveal Frame Class",()=>{
     const eventRenderResponse = on.mock.calls[3][0];
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
     const callback = on.mock.calls[3][1];
-    callback(
-      "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631"
-    );
+    callback({
+      url:  "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
+      iframeName: '',
+  });
   })
   test('render success response event for embed tag', () => {
     const testFrame = RevealFrame.init();
@@ -683,9 +686,10 @@ describe("Reveal Frame Class",()=>{
     const eventRenderResponse = on.mock.calls[3][0];
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
     const callback = on.mock.calls[3][1];
-    callback(
-      "https://fileurl?filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631"
-    );
+    callback({
+      url: "https://fileurl?filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
+      iframeName: '',
+    });
   })
 
   test('render error response event', () => {
@@ -717,8 +721,10 @@ describe("Reveal Frame Class",()=>{
     const eventRenderResponse = on.mock.calls[3][0];
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
     const callback = on.mock.calls[3][1];
-    callback(
-      DEFAULT_FILE_RENDER_ERROR
+    callback({
+      error: DEFAULT_FILE_RENDER_ERROR,
+      iframeName: ''
+    }
     );
   })
   

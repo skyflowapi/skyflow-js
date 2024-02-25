@@ -188,7 +188,7 @@ class RevealFrame {
         //   );
       } else {
         // eslint-disable-next-line no-lonely-if
-        if (Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
+        if (!Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
           this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
         }
       }
