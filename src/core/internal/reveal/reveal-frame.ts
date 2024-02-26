@@ -269,9 +269,6 @@ class RevealFrame {
           {
             height: this.#elementContainer.scrollHeight,
           }, () => {
-            if (this.#elementContainer.childNodes[0] !== undefined && this.#elementContainer.childNodes[0].nodeName === 'SPAN') {
-              this.#elementContainer.childNodes[0].remove();
-            }
           },
         );
     });
@@ -289,7 +286,7 @@ class RevealFrame {
       };
       getCssClassesFromJss(this.#inputStyles, tag);
     }
-    if (this.#elementContainer.childNodes[0] !== undefined && this.#elementContainer.childNodes[0].nodeName === 'IMG') {
+    if (this.#elementContainer.childNodes[0] !== undefined) {
       this.#elementContainer.innerHTML = '';
       this.#elementContainer.appendChild(fileElement);
     } else {
