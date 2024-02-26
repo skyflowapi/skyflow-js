@@ -48,8 +48,6 @@ class RevealElement extends SkyflowElement {
 
   #clientId: string;
 
-  resizeObserver: ResizeObserver | null;
-
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
     metaData: any, container: any, elementId: string, context: Context) {
@@ -73,17 +71,13 @@ class RevealElement extends SkyflowElement {
     );
     this.#domSelecter = '';
     this.#isFrameReady = false;
-    this.resizeObserver = null;
     if (!this.#readyToMount) {
       this.#eventEmitter.on(ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED, (data) => {
         if (data?.containerId === this.#containerId) { this.#readyToMount = true; }
       });
     }
-    this.resizeObserver = new ResizeObserver(() => {
-      bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-        {}, (payload:any) => {
-          this.#iframe.setIframeHeight(payload.height);
-        });
+    bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name, (data) => {
+      this.#iframe.setIframeHeight(data.height);
     });
   }
 
@@ -126,10 +120,12 @@ class RevealElement extends SkyflowElement {
             );
         }
         this.#isMounted = true;
-        bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-          {}, (payload:any) => {
-            this.#iframe.setIframeHeight(payload.height);
-          });
+        if (Object.prototype.hasOwnProperty.call(this.#recordData, 'skyflowID')) {
+          bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+            {}, (payload:any) => {
+              this.#iframe.setIframeHeight(payload.height);
+            });
+        }
       }
     };
 
@@ -148,14 +144,6 @@ class RevealElement extends SkyflowElement {
           .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
       }
     });
-    if (typeof domElementSelector === 'string') {
-      const targetElement = document.querySelector(domElementSelector);
-      if (targetElement) {
-        this.resizeObserver?.observe(targetElement);
-      }
-    } else if (domElementSelector instanceof HTMLElement) {
-      this.resizeObserver?.observe(domElementSelector);
-    }
   }
 
   renderFile() {
@@ -216,6 +204,7 @@ class RevealElement extends SkyflowElement {
                 (rejectedResult) => {
                   printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                     this.#context.logLevel);
+                  console.log('------1', this.#recordData);
                   if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
                     this.setAltText(altText);
                   }
@@ -304,9 +293,6 @@ class RevealElement extends SkyflowElement {
       this.#iframe.container?.remove();
     }
     this.#iframe.unmount();
-    if (this.resizeObserver) {
-      this.resizeObserver?.disconnect();
-    }
   }
 
   update(options) {

@@ -15,11 +15,6 @@ import SkyflowContainer from '../../../../src/core/external/skyflow-container';
 import Client from '../../../../src/client';
 import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
 
-global.ResizeObserver = jest.fn(() => ({
-  observe: jest.fn(),
-  disconnect: jest.fn(),
-}));
-
 const containerId = '1234'; 
 const elementId = '1234'; 
 
@@ -435,13 +430,13 @@ test("render request error",()=>{
   getFileURLFromVaultBySkyflowID.mockImplementation(()=>{
     return new Promise((_,reject)=>{
       reject({
-        errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"token not found"}}]
+        errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"id not found"}}]
       })
     });
   });
   formatRecordsForRender.mockImplementation(()=>{
     return {
-      errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"token not found"}}]
+      errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"id not found"}}]
     }
   });
   jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq })); 
@@ -482,7 +477,7 @@ test("render request error",()=>{
   console.log(emitCb);
   expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST+mockUuid);
   emitCb({
-    errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"token not found"}}]
+    errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"id not found"}}]
   });
 });
 
@@ -554,7 +549,7 @@ test("render request error case 2",()=>{
   const emitCb = emitSpy.mock.calls[0][2];
   expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST+mockUuid);
   emitCb({
-    errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"token not found"}}]
+    errors:[{skyflow_id:"1815-6223-1073-1425","error":{"code":404,"description":"id not found"}}]
   });
 });
 test("render request error case2",()=>{

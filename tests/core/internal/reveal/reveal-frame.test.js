@@ -3,13 +3,9 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
-import { COPY_UTILS, DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from "../../../../src/core/constants";
+import { COPY_UTILS, DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from "../../../../src/core/constants";
 import { Env, LogLevel } from "../../../../src/utils/common";
 
-global.ResizeObserver = jest.fn(() => ({
-  observe: jest.fn(),
-  disconnect: jest.fn(),
-}));
 const testRecord = {
   token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
   // redaction: RedactionType.DEFAULT,
@@ -565,9 +561,8 @@ describe("Reveal Frame Class",()=>{
       updatedValue:testUpdateOptions,
     });
   });
-  test('render success response event for img tag', () => {
+  test('render success response event for img tag', (done) => {
     const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         skyflowID:"1815-6223-1073-1425",
@@ -586,6 +581,7 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -598,6 +594,18 @@ describe("Reveal Frame Class",()=>{
       { url: "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
       iframeName: '',
   });
+
+  const heightRequest = ELEMENT_EVENTS_TO_CLIENT.HEIGHT
+  const emitterCb = jest.fn();
+  bus.emit(heightRequest,data,emitterCb);
+  const onCbName = emitSpy.mock.calls[1][0];
+  expect(onCbName).toBe(heightRequest);
+  const onCb =  emitSpy.mock.calls[1][2];
+  onCb({}, emitterCb);
+  setTimeout(()=>{
+    expect(emitterCb).toBeCalled();
+    done();
+  },1000);
   })
   test('render success response event for embed tag', () => {
     const testFrame = RevealFrame.init();

@@ -2,7 +2,6 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import mime from 'mime';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
@@ -26,6 +25,8 @@ import { Context, MessageType } from '../../../utils/common';
 import {
   constructMaskTranslation, getMaskedOutput, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
+
+const { getType } = require('mime');
 
 const CLASS_NAME = 'RevealFrame';
 class RevealFrame {
@@ -216,6 +217,14 @@ class RevealFrame {
           if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
             this.#dataElememt.innerText = this.#record.altText;
           }
+          bus
+            .emit(
+              ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+              {
+                height: this.#elementContainer.scrollHeight,
+              }, () => {
+              },
+            );
         } else {
           const ext = this.getExtension(responseUrl.url);
           this.addFileRender(responseUrl.url, ext);
@@ -228,21 +237,21 @@ class RevealFrame {
         ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#containerId,
         sub2,
       );
-    bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (_, callback) => {
-      // eslint-disable-next-line max-len
-      callback({ height: this.#elementContainer.scrollHeight + this.#errorElement.scrollHeight, name: this.#name });
-    });
   }
 
   // eslint-disable-next-line class-methods-use-this
   private getExtension(url) {
-    const params = new URL(url).searchParams;
-    const name = params.get('response-content-disposition');
-    if (name) {
-      const ext = mime.getType(name);
-      return ext;
+    try {
+      const params = new URL(url).searchParams;
+      const name = params.get('response-content-disposition');
+      if (name) {
+        const ext = getType(name);
+        return ext;
+      }
+      return '';
+    } catch {
+      return '';
     }
-    return '';
   }
 
   private addFileRender(responseUrl, ext) {
@@ -253,6 +262,19 @@ class RevealFrame {
       tag = 'embed';
     }
     const fileElement = document.createElement(tag);
+    fileElement.addEventListener('load', () => {
+      bus
+        .emit(
+          ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+          {
+            height: this.#elementContainer.scrollHeight,
+          }, () => {
+            if (this.#elementContainer.childNodes[0] !== undefined && this.#elementContainer.childNodes[0].nodeName === 'SPAN') {
+              this.#elementContainer.childNodes[0].remove();
+            }
+          },
+        );
+    });
     fileElement.className = `SkyflowElement-${tag}-${STYLE_TYPE.BASE}`;
     if (tag === 'embed' && typeof ext === 'string') {
       fileElement.setAttribute('type', ext);
@@ -267,8 +289,8 @@ class RevealFrame {
       };
       getCssClassesFromJss(this.#inputStyles, tag);
     }
-    if (this.#elementContainer.childNodes[0] !== undefined) {
-      this.#elementContainer.childNodes[0].remove();
+    if (this.#elementContainer.childNodes[0] !== undefined && this.#elementContainer.childNodes[0].nodeName === 'IMG') {
+      this.#elementContainer.innerHTML = '';
       this.#elementContainer.appendChild(fileElement);
     } else {
       this.#elementContainer.appendChild(fileElement);

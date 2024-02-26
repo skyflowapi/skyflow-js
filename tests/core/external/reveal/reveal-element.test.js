@@ -12,11 +12,6 @@ import RevealFrameController from '../../../../src/core/internal/reveal/reveal-f
 import bus from "framebus";
 import { JSDOM } from 'jsdom';
 
-global.ResizeObserver = jest.fn(() => ({
-  observe: jest.fn(),
-  disconnect: jest.fn(),
-}));
-
 const mockUuid = '1234'; 
 const elementId = 'id';
 jest.mock('../../../../src/libs/uuid',()=>({
@@ -184,7 +179,8 @@ describe("Reveal Element Class", () => {
       {
         skyflowID: "1244",
         column: 'column', 
-        table: 'table'
+        table: 'table',
+        altText:'alt text'
       },
       undefined,
       clientData,
@@ -223,7 +219,8 @@ describe("Reveal Element Class", () => {
       {
         skyflowID: "1244",
         column: 'column', 
-        table: 'table'
+        table: 'table',
+        altText:'alt text'
       },
       undefined,
       clientData,
@@ -278,7 +275,8 @@ describe("Reveal Element Class", () => {
       {
         skyflowID: "1244",
         column: 'column', 
-        table: 'table'
+        table: 'table',
+        altText:'alt text'
       },
       undefined,
       clientData,
