@@ -190,7 +190,7 @@ class RevealElement extends SkyflowElement {
           .on(
             ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId, () => {
               this.#metaData.skyflowContainer.renderFile(
-                this.#recordData, this.#metaData, this.#containerId,
+                this.#recordData, this.#metaData, this.#containerId, this.#iframe.name,
               ).then(
                 (resolvedResult) => {
                   printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
@@ -204,7 +204,6 @@ class RevealElement extends SkyflowElement {
                 (rejectedResult) => {
                   printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
                     this.#context.logLevel);
-                  console.log('------1', this.#recordData);
                   if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
                     this.setAltText(altText);
                   }

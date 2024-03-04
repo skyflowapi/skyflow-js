@@ -499,6 +499,7 @@ class SkyflowContainer {
                 {
                   records: recordData,
                   containerId,
+                  iframeName,
                 },
                 (revealData: any) => {
                   if (revealData.errors) {
