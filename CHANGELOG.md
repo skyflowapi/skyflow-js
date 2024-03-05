@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.34.3] - 2024-03-05
+### Added
+- File render element enhancement.
+
+
 ## [1.34.2] - 2024-01-25
 ### Fixed
 - Fixed multiple column names error with unique column values in `get` interface.
