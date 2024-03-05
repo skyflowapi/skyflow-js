@@ -14,7 +14,7 @@ import {
   getFileURLFromVaultBySkyflowID,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
-import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../constants';
+import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
@@ -27,6 +27,7 @@ import {
   IGetOptions,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
+import properties from '../../../properties';
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -188,7 +189,7 @@ class SkyflowFrameController {
       printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
         CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
       MessageType.LOG, this.#context.logLevel);
-      this.renderFile(data.records).then(
+      this.renderFile(data.records, data.containerId, data.iframeName).then(
         (resolvedResult) => {
           callback(
             resolvedResult,
@@ -255,14 +256,39 @@ class SkyflowFrameController {
     });
   }
 
-  renderFile(data: IRevealRecord) {
+  renderFile(data: IRevealRecord, containerId, iframeName) {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowID(data, this.#client)
           .then((resolvedResult) => {
+            let url = '';
+            if (resolvedResult.fields && data.column) {
+              url = resolvedResult.fields[data.column];
+            }
+            bus
+              .target(properties.IFRAME_SECURE_SITE)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
+                + containerId,
+                {
+                  url,
+                  iframeName,
+                },
+              );
+
             resolve(resolvedResult);
           },
           (rejectedResult) => {
+            bus
+              .target(properties.IFRAME_SECURE_SITE)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
+                + containerId,
+                {
+                  error: DEFAULT_FILE_RENDER_ERROR,
+                  iframeName,
+                },
+              );
             reject(rejectedResult);
           });
       } catch (err) {

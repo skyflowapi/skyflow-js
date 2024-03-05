@@ -12,6 +12,9 @@ import {
   REVEAL_ELEMENT_OPTIONS_TYPES,
   COPY_UTILS,
   REVEAL_COPY_ICON_STYLES,
+  RENDER_ELEMENT_IMAGE_STYLES,
+  DEFAULT_FILE_RENDER_ERROR,
+  ELEMENT_EVENTS_TO_CLIENT,
 } from '../../constants';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import {
@@ -22,6 +25,8 @@ import { Context, MessageType } from '../../../utils/common';
 import {
   constructMaskTranslation, getMaskedOutput, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
+
+const { getType } = require('mime');
 
 const CLASS_NAME = 'RevealFrame';
 class RevealFrame {
@@ -103,8 +108,7 @@ class RevealFrame {
         }
       };
     }
-
-    if (Object.prototype.hasOwnProperty.call(this.#record, 'label')) {
+    if (Object.prototype.hasOwnProperty.call(this.#record, 'label') && !Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
       this.#labelElement.innerText = this.#record.label;
       this.#elementContainer.append(this.#labelElement);
 
@@ -159,6 +163,10 @@ class RevealFrame {
 
     document.body.append(this.#elementContainer);
 
+    bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (_, callback) => {
+      callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
+    });
+
     const sub = (data) => {
       if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
         const responseValue = data[this.#record.token] as string;
@@ -180,7 +188,10 @@ class RevealFrame {
         //     sub,
         //   );
       } else {
-        this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
+        // eslint-disable-next-line no-lonely-if
+        if (!Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
+          this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
+        }
       }
       // this.updateDataView();
     };
@@ -198,6 +209,89 @@ class RevealFrame {
       }
     });
     this.updateRevealElementOptions();
+
+    const sub2 = (responseUrl) => {
+      if (responseUrl.iframeName === this.#name) {
+        if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
+          this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
+          if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
+            this.#dataElememt.innerText = this.#record.altText;
+          }
+          bus
+            .emit(
+              ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+              {
+                height: this.#elementContainer.scrollHeight,
+              }, () => {
+              },
+            );
+        } else {
+          const ext = this.getExtension(responseUrl.url);
+          this.addFileRender(responseUrl.url, ext);
+        }
+      }
+    };
+    bus
+      .target(window.location.origin)
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#containerId,
+        sub2,
+      );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private getExtension(url) {
+    try {
+      const params = new URL(url).searchParams;
+      const name = params.get('response-content-disposition');
+      if (name) {
+        const ext = getType(name);
+        return ext;
+      }
+      return '';
+    } catch {
+      return '';
+    }
+  }
+
+  private addFileRender(responseUrl, ext) {
+    let tag = '';
+    if (typeof ext === 'string' && ext.includes('image')) {
+      tag = 'img';
+    } else {
+      tag = 'embed';
+    }
+    const fileElement = document.createElement(tag);
+    fileElement.addEventListener('load', () => {
+      bus
+        .emit(
+          ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+          {
+            height: this.#elementContainer.scrollHeight,
+          }, () => {
+          },
+        );
+    });
+    fileElement.className = `SkyflowElement-${tag}-${STYLE_TYPE.BASE}`;
+    if (tag === 'embed' && typeof ext === 'string') {
+      fileElement.setAttribute('type', ext);
+    }
+    fileElement.setAttribute('src', responseUrl);
+
+    if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
+      this.#inputStyles = {};
+      this.#inputStyles[STYLE_TYPE.BASE] = {
+        ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
+        ...this.#record.inputStyles[STYLE_TYPE.BASE],
+      };
+      getCssClassesFromJss(this.#inputStyles, tag);
+    }
+    if (this.#elementContainer.childNodes[0] !== undefined) {
+      this.#elementContainer.innerHTML = '';
+      this.#elementContainer.appendChild(fileElement);
+    } else {
+      this.#elementContainer.appendChild(fileElement);
+    }
   }
 
   private setRevealError(errorText: string) {

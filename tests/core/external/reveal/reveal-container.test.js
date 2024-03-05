@@ -10,7 +10,6 @@ import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
 // import { JSDOM } from 'jsdom';
 
-
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 const mockUuid = '1234'; 
 jest.mock('../../../../src/libs/uuid',()=>({
