@@ -155,6 +155,7 @@ export interface MeticsObjectType {
   element_type: string[],
   div_id: string,
   container_id: string,
+  container_name: string,
   session_id: string,
   vault_id: string,
   vault_url: string,

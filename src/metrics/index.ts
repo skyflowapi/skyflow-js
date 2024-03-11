@@ -16,6 +16,7 @@ export function initalizeMetricObject(metadata: any, elementId: string) {
     element_id: elementId,
     element_type: [],
     div_id: '',
+    container_name: '',
     container_id: metadata?.uuid || '',
     session_id: metadata?.session_id || '',
     vault_id: metadata?.clientJSON?.config?.vaultID || '',

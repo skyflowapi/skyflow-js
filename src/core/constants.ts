@@ -28,6 +28,7 @@ export const FRAME_ELEMENT = 'element';
 export const ELEMENT_TYPES = {
   COLLECT: 'COLLECT',
   REVEAL: 'REVEAL',
+  COMPOSE: 'COMPOSABLE',
 };
 
 export const EVENT_TYPES = {
@@ -48,6 +49,7 @@ export const METRIC_TYPES = {
   ELEMENT_TYPE_KEY: 'element_type',
   DIV_ID: 'div_id',
   CONTAINER_ID: 'container_id',
+  CONTAINER_NAME: 'container_name',
   SESSION_ID: 'session_id',
   VAULT_ID: 'vault_id',
   VAULT_URL: 'vault_url',

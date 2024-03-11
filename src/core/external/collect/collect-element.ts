@@ -9,6 +9,7 @@ import {
   ELEMENTS,
   EVENT_TYPES,
   METRIC_TYPES,
+  ELEMENT_TYPES,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import Bus from '../../../libs/bus';
@@ -119,9 +120,6 @@ class CollectElement extends SkyflowElement {
       : 'group';
 
     initalizeMetricObject(metaData, elementId);
-    if (!this.#isSingleElementAPI) {
-      updateMetricObjectValue(this.#elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, this.elementType);
-    }
     this.#states = [];
     this.#elements.forEach((element) => {
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, element.elementType);
@@ -136,6 +134,11 @@ class CollectElement extends SkyflowElement {
         isRequired: element.required,
       });
     });
+    if (this.#elements && this.#elements.length && this.#elements.length > 1) {
+      updateMetricObjectValue(this.#elementId, METRIC_TYPES.CONTAINER_NAME, ELEMENT_TYPES.COMPOSE);
+    } else {
+      updateMetricObjectValue(this.#elementId, METRIC_TYPES.CONTAINER_NAME, ELEMENT_TYPES.COLLECT);
+    }
     this.#iframe = new IFrame(
       this.#group.elementName,
       metaData,
