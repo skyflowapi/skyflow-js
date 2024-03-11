@@ -28,6 +28,7 @@ import {
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
+import { getVaultBeffeURL } from '../../../utils/helpers';
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -216,6 +217,27 @@ class SkyflowFrameController {
             CLASS_NAME, PUREJS_TYPES[key]), MessageType.LOG, this.#context.logLevel);
         });
       });
+    bus
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + this.#clientId,
+        (data: any) => {
+          this.pushEvent(data.event)
+            .then((result: any) => {
+              if (result) {
+                printLog(parameterizedString(logs.infoLogs.METRIC_CAPTURE_EVENT),
+                  MessageType.LOG, this.#context.logLevel);
+              } else {
+                printLog(parameterizedString(logs.infoLogs.UNKNOWN_RESPONSE_FROM_METRIC_EVENT),
+                  MessageType.LOG, this.#context.logLevel);
+              }
+            })
+            .catch((error) => {
+              printLog(parameterizedString(logs.infoLogs.UNKNOWN_METRIC_CAPTURE_EVENT,
+                error.toString()),
+              MessageType.LOG, this.#context.logLevel);
+            });
+        },
+      );
   }
 
   static init(clientId) {
@@ -294,6 +316,33 @@ class SkyflowFrameController {
       } catch (err) {
         reject(err);
       }
+    });
+  }
+
+  pushEvent(event: any) {
+    return new Promise((resolve, reject) => {
+      getAccessToken(this.#clientId).then((authToken) => {
+        this.#client
+          .request({
+            body: event,
+            requestMethod: 'POST',
+            url:
+              `${getVaultBeffeURL(event.vault_url)}/sdk/sdk-metrics`,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authToken}`,
+            },
+
+          })
+          .then((response: any) => {
+            resolve(response);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      }).catch((err) => {
+        reject(err);
+      });
     });
   }
 }
