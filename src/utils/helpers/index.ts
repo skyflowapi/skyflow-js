@@ -257,7 +257,7 @@ interface BrowserInfo {
   browserVersion: string;
 }
 export function getSdkVersionName(metaDataVersion: string, sdkData: SdkInfo): string {
-  if (metaDataVersion !== '') {
+  if (metaDataVersion && metaDataVersion !== '') {
     return `${metaDataVersion}`;
   }
   return `${sdkData.sdkName}@${sdkData.sdkVersion}`;
@@ -343,7 +343,7 @@ export function getMetaObject(sdkDetails: any, metaData: any, navigator: any) {
     sdkName: sdkDetails.name,
     sdkVersion: sdkDetails.version,
   };
-  const SDKversion = getSdkVersionName(metaData.sdkVersion, sdkData);
+  const SDKversion = getSdkVersionName(metaData?.sdkVersion, sdkData);
   const osDetail = getOSDetails(navigator.userAgent);
   const browserDetails = getBrowserInfo(navigator.userAgent);
   const deviceDetails = getDeviceType(navigator.userAgent);
@@ -369,4 +369,8 @@ export function checkAndSetForCustomUrl(config: ISkyflow) {
     properties.IFRAME_SECURE_ORGIN = fullDomain;
     properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
   }
+}
+
+export function getVaultBeffeURL(vaultURL: string): string {
+  return vaultURL.replace('vault', 'vault-beffe');
 }

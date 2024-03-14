@@ -47,6 +47,10 @@ const options = {
   }]
 };
 
+const pushEventResponse = {
+  data: 1,
+};
+
 const insertResponse = {
   vaultID: 'vault123',
   responses: [
@@ -96,6 +100,99 @@ const renderResponse = {
     skyflow_id: '1234'
   }
 }
+
+describe('push event', () => {
+  let emitSpy;
+  let targetSpy;
+  let onSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    onSpy = jest.spyOn(bus, 'on');
+    targetSpy.mockReturnValue({
+      on,
+    });
+  });
+
+  test('push event with elementid', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(pushEventResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = onSpy.mock.calls[0][1]
+    const data = {
+      event: {
+        element_id: 'element123',
+        container_id: 'container456',
+        vault_url: 'http://example.com',
+        status: "Error",
+        events: ["MOUNTED"]
+      }
+    };
+    onCb(data)
+    setTimeout(() => {
+      expect(onCb).toBeTruthy();
+      done();
+    }, 1000);
+  });
+
+  test('push event with error', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(pushEventResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = onSpy.mock.calls[0][1]
+    const data = {
+      event: {
+      }
+    };
+    onCb(data)
+    setTimeout(() => {
+      expect(onCb).toBeTruthy();
+      done();
+    }, 1000);
+  });
+
+  test('push event throw error resopnse', (done) => {
+    const clientReq = jest.fn(() => Promise.reject(errorResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = onSpy.mock.calls[0][1]
+    const data = {
+      event: {
+        element_id: 'element123',
+        container_id: 'container456',
+        vault_url: 'http://example.com',
+        status: "Error",
+        events: ["MOUNTED"]
+      }
+    };
+    onCb(data)
+    setTimeout(() => {
+      expect(onCb).toBeTruthy();
+      done();
+    }, 1000);
+  });
+});
 
 describe('Inserting records into the vault', () => {
   let emitSpy;
