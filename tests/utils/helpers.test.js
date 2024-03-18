@@ -25,6 +25,7 @@ import {
   domReady,
   vaildateFileName,
   generateUploadFileName
+  getVaultBeffeURL,
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -671,3 +672,11 @@ describe('test generateUploadFileName function',()=>{
 
 });
 
+describe('test vault beffe url helper', () => {
+  test("test with vault string in vault url", () => {
+    expect(getVaultBeffeURL("test.vault.com")).toBe("test.vault-beffe.com")
+  })
+  test("test without vault string in vault url", () => {
+    expect(getVaultBeffeURL("test.com")).toBe("test.com")
+  })
+})
