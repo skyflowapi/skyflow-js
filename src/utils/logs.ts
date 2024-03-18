@@ -63,6 +63,9 @@ const logs = {
 
     EMIT_EVENT: '%s1 - %s2 event emitted',
     CAPTURE_EVENT: '%s1 - Captured event %s2',
+    METRIC_CAPTURE_EVENT: 'Metric event captured Successfully',
+    UNKNOWN_METRIC_CAPTURE_EVENT: 'Metric event capturing Failed with %s1',
+    UNKNOWN_RESPONSE_FROM_METRIC_EVENT: 'Metric event Captured with Unknown Response',
     LISTEN_COLLECT_FRAME_READY: '%s1 - Listening to collect FRAME_READY event',
     EMIT_COLLECT_ELEMENT_FRAME_READY: '%s1 - Emitting collect element %s2 FRAME_READY event',
     ENTERED_COLLECT_FRAME_READY_CB: '%s1 - In IFrameForm constructor, Entered FRAME_READY callback',
