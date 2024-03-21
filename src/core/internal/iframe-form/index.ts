@@ -53,7 +53,12 @@ import {
   ValidationRuleType,
 } from '../../../utils/common';
 import {
-  fileValidation, formatFrameNameToId, getReturnValue, removeSpaces, vaildateFileName,
+  fileValidation,
+  formatFrameNameToId,
+  generateUploadFileName,
+  getReturnValue,
+  removeSpaces,
+  vaildateFileName,
 } from '../../../utils/helpers';
 import { ContainerType } from '../../../skyflow';
 
@@ -110,6 +115,8 @@ export class IFrameFormElement extends EventEmitter {
   containerType: string;
 
   cardType: string = CardType.DEFAULT;
+
+  preserveFileName: boolean = true;
 
   constructor(name: string, label: string, metaData, context: Context, skyflowID?: string) {
     super();
@@ -390,7 +397,7 @@ export class IFrameFormElement extends EventEmitter {
       } catch (err) {
         resp = false;
       }
-      vaildateFileNames = vaildateFileName(value.name);
+      if (this.preserveFileName) vaildateFileNames = vaildateFileName(value.name);
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex && value) {
@@ -873,7 +880,7 @@ export class IFrameForm {
     const fileUploadObject: any = {};
 
     const {
-      state, tableName, skyflowID, onFocusChange,
+      state, tableName, skyflowID, onFocusChange, preserveFileName,
     } = fileElement;
 
     if (state.isRequired) {
@@ -899,12 +906,17 @@ export class IFrameForm {
 
     const value: Blob = Object.values(fileUploadObject)[0] as Blob;
 
-    formData.append(column, value);
-
-    const validateFileName = vaildateFileName(state.value.name);
-
-    if (!validateFileName) {
-      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true));
+    if (preserveFileName) {
+      const isValidFileName = vaildateFileName(state.value.name);
+      if (!isValidFileName) {
+        return Promise.reject(
+          new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true),
+        );
+      }
+      formData.append(column, value);
+    } else {
+      const generatedFileName = generateUploadFileName(state.value.name);
+      formData.append(column, new File([value], generatedFileName, { type: state.value.type }));
     }
 
     const { client } = this;

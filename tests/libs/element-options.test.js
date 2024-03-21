@@ -97,5 +97,25 @@ describe('test formatOptions function with format and translation', () => {
         expect(formattedOptions).toEqual({required:false,cardSeperator:DEFAULT_CARD_NUMBER_SEPERATOR,enableCardIcon:true});
     });
 
+    test('should return preserveFileName true when not provied in options',()=>{
+        const formattedOptions = formatOptions(ElementType.FILE_INPUT,{required:true},LogLevel.ERROR);
+        expect(formattedOptions).toEqual({required:true,preserveFileName:true});
+    });
+
+    test('should return preserveFileName false when not provied as false in options',()=>{
+        const formattedOptions = formatOptions(ElementType.FILE_INPUT,{required:true,preserveFileName:false},LogLevel.ERROR);
+        expect(formattedOptions).toEqual({required:true,preserveFileName:false});
+    });
+
+    test('should throw errror for preserveFileName provied as not of boolean type',(done)=>{
+        try{
+            formatOptions(ElementType.FILE_INPUT,{required:true,preserveFileName:undefined},LogLevel.ERROR);
+            done('should throw error');
+        }catch(err){
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description,'preserveFileName'))
+            done();
+        }
+    });
+
 
 });
