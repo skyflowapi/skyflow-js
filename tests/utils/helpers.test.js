@@ -26,6 +26,7 @@ import {
   vaildateFileName,
   generateUploadFileName
   getVaultBeffeURL,
+  generateUploadFileName
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -680,3 +681,23 @@ describe('test vault beffe url helper', () => {
     expect(getVaultBeffeURL("test.com")).toBe("test.com")
   })
 })
+
+describe('test generateUploadFileName function',()=>{
+  it('should return file name with uuid and extension',()=>{
+      expect(generateUploadFileName('test_file.png')).toEqual(`${mockUUID}.png`);
+  });
+
+  it('should return file name with  uuid and extension even with multiple in the file name',()=>{
+    expect(generateUploadFileName('test.file.pdf')).toEqual(`${mockUUID}.pdf`);
+  });
+
+  it('should return file name with uuid for undefined file name',()=>{
+    expect(generateUploadFileName(undefined)).toEqual(`${mockUUID}`);
+    expect(generateUploadFileName(null)).toEqual(`${mockUUID}`);
+  });
+
+
+
+
+});
+
