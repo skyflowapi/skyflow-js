@@ -24,8 +24,8 @@ import {
   checkAndSetForCustomUrl,
   domReady,
   vaildateFileName,
-  generateUploadFileName
   getVaultBeffeURL,
+  generateUploadFileName
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString

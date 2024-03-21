@@ -372,10 +372,10 @@ export function checkAndSetForCustomUrl(config: ISkyflow) {
   }
 }
 
+export function getVaultBeffeURL(vaultURL: string): string {
+  return vaultURL.replace('vault', 'vault-beffe');
+}
 export const generateUploadFileName = (fileName:string) => {
   const fileExtentsion = fileName?.split('.')?.pop() || '';
   return `${uuid()}${fileExtentsion && `.${fileExtentsion}`}`;
 };
-export function getVaultBeffeURL(vaultURL: string): string {
-  return vaultURL.replace('vault', 'vault-beffe');
-}
