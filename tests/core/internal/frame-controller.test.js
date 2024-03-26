@@ -300,6 +300,67 @@ describe('test frame controller', () => {
 
   })
 
+  test('file element validator should return true, for invalid file name when preserveFileName is false', () => {
+
+    const month_element = `element:FILE_INPUT:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(month_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      preserveFileName:false
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    expect(formElement.validator({
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample@ #2 @@1.png", // invalid file name
+      size: 48848,
+      type: "image/jpeg",
+      webkitRelativePath: ""
+  })).toBe(true)
+
+
+
+  })
+
+  test('file element validator should return false, for invalid file name when preserveFileName is true', () => {
+
+    const month_element = `element:FILE_INPUT:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(month_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      preserveFileName:true
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    expect(formElement.validator({
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample@ #2 @@1.png", // invalid file name
+      size: 48848,
+      type: "image/jpeg",
+      webkitRelativePath: ""
+  })).toBe(false)
+
+
+
+  })
+
+
   test('expiration date FrameElement with YYYY/MM format', () => {
 
     const expirationDate = `element:EXPIRATION_DATE:${tableCol}`;

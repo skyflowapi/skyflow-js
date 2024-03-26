@@ -454,14 +454,6 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
   });
 };
 
-// export const validateFileDownloadURL = (url: string, vaultID: string, vaultURL: string, skyflowID: string) => {
-//   const urlPattern = new RegExp(`.*/record_file\/${vaultID}\/.*\/${skyflowID}`);
-//   const containsVaultID = url.includes(vaultID);
-//   if (urlPattern.test(url) && containsVaultID) {
-//   } else {
-//   }
-// };
-
 export const validateRenderElementRecord = (record: IRevealElementInput) => {
   if (!(record && Object.prototype.hasOwnProperty.call(record, 'skyflowID'))) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_KEY_REVEAL);

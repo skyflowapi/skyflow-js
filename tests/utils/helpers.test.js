@@ -23,7 +23,8 @@ import {
   getMetaObject,
   checkAndSetForCustomUrl,
   domReady,
-  vaildateFileName
+  vaildateFileName,
+  generateUploadFileName
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -34,6 +35,13 @@ import {
 } from '../../src/utils/validators/index';
 import successIcon from '../../assets/path.svg'
 import { isValidURL } from '../../src/utils/validators/index';
+
+const mockUUID = '1234'
+
+jest.mock('../../src/libs/uuid',()=>({
+  __esModule: true,
+  default:jest.fn(()=>(mockUUID)),
+}));
 
 describe('bin data for for all card number except AMEX element type on CHANGE event', () => {
   test("in PROD return bin data only for card number element", () => {
@@ -642,4 +650,24 @@ describe('test domReady function', () => {
     expect(testSpyFunction2).toBeCalled()
   })
 })
+
+
+describe('test generateUploadFileName function',()=>{
+  it('should return file name with uuid and extension',()=>{
+      expect(generateUploadFileName('test_file.png')).toEqual(`${mockUUID}.png`);
+  });
+
+  it('should return file name with  uuid and extension even with multiple in the file name',()=>{
+    expect(generateUploadFileName('test.file.pdf')).toEqual(`${mockUUID}.pdf`);
+  });
+
+  it('should return file name with uuid for undefined file name',()=>{
+    expect(generateUploadFileName(undefined)).toEqual(`${mockUUID}`);
+    expect(generateUploadFileName(null)).toEqual(`${mockUUID}`);
+  });
+
+
+
+
+});
 

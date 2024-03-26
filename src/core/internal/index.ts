@@ -137,6 +137,9 @@ export class FrameElement {
     this.iFrameFormElement.fieldName = options.column;
     this.iFrameFormElement.tableName = options.table;
     this.iFrameFormElement.state.name = options.column;
+    if (Object.prototype.hasOwnProperty.call(options, 'preserveFileName')) {
+      this.iFrameFormElement.preserveFileName = options?.preserveFileName;
+    }
   }
 
   // mount element onto dom

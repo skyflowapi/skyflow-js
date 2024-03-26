@@ -287,49 +287,64 @@ export const formatOptions = (elementType, options, logLevel) => {
       delete formattedOptions?.translation;
     }
   }
-
-  if (elementType === ELEMENTS.CARD_NUMBER.name) {
-    if (!Object.prototype.hasOwnProperty.call(formattedOptions, 'enableCardIcon')) {
-      formattedOptions = { ...formattedOptions, enableCardIcon: true };
-    }
-    let cardSeperator = DEFAULT_CARD_NUMBER_SEPERATOR;
-
-    if (formattedOptions?.format === CARDNUMBER_INPUT_FORMAT.DASH_FORMAT) {
-      cardSeperator = CARD_NUMBER_HYPEN_SEPERATOR;
-    }
-    formattedOptions = { ...formattedOptions, cardSeperator };
-    delete formattedOptions?.format;
-    delete formattedOptions?.translation;
-  } else if (elementType === ELEMENTS.EXPIRATION_DATE.name) {
-    let isvalidFormat = false;
-    if (formattedOptions.format) {
-      isvalidFormat = isValidExpiryDateFormat(formattedOptions.format.toUpperCase());
-      if (!isvalidFormat) {
-        printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
-          ALLOWED_EXPIRY_DATE_FORMATS.toString()), MessageType.WARN, logLevel);
+  switch (elementType) {
+    case ELEMENTS.CARD_NUMBER.name: {
+      if (!Object.prototype.hasOwnProperty.call(formattedOptions, 'enableCardIcon')) {
+        formattedOptions = { ...formattedOptions, enableCardIcon: true };
       }
-    }
-    formattedOptions = {
-      ...formattedOptions,
-      format: isvalidFormat ? formattedOptions.format.toUpperCase()
-        : DEFAULT_EXPIRATION_DATE_FORMAT,
-    };
-    delete formattedOptions?.translation;
-  } else if (elementType === ELEMENTS.EXPIRATION_YEAR.name) {
-    let isvalidFormat = false;
-    if (formattedOptions.format) {
-      isvalidFormat = isValidExpiryYearFormat(formattedOptions.format.toUpperCase());
-      if (!isvalidFormat) {
-        printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_YEAR_FORMAT,
-          ALLOWED_EXPIRY_YEAR_FORMATS.toString()), MessageType.WARN, logLevel);
+      let cardSeperator = DEFAULT_CARD_NUMBER_SEPERATOR;
+
+      if (formattedOptions?.format === CARDNUMBER_INPUT_FORMAT.DASH_FORMAT) {
+        cardSeperator = CARD_NUMBER_HYPEN_SEPERATOR;
       }
+      formattedOptions = { ...formattedOptions, cardSeperator };
+      delete formattedOptions?.format;
+      delete formattedOptions?.translation;
+      break;
     }
-    formattedOptions = {
-      ...formattedOptions,
-      format: isvalidFormat ? formattedOptions.format.toUpperCase()
-        : DEFAULT_EXPIRATION_YEAR_FORMAT,
-    };
-    delete formattedOptions?.translation;
+    case ELEMENTS.EXPIRATION_DATE.name: {
+      let isvalidFormat = false;
+      if (formattedOptions.format) {
+        isvalidFormat = isValidExpiryDateFormat(formattedOptions.format.toUpperCase());
+        if (!isvalidFormat) {
+          printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
+            ALLOWED_EXPIRY_DATE_FORMATS.toString()), MessageType.WARN, logLevel);
+        }
+      }
+      formattedOptions = {
+        ...formattedOptions,
+        format: isvalidFormat ? formattedOptions.format.toUpperCase()
+          : DEFAULT_EXPIRATION_DATE_FORMAT,
+      };
+      delete formattedOptions?.translation;
+      break;
+    }
+    case ELEMENTS.EXPIRATION_YEAR.name: {
+      let isvalidFormat = false;
+      if (formattedOptions.format) {
+        isvalidFormat = isValidExpiryYearFormat(formattedOptions.format.toUpperCase());
+        if (!isvalidFormat) {
+          printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_YEAR_FORMAT,
+            ALLOWED_EXPIRY_YEAR_FORMATS.toString()), MessageType.WARN, logLevel);
+        }
+      }
+      formattedOptions = {
+        ...formattedOptions,
+        format: isvalidFormat ? formattedOptions.format.toUpperCase()
+          : DEFAULT_EXPIRATION_YEAR_FORMAT,
+      };
+      delete formattedOptions?.translation;
+      break;
+    }
+
+    case ELEMENTS.FILE_INPUT.name: {
+      if (!Object.prototype.hasOwnProperty.call(formattedOptions, 'preserveFileName')) {
+        formattedOptions = { ...formattedOptions, preserveFileName: true };
+      }
+      break;
+    }
+
+    default: break;
   }
 
   if (Object.prototype.hasOwnProperty.call(formattedOptions, 'enableCardIcon') && !validateBooleanOptions(formattedOptions.enableCardIcon)) {
@@ -340,6 +355,9 @@ export const formatOptions = (elementType, options, logLevel) => {
   }
   if (Object.prototype.hasOwnProperty.call(formattedOptions, 'required') && !validateBooleanOptions(formattedOptions.required)) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['required'], true);
+  }
+  if (Object.prototype.hasOwnProperty.call(formattedOptions, 'preserveFileName') && !validateBooleanOptions(formattedOptions.preserveFileName)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['preserveFileName'], true);
   }
   if (elementType === ELEMENTS.FILE_INPUT.name) {
     if (options.allowedFileType) {
