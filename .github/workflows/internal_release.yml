@@ -25,7 +25,26 @@ jobs:
         with:
           node-version: 14.17.6
       - run: npm install
-      
+
+      - name: Get Previous tag
+        id: previoustag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+        with:
+          fallback: 1.0.0
+
+      - name: Bump Version
+        run: |
+          chmod +x ./scripts/bump_version.sh
+          ./scripts/bump_version.sh "${{ steps.previoustag.outputs.tag }}" "$(git rev-parse --short "$GITHUB_SHA")"
+
+      - name: Commit changes
+        run: |
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ github.actor }}@users.noreply.github.com
+          git add package.json
+          git commit -m "[AUTOMATED] Private Release ${{ steps.previoustag.outputs.tag }}-dev.$(git rev-parse --short $GITHUB_SHA)"
+          git push origin -f
+
       - name: npm build
         run: npm run build-browser-sdk
         env:
@@ -60,26 +79,6 @@ jobs:
           npm config set unsafe-perm true
           npm run build:types 
           npm run build-node-sdk
-
-      - name: Get Previous tag
-        id: previoustag
-        uses: WyriHaximus/github-action-get-previous-tag@v1
-        with:
-          fallback: 1.0.0
-
-      - name: Bump Version
-        run: |
-           chmod +x ./scripts/bump_version.sh
-           ./scripts/bump_version.sh "${{ steps.previoustag.outputs.tag }}" "$(git rev-parse --short "$GITHUB_SHA")"
-    
-      - name: Commit changes
-        run: |
-           git config user.name ${{ github.actor }}
-           git config user.email ${{ github.actor }}@users.noreply.github.com
-           git add package.json
-           git commit -m "[AUTOMATED] Private Release ${{ steps.previoustag.outputs.tag }}-dev.$(git rev-parse --short $GITHUB_SHA)"
-           git push origin -f
-
           
       - name: publish to jfrog
         run: |

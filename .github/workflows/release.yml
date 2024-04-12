@@ -24,7 +24,26 @@ jobs:
           node-version: 14.17.6
           registry-url: 'https://registry.npmjs.org'
       - run: npm install
-      
+
+      - name: Get Previous tag
+        id: previoustag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+        with:
+          fallback: 1.0.0
+
+      - name: Bump Version
+        run: |
+            chmod +x ./scripts/bump_version.sh
+            ./scripts/bump_version.sh "${{ steps.previoustag.outputs.tag }}"
+
+      - name: Commit changes
+        run: |
+            git config user.name ${{ github.actor }}
+            git config user.email ${{ github.actor }}@users.noreply.github.com
+            git add package.json
+            git commit -m "[AUTOMATED] Public Release - ${{ steps.previoustag.outputs.tag }}"
+            git push origin
+
       - name: npm build
         run: npm run build-browser-sdk
         env:
@@ -56,25 +75,6 @@ jobs:
         run: |
           npm run build:types 
           npm run build-node-sdk
-
-      - name: Get Previous tag
-        id: previoustag
-        uses: WyriHaximus/github-action-get-previous-tag@v1
-        with:
-          fallback: 1.0.0
-
-      - name: Bump Version
-        run: |
-           chmod +x ./scripts/bump_version.sh
-           ./scripts/bump_version.sh "${{ steps.previoustag.outputs.tag }}"
-
-      - name: Commit changes
-        run: |
-           git config user.name ${{ github.actor }}
-           git config user.email ${{ github.actor }}@users.noreply.github.com
-           git add package.json
-           git commit -m "[AUTOMATED] Public Release - ${{ steps.previoustag.outputs.tag }}"
-           git push origin
           
       - name: publish to npm
         run: npm publish
