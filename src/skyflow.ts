@@ -8,6 +8,7 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
   SDK_VERSION,
   SESSION_ID,
+  CardType,
 } from './core/constants';
 import Client from './client';
 import RevealContainer from './core/external/reveal/reveal-container';
@@ -267,6 +268,10 @@ class Skyflow {
 
   static get ValidationRuleType() {
     return ValidationRuleType;
+  }
+
+  static get CardType() {
+    return CardType;
   }
 }
 export default Skyflow;
