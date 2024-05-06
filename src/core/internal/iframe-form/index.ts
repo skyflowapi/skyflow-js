@@ -180,7 +180,7 @@ export class IFrameFormElement extends EventEmitter {
 
   onDropdownSelect = (cardType:string) => {
     this.state.selectedCardScheme = cardType;
-    if (this.state.selectedCardScheme) this.sendChangeStatus(true);
+    this.sendChangeStatus(true);
   };
 
   changeFocus = (focus: boolean) => {
