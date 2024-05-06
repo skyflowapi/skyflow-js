@@ -220,6 +220,84 @@ describe('test frame controller', () => {
     element.setupInputField();
   });
 
+  test('FrameElement constructor with card number to create card choice dropdown', () => {
+    const cardElement = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(cardElement, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      enableCardIcon:true,
+      inputStyles:{...inputStyles,cardIcon:{left:'34px'},dropdown:{'background-color':'green'},dropdownIcon:{'left':'36px'}},
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: false,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+
+    const setCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.SET_VALUE);
+    setCb[0][1]({
+      label:'cardnumber',
+      options: {
+        cardMetadata:{
+          scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]
+        }
+      },
+    });
+    expect(div.getElementsByTagName('select')).toBeDefined();
+    expect(div.getElementsByTagName('select').length).toBe(1);
+    expect(div.getElementsByTagName('option').length).toBe(3);
+
+    const select = div.getElementsByTagName('select')[0];
+    select.value = CardType.CARTES_BANCAIRES;
+    select.dispatchEvent(new Event('change'))
+    expect(select.selectedIndex).toBe(2) // cartes bancaries
+
+    select.value = CardType.VISA;
+    select.dispatchEvent(new Event('change'))
+    expect(select.selectedIndex).toBe(1) // visa
+
+    expect(div.getElementsByTagName('img').length).toBe(2); // dropdown + card icon
+
+    setCb[0][1]({
+      label:'cardnumber',
+      options: {
+        cardMetadata:{
+          scheme:[]
+        }
+      },
+    });
+
+    expect(div.getElementsByTagName('select').length).toBe(0);
+    expect(div.getElementsByTagName('img').length).toBe(1); // only cardicon
+
+    element.setupInputField();
+  });
+
   test('card element FrameElement with card type', () => {
 
     const cardElement = `element:CARD_NUMBER:${tableCol}`;

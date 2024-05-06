@@ -1,4 +1,4 @@
-import { CARDNUMBER_INPUT_FORMAT, ElementType } from "../../src/core/constants";
+import { CARDNUMBER_INPUT_FORMAT, CardType, ElementType } from "../../src/core/constants";
 import { formatOptions } from "../../src/libs/element-options";
 import { LogLevel } from "../../src/utils/common";
 import SKYFLOW_ERROR_CODE from "../../src/utils/constants";
@@ -115,6 +115,41 @@ describe('test formatOptions function with format and translation', () => {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description,'preserveFileName'))
             done();
         }
+    });
+
+    test('should throw errror for cardMetadata provied as not of object type',(done)=>{
+        try{
+            formatOptions(ElementType.CARD_NUMBER,{cardMetadata:true},LogLevel.ERROR);
+            done('should throw error');
+        }catch(err){
+            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description);
+            done();
+        }
+    });
+
+    test('should throw errror for cardMetadata provied value is object type',(done)=>{
+        try{
+            formatOptions(ElementType.CARD_NUMBER,{cardMetadata:[]},LogLevel.ERROR);
+            done('should throw error');
+        }catch(err){
+            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description);
+            done();
+        }
+    });
+
+    test('should throw errror for cardMetadata schema provied value is array type',(done)=>{
+        try{
+            formatOptions(ElementType.CARD_NUMBER,{cardMetadata:{scheme:{}}},LogLevel.ERROR);
+            done('should throw error');
+        }catch(err){
+            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_SCHEME.description);
+            done();
+        }
+    });
+
+    test('should return the array of Cardtype provided in scheme of cardmetadata',()=>{
+        const options = formatOptions(ElementType.CARD_NUMBER,{cardMetadata:{scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]}},LogLevel.ERROR);
+        expect(options).toEqual({cardMetadata:{scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]}, "cardSeperator": " ","enableCardIcon": true,"required": false,})
     });
 
 

@@ -300,6 +300,22 @@ export const formatOptions = (elementType, options, logLevel) => {
       formattedOptions = { ...formattedOptions, cardSeperator };
       delete formattedOptions?.format;
       delete formattedOptions?.translation;
+
+      if (Object.prototype.hasOwnProperty.call(formattedOptions, 'cardMetadata')) {
+        if (!(typeof formattedOptions.cardMetadata === 'object')
+          || (Object.prototype.toString.call(formattedOptions.cardMetadata) !== '[object Object]')
+        ) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA, [], true);
+        }
+
+        if (Object.prototype.hasOwnProperty.call(formattedOptions.cardMetadata, 'scheme')) {
+          if (!(typeof formattedOptions.cardMetadata.scheme === 'object')
+              || (Object.prototype.toString.call(formattedOptions.cardMetadata.scheme) !== '[object Array]')) {
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_SCHEME, [], true);
+          }
+        }
+      }
+
       break;
     }
     case ELEMENTS.EXPIRATION_DATE.name: {

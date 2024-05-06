@@ -13,6 +13,9 @@ import unionPayIcon from '../../assets/unionpay.svg';
 import visaCardIcon from '../../assets/visa.svg';
 import copyIcon from '../../assets/copyIcon.svg';
 import successIcon from '../../assets/path.svg';
+import dropDownIcon from '../../assets/drop-down.svg';
+import cartesBancairesIcon from '../../assets/carter-banceris.svg';
+
 import logs from '../utils/logs';
 
 export const SESSION_ID = 'session_id';
@@ -156,7 +159,23 @@ export enum CardType {
   HIPERCARD = 'HIPERCARD',
   DEFAULT = 'DEFAULT',
   UNKNOWN = 'UNKNOWN',
+  CARTES_BANCAIRES = 'CARTES BANCAIRES',
 }
+
+export const CardTypeValues = {
+  [CardType.VISA]: 'Visa',
+  [CardType.MASTERCARD]: 'MasterCard',
+  [CardType.AMEX]: 'Amex',
+  [CardType.DINERS_CLUB]: 'DinersClub',
+  [CardType.DISCOVER]: 'Discover',
+  [CardType.JCB]: 'Jcb',
+  [CardType.MAESTRO]: 'Maestro',
+  [CardType.UNIONPAY]: 'Unionpay',
+  [CardType.HIPERCARD]: 'Hipercard',
+  [CardType.DEFAULT]: 'Default',
+  [CardType.UNKNOWN]: 'Unknown',
+  [CardType.CARTES_BANCAIRES]: 'Cartes Bancaires',
+};
 
 export const CARD_NUMBER_MASK = {
   [CardType.AMEX]: ['XXXX XXXXXX XXXXX', { X: '[0-9]' }],
@@ -339,7 +358,9 @@ export const INPUT_WITH_ICON_DEFAULT_STYLES = {
   padding: '4px',
 };
 
-export const INPUT_ICON_STYLES = 'position: absolute; left:8px; bottom:calc(50% - 12px)';
+export const INPUT_ICON_STYLES = 'position: absolute; left:8px; bottom:calc(50% - 12px); cursor:pointer;';
+export const DROPDOWN_ICON_STYLES = 'position: absolute; left:46px; bottom:calc(50% - 12px);cursor:pointer;display:none;';
+export const DROPDOWN_STYLES = 'position: absolute; left:8px; bottom:calc(50% - 12px);appearance: none;padding: unset; box-shadow: none;background: transparent;cursor:pointer;outline:none;opacity:0;width:54px;';
 export const COLLECT_COPY_ICON_STYLES = 'position: absolute; right:8px; bottom:calc(50% - 12px); cursor:pointer;';
 export const REVEAL_COPY_ICON_STYLES = 'position: absolute; right:8px; top:calc(50% - 12px); cursor:pointer;';
 
@@ -532,6 +553,7 @@ export const DEFAULT_CARD_LENGTH_RANGE = [0, 12, 13, 14, 15, 16, 17, 18, 19];
 export const CARD_ENCODED_ICONS = {
   [CardType.DEFAULT]: defaultCardIcon,
   [CardType.AMEX]: amexIcon,
+  [CardType.CARTES_BANCAIRES]: cartesBancairesIcon,
   [CardType.DINERS_CLUB]: dinnersClubIcon,
   [CardType.DISCOVER]: discoverIcon,
   [CardType.HIPERCARD]: hipperCardIcon,
@@ -637,3 +659,5 @@ export const DEFAULT_INPUT_FORMAT_TRANSLATION = { X: '[0-9]' };
 export const DEFAULT_FILE_RENDER_ERROR = 'File rendering failed. Please try again later.';
 
 export const FILE_DOWNLOAD_URL_PARAM = 'downloadURL=true&contentDisposition=INLINE';
+
+export const DROP_DOWN_ICON = dropDownIcon;

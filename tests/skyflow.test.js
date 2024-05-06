@@ -1341,6 +1341,11 @@ describe('Skyflow Enums', () => {
     expect(Skyflow.ValidationRuleType.LENGTH_MATCH_RULE).toEqual(ValidationRuleType.LENGTH_MATCH_RULE);
     expect(Skyflow.ValidationRuleType.REGEX_MATCH_RULE).toEqual(ValidationRuleType.REGEX_MATCH_RULE);
   });
+
+  test('Skflow.CardType', () => {
+    expect(Skyflow.CardType.VISA).toEqual("VISA");
+    expect(Skyflow.CardType.CARTES_BANCAIRES).toEqual("CARTES BANCAIRES");
+  });
 });
 
 describe('Get BearerToken Listener', () => {

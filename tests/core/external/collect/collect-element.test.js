@@ -1003,6 +1003,66 @@ describe('collect element methods', () => {
       console.log(err);
     }
   });
+
+  it('invalid on listener - 4', () => {
+    try {
+      testCollectElementDev.on('CHANGE', {key:'value'});
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+
+
+  it('valid on listener return state in handler - 1', () => {
+    let handlerState;
+    const handler = (state)=>{
+      handlerState = state
+    };
+    const mockState = {
+      "name":"cardnumberiframe",
+      "isEmpty": false,
+      "isValid": false,
+      "isFocused": true,
+      "value": "4111",
+      "elementType": "CARD_NUMBER",
+      "isRequired": true,
+      "selectedCardScheme": "",
+      "isComplete":false
+  }
+    // try {
+      testCollectElementDev.on('CHANGE', handler);
+      emitterSpy(mockState);
+      expect(handlerState).toEqual(mockState)
+    // } catch (err) {
+    //   expect(err).toBeUndefined();
+    // }
+  });
+
+  it('valid on listener return state in handler - 2', () => {
+    let handlerState;
+    const handler = (state)=>{
+      handlerState = state
+    };
+    const mockState = {
+      "name":"cardnumberiframe",
+      "isEmpty": false,
+      "isValid": false,
+      "isFocused": true,
+      "value": undefined,
+      "elementType": "CVV",
+      "isRequired": true,
+      "selectedCardScheme": "",
+      "isComplete":false
+  }
+    // try {
+      testCollectElementDev.on('CHANGE', handler);
+      emitterSpy(mockState);
+      expect(handlerState).toEqual(mockState)
+    // } catch (err) {
+    //   expect(err).toBeUndefined();
+    // }
+  });
+
   it('should create a ResizeObserver when mounted', () => {
     const testCollectElementProd = new CollectElement(id,
       {
