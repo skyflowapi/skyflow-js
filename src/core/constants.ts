@@ -360,7 +360,7 @@ export const INPUT_WITH_ICON_DEFAULT_STYLES = {
 
 export const INPUT_ICON_STYLES = 'position: absolute; left:8px; bottom:calc(50% - 12px); cursor:pointer;';
 export const DROPDOWN_ICON_STYLES = 'position: absolute; left:46px; bottom:calc(50% - 12px);cursor:pointer;display:none;';
-export const DROPDOWN_STYLES = 'position: absolute; left:8px; bottom:calc(50% - 12px);appearance: none; border: 1px solid green; background: none;padding: unset; box-shadow: none;background: transparent;-webkit-appearance: none;cursor:pointer;outline:none;opacity:0;width:54px;';
+export const DROPDOWN_STYLES = 'position: absolute; left:8px; bottom:calc(50% - 12px);appearance: none;padding: unset; box-shadow: none;background: transparent;cursor:pointer;outline:none;opacity:0;width:54px;';
 export const COLLECT_COPY_ICON_STYLES = 'position: absolute; right:8px; bottom:calc(50% - 12px); cursor:pointer;';
 export const REVEAL_COPY_ICON_STYLES = 'position: absolute; right:8px; top:calc(50% - 12px); cursor:pointer;';
 
