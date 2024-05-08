@@ -509,6 +509,14 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_INPUT_OPTIONS_TRANSLATION,
   },
+  INVALID_OPTION_CARD_METADATA: {
+    code: 400,
+    description: logs.errorLogs.INVALID_OPTION_CARD_METADATA,
+  },
+  INVALID_OPTION_CARD_SCHEME: {
+    code: 400,
+    description: logs.errorLogs.INVALID_OPTION_CARD_SCHEME,
+  },
 
 };
 

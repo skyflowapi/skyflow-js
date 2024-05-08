@@ -10,6 +10,7 @@ import {
   EVENT_TYPES,
   METRIC_TYPES,
   ELEMENT_TYPES,
+  ElementType,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import Bus from '../../../libs/bus';
@@ -65,6 +66,7 @@ class CollectElement extends SkyflowElement {
     isFocused: false,
     value: <string | Object | Blob | undefined>undefined,
     isRequired: false,
+    selectedCardScheme: '',
   };
 
   #group: any;
@@ -132,6 +134,7 @@ class CollectElement extends SkyflowElement {
         elementType: element.elementType,
         name: element.elementName,
         isRequired: element.required,
+        selectedCardScheme: '',
       });
     });
     if (this.#elements && this.#elements.length && this.#elements.length > 1) {
@@ -366,6 +369,7 @@ class CollectElement extends SkyflowElement {
         this.#state.isFocused = elementState.isFocused;
         this.#state.isRequired = elementState.isRequired;
         this.#state.value = {};
+        this.#state.selectedCardScheme = '';
         const key = this.#elements[index].elementName;
         const value = elementState.value
           && getReturnValue(elementState.value, elementState.elementType,
@@ -379,6 +383,8 @@ class CollectElement extends SkyflowElement {
         this.#state.isValid = this.#state.isValid && elementState.isValid;
         this.#state.isFocused = this.#state.isFocused || elementState.isFocused;
         this.#state.isRequired = this.#state.isRequired || elementState.isRequired;
+        this.#state.selectedCardScheme = this.#state.selectedCardScheme
+        || elementState.selectedCardScheme;
 
         if (!this.#state.value) this.#state.value = {};
         if (!this.#elements[index].sensitive) this.#state.value[this.#elements[index].elementName] = elementState.value || '';
@@ -393,6 +399,7 @@ class CollectElement extends SkyflowElement {
     isFocused: this.#state.isFocused,
     value: this.#state.value,
     required: this.#state.isRequired,
+    selectedCardScheme: '',
   });
 
   getOptions = () => {
@@ -430,6 +437,9 @@ class CollectElement extends SkyflowElement {
       if (data.value === undefined) {
         data.value = '';
       }
+
+      if (data.elementType !== ElementType.CARD_NUMBER) delete data.selectedCardScheme;
+
       delete data.isComplete;
       delete data.name;
       handler(data);
@@ -499,6 +509,7 @@ class CollectElement extends SkyflowElement {
             this.#states[index].isComplete = data.value.isComplete;
             this.#states[index].isFocused = data.value.isFocused;
             this.#states[index].isRequired = data.value.isRequired;
+            this.#states[index].selectedCardScheme = data?.value?.selectedCardScheme || '';
 
             if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
             else this.#states[index].value = undefined;

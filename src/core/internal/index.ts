@@ -27,6 +27,10 @@ import {
   ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES,
   INPUT_KEYBOARD_EVENTS,
   CUSTOM_ROW_ID_ATTRIBUTE,
+  DROPDOWN_STYLES,
+  DROP_DOWN_ICON,
+  DROPDOWN_ICON_STYLES,
+  CardTypeValues,
 } from '../constants';
 import { IFrameForm, IFrameFormElement } from './iframe-form';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-styles';
@@ -124,6 +128,10 @@ export class FrameElement {
 
   private isRequiredLabel?: HTMLLabelElement;
 
+  private dropdownIcon?: HTMLImageElement;
+
+  private dropdownSelect?: HTMLSelectElement;
+
   constructor(
     iFrameFormElement: IFrameFormElement,
     options: any,
@@ -179,7 +187,24 @@ export class FrameElement {
       this.domImg.src = CARD_ENCODED_ICONS[this.iFrameFormElement?.cardType]
         || CARD_ENCODED_ICONS.DEFAULT;
       this.domImg.setAttribute('style', this.options?.inputStyles?.cardIcon ? styleToString(this.options.inputStyles.cardIcon) : INPUT_ICON_STYLES);
-      this.inputParent.append(this.domImg);
+
+      this.inputParent.append(this.domImg); // added card
+
+      this.dropdownIcon = document.createElement('img');
+      this.dropdownIcon.src = DROP_DOWN_ICON;
+      this.dropdownIcon.setAttribute('style', this.options?.inputStyles?.dropdownIcon ? (DROPDOWN_ICON_STYLES + styleToString(this.options.inputStyles.dropdownIcon)) : DROPDOWN_ICON_STYLES);
+
+      this.dropdownSelect = document.createElement('select');
+      this.dropdownSelect.setAttribute('style', this.options?.inputStyles?.dropdown ? (DROPDOWN_STYLES + styleToString(this.options.inputStyles.dropdown)) : DROPDOWN_STYLES);
+
+      this.dropdownSelect.addEventListener('change', (event:any) => {
+        event.preventDefault();
+        if (this.domImg && CARD_ENCODED_ICONS[event.target.value]) {
+          this.domImg.src = CARD_ENCODED_ICONS[event.target.value]
+            || CARD_ENCODED_ICONS.DEFAULT;
+          this.iFrameFormElement.onDropdownSelect(event.target.value);
+        }
+      });
     }
 
     if (this.options?.enableCopy) {
@@ -343,6 +368,7 @@ export class FrameElement {
           labelStyles,
           errorTextStyles,
           skyflowID,
+          cardMetadata,
         } = data.options;
         if (validations) {
           this.iFrameFormElement.validations = validations;
@@ -375,6 +401,22 @@ export class FrameElement {
         }
         if (skyflowID) {
           this.iFrameFormElement.skyflowID = skyflowID;
+        }
+        if (cardMetadata?.scheme) {
+          if (Array.isArray(cardMetadata.scheme) && cardMetadata.scheme.length >= 2) {
+            this.appendDropdown(cardMetadata.scheme);
+          } else if (this.dropdownIcon && this.dropdownSelect && this.domInput && this.domImg) {
+            this.domInput.style.textIndent = '36px';
+            this.iFrameFormElement.onDropdownSelect('');
+            this.domImg.src = CARD_ENCODED_ICONS[this.iFrameFormElement?.cardType]
+            || CARD_ENCODED_ICONS.DEFAULT;
+            if (this.inputParent?.contains(this.dropdownIcon)) {
+              this.inputParent?.removeChild(this.dropdownIcon);
+            }
+            if (this.inputParent?.contains(this.dropdownSelect)) {
+              this.inputParent?.removeChild(this.dropdownSelect);
+            }
+          }
         }
       }
     });
@@ -845,6 +887,32 @@ export class FrameElement {
         printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
           this.iFrameFormElement.fieldType), MessageType.WARN,
         (this.iFrameFormElement?.context?.logLevel || LogLevel.ERROR));
+      }
+    }
+  }
+
+  private appendDropdown(cardBrandList:any) {
+    if (this.dropdownSelect) {
+      this.dropdownSelect.innerHTML = '';
+      const defaultOption = document.createElement('option');
+      defaultOption.value = 'unknown';
+      defaultOption.text = 'Select card brand (optional)';
+      defaultOption.disabled = true;
+      this.dropdownSelect.append(defaultOption);
+
+      cardBrandList.forEach((cardOption) => {
+        const option = document.createElement('option');
+        option.value = cardOption;
+        option.text = CardTypeValues[cardOption];
+        this.dropdownSelect?.append(option);
+      });
+
+      if (this.inputParent && this.dropdownIcon && this.domInput && this.domImg) {
+        this.dropdownSelect.selectedIndex = 0;
+        this.domInput.style.textIndent = '48px';
+        this.dropdownIcon.style.display = 'block';
+        this.inputParent.append(this.dropdownIcon);
+        this.inputParent.append(this.dropdownSelect);
       }
     }
   }

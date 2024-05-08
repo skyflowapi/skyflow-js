@@ -76,6 +76,7 @@ export class IFrameFormElement extends EventEmitter {
     name: '',
     isRequired: false,
     isTouched: false,
+    selectedCardScheme: '',
   };
 
   readonly fieldType: string;
@@ -175,6 +176,11 @@ export class IFrameFormElement extends EventEmitter {
         error: this.clientErrorText || this.errorText,
       });
     }
+  };
+
+  onDropdownSelect = (cardType:string) => {
+    this.state.selectedCardScheme = cardType;
+    this.sendChangeStatus(true);
   };
 
   changeFocus = (focus: boolean) => {
@@ -373,6 +379,7 @@ export class IFrameFormElement extends EventEmitter {
     value: this.state.value
       && getReturnValue(this.state.value, this.fieldType,
         EnvOptions[this.context?.env]?.doesReturnValue),
+    ...(this.state.selectedCardScheme ? { selectedCardScheme: this.state.selectedCardScheme } : {}),
   });
 
   validator(value: any) {
@@ -649,6 +656,7 @@ export class IFrameFormElement extends EventEmitter {
       name: '',
       isRequired: false,
       isTouched: false,
+      selectedCardScheme: '',
     };
   }
 

@@ -297,6 +297,8 @@ const logs = {
     INVALID_ALLOWED_OPTIONS: 'Interface: collect element - Invalid options, allowedFileType must be of string array type.',
     EMPTY_ALLOWED_OPTIONS_ARRAY: 'Interface: collect element - Invalid options value, allowedFileType array is empty.',
     INVALID_ALLOWED_FILETYPE_ARRAY: 'Interface: collect element - Invalid options value, allowedFileType array must contain only string elements.',
+    INVALID_OPTION_CARD_METADATA: 'Interface: container create - Invalid type, cardMetadata must be of non-empty object type.',
+    INVALID_OPTION_CARD_SCHEME: 'Interface: container create - Invalid options, scheme must be of string array type.',
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',

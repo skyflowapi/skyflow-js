@@ -3,7 +3,7 @@ import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
 import { EventName } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
-import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../constants';
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '../../constants';
 
 class ComposableElement {
   #elementName: string;
@@ -51,6 +51,9 @@ class ComposableElement {
       if (data.value === undefined) {
         data.value = '';
       }
+
+      if (data.elementType !== ElementType.CARD_NUMBER) delete data.selectedCardScheme;
+
       delete data.isComplete;
       delete data.name;
       handler(data);
