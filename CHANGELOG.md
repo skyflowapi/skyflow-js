@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.36.0] - 2024-05-08
+### Added
+- card brand choice support for card number element.
+
 ## [1.35.1] - 2024-04-12
 ### Added
 - iframe latency metrics.
