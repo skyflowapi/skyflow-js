@@ -5,7 +5,7 @@ import { SdkInfo } from '../../client';
 import {
   ALLOWED_NAME_FOR_FILE,
   CardType,
-  COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType,
+  COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType, SDK_DETAILS,
 } from '../../core/constants';
 import { IRevealElementOptions } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
@@ -171,15 +171,18 @@ const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-p
 // Check file type and file size in KB
 export const fileValidation = (value, required: Boolean = false) => {
   if (required && (value === undefined || value === '')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED,
+      [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
   }
 
   if (DANGEROUS_FILE_TYPE.includes(value.type)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE,
+      [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
   }
 
   if (value.size > 32000000) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE,
+      [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
   }
 
   return true;
@@ -223,7 +226,7 @@ export const formatRevealElementOptions = (options:IRevealElementOptions) => {
   if (options) {
     revealOptions = { ...options };
     if (Object.prototype.hasOwnProperty.call(revealOptions, 'enableCopy') && !validateBooleanOptions(revealOptions.enableCopy)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['enableCopy'], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 'enableCopy'], true);
     }
     if (Object.prototype.hasOwnProperty.call(revealOptions, 'format')
     || Object.prototype.hasOwnProperty.call(revealOptions, 'translation')) {

@@ -13,6 +13,7 @@ import {
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
+import { SDK_DETAILS } from '../core/constants';
 
 export interface IUpsertOptions{
   table: string,
@@ -137,7 +138,7 @@ const checkDuplicateColumns = (additionalColumns, columns, table) => {
   keys.forEach((key) => {
     const value = get(columns, key);
     if (value) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT, [`${key}`, `${table}`], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${key}`, `${table}`], true);
     }
   });
 };

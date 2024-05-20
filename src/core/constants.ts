@@ -15,8 +15,9 @@ import copyIcon from '../../assets/copyIcon.svg';
 import successIcon from '../../assets/path.svg';
 import dropDownIcon from '../../assets/drop-down.svg';
 import cartesBancairesIcon from '../../assets/carter-banceris.svg';
-
+import sdkDetails from '../../package.json';
 import logs from '../utils/logs';
+import { SdkInfo } from '../client';
 
 export const SESSION_ID = 'session_id';
 export const SKY_METADATA_HEADER = 'sky-metadata';
@@ -37,6 +38,11 @@ export const ELEMENT_TYPES = {
 export const EVENT_TYPES = {
   MOUNTED: 'MOUNTED',
   READY: 'FRAME_READY',
+};
+
+export const SDK_DETAILS: SdkInfo = {
+  sdkName: 'JS',
+  sdkVersion: sdkDetails.version,
 };
 
 export const STATUS_TYPES = {

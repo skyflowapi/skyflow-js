@@ -5,7 +5,8 @@ import {
   COLLECT_FRAME_CONTROLLER,
   ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENT_EVENTS_TO_CONTAINER
+  ELEMENT_EVENTS_TO_CONTAINER,
+  SDK_DETAILS
 } from '../../../../src/core/constants';
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
@@ -14,6 +15,7 @@ import Skyflow from '../../../../src/skyflow';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import logs from '../../../../src/utils/logs';
+import { parameterizedString } from '../../../../src/utils/logs-helper';
 
 global.ResizeObserver = jest.fn(() => ({
   observe: jest.fn(),
@@ -304,7 +306,7 @@ describe('Collect container', () => {
 
     expect(cvv.elementType).toBe('CVV');
 
-    expect(container.collect).rejects.toEqual(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED));
+    expect(container.collect).rejects.toEqual(new Error(parameterizedString(logs.errorLogs.ELEMENTS_NOT_MOUNTED, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion)));
   });
 
   it('test default options for card_number', () => {
@@ -465,7 +467,7 @@ describe('Collect container', () => {
 
     expect(file.elementType).toBe('FILE_INPUT');
 
-    expect(container.collect).rejects.toEqual(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED));
+    expect(container.collect).rejects.toEqual(new Error(parameterizedString(logs.errorLogs.ELEMENTS_NOT_MOUNTED, SDK_DETAILS.sdkName,SDK_DETAILS.sdkVersion)));
   });
 
   it('skyflowID undefined for file Element', () => {

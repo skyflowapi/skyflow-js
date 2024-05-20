@@ -9,6 +9,7 @@ import {
   SDK_VERSION,
   SESSION_ID,
   CardType,
+  SDK_DETAILS,
 } from './core/constants';
 import Client from './client';
 import RevealContainer from './core/external/reveal/reveal-container';
@@ -110,13 +111,22 @@ class Skyflow {
               this.#bearerToken = bearerToken;
               callback({ authToken: this.#bearerToken });
             } else {
-              printLog(logs.errorLogs.INVALID_BEARER_TOKEN, MessageType.ERROR, this.#logLevel);
-              callback({ error: logs.errorLogs.INVALID_BEARER_TOKEN });
+              printLog(parameterizedString(
+                logs.errorLogs.INVALID_BEARER_TOKEN,
+                SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion,
+              ), MessageType.ERROR, this.#logLevel);
+              callback({
+                error: parameterizedString(
+                  logs.errorLogs.INVALID_BEARER_TOKEN,
+                  SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion,
+                ),
+              });
             }
           })
           .catch((err) => {
-            printLog(logs.errorLogs.BEARER_TOKEN_REJECTED, MessageType.ERROR,
-              this.#logLevel);
+            printLog(parameterizedString(logs.errorLogs.BEARER_TOKEN_REJECTED,
+              SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion), MessageType.ERROR,
+            this.#logLevel);
             callback({ error: err });
           });
       } else {
@@ -198,9 +208,11 @@ class Skyflow {
 
       default:
         if (!type) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONTAINER_TYPE, [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONTAINER_TYPE,
+            [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
         }
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTAINER_TYPE, [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTAINER_TYPE,
+          [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, type], true);
     }
   }
 

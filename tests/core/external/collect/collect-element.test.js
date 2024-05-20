@@ -5,7 +5,7 @@ import bus from 'framebus';
 import CollectElement from '../../../../src/core/external/collect/collect-element';
 import SkyflowError from '../../../../src/libs/skyflow-error';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
-import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../../../src/core/constants';
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, SDK_DETAILS } from '../../../../src/core/constants';
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import { checkForElementMatchRule } from '../../../../src/core-utils/collect';
 import { ContainerType } from '../../../../src/skyflow';
@@ -654,7 +654,7 @@ describe('collect element validations', () => {
     };
 
     expect(createElement).toThrow(
-      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_TYPE, [], true),
+      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_TYPE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true),
     );
   });
 
@@ -684,7 +684,7 @@ describe('collect element validations', () => {
     };
 
     expect(createElement).toThrow(
-      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATIONS_TYPE, [], true),
+      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATIONS_TYPE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true),
     );
   });
 
@@ -714,7 +714,7 @@ describe('collect element validations', () => {
     };
 
     expect(createElement).toThrow(
-      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_TYPE, [0], true),
+      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_TYPE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 0], true),
     );
   });
 
@@ -746,7 +746,7 @@ describe('collect element validations', () => {
     };
 
     expect(createElement).toThrow(
-      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_TYPE, [0], true),
+      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_TYPE, [SDK_DETAILS.sdkName,SDK_DETAILS.sdkVersion, 0], true),
     );
   });
 
@@ -778,7 +778,7 @@ describe('collect element validations', () => {
     };
 
     expect(createElement).toThrow(
-      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_PARAMS, [0], true),
+      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_PARAMS, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 0], true),
     );
   });
 
@@ -811,7 +811,7 @@ describe('collect element validations', () => {
     };
 
     expect(createElement).toThrow(
-      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_PARAMS, [0], true),
+      new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_PARAMS, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 0], true),
     );
   });
 
@@ -846,7 +846,7 @@ describe('collect element validations', () => {
     };
 
     expect(createElement).toThrow(
-      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_REGEX_MATCH_RULE, [0], true),
+      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_REGEX_MATCH_RULE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 0], true),
     );
   });
 
@@ -881,7 +881,7 @@ describe('collect element validations', () => {
     };
 
     expect(createElement).toThrow(
-      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE, [0], true),
+      new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 0], true),
     );
   });
   it('Missing element in LENGTH_MATCH_RULE', () => {

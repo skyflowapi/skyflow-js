@@ -8,7 +8,7 @@ import iframer, {
 import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { updateMetricObjectValue } from '../../../metrics/index';
-import { METRIC_TYPES } from '../../constants';
+import { METRIC_TYPES, SDK_DETAILS } from '../../constants';
 
 export default class IFrame {
   name: string;
@@ -31,12 +31,14 @@ export default class IFrame {
       if (typeof domElement === 'string') {
         this.container = document.querySelector(domElement) || undefined;
         if (!this.container) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR,
+            [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
         }
       } else if (domElement instanceof HTMLElement) {
         this.container = domElement;
       } else {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR,
+          [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
       }
     } catch (e: any) {
       // eslint-disable-next-line no-console

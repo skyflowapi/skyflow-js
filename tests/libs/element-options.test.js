@@ -6,6 +6,7 @@ import { parameterizedString } from "../../src/utils/logs-helper";
 import logs from "../../src/utils/logs";
 import { validateInputFormatOptions } from "../../src/utils/validators";
 import { DEFAULT_CARD_NUMBER_SEPERATOR } from "../../src/core/constants";
+import { SDK_DETAILS } from "../../src/core/constants";
 
 jest.mock('../../src/utils/validators',()=>{
     const originalModule = jest.requireActual('../../src/utils/validators')
@@ -112,7 +113,7 @@ describe('test formatOptions function with format and translation', () => {
             formatOptions(ElementType.FILE_INPUT,{required:true,preserveFileName:undefined},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
-            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description,'preserveFileName'))
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 'preserveFileName'))
             done();
         }
     });
@@ -122,7 +123,7 @@ describe('test formatOptions function with format and translation', () => {
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:true},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
-            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description);
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion));
             done();
         }
     });
@@ -132,7 +133,7 @@ describe('test formatOptions function with format and translation', () => {
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:[]},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
-            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description);
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion));
             done();
         }
     });
@@ -142,7 +143,7 @@ describe('test formatOptions function with format and translation', () => {
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:{scheme:{}}},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
-            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_SCHEME.description);
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_SCHEME.description, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion));
             done();
         }
     });

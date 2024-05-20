@@ -17,6 +17,7 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_TYPES,
   EVENT_TYPES,
+  SDK_DETAILS,
 } from '../../constants';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
@@ -102,7 +103,7 @@ class RevealElement extends SkyflowElement {
 
   mount(domElementSelector) {
     if (!domElementSelector) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 'RevealElement'], true);
     }
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.DIV_ID, domElementSelector);
     pushElementEventWithTimeout(this.#elementId);
@@ -193,8 +194,10 @@ class RevealElement extends SkyflowElement {
               resolve(formatForRenderClient(resolvedResult, this.#recordData.column as string));
             },
             (rejectedResult) => {
-              printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
-                this.#context.logLevel);
+              printLog(parameterizedString(
+                logs.errorLogs.FAILED_RENDER, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion,
+              ), MessageType.ERROR,
+              this.#context.logLevel);
               if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
                 this.setAltText(altText);
               }
@@ -227,8 +230,10 @@ class RevealElement extends SkyflowElement {
                   resolve(formatForRenderClient(resolvedResult, this.#recordData.column as string));
                 },
                 (rejectedResult) => {
-                  printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
-                    this.#context.logLevel);
+                  printLog(parameterizedString(
+                    logs.errorLogs.FAILED_RENDER, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion,
+                  ), MessageType.ERROR,
+                  this.#context.logLevel);
                   if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
                     this.setAltText(altText);
                   }

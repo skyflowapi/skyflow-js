@@ -27,7 +27,7 @@ import {
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CONTAINER,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CONTAINER, SDK_DETAILS,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
@@ -192,7 +192,7 @@ class CollectContainer extends Container {
       && !this.#elements[elements[0].elementName]
       && this.#hasElementName(elements[0].name)
     ) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [`${elements[0].name}`], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${elements[0].name}`], true);
     }
 
     let element = this.#elements[tempElements.elementName];
@@ -272,12 +272,14 @@ class CollectContainer extends Container {
       const collectElements = Object.values(this.#elements);
       collectElements.forEach((element) => {
         if (!element.isMounted()) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED,
+            [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
         }
         element.isValidElement();
       });
       if (Object.prototype.hasOwnProperty.call(options, 'tokens') && !validateBooleanOptions(options.tokens)) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT,
+          [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
       }
       if (options?.additionalFields) {
         validateAdditionalFieldsInCollect(options.additionalFields);
@@ -321,7 +323,8 @@ class CollectContainer extends Container {
       const fileElements = Object.values(this.#elements);
       fileElements.forEach((element) => {
         if (!element.isMounted()) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED,
+            [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
         }
         element.isValidElement();
       });
