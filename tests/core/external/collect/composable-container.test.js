@@ -1,5 +1,5 @@
 import {
-  COLLECT_FRAME_CONTROLLER, SDK_DETAILS
+  COLLECT_FRAME_CONTROLLER
 } from '../../../../src/core/constants';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
@@ -198,7 +198,7 @@ describe('test composable container class',()=>{
       container.collect().then((res)=>{
         done(res)
       }).catch((err)=>{
-        expect(err.error.description).toBe(parameterizedString(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED.description, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion));
+        expect(err.error.description).toBe(parameterizedString(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED.description));
         done();
       });
     }catch(err){

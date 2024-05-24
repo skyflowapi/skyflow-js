@@ -36,7 +36,6 @@ import {
 } from '../../src/utils/validators/index';
 import successIcon from '../../assets/path.svg'
 import { isValidURL } from '../../src/utils/validators/index';
-import { SDK_DETAILS } from '../../src/core/constants';
 
 const mockUUID = '1234'
 
@@ -142,7 +141,7 @@ describe('test file name validation', () => {
       try {
         vaildateFileName(invalidFile)
       } catch(err) {
-        expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME.description, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion))
+        expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME.description))
       }      
     })
   })
@@ -185,7 +184,7 @@ describe('test file validation', () => {
       try {
         fileValidation(invalidFile)
       } catch(err) {
-        expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE.description, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion))
+        expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE.description))
       }      
     })
   })
@@ -213,7 +212,7 @@ describe('test file validation', () => {
     try {
       fileValidation(file);
     } catch(err) {
-      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion))
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description))
     }
   })
   test('no file selected', () => {
@@ -227,7 +226,7 @@ describe('test file validation', () => {
     try {
       fileValidation(file, true);
     } catch(err) {
-      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED.description, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion))
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED.description))
     }
   })
 })
@@ -326,7 +325,7 @@ describe('test formatRevealElementOptions function', () => {
       formatRevealElementOptions({ enableCopy: '123' })
       done('should throw error');
     } catch (err) {
-      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 'enableCopy'))
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, 'enableCopy'))
       done()
     }
   });

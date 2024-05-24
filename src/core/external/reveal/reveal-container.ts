@@ -15,7 +15,7 @@ import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateInputFormatOptions, validateRevealElementRecords } from '../../../utils/validators';
 import {
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_CONTAINER,
-  ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER, SDK_DETAILS,
+  ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
 } from '../../constants';
 import Container from '../common/container';
 import RevealElement from './reveal-element';
@@ -174,7 +174,7 @@ class RevealContainer extends Container {
           this.#revealElements.forEach((currentElement) => {
             if (currentElement.isClientSetError()) {
               throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE,
-                [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion]);
+                []);
             }
             if (!currentElement.getRecordData().skyflowID) {
               this.#revealRecords.push(currentElement.getRecordData());
@@ -192,9 +192,8 @@ class RevealContainer extends Container {
                 this.#mountedRecords = [];
                 this.#revealRecords = [];
                 if (revealData.error) {
-                  printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL,
-                    SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion), MessageType.ERROR,
-                  this.#context.logLevel);
+                  printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL), MessageType.ERROR,
+                    this.#context.logLevel);
 
                   reject(revealData.error);
                 } else {
@@ -224,21 +223,17 @@ class RevealContainer extends Container {
         const elementMountTimeOut = setTimeout(() => {
           printLog(parameterizedString(
             logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
-            SDK_DETAILS.sdkName,
-            SDK_DETAILS.sdkVersion,
           ), MessageType.ERROR,
           this.#context.logLevel);
           reject(parameterizedString(
             logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
-            SDK_DETAILS.sdkName,
-            SDK_DETAILS.sdkVersion,
           ));
         }, 30000);
         this.#revealElements.forEach((currentElement) => {
           if (currentElement.isClientSetError()) {
             clearTimeout(elementMountTimeOut);
             throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE,
-              [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion]);
+              []);
           }
           if (!currentElement.getRecordData().skyflowID) {
             this.#revealRecords.push(currentElement.getRecordData());

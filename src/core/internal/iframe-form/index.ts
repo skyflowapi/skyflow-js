@@ -16,7 +16,6 @@ import {
   DEFAULT_ERROR_TEXT_ELEMENT_TYPES,
   DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES,
   CardType,
-  SDK_DETAILS,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -429,7 +428,7 @@ export class IFrameFormElement extends EventEmitter {
       if (!vaildateFileNames) {
         this.errorText = this.containerType === ContainerType.COLLECT
           ? parameterizedString(
-            logs.errorLogs.INVALID_FILE_NAMES, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion,
+            logs.errorLogs.INVALID_FILE_NAMES,
           )
           : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
         return vaildateFileNames;
@@ -471,7 +470,7 @@ export class IFrameFormElement extends EventEmitter {
             try {
               elementIFrame = window.parent.frames[elementName];
             } catch (err) {
-              throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${i}`], true);
+              throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE, [`${i}`], true);
             }
             let elementValue;
             if (elementIFrame) {
@@ -493,14 +492,13 @@ export class IFrameFormElement extends EventEmitter {
             break;
           }
           default:
-            this.errorText = parameterizedString(logs.errorLogs.INVALID_VALIDATION_RULE_TYPE,
-              SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion);
+            this.errorText = parameterizedString(logs.errorLogs.INVALID_VALIDATION_RULE_TYPE);
             resp = false;
         }
 
         if (!resp) {
           this.errorText = this.validations[i].params.error || parameterizedString(
-            logs.errorLogs.VALIDATION_FAILED, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion,
+            logs.errorLogs.VALIDATION_FAILED,
           );
           return resp;
         }
@@ -724,7 +722,7 @@ export class IFrameForm {
           );
           if (!data.name) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.REQUIRED_PARAMS_NOT_PROVIDED,
-              [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+              [], true);
           }
           // @ts-ignore
           if (data.name && data.name.includes(COLLECT_FRAME_CONTROLLER)) {
@@ -893,7 +891,7 @@ export class IFrameForm {
   uploadFiles = (fileElement) => {
     if (!this.client) {
       throw new SkyflowError(
-        SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true,
+        SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true,
       );
     }
     const fileUploadObject: any = {};
@@ -916,7 +914,7 @@ export class IFrameForm {
 
     if (!validatedFileState) {
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE,
-        [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true));
+        [], true));
     }
     fileUploadObject[state.name] = state.value;
 
@@ -931,7 +929,7 @@ export class IFrameForm {
       if (!isValidFileName) {
         return Promise.reject(
           new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME,
-            [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true),
+            [], true),
         );
       }
       formData.append(column, value);
@@ -977,7 +975,7 @@ export class IFrameForm {
   tokenize = (options) => {
     if (!this.client) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION,
-        [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+        [], true);
     }
     const insertResponseObject: any = {};
     const updateResponseObject: any = {};
@@ -1005,7 +1003,7 @@ export class IFrameForm {
     }
 
     if (errorMessage.length > 0) {
-      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${errorMessage}`], true));
+      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
     }
 
     for (let i = 0; i < formElements.length; i += 1) {
@@ -1031,7 +1029,7 @@ export class IFrameForm {
             if (get(insertResponseObject[tableName], state.name)
             && !(validations && checkForElementMatchRule(validations))) {
               return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
-                [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, state.name, tableName], true));
+                [state.name, tableName], true));
             }
             set(
               insertResponseObject[tableName],
@@ -1042,7 +1040,7 @@ export class IFrameForm {
             if (skyflowID === '' || skyflowID === null) {
               return Promise.reject(new SkyflowError(
                 SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
-                [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion],
+                [],
               ));
             }
             if (updateResponseObject[skyflowID]) {
@@ -1229,7 +1227,7 @@ export class IFrameForm {
     }
 
     if (!frameInstance) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.FRAME_NOT_FOUND, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${frameGlobalName}`], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.FRAME_NOT_FOUND, [`${frameGlobalName}`], true);
     } else if (frameInstance?.Skyflow?.init) {
       printLog(
         parameterizedString(

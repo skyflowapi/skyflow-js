@@ -29,7 +29,7 @@ import {
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER, SDK_DETAILS,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
@@ -194,7 +194,7 @@ class ComposableContainer extends Container {
       && !this.#elements[elements[0].elementName]
       && this.#hasElementName(elements[0].name)
     ) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${elements[0].name}`], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [`${elements[0].name}`], true);
     }
 
     let element = this.#elements[this.#tempElements.elementName];
@@ -261,7 +261,7 @@ class ComposableContainer extends Container {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(
         SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER,
-        [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion],
+        [],
         true,
       );
     }
@@ -275,7 +275,7 @@ class ComposableContainer extends Container {
     if (typeof handler !== 'function') {
       throw new SkyflowError(
         SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER,
-        [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion],
+        [],
         true,
       );
     }
@@ -288,13 +288,13 @@ class ComposableContainer extends Container {
   mount = (domElement) => {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT,
-        [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 'CollectElement'], true);
+        ['CollectElement'], true);
     }
 
     const { layout } = this.#options;
     if (sum(layout) !== this.#elementsList.length) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.MISMATCH_ELEMENT_COUNT_LAYOUT_SUM,
-        [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+        [], true);
     }
     let count = 0;
     layout.forEach((rowCount, index) => {
@@ -346,14 +346,14 @@ class ComposableContainer extends Container {
       validateInitConfig(this.#metaData.clientJSON.config);
       if (!this.#isMounted) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED,
-          [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+          [], true);
       }
 
       const containerElements = getElements(this.#tempElements);
       containerElements.forEach((element:any) => {
         if (!element?.isMounted) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED,
-            [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+            [], true);
         }
       });
 
@@ -364,7 +364,7 @@ class ComposableContainer extends Container {
 
       if (options && options.tokens && typeof options.tokens !== 'boolean') {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT,
-          [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+          [], true);
       }
       if (options?.additionalFields) {
         validateAdditionalFieldsInCollect(options.additionalFields);

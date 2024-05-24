@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, SDK_DETAILS } from '../../../../src/core/constants';
+import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS } from '../../../../src/core/constants';
 import { Env, LogLevel, ValidationRuleType } from '../../../../src/utils/common';
 import { IFrameForm, IFrameFormElement } from '../../../../src/core/internal/iframe-form'
 import * as busEvents from '../../../../src/utils/bus-events';
@@ -378,7 +378,7 @@ describe('test iframeFormelement', () => {
 
         isValid = element.validator('99999')
         expect(isValid).toBe(false)
-        expect(element.errorText).toBe(parameterizedString(logs.errorLogs.VALIDATION_FAILED, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion))
+        expect(element.errorText).toBe(parameterizedString(logs.errorLogs.VALIDATION_FAILED))
     });
     
     test('card number custom validation',()=>{
@@ -406,7 +406,7 @@ describe('test iframeFormelement', () => {
 
         isValid = cardNumberElement.validator('5555 3412 4444 1115')
         expect(isValid).toBe(false)
-        expect(cardNumberElement.errorText).toBe(parameterizedString(logs.errorLogs.VALIDATION_FAILED, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion))
+        expect(cardNumberElement.errorText).toBe(parameterizedString(logs.errorLogs.VALIDATION_FAILED))
     });
 
     test('card number custom validation',()=>{
@@ -422,7 +422,7 @@ describe('test iframeFormelement', () => {
 
         let isValid = cardNumberElement.validator('5555 3412 4444 1115')
         expect(isValid).toBe(false)
-        expect(cardNumberElement.errorText).toBe(parameterizedString(logs.errorLogs.VALIDATION_FAILED, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion))
+        expect(cardNumberElement.errorText).toBe(parameterizedString(logs.errorLogs.VALIDATION_FAILED))
     });
 
 })
@@ -945,7 +945,7 @@ describe('test file Upload method', () => {
       
         expect(() => {
           const formattedOptions = formatOptions(elementType, options, logLevel);
-        }).toThrowError(parameterizedString(logs.errorLogs.INVALID_ALLOWED_FILETYPE_ARRAY, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion));
+        }).toThrowError(parameterizedString(logs.errorLogs.INVALID_ALLOWED_FILETYPE_ARRAY));
       });
     test('validate for file input - invalid allowedFileType (not an array)', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
@@ -954,7 +954,7 @@ describe('test file Upload method', () => {
       
         expect(() => {
           const formattedOptions = formatOptions(elementType, options, logLevel);
-        }).toThrowError(parameterizedString(logs.errorLogs.INVALID_ALLOWED_OPTIONS, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion));
+        }).toThrowError(parameterizedString(logs.errorLogs.INVALID_ALLOWED_OPTIONS));
       });
     test('validate for file input - empty allowedFileType array', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
@@ -963,7 +963,7 @@ describe('test file Upload method', () => {
       
         expect(() => {
           const formattedOptions = formatOptions(elementType, options, logLevel);
-        }).toThrowError(parameterizedString(logs.errorLogs.EMPTY_ALLOWED_OPTIONS_ARRAY, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion));
+        }).toThrowError(parameterizedString(logs.errorLogs.EMPTY_ALLOWED_OPTIONS_ARRAY));
       });
       test('initialize iFrame and upload with file input error case', (done) => {
         const form = new IFrameForm("controllerId", "", "ERROR");

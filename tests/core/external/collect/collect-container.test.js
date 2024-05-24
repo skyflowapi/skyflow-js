@@ -6,7 +6,6 @@ import {
   ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENT_EVENTS_TO_CONTAINER,
-  SDK_DETAILS
 } from '../../../../src/core/constants';
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
@@ -306,7 +305,7 @@ describe('Collect container', () => {
 
     expect(cvv.elementType).toBe('CVV');
 
-    expect(container.collect).rejects.toEqual(new Error(parameterizedString(logs.errorLogs.ELEMENTS_NOT_MOUNTED, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion)));
+    expect(container.collect).rejects.toEqual(new Error(parameterizedString(logs.errorLogs.ELEMENTS_NOT_MOUNTED)));
   });
 
   it('test default options for card_number', () => {
@@ -467,7 +466,7 @@ describe('Collect container', () => {
 
     expect(file.elementType).toBe('FILE_INPUT');
 
-    expect(container.collect).rejects.toEqual(new Error(parameterizedString(logs.errorLogs.ELEMENTS_NOT_MOUNTED, SDK_DETAILS.sdkName,SDK_DETAILS.sdkVersion)));
+    expect(container.collect).rejects.toEqual(new Error(parameterizedString(logs.errorLogs.ELEMENTS_NOT_MOUNTED)));
   });
 
   it('skyflowID undefined for file Element', () => {

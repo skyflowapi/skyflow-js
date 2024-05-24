@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { ContentType, SDK_DETAILS, SKY_METADATA_HEADER } from '../core/constants';
+import { ContentType, SKY_METADATA_HEADER } from '../core/constants';
 import SkyflowError from '../libs/skyflow-error';
 import { ISkyflow } from '../skyflow';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
@@ -55,7 +55,7 @@ class Client {
     const httpRequest = new XMLHttpRequest();
     if (!httpRequest) {
       reject(new SkyflowError(SKYFLOW_ERROR_CODE.CONNECTION_ERROR,
-        [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true));
+        [], true));
       return;
     }
 
@@ -121,7 +121,7 @@ class Client {
 
     httpRequest.onerror = () => {
       reject(new SkyflowError(SKYFLOW_ERROR_CODE.NETWORK_ERROR,
-        [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true));
+        [], true));
     };
   });
 }

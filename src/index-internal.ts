@@ -11,7 +11,6 @@ import {
   FRAME_REVEAL,
   SKYFLOW_FRAME_CONTROLLER,
   REVEAL_FRAME_CONTROLLER,
-  SDK_DETAILS,
 } from './core/constants';
 import RevealFrameController from './core/internal/reveal/reveal-frame-controller';
 import SkyflowFrameController from './core/internal/skyflow-frame/skyflow-frame-controller';
@@ -68,7 +67,6 @@ import {
       RevealFrame.init();
     }
   } catch (e) {
-    throw new Error(parameterizedString(logs.errorLogs.INVALID_IFRAME,
-      SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion));
+    throw new Error(parameterizedString(logs.errorLogs.INVALID_IFRAME));
   }
 }(window));

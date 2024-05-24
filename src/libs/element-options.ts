@@ -13,7 +13,6 @@ import {
   ELEMENTS,
   INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES,
   INPUT_STYLES,
-  SDK_DETAILS,
 } from '../core/constants';
 import { CollectElementInput } from '../core/external/collect/collect-container';
 import CollectElement from '../core/external/collect/collect-element';
@@ -37,38 +36,38 @@ export function validateElementOptions(
 ) {
   if (elementType !== 'group' && !Object.prototype.hasOwnProperty.call(ELEMENTS, elementType)) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_TYPE,
-      [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+      [], true);
   }
 
   if (Object.prototype.hasOwnProperty.call(oldOptions, 'validations')) {
     if (!Array.isArray(oldOptions.validations)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATIONS_TYPE,
-        [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+        [], true);
     } else {
       oldOptions.validations.forEach((validationRule: IValidationRule, index) => {
         if (!Object.prototype.hasOwnProperty.call(validationRule, 'type')) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_TYPE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${index}`], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_TYPE, [`${index}`], true);
         }
         if (!Object.values(ValidationRuleType).includes(validationRule.type)) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_TYPE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${index}`], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_TYPE, [`${index}`], true);
         }
         if (!Object.prototype.hasOwnProperty.call(validationRule, 'params')) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_PARAMS, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${index}`], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_VALIDATION_RULE_PARAMS, [`${index}`], true);
         }
         if (
           typeof validationRule.params !== 'object'
           || Array.isArray(validationRule.params)
           || validationRule.params === null) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_PARAMS, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${index}`], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATION_RULE_PARAMS, [`${index}`], true);
         }
         if (validationRule.type === ValidationRuleType.REGEX_MATCH_RULE) {
           if (!Object.prototype.hasOwnProperty.call(validationRule.params, 'regex')) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_REGEX_MATCH_RULE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${index}`], true);
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_REGEX_IN_REGEX_MATCH_RULE, [`${index}`], true);
           }
         } else if (validationRule.type === ValidationRuleType.LENGTH_MATCH_RULE) {
           if (!Object.prototype.hasOwnProperty.call(validationRule.params, 'min')
           && !Object.prototype.hasOwnProperty.call(validationRule.params, 'max')) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${index}`], true);
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE, [`${index}`], true);
           }
         }
       });
@@ -159,7 +158,7 @@ export function validateAndSetupGroupOptions(
         && oldElement.elementName !== newElement.elementName
       ) {
         throw new Error(parameterizedString(
-          logs.errorLogs.CANNOT_CHANGE_ELEMENT, SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion,
+          logs.errorLogs.CANNOT_CHANGE_ELEMENT,
         ));
       }
       validateElementOptions(oldElement.elementType, oldElement, newElement);
@@ -227,12 +226,12 @@ export const formatValidations = (input: CollectElementInput) => {
     validations.forEach((validationRule: IValidationRule, index:number) => {
       if (validationRule && validationRule.type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {
         if (validationRule.params && !Object.prototype.hasOwnProperty.call(validationRule.params, 'element')) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_IN_ELEMENT_MATCH_RULE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${index}`], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
         }
         if (validationRule.params
           && (validationRule.params.element == null
             || !(validationRule.params.element instanceof CollectElement))) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${index}`], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
         }
         if (validationRule.params
           && validationRule.params.element
@@ -248,7 +247,7 @@ export const formatValidations = (input: CollectElementInput) => {
         if (validationRule.params
           && validationRule.params.regex
           && !isValidRegExp(validationRule.params.regex)) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REGEX_IN_REGEX_MATCH_RULE, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, `${index}`], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REGEX_IN_REGEX_MATCH_RULE, [`${index}`], true);
         }
         if (validationRule.params
           && validationRule.params.regex
@@ -311,14 +310,14 @@ export const formatOptions = (elementType, options, logLevel) => {
           || (Object.prototype.toString.call(formattedOptions.cardMetadata) !== '[object Object]')
         ) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA,
-            [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+            [], true);
         }
 
         if (Object.prototype.hasOwnProperty.call(formattedOptions.cardMetadata, 'scheme')) {
           if (!(typeof formattedOptions.cardMetadata.scheme === 'object')
               || (Object.prototype.toString.call(formattedOptions.cardMetadata.scheme) !== '[object Array]')) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_SCHEME,
-              [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+              [], true);
           }
         }
       }
@@ -371,30 +370,30 @@ export const formatOptions = (elementType, options, logLevel) => {
   }
 
   if (Object.prototype.hasOwnProperty.call(formattedOptions, 'enableCardIcon') && !validateBooleanOptions(formattedOptions.enableCardIcon)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 'enableCardIcon'], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['enableCardIcon'], true);
   }
   if (Object.prototype.hasOwnProperty.call(formattedOptions, 'enableCopy') && !validateBooleanOptions(formattedOptions.enableCopy)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 'enableCopy'], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['enableCopy'], true);
   }
   if (Object.prototype.hasOwnProperty.call(formattedOptions, 'required') && !validateBooleanOptions(formattedOptions.required)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 'required'], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['required'], true);
   }
   if (Object.prototype.hasOwnProperty.call(formattedOptions, 'preserveFileName') && !validateBooleanOptions(formattedOptions.preserveFileName)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion, 'preserveFileName'], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['preserveFileName'], true);
   }
   if (elementType === ELEMENTS.FILE_INPUT.name) {
     if (options.allowedFileType) {
       if (!Array.isArray(options.allowedFileType)) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_OPTIONS,
-          [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+          [], true);
       }
       if (options.allowedFileType.length <= 0) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ALLOWED_OPTIONS_ARRAY,
-          [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+          [], true);
       }
       if (!options.allowedFileType.every((item) => typeof item === 'string')) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_FILETYPE_ARRAY,
-          [SDK_DETAILS.sdkName, SDK_DETAILS.sdkVersion], true);
+          [], true);
       }
     }
   }
