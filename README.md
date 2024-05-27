@@ -381,7 +381,7 @@ const cardMetadata = {
 }
 ```
 
-Supported card types by Skyflow.CardType :
+##### Supported card types by Skyflow.CardType :
 - `VISA`
 - `MASTERCARD`
 - `AMEX`
@@ -1048,7 +1048,7 @@ state : {
 
 **Note:**
 - values of SkyflowElements will be returned in element state object only when `env` is  `DEV`,  else it is empty string i.e, '', but in case of CARD_NUMBER type element when the `env` is `PROD` for all the card types except AMEX, it will return first eight digits, for AMEX it will return first six digits and rest all digits in masked format.
-- `selectedCardScheme` will exist for `CARD_NUMBER` element state and the value will be only populated when cardbrand choice selection is triggered otherwise, it will always be an empty string.
+- `selectedCardScheme` will exist for `CARD_NUMBER` element state and the value of [Skyflow.CardType](#supported-card-types-by-skyflowcardtype) will be only populated when cardbrand choice selection is triggered otherwise, it will always be an empty string.
 
 ##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/collect-element-listeners.html) for using listeners 
 ```javascript
