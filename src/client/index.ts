@@ -54,8 +54,7 @@ class Client {
   request = (request: IClientRequest) => new Promise((resolve, reject) => {
     const httpRequest = new XMLHttpRequest();
     if (!httpRequest) {
-      reject(new SkyflowError(SKYFLOW_ERROR_CODE.CONNECTION_ERROR,
-        [], true));
+      reject(new SkyflowError(SKYFLOW_ERROR_CODE.CONNECTION_ERROR, [], true));
       return;
     }
 

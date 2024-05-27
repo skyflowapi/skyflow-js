@@ -889,11 +889,7 @@ export class IFrameForm {
   });
 
   uploadFiles = (fileElement) => {
-    if (!this.client) {
-      throw new SkyflowError(
-        SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true,
-      );
-    }
+    if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const fileUploadObject: any = {};
 
     const {
@@ -913,8 +909,7 @@ export class IFrameForm {
     const validatedFileState = fileValidation(state.value, state.isRequired);
 
     if (!validatedFileState) {
-      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE,
-        [], true));
+      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true));
     }
     fileUploadObject[state.name] = state.value;
 

@@ -905,6 +905,13 @@ describe("validate file render element input", () => {
       expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.SKYFLOW_IDS_AND_TOKEN_BOTH_SPECIFIED.description))
     }
   })
+  test("invalid altText", () => {
+    try {
+      validateRenderElementRecord({ altText: [], column: 'col', skyflowID: '121232', table: 'table' })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_RENDER.description))
+    }
+  })
 
 })
 

@@ -173,8 +173,7 @@ class RevealContainer extends Container {
             this.#context.logLevel);
           this.#revealElements.forEach((currentElement) => {
             if (currentElement.isClientSetError()) {
-              throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE,
-                []);
+              throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
             }
             if (!currentElement.getRecordData().skyflowID) {
               this.#revealRecords.push(currentElement.getRecordData());
@@ -221,19 +220,14 @@ class RevealContainer extends Container {
           MessageType.LOG,
           this.#context.logLevel);
         const elementMountTimeOut = setTimeout(() => {
-          printLog(parameterizedString(
-            logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
-          ), MessageType.ERROR,
-          this.#context.logLevel);
-          reject(parameterizedString(
-            logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
-          ));
+          printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL, MessageType.ERROR,
+            this.#context.logLevel);
+          reject(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL);
         }, 30000);
         this.#revealElements.forEach((currentElement) => {
           if (currentElement.isClientSetError()) {
             clearTimeout(elementMountTimeOut);
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE,
-              []);
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
           }
           if (!currentElement.getRecordData().skyflowID) {
             this.#revealRecords.push(currentElement.getRecordData());
