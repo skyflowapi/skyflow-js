@@ -208,7 +208,7 @@ class Skyflow {
             [], true);
         }
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTAINER_TYPE,
-          [], true);
+          [type], true);
     }
   }
 
