@@ -14,7 +14,9 @@ import {
   getFileURLFromVaultBySkyflowID,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
-import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../constants';
+import {
+  DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES,
+} from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
@@ -99,7 +101,7 @@ class SkyflowFrameController {
               },
               (rejectedResult) => {
                 printLog(
-                  logs.errorLogs.FETCH_RECORDS_REJECTED,
+                  parameterizedString(logs.errorLogs.FETCH_RECORDS_REJECTED),
                   MessageType.ERROR,
                   this.#context.logLevel,
                 );
@@ -123,7 +125,7 @@ class SkyflowFrameController {
               })
               .catch((error) => {
                 printLog(
-                  logs.errorLogs.INSERT_RECORDS_REJECTED,
+                  parameterizedString(logs.errorLogs.INSERT_RECORDS_REJECTED),
                   MessageType.ERROR,
                   this.#context.logLevel,
                 );
@@ -143,11 +145,11 @@ class SkyflowFrameController {
                 callback(resolvedResult);
               },
               (rejectedResult) => {
-                printLog(
+                printLog(parameterizedString(
                   logs.errorLogs.GET_REJECTED,
-                  MessageType.ERROR,
-                  this.#context.logLevel,
-                );
+                ),
+                MessageType.ERROR,
+                this.#context.logLevel);
 
                 callback({ error: rejectedResult });
               },
@@ -171,7 +173,7 @@ class SkyflowFrameController {
               },
               (rejectedResult) => {
                 printLog(
-                  logs.errorLogs.GET_BY_SKYFLOWID_REJECTED,
+                  parameterizedString(logs.errorLogs.GET_BY_SKYFLOWID_REJECTED),
                   MessageType.ERROR,
                   this.#context.logLevel,
                 );
@@ -199,7 +201,9 @@ class SkyflowFrameController {
               },
             ).catch((rejectedResult) => {
               printLog(
-                logs.errorLogs.DELETE_RECORDS_REJECTED,
+                parameterizedString(
+                  logs.errorLogs.DELETE_RECORDS_REJECTED,
+                ),
                 MessageType.ERROR,
                 this.#context.logLevel,
               );

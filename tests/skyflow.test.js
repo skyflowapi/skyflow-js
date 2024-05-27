@@ -11,6 +11,7 @@ import { Env, EventName, LogLevel, RedactionType, RequestMethod, ValidationRuleT
 import ComposableContainer from '../src/core/external/collect/compose-collect-container';
 import SkyflowContainer from '../src/core/external/skyflow-container';
 import Client from '../src/client'
+import logs from '../src/utils/logs';
 
 jest.mock('../src/utils/jwt-utils', () => ({
   __esModule: true,
@@ -92,6 +93,14 @@ describe('Create container', () => {
     try {
       const revealContainer = skyflow.container('test');
     } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+  test('Invalid container', () => {
+    try {
+      const collectContainer = skyflow.container();
+    } catch (err) {
+      expect(err.message).toContain(logs.errorLogs.EMPTY_CONTAINER_TYPE);
       expect(err).toBeDefined();
     }
   });

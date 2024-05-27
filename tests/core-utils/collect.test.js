@@ -1,5 +1,6 @@
 import { getUpsertColumn, constructElementsInsertReq } from "../../src/core-utils/collect";
 import SKYFLOW_ERROR_CODE from "../../src/utils/constants";
+import { parameterizedString } from "../../src/utils/logs-helper";
 
 describe("getUpsertColumn fn test", () => {
     const options = {
@@ -78,22 +79,22 @@ describe("constructElementsInsertReq fn test", () => {
          try{
             constructElementsInsertReq(req, update, options);
         }catch(err){
-            expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT_ADDITIONAL_FIELDS.description);
+            expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT_ADDITIONAL_FIELDS.description));
         }
     });
     test("constructElementsInsertReq error 2", () => {
         try{
            constructElementsInsertReq(req, update2, options);
        }catch(err){
-           expect(err.error.description).toContain('Duplicate column');
+           expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT.description, 'name', 'table1'));
        }
    });
    test("constructElementsInsertReq error 2", () => {
     try{
        constructElementsInsertReq(req, update2, options2);
    }catch(err){
-       expect(err.error.description).toContain('Duplicate column');
-   }
+    expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT.description));
+}
 });
 
 });

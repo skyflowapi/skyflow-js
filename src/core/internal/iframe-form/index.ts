@@ -427,7 +427,9 @@ export class IFrameFormElement extends EventEmitter {
       }
       if (!vaildateFileNames) {
         this.errorText = this.containerType === ContainerType.COLLECT
-          ? logs.errorLogs.INVALID_FILE_NAMES
+          ? parameterizedString(
+            logs.errorLogs.INVALID_FILE_NAMES,
+          )
           : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
         return vaildateFileNames;
       }
@@ -490,12 +492,14 @@ export class IFrameFormElement extends EventEmitter {
             break;
           }
           default:
-            this.errorText = logs.errorLogs.INVALID_VALIDATION_RULE_TYPE;
+            this.errorText = parameterizedString(logs.errorLogs.INVALID_VALIDATION_RULE_TYPE);
             resp = false;
         }
 
         if (!resp) {
-          this.errorText = this.validations[i].params.error || logs.errorLogs.VALIDATION_FAILED;
+          this.errorText = this.validations[i].params.error || parameterizedString(
+            logs.errorLogs.VALIDATION_FAILED,
+          );
           return resp;
         }
       }
@@ -717,7 +721,8 @@ export class IFrameForm {
             logLevel,
           );
           if (!data.name) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.REQUIRED_PARAMS_NOT_PROVIDED, [], true);
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.REQUIRED_PARAMS_NOT_PROVIDED,
+              [], true);
           }
           // @ts-ignore
           if (data.name && data.name.includes(COLLECT_FRAME_CONTROLLER)) {
@@ -918,7 +923,8 @@ export class IFrameForm {
       const isValidFileName = vaildateFileName(state.value.name);
       if (!isValidFileName) {
         return Promise.reject(
-          new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true),
+          new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME,
+            [], true),
         );
       }
       formData.append(column, value);
@@ -962,7 +968,10 @@ export class IFrameForm {
   };
 
   tokenize = (options) => {
-    if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
+    if (!this.client) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION,
+        [], true);
+    }
     const insertResponseObject: any = {};
     const updateResponseObject: any = {};
     const formElements = Object.keys(this.iFrameFormElements);
@@ -1026,6 +1035,7 @@ export class IFrameForm {
             if (skyflowID === '' || skyflowID === null) {
               return Promise.reject(new SkyflowError(
                 SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
+                [],
               ));
             }
             if (updateResponseObject[skyflowID]) {

@@ -193,8 +193,10 @@ class RevealElement extends SkyflowElement {
               resolve(formatForRenderClient(resolvedResult, this.#recordData.column as string));
             },
             (rejectedResult) => {
-              printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
-                this.#context.logLevel);
+              printLog(parameterizedString(
+                logs.errorLogs.FAILED_RENDER,
+              ), MessageType.ERROR,
+              this.#context.logLevel);
               if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
                 this.setAltText(altText);
               }
@@ -227,8 +229,10 @@ class RevealElement extends SkyflowElement {
                   resolve(formatForRenderClient(resolvedResult, this.#recordData.column as string));
                 },
                 (rejectedResult) => {
-                  printLog(logs.errorLogs.FAILED_RENDER, MessageType.ERROR,
-                    this.#context.logLevel);
+                  printLog(parameterizedString(
+                    logs.errorLogs.FAILED_RENDER,
+                  ), MessageType.ERROR,
+                  this.#context.logLevel);
                   if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
                     this.setAltText(altText);
                   }

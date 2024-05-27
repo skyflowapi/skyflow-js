@@ -1,10 +1,7 @@
 import {
-  COLLECT_FRAME_CONTROLLER,
-  ELEMENT_EVENTS_TO_IFRAME,
+  COLLECT_FRAME_CONTROLLER
 } from '../../../../src/core/constants';
-import CollectContainer from '../../../../src/core/external/collect/collect-container';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
-import Skyflow from '../../../../src/skyflow';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
 import logs from '../../../../src/utils/logs';
 import ComposableContainer from "../../../../src/core/external/collect/compose-collect-container";
@@ -12,6 +9,7 @@ import ComposableElement from '../../../../src/core/external/collect/compose-col
 import CollectElement from '../../../../src/core/external/collect/collect-element';
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import EventEmitter from '../../../../src/event-emitter';
+import { parameterizedString } from '../../../../src/utils/logs-helper';
 
 const bus = require('framebus');
 
@@ -200,7 +198,7 @@ describe('test composable container class',()=>{
       container.collect().then((res)=>{
         done(res)
       }).catch((err)=>{
-        expect(err.error.description).toBe(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED.description);
+        expect(err.error.description).toBe(parameterizedString(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED.description));
         done();
       });
     }catch(err){

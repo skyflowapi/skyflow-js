@@ -171,15 +171,18 @@ const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-p
 // Check file type and file size in KB
 export const fileValidation = (value, required: Boolean = false) => {
   if (required && (value === undefined || value === '')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED,
+      [], true);
   }
 
   if (DANGEROUS_FILE_TYPE.includes(value.type)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE,
+      [], true);
   }
 
   if (value.size > 32000000) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE,
+      [], true);
   }
 
   return true;

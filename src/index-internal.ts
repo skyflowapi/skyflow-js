@@ -67,6 +67,6 @@ import {
       RevealFrame.init();
     }
   } catch (e) {
-    throw new Error(logs.errorLogs.INVALID_IFRAME);
+    throw new Error(parameterizedString(logs.errorLogs.INVALID_IFRAME));
   }
 }(window));
