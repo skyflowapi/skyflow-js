@@ -42,20 +42,26 @@ jobs:
           git config user.name ${{ github.actor }}
           git config user.email ${{ github.actor }}@users.noreply.github.com
           git add package.json
-          git commit -m "[AUTOMATED] Private Release ${{ steps.previoustag.outputs.tag }}-dev.$(git rev-parse --short $GITHUB_SHA)"
+          echo "INTERNAL_RELEASE_VERSION=v${{ steps.previoustag.outputs.tag }}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
+          git commit -m "[AUTOMATED] Private Release ${{ env.INTERNAL_RELEASE_VERSION }}"
           git push origin -f
+
+      - name: Set IFRAME_SECURE_SITE with version
+        run: |
+          VERSION=$(echo "${{ secrets.IFRAME_SECURE_SITE }}" | sed -E "s|/version/|/${{ env.INTERNAL_RELEASE_VERSION }}/|")
+          echo "IFRAME_SECURE_SITE=$VERSION" >> $GITHUB_ENV
 
       - name: npm build
         run: npm run build-browser-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ env.IFRAME_SECURE_SITE }}
 
       - name: npm build iframe
         run: npm run build-iframe
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ env.IFRAME_SECURE_SITE }}
  
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
@@ -67,7 +73,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
           AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
           SOURCE_DIR: "dist/v1"
-          DEST_DIR: "v1/"
+          DEST_DIR: "${{ env.INTERNAL_RELEASE_VERSION }}/"
 
       - name: build node-sdk
         env:
