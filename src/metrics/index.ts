@@ -1,11 +1,11 @@
-import bus from 'framebus';
+import { CoralogixRum } from '@coralogix/browser';
 import { MeticsObjectType, SharedMeticsObjectType } from '../utils/common';
 import sdkDetails from '../../package.json';
 import { getMetaObject } from '../utils/helpers';
 import {
-  ELEMENT_EVENTS_TO_IFRAME,
   EVENT_TYPES,
   METRIC_TYPES,
+  SDK_IFRAME_EVENT,
 } from '../core/constants';
 
 export const METRIC_OBJECT: SharedMeticsObjectType = { records: [] };
@@ -71,12 +71,7 @@ export function pushEventToMixpanel(elementId: string) {
       ...metricEvent,
       time: Math.floor(Date.now() / 1000),
     };
-    if (metricEvent.vault_id !== '' && metricEvent.vault_url !== '') {
-      bus
-        .emit(ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + metricEvent.container_id, {
-          event,
-        });
-    }
+    CoralogixRum.info(SDK_IFRAME_EVENT, event);
   }
 }
 

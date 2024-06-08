@@ -33,6 +33,7 @@
     "url": "https://github.com/skyflowapi/skyflow-js.git"
   },
   "dependencies": {
+    "@coralogix/browser": "^1.1.12",
     "core-js": "^3.6.5",
     "framebus": "^4.0.0",
     "inject-stylesheet": "^2.0.0",

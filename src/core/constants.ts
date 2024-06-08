@@ -25,7 +25,8 @@ export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';
 export const SKYFLOW_FRAME_CONTROLLER = 'skyflow_controller';
 export const FRAME_REVEAL = 'reveal';
-
+export const SDK_IFRAME_EVENT = 'SDK IFRAME EVENT';
+export const DOMAIN = 'US2';
 export const FRAME_ELEMENT = 'element';
 
 export const ELEMENT_TYPES = {

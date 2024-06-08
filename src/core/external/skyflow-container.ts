@@ -2,6 +2,8 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import { CoralogixRum } from '@coralogix/browser';
+import SDKDetails from '../../../package.json';
 import Client from '../../client';
 import iframer, {
   getIframeSrc,
@@ -24,6 +26,7 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
   SKYFLOW_FRAME_CONTROLLER,
   PUREJS_TYPES,
+  DOMAIN,
 } from '../constants';
 import {
   printLog,
@@ -65,6 +68,12 @@ class SkyflowContainer {
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
+    CoralogixRum.init({
+      application: SDKDetails.name,
+      public_key: properties.RUM_KEY,
+      coralogixDomain: DOMAIN,
+      version: SDKDetails.version,
+    });
     bus
       .target(properties.IFRAME_SECURE_ORGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, (data, callback) => {
