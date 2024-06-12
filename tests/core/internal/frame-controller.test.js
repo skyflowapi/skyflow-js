@@ -793,6 +793,28 @@ describe('test frame controller', () => {
     expect(formElement.getValue()).toBe("   ");
   })
 
+  test('cvv element with input masking set true', () => {
+    const cvv_element = `element:CVV:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      "target": {
+        checkValidity: jest.fn(),
+        "value": "123"
+      }
+    }
+    const formElement = new IFrameFormElement(cvv_element, {}, context);
+    formElement.setValue("123");
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      masking: true
+    }, div);
+
+    element.onInputChange(inputEvent);
+  })
+
   test('card_number extra input on FrameElement', () => {
 
     const card_element = `element:CARD_NUMBER:${tableCol}`;
