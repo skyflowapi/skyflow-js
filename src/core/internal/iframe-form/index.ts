@@ -119,6 +119,8 @@ export class IFrameFormElement extends EventEmitter {
 
   preserveFileName: boolean = true;
 
+  allowedFileType: any;
+
   constructor(name: string, label: string, metaData, context: Context, skyflowID?: string) {
     super();
     const frameValues = name.split(':');
@@ -400,7 +402,9 @@ export class IFrameFormElement extends EventEmitter {
       resp = validateExpiryYear(value, this.format);
     } else if (this.fieldType === ElementType.FILE_INPUT) {
       try {
-        resp = fileValidation(value, this.state.isRequired);
+        resp = fileValidation(value, this.state.isRequired, {
+          allowedFileType: this.allowedFileType,
+        });
       } catch (err) {
         resp = false;
       }
@@ -894,14 +898,13 @@ export class IFrameForm {
     if (state.isRequired) {
       onFocusChange(false);
     }
-
     try {
-      fileValidation(state.value, state.isRequired);
+      fileValidation(state.value, state.isRequired, fileElement);
     } catch (err) {
       return Promise.reject(err);
     }
 
-    const validatedFileState = fileValidation(state.value, state.isRequired);
+    const validatedFileState = fileValidation(state.value, state.isRequired, fileElement);
 
     if (!validatedFileState) {
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true));
