@@ -148,10 +148,15 @@ describe('push event', () => {
   });
 
   test('push event with error', (done) => {
+    window.CoralogixRum = {
+      isInited: false,
+      init: jest.fn(),
+      info: jest.fn(),
+    };
     const clientReq = jest.fn(() => Promise.resolve(pushEventResponse));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
 
-    SkyflowFrameController.init();
+    SkyflowFrameController.init(undefined,true);
 
     const emitEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
@@ -160,8 +165,6 @@ describe('push event', () => {
 
     const onCb = onSpy.mock.calls[0][1]
     const data = {
-      event: {
-      }
     };
     onCb(data)
     setTimeout(() => {
@@ -171,6 +174,10 @@ describe('push event', () => {
   });
 
   test('push event throw error resopnse', (done) => {
+    window.CoralogixRum = {
+      isInited: false,
+      init: jest.fn(),
+    };
     const clientReq = jest.fn(() => Promise.reject(errorResponse));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq }));
 
