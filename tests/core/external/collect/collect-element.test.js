@@ -390,7 +390,7 @@ describe('collect element', () => {
       elementName,
       rows,
     },
-    { clientDomain: clientDomain},
+    {clientDomain: clientDomain,clientJSON:{config: { options: { trackMetrics: true, trackingKey: "key" } }}},
     {containerId:'containerId',isMounted:false},
     true,
     destroyCallback,
