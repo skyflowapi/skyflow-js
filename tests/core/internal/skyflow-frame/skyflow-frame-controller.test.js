@@ -106,6 +106,11 @@ describe('push event', () => {
   let targetSpy;
   let onSpy;
   beforeEach(() => {
+    window.CoralogixRum = {
+      isInited: true,
+      init: jest.fn(),
+      info: jest.fn(),
+    };
     emitSpy = jest.spyOn(bus, 'emit');
     targetSpy = jest.spyOn(bus, 'target');
     onSpy = jest.spyOn(bus, 'on');

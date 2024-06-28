@@ -64,7 +64,7 @@ class RevealContainer extends Container {
 
   type:string = ContainerType.REVEAL;
 
-  constructor(metaData, skyflowElements, context, options?) {
+  constructor(metaData, skyflowElements, context, options = {}) {
     super();
     this.#metaData = {
       ...metaData,
@@ -104,10 +104,6 @@ class RevealContainer extends Container {
             ...metaData.clientJSON,
             config: {
               ...metaData.clientJSON?.config,
-              options: {
-                ...metaData.clientJSON.config?.options,
-                ...options,
-              },
             },
             context,
           },
