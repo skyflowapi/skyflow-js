@@ -124,10 +124,6 @@ class ComposableContainer extends Container {
             ...metaData.clientJSON,
             config: {
               ...metaData.clientJSON.config,
-              options: {
-                ...metaData.clientJSON.config?.options,
-                ...options,
-              },
             },
           },
           context,
