@@ -59,7 +59,7 @@ class SkyflowContainer {
     this.#context = context;
     const clientDomain = window.location.origin || '';
     const iframe = iframer({
-      name: `${SKYFLOW_FRAME_CONTROLLER}:${this.#containerId}:${btoa(clientDomain)}`,
+      name: `${SKYFLOW_FRAME_CONTROLLER}:${this.#containerId}:${btoa(clientDomain)}:${!!this.#client.toJSON()?.config?.options?.trackingKey}`,
       referrer: clientDomain,
     });
     setAttributes(iframe, {

@@ -87,7 +87,19 @@ class ComposableContainer extends Container {
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
-    this.#metaData = metaData;
+    this.#metaData = {
+      ...metaData,
+      clientJSON: {
+        ...metaData.clientJSON,
+        config: {
+          ...metaData.clientJSON.config,
+          options: {
+            ...metaData.clientJSON.config?.options,
+            ...options,
+          },
+        },
+      },
+    };
     this.#skyflowElements = skyflowElements;
     this.#context = context;
     this.#options = options;
@@ -114,6 +126,10 @@ class ComposableContainer extends Container {
             ...metaData.clientJSON,
             config: {
               ...metaData.clientJSON.config,
+              options: {
+                ...metaData.clientJSON.config?.options,
+                ...options,
+              },
             },
           },
           context,
