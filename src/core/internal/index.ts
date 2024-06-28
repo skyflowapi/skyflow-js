@@ -559,14 +559,32 @@ export class FrameElement {
       const target = event.target as HTMLInputElement;
       const { mask } = this.iFrameFormElement;
       const value = this.domInput?.value || this.iFrameFormElement.getValue();
+      let updatedMask;
       if (mask) {
+        updatedMask = [...mask];
+      }
+      if (
+        this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
+        && this.iFrameFormElement.mask
+      ) {
+        const cardType = detectCardType(value);
+        const cardNumberMask = addSeperatorToCardNumberMask(
+          CARD_NUMBER_MASK[cardType],
+          this.options?.cardSeperator,
+        );
+        updatedMask[0] = cardNumberMask[0];
+        updatedMask[1] = null;
+        updatedMask[2] = cardNumberMask[1];
+        this.iFrameFormElement.setMask(cardNumberMask as string[]);
+      }
+      if (updatedMask) {
         const translation = {};
-        if (mask[2]) {
-          Object.keys(mask[2]).forEach((key) => {
-            translation[key] = { pattern: mask[2][key] };
+        if (updatedMask[2]) {
+          Object.keys(updatedMask[2]).forEach((key) => {
+            translation[key] = { pattern: updatedMask[2][key] };
           });
         }
-        const output = getMaskedOutput(target?.value, mask[0], translation);
+        const output = getMaskedOutput(target?.value, updatedMask[0], translation);
         if (output.length >= value.length) {
           this.iFrameFormElement.setValue(output, target?.checkValidity());
         } else if (output === '' && target?.value === '') {
