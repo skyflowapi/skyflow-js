@@ -1,6 +1,12 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+declare global {
+  interface Window {
+    CoralogixRum: any;
+  }
+}
+
 export enum RedactionType {
   DEFAULT = 'DEFAULT',
   PLAIN_TEXT = 'PLAIN_TEXT',
