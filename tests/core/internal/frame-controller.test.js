@@ -761,7 +761,7 @@ describe('test frame controller', () => {
     }, div);
 
     element.onInputChange(inputEvent);
-    expect(formElement.getValue()).toBe('4111111111111111')
+    expect(formElement.getValue()).toBe('4111 1111 1111 1111')
   })
 
 
@@ -790,7 +790,7 @@ describe('test frame controller', () => {
     }, div);
 
     element.onInputChange(inputEvent);
-    expect(formElement.getValue()).toBe("   ");
+    expect(formElement.getValue()).toBe("4111 1111 1111 1111");
   })
 
   test('card_number extra input on FrameElement', () => {
