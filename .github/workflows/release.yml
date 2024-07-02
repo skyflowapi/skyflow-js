@@ -44,17 +44,22 @@ jobs:
             git commit -m "[AUTOMATED] Public Release - ${{ steps.previoustag.outputs.tag }}"
             git push origin
 
+      - name: Set PROD_IFRAME_SECURE_SITE with version
+        run: |
+          VERSION=$(echo "${{ secrets.PROD_IFRAME_SECURE_SITE }}" | sed -E "s|/version/|/v${{ steps.previoustag.outputs.tag }}/|")
+          echo "PROD_IFRAME_SECURE_SITE=$VERSION" >> $GITHUB_ENV
+
       - name: npm build
         run: npm run build-browser-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ env.PROD_IFRAME_SECURE_SITE }}
 
       - name: npm build iframe
         run: npm run build-iframe
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ env.PROD_IFRAME_SECURE_SITE }}
  
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
@@ -66,12 +71,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_ACCESS_KEY_SECRET }}
           AWS_REGION: ${{ secrets.PROD_AWS_REGION }}
           SOURCE_DIR: "dist/v1"
-          DEST_DIR: "v1/"
+          DEST_DIR: "v${{ steps.previoustag.outputs.tag }}/"
 
       - name: build node-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ env.PROD_IFRAME_SECURE_SITE }}
         run: |
           npm run build:types 
           npm run build-node-sdk
