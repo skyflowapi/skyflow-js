@@ -182,6 +182,7 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
 
   if (Object.prototype.hasOwnProperty.call(fileElement, 'allowedFileType') && (value !== undefined && value !== '')) {
     let isValidType = false;
+
     if (fileElement.allowedFileType !== null && fileElement.allowedFileType !== undefined) {
       fileElement.allowedFileType.forEach((type) => {
         const allowedType = getType(type);
