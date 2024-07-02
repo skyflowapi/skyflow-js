@@ -148,6 +148,9 @@ export class FrameElement {
     if (Object.prototype.hasOwnProperty.call(options, 'preserveFileName')) {
       this.iFrameFormElement.preserveFileName = options?.preserveFileName;
     }
+    if (Object.prototype.hasOwnProperty.call(options, 'allowedFileType')) {
+      this.iFrameFormElement.allowedFileType = options?.allowedFileType;
+    }
   }
 
   // mount element onto dom

@@ -387,6 +387,9 @@ export const formatOptions = (elementType, options, logLevel) => {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_FILETYPE_ARRAY, [], true);
       }
     }
+    if (Object.prototype.hasOwnProperty.call(options, 'allowedFileType')) {
+      formattedOptions = { ...formattedOptions, allowedFileType: options.allowedFileType };
+    }
   }
 
   return formattedOptions;
