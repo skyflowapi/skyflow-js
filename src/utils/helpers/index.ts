@@ -15,6 +15,8 @@ import { detectCardType, isValidURL, validateBooleanOptions } from '../validator
 import properties from '../../properties';
 import uuid from '../../libs/uuid';
 
+const { getType } = require('mime');
+
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
 export function formatFrameNameToId(name: string) {
@@ -169,13 +171,30 @@ export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
 
 const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-package', 'application/vnd.microsoft.portable-executable', 'application/vnd.rar'];
 // Check file type and file size in KB
-export const fileValidation = (value, required: Boolean = false) => {
+export const fileValidation = (value, required: Boolean = false, fileElement) => {
   if (required && (value === undefined || value === '')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED, [], true);
   }
 
   if (DANGEROUS_FILE_TYPE.includes(value.type)) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(fileElement, 'allowedFileType') && (value !== undefined && value !== '')) {
+    let isValidType = false;
+
+    if (fileElement.allowedFileType !== null && fileElement.allowedFileType !== undefined) {
+      fileElement.allowedFileType.forEach((type) => {
+        const allowedType = getType(type);
+        // eslint-disable-next-line max-len
+        if (value.type.includes(allowedType) || value.type.includes(type) || value.type.includes(type.substring(1)) || value.type.includes(type)) {
+          isValidType = true;
+        }
+      });
+      if (!isValidType) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
+      }
+    }
   }
 
   if (value.size > 32000000) {
