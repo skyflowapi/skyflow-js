@@ -186,7 +186,8 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
     if (fileElement.allowedFileType !== null && fileElement.allowedFileType !== undefined) {
       fileElement.allowedFileType.forEach((type) => {
         const allowedType = getType(type);
-        if (value.type.includes(allowedType) || value.type.includes(type)) {
+        // eslint-disable-next-line max-len
+        if (value.type.includes(allowedType) || value.type.includes(type) || value.type.includes(type.substring(1)) || value.type.includes(type)) {
           isValidType = true;
         }
       });
