@@ -593,6 +593,14 @@ class CollectElement extends SkyflowElement {
     return true;
   }
 
+  setErrorOverride(customErrorText: string) {
+    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE,
+      {
+        name: formatFrameNameToId(this.#iframe.name),
+        customErrorText,
+      });
+  }
+
   setError(clientErrorText:string) {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR,
       {

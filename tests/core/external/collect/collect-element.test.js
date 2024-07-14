@@ -951,6 +951,9 @@ describe('collect element methods', () => {
   it('resetError method', () => {
     testCollectElementProd.resetError();
   });
+  it('setErrorOverride method', () => {
+    testCollectElementProd.setErrorOverride('ErrorText');
+  });
   it('setValue method prod env', () => {
     testCollectElementProd.setValue('testValue');
   });

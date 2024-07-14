@@ -708,6 +708,188 @@ describe('test frame controller', () => {
     // expect(formElement.getValue()).toBe('')
   })
 
+  test('should verify setErrorOverride when the value is invalid', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: false,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+
+    const setCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE);
+    setCb[0][1]({
+      options: {
+        label: 'updatedLabel',
+        inputStyles,
+        labelStyles,
+        errorTextStyles,
+        table:'updatedTable',
+        column:'updateColumn',
+        placeholder:'XX',
+        skyflowID: 'updated-skyflow-id',
+      },
+      customErrorText: 'test custom error',
+      state: {
+        error: 'test error'
+      }
+    });
+
+    element.setupInputField();
+  });
+
+  test('should verify setErrorOverride when the field is required and empty', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: false,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+
+    const setCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE);
+    setCb[0][1]({
+      options: {
+        label: 'updatedLabel',
+        inputStyles,
+        labelStyles,
+        errorTextStyles,
+        table:'updatedTable',
+        column:'updateColumn',
+        placeholder:'XX',
+        skyflowID: 'updated-skyflow-id',
+      },
+      customErrorText: 'test custom error',
+      state: {
+        error: 'test error',
+        isRequired: true,
+        isEmpty: true
+      }
+    });
+
+    element.setupInputField();
+  });
+
+  test('should verify setErrorOverride when the field is valid and not empty', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: true,
+      isEmpty: false,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+
+    const setCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE);
+    setCb[0][1]({
+      options: {
+        label: 'updatedLabel',
+        inputStyles,
+        labelStyles,
+        errorTextStyles,
+        table:'updatedTable',
+        column:'updateColumn',
+        placeholder:'XX',
+        skyflowID: 'updated-skyflow-id',
+      },
+      customErrorText: 'test custom error',
+      state: {
+        error: 'test error',
+        isRequired: true,
+        isEmpty: false,
+        isValid: true
+      }
+    });
+
+    element.setupInputField();
+  });
+
   test('card_number Input With mask empty state FrameElement', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
@@ -912,4 +1094,189 @@ describe('test frame controller', () => {
 
     changeCb[0][1](state);
   })
+  test('should verify setError when the field is required and empty', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: true,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+
+    const setCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR);
+    setCb[0][1]({
+      options: {
+        label: 'updatedLabel',
+        inputStyles,
+        labelStyles,
+        errorTextStyles,
+        table:'updatedTable',
+        column:'updateColumn',
+        placeholder:'XX',
+        skyflowID: 'updated-skyflow-id',
+      },
+      customErrorText: 'test custom error',
+      clientErrorText: 'test client error',
+      isTriggerError: true,
+      state: {
+        error: 'test error',
+        isRequired: true,
+        isEmpty: true
+      }
+    });
+
+    element.setupInputField();
+  });
+
+  test('should verify setError when the field is empty and valid', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: true,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+
+    const setCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR);
+    setCb[0][1]({
+      options: {
+        label: 'updatedLabel',
+        inputStyles,
+        labelStyles,
+        errorTextStyles,
+        table:'updatedTable',
+        column:'updateColumn',
+        placeholder:'XX',
+        skyflowID: 'updated-skyflow-id',
+      },
+      customErrorText: 'test custom error',
+      clientErrorText: 'test client error',
+      isTriggerError: false,
+      state: {
+        error: 'test error',
+        isRequired: true,
+        isEmpty: true
+      }
+    });
+    element.setupInputField();
+  });
+
+  test('should verify setError when the field is not empty and not valid', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: true,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+
+    const setCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR);
+    setCb[0][1]({
+      options: {
+        label: 'updatedLabel',
+        inputStyles,
+        labelStyles,
+        errorTextStyles,
+        table:'updatedTable',
+        column:'updateColumn',
+        placeholder:'XX',
+        skyflowID: 'updated-skyflow-id',
+      },
+      customErrorText: 'test custom error',
+      clientErrorText: 'test client error',
+      isTriggerError: true,
+      state: {
+        error: 'test error',
+        isRequired: true,
+        isEmpty: false,
+        isValid: false
+      }
+    });
+
+    element.setupInputField();
+  });
 });
