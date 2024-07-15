@@ -290,6 +290,12 @@ export class FrameElement {
     });
 
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
+      if (!state.isEmpty && state.isValid && this.domCopy) {
+        this.domCopy.style.display = 'block';
+      } else if (this.domCopy) {
+        this.domCopy.style.display = 'none';
+      }
+
       // On CHANGE set isEmpty to false
       state.isEmpty = !state.value;
 
