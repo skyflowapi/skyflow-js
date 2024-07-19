@@ -20,7 +20,7 @@ jobs:
 
       - name: Run Semgrep
         run: |
-          semgrep --config .semgreprules/Customrule.yml --config auto --severity ERROR --sarif . > results.sarif
+          semgrep --config .semgreprules/customRule.yml --config auto --severity ERROR --sarif . > results.sarif
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
