@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           token: ${{ secrets.PAT_ACTIONS }}
-          ref: master
+          ref: main
           fetch-depth: 0
 
       - uses: actions/setup-node@v2
@@ -57,7 +57,7 @@ jobs:
           IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
  
       - name: Deploy to S3
-        uses: jakejarvis/s3-sync-action@master
+        uses: jakejarvis/s3-sync-action@main
         with:
           args: --acl public-read --delete
         env:

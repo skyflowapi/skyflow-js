@@ -5,7 +5,7 @@ Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal
 
 [![CI](https://img.shields.io/static/v1?label=CI&message=passing&color=green?style=plastic&logo=github)](https://github.com/skyflowapi/skyflow-js/actions)
 [![GitHub release](https://img.shields.io/github/v/release/skyflowapi/skyflow-js.svg)](https://www.npmjs.com/package/skyflow-js)
-[![License](https://img.shields.io/github/license/skyflowapi/skyflow-android)](https://github.com/skyflowapi/skyflow-js/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/skyflowapi/skyflow-android)](https://github.com/skyflowapi/skyflow-js/blob/main/LICENSE)
 
 # Table of Contents
 - [**Including Skyflow.js**](#including-skyflowjs) 
@@ -168,7 +168,7 @@ const options = {
 skyflowClient.insert(records, options);
 ```
 
-An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/pure-js.html) of an insert call: 
+An [example](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/pure-js.html) of an insert call: 
 ```javascript
 skyflowClient.insert({
   records: [
@@ -487,7 +487,7 @@ container.collect(options);
 
 ### End to end example of collecting data with Skyflow Elements
 
-**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/skyflow-elements.html)**
+**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/skyflow-elements.html)**
 
 ```javascript
 //Step 1
@@ -918,7 +918,7 @@ const elementValueMatchRule = {
 }
 ```
 
-The Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/custom-validations.html) for using custom validations:
+The Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/custom-validations.html) for using custom validations:
 
 ```javascript
 /*
@@ -1025,7 +1025,7 @@ state : {
 `Note:`
 values of SkyflowElements will be returned in element state object only when `env` is  `DEV`,  else it is empty string i.e, '', but in case of CARD_NUMBER type element when the `env` is `PROD` for all the card types except AMEX, it will return first eight digits, for AMEX it will return first six digits and rest all digits in masked format.
 
-##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/collect-element-listeners.html) for using listeners 
+##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/collect-element-listeners.html) for using listeners 
 ```javascript
 // Create Skyflow client.
 const skyflowClient = Skyflow.init({
@@ -1886,7 +1886,7 @@ Note: If you do not provide a redaction type, RedactionType.PLAIN_TEXT is the de
 
 skyflow.detokenize(records);
 ```
-An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/pure-js.html) of a detokenize call: 
+An [example](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/pure-js.html) of a detokenize call: 
 
 ```javascript
 skyflow.detokenize({
@@ -1973,7 +1973,7 @@ data = {
  ],
 };
 ```
-[Example usage (Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/get-pure-js.html)
+[Example usage (Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/get-pure-js.html)
 
 ```javascript
 skyflow.get({
@@ -2018,7 +2018,7 @@ Example response
    ]
 }
 ```
-[Example usage (Unique column values)](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/get-pure-js.html)
+[Example usage (Unique column values)](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/get-pure-js.html)
 
 ```javascript
 skyflow.get({
@@ -2058,7 +2058,7 @@ Sample response:
 }
 ```
 
-[Example usage (Fetch tokens using Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/get-pure-js.html)
+[Example usage (Fetch tokens using Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/get-pure-js.html)
 ```javascript
 skyflow.get({
  records: [
@@ -2250,7 +2250,7 @@ container
 
 ### End to end example of all steps
 
-**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/skyflow-elements.html)**
+**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/skyflow-elements.html)**
 ```javascript
 // Step 1.
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
@@ -2966,7 +2966,7 @@ const records = [
 skyflowClient.delete(records);
 ```
 
-An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/delete-pure-js.html) of delete call:
+An [example](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/delete-pure-js.html) of delete call:
 
 ```javascript
 skyflowClient.delete({
