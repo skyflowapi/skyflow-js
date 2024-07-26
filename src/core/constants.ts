@@ -164,7 +164,7 @@ export enum CardType {
 
 export const CardTypeValues = {
   [CardType.VISA]: 'Visa',
-  [CardType.MASTERCARD]: 'MasterCard',
+  [CardType.MASTERCARD]: 'Mastercard',
   [CardType.AMEX]: 'Amex',
   [CardType.DINERS_CLUB]: 'DinersClub',
   [CardType.DISCOVER]: 'Discover',
