@@ -109,8 +109,6 @@ export class IFrameFormElement extends EventEmitter {
 
   doesClientHasError: boolean = false;
 
-  customErrorText: string | undefined = undefined;
-
   clientErrorText: string | undefined = undefined;
 
   format: string = '';
@@ -420,6 +418,7 @@ export class IFrameFormElement extends EventEmitter {
       }
     }
     if (!resp || !vaildateFileNames) {
+      this.isCustomValidationFailed = false;
       if (!resp) {
         if (this.label) {
           this.errorText = `${parameterizedString(
@@ -431,7 +430,6 @@ export class IFrameFormElement extends EventEmitter {
             ? logs.errorLogs.INVALID_COLLECT_VALUE
             : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
         }
-        this.isCustomValidationFailed = false;
         return resp;
       }
       if (!vaildateFileNames) {
@@ -583,7 +581,6 @@ export class IFrameFormElement extends EventEmitter {
     bus.target(this.metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE, (data) => {
         if (data.name === this.iFrameName) {
-          this.customErrorText = data.customErrorText as string;
           this._emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE, {
             ...data,
             state: { ...this.getStatus(), error: this.errorText },

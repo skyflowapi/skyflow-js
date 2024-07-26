@@ -10,6 +10,8 @@ abstract class SkyflowElement {
 
   abstract resetError();
 
+  abstract setErrorOverride(customErrorText:string);
+
   abstract iframeName();
 
   abstract getID();
