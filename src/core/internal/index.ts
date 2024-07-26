@@ -578,6 +578,9 @@ export class FrameElement {
           target.value = output;
         }
       } else {
+        if (this.options.masking) {
+          target.type = 'password';
+        }
         this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
       }
     }
