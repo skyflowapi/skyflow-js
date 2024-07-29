@@ -266,6 +266,15 @@ class RevealElement extends SkyflowElement {
     return this.#recordData;
   }
 
+  setErrorOverride(clientErrorText: string) {
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
+      name: this.#iframe.name,
+      isTriggerError: true,
+      clientErrorText,
+    });
+    this.#isClientSetError = true;
+  }
+
   setError(clientErrorText:string) {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
       name: this.#iframe.name,
