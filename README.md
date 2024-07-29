@@ -344,6 +344,7 @@ const options = {
   enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false').
   format: String,       // Optional, format for the element 
   translation: {}      // Optional, indicates the allowed data type value for format. 
+  masking: Boolean      // Optional, mask the input in element. Defaults to 'false'
 };
 ```
 
@@ -396,6 +397,27 @@ const options = {
 
 User input: "B1234121234"
 Value displayed in INPUT_FIELD: "AB 12-341-2123"
+
+`masking` : A boolean value for whether to mask the input of the element. Only applicable to CVV, PIN, INPUT_FIELD and CARDHOLDER_NAME elements.
+Masking is applicable to INPUT_FIELD elements only when you don't use input formatting. Masking character is "•".
+
+Collect Element Options examples with masking:
+```js
+const options = {
+  required: true,
+  enableCopy: false, 
+  masking: true, 
+}
+```
+
+Example for CVV:
+User input: "1234" 
+Value displayed in CVV: "••••"
+
+Example for CARDHOLDER_NAME:
+User input: "Raj kumar" 
+Value displayed in CARDHOLDER_NAME: "•••••••••"
+
 
 Once the Element object and options has been defined, add it to the container using the `create(element, options)` method as shown below. The `element` param takes a Skyflow Element object and options as defined above:
 
