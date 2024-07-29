@@ -57,7 +57,7 @@ jobs:
           IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
  
       - name: Deploy to S3
-        uses: jakejarvis/s3-sync-action@main
+        uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read --delete
         env:
