@@ -438,6 +438,38 @@ export class FrameElement {
       this.updateStyleClasses(data.state);
     });
 
+    this.iFrameFormElement.on(
+      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE,
+      (data) => {
+        if (
+          this.domError && data.customErrorText
+          && !this.iFrameFormElement.doesClientHasError
+        ) {
+          if (data.state.isEmpty && data.state.isRequired) {
+            this.domError.innerText = data.customErrorText;
+          } else if (!data.isEmpty && !data.state.isValid) {
+            if (
+              data.state.error
+              && !this.iFrameFormElement.validations?.length
+            ) {
+              this.domError.innerText = data.customErrorText;
+            } else if (
+              data.state.error
+              && this.iFrameFormElement.validations?.length
+              && this.iFrameFormElement.isCustomValidationFailed
+            ) {
+              this.domError.innerText = data.state.error;
+            } else {
+              this.domError.innerText = data.customErrorText;
+            }
+          } else if (data.state.isEmpty || data.state.isValid) {
+            this.domError.innerText = '';
+          }
+        }
+        this.updateStyleClasses(data.state);
+      },
+    );
+
     // this.setupInputField();
     this.updateOptions(this.options);
 
