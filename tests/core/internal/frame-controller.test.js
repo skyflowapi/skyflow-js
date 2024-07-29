@@ -1489,4 +1489,143 @@ describe('test frame controller', () => {
 
     element.setupInputField();
   });
+
+  test('should verify copy icon when field is empty', () => {
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(collect_element, {enableCopy: true}, context);
+
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    element.domCopy = document.createElement('img');
+    element.domCopy.src = 'source';
+    element.domCopy.title = 'title';
+    element.inputParent?.append(formElement.domCopy);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: false,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1]({
+      isEmpty: true,
+      isValid: true
+    });
+
+    element.setupInputField();
+  });
+
+  test('should verify copy icon when field is not empty', () => {
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(collect_element, {enableCopy: true}, context);
+
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    element.domCopy = document.createElement('img');
+    element.domCopy.src = 'COPY_UTILS.copyIcon';
+    element.domCopy.title = 'COPY_UTILS.toCopy';
+    element.inputParent?.append(formElement.domCopy);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: false,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1]({
+      isEmpty: false,
+      isValid: true
+    });
+
+    element.setupInputField();
+  });
+
+  test('should verify copy icon when img tag is not present', () => {
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(collect_element, {enableCopy: true}, context);
+
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: false,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1]({
+      isEmpty: true,
+      isValid: true
+    });
+
+    element.setupInputField();
+  });
 });
