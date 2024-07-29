@@ -300,7 +300,7 @@ export class FrameElement {
         (<HTMLInputElement> this.domInput).checked = this.options.value === state.value;
       }
       if (this.options.enableCopy) {
-        this.copyText = state.value;
+        this.copyText = this.iFrameFormElement.getUnformattedValue();
       }
       if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
         const cardType = detectCardType(state.value);
