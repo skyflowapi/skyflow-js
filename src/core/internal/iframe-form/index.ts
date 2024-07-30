@@ -95,6 +95,8 @@ export class IFrameFormElement extends EventEmitter {
 
   validations?: IValidationRule[];
 
+  isCustomValidationFailed: boolean = false;
+
   errorText?: string;
 
   replacePattern?: [RegExp, string];
@@ -416,6 +418,7 @@ export class IFrameFormElement extends EventEmitter {
       }
     }
     if (!resp || !vaildateFileNames) {
+      this.isCustomValidationFailed = false;
       if (!resp) {
         if (this.label) {
           this.errorText = `${parameterizedString(
@@ -498,8 +501,13 @@ export class IFrameFormElement extends EventEmitter {
             resp = false;
         }
 
+        if (resp) {
+          this.isCustomValidationFailed = false;
+        }
+
         if (!resp) {
           this.errorText = this.validations[i].params.error || logs.errorLogs.VALIDATION_FAILED;
+          this.isCustomValidationFailed = true;
           return resp;
         }
       }
@@ -569,6 +577,16 @@ export class IFrameFormElement extends EventEmitter {
     //       }
     //     }
     //   });
+
+    bus.target(this.metaData.clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE, (data) => {
+        if (data.name === this.iFrameName) {
+          this._emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE, {
+            ...data,
+            state: { ...this.getStatus(), error: this.errorText },
+          });
+        }
+      });
 
     bus.target(this.metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR, (data) => {

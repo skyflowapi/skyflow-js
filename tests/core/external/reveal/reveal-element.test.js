@@ -477,6 +477,9 @@ describe("Reveal Element Methods",()=>{
   it("setError method",()=>{
     testRevealElement.setError("errorText");
   });
+  it("setErrorOverride method",()=>{
+    testRevealElement.setErrorOverride("errorText");
+  });
   it("check for isSetError True",()=>{
     expect(testRevealElement.isClientSetError()).toBe(true);
   });
