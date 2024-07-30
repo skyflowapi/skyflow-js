@@ -67,7 +67,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
           AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
           SOURCE_DIR: "dist/v1"
-          DEST_DIR: "v1/"
+          DEST_DIR: "${{ steps.previoustag.outputs.tag }}/v1/"
 
       - name: build node-sdk
         env:
@@ -98,5 +98,15 @@ jobs:
         aws-access-key-id: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
         aws-region: us-east-1
-    - name: invalidate-cf-distribution
-      run: aws cloudfront create-invalidation --distribution-id ${{ secrets.BLITZ_CF_DISTRIBUTION_ID }} --paths "/*"
+    - name: update-cf-distribution
+      
+      run: |
+        export version_number=/${{ steps.previoustag.outputs.tag }}
+        aws cloudfront get-distribution-config --id ${{ secrets.BLITZ_CF_DISTRIBUTION_ID }} > dist-config.json
+        echo "Change the value of the origin Path"
+        jq '.DistributionConfig.Origins.Items[1].OriginPath = env.version_number' dist-config.json >> dist-config-new.json
+        cat dist-config-new.json | python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin)['DistributionConfig']))" > distributionToPushPath
+        echo "Export Etag"
+        etag=$(cat dist-config.json | python3 -c "import sys, json; print(json.load(sys.stdin)['ETag'])")
+        echo $etag
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.BLITZ_CF_DISTRIBUTION_ID }} --paths "/*"
