@@ -1130,6 +1130,48 @@ cardNumber.setError('custom error');
 cardNumber.resetError();
 ```
 
+### Override default error Messages
+
+You can override the default error messages with custom ones by using `setErrorOverride`. This is especially useful to override default error messages in non-English languages.
+
+`setErrorOverride(message: string)`
+
+`setErrorOverride` overrides the default error message. When the value is invalid, the error resets automatically when the value becomes valid.
+
+##### Sample code snippet for setErrorOverride
+
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
+
+const cardNumber = container.create({
+  table: 'pii_fields',
+  column: 'primary_card.card_number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+// override default error.
+cardHolderNameElement.on(Skyflow.EventName.BLUR, state=>{
+  if(state.isEmpty) {
+    //can override the message when the field is required and empty
+    cardHolderNameElement.setErrorOverride('custom error for required'); 
+  } else if(!state.isValid) {
+    //can override the message when the input is invalid
+    cardHolderName.setErrorOverride('custom error for invalid');
+  }
+});
+```
+
+##### Difference between setError and setErrorOverride:
+
+- `setError` sets the error state on the collect element, regardless of the element's state and value (valid or invalid). Once you call `setError`, the element remains in the error state until you call `resetError`. Use `setError` to set the error state on collect element based on server-side validations.
+
+- `setErrorOverride` overrides the default error message. The error message resets automatically once the value becomes valid. Use `setErrorOverride` to change the default error message for a collect element.
+
+**Note**:
+- `setErrorOverride` can only override default error messages.
+- `setErrorOverride` can only be used in BLUR event listener as shown in the earlier example.
+
+
 ### Set and Clear value for Collect Elements (DEV ENV ONLY)
 
 `setValue(value: string)` method is used to set the value of the element. This method will override any previous value present in the element.
@@ -2367,6 +2409,31 @@ cardNumber.setError('custom error');
 // Reset custom error.
 cardNumber.resetError();
 ```
+
+### Override default error messages
+
+You can override the default error messages with custom ones by using `setErrorOverride`. This is especially useful to override default error messages in non-English languages.
+
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
+
+const cardNumber = container.create({
+  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+});
+
+const revealButton = document.getElementById('revealPCIData');
+
+if (revealButton) {
+  revealButton.addEventListener('click', () => {
+    revealContainer.reveal().then((res) => {
+      //handle reveal response
+    }).catch((err) => {
+      cardNumber.setErrorOverride("custom error")
+    });
+  });
+}
+```
+
 ### Set token for Reveal Elements
 
 The `setToken(value: string)` method can be used to set the token of the Reveal Element. If no altText is set, the set token will be displayed on the UI as well. If altText is set, then there will be no change in the UI but the token of the element will be internally updated.
