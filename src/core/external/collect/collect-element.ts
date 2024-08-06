@@ -16,6 +16,7 @@ import EventEmitter from '../../../event-emitter';
 import Bus from '../../../libs/bus';
 import deepClone from '../../../libs/deep-clone';
 import {
+  formatValidations,
   getElements,
   validateAndSetupGroupOptions,
 } from '../../../libs/element-options';
@@ -40,6 +41,7 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
+import { CollectElementInput } from './collect-container';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
@@ -346,13 +348,15 @@ class CollectElement extends SkyflowElement {
     });
   };
 
-  update = (options) => {
+  update = (options: CollectElementInput) => {
     this.#isUpdateCalled = true;
     if (this.#mounted) {
+      options.validations = formatValidations(options.validations);
       this.updateElement({ elementName: this.#group.elementName, ...options });
       this.#isUpdateCalled = false;
     } else if (this.#isUpdateCalled) {
       this.#eventEmitter.on(`${EventName.READY}:${this.#elementId}`, () => {
+        options.validations = formatValidations(options.validations);
         this.updateElement({ elementName: this.#group.elementName, ...options });
         this.#mounted = true;
         this.#isUpdateCalled = false;
