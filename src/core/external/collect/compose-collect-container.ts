@@ -139,7 +139,7 @@ class ComposableContainer extends Container {
     required: false,
   }) => {
     validateCollectElementInput(input, this.#context.logLevel);
-    const validations = formatValidations(input);
+    const validations = formatValidations(input.validations);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
     // let elementName;
     // elementName = `${input.table}.${input.column}:${btoa(uuid())}`;

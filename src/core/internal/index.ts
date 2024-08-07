@@ -380,7 +380,7 @@ export class FrameElement {
           cardMetadata,
         } = data.options;
         if (validations) {
-          this.iFrameFormElement.validations = validations;
+          this.iFrameFormElement.setValidation(validations);
         }
         if (table) {
           this.iFrameFormElement.tableName = table;

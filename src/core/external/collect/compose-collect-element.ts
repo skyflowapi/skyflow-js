@@ -1,4 +1,5 @@
 import EventEmitter from '../../../event-emitter';
+import { formatValidations } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
 import { EventName } from '../../../utils/common';
@@ -63,6 +64,7 @@ class ComposableElement {
   update = (options) => {
     this.#isUpdateCalled = true;
     if (this.#isMounted) {
+      options.validations = formatValidations(options.validations);
       // eslint-disable-next-line no-underscore-dangle
       this.#eventEmitter
         ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
@@ -72,6 +74,7 @@ class ComposableElement {
       this.#isUpdateCalled = false;
     } else if (this.#isUpdateCalled) {
       this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
+        options.validations = formatValidations(options.validations);
         // eslint-disable-next-line no-underscore-dangle
         this.#eventEmitter
           ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
