@@ -884,7 +884,7 @@ describe('collect element validations', () => {
       new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_MIN_AND_MAX_IN_LENGTH_MATCH_RULE, [0], true),
     );
   });
-  it('Missing element in LENGTH_MATCH_RULE', () => {
+  it('Missing element in ELEMENT_VALUE_MATCH_RULE', () => {
     const invalidParams = [
       {
         elements: [
@@ -1120,77 +1120,4 @@ describe('collect element methods', () => {
     expect(ResizeObserver).toHaveBeenCalled();
     expect(testCollectElementProd.resizeObserver.disconnect).toHaveBeenCalled();
   });
-
-  // it('update element in DEV environment', () => {
-  //   const collectElement = new CollectElement(id,
-  //     { elementName,rows },
-  //     {},
-  //     'containerId',
-  //     true,
-  //     destroyCallback,
-  //     updateCallback,
-  //     { logLevel: LogLevel.ERROR, env: Env.DEV },
-  //   );
-
-  //   const testUpdateOptions = {
-  //     table: 'table',
-  //     inputStyles: {
-  //       base: {
-  //         color: 'blue'
-  //       }
-  //     }
-  //   };
-  //   expect(collectElement.isMounted()).toBe(false);
-  //   expect(collectElement.isUpdateCalled()).toBe(false);
-  //   collectElement.update(testUpdateOptions);
-  // });
-
-  // it('update element in DEV environment when element is mounted', () => {
-  //   const collectElement = new CollectElement(id,
-  //     { elementName,rows },
-  //     {},
-  //     'containerId',
-  //     true,
-  //     destroyCallback,
-  //     updateCallback,
-  //     { logLevel: LogLevel.ERROR, env: Env.PROD }
-  //   );
-
-  //   const testUpdateOptions = {
-  //     table: 'table',
-  //     inputStyles: {
-  //       base: {
-  //         color: 'blue'
-  //       }
-  //     }
-  //   };
-
-  //   expect(collectElement.isMounted()).toBe(false);
-  //   expect(collectElement.isUpdateCalled()).toBe(false);
-
-  //   const div = document.createElement('div');
-  //   collectElement.mount(div)
-  //   collectElement.update(testUpdateOptions);
-
-  //   setTimeout(() => {
-  //     expect(collectElement.isMounted()).toBe(true);
-  //     expect(collectElement.updateElement).toBeCalledTimes(1);
-  //     expect(collectElement.isUpdateCalled()).toBe(false);
-  //   }, 0);
-  //   collectElement.unmount();
-  // });
-  
-  // it('update element in PROD environment', () => {
-  //   const testUpdateOptions = {
-  //     table: 'table',
-  //     inputStyles: {
-  //       base: {
-  //         color: 'blue'
-  //       }
-  //     }
-  //   };
-  //   expect(testCollectElementProd.isMounted()).toBe(false);
-  //   expect(testCollectElementProd.isUpdateCalled()).toBe(false);
-  //   testCollectElementProd.update(testUpdateOptions);
-  // });
 });
