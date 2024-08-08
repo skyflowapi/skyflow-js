@@ -14,7 +14,6 @@ import {
   INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES,
   INPUT_STYLES,
 } from '../core/constants';
-import { CollectElementInput } from '../core/external/collect/collect-container';
 import CollectElement from '../core/external/collect/collect-element';
 import {
   IValidationRule, MessageType, ValidationRuleType,
@@ -216,8 +215,7 @@ export const getValueAndItsUnit = (
   return [string.slice(0, index), string.slice(index)];
 };
 
-export const formatValidations = (input: CollectElementInput) => {
-  const validations = input.validations;
+export const formatValidations = (validations?: IValidationRule[]) => {
   if (validations && Array.isArray(validations) && validations.length > 0) {
     validations.forEach((validationRule: IValidationRule, index:number) => {
       if (validationRule && validationRule.type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {

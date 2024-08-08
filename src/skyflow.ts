@@ -273,5 +273,9 @@ class Skyflow {
   static get CardType() {
     return CardType;
   }
+
+  static get Error() {
+    return SkyflowError;
+  }
 }
 export default Skyflow;
