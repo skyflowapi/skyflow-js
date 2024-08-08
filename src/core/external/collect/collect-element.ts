@@ -41,7 +41,6 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
-import { CollectElementInput } from './collect-container';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
@@ -348,7 +347,7 @@ class CollectElement extends SkyflowElement {
     });
   };
 
-  update = (options: CollectElementInput) => {
+  update = (options) => {
     this.#isUpdateCalled = true;
     if (this.#mounted) {
       options.validations = formatValidations(options.validations);
