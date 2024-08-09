@@ -41,7 +41,8 @@ import {
       RevealFrameController.init(names[1]);
     } else if (names[0] === SKYFLOW_FRAME_CONTROLLER) {
       const clientId = names.length > 1 ? names[1] : '';
-      SkyflowFrameController.init(clientId);
+      const trackingStatus: boolean = names.length > 2 && (names[2] === 'true');
+      SkyflowFrameController.init(clientId, trackingStatus);
     } else if (names[0] === FRAME_ELEMENT) {
       printLog(
         parameterizedString(

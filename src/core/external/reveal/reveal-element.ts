@@ -105,7 +105,12 @@ class RevealElement extends SkyflowElement {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.DIV_ID, domElementSelector);
-    pushElementEventWithTimeout(this.#elementId);
+    if (
+      this.#metaData?.clientJSON?.config?.options?.trackMetrics
+      && this.#metaData.clientJSON.config?.options?.trackingKey
+    ) {
+      pushElementEventWithTimeout(this.#elementId);
+    }
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback({
