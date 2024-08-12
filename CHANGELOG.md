@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.36.3] - 2024-08-12
+### Fixed
+- `update` method not working while updating custom validation rules.
+
 ## [1.36.2] - 2024-07-31
 ### Added
 - Custom error message support for prebuilt collect elements.
