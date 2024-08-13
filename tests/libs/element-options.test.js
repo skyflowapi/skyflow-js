@@ -1,11 +1,12 @@
 import { CARDNUMBER_INPUT_FORMAT, CardType, ElementType } from "../../src/core/constants";
-import { formatOptions } from "../../src/libs/element-options";
+import { formatOptions, formatValidations } from "../../src/libs/element-options";
 import { LogLevel } from "../../src/utils/common";
 import SKYFLOW_ERROR_CODE from "../../src/utils/constants";
 import { parameterizedString } from "../../src/utils/logs-helper";
 import logs from "../../src/utils/logs";
 import { validateInputFormatOptions } from "../../src/utils/validators";
 import { DEFAULT_CARD_NUMBER_SEPERATOR } from "../../src/core/constants";
+import ComposableElement from "../../src/core/external/collect/compose-collect-element";
 
 jest.mock('../../src/utils/validators',()=>{
     const originalModule = jest.requireActual('../../src/utils/validators')
@@ -152,5 +153,26 @@ describe('test formatOptions function with format and translation', () => {
         expect(options).toEqual({cardMetadata:{scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]}, "cardSeperator": " ","enableCardIcon": true,"required": false,})
     });
 
+
+});
+
+describe('test formatValidations function with validations', () => {
+    const emitter = jest.fn();
+    emitter.on = jest.fn();
+    const cvvElement = new ComposableElement("test1", emitter, "controller_iframe");
+    const elementValueMatchRule = {
+        type: "ELEMENT_VALUE_MATCH_RULE",
+        params: {
+            element: cvvElement,
+            error: "cvv doesn't match"
+        }
+    }
+    const validations = [
+        elementValueMatchRule
+    ];
+    test("format validation function should return element id added in params", () => {
+        const formattedValidations = formatValidations(validations);
+        expect(formattedValidations[0].params.elementId).toEqual("test1")
+    });
 
 });

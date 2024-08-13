@@ -27,8 +27,22 @@ describe("test composable element", () => {
     _emit: emitter,
   };
   const handler = jest.fn();
+  const iframeName = "controller_iframe";
   const testElement = new ComposableElement("testce1", testEventEmitter);
   const testElement2 = new ComposableElement("testce2", testEventEmitter);
+  const testElement3 = new ComposableElement("testce3", testEventEmitter, iframeName);
+
+  it("Check for iframe name", () => {
+    expect(testElement3.type).toBe(ContainerType.COMPOSABLE);
+    const iframe = testElement3.iframeName();
+    expect(iframe).toBe(iframeName);
+  });
+
+  it("Check for element name", () => {
+    expect(testElement3.type).toBe(ContainerType.COMPOSABLE);
+    const id = testElement3.getID();
+    expect(id).toBe("testce3");
+  });
 
   it("test valid listner - 2 ", () => {
     expect(testElement.type).toBe(ContainerType.COMPOSABLE);

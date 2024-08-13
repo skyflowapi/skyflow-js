@@ -11,14 +11,17 @@ class ComposableElement {
 
   #eventEmitter: EventEmitter;
 
+  #iframeName: string;
+
   type: string = ContainerType.COMPOSABLE;
 
   #isMounted = false;
 
   #isUpdateCalled = false;
 
-  constructor(name, eventEmitter) {
+  constructor(name, eventEmitter, iframeName) {
     this.#elementName = name;
+    this.#iframeName = iframeName;
     this.#eventEmitter = eventEmitter;
     this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
       this.#isMounted = true;
@@ -59,6 +62,14 @@ class ComposableElement {
       delete data.name;
       handler(data);
     });
+  }
+
+  iframeName(): string {
+    return this.#iframeName;
+  }
+
+  getID(): string {
+    return this.#elementName;
   }
 
   update = (options) => {
