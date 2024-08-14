@@ -172,7 +172,7 @@ describe('test formatValidations function with validations', () => {
     ];
     test("format validation function should return element id added in params", () => {
         const formattedValidations = formatValidations(validations);
-        expect(formattedValidations[0].params.elementId).toEqual("test1")
+        expect(formattedValidations[0].params.elementID).toEqual("test1")
     });
 
 });

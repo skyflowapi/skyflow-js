@@ -236,7 +236,7 @@ export const formatValidations = (validations?: IValidationRule[]) => {
           //     SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE, [`${index}`], true,
           //   );
           // }
-          validationRule.params.elementId = validationRule.params.element.getID();
+          validationRule.params.elementID = validationRule.params.element.getID();
           validationRule.params.element = validationRule.params.element.iframeName();
         }
       } else if (validationRule && validationRule.type === ValidationRuleType.REGEX_MATCH_RULE) {
