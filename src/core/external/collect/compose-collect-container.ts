@@ -93,8 +93,10 @@ class ComposableContainer extends Container {
     this.#options = options;
     this.#eventEmitter = new EventEmitter();
 
+    const clientDomain = this.#metaData.clientDomain || '';
     const iframe = iframer({
-      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}`,
+      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${btoa(clientDomain)}:${this.#context.logLevel}`,
+      referrer: clientDomain,
     });
     setAttributes(iframe, {
       src: getIframeSrc(),

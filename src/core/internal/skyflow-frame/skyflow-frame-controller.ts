@@ -28,7 +28,7 @@ import {
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
-import { getVaultBeffeURL } from '../../../utils/helpers';
+import { getValueFromName, getVaultBeffeURL } from '../../../utils/helpers';
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -42,7 +42,11 @@ class SkyflowFrameController {
 
   constructor(clientId) {
     this.#clientId = clientId || '';
-    this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/');
+    const clientDomain = atob(getValueFromName(window.name, 2));
+    // added for testing
+    // eslint-disable-next-line no-console
+    console.log('Client Domain in Skyflow Frame Controller : ', clientDomain);
+    this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
     bus
       .on(
         ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + this.#clientId,
