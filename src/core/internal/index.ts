@@ -135,6 +135,8 @@ export class FrameElement {
 
   private dropdownSelect?: HTMLSelectElement;
 
+  private actualValue = '';
+
   constructor(
     iFrameFormElement: IFrameFormElement,
     options: any,
@@ -616,7 +618,12 @@ export class FrameElement {
         this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
         && this.iFrameFormElement.mask
       ) {
-        const cardType = detectCardType(value);
+        let cardType = '';
+        if (Object.prototype.hasOwnProperty.call(this.options, 'masking')) {
+          cardType = detectCardType(this.actualValue);
+        } else {
+          cardType = detectCardType(value);
+        }
         const cardNumberMask = addSeperatorToCardNumberMask(
           CARD_NUMBER_MASK[cardType],
           this.options?.cardSeperator,
@@ -633,18 +640,122 @@ export class FrameElement {
             translation[key] = { pattern: updatedMask[2][key] };
           });
         }
-        const output = getMaskedOutput(target?.value, updatedMask[0], translation);
-        if (output.length >= value.length) {
-          this.iFrameFormElement.setValue(output, target?.checkValidity());
-        } else if (output === '' && target?.value === '') {
-          this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
+        if (Object.prototype.hasOwnProperty.call(this.options, 'masking')) {
+          const input = target;
+          const cursorPosition = input.selectionStart;
+          const currentValue = input.value;
+          const previousMaskedValue = getMaskedOutput(this.actualValue, mask[0], translation);
+          const isCursorAtEnd = cursorPosition === currentValue.length;
+
+          if (this.actualValue.length === 0 && currentValue.length > 0) {
+            this.actualValue = currentValue;
+          } else if (currentValue.length > previousMaskedValue.length && cursorPosition != null) {
+            const addedChar = currentValue[cursorPosition - 1];
+
+            this.actualValue = this.actualValue.substring(0, cursorPosition - 1)
+                  + addedChar
+                  + this.actualValue.substring(cursorPosition - 1);
+          } else if (cursorPosition != null) {
+            const diff = previousMaskedValue.length - currentValue.length;
+            if (isCursorAtEnd && currentValue.length < mask[0].length) {
+              this.actualValue = this.actualValue.slice(0, -diff);
+            } else {
+              // Handling deletion of character(s) at any position
+              const removedCount = previousMaskedValue.length - currentValue.length;
+              this.actualValue = this.actualValue.substring(0, cursorPosition)
+                      + this.actualValue.substring(cursorPosition + removedCount);
+            }
+          }
+
+          // Recalculate the masked value after changes
+          const newMaskedValue = getMaskedOutput(this.actualValue, mask[0], translation);
+
+          if (cursorPosition != null) {
+            // Adjust cursor position to match the new masked value length
+            const newCursorPosition = isCursorAtEnd
+              ? newMaskedValue.length
+              : cursorPosition + (newMaskedValue.length - previousMaskedValue.length);
+            input.setSelectionRange(newCursorPosition, newCursorPosition);
+          }
+
+          // Set the masked value as the input value
+          if (newMaskedValue.length >= value.length) {
+            this.iFrameFormElement.setValue(newMaskedValue, target?.checkValidity());
+            target.value = this.options.maskChar.repeat(newMaskedValue.length);
+          } else if (newMaskedValue === '' && target?.value === '') {
+            target.value = this.options.maskChar.repeat(newMaskedValue.length);
+            this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
+          } else if (newMaskedValue.length <= mask[0].length) {
+            target.value = this.options.maskChar.repeat(newMaskedValue.length);
+            this.iFrameFormElement.setValue(newMaskedValue, target?.checkValidity());
+          }
         } else {
-          target.value = output;
+          const output = getMaskedOutput(target?.value, updatedMask[0], translation);
+          if (output.length >= value.length) {
+            this.iFrameFormElement.setValue(output, target?.checkValidity());
+          } else if (output === '' && target?.value === '') {
+            this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
+          } else {
+            target.value = output;
+          }
         }
       } else {
-        this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
+        // eslint-disable-next-line no-lonely-if
+        if (Object.prototype.hasOwnProperty.call(this.options, 'masking')) {
+          const input = event.target as HTMLInputElement;
+          const cursorPosition = input.selectionStart;
+          const currentValue = input.value;
+
+          if (currentValue.length > this.actualValue.length && cursorPosition != null) {
+            const diff = currentValue.length - this.actualValue.length;
+
+            if (diff > 1) {
+              const pastedData = currentValue.substring(cursorPosition - diff, cursorPosition);
+              // Modify the pasted data as needed
+              this.actualValue = this.actualValue.substring(0, cursorPosition - diff)
+        + pastedData
+        + this.actualValue.substring(cursorPosition - diff);
+            } else {
+              this.actualValue = this.actualValue.substring(0, cursorPosition - 1)
+        + currentValue[cursorPosition - 1]
+        + this.actualValue.substring(cursorPosition - 1);
+            }
+          } else {
+            const removedCount = this.actualValue.length - currentValue.length;
+            if (removedCount > 0 && cursorPosition !== null) {
+              this.actualValue = this.actualValue.substring(0, cursorPosition)
+          + this.actualValue.substring(cursorPosition + removedCount);
+            }
+          }
+
+          if (Object.prototype.hasOwnProperty.call(this.options, 'maskRange') && Array.isArray(this.options.maskRange)) {
+            input.value = this.maskInputRange(this.actualValue,
+              this.options.maskRange, this.options.maskChar);
+          } else {
+            input.value = this.options.maskChar.repeat(this.actualValue.length);
+          }
+          input.setSelectionRange(cursorPosition, cursorPosition);
+          this.iFrameFormElement.setValue(this.actualValue, target?.checkValidity());
+        } else {
+          this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
+        }
       }
     }
+  };
+
+  maskInputRange = (data, range, maskChar) => {
+    let [start, end] = range;
+
+    start = Math.max(0, start);
+    end = Math.min(data.length, end);
+
+    if (start >= data.length) {
+      return data;
+    }
+    const maskedPart = maskChar.repeat(end - start);
+    const maskedData = data.slice(0, start) + maskedPart + data.slice(end);
+
+    return maskedData;
   };
 
   findPreviousElement = (currentInput) => {
@@ -944,10 +1055,10 @@ export class FrameElement {
         translation[key] = { pattern: mask[2][key] };
       });
       try {
-        const value = this.domInput?.value || this.iFrameFormElement.getValue();
-        output = getMaskedOutput(value, mask[0], translation);
+        // const value = this.domInput?.value || this.iFrameFormElement.getValue();
         if (this.domInput) {
-          this.domInput.value = output;
+          output = getMaskedOutput(this.actualValue, mask[0], translation);
+          this.domInput.value = this.options.maskChar.repeat(output.length);
           if (!this.domInput.getAttribute('maxlength')) { this.domInput.setAttribute('maxlength', mask[0].length); }
         }
       } catch (err) {
