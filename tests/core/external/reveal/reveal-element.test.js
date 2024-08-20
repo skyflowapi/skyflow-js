@@ -57,6 +57,7 @@ jest.mock('../../../../src/core/external/skyflow-container', () => {
 // bus.off = _off;
 // bus.emit = _emit;
 
+const clientDomain = "http://abc.com";
 const metaData = {
   uuid: "123",
   config: {
@@ -67,8 +68,8 @@ const metaData = {
   metaData: {
     vaultID: "vault123",
     vaultURL: "https://sb.vault.dev",
-    clientDomain: "http://abc.com",
   },
+  clientDomain: clientDomain,
 };
 const skyflowConfig = {
   vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
@@ -97,7 +98,8 @@ const clientData = {
   },
   skyflowContainer: {
     renderFile : renderFile
-  }
+  },
+  clientDomain: clientDomain,
 }
 const client = new Client(clientData.client.config, clientData);
 
@@ -158,7 +160,7 @@ describe("Reveal Element Class", () => {
     
 
     expect(document.querySelector("iframe")).toBeTruthy();
-    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR`;
+    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${btoa(clientDomain)}:${containerId}:ERROR`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     
     const eventListenerName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY;
@@ -199,7 +201,7 @@ describe("Reveal Element Class", () => {
     
 
     expect(document.querySelector("iframe")).toBeTruthy();
-    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR`;
+    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${btoa(clientDomain)}:${containerId}:ERROR`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     
     const eventListenerName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY;
@@ -239,7 +241,7 @@ describe("Reveal Element Class", () => {
     
 
     expect(document.querySelector("iframe")).toBeTruthy();
-    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR`;
+    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${btoa(clientDomain)}:${containerId}:ERROR`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     
     const eventListenerName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY;
@@ -295,7 +297,7 @@ describe("Reveal Element Class", () => {
     
 
     expect(document.querySelector("iframe")).toBeTruthy();
-    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR`;
+    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${btoa(clientDomain)}:${containerId}:ERROR`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     
     const eventListenerName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY;
@@ -360,7 +362,7 @@ describe("Reveal Element Class", () => {
     
     groupOnCb({containerId});
     expect(document.querySelector("iframe")).toBeTruthy();
-    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR`;
+    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${btoa(clientDomain)}:${containerId}:ERROR`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     
     expect(testRevealElement.iframeName()).toBe(testIframeName);
@@ -387,7 +389,7 @@ describe("Reveal Element Class", () => {
     
     groupOnCb({containerId});
     expect(document.querySelector("iframe")).toBeTruthy();
-    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR`;
+    const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${btoa(clientDomain)}:${containerId}:ERROR`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     
     expect(testRevealElement.iframeName()).toBe(testIframeName);

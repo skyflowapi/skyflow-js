@@ -76,7 +76,7 @@ class RevealFrame {
 
   constructor(record, context) {
     this.#name = window.name;
-    const clientDomain = atob(getValueFromName(window.name, 2));
+    const clientDomain = document.referrer.split('/').slice(0, 3).join('/') || atob(getValueFromName(window.name, 2));
     // added for testing
     // eslint-disable-next-line no-console
     console.log('Client Domain in Reveal Frame : ', clientDomain);
