@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.36.4] - 2024-08-20
+### Fixed
+- Custom validation rule `ELEMENT_VALUE_MATCH_RULE` not working for Composable Elements.
+
 ## [1.36.3] - 2024-08-12
 ### Fixed
 - `update` method not working while updating custom validation rules.
