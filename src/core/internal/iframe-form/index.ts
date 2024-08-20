@@ -480,7 +480,9 @@ export class IFrameFormElement extends EventEmitter {
             let elementValue;
             if (elementIFrame) {
               if (elementName.startsWith(`${FRAME_ELEMENT}:`)) {
-                const elementId = formatFrameNameToId(elementName);
+                const elementId = elementName.includes('group:')
+                  ? this.validations[i].params.elementID
+                  : formatFrameNameToId(elementName);
                 const collectInputElement = elementIFrame
                   .document.getElementById(elementId) as HTMLInputElement;
                 if (collectInputElement) {

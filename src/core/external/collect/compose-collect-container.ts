@@ -157,7 +157,8 @@ class ComposableContainer extends Container {
       validations,
       elementName,
     });
-    return new ComposableElement(elementName, this.#eventEmitter);
+    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}`;
+    return new ComposableElement(elementName, this.#eventEmitter, controllerIframeName);
   };
 
   #createMultipleElement = (
@@ -187,8 +188,7 @@ class ComposableContainer extends Container {
 
     this.#tempElements.elementName = isSingleElementAPI
       ? elements[0].elementName
-      : `${FRAME_ELEMENT}:group:${btoa(this.#tempElements.name)}`;
-
+      : `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}`;
     if (
       isSingleElementAPI
       && !this.#elements[elements[0].elementName]
