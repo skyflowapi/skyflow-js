@@ -79,8 +79,8 @@ class RevealElement extends SkyflowElement {
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, ELEMENT_TYPES.REVEAL);
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.CONTAINER_NAME, ELEMENT_TYPES.REVEAL);
     this.#iframe = new IFrame(
-      `${FRAME_REVEAL}:${btoa(uuid())}`,
-      { metaData },
+      `${FRAME_REVEAL}:${btoa(uuid())}:${btoa(metaData.clientDomain)}`,
+      metaData,
       this.#containerId,
       this.#context.logLevel,
     );

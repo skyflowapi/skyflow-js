@@ -42,7 +42,7 @@ import {
   addSeperatorToCardNumberMask,
   appendMonthFourDigitYears,
   appendMonthTwoDigitYears,
-  appendZeroToOne, domReady, getMaskedOutput, handleCopyIconClick, styleToString,
+  appendZeroToOne, domReady, getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
 
@@ -60,7 +60,11 @@ export class FrameController {
   private CLASS_NAME = 'FrameController';
 
   constructor(controllerId: string, logLevel: LogLevel) {
-    this.clientDomain = document.referrer.split('/').slice(0, 3).join('/');
+    const clientDomain = atob(getValueFromName(window.name, 2));
+    // added for testing
+    // eslint-disable-next-line no-console
+    console.log('Client Domain in Frame Controller : ', clientDomain);
+    this.clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
     this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain, logLevel);
     this.controllerId = controllerId;
     printLog(

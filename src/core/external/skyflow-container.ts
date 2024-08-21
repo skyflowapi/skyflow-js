@@ -53,12 +53,16 @@ class SkyflowContainer {
 
   #context: Context;
 
+  #clientDomain: string;
+
   constructor(client, context) {
     this.#client = client;
     this.#containerId = this.#client.toJSON()?.metaData?.uuid || '';
     this.#context = context;
+    this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || '';
     const iframe = iframer({
-      name: `${SKYFLOW_FRAME_CONTROLLER}:${this.#containerId}`,
+      name: `${SKYFLOW_FRAME_CONTROLLER}:${this.#containerId}:${btoa(this.#clientDomain)}`,
+      referrer: this.#clientDomain,
     });
     setAttributes(iframe, {
       src: getIframeSrc(),

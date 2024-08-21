@@ -71,8 +71,10 @@ class RevealContainer extends Container {
     this.#containerId = uuid();
     this.#eventEmmiter = new EventEmitter();
     this.#context = context;
+    const clientDomain = this.#metaData.clientDomain || '';
     const iframe = iframer({
-      name: `${REVEAL_FRAME_CONTROLLER}:${this.#containerId}`,
+      name: `${REVEAL_FRAME_CONTROLLER}:${this.#containerId}:${btoa(clientDomain)}`,
+      referrer: clientDomain,
     });
     setAttributes(iframe, {
       src: getIframeSrc(),
