@@ -398,3 +398,18 @@ export const generateUploadFileName = (fileName:string) => {
   const fileExtentsion = fileName?.split('.')?.pop() || '';
   return `${uuid()}${fileExtentsion && `.${fileExtentsion}`}`;
 };
+
+export const getValueFromName = (name: string, index: number) => {
+  const names = name.split(':');
+  const value = names.length > index ? names[index] : '';
+  return value;
+};
+
+export const getAtobValue = (encodedValue: string) => {
+  try {
+    const decodedValue = atob(encodedValue);
+    return decodedValue;
+  } catch (err) {
+    return '';
+  }
+};

@@ -21,11 +21,15 @@ import {
   parameterizedString,
   getElementName,
 } from './utils/logs-helper';
+import { getAtobValue, getValueFromName } from './utils/helpers';
 
 (function init(root: any) {
   try {
-    const names = root.name.split(':');
-    if (names[0] === COLLECT_FRAME_CONTROLLER && names[1] !== undefined) {
+    const frameName = root.name;
+    const frameType = getValueFromName(frameName, 0);
+    const frameId = getValueFromName(frameName, 1);
+    if (frameType === COLLECT_FRAME_CONTROLLER && frameId) {
+      const logLevel = getValueFromName(frameName, 2) || LogLevel.ERROR;
       printLog(
         parameterizedString(
           logs.infoLogs.COLLECT_CONTROLLER_START,
@@ -33,36 +37,37 @@ import {
           'collect container',
         ),
         MessageType.LOG,
-        LogLevel[names[names.length - 1]],
+        LogLevel[logLevel],
       );
       root.Skyflow = FrameController;
-      FrameController.init(names[1], names[2]);
-    } else if (names[0] === REVEAL_FRAME_CONTROLLER && names[1] !== undefined) {
-      RevealFrameController.init(names[1]);
-    } else if (names[0] === SKYFLOW_FRAME_CONTROLLER) {
-      const clientId = names.length > 1 ? names[1] : '';
-      SkyflowFrameController.init(clientId);
-    } else if (names[0] === FRAME_ELEMENT) {
+      FrameController.init(frameId, logLevel);
+    } else if (frameType === REVEAL_FRAME_CONTROLLER && frameId) {
+      RevealFrameController.init(frameId);
+    } else if (frameType === SKYFLOW_FRAME_CONTROLLER) {
+      SkyflowFrameController.init(frameId);
+    } else if (frameType === FRAME_ELEMENT) {
+      const logLevel = getValueFromName(frameName, 4) || LogLevel.ERROR;
       printLog(
         parameterizedString(
           logs.infoLogs.COLLECT_ELEMET_START,
           'index-internal',
-          getElementName(root.name),
+          getElementName(frameName),
         ),
         MessageType.LOG,
-        LogLevel[names[names.length - 1]],
+        LogLevel[logLevel],
       );
       root.Skyflow = FrameElements;
       FrameElements.start();
-    } else if (names[0] === FRAME_REVEAL) {
+    } else if (frameType === FRAME_REVEAL) {
+      const logLevel = getValueFromName(frameName, 3) || LogLevel.ERROR;
       printLog(
         parameterizedString(
           logs.infoLogs.REVEAL_ELEMENT_START,
           'index-internal',
-          atob(names[1]),
+          getAtobValue(frameId),
         ),
         MessageType.LOG,
-        LogLevel[names[names.length - 1]],
+        LogLevel[logLevel],
       );
       RevealFrame.init();
     }
