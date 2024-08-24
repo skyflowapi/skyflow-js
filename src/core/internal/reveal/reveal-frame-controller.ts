@@ -18,6 +18,7 @@ import logs from '../../../utils/logs';
 import {
   Context, IRevealRecord, MessageType,
 } from '../../../utils/common';
+import { getValueFromName, getAtobValue } from '../../../utils/helpers';
 
 const CLASS_NAME = 'RevealFrameController';
 class RevealFrameController {
@@ -33,7 +34,12 @@ class RevealFrameController {
 
   constructor(containerId) {
     this.#containerId = containerId;
-    this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/');
+    const encodedClientDomain = getValueFromName(window.name, 2);
+    const clientDomain = getAtobValue(encodedClientDomain);
+    // added for testing
+    // eslint-disable-next-line no-console
+    console.log('Client Domain in Reveal FrameController : ', clientDomain);
+    this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
     bus
     // .target(this.#clientDomain)
       .emit(

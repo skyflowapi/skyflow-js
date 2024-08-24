@@ -20,9 +20,13 @@ export default class IFrame {
   container?: Element;
 
   constructor(name, metadata, containerId, logLevel) {
-    this.name = `${name}:${containerId}:${logLevel}`;
+    const clientDomain = metadata.clientDomain || '';
+    this.name = `${name}:${containerId}:${logLevel}:${btoa(clientDomain)}`;
     this.metadata = metadata;
-    this.iframe = iframer({ name: this.name });
+    this.iframe = iframer({
+      name: this.name,
+      referrer: clientDomain,
+    });
   }
 
   mount = (domElement, elementId?: string) => {
