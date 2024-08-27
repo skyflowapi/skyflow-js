@@ -21,16 +21,9 @@ export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(
 
 export function formatFrameNameToId(name: string) {
   const arr = name.split(':');
-  if (arr.length > 5) {
-    arr.pop();
-    arr.pop();
-    arr.pop();
-    return arr.join(':');
-  }
   if (arr.length > 2) {
-    arr.pop();
-    arr.pop();
-    return arr.join(':');
+    const id = `${arr[0]}:${arr[1]}:${arr[2]}`;
+    return id;
   }
   return '';
 }
