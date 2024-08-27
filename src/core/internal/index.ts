@@ -63,9 +63,6 @@ export class FrameController {
   constructor(controllerId: string, logLevel: LogLevel) {
     const encodedClientDomain = getValueFromName(window.name, 3);
     const clientDomain = getAtobValue(encodedClientDomain);
-    // added for testing
-    // eslint-disable-next-line no-console
-    console.log('Client Domain in Frame Controller : ', clientDomain);
     this.clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
     this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain, logLevel);
     this.controllerId = controllerId;
