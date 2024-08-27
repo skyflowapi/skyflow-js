@@ -36,9 +36,6 @@ class RevealFrameController {
     this.#containerId = containerId;
     const encodedClientDomain = getValueFromName(window.name, 2);
     const clientDomain = getAtobValue(encodedClientDomain);
-    // added for testing
-    // eslint-disable-next-line no-console
-    console.log('Client Domain in Reveal FrameController : ', clientDomain);
     this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
     bus
     // .target(this.#clientDomain)

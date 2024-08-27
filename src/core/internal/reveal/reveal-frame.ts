@@ -80,9 +80,6 @@ class RevealFrame {
     this.#containerId = getValueFromName(this.#name, 2);
     const encodedClientDomain = getValueFromName(this.#name, 4);
     const clientDomain = getAtobValue(encodedClientDomain);
-    // added for testing
-    // eslint-disable-next-line no-console
-    console.log('Client Domain in Reveal Frame : ', clientDomain);
     this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
     this.#record = record;
     this.#context = context;
