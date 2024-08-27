@@ -22,9 +22,8 @@ export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(
 export function formatFrameNameToId(name: string) {
   const arr = name.split(':');
   if (arr.length > 2) {
-    arr.pop();
-    arr.pop();
-    return arr.join(':');
+    const id = `${arr[0]}:${arr[1]}:${arr[2]}`;
+    return id;
   }
   return '';
 }
@@ -397,4 +396,19 @@ export function getVaultBeffeURL(vaultURL: string): string {
 export const generateUploadFileName = (fileName:string) => {
   const fileExtentsion = fileName?.split('.')?.pop() || '';
   return `${uuid()}${fileExtentsion && `.${fileExtentsion}`}`;
+};
+
+export const getValueFromName = (name: string, index: number) => {
+  const names = name.split(':');
+  const value = names.length > index ? names[index] : '';
+  return value;
+};
+
+export const getAtobValue = (encodedValue: string) => {
+  try {
+    const decodedValue = atob(encodedValue);
+    return decodedValue;
+  } catch (err) {
+    return '';
+  }
 };

@@ -78,8 +78,10 @@ class CollectContainer extends Container {
     this.#context = context;
     this.#eventEmitter = new EventEmitter();
 
+    const clientDomain = this.#metaData.clientDomain || '';
     const iframe = iframer({
-      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}`,
+      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}:${btoa(clientDomain)}`,
+      referrer: clientDomain,
     });
     setAttributes(iframe, {
       src: getIframeSrc(),

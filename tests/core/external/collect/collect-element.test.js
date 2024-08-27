@@ -15,7 +15,7 @@ global.ResizeObserver = jest.fn(() => ({
   observe: jest.fn(),
   disconnect: jest.fn(),
 }));
-
+const clientDomain = "http://abc.com";
 const elementName = 'element:CVV:cGlpX2ZpZWxkcy5wcmltYXJ5X2NhcmQuY3Z2';
 const id = 'id';
 const input = {
@@ -390,7 +390,7 @@ describe('collect element', () => {
       elementName,
       rows,
     },
-    {},
+    { clientDomain: clientDomain},
     {containerId:'containerId',isMounted:false},
     true,
     destroyCallback,
@@ -408,7 +408,7 @@ describe('collect element', () => {
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: `${elementName}:containerId` + ':ERROR',
+      name: `${elementName}:containerId` + `:ERROR:${btoa(clientDomain)}`,
     }, cb2);
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
@@ -424,7 +424,7 @@ describe('collect element', () => {
       elementName,
       rows:composableRows,
     },
-    {},
+    { clientDomain : clientDomain},
     {type:ContainerType.COMPOSABLE, containerId:'containerId',isMounted:true},
     true,
     destroyCallback,
@@ -442,7 +442,7 @@ describe('collect element', () => {
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: `${elementName}:containerId` + ':ERROR',
+      name: `${elementName}:containerId` + `:ERROR:${btoa(clientDomain)}`,
     }, cb2);
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
