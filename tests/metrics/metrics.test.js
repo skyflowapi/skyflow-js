@@ -1,6 +1,6 @@
 import {
   updateMetricObjectValue,
-  pushEventToMixpanel,
+  pushEvent,
   pushElementEventWithTimeout,
   initalizeMetricObject,
   getEventStatus,
@@ -101,7 +101,7 @@ describe('metric object test', () => {
     });
   });
 
-  describe('pushEventToMixpanel', () => {
+  describe('pushEvent', () => {
 
 
     // Mock the fetch function
@@ -111,8 +111,8 @@ describe('metric object test', () => {
       METRIC_OBJECT.records.push({ element_id: 'ElementIDMock', vault_url: 'VaultURLMock', events: ["MOUNTED"] });
 
       const elementId = 'ElementIDMock';
-      await pushEventToMixpanel(elementId);
-      expect(pushEventToMixpanel).toBeTruthy();
+      await pushEvent(elementId);
+      expect(pushEvent).toBeTruthy();
     });
 
     it('should push the event to Mixpanel after a timeout', () => {

@@ -106,6 +106,7 @@ describe('push event', () => {
   let targetSpy;
   let onSpy;
   beforeEach(() => {
+    window.name = "controller:frameId:clientDomain:true";
     window.CoralogixRum = {
       isInited: true,
       init: jest.fn(),
@@ -117,6 +118,111 @@ describe('push event', () => {
     targetSpy.mockReturnValue({
       on,
     });
+  });
+
+  test('before send function in init',(done) => {
+    const event = {
+      log_context: {
+        message: "SDK IFRAME EVENT",
+      },
+    };
+    window.CoralogixRum = {
+      isInited: false,
+      init: ({
+        beforeSend
+      }) => {
+        beforeSend(event)
+      }
+    };
+    expect(event).toBeTruthy();
+    const clientReq = jest.fn(() => Promise.resolve(pushEventResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ 
+      ...clientData.client, 
+      config: {
+        ...clientData.client.config,
+        options: {
+          ...clientData.client?.config?.options,
+          trackingKey: 'aaaaabbbbbcccccdddddeeeeefffffggggg'
+        }
+      },
+      request: clientReq 
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = onSpy.mock.calls[0][1]
+    const data = {
+      event: {
+        element_id: 'element123',
+        container_id: 'container456',
+        vault_url: 'http://example.com',
+        status: "Error",
+        events: ["MOUNTED"]
+      }
+    };
+    onCb(data)
+    setTimeout(() => {
+      expect(onCb).toBeTruthy();
+      done();
+    }, 1000);
+
+  })
+
+  test('init coralogix', (done) => {
+    const event = {
+      log_context: {
+        message: null,
+      },
+    };
+    window.CoralogixRum = {
+      isInited: false,
+      init: ({
+        beforeSend
+      }) => {
+        beforeSend(event)
+      }
+    };
+
+    const clientReq = jest.fn(() => Promise.resolve(pushEventResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ 
+      ...clientData.client, 
+      config: {
+        ...clientData.client.config,
+        options: {
+          ...clientData.client?.config?.options,
+          trackingKey: 'aaaaabbbbbcccccdddddeeeeefffffggggg'
+        }
+      },
+      request: clientReq 
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY);
+    emitCb(clientData);
+
+    const onCb = onSpy.mock.calls[0][1]
+    const data = {
+      event: {
+        element_id: 'element123',
+        container_id: 'container456',
+        vault_url: 'http://example.com',
+        status: "Error",
+        events: ["MOUNTED"]
+      }
+    };
+    onCb(data)
+    setTimeout(() => {
+      expect(onCb).toBeTruthy();
+      done();
+    }, 1000);
   });
 
   test('push event with elementid', (done) => {

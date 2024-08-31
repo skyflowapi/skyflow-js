@@ -52,17 +52,18 @@ export function updateMetricObjectValue(id: string, key: string, value: any) {
 
 export function getEventStatus(metricEvent: MeticsObjectType): string {
   let status = metricEvent.status;
-  if (metricEvent.events.length === 0 || metricEvent.error) {
-    status = METRIC_TYPES.STATUS.FAILED;
-  } else if (metricEvent.events.filter((event) => event.includes(EVENT_TYPES.MOUNTED)).length > 0) {
+  if (metricEvent.events
+    && metricEvent.events.filter((event) => event.includes(EVENT_TYPES.MOUNTED)).length > 0) {
     status = METRIC_TYPES.STATUS.SUCCESS;
   } else if (metricEvent.events.length > 0) {
     status = METRIC_TYPES.STATUS.PARTIAL_RENDER;
+  } else if (metricEvent.events.length === 0 || metricEvent.error) {
+    status = METRIC_TYPES.STATUS.FAILED;
   }
   return status;
 }
 
-export function pushEventToMixpanel(elementId: string) {
+export function pushEvent(elementId: string) {
   const filteredEvent = METRIC_OBJECT.records.filter((event) => event.element_id === elementId);
   if (filteredEvent && filteredEvent[0]) {
     const metricEvent = filteredEvent[0];
@@ -82,6 +83,6 @@ export function pushEventToMixpanel(elementId: string) {
 
 export function pushElementEventWithTimeout(elementID: string) {
   setTimeout(() => {
-    pushEventToMixpanel(elementID);
+    pushEvent(elementID);
   }, 20000);
 }
