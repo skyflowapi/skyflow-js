@@ -53,15 +53,23 @@ class SkyflowFrameController {
       .on(
         ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + this.#clientId,
         (data: any) => {
-          if (!window.CoralogixRum.isInited) {
+          if (!window.CoralogixRum.isInited
+            && this.#client?.config?.options?.trackingKey
+            && this.#client?.config?.options?.trackingKey.length >= 35) {
             window.CoralogixRum.init({
               application: SDKDetails.name,
               public_key: this.#client.config?.options?.trackingKey,
               coralogixDomain: DOMAIN,
               version: SDKDetails.version,
+              beforeSend: (event: any) => {
+                if (event?.log_context?.message && event.log_context.message === SDK_IFRAME_EVENT) {
+                  return event;
+                }
+                return null;
+              },
             });
           }
-          if (data && data.event) {
+          if (data && data.event && window?.CoralogixRum) {
             try {
               window.CoralogixRum.info(SDK_IFRAME_EVENT, data.event);
               printLog(parameterizedString(logs.infoLogs.METRIC_CAPTURE_EVENT),
@@ -251,7 +259,7 @@ class SkyflowFrameController {
   }
 
   static init(clientId) {
-    const trackingStatus = getValueFromName(window.name, 3);
+    const trackingStatus = getValueFromName(window.name, 3) === 'true';
     if (trackingStatus) {
       const scriptTag = document.createElement('script');
       scriptTag.src = CORALOGIX_DOMAIN;
