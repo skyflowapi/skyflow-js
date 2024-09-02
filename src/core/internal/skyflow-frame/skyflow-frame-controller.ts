@@ -14,7 +14,10 @@ import {
   getFileURLFromVaultBySkyflowID,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
-import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../constants';
+import {
+  CORALOGIX_DOMAIN,
+  DEFAULT_FILE_RENDER_ERROR, DOMAIN, ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES, SDK_IFRAME_EVENT,
+} from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
@@ -28,7 +31,8 @@ import {
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
-import { getAtobValue, getValueFromName, getVaultBeffeURL } from '../../../utils/helpers';
+import { getAtobValue, getValueFromName } from '../../../utils/helpers';
+import SDKDetails from '../../../../package.json';
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -49,22 +53,32 @@ class SkyflowFrameController {
       .on(
         ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + this.#clientId,
         (data: any) => {
-          if (data && data.event) {
-            this.pushEvent(data.event)
-              .then((result: any) => {
-                if (result) {
-                  printLog(parameterizedString(logs.infoLogs.METRIC_CAPTURE_EVENT),
-                    MessageType.LOG, this.#context.logLevel);
-                } else {
-                  printLog(parameterizedString(logs.infoLogs.UNKNOWN_RESPONSE_FROM_METRIC_EVENT),
-                    MessageType.LOG, this.#context.logLevel);
+          if (!window.CoralogixRum.isInited
+            && this.#client?.config?.options?.trackingKey
+            && this.#client?.config?.options?.trackingKey.length >= 35) {
+            window.CoralogixRum.init({
+              application: SDKDetails.name,
+              public_key: this.#client.config?.options?.trackingKey,
+              coralogixDomain: DOMAIN,
+              version: SDKDetails.version,
+              beforeSend: (event: any) => {
+                if (event?.log_context?.message && event.log_context.message === SDK_IFRAME_EVENT) {
+                  return event;
                 }
-              })
-              .catch((error) => {
-                printLog(parameterizedString(logs.infoLogs.UNKNOWN_METRIC_CAPTURE_EVENT,
-                  error.toString()),
+                return null;
+              },
+            });
+          }
+          if (data && data.event && window?.CoralogixRum) {
+            try {
+              window.CoralogixRum.info(SDK_IFRAME_EVENT, data.event);
+              printLog(parameterizedString(logs.infoLogs.METRIC_CAPTURE_EVENT),
                 MessageType.LOG, this.#context.logLevel);
-              });
+            } catch (err: any) {
+              printLog(parameterizedString(logs.infoLogs.UNKNOWN_METRIC_CAPTURE_EVENT,
+                err.toString()),
+              MessageType.LOG, this.#context.logLevel);
+            }
           }
         },
       );
@@ -245,6 +259,12 @@ class SkyflowFrameController {
   }
 
   static init(clientId) {
+    const trackingStatus = getValueFromName(window.name, 3) === 'true';
+    if (trackingStatus) {
+      const scriptTag = document.createElement('script');
+      scriptTag.src = CORALOGIX_DOMAIN;
+      document.head.append(scriptTag);
+    }
     return new SkyflowFrameController(clientId);
   }
 
@@ -320,33 +340,6 @@ class SkyflowFrameController {
       } catch (err) {
         reject(err);
       }
-    });
-  }
-
-  pushEvent(event: any) {
-    return new Promise((resolve, reject) => {
-      getAccessToken(this.#clientId).then((authToken) => {
-        this.#client
-          .request({
-            body: event,
-            requestMethod: 'POST',
-            url:
-              `${getVaultBeffeURL(event.vault_url)}/sdk/sdk-metrics`,
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${authToken}`,
-            },
-
-          })
-          .then((response: any) => {
-            resolve(response);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      }).catch((err) => {
-        reject(err);
-      });
     });
   }
 }

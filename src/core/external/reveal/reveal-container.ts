@@ -64,9 +64,21 @@ class RevealContainer extends Container {
 
   type:string = ContainerType.REVEAL;
 
-  constructor(metaData, skyflowElements, context) {
+  constructor(metaData, skyflowElements, context, options = {}) {
     super();
-    this.#metaData = metaData;
+    this.#metaData = {
+      ...metaData,
+      clientJSON: {
+        ...metaData.clientJSON,
+        config: {
+          ...metaData.clientJSON?.config,
+          options: {
+            ...metaData.clientJSON?.config?.options,
+            ...options,
+          },
+        },
+      },
+    };
     this.#skyflowElements = skyflowElements;
     this.#containerId = uuid();
     this.#eventEmmiter = new EventEmitter();
@@ -91,7 +103,7 @@ class RevealContainer extends Container {
           clientJSON: {
             ...metaData.clientJSON,
             config: {
-              ...metaData.clientJSON.config,
+              ...metaData.clientJSON?.config,
             },
             context,
           },
