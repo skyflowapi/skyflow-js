@@ -145,6 +145,7 @@ describe('push event', () => {
           trackingKey: 'aaaaabbbbbcccccdddddeeeeefffffggggg'
         }
       },
+      toJSON:toJson,
       request: clientReq 
     }));
 
@@ -198,6 +199,7 @@ describe('push event', () => {
           trackingKey: 'aaaaabbbbbcccccdddddeeeeefffffggggg'
         }
       },
+      toJSON:toJson,
       request: clientReq 
     }));
 
@@ -441,7 +443,8 @@ const detokenizeErrorResponse = {
 const toJson = jest.fn(() => ({
   config: {},
   metaData: {
-    uuid: ''
+    uuid: '',
+    sdkVersion:'skyflow-react-js@1.2.3'
   }
 }))
 
