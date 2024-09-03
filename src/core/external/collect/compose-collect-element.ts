@@ -1,4 +1,5 @@
 import EventEmitter from '../../../event-emitter';
+import { formatValidations } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
 import { EventName } from '../../../utils/common';
@@ -12,14 +13,17 @@ class ComposableElement {
 
   #eventEmitter: EventEmitter;
 
+  #iframeName: string;
+
   type: string = ContainerType.COMPOSABLE;
 
   #isMounted = false;
 
   #isUpdateCalled = false;
 
-  constructor(name, eventEmitter) {
+  constructor(name, eventEmitter, iframeName) {
     this.#elementName = name;
+    this.#iframeName = iframeName;
     this.#eventEmitter = eventEmitter;
     this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
       this.#isMounted = true;
@@ -62,9 +66,18 @@ class ComposableElement {
     });
   }
 
+  iframeName(): string {
+    return this.#iframeName;
+  }
+
+  getID(): string {
+    return this.#elementName;
+  }
+
   update = (options) => {
     this.#isUpdateCalled = true;
     if (this.#isMounted) {
+      options.validations = formatValidations(options.validations);
       // eslint-disable-next-line no-underscore-dangle
       this.#eventEmitter
         ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
@@ -74,6 +87,7 @@ class ComposableElement {
       this.#isUpdateCalled = false;
     } else if (this.#isUpdateCalled) {
       this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
+        options.validations = formatValidations(options.validations);
         // eslint-disable-next-line no-underscore-dangle
         this.#eventEmitter
           ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {

@@ -1,0 +1,35 @@
+name: Semgrep
+
+# Run workflow each time code is pushed to your repository.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep
+        run: |
+          semgrep --config .semgreprules/customRule.yml --config auto --severity ERROR --sarif . > results.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          # Path to SARIF file relative to the root of the repository
+          sarif_file: results.sarif
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-results
+          path: results.sarif

@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.36.4] - 2024-08-20
+### Fixed
+- Custom validation rule `ELEMENT_VALUE_MATCH_RULE` not working for Composable Elements.
+
+## [1.36.3] - 2024-08-12
+### Fixed
+- `update` method not working while updating custom validation rules.
+
+## [1.36.2] - 2024-07-31
+### Added
+- Custom error message support for prebuilt collect elements.
+
+### Fixed
+- Input error for card number when pasting a valid VISA card number by clearing the existing AMEX card number
+- Remove format from copy text in card number element in JS SDK
+- Hide copy icon when data is invalid in collect elements in JS SDK
+- Change MasterCard to Mastercard in card brand choice dropdown
+
+## [1.36.1] - 2024-07-02
+### Fixed
+- Restrict file types to upload
+
 ## [1.36.0] - 2024-05-08
 ### Added
 - card brand choice support for card number element.

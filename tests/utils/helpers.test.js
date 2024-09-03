@@ -182,7 +182,7 @@ describe('test file validation', () => {
 
     invalidFiles.forEach(invalidFile => {
       try {
-        fileValidation(invalidFile)
+        fileValidation(invalidFile, false, {})
       } catch(err) {
         expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE.description))
       }      
@@ -198,7 +198,7 @@ describe('test file validation', () => {
       type: "image/jpeg",
       webkitRelativePath: ""
     }
-    expect(fileValidation(file)).toBe(true);
+    expect(fileValidation(file, false, {})).toBe(true);
   })
   test('invalid file size', () => {
     const file = {
@@ -210,26 +210,64 @@ describe('test file validation', () => {
       webkitRelativePath: ""
     }
     try {
-      fileValidation(file);
+      fileValidation(file, false, {});
     } catch(err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description))
     }
   })
   test('no file selected', () => {
     const file = {}
-      const isValid = fileValidation(file);
+      const isValid = fileValidation(file, false, {});
       expect(isValid).toBe(true);
   })
 
   test('no file selected for required file input', () => {
     const file = {}
     try {
-      fileValidation(file, true);
+      fileValidation(file, true, file);
     } catch(err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED.description))
     }
   })
+  test('invalid file selected for required file input', () => {
+    const file = {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.pdf",
+      size: 74570648,
+      type: "application/pdf",
+      webkitRelativePath: ""
+    }
+    try {
+      fileValidation(file, true, {allowedFileType: ['.png']});
+    } catch(err) {
+      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE.description)
+    }
+  })
+  test('valid file type with allowedfiletye options', () => {
+    const file = {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.jpg",
+      size: 48848,
+      type: "image/jpeg",
+      webkitRelativePath: ""
+    }
+    expect(fileValidation(file, false, {allowedFileType: ['.jpeg']})).toBe(true);
+  })
+  test('valid file type with allowedfiletye options case 2', () => {
+    const file = {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.jpg",
+      size: 48848,
+      type: "image/jpeg",
+      webkitRelativePath: ""
+    }
+    expect(fileValidation(file, false, {allowedFileType: ['image/jpeg']})).toBe(true);
+  })
 })
+
 
 describe('test JSX style object conversion function',()=>{
   test('valid JSX style test 1', () => {

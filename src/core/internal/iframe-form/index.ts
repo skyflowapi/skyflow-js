@@ -95,6 +95,8 @@ export class IFrameFormElement extends EventEmitter {
 
   validations?: IValidationRule[];
 
+  isCustomValidationFailed: boolean = false;
+
   errorText?: string;
 
   replacePattern?: [RegExp, string];
@@ -118,6 +120,8 @@ export class IFrameFormElement extends EventEmitter {
   cardType: string = CardType.DEFAULT;
 
   preserveFileName: boolean = true;
+
+  allowedFileType: any;
 
   constructor(name: string, label: string, metaData, context: Context, skyflowID?: string) {
     super();
@@ -400,7 +404,9 @@ export class IFrameFormElement extends EventEmitter {
       resp = validateExpiryYear(value, this.format);
     } else if (this.fieldType === ElementType.FILE_INPUT) {
       try {
-        resp = fileValidation(value, this.state.isRequired);
+        resp = fileValidation(value, this.state.isRequired, {
+          allowedFileType: this.allowedFileType,
+        });
       } catch (err) {
         resp = false;
       }
@@ -412,6 +418,7 @@ export class IFrameFormElement extends EventEmitter {
       }
     }
     if (!resp || !vaildateFileNames) {
+      this.isCustomValidationFailed = false;
       if (!resp) {
         if (this.label) {
           this.errorText = `${parameterizedString(
@@ -475,7 +482,9 @@ export class IFrameFormElement extends EventEmitter {
             let elementValue;
             if (elementIFrame) {
               if (elementName.startsWith(`${FRAME_ELEMENT}:`)) {
-                const elementId = formatFrameNameToId(elementName);
+                const elementId = elementName.includes('group:')
+                  ? this.validations[i].params.elementID
+                  : formatFrameNameToId(elementName);
                 const collectInputElement = elementIFrame
                   .document.getElementById(elementId) as HTMLInputElement;
                 if (collectInputElement) {
@@ -496,10 +505,15 @@ export class IFrameFormElement extends EventEmitter {
             resp = false;
         }
 
+        if (resp) {
+          this.isCustomValidationFailed = false;
+        }
+
         if (!resp) {
           this.errorText = this.validations[i].params.error || parameterizedString(
             logs.errorLogs.VALIDATION_FAILED,
           );
+          this.isCustomValidationFailed = true;
           return resp;
         }
       }
@@ -569,6 +583,16 @@ export class IFrameFormElement extends EventEmitter {
     //       }
     //     }
     //   });
+
+    bus.target(this.metaData.clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE, (data) => {
+        if (data.name === this.iFrameName) {
+          this._emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE, {
+            ...data,
+            state: { ...this.getStatus(), error: this.errorText },
+          });
+        }
+      });
 
     bus.target(this.metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR, (data) => {
@@ -899,14 +923,13 @@ export class IFrameForm {
     if (state.isRequired) {
       onFocusChange(false);
     }
-
     try {
-      fileValidation(state.value, state.isRequired);
+      fileValidation(state.value, state.isRequired, fileElement);
     } catch (err) {
       return Promise.reject(err);
     }
 
-    const validatedFileState = fileValidation(state.value, state.isRequired);
+    const validatedFileState = fileValidation(state.value, state.isRequired, fileElement);
 
     if (!validatedFileState) {
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true));

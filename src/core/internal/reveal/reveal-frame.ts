@@ -23,7 +23,8 @@ import {
 import logs from '../../../utils/logs';
 import { Context, MessageType } from '../../../utils/common';
 import {
-  constructMaskTranslation, getMaskedOutput, handleCopyIconClick, styleToString,
+  constructMaskTranslation,
+  getAtobValue, getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
 
 const { getType } = require('mime');
@@ -45,6 +46,8 @@ class RevealFrame {
   #record: any;
 
   #containerId: string;
+
+  #clientDomain: string;
 
   #inputStyles!: object;
 
@@ -74,7 +77,10 @@ class RevealFrame {
 
   constructor(record, context) {
     this.#name = window.name;
-    this.#containerId = this.#name.split(':')[2];
+    this.#containerId = getValueFromName(this.#name, 2);
+    const encodedClientDomain = getValueFromName(this.#name, 4);
+    const clientDomain = getAtobValue(encodedClientDomain);
+    this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
     this.#record = record;
     this.#context = context;
     this.isRevealCalled = false;
@@ -203,7 +209,7 @@ class RevealFrame {
         sub,
       );
 
-    bus.target(document.referrer.split('/').slice(0, 3).join('/')).on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, (data) => {
+    bus.target(this.#clientDomain).on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, (data) => {
       if (this.#name === data.name) {
         if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
       }
@@ -300,35 +306,36 @@ class RevealFrame {
   }
 
   private updateRevealElementOptions() {
-    bus.target(document.referrer.split('/').slice(0, 3).join('/')).on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, (data) => {
-      if (data.name === this.#name) {
-        if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT) {
-          if (data.updatedValue) {
+    bus.target(this.#clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, (data) => {
+        if (data.name === this.#name) {
+          if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT) {
+            if (data.updatedValue) {
+              this.#record = {
+                ...this.#record,
+                altText: data.updatedValue,
+              };
+            } else {
+              delete this.#record.altText;
+            }
+
+            this.updateDataView();
+          } else if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN) {
             this.#record = {
               ...this.#record,
-              altText: data.updatedValue,
+              token: data.updatedValue,
             };
-          } else {
-            delete this.#record.altText;
+            this.updateDataView();
+          } else if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS) {
+            const updatedValue = data.updatedValue as object;
+            this.#record = {
+              ...this.#record,
+              ...updatedValue,
+            };
+            this.updateElementProps();
           }
-
-          this.updateDataView();
-        } else if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN) {
-          this.#record = {
-            ...this.#record,
-            token: data.updatedValue,
-          };
-          this.updateDataView();
-        } else if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS) {
-          const updatedValue = data.updatedValue as object;
-          this.#record = {
-            ...this.#record,
-            ...updatedValue,
-          };
-          this.updateElementProps();
         }
-      }
-    });
+      });
   }
 
   private updateElementProps() {

@@ -21,7 +21,7 @@ import logs from '../../utils/logs';
 import { LogLevel, MessageType } from '../../utils/common';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-styles';
 import { ContainerType } from '../../skyflow';
-import { getContainerType } from '../../utils/helpers';
+import { getContainerType, getValueFromName } from '../../utils/helpers';
 
 const CLASS_NAME = 'FrameElements';
 export default class FrameElements {
@@ -55,17 +55,18 @@ export default class FrameElements {
 
   // called on iframe loaded im html file
   static start = () => {
-    const names = window.name.split(':');
-    const logLevel = LogLevel[names[names.length - 1]];
+    const frameName = window.name;
+    const level = getValueFromName(frameName, 4) || LogLevel.ERROR;
+    const logLevel = LogLevel[level];
     printLog(parameterizedString(logs.infoLogs.EMIT_COLLECT_ELEMENT_FRAME_READY,
-      CLASS_NAME, getElementName(window.name)), MessageType.LOG,
+      CLASS_NAME, getElementName(frameName)), MessageType.LOG,
     logLevel);
     bus.emit(
-      ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + names[3],
-      { name: window.name },
+      ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + getValueFromName(frameName, 3),
+      { name: frameName },
       (group: any) => {
         printLog(parameterizedString(logs.infoLogs.COLLECT_FRAME_READY_CB,
-          CLASS_NAME, getElementName(window.name)), MessageType.LOG,
+          CLASS_NAME, getElementName(frameName)), MessageType.LOG,
         logLevel);
         FrameElements.group = group;
         if (FrameElements.frameElements) {
@@ -79,10 +80,11 @@ export default class FrameElements {
 
   // called by IFrameForm
   static init = (getOrCreateIFrameFormElement: Function, metaData) => {
-    const names = window.name.split(':');
-    const logLevel = LogLevel[names[names.length - 1]];
+    const frameName = window.name;
+    const level = getValueFromName(frameName, 4) || LogLevel.ERROR;
+    const logLevel = LogLevel[level];
     printLog(parameterizedString(logs.infoLogs.INSIDE__COLLECT_ELEMENT_INIT,
-      CLASS_NAME, getElementName(window.name)), MessageType.LOG,
+      CLASS_NAME, getElementName(frameName)), MessageType.LOG,
     logLevel);
     FrameElements.frameElements = new FrameElements(
       getOrCreateIFrameFormElement,
@@ -92,10 +94,11 @@ export default class FrameElements {
   };
 
   setup = () => {
-    const names = window.name.split(':');
-    const logLevel = LogLevel[names[names.length - 1]];
+    const frameName = window.name;
+    const level = getValueFromName(frameName, 4) || LogLevel.ERROR;
+    const logLevel = LogLevel[level];
     printLog(parameterizedString(logs.infoLogs.CREATING_COLLECT_ELEMENT_FORM,
-      CLASS_NAME, getElementName(window.name)), MessageType.LOG,
+      CLASS_NAME, getElementName(frameName)), MessageType.LOG,
     logLevel);
     this.#domForm = document.createElement('form');
     this.#domForm.action = '#';

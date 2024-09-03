@@ -114,7 +114,7 @@ describe("Reveal Frame Class",()=>{
     // reveal response ready
     const onRevealResponseName = on.mock.calls[0][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+undefined);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
     const onRevealResponseCb = on.mock.calls[0][1];
     onRevealResponseCb({"1815-6223-1073-1425":"card_value"})
 
@@ -150,7 +150,7 @@ describe("Reveal Frame Class",()=>{
     // reveal response ready
     const onRevealResponseName = on.mock.calls[0][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+undefined);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
     const onRevealResponseCb = on.mock.calls[0][1];
     onRevealResponseCb({"1815":"1234"})
   });
@@ -188,7 +188,7 @@ describe("Reveal Frame Class",()=>{
     // reveal response ready
     const onRevealResponseName = on.mock.calls[0][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+undefined);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
     const onRevealResponseCb = on.mock.calls[0][1];
     onRevealResponseCb({});
 
@@ -588,7 +588,7 @@ describe("Reveal Frame Class",()=>{
     emitCb(data);
 
     const eventRenderResponse = on.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'');
     const callback = on.mock.calls[3][1];
     callback(
       { url: "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
@@ -634,7 +634,7 @@ describe("Reveal Frame Class",()=>{
     emitCb(data);
 
     const eventRenderResponse = on.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'');
     const callback = on.mock.calls[3][1];
     callback({
       url:  "https://url?response-content-disposition=inline%3B%20filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
@@ -658,7 +658,7 @@ describe("Reveal Frame Class",()=>{
     emitCb(data);
 
     const eventRenderResponse = on.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'');
     const callback = on.mock.calls[3][1];
     callback({
       url:  "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
@@ -692,7 +692,7 @@ describe("Reveal Frame Class",()=>{
     emitCb(data);
 
     const eventRenderResponse = on.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'');
     const callback = on.mock.calls[3][1];
     callback({
       url: "https://fileurl?filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
@@ -727,7 +727,7 @@ describe("Reveal Frame Class",()=>{
     emitCb(data);
 
     const eventRenderResponse = on.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'undefined');
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'');
     const callback = on.mock.calls[3][1];
     callback({
       error: DEFAULT_FILE_RENDER_ERROR,

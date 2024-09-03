@@ -42,7 +42,8 @@ import {
   addSeperatorToCardNumberMask,
   appendMonthFourDigitYears,
   appendMonthTwoDigitYears,
-  appendZeroToOne, domReady, getMaskedOutput, handleCopyIconClick, styleToString,
+  appendZeroToOne,
+  domReady, getAtobValue, getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
 
@@ -60,7 +61,9 @@ export class FrameController {
   private CLASS_NAME = 'FrameController';
 
   constructor(controllerId: string, logLevel: LogLevel) {
-    this.clientDomain = document.referrer.split('/').slice(0, 3).join('/');
+    const encodedClientDomain = getValueFromName(window.name, 3);
+    const clientDomain = getAtobValue(encodedClientDomain);
+    this.clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
     this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain, logLevel);
     this.controllerId = controllerId;
     printLog(
@@ -147,6 +150,9 @@ export class FrameElement {
     this.iFrameFormElement.state.name = options.column;
     if (Object.prototype.hasOwnProperty.call(options, 'preserveFileName')) {
       this.iFrameFormElement.preserveFileName = options?.preserveFileName;
+    }
+    if (Object.prototype.hasOwnProperty.call(options, 'allowedFileType')) {
+      this.iFrameFormElement.allowedFileType = options?.allowedFileType;
     }
   }
 
@@ -287,6 +293,12 @@ export class FrameElement {
     });
 
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, (state) => {
+      if (!state.isEmpty && state.isValid && this.domCopy) {
+        this.domCopy.style.display = 'block';
+      } else if (this.domCopy) {
+        this.domCopy.style.display = 'none';
+      }
+
       // On CHANGE set isEmpty to false
       state.isEmpty = !state.value;
 
@@ -297,7 +309,7 @@ export class FrameElement {
         (<HTMLInputElement> this.domInput).checked = this.options.value === state.value;
       }
       if (this.options.enableCopy) {
-        this.copyText = state.value;
+        this.copyText = this.iFrameFormElement.getUnformattedValue();
       }
       if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name) {
         const cardType = detectCardType(state.value);
@@ -371,7 +383,7 @@ export class FrameElement {
           cardMetadata,
         } = data.options;
         if (validations) {
-          this.iFrameFormElement.validations = validations;
+          this.iFrameFormElement.setValidation(validations);
         }
         if (table) {
           this.iFrameFormElement.tableName = table;
@@ -434,6 +446,38 @@ export class FrameElement {
       }
       this.updateStyleClasses(data.state);
     });
+
+    this.iFrameFormElement.on(
+      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE,
+      (data) => {
+        if (
+          this.domError && data.customErrorText
+          && !this.iFrameFormElement.doesClientHasError
+        ) {
+          if (data.state.isEmpty && data.state.isRequired) {
+            this.domError.innerText = data.customErrorText;
+          } else if (!data.isEmpty && !data.state.isValid) {
+            if (
+              data.state.error
+              && !this.iFrameFormElement.validations?.length
+            ) {
+              this.domError.innerText = data.customErrorText;
+            } else if (
+              data.state.error
+              && this.iFrameFormElement.validations?.length
+              && this.iFrameFormElement.isCustomValidationFailed
+            ) {
+              this.domError.innerText = data.state.error;
+            } else {
+              this.domError.innerText = data.customErrorText;
+            }
+          } else if (data.state.isEmpty || data.state.isValid) {
+            this.domError.innerText = '';
+          }
+        }
+        this.updateStyleClasses(data.state);
+      },
+    );
 
     // this.setupInputField();
     this.updateOptions(this.options);
@@ -559,14 +603,32 @@ export class FrameElement {
       const target = event.target as HTMLInputElement;
       const { mask } = this.iFrameFormElement;
       const value = this.domInput?.value || this.iFrameFormElement.getValue();
+      let updatedMask;
       if (mask) {
+        updatedMask = [...mask];
+      }
+      if (
+        this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
+        && this.iFrameFormElement.mask
+      ) {
+        const cardType = detectCardType(value);
+        const cardNumberMask = addSeperatorToCardNumberMask(
+          CARD_NUMBER_MASK[cardType],
+          this.options?.cardSeperator,
+        );
+        updatedMask[0] = cardNumberMask[0];
+        updatedMask[1] = null;
+        updatedMask[2] = cardNumberMask[1];
+        this.iFrameFormElement.setMask(cardNumberMask as string[]);
+      }
+      if (updatedMask) {
         const translation = {};
-        if (mask[2]) {
-          Object.keys(mask[2]).forEach((key) => {
-            translation[key] = { pattern: mask[2][key] };
+        if (updatedMask[2]) {
+          Object.keys(updatedMask[2]).forEach((key) => {
+            translation[key] = { pattern: updatedMask[2][key] };
           });
         }
-        const output = getMaskedOutput(target?.value, mask[0], translation);
+        const output = getMaskedOutput(target?.value, updatedMask[0], translation);
         if (output.length >= value.length) {
           this.iFrameFormElement.setValue(output, target?.checkValidity());
         } else if (output === '' && target?.value === '') {

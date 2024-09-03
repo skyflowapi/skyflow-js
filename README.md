@@ -5,7 +5,7 @@ Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal
 
 [![CI](https://img.shields.io/static/v1?label=CI&message=passing&color=green?style=plastic&logo=github)](https://github.com/skyflowapi/skyflow-js/actions)
 [![GitHub release](https://img.shields.io/github/v/release/skyflowapi/skyflow-js.svg)](https://www.npmjs.com/package/skyflow-js)
-[![License](https://img.shields.io/github/license/skyflowapi/skyflow-android)](https://github.com/skyflowapi/skyflow-js/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/skyflowapi/skyflow-android)](https://github.com/skyflowapi/skyflow-js/blob/main/LICENSE)
 
 # Table of Contents
 - [**Including Skyflow.js**](#including-skyflowjs) 
@@ -168,7 +168,7 @@ const options = {
 skyflowClient.insert(records, options);
 ```
 
-An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/pure-js.html) of an insert call: 
+An [example](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/pure-js.html) of an insert call: 
 ```javascript
 skyflowClient.insert({
   records: [
@@ -487,7 +487,7 @@ container.collect(options);
 
 ### End to end example of collecting data with Skyflow Elements
 
-**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/skyflow-elements.html)**
+**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/skyflow-elements.html)**
 
 ```javascript
 //Step 1
@@ -918,7 +918,7 @@ const elementValueMatchRule = {
 }
 ```
 
-The Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/custom-validations.html) for using custom validations:
+The Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/custom-validations.html) for using custom validations:
 
 ```javascript
 /*
@@ -1025,7 +1025,7 @@ state : {
 `Note:`
 values of SkyflowElements will be returned in element state object only when `env` is  `DEV`,  else it is empty string i.e, '', but in case of CARD_NUMBER type element when the `env` is `PROD` for all the card types except AMEX, it will return first eight digits, for AMEX it will return first six digits and rest all digits in masked format.
 
-##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/collect-element-listeners.html) for using listeners 
+##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/collect-element-listeners.html) for using listeners 
 ```javascript
 // Create Skyflow client.
 const skyflowClient = Skyflow.init({
@@ -1129,6 +1129,48 @@ cardNumber.setError('custom error');
 // Reset custom error.
 cardNumber.resetError();
 ```
+
+### Override default error Messages
+
+You can override the default error messages with custom ones by using `setErrorOverride`. This is especially useful to override default error messages in non-English languages.
+
+`setErrorOverride(message: string)`
+
+`setErrorOverride` overrides the default error message. When the value is invalid, the error resets automatically when the value becomes valid.
+
+##### Sample code snippet for setErrorOverride
+
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
+
+const cardNumber = container.create({
+  table: 'pii_fields',
+  column: 'primary_card.card_number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+// override default error.
+cardHolderNameElement.on(Skyflow.EventName.BLUR, state=>{
+  if(state.isEmpty) {
+    //can override the message when the field is required and empty
+    cardHolderNameElement.setErrorOverride('custom error for required'); 
+  } else if(!state.isValid) {
+    //can override the message when the input is invalid
+    cardHolderName.setErrorOverride('custom error for invalid');
+  }
+});
+```
+
+##### Difference between setError and setErrorOverride:
+
+- `setError` sets the error state on the collect element, regardless of the element's state and value (valid or invalid). Once you call `setError`, the element remains in the error state until you call `resetError`. Use `setError` to set the error state on collect element based on server-side validations.
+
+- `setErrorOverride` overrides the default error message. The error message resets automatically once the value becomes valid. Use `setErrorOverride` to change the default error message for a collect element.
+
+**Note**:
+- `setErrorOverride` can only override default error messages.
+- `setErrorOverride` can only be used in BLUR event listener as shown in the earlier example.
+
 
 ### Set and Clear value for Collect Elements (DEV ENV ONLY)
 
@@ -1886,7 +1928,7 @@ Note: If you do not provide a redaction type, RedactionType.PLAIN_TEXT is the de
 
 skyflow.detokenize(records);
 ```
-An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/pure-js.html) of a detokenize call: 
+An [example](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/pure-js.html) of a detokenize call: 
 
 ```javascript
 skyflow.detokenize({
@@ -1973,7 +2015,7 @@ data = {
  ],
 };
 ```
-[Example usage (Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/get-pure-js.html)
+[Example usage (Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/get-pure-js.html)
 
 ```javascript
 skyflow.get({
@@ -2018,7 +2060,7 @@ Example response
    ]
 }
 ```
-[Example usage (Unique column values)](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/get-pure-js.html)
+[Example usage (Unique column values)](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/get-pure-js.html)
 
 ```javascript
 skyflow.get({
@@ -2058,7 +2100,7 @@ Sample response:
 }
 ```
 
-[Example usage (Fetch tokens using Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/get-pure-js.html)
+[Example usage (Fetch tokens using Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/get-pure-js.html)
 ```javascript
 skyflow.get({
  records: [
@@ -2250,7 +2292,7 @@ container
 
 ### End to end example of all steps
 
-**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/skyflow-elements.html)**
+**[Sample Code:](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/skyflow-elements.html)**
 ```javascript
 // Step 1.
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
@@ -2367,6 +2409,31 @@ cardNumber.setError('custom error');
 // Reset custom error.
 cardNumber.resetError();
 ```
+
+### Override default error messages
+
+You can override the default error messages with custom ones by using `setErrorOverride`. This is especially useful to override default error messages in non-English languages.
+
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
+
+const cardNumber = container.create({
+  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+});
+
+const revealButton = document.getElementById('revealPCIData');
+
+if (revealButton) {
+  revealButton.addEventListener('click', () => {
+    revealContainer.reveal().then((res) => {
+      //handle reveal response
+    }).catch((err) => {
+      cardNumber.setErrorOverride("custom error")
+    });
+  });
+}
+```
+
 ### Set token for Reveal Elements
 
 The `setToken(value: string)` method can be used to set the token of the Reveal Element. If no altText is set, the set token will be displayed on the UI as well. If altText is set, then there will be no change in the UI but the token of the element will be internally updated.
@@ -2966,7 +3033,7 @@ const records = [
 skyflowClient.delete(records);
 ```
 
-An [example](https://github.com/skyflowapi/skyflow-js/blob/master/samples/using-script-tag/delete-pure-js.html) of delete call:
+An [example](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/delete-pure-js.html) of delete call:
 
 ```javascript
 skyflowClient.delete({

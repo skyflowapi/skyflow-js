@@ -14,8 +14,8 @@ import {
   INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES,
   INPUT_STYLES,
 } from '../core/constants';
-import { CollectElementInput } from '../core/external/collect/collect-container';
 import CollectElement from '../core/external/collect/collect-element';
+import ComposableElement from '../core/external/collect/compose-collect-element';
 import {
   IValidationRule, MessageType, ValidationRuleType,
 } from '../utils/common';
@@ -220,8 +220,7 @@ export const getValueAndItsUnit = (
   return [string.slice(0, index), string.slice(index)];
 };
 
-export const formatValidations = (input: CollectElementInput) => {
-  const validations = input.validations;
+export const formatValidations = (validations?: IValidationRule[]) => {
   if (validations && Array.isArray(validations) && validations.length > 0) {
     validations.forEach((validationRule: IValidationRule, index:number) => {
       if (validationRule && validationRule.type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {
@@ -230,17 +229,18 @@ export const formatValidations = (input: CollectElementInput) => {
         }
         if (validationRule.params
           && (validationRule.params.element == null
-            || !(validationRule.params.element instanceof CollectElement))) {
+            || !(validationRule.params.element instanceof CollectElement || ComposableElement))) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
         }
         if (validationRule.params
           && validationRule.params.element
-          && (validationRule.params.element instanceof CollectElement)) {
+          && (validationRule.params.element instanceof CollectElement || ComposableElement)) {
           // if (!validationRule.params.element.isMounted()) {
           //   throw new SkyflowError(
           //     SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE, [`${index}`], true,
           //   );
           // }
+          validationRule.params.elementID = validationRule.params.element.getID();
           validationRule.params.element = validationRule.params.element.iframeName();
         }
       } else if (validationRule && validationRule.type === ValidationRuleType.REGEX_MATCH_RULE) {
@@ -395,6 +395,9 @@ export const formatOptions = (elementType, options, logLevel) => {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_FILETYPE_ARRAY,
           [], true);
       }
+    }
+    if (Object.prototype.hasOwnProperty.call(options, 'allowedFileType')) {
+      formattedOptions = { ...formattedOptions, allowedFileType: options.allowedFileType };
     }
   }
 

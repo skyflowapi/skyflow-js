@@ -80,7 +80,7 @@ class RevealElement extends SkyflowElement {
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.CONTAINER_NAME, ELEMENT_TYPES.REVEAL);
     this.#iframe = new IFrame(
       `${FRAME_REVEAL}:${btoa(uuid())}`,
-      { metaData },
+      metaData,
       this.#containerId,
       this.#context.logLevel,
     );
@@ -268,6 +268,15 @@ class RevealElement extends SkyflowElement {
 
   getRecordData() {
     return this.#recordData;
+  }
+
+  setErrorOverride(clientErrorText: string) {
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, {
+      name: this.#iframe.name,
+      isTriggerError: true,
+      clientErrorText,
+    });
+    this.#isClientSetError = true;
   }
 
   setError(clientErrorText:string) {

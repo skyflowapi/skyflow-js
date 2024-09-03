@@ -78,8 +78,10 @@ class CollectContainer extends Container {
     this.#context = context;
     this.#eventEmitter = new EventEmitter();
 
+    const clientDomain = this.#metaData.clientDomain || '';
     const iframe = iframer({
-      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}`,
+      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}:${btoa(clientDomain)}`,
+      referrer: clientDomain,
     });
     setAttributes(iframe, {
       src: getIframeSrc(),
@@ -124,7 +126,7 @@ class CollectContainer extends Container {
     required: false,
   }) => {
     validateCollectElementInput(input, this.#context.logLevel);
-    const validations = formatValidations(input);
+    const validations = formatValidations(input.validations);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
     const elementGroup = {
       rows: [
