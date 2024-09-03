@@ -53,7 +53,8 @@ class SkyflowFrameController {
       .on(
         ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + this.#clientId,
         (data: any) => {
-          if (!window.CoralogixRum.isInited
+          if (window?.CoralogixRum
+            && !window.CoralogixRum.isInited
             && this.#client?.config?.options?.trackingKey
             && this.#client?.config?.options?.trackingKey.length >= 35) {
             window.CoralogixRum.init({
