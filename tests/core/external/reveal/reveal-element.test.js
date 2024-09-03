@@ -75,6 +75,7 @@ const skyflowConfig = {
   vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
   vaultURL: 'https://testurl.com',
   getBearerToken: jest.fn(),
+  options: { trackMetrics: true, trackingKey: "key" }
 };
 let controller = new SkyflowContainer(client,{
   logLevel:LogLevel.DEBUG,
