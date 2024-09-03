@@ -14,6 +14,7 @@ import SKYFLOW_ERROR_CODE from '../constants';
 import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
 import properties from '../../properties';
 import uuid from '../../libs/uuid';
+import SDKDetails from '../../../package.json';
 
 const { getType } = require('mime');
 
@@ -280,6 +281,17 @@ export function getSdkVersionName(metaDataVersion: string, sdkData: SdkInfo): st
     return `${metaDataVersion}`;
   }
   return `${sdkData.sdkName}@${sdkData.sdkVersion}`;
+}
+export function getSDKNameAndVersion(metaData?: string): SdkInfo {
+  const nameAndVersion: SdkInfo = {
+    sdkName: SDKDetails.name,
+    sdkVersion: SDKDetails.version,
+  };
+  if (metaData && metaData !== '' && metaData.split('@').length > 1) {
+    nameAndVersion.sdkName = metaData.split('@')[0];
+    nameAndVersion.sdkVersion = metaData.split('@')[1];
+  }
+  return nameAndVersion;
 }
 export function getOSDetails(userAgentString: string): OSInfo {
   let os: string | null = null;

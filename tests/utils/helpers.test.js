@@ -24,7 +24,8 @@ import {
   checkAndSetForCustomUrl,
   domReady,
   vaildateFileName,
-  generateUploadFileName
+  generateUploadFileName,
+  getSDKNameAndVersion,
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -704,4 +705,24 @@ describe('test generateUploadFileName function',()=>{
     expect(generateUploadFileName(null)).toEqual(`${mockUUID}`);
   });
 
+});
+
+describe('getSDKNameAndVersion', () => {
+  it('should correctly identify js sdk name when we pass metadata version as empty string', () => {
+    const sdkData = {
+      sdkName: 'skyflow-js',
+      sdkVersion: '1.29.9',
+    };
+    const result = getSDKNameAndVersion('');
+    expect(result.sdkName).toEqual(sdkData.sdkName);
+  });
+
+  it('should correctly identify react sdk name when we pass metadata version as skyflow-react-js', () => {
+    const sdkData = {
+      sdkName: 'skyflow-react-js',
+      sdkVersion: '1.2.3',
+    };
+    const result = getSDKNameAndVersion(`skyflow-react-js@1.2.3`);
+    expect(result).toEqual(sdkData);
+  });
 });

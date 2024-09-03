@@ -31,8 +31,7 @@ import {
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
-import { getAtobValue, getValueFromName } from '../../../utils/helpers';
-import SDKDetails from '../../../../package.json';
+import { getAtobValue, getSDKNameAndVersion, getValueFromName } from '../../../utils/helpers';
 
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController {
@@ -57,11 +56,12 @@ class SkyflowFrameController {
             && !window.CoralogixRum.isInited
             && this.#client?.config?.options?.trackingKey
             && this.#client?.config?.options?.trackingKey.length >= 35) {
+            const sdkMetaData = getSDKNameAndVersion(this.#client?.toJSON()?.metaData?.sdkVersion);
             window.CoralogixRum.init({
-              application: SDKDetails.name,
+              application: sdkMetaData.sdkName,
               public_key: this.#client.config?.options?.trackingKey,
               coralogixDomain: DOMAIN,
-              version: SDKDetails.version,
+              version: sdkMetaData.sdkVersion,
               beforeSend: (event: any) => {
                 if (event?.log_context?.message && event.log_context.message === SDK_IFRAME_EVENT) {
                   return event;
