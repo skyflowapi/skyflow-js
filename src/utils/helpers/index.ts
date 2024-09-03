@@ -14,6 +14,7 @@ import SKYFLOW_ERROR_CODE from '../constants';
 import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
 import properties from '../../properties';
 import uuid from '../../libs/uuid';
+import SDKDetails from '../../../package.json';
 
 const { getType } = require('mime');
 
@@ -284,6 +285,17 @@ export function getSdkVersionName(metaDataVersion: string, sdkData: SdkInfo): st
   }
   return `${sdkData.sdkName}@${sdkData.sdkVersion}`;
 }
+export function getSDKNameAndVersion(metaData?: string): SdkInfo {
+  const nameAndVersion: SdkInfo = {
+    sdkName: SDKDetails.name,
+    sdkVersion: SDKDetails.version,
+  };
+  if (metaData && metaData !== '' && metaData.split('@').length > 1) {
+    nameAndVersion.sdkName = metaData.split('@')[0];
+    nameAndVersion.sdkVersion = metaData.split('@')[1];
+  }
+  return nameAndVersion;
+}
 export function getOSDetails(userAgentString: string): OSInfo {
   let os: string | null = null;
   let version: string | null = null;
@@ -393,9 +405,6 @@ export function checkAndSetForCustomUrl(config: ISkyflow) {
   }
 }
 
-export function getVaultBeffeURL(vaultURL: string): string {
-  return vaultURL.replace('vault', 'vault-beffe');
-}
 export const generateUploadFileName = (fileName:string) => {
   const fileExtentsion = fileName?.split('.')?.pop() || '';
   return `${uuid()}${fileExtentsion && `.${fileExtentsion}`}`;

@@ -72,6 +72,8 @@ class CollectElement extends SkyflowElement {
 
   #group: any;
 
+  #metaData: any;
+
   #eventEmitter: EventEmitter = new EventEmitter();
 
   #groupEmitter: EventEmitter | undefined = undefined;
@@ -108,6 +110,7 @@ class CollectElement extends SkyflowElement {
     this.containerId = container.containerId;
     this.#elementId = elementId;
     this.#context = context;
+    this.#metaData = metaData;
     this.#group = validateAndSetupGroupOptions(elementGroup);
     this.#elements = getElements(elementGroup);
     this.#isSingleElementAPI = isSingleElementAPI;
@@ -200,7 +203,12 @@ class CollectElement extends SkyflowElement {
         });
     });
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.DIV_ID, domElement);
-    pushElementEventWithTimeout(this.#elementId);
+    if (
+      this.#metaData?.clientJSON?.config?.options?.trackMetrics
+      && this.#metaData.clientJSON.config.options.trackingKey
+    ) {
+      pushElementEventWithTimeout(this.#elementId);
+    }
     const sub = (data, callback) => {
       if (data.name === this.#iframe.name) {
         callback(this.#group);

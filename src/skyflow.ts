@@ -181,7 +181,7 @@ class Skyflow {
           skyflowContainer: this.#skyflowContainer,
         },
         this.#skyflowElements,
-        { logLevel: this.#logLevel });
+        { logLevel: this.#logLevel }, options);
         printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);

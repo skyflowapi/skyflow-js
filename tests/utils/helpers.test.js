@@ -24,8 +24,8 @@ import {
   checkAndSetForCustomUrl,
   domReady,
   vaildateFileName,
-  getVaultBeffeURL,
-  generateUploadFileName
+  generateUploadFileName,
+  getSDKNameAndVersion,
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -705,16 +705,24 @@ describe('test generateUploadFileName function',()=>{
     expect(generateUploadFileName(null)).toEqual(`${mockUUID}`);
   });
 
-
-
-
 });
 
-describe('test vault beffe url helper', () => {
-  test("test with vault string in vault url", () => {
-    expect(getVaultBeffeURL("test.vault.com")).toBe("test.vault-beffe.com")
-  })
-  test("test without vault string in vault url", () => {
-    expect(getVaultBeffeURL("test.com")).toBe("test.com")
-  })
-})
+describe('getSDKNameAndVersion', () => {
+  it('should correctly identify js sdk name when we pass metadata version as empty string', () => {
+    const sdkData = {
+      sdkName: 'skyflow-js',
+      sdkVersion: '1.29.9',
+    };
+    const result = getSDKNameAndVersion('');
+    expect(result.sdkName).toEqual(sdkData.sdkName);
+  });
+
+  it('should correctly identify react sdk name when we pass metadata version as skyflow-react-js', () => {
+    const sdkData = {
+      sdkName: 'skyflow-react-js',
+      sdkVersion: '1.2.3',
+    };
+    const result = getSDKNameAndVersion(`skyflow-react-js@1.2.3`);
+    expect(result).toEqual(sdkData);
+  });
+});
