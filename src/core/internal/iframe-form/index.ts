@@ -435,7 +435,7 @@ export class IFrameFormElement extends EventEmitter {
       if (!vaildateFileNames) {
         this.errorText = this.containerType === ContainerType.COLLECT
           ? parameterizedString(
-            logs.errorLogs.INVALID_FILE_NAMES,
+            logs.errorLogs.INVALID_FILE_NAME,
           )
           : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
         return vaildateFileNames;
