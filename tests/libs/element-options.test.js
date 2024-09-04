@@ -113,7 +113,7 @@ describe('test formatOptions function with format and translation', () => {
             formatOptions(ElementType.FILE_INPUT,{required:true,preserveFileName:undefined},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
-            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description,'preserveFileName'))
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, 'preserveFileName'))
             done();
         }
     });
@@ -123,7 +123,7 @@ describe('test formatOptions function with format and translation', () => {
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:true},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
-            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description);
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description));
             done();
         }
     });
@@ -133,7 +133,7 @@ describe('test formatOptions function with format and translation', () => {
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:[]},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
-            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description);
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description));
             done();
         }
     });
@@ -143,7 +143,7 @@ describe('test formatOptions function with format and translation', () => {
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:{scheme:{}}},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
-            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_SCHEME.description);
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_SCHEME.description));
             done();
         }
     });

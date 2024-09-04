@@ -14,7 +14,8 @@ import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateInputFormatOptions, validateRevealElementRecords } from '../../../utils/validators';
 import {
-  CONTROLLER_STYLES, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
+  CONTROLLER_STYLES, ELEMENT_EVENTS_TO_CONTAINER,
+  ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
 } from '../../constants';
 import Container from '../common/container';
 import RevealElement from './reveal-element';
@@ -204,7 +205,7 @@ class RevealContainer extends Container {
                 this.#mountedRecords = [];
                 this.#revealRecords = [];
                 if (revealData.error) {
-                  printLog(logs.errorLogs.FAILED_REVEAL, MessageType.ERROR,
+                  printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL), MessageType.ERROR,
                     this.#context.logLevel);
 
                   reject(revealData.error);

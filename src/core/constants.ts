@@ -15,7 +15,6 @@ import copyIcon from '../../assets/copyIcon.svg';
 import successIcon from '../../assets/path.svg';
 import dropDownIcon from '../../assets/drop-down.svg';
 import cartesBancairesIcon from '../../assets/carter-banceris.svg';
-
 import logs from '../utils/logs';
 
 export const SESSION_ID = 'session_id';

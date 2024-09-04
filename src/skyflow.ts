@@ -110,12 +110,18 @@ class Skyflow {
               this.#bearerToken = bearerToken;
               callback({ authToken: this.#bearerToken });
             } else {
-              printLog(logs.errorLogs.INVALID_BEARER_TOKEN, MessageType.ERROR, this.#logLevel);
-              callback({ error: logs.errorLogs.INVALID_BEARER_TOKEN });
+              printLog(parameterizedString(
+                logs.errorLogs.INVALID_BEARER_TOKEN,
+              ), MessageType.ERROR, this.#logLevel);
+              callback({
+                error: parameterizedString(
+                  logs.errorLogs.INVALID_BEARER_TOKEN,
+                ),
+              });
             }
           })
           .catch((err) => {
-            printLog(logs.errorLogs.BEARER_TOKEN_REJECTED, MessageType.ERROR,
+            printLog(parameterizedString(logs.errorLogs.BEARER_TOKEN_REJECTED), MessageType.ERROR,
               this.#logLevel);
             callback({ error: err });
           });
@@ -198,9 +204,11 @@ class Skyflow {
 
       default:
         if (!type) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONTAINER_TYPE, [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONTAINER_TYPE,
+            [], true);
         }
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTAINER_TYPE, [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTAINER_TYPE,
+          [type], true);
     }
   }
 

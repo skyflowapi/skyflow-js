@@ -307,7 +307,8 @@ class ComposableContainer extends Container {
 
     const { layout } = this.#options;
     if (sum(layout) !== this.#elementsList.length) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISMATCH_ELEMENT_COUNT_LAYOUT_SUM, [], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISMATCH_ELEMENT_COUNT_LAYOUT_SUM,
+        [], true);
     }
     let count = 0;
     layout.forEach((rowCount, index) => {
@@ -358,13 +359,15 @@ class ComposableContainer extends Container {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
       if (!this.#isMounted) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED, [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED,
+          [], true);
       }
 
       const containerElements = getElements(this.#tempElements);
       containerElements.forEach((element:any) => {
         if (!element?.isMounted) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED,
+            [], true);
         }
       });
 
@@ -374,7 +377,8 @@ class ComposableContainer extends Container {
       });
 
       if (options && options.tokens && typeof options.tokens !== 'boolean') {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT,
+          [], true);
       }
       if (options?.additionalFields) {
         validateAdditionalFieldsInCollect(options.additionalFields);

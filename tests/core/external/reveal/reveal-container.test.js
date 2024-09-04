@@ -8,6 +8,7 @@ import { LogLevel,Env } from "../../../../src/utils/common";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
+import { parameterizedString } from "../../../../src/utils/logs-helper";
 // import { JSDOM } from 'jsdom';
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
@@ -115,7 +116,7 @@ describe("Reveal Container Class", () => {
       });
       done('should throw error');
     } catch (error) {
-      expect(error.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description);
+      expect(error.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description));
       done();
     }
   });

@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { CardType } from '../../src/core/constants';
+import { CardType, SDK_VERSION } from '../../src/core/constants';
 import SKYFLOW_ERROR_CODE from '../../src/utils/constants';
 import {
   detectCardType,
@@ -124,7 +124,7 @@ describe('insert records validation', () => {
     try {
       validateInsertRecords({ records: {} })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_INSERT.description);
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_INSERT.description));
     }
   })
 
@@ -156,7 +156,7 @@ describe('insert records validation', () => {
     try {
       validateInsertRecords({ records: [{ table: 'abc', fields: {} }] }, { tokens: '123' })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_INSERT.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_INSERT.description))
     }
   })
 })
@@ -166,7 +166,7 @@ describe('insert additional records validation', () => {
     try {
       validateAdditionalFieldsInCollect()
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_IN_ADDITIONAL_FIELDS.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_IN_ADDITIONAL_FIELDS.description))
     }
   })
 
@@ -174,7 +174,7 @@ describe('insert additional records validation', () => {
     try {
       validateAdditionalFieldsInCollect({ records: {} })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_ADDITIONAL_FIELDS.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_ADDITIONAL_FIELDS.description))
     }
   })
 
@@ -182,7 +182,7 @@ describe('insert additional records validation', () => {
     try {
       validateAdditionalFieldsInCollect({ records: [] })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_IN_ADDITIONAL_FIELDS.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_IN_ADDITIONAL_FIELDS.description))
     }
   })
 
@@ -253,7 +253,7 @@ describe('detokenize input validation', () => {
     try {
       validateDetokenizeInput()
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_DETOKENIZE.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_DETOKENIZE.description))
     }
   })
 
@@ -261,7 +261,7 @@ describe('detokenize input validation', () => {
     try {
       validateDetokenizeInput({ records: {} })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_DETOKENIZE.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_DETOKENIZE.description))
     }
   })
 
@@ -269,7 +269,7 @@ describe('detokenize input validation', () => {
     try {
       validateDetokenizeInput({ records: [] })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_DETOKENIZE.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_DETOKENIZE.description))
     }
   })
 
@@ -296,7 +296,7 @@ describe('getById input validation', () => {
     try {
       validateGetByIdInput({ records: {} })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_GETBYID.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_GETBYID.description))
     }
   })
 
@@ -329,7 +329,7 @@ describe('getById input validation', () => {
     try {
       validateGetByIdInput({ records: [{ ids: [{}] }] })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_TYPE_IN_GETBYID.description, 0))
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_TYPE_IN_GETBYID.description,0))
     }
   })
 
@@ -389,7 +389,7 @@ describe('get input validation', () => {
     try {
       validateGetInput({ records: {} })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_GET.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_GET.description))
     }
   })
 
@@ -430,7 +430,7 @@ describe('get input validation', () => {
     try {
       validateGetInput({ records: [{ ids: ['123'] }] })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_GET.description, 0))
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_GET.description,0))
     }
   })
 
@@ -454,7 +454,7 @@ describe('get input validation', () => {
     try {
       validateGetInput({ records: [{ ids: ['123'], table: 'test' }] })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_REDACTION_IN_GET.description, 0))
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_REDACTION_IN_GET.description,0))
     }
   })
 
@@ -480,7 +480,7 @@ describe('get input validation for fetching unique column values',() => {
     try {
       validateGetInput({ records: [{ table: 'table', columnValues: {}, redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COLUMN_VALUES_IN_GET.description, 0))
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COLUMN_VALUES_IN_GET.description ,0))
     }
   })
   test('empty column values', () => {
@@ -511,7 +511,7 @@ describe('get input validation for fetching unique column values',() => {
     try {
       validateGetInput({ records: [{columnValues: ['123'], redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_GET.description, 0))
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_GET.description,0))
     }
   })
 
@@ -535,7 +535,7 @@ describe('get input validation for fetching unique column values',() => {
     try {
       validateGetInput({ records: [{ columnValues: ['123'], table: 'test', columnName: 'columnName' }] })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_REDACTION_IN_GET.description, 0))
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_REDACTION_IN_GET.description,0))
     }
   })
 
@@ -572,7 +572,7 @@ describe('get input validation for fetching unique column values',() => {
     try {
       validateGetInput({ records: [{ columnValues: [], columnName:'cloumn', table: 'test', redaction: RedactionType.PLAIN_TEXT }] })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_RECORD_COLUMN_VALUES.description, 0))
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_RECORD_COLUMN_VALUES.description,  0))
     }
   })
   test('missing ids or columnValues in get', () => {
@@ -586,7 +586,7 @@ describe('get input validation for fetching unique column values',() => {
     try {
       validateGetInput({ records: [{ table: 'test', redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName', columnValues: undefined }] })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_RECORD_COLUMN_VALUE.description, 0))
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_RECORD_COLUMN_VALUE.description,0))
     }
   })
   test('ids and columnName both specified in get', () => {
@@ -600,7 +600,7 @@ describe('get input validation for fetching unique column values',() => {
     try {
       validateGetInput({ records: [{ table: 'test', redaction: RedactionType.PLAIN_TEXT, columnName: 'columnName' }] })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_RECORD_COLUMN_VALUE.description, 0))
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_RECORD_COLUMN_VALUE.description,0))
     }
   })
 })
@@ -693,7 +693,7 @@ describe('skyflow init validation', () => {
     try {
       validateInitConfig({})
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.VAULTID_IS_REQUIRED.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.VAULTID_IS_REQUIRED.description))
     }
   })
 
@@ -701,7 +701,7 @@ describe('skyflow init validation', () => {
     try {
       validateInitConfig({ vaultID: null })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_VAULTID_IN_INIT.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_VAULTID_IN_INIT.description))
     }
   })
 
@@ -709,7 +709,7 @@ describe('skyflow init validation', () => {
     try {
       validateInitConfig({ vaultID: '123' })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.VAULTURL_IS_REQUIRED.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.VAULTURL_IS_REQUIRED.description))
     }
   })
 
@@ -717,14 +717,14 @@ describe('skyflow init validation', () => {
     try {
       validateInitConfig({ vaultID: '123', vaultURL: 'url' })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_VAULTURL_IN_INIT.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_VAULTURL_IN_INIT.description))
     }
   })
   test('empty vaultURL', () => {
     try {
       validateInitConfig({ vaultID: '123', vaultURL: null })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT.description))
     }
   })
 
@@ -732,7 +732,7 @@ describe('skyflow init validation', () => {
     try {
       validateInitConfig({ vaultID: '123', vaultURL: 'https://abc.com' })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED.description))
     }
   })
 
@@ -744,7 +744,7 @@ describe("validate collect element input", () => {
     try {
       validateCollectElementInput({})
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_TYPE.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_TYPE.description))
     }
   })
 
@@ -752,7 +752,7 @@ describe("validate collect element input", () => {
     try {
       validateCollectElementInput({ type: null })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_TYPE.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_TYPE.description))
     }
   })
 })
@@ -760,21 +760,21 @@ test("invalid skyflow id", () => {
   try {
     validateCollectElementInput({type: 'CARD_NUMBER', skyflowID: undefined })
   } catch (err) {
-    expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT.description)
+    expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT.description))
   }
 })
 test("invalid skyflow id", () => {
   try {
     validateCollectElementInput({type: 'FILE_INPUT', skyflowID: undefined, altText: 'text' })
   } catch (err) {
-    expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT.description)
+    expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT.description))
   }
 })
 test("missing skyflow id for file type element", () => {
   try {
     validateCollectElementInput({type: 'FILE_INPUT' })
   } catch (err) {
-    expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_IN_COLLECT.description)
+    expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_IN_COLLECT.description))
   }
 })
 
@@ -783,7 +783,7 @@ describe("validate reveal element input", () => {
     try {
       validateRevealElementRecords([{}])
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_TOKEN_KEY_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TOKEN_KEY_REVEAL.description))
     }
   })
 
@@ -791,14 +791,14 @@ describe("validate reveal element input", () => {
     try {
       validateRevealElementRecords([{ token: null }])
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_TOKEN_ID_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_TOKEN_ID_REVEAL.description))
     }
   })
   test("invalid token type", () => {
     try {
       validateRevealElementRecords([{ token: {} }])
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID_REVEAL.description))
     }
   })
 
@@ -806,7 +806,7 @@ describe("validate reveal element input", () => {
     try {
       validateRevealElementRecords([{ token: '123', label: {} }])
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_LABEL_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_LABEL_REVEAL.description))
     }
   })
 
@@ -814,7 +814,7 @@ describe("validate reveal element input", () => {
     try {
       validateRevealElementRecords([{ token: '123', altText: {} }])
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_REVEAL.description))
     }
   })
 
@@ -822,7 +822,7 @@ describe("validate reveal element input", () => {
     try {
       validateRevealElementRecords([{ token: '123', redaction: 'invalid' }])
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL.description))
     }
   })
 
@@ -833,7 +833,7 @@ describe("validate file render element input", () => {
     try {
       validateRenderElementRecord({})
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_KEY_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_KEY_REVEAL.description))
     }
   })
 
@@ -841,14 +841,14 @@ describe("validate file render element input", () => {
     try {
       validateRenderElementRecord({ skyflowID: undefined })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_REVEAL.description))
     }
   })
   test("invalid skyflow id type", () => {
     try {
       validateRenderElementRecord({ skyflowID: {} })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_SKYFLOW_ID_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOW_ID_REVEAL.description))
     }
   })
 
@@ -856,7 +856,7 @@ describe("validate file render element input", () => {
     try {
       validateRenderElementRecord({ skyflowID: '123', column: {} })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COLUMN_NAME_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COLUMN_NAME_REVEAL.description))
     }
   })
 
@@ -864,7 +864,7 @@ describe("validate file render element input", () => {
     try {
       validateRenderElementRecord({ skyflowID: '123', column: null })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_COLUMN_NAME_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_COLUMN_NAME_REVEAL.description))
     }
   })
 
@@ -872,14 +872,14 @@ describe("validate file render element input", () => {
     try {
       validateRenderElementRecord({ skyflowID: '123', table: 'table' })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_COLUMN_KEY_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_COLUMN_KEY_REVEAL.description))
     }
   })
   test("invalid TABLE type", () => {
     try {
       validateRenderElementRecord({ skyflowID: '123', column: 'COLUMN', table: {} })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_TABLE_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_REVEAL.description))
     }
   })
 
@@ -887,7 +887,7 @@ describe("validate file render element input", () => {
     try {
       validateRenderElementRecord({ skyflowID: '123', column: 'column', table: null })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_TABLE_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_TABLE_REVEAL.description))
     }
   })
 
@@ -895,14 +895,21 @@ describe("validate file render element input", () => {
     try {
       validateRenderElementRecord({ skyflowID: '123', column: 'col' })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_TABLE_KEY_REVEAL.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_KEY_REVEAL.description))
     }
   })
   test("ID and token both specified", () => {
     try {
       validateRenderElementRecord({ skyflowID: '123', token: 'token' })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.SKYFLOW_IDS_AND_TOKEN_BOTH_SPECIFIED.description)
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.SKYFLOW_IDS_AND_TOKEN_BOTH_SPECIFIED.description))
+    }
+  })
+  test("invalid altText", () => {
+    try {
+      validateRenderElementRecord({ altText: [], column: 'col', skyflowID: '121232', table: 'table' })
+    } catch (err) {
+      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_RENDER.description))
     }
   })
 
@@ -940,21 +947,21 @@ describe("validate upsert options in collect", () => {
     try {
       validateUpsertOptions({})
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_UPSERT_OPTION_TYPE.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UPSERT_OPTION_TYPE.description))
     }
   })
   test('empty upsert array', () => {
     try {
       validateUpsertOptions([])
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_UPSERT_OPTIONS_ARRAY.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_UPSERT_OPTIONS_ARRAY.description))
     }
   })
   test('invalid upsert object type', () => {
     try {
       validateUpsertOptions([undefined])
     } catch (err) {
-      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UPSERT_OPTION_OBJECT_TYPE.description, 0))
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UPSERT_OPTION_OBJECT_TYPE.description,0))
     }
   })
   test('missing table key', () => {
@@ -1003,19 +1010,19 @@ describe('test validateComposableContainerOptions',()=>{
     try{
       validateComposableContainerOptions();
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS.description));
     }
 
     try{
       validateComposableContainerOptions(undefined);
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS.description));
     }
 
     try{
       validateComposableContainerOptions(null);
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS.description));
     }
   });
 
@@ -1023,13 +1030,13 @@ describe('test validateComposableContainerOptions',()=>{
     try{
       validateComposableContainerOptions(true);
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_CONTAINER_OPTIONS.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_CONTAINER_OPTIONS.description));
     }
 
     try{
       validateComposableContainerOptions(123);
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_CONTAINER_OPTIONS.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_CONTAINER_OPTIONS.description));
     }
   });
 
@@ -1037,7 +1044,7 @@ describe('test validateComposableContainerOptions',()=>{
     try{
       validateComposableContainerOptions({});
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_LAYOUT_KEY.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_LAYOUT_KEY.description));
     }
   });
 
@@ -1045,13 +1052,13 @@ describe('test validateComposableContainerOptions',()=>{
     try{
       validateComposableContainerOptions({layout:undefined});
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description));
     }
 
     try{
       validateComposableContainerOptions({layout:null});
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description));
     }
   });
 
@@ -1059,13 +1066,13 @@ describe('test validateComposableContainerOptions',()=>{
     try{
       validateComposableContainerOptions({layout:'invalid'});
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description));
     }
 
     try{
       validateComposableContainerOptions({layout:true});
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description));
     }
   });
 
@@ -1073,7 +1080,7 @@ describe('test validateComposableContainerOptions',()=>{
     try{
       validateComposableContainerOptions({layout:[]});
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.EMPTY_COMPOSABLE_LAYOUT_ARRAY.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_COMPOSABLE_LAYOUT_ARRAY.description));
     }
   });
 
@@ -1081,7 +1088,7 @@ describe('test validateComposableContainerOptions',()=>{
     try{
       validateComposableContainerOptions({layout:[1,'122']});
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COMPOSABLE_LAYOUT_TYPE.description));
     }
   });
 
@@ -1089,7 +1096,7 @@ describe('test validateComposableContainerOptions',()=>{
     try{
       validateComposableContainerOptions({layout:[2,-1]});
     }catch(err){
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.NEGATIVE_VALUES_COMPOSABLE_LAYOUT.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.NEGATIVE_VALUES_COMPOSABLE_LAYOUT.description));
     }
   });
 
@@ -1100,7 +1107,7 @@ describe('delete input records validation', () => {
     try {
       validateDeleteRecords({ recordss: {} })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_DELETE.description);
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND_DELETE.description));
     }
   });
 
@@ -1108,7 +1115,7 @@ describe('delete input records validation', () => {
     try {
       validateDeleteRecords({ records: {} })
     } catch (err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_DELETE.description);
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_RECORDS_IN_DELETE.description));
     }
   });
   
@@ -1124,7 +1131,7 @@ describe('delete input records validation', () => {
     try {
       validateDeleteRecords({ records: [{}] })
     } catch (err) {
-      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_DELETE.description, 0));
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_DELETE.description,0));
     }
   });
   
@@ -1188,7 +1195,7 @@ describe('test validateInputFormatOptions', () => {
       validateInputFormatOptions(options)
       done('should throw error');
     } catch (err) {
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description));
       done();
     }
   });
@@ -1199,7 +1206,7 @@ describe('test validateInputFormatOptions', () => {
       validateInputFormatOptions(options)
       done('should throw error');
     } catch (err) {
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description));
       done();
     }
   });
@@ -1210,7 +1217,7 @@ describe('test validateInputFormatOptions', () => {
       validateInputFormatOptions(options)
       done('should throw error');
     } catch (err) {
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description));
       done();
     }
   });
@@ -1224,7 +1231,7 @@ describe('test validateInputFormatOptions', () => {
       validateInputFormatOptions(options)
       done('should throw error');
     } catch (err) {
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description));
       done();
     }
   });
@@ -1236,7 +1243,7 @@ describe('test validateInputFormatOptions', () => {
       validateInputFormatOptions(options)
       done('should throw error');
     } catch (err) {
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description));
       done();
     }
   });
@@ -1248,7 +1255,7 @@ describe('test validateInputFormatOptions', () => {
       validateInputFormatOptions(options)
       done('should throw error');
     } catch (err) {
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description));
       done();
     }
   });
@@ -1259,7 +1266,7 @@ describe('test validateInputFormatOptions', () => {
       validateInputFormatOptions(options)
       done('should throw error');
     } catch (err) {
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description));
       done();
     }
   });
@@ -1270,7 +1277,7 @@ describe('test validateInputFormatOptions', () => {
       validateInputFormatOptions(options)
       done('should throw error');
     } catch (err) {
-      expect(err.error.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description);
+      expect(err.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_TRANSLATION.description));
       done();
     }
   });
