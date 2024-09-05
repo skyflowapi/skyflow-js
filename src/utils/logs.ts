@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 
-import { getSDKLanguageAndVersion } from "./helpers";
+import { getSDKLanguageAndVersion } from './helpers';
 
 const sdkLanguageAndVersion = getSDKLanguageAndVersion();
 
