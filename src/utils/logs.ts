@@ -1,9 +1,10 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import sdkDetails from '../../package.json';
 
-const sdkLanguageAndVersion = `JS SDK v${sdkDetails.version}`;
+import { getSDKLanguageAndVersion } from "./helpers";
+
+const sdkLanguageAndVersion = getSDKLanguageAndVersion();
 
 const logs = {
   infoLogs: {

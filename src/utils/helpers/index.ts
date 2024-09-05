@@ -424,3 +424,10 @@ export const getAtobValue = (encodedValue: string) => {
     return '';
   }
 };
+
+export const getSDKLanguageAndVersion = () => {
+  const sdkNameAndVersion = localStorage.getItem('sdk_version') || '';
+  const sdkDetails = getSDKNameAndVersion(sdkNameAndVersion);
+  const sdkName = sdkDetails.sdkName == "skyflow-js" ? "JS" : "React"
+  return `${sdkName} SDK v${sdkDetails.sdkVersion}`;
+}
