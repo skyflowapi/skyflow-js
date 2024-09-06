@@ -2,6 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import { LogLevel, MessageType } from '../common';
+import { getSDKLanguageAndVersion } from '../helpers';
 
 export const LogLevelOptions = {
   DEBUG: {
@@ -30,6 +31,7 @@ export const EnvOptions = {
 const SDK_OWNER = '[Skyflow]';
 
 export const printLog = (message: string, messageType:MessageType, logLevel:LogLevel) => {
+  const {sdkLanguageAndVersion, sdkOwner} = getSDKLanguageAndVersion();
   if (logLevel && LogLevelOptions[logLevel]) {
     const {
       showDebugLogs, showInfoLogs, showWarnLogs, showErrorLogs,
@@ -45,7 +47,7 @@ export const printLog = (message: string, messageType:MessageType, logLevel:LogL
       console.warn(`${LogLevel.WARN}: ${SDK_OWNER} ${message}`);
     } else if (messageType === MessageType.ERROR && showErrorLogs) {
       // eslint-disable-next-line no-console
-      console.error(`${LogLevel.ERROR}: ${SDK_OWNER} ${message}`);
+      console.error(`${LogLevel.ERROR}: ${sdkOwner} ${sdkLanguageAndVersion} ${message}`);
     }
   }
 };

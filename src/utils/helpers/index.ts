@@ -426,8 +426,11 @@ export const getAtobValue = (encodedValue: string) => {
 };
 
 export const getSDKLanguageAndVersion = () => {
-  const sdkNameAndVersion = localStorage.getItem('sdk_version') || '';
-  const sdkDetails = getSDKNameAndVersion(sdkNameAndVersion);
+  const metaData = localStorage.getItem('sdk_version') || '';
+  const sdkDetails = getSDKNameAndVersion(metaData);
   const sdkName = sdkDetails.sdkName === 'skyflow-js' ? 'JS' : 'React';
-  return `${sdkName} SDK v${sdkDetails.sdkVersion}`;
+  return {
+    'sdkLanguageAndVersion': `${sdkName} SDK v${sdkDetails.sdkVersion}`,
+    'sdkOwner': 'Skyflow'
+  };
 };
