@@ -31,7 +31,7 @@ export const EnvOptions = {
 const SDK_OWNER = '[Skyflow]';
 
 export const printLog = (message: string, messageType:MessageType, logLevel:LogLevel) => {
-  const {sdkLanguageAndVersion, sdkOwner} = getSDKLanguageAndVersion();
+  const { sdkLanguageAndVersion, sdkOwner } = getSDKLanguageAndVersion();
   if (logLevel && LogLevelOptions[logLevel]) {
     const {
       showDebugLogs, showInfoLogs, showWarnLogs, showErrorLogs,

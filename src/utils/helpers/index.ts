@@ -430,7 +430,7 @@ export const getSDKLanguageAndVersion = () => {
   const sdkDetails = getSDKNameAndVersion(metaData);
   const sdkName = sdkDetails.sdkName === 'skyflow-js' ? 'JS' : 'React';
   return {
-    'sdkLanguageAndVersion': `${sdkName} SDK v${sdkDetails.sdkVersion}`,
-    'sdkOwner': 'Skyflow'
+    sdkLanguageAndVersion: `${sdkName} SDK v${sdkDetails.sdkVersion}`,
+    sdkOwner: 'Skyflow',
   };
 };
