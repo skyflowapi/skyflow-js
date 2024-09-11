@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
@@ -51,8 +52,6 @@ export class FrameController {
   controller?: FrameController;
 
   controllerId: string;
-
-  #client?: Client;
 
   #iFrameForm: IFrameForm;
 
@@ -641,56 +640,82 @@ export class FrameElement {
           });
         }
         if (Object.prototype.hasOwnProperty.call(this.options, 'masking')) {
+          console.log('masking true', mask[0], translation, this.iFrameFormElement.fieldType);
+          const excludeFormatIndex = this.getNonTranslatedIndexes(mask[0], translation);
           const input = target;
           const cursorPosition = input.selectionStart;
           const currentValue = input.value;
-          const previousMaskedValue = getMaskedOutput(this.actualValue, mask[0], translation);
+          const { formattedOutput, maskedOutput: previousMaskedValue } = getMaskedOutput(
+            this.actualValue,
+            mask[0],
+            translation,
+            this.options.maskChar,
+          );
           const isCursorAtEnd = cursorPosition === currentValue.length;
-
+          console.log('--', currentValue, isCursorAtEnd, excludeFormatIndex);
+          // Handle when actualValue is empty but currentValue is not
           if (this.actualValue.length === 0 && currentValue.length > 0) {
+            console.log('here it is', this.actualValue.length);
             this.actualValue = currentValue;
-          } else if (currentValue.length > previousMaskedValue.length && cursorPosition != null) {
-            const addedChar = currentValue[cursorPosition - 1];
+          } else if (currentValue.length > formattedOutput.length && cursorPosition != null && currentValue.length <= mask[0].length) {
+            // Handle when a character is added
 
+            const addedChar = currentValue[cursorPosition - 1];
             this.actualValue = this.actualValue.substring(0, cursorPosition - 1)
-                  + addedChar
-                  + this.actualValue.substring(cursorPosition - 1);
+            + addedChar
+            + this.actualValue.substring(cursorPosition - 1);
           } else if (cursorPosition != null) {
-            const diff = previousMaskedValue.length - currentValue.length;
-            if (isCursorAtEnd && currentValue.length < mask[0].length) {
-              this.actualValue = this.actualValue.slice(0, -diff);
-            } else {
-              // Handling deletion of character(s) at any position
-              const removedCount = previousMaskedValue.length - currentValue.length;
-              this.actualValue = this.actualValue.substring(0, cursorPosition)
-                      + this.actualValue.substring(cursorPosition + removedCount);
-            }
+            input.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+
+            // if (isCursorAtEnd && currentValue.length < mask[0].length) {
+            //   console.log('here end', isCursorAtEnd, previousMaskedValue.length, currentValue.length);
+            //   const diff = previousMaskedValue.length - currentValue.length;
+            //   this.actualValue = this.actualValue.slice(0, -diff);
+            // } else {
+            // Handling deletion of character(s) at any position
+            const removedCount = previousMaskedValue.length - currentValue.length;
+            console.log('cursorPosition=>before', cursorPosition, cursorPosition + removedCount, previousMaskedValue, this.actualValue);
+
+            this.actualValue = this.handleDeletion(this.actualValue, previousMaskedValue, excludeFormatIndex, cursorPosition, cursorPosition + removedCount);
+            console.log('cursorPosition=>after', cursorPosition, cursorPosition + removedCount, previousMaskedValue, this.actualValue);
+            // if (removedCount === 1 && excludeFormatIndex.includes(cursorPosition)) {
+            //   console.log('diff count is', removedCount, cursorPosition);
+            // } else {
+            //   this.actualValue = this.actualValue.substring(0, cursorPosition)
+            //         + this.actualValue.substring(cursorPosition + removedCount);
+            // }
+            // }
           }
 
-          // Recalculate the masked value after changes
-          const newMaskedValue = getMaskedOutput(this.actualValue, mask[0], translation);
+          const { formattedOutput: newFormattedOutput, maskedOutput: newMaskedOutput } = getMaskedOutput(
+            this.actualValue,
+            mask[0],
+            translation,
+            this.options.maskChar,
+          );
 
           if (cursorPosition != null) {
-            // Adjust cursor position to match the new masked value length
             const newCursorPosition = isCursorAtEnd
-              ? newMaskedValue.length
-              : cursorPosition + (newMaskedValue.length - previousMaskedValue.length);
+              ? newFormattedOutput.length
+              : cursorPosition + (newFormattedOutput.length - formattedOutput.length);
             input.setSelectionRange(newCursorPosition, newCursorPosition);
           }
+          console.log('actual value =>', this.actualValue, 'masked data=>', newMaskedOutput, 'formatted data=>', newFormattedOutput);
 
-          // Set the masked value as the input value
-          if (newMaskedValue.length >= value.length) {
-            this.iFrameFormElement.setValue(newMaskedValue, target?.checkValidity());
-            target.value = this.options.maskChar.repeat(newMaskedValue.length);
-          } else if (newMaskedValue === '' && target?.value === '') {
-            target.value = this.options.maskChar.repeat(newMaskedValue.length);
+          // Set the masked value to the input field and update the form
+          if (newFormattedOutput.length >= value.length) {
+            this.iFrameFormElement.setValue(newFormattedOutput, target?.checkValidity());
+            target.value = newMaskedOutput;
+          } else if (newFormattedOutput === '' && target?.value === '') {
+            target.value = newMaskedOutput;
             this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
-          } else if (newMaskedValue.length <= mask[0].length) {
-            target.value = this.options.maskChar.repeat(newMaskedValue.length);
-            this.iFrameFormElement.setValue(newMaskedValue, target?.checkValidity());
+          } else if (newFormattedOutput.length <= mask[0].length) {
+            target.value = newMaskedOutput;
+            this.iFrameFormElement.setValue(newFormattedOutput, target?.checkValidity());
           }
         } else {
-          const output = getMaskedOutput(target?.value, updatedMask[0], translation);
+          const { formattedOutput: output } = getMaskedOutput(target?.value, updatedMask[0], translation);
+          // const { output } = getMaskedOutput(target?.value, updatedMask[0], translation);
           if (output.length >= value.length) {
             this.iFrameFormElement.setValue(output, target?.checkValidity());
           } else if (output === '' && target?.value === '') {
@@ -735,12 +760,66 @@ export class FrameElement {
             input.value = this.options.maskChar.repeat(this.actualValue.length);
           }
           input.setSelectionRange(cursorPosition, cursorPosition);
+          console.log('actual value =>', this.actualValue);
           this.iFrameFormElement.setValue(this.actualValue, target?.checkValidity());
         } else {
           this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
         }
       }
     }
+  };
+
+  getNonTranslatedIndexes = (
+    format: string,
+    translation: { [key: string]: string },
+  ): number[] => {
+    const nonTranslatedIndexes: number[] = [];
+
+    // Loop through the format string
+    for (let i = 0; i < format.length; i += 1) {
+      const formatChar = format[i];
+
+      // If the format character doesn't have a translation, add the index
+      if (!translation[formatChar]) {
+        nonTranslatedIndexes.push(i);
+      }
+    }
+
+    return nonTranslatedIndexes;
+  };
+
+  handleDeletion = (
+    actualValue,
+    maskedValue,
+    excludeFormatIndexes,
+    selectionStart,
+    selectionEnd,
+  ) => {
+    console.log('called');
+    const filteredIndexes: number[] = [];
+
+    for (let i = selectionStart; i < selectionEnd; i += 1) {
+      if (!excludeFormatIndexes.includes(i)) {
+        filteredIndexes.push(i);
+      } else {
+        selectionEnd -= 1;
+      }
+    }
+    console.log('selection', selectionEnd, excludeFormatIndexes);
+
+    let newActualValue = '';
+    let actualIndex = 0;
+
+    for (let i = 0; i < maskedValue.length; i += 1) {
+      if (!excludeFormatIndexes.includes(i)) {
+        if (!filteredIndexes.includes(i)) {
+          newActualValue += actualValue[actualIndex];
+        }
+        actualIndex += 1;
+      }
+    }
+    console.log('-----', newActualValue, filteredIndexes, selectionStart, selectionEnd);
+    return newActualValue;
   };
 
   maskInputRange = (data, range, maskChar) => {
@@ -1048,17 +1127,23 @@ export class FrameElement {
 
   private applyMask() {
     const { mask } = this.iFrameFormElement;
-    let output = '';
+    // let output = '';x
     if (mask) {
       const translation = {};
       Object.keys(mask[2]).forEach((key) => {
         translation[key] = { pattern: mask[2][key] };
       });
       try {
-        // const value = this.domInput?.value || this.iFrameFormElement.getValue();
+        const value = this.domInput?.value || this.iFrameFormElement.getValue();
         if (this.domInput) {
-          output = getMaskedOutput(this.actualValue, mask[0], translation);
-          this.domInput.value = this.options.maskChar.repeat(output.length);
+          if (Object.prototype.hasOwnProperty.call(this.options, 'masking')) {
+            // eslint-disable-next-line @typescript-eslint/no-shadow
+            const { maskedOutput } = getMaskedOutput(this.actualValue, mask[0], translation, this.options.maskChar);
+            this.domInput.value = maskedOutput;
+          } else {
+            const { formattedOutput } = getMaskedOutput(value, mask[0], translation);
+            this.domInput.value = formattedOutput;
+          }
           if (!this.domInput.getAttribute('maxlength')) { this.domInput.setAttribute('maxlength', mask[0].length); }
         }
       } catch (err) {

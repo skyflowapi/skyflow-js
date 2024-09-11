@@ -180,9 +180,10 @@ class RevealFrame {
         this.isRevealCalled = true;
         this.#dataElememt.innerText = responseValue;
         if (this.#record.mask) {
-          this.#dataElememt.innerText = getMaskedOutput(this.#dataElememt.innerText,
+          const { formattedOutput } = getMaskedOutput(this.#dataElememt.innerText,
             this.#record.mask[0],
             constructMaskTranslation(this.#record.mask));
+          this.#dataElememt.innerText = formattedOutput;
         }
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
           CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);

@@ -116,12 +116,20 @@ export function domReady(fn) {
     };
   })()(fn);
 }
-
-export const getMaskedOutput = (input: string, format: string, translation: any): string => {
-  if (!input) { return ''; }
+export const getMaskedOutput = (
+  input: string,
+  format: string,
+  translation: any,
+  maskChar: string = '',
+) => {
+  if (!input) {
+    return { formattedOutput: '', maskedOutput: '' };
+  }
+  // console.log('mask char', maskChar, input);
   const inputArray = Array.from(input);
   const formatArray = Array.from(format);
-  let output = '';
+  let formattedOutput = '';
+  let maskedOutput = '';
   let j = 0;
 
   for (let i = 0; i < inputArray.length; i += 1) {
@@ -130,16 +138,20 @@ export const getMaskedOutput = (input: string, format: string, translation: any)
     if (j < formatArray.length) {
       let formatChar = formatArray[j];
       if (!translation[formatChar] || character === formatChar) {
-        output += formatChar;
+        formattedOutput += formatChar;
+        maskedOutput += formatChar;
         j += 1;
       }
       formatChar = formatArray[j];
       if (translation[formatChar]) {
-        const translationString = translation[formatChar].pattern;
-        const regex = new RegExp(translationString);
+        const translationPattern = translation[formatChar].pattern;
+        const regex = new RegExp(translationPattern);
         const characterString = character.toString();
         if (regex.test(characterString)) {
-          output += characterString;
+          formattedOutput += characterString;
+          // Append the maskChar or the original character if no maskChar provided
+          // eslint-disable-next-line no-unneeded-ternary
+          maskedOutput += maskChar ? maskChar : '*';
           j += 1;
         }
       }
@@ -147,7 +159,11 @@ export const getMaskedOutput = (input: string, format: string, translation: any)
       break;
     }
   }
-  return output;
+
+  return {
+    formattedOutput,
+    maskedOutput,
+  };
 };
 
 export const copyToClipboard = (text:string) => {
