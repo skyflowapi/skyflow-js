@@ -141,7 +141,7 @@ describe('test file name validation', () => {
       try {
         vaildateFileName(invalidFile)
       } catch(err) {
-        expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME.description)
+        expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME.description))
       }      
     })
   })
@@ -184,7 +184,7 @@ describe('test file validation', () => {
       try {
         fileValidation(invalidFile, false, {})
       } catch(err) {
-        expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE.description)
+        expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE.description))
       }      
     })
   })
@@ -212,7 +212,7 @@ describe('test file validation', () => {
     try {
       fileValidation(file, false, {});
     } catch(err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description))
     }
   })
   test('no file selected', () => {
@@ -226,7 +226,7 @@ describe('test file validation', () => {
     try {
       fileValidation(file, true, file);
     } catch(err) {
-      expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED.description)
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED.description))
     }
   })
   test('invalid file selected for required file input', () => {
@@ -363,7 +363,7 @@ describe('test formatRevealElementOptions function', () => {
       formatRevealElementOptions({ enableCopy: '123' })
       done('should throw error');
     } catch (err) {
-      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description,'enableCopy'))
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, 'enableCopy'))
       done()
     }
   });

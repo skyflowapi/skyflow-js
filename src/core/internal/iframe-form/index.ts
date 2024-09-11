@@ -434,7 +434,9 @@ export class IFrameFormElement extends EventEmitter {
       }
       if (!vaildateFileNames) {
         this.errorText = this.containerType === ContainerType.COLLECT
-          ? logs.errorLogs.INVALID_FILE_NAMES
+          ? parameterizedString(
+            logs.errorLogs.INVALID_FILE_NAME,
+          )
           : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
         return vaildateFileNames;
       }
@@ -499,7 +501,7 @@ export class IFrameFormElement extends EventEmitter {
             break;
           }
           default:
-            this.errorText = logs.errorLogs.INVALID_VALIDATION_RULE_TYPE;
+            this.errorText = parameterizedString(logs.errorLogs.INVALID_VALIDATION_RULE_TYPE);
             resp = false;
         }
 
@@ -508,7 +510,9 @@ export class IFrameFormElement extends EventEmitter {
         }
 
         if (!resp) {
-          this.errorText = this.validations[i].params.error || logs.errorLogs.VALIDATION_FAILED;
+          this.errorText = this.validations[i].params.error || parameterizedString(
+            logs.errorLogs.VALIDATION_FAILED,
+          );
           this.isCustomValidationFailed = true;
           return resp;
         }
@@ -1049,6 +1053,7 @@ export class IFrameForm {
             if (skyflowID === '' || skyflowID === null) {
               return Promise.reject(new SkyflowError(
                 SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
+                [],
               ));
             }
             if (updateResponseObject[skyflowID]) {

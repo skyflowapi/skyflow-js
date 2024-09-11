@@ -204,7 +204,7 @@ class RevealContainer extends Container {
                 this.#mountedRecords = [];
                 this.#revealRecords = [];
                 if (revealData.error) {
-                  printLog(logs.errorLogs.FAILED_REVEAL, MessageType.ERROR,
+                  printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL), MessageType.ERROR,
                     this.#context.logLevel);
 
                   reject(revealData.error);

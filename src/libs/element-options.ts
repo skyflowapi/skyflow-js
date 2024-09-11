@@ -155,7 +155,9 @@ export function validateAndSetupGroupOptions(
         && oldElement.elementName
         && oldElement.elementName !== newElement.elementName
       ) {
-        throw new Error(logs.errorLogs.CANNOT_CHANGE_ELEMENT);
+        throw new Error(parameterizedString(
+          logs.errorLogs.CANNOT_CHANGE_ELEMENT,
+        ));
       }
       validateElementOptions(oldElement.elementType, oldElement, newElement);
       newRow.elements[elementIndex] = {
