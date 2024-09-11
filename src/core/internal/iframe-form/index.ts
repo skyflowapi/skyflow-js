@@ -745,8 +745,7 @@ export class IFrameForm {
             logLevel,
           );
           if (!data.name) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.REQUIRED_PARAMS_NOT_PROVIDED,
-              [], true);
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.REQUIRED_PARAMS_NOT_PROVIDED, [], true);
           }
           // @ts-ignore
           if (data.name && data.name.includes(COLLECT_FRAME_CONTROLLER)) {
@@ -946,8 +945,7 @@ export class IFrameForm {
       const isValidFileName = vaildateFileName(state.value.name);
       if (!isValidFileName) {
         return Promise.reject(
-          new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME,
-            [], true),
+          new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true),
         );
       }
       formData.append(column, value);
