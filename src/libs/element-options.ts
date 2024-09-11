@@ -35,14 +35,12 @@ export function validateElementOptions(
   newOptions: any = {},
 ) {
   if (elementType !== 'group' && !Object.prototype.hasOwnProperty.call(ELEMENTS, elementType)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_TYPE,
-      [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_TYPE, [], true);
   }
 
   if (Object.prototype.hasOwnProperty.call(oldOptions, 'validations')) {
     if (!Array.isArray(oldOptions.validations)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATIONS_TYPE,
-        [], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VALIDATIONS_TYPE, [], true);
     } else {
       oldOptions.validations.forEach((validationRule: IValidationRule, index) => {
         if (!Object.prototype.hasOwnProperty.call(validationRule, 'type')) {
@@ -309,15 +307,13 @@ export const formatOptions = (elementType, options, logLevel) => {
         if (!(typeof formattedOptions.cardMetadata === 'object')
           || (Object.prototype.toString.call(formattedOptions.cardMetadata) !== '[object Object]')
         ) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA,
-            [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA, [], true);
         }
 
         if (Object.prototype.hasOwnProperty.call(formattedOptions.cardMetadata, 'scheme')) {
           if (!(typeof formattedOptions.cardMetadata.scheme === 'object')
               || (Object.prototype.toString.call(formattedOptions.cardMetadata.scheme) !== '[object Array]')) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_SCHEME,
-              [], true);
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_SCHEME, [], true);
           }
         }
       }
@@ -388,12 +384,10 @@ export const formatOptions = (elementType, options, logLevel) => {
           [], true);
       }
       if (options.allowedFileType.length <= 0) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ALLOWED_OPTIONS_ARRAY,
-          [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ALLOWED_OPTIONS_ARRAY, [], true);
       }
       if (!options.allowedFileType.every((item) => typeof item === 'string')) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_FILETYPE_ARRAY,
-          [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_FILETYPE_ARRAY, [], true);
       }
     }
     if (Object.prototype.hasOwnProperty.call(options, 'allowedFileType')) {

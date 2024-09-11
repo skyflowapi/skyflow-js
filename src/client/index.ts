@@ -119,8 +119,7 @@ class Client {
     };
 
     httpRequest.onerror = () => {
-      reject(new SkyflowError(SKYFLOW_ERROR_CODE.NETWORK_ERROR,
-        [], true));
+      reject(new SkyflowError(SKYFLOW_ERROR_CODE.NETWORK_ERROR, [], true));
     };
   });
 }

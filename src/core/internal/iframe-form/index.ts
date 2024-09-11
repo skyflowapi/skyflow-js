@@ -991,10 +991,7 @@ export class IFrameForm {
   };
 
   tokenize = (options) => {
-    if (!this.client) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION,
-        [], true);
-    }
+    if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const insertResponseObject: any = {};
     const updateResponseObject: any = {};
     const formElements = Object.keys(this.iFrameFormElements);

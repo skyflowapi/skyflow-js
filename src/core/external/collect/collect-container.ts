@@ -286,14 +286,12 @@ class CollectContainer extends Container {
       const collectElements = Object.values(this.#elements);
       collectElements.forEach((element) => {
         if (!element.isMounted()) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED,
-            [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
         }
         element.isValidElement();
       });
       if (Object.prototype.hasOwnProperty.call(options, 'tokens') && !validateBooleanOptions(options.tokens)) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT,
-          [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
       }
       if (options?.additionalFields) {
         validateAdditionalFieldsInCollect(options.additionalFields);
@@ -337,8 +335,7 @@ class CollectContainer extends Container {
       const fileElements = Object.values(this.#elements);
       fileElements.forEach((element) => {
         if (!element.isMounted()) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED,
-            [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
         }
         element.isValidElement();
       });

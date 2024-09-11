@@ -436,16 +436,13 @@ class CollectElement extends SkyflowElement {
   // todo: off methods
   on(eventName: string, handler) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER,
-        [], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER, [], true);
     }
     if (!handler) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_HANDLER_IN_EVENT_LISTENER,
-        [], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_HANDLER_IN_EVENT_LISTENER, [], true);
     }
     if (typeof handler !== 'function') {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER,
-        [], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER, [], true);
     }
     this.#eventEmitter.on(eventName, (data) => {
       if (data.value === undefined) {
@@ -516,8 +513,7 @@ class CollectElement extends SkyflowElement {
                 //   break;
 
               default:
-                throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_TYPE,
-                  [], true);
+                throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_TYPE, [], true);
             }
             this.#states[index].isEmpty = data.value.isEmpty;
             this.#states[index].isValid = data.value.isValid;
