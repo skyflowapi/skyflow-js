@@ -43,7 +43,7 @@ jobs:
       uses: github/codeql-action/analyze@v2
 
     - name: Upload SARIF Results
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: sarif-results
         path: /home/runner/work/skyflow-js/results/javascript.sarif
