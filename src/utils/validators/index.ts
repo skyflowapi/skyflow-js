@@ -118,9 +118,7 @@ export const isValidExpiryYearFormat = (format: string): boolean => {
   }
   return false;
 };
-// {
-//   "records": []
-// }
+
 export const validateInsertRecords = (recordObj: IInsertRecordInput, options: any) => {
   if (!(recordObj && Object.prototype.hasOwnProperty.call(recordObj, 'records'))) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.RECORDS_KEY_NOT_FOUND, [], true);

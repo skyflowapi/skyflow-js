@@ -380,8 +380,7 @@ export const formatOptions = (elementType, options, logLevel) => {
   if (elementType === ELEMENTS.FILE_INPUT.name) {
     if (options.allowedFileType) {
       if (!Array.isArray(options.allowedFileType)) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_OPTIONS,
-          [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_OPTIONS, [], true);
       }
       if (options.allowedFileType.length <= 0) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ALLOWED_OPTIONS_ARRAY, [], true);
