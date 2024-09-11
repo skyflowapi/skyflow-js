@@ -35,14 +35,12 @@ export default class IFrame {
       if (typeof domElement === 'string') {
         this.container = document.querySelector(domElement) || undefined;
         if (!this.container) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR,
-            [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
         }
       } else if (domElement instanceof HTMLElement) {
         this.container = domElement;
       } else {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR,
-          [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
       }
     } catch (e: any) {
       // eslint-disable-next-line no-console

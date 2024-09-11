@@ -204,11 +204,9 @@ class Skyflow {
 
       default:
         if (!type) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONTAINER_TYPE,
-            [], true);
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CONTAINER_TYPE, [], true);
         }
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTAINER_TYPE,
-          [type], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_CONTAINER_TYPE, [type], true);
     }
   }
 
