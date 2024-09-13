@@ -10,6 +10,9 @@ on:
       - "*.md"
     branches:
       - release/*
+  pull_request:
+    branches:
+      - release/*
 
       
 jobs:
@@ -40,7 +43,6 @@ jobs:
       - name: Set INTERNAL_RELEASE_VERSION
         run: |
           echo "INTERNAL_RELEASE_VERSION=${{ steps.previoustag.outputs.tag }}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
-          echo "IFRAME_SECURE_SITE=${{ secrets.IFRAME_SECURE_ORIGIN }}/v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html" >> $GITHUB_ENV
 
       - name: Commit changes
         run: |
@@ -54,13 +56,13 @@ jobs:
         run: npm run build-browser-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ env.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_ORIGIN }}/v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html
 
       - name: npm build iframe
         run: npm run build-iframe
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ env.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_ORIGIN }}/v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html
  
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
@@ -77,7 +79,7 @@ jobs:
       - name: build node-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ env.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_ORIGIN }}/v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html
         run: |
           curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
           npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
