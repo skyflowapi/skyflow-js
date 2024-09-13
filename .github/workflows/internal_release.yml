@@ -37,25 +37,30 @@ jobs:
           chmod +x ./scripts/bump_version.sh
           ./scripts/bump_version.sh "${{ steps.previoustag.outputs.tag }}" "$(git rev-parse --short "$GITHUB_SHA")"
 
+      - name: Set INTERNAL_RELEASE_VERSION
+        run: |
+          echo "INTERNAL_RELEASE_VERSION=${{ steps.previoustag.outputs.tag }}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
+          echo "IFRAME_SECURE_SITE=${{ secrets.IFRAME_SECURE_ORIGIN }}/v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html" >> $GITHUB_ENV
+
       - name: Commit changes
         run: |
           git config user.name ${{ github.actor }}
           git config user.email ${{ github.actor }}@users.noreply.github.com
           git add package.json
-          git commit -m "[AUTOMATED] Private Release ${{ steps.previoustag.outputs.tag }}-dev.$(git rev-parse --short $GITHUB_SHA)"
+          git commit -m "[AUTOMATED] Private Release ${{ env.INTERNAL_RELEASE_VERSION }}"
           git push origin -f
 
       - name: npm build
         run: npm run build-browser-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ env.IFRAME_SECURE_SITE }}
 
       - name: npm build iframe
         run: npm run build-iframe
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ env.IFRAME_SECURE_SITE }}
  
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
@@ -67,12 +72,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
           AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
           SOURCE_DIR: "dist/v1"
-          DEST_DIR: "v1/"
+          DEST_DIR: "v${{ env.INTERNAL_RELEASE_VERSION }}/"
 
       - name: build node-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: ${{ env.IFRAME_SECURE_SITE }}
         run: |
           curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
           npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
