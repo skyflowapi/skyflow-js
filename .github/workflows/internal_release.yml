@@ -53,13 +53,13 @@ jobs:
         run: npm run build-browser-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_ORIGIN }}/v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html
+          IFRAME_SECURE_SITE: v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html
 
       - name: npm build iframe
         run: npm run build-iframe
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_ORIGIN }}/v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html
+          IFRAME_SECURE_SITE: v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html
  
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
@@ -76,7 +76,7 @@ jobs:
       - name: build node-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_ORIGIN }}/v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html
+          IFRAME_SECURE_SITE: v${{ env.INTERNAL_RELEASE_VERSION }}/elements/index.html
         run: |
           curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
           npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
