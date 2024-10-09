@@ -121,11 +121,12 @@ export const getMaskedOutput = (
   format: string,
   translation: any,
   maskChar: string = '',
+  maskRange: number[] = [],
 ) => {
   if (!input) {
     return { formattedOutput: '', maskedOutput: '' };
   }
-  // console.log('mask char', maskChar, input);
+  console.log('mask char', maskChar, input, maskRange);
   const inputArray = Array.from(input);
   const formatArray = Array.from(format);
   let formattedOutput = '';
