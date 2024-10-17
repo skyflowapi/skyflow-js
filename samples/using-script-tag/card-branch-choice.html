@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skyflow Elements</title>
+    <script src="https://js.skyflow.dev/v1/index.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .empty-div {
+            height: 85px;
+            width: 350px;
+        }
+
+        .reveal-view {
+            margin-top: 48px;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 16px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f1f1f1;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Collect Elements</h3>
+    <!-- COllect Part -->
+    <div>
+        <div id="collectCardNumber" class="empty-div"></div>
+        <div id="collectFile" class="empty-div"></div>
+
+        <div>
+            <button id="collectPCIData">Collect PCI Data</button>
+        </div>
+        <br />
+
+        <div>
+            <button id="uploadFileData">Upload File</button>
+        </div>
+        <div>
+            <pre id="collectResponse"></pre>
+        </div>
+        <br />
+        <div>
+            <pre id="uploadResponse"></pre>
+        </div>
+    </div>
+
+    <!-- Javascript -->
+    <script>
+        try {
+            const skyflow = Skyflow.init({
+
+                getBearerToken: () => {
+                    return new Promise((resolve, reject) => {
+                        const Http = new XMLHttpRequest();
+
+                        Http.onreadystatechange = () => {
+                            if (Http.readyState === 4 && Http.status === 200) {
+                                const response = JSON.parse(Http.responseText);
+                                resolve(response.accessToken);
+                            }
+                        };
+                        const url = '<TOKEN_END_POINT_URL>';
+                        Http.open('GET', url);
+                        Http.send();
+                    });
+                },
+                options: {
+                    logLevel: Skyflow.LogLevel.ERROR,
+                    env: Skyflow.Env.PROD,
+                },
+            });
+
+            // Create collect Container.
+            const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+
+            // Custom styles for collect elements.
+            const collectStylesOptions = {
+                inputStyles: {
+                    base: {
+                        border: '1px solid #eae8ee',
+                        padding: '10px 16px',
+                        borderRadius: '4px',
+                        color: '#1d1d1d',
+                        marginTop: '4px',
+                    },
+                    complete: {
+                        color: '#4caf50',
+                    },
+                    empty: {},
+                    focus: {},
+                    invalid: {
+                        color: '#f44336',
+                    },
+                    dropdownIcon: {
+                        // Pass styles for the dropdown icon.
+                    },
+                    dropdown: {
+                        // Pass styles for the card choice dropdown.
+                    }
+                },
+                labelStyles: {
+                    base: {
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                    },
+                },
+                errorTextStyles: {
+                    base: {
+                        color: '#f44336',
+                    },
+                },
+            };
+
+            const cardNumberElement = collectContainer.create({
+                table: 'pii_fields',
+                column: 'primary_card.card_number',
+                ...collectStylesOptions,
+                placeholder: 'card number',
+                label: 'Card Number',
+                type: Skyflow.ElementType.CARD_NUMBER,
+            }, {
+                required: true
+            });
+
+            const options = {
+                allowedFileType: [".pdf", ".png"],
+                preserveFileName: false
+            }
+
+            const fileElement = collectContainer.create({
+                table: 'file_data',
+                column: 'file',
+                ...collectStylesOptions,
+                type: Skyflow.ElementType.FILE_INPUT,
+                skyflowID: 'SKYFLOW_ID',
+            },
+                options
+            );
+
+            // Mount the elements.
+            cardNumberElement.mount("#collectCardNumber")
+            fileElement.mount('#collectFile');
+
+            // Use this to aviod unnesscary bin api calls.
+            let calledUpdate = false;
+
+            // Cardnumber element change handler
+            cardNumberElement.on("CHANGE", (state) => {
+                console.log("Changed", state);
+                console.log('Updated', calledUpdate, state.value)
+                const currentBin = state.value.slice(0, 8)
+                if (currentBin.length >= 8 && !calledUpdate) {
+                    console.log(currentBin);
+                    calledUpdate = true;
+                    // Perform Bin Lookup
+                    binLookup(currentBin)
+                        .then((response) => response.text())
+                        .then((result) => {
+                            const cardData = JSON.parse(result)["cards_data"];
+                            const schemeList = getCardSchems(cardData)
+                            cardNumberElement.update({
+                                cardMetadata: {
+                                    scheme: schemeList // update card schemeList 
+                                }
+                            })
+                        })
+                        .catch((error) => console.error(error));
+                } else if (currentBin.length < 8 && calledUpdate) {
+                    calledUpdate = false
+                    cardNumberElement.update({
+                        cardMetadata: {
+                            scheme: []
+                        }
+                    })
+                }
+            });
+
+            // Collect all elements data.
+            const collectButton = document.getElementById('collectPCIData');
+            if (collectButton) {
+                collectButton.addEventListener('click', () => {
+                    cardNumberElement.mount("#collectCardNumber")
+                    const collectResponse = collectContainer.collect();
+
+                    collectResponse
+                        .then(response => {
+                            document.getElementById('collectResponse').innerHTML =
+                                JSON.stringify(response, null, 2);
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        });
+                });
+            }
+
+            const uploadButton = document.getElementById('uploadFileData');
+            if (uploadButton) {
+                uploadButton.addEventListener('click', () => {
+                    cardNumberElement.unmount();
+                    const uploadResponse = collectContainer
+                        .uploadFiles()
+                        .then(res => {
+                            document.getElementById('uploadResponse').innerHTML =
+                                JSON.stringify(res, null, 2);
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        });
+                });
+            }
+
+            // Sample Bin lookup api call.
+            const binLookup = (bin) => {
+                const myHeaders = new Headers();
+                myHeaders.append("X-skyflow-authorization", "<BEARER_TOKEN>"); // TODO: replace bearer token
+                myHeaders.append("Content-Type", "application/json");
+
+                const raw = JSON.stringify({
+                    "BIN": bin
+                });
+
+                const requestOptions = {
+                    method: "POST",
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: "follow"
+                };
+                // TODO: replace <VAULT_URL>  
+                return fetch(`${VAULT_URL}/v1/card_lookup`, requestOptions);
+            };
+
+            const getCardSchems = (cardData) => {
+                let schemeList = [];
+                // cardData will results in array of length more than 1 if it is cobranded.
+                cardData.forEach((card) => {
+                    if (card.card_scheme === 'VISA') {
+                        schemeList.push(Skyflow.CardType.VISA);
+                    } else if (card.card_scheme === 'MASTERCARD') {
+                        schemeList.push(Skyflow.CardType.MASTERCARD)
+                    } else if (card.card_scheme === 'CARTES BANCAIRES') {
+                        schemeList.push(Skyflow.CardType.CARTES_BANCAIRES)
+                    }
+                })
+                return schemeList
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    </script>
+</body>
+
+</html>
