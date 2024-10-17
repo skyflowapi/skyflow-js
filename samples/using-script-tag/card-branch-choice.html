@@ -63,22 +63,13 @@
     <!-- COllect Part -->
     <div>
         <div id="collectCardNumber" class="empty-div"></div>
-        <div id="collectFile" class="empty-div"></div>
 
         <div>
             <button id="collectPCIData">Collect PCI Data</button>
         </div>
-        <br />
 
         <div>
-            <button id="uploadFileData">Upload File</button>
-        </div>
-        <div>
             <pre id="collectResponse"></pre>
-        </div>
-        <br />
-        <div>
-            <pre id="uploadResponse"></pre>
         </div>
     </div>
 
@@ -160,35 +151,16 @@
                 required: true
             });
 
-            const options = {
-                allowedFileType: [".pdf", ".png"],
-                preserveFileName: false
-            }
-
-            const fileElement = collectContainer.create({
-                table: 'file_data',
-                column: 'file',
-                ...collectStylesOptions,
-                type: Skyflow.ElementType.FILE_INPUT,
-                skyflowID: 'SKYFLOW_ID',
-            },
-                options
-            );
-
             // Mount the elements.
             cardNumberElement.mount("#collectCardNumber")
-            fileElement.mount('#collectFile');
 
-            // Use this to aviod unnesscary bin api calls.
+            // Use this to avoid unnecessary bin api calls.
             let calledUpdate = false;
 
-            // Cardnumber element change handler
+            // Card number element change handler
             cardNumberElement.on("CHANGE", (state) => {
-                console.log("Changed", state);
-                console.log('Updated', calledUpdate, state.value)
                 const currentBin = state.value.slice(0, 8)
                 if (currentBin.length >= 8 && !calledUpdate) {
-                    console.log(currentBin);
                     calledUpdate = true;
                     // Perform Bin Lookup
                     binLookup(currentBin)
@@ -224,22 +196,6 @@
                         .then(response => {
                             document.getElementById('collectResponse').innerHTML =
                                 JSON.stringify(response, null, 2);
-                        })
-                        .catch(err => {
-                            console.log(err);
-                        });
-                });
-            }
-
-            const uploadButton = document.getElementById('uploadFileData');
-            if (uploadButton) {
-                uploadButton.addEventListener('click', () => {
-                    cardNumberElement.unmount();
-                    const uploadResponse = collectContainer
-                        .uploadFiles()
-                        .then(res => {
-                            document.getElementById('uploadResponse').innerHTML =
-                                JSON.stringify(res, null, 2);
                         })
                         .catch(err => {
                             console.log(err);
