@@ -343,8 +343,7 @@ const options = {
   enableCardIcon: true, // Optional, indicates whether a card icon should be enabled (only applicable for CARD_NUMBER ElementType).
   enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false').
   format: String,       // Optional, format for the element 
-  translation: {},      // Optional, indicates the allowed data type value for format. 
-  cardMetadata:{}       // Optional, metadata to control card number element behavior. (only applicable for CARD_NUMBER ElementType).
+  translation: {}      // Optional, indicates the allowed data type value for format. 
 };
 ```
 
@@ -370,29 +369,6 @@ Accepted values by element type:
 | EXPIRATION_YEAR | <li>`format`</li> <ul><li>`yy` (default)</li><li>`yyyy`</li></ul>                                                                                                                          | <ul><li>27</li><li>2027</li></ul>                                                                                                          |
 | CARD_NUMBER     | <li>`format`</li> <ul><li>`XXXX XXXX XXXX XXXX` (default)</li><li>`XXXX-XXXX-XXXX-XXXX`</li></ul>                                                                                          | <ul><li>1234 5678 9012 3456</li><li>1234-5678-9012-3456</li></ul>                                                                          |
 | INPUT_FIELD     | <li>`format`: A string that matches the desired output, with placeholder characters of your choice.</li><li>`translation`: An object of key/value pairs. Defaults to `{"X": "[0-9]"}`</li> | With a `format` of `+91 XXXX-XX-XXXX` and a `translation` of `[ "X": "[0-9]"]`, user input of "1234121234" displays as "+91 1234-12-1234". |
-
-`cardMetadata`: An object of metadata keys to control card number element behavior. It supports an optional key called `scheme`, which accepts an array of Skyflow accept card types based on which SDK will display card brand choice dropdown in the card number element. `Skyflow.CardType`   is an enum with all skyflow supported card schemes.
-
-```javascript
-import Skyflow from 'skyflow-js'
-
-const cardMetadata = { 
-  scheme: Skyflow.CardType [] // Optional, array of skyflow supported card types. 
-}
-```
-
-<div id="supported-card-types-by-skyflowcardtype">Supported card types by Skyflow.CardType :</div>
-
-- `VISA`
-- `MASTERCARD`
-- `AMEX`
-- `DINERS_CLUB`
-- `DISCOVER`
-- `JCB`
-- `MAESTRO`
-- `UNIONPAY`
-- `HIPERCARD`
-- `CARTES_BANCAIRES`
 
 **Collect Element Options examples for INPUT_FIELD**
 Example 1
@@ -1043,13 +1019,11 @@ state : {
   isFocused: boolean
   isValid: boolean
   value: string
-  selectedCardScheme: Skyflow.CardType  // only for CARD_NUMBER element type
 }
 ```
 
-**Note:**
-- values of SkyflowElements will be returned in element state object only when `env` is  `DEV`,  else it is empty string i.e, '', but in case of CARD_NUMBER type element when the `env` is `PROD` for all the card types except AMEX, it will return first eight digits, for AMEX it will return first six digits and rest all digits in masked format.
-- `selectedCardScheme` will exist for `CARD_NUMBER` element state and the value of <a href="#supported-card-types-by-skyflowcardtype">Skyflow.CardType</a> will be only populated when cardbrand choice selection is triggered otherwise, it will always be an empty string.
+`Note:`
+values of SkyflowElements will be returned in element state object only when `env` is  `DEV`,  else it is empty string i.e, '', but in case of CARD_NUMBER type element when the `env` is `PROD` for all the card types except AMEX, it will return first eight digits, for AMEX it will return first six digits and rest all digits in masked format.
 
 ##### Sample [code snippet](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/collect-element-listeners.html) for using listeners 
 ```javascript
