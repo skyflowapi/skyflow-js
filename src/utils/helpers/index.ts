@@ -21,8 +21,8 @@ const { getType } = require('mime');
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
 export function formatFrameNameToId(name: string) {
-  const arr = name.split(':');
-  if (arr.length > 2) {
+  const arr = name?.split(':');
+  if (arr && arr.length > 2) {
     const id = `${arr[0]}:${arr[1]}:${arr[2]}`;
     return id;
   }

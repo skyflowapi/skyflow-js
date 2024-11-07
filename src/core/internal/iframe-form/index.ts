@@ -157,9 +157,8 @@ export class IFrameFormElement extends EventEmitter {
   }
 
   isMatchEqual(index: number, value: string, validation: IValidationRule): boolean {
-    const elementName = validation.params.element;
-
     try {
+      const elementName = validation?.params?.element;
       const elementIFrame = window.parent.frames[elementName];
       if (!elementIFrame) return false;
 
@@ -191,7 +190,7 @@ export class IFrameFormElement extends EventEmitter {
   }
 
   checkMatch(index: number, validation: IValidationRule): void {
-    const elementName = validation.params.element;
+    const elementName = validation?.params?.element;
     const iframeName = formatFrameNameToId(elementName);
     // listen to on blur or main element
     bus.on(ELEMENT_EVENTS_TO_CLIENT.BLUR + iframeName, () => {

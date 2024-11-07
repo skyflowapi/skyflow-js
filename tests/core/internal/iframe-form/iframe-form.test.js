@@ -431,6 +431,32 @@ describe('test iframeFormelement', () => {
         expect(cardNumberElement.errorText).toBe(parameterizedString(logs.errorLogs.VALIDATION_FAILED))
     });
 
+    test('card number custom validation with error',()=>{
+        windowSpy.mockImplementation(()=>({}));
+        testValue = '5555 3412 4444 '
+        const elementRule = {
+            type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
+        }
+        const cardNumberElement = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
+        try{
+            cardNumberElement.setValidation([elementRule]);
+            cardNumberElement.state.value = "test";
+        } catch(err) {
+            expect(err).toBeDefined();
+        }
+        
+        try{
+            const callback = onSpy.mock.calls[0][1];
+            callback({});
+            expect(callback).toBeDefined();
+            let isValid = cardNumberElement.validator('5555 3412 4444 1115')
+            expect(isValid).toBe(false)
+            expect(cardNumberElement.errorText).toBe(parameterizedString(logs.errorLogs.VALIDATION_FAILED))
+        } catch (err) {
+            expect(err).toBeDefined();
+        }
+    });
+
 })
 
 
