@@ -53,10 +53,12 @@ describe('test iframeFormelement', () => {
     let targetSpy;
     let on = jest.fn()
     let windowSpy
+    let onSpy;
     let testValue;
     beforeEach(() => {
         jest.clearAllMocks()
         emitSpy = jest.spyOn(bus, 'emit');
+        onSpy = jest.spyOn(bus, 'on');
         targetSpy = jest.spyOn(bus, 'target');
         targetSpy.mockReturnValue({
             on,
@@ -419,7 +421,11 @@ describe('test iframeFormelement', () => {
         }
         const cardNumberElement = new IFrameFormElement(`element:CARD_NUMBER:${tableCol}`, {}, context)
         cardNumberElement.setValidation([elementRule]);
+        cardNumberElement.state.value = "test";
 
+        const callback = onSpy.mock.calls[0][1];
+        callback({});
+        expect(callback).toBeDefined();
         let isValid = cardNumberElement.validator('5555 3412 4444 1115')
         expect(isValid).toBe(false)
         expect(cardNumberElement.errorText).toBe(parameterizedString(logs.errorLogs.VALIDATION_FAILED))

@@ -172,7 +172,7 @@ export class IFrameFormElement extends EventEmitter {
         if (inputElement) {
           let elementValue = inputElement.value;
 
-          if (this.fieldType === ElementType.CARD_NUMBER) {
+          if (elementValue && this.fieldType === ElementType.CARD_NUMBER) {
             elementValue = elementValue.replace(/[\s-]/g, '');
           }
 
@@ -196,7 +196,7 @@ export class IFrameFormElement extends EventEmitter {
     // listen to on blur or main element
     bus.on(ELEMENT_EVENTS_TO_CLIENT.BLUR + iframeName, () => {
       let { value } = this.state;
-      if (this.fieldType === ElementType.CARD_NUMBER) {
+      if (value && this.fieldType === ElementType.CARD_NUMBER) {
         value = value.replace(/[\s-]/g, '');
       }
       // Validate the match and update the state accordingly
