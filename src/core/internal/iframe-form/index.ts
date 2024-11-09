@@ -28,6 +28,7 @@ import {
 } from '../../../utils/validators';
 import {
   checkForElementMatchRule,
+  checkForValueMatch,
   constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
@@ -169,7 +170,7 @@ export class IFrameFormElement extends EventEmitter {
 
         const inputElement = elementIFrame.document.getElementById(elementId) as HTMLInputElement;
         if (inputElement) {
-          let elementValue = inputElement.value;
+          let elementValue = inputElement?.value;
 
           if (elementValue && this.fieldType === ElementType.CARD_NUMBER) {
             elementValue = elementValue.replace(/[\s-]/g, '');
@@ -1039,9 +1040,17 @@ export class IFrameForm {
       ) {
         const {
           state, doesClientHasError, clientErrorText, errorText, onFocusChange,
+          validations, setValue,
         } = this.iFrameFormElements[formElements[i]];
 
         if (state.isRequired || !state.isValid) {
+          onFocusChange(false);
+        }
+
+        if (validations
+          && checkForElementMatchRule(validations)
+          && checkForValueMatch(validations, this.iFrameFormElements[formElements[i]])) {
+          setValue(state.value);
           onFocusChange(false);
         }
 

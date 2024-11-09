@@ -135,9 +135,11 @@ const collectResponse = {
 describe('test composable container class',()=>{
   let emitSpy;
   let targetSpy;
+  let onSpy;
   beforeEach(() => {
     emitSpy = jest.spyOn(bus, 'emit');
     targetSpy = jest.spyOn(bus, 'target');
+    onSpy = jest.spyOn(bus, 'on');
     targetSpy.mockReturnValue({
       on,
       off: jest.fn()
@@ -160,6 +162,14 @@ describe('test composable container class',()=>{
   it('test create method',()=>{
     const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
     const element = container.create(cvvElement);
+    expect(element).toBeInstanceOf(ComposableElement);
+  });
+
+  it('test create method with callback',()=>{
+    const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
+    const element = container.create(cvvElement);
+    on.mock.calls[0][1]({name : "collect_controller1234"},()=>{});
+    on.mock.calls[1][1]({name : "collect_controller"},()=>{});
     expect(element).toBeInstanceOf(ComposableElement);
   });
 
@@ -265,4 +275,32 @@ describe('test composable container class',()=>{
 
   });
     
+  it('test on method without parameters will throw error',()=>{
+    try{
+      const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
+      const element = container.create(cvvElement);
+      container.on();
+      expect(element).toBeInstanceOf(ComposableElement);
+    } catch(err) {
+      expect(err).toBeDefined();
+    }
+  });
+
+  it('test on method without event name will throw error',()=>{
+    try {
+      const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
+      const element = container.create(cvvElement);
+      container.on("CHANGE");
+      expect(element).toBeInstanceOf(ComposableElement);
+    } catch(err) {
+      expect(err).toBeDefined();
+    }
+  });
+
+  it('test on method without error',()=>{
+    const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
+    const element = container.create(cvvElement);
+    container.on("CHANGE",()=>{});
+    expect(element).toBeInstanceOf(ComposableElement);
+  });
 });

@@ -14,6 +14,7 @@ import { parameterizedString } from '../../../../src/utils/logs-helper';
 
 const tableCol = btoa('1234')
 const collect_element = `element:CVV:${tableCol}`;
+const test_collect_element = `element:CARD_NUMBER:${tableCol}`;
 const file_element = `element:FILE_INPUT:${tableCol}`;
 
 const context = {
@@ -112,6 +113,31 @@ describe('test iframeFormelement', () => {
         })
 
     })
+
+    test('is match equal tests',()=>{
+        const validation = {
+            type: 'ELEMENT_VALUE_MATCH_RULE',
+            params: {
+                element: 'element:CARD_NUMBER:${tableCol}',
+            },
+        };
+        const element = new IFrameFormElement(test_collect_element, '',{} ,context);
+        element.isMatchEqual(1,"123",validation)
+        expect(element).toBeInstanceOf(IFrameFormElement)
+    });
+
+    test('is match equal tests with invalid id',()=>{
+        const validation = {
+            type: 'ELEMENT_VALUE_MATCH_RULE',
+            params: {
+                element: 'test:group',
+                elementID: "id"
+            },
+        };
+        const element = new IFrameFormElement(collect_element, '',{} ,context);
+        element.isMatchEqual(1,"123",validation)
+        expect(element).toBeInstanceOf(IFrameFormElement)
+    });
 
     test('set mask with null value',()=>{
         const element = new IFrameFormElement(collect_element, '',{} ,context);
@@ -671,6 +697,165 @@ describe('test iframeForm collect method', () => {
             done()
         }, 1000)
 
+    })
+
+    test('initialize iframeform with element value match rule', (done) => {
+        const form = new IFrameForm("controllerId", "", "ERROR");
+        form.setClient(clientObj)
+        form.setClientMetadata(metaData)
+        form.setContext(context)
+
+        const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
+        const frameReadyCb = frameReadyEvent[0][1];
+
+        expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
+
+        frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
+
+        expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
+        const skyflowInit = jest.fn();
+        let windowSpy = jest.spyOn(global, 'window', 'get');
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+
+        frameReadyCb({ name:collect_element})
+
+        const createFormElement = skyflowInit.mock.calls[0][0]
+        const element = createFormElement(collect_element,undefined,undefined,true)
+        element.doesClientHasError = false;
+        element.validations = [
+            {
+                type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
+                params:{
+                    element: "",
+                    elementID: "",
+                    error: "test rule"
+                }
+            }
+        ]
+        const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
+        const tokenizationCb = tokenizationEvent[0][1];
+        const cb2 = jest.fn();
+        tokenizationCb(data, cb2)
+
+        setTimeout(() => {
+            expect(cb2.mock.calls[0][0].error.message).toBeDefined()
+        }, 1000)
+        element.setValue('123')
+        const cb3 = jest.fn()
+        tokenizationCb(data, cb3)
+        
+        const cb4 = jest.fn()
+        tokenizationCb({
+            ...data,
+            additionalFields: {
+                ...data.additionalFields,
+                records: [{
+                    table: 'table',
+                    fields: {
+                        col: '123'
+                    }
+                }]
+            }
+        }, cb4)
+        setTimeout(() => {
+            expect(form).toBeDefined()
+            done()
+        }, 1000)
+
+    })
+
+    test('initialize iframeform with element value match rule & client error', (done) => {
+        const form = new IFrameForm("controllerId", "", "ERROR");
+        form.setClient(clientObj)
+        form.setClientMetadata(metaData)
+        form.setContext(context)
+
+        const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
+        const frameReadyCb = frameReadyEvent[0][1];
+
+        expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
+
+        frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
+
+        expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
+        const skyflowInit = jest.fn();
+        let windowSpy = jest.spyOn(global, 'window', 'get');
+        windowSpy.mockImplementation(() => ({
+            parent: {
+                frames: [{
+                    name: collect_element,
+                    location: {
+                        href: 'http://iframe.html'
+                    },
+                    Skyflow: {
+                        init: skyflowInit
+                    }
+                }]
+            },
+            location: {
+                href: 'http://iframe.html'
+            }
+        }));
+
+        frameReadyCb({ name:collect_element})
+
+        const createFormElement = skyflowInit.mock.calls[0][0]
+        const element = createFormElement(collect_element,undefined,undefined,true)
+        element.doesClientHasError = true;
+        element.validations = [
+            {
+                type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
+                params:{
+                    element: "",
+                    elementID: "",
+                    error: "test rule"
+                }
+            }
+        ]
+        const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
+        const tokenizationCb = tokenizationEvent[0][1];
+        const cb2 = jest.fn();
+        tokenizationCb(data, cb2)
+
+        setTimeout(() => {
+            expect(cb2.mock.calls[0][0].error.message).toBeDefined()
+        }, 1000)
+        element.setValue('123')
+        const cb3 = jest.fn()
+        tokenizationCb(data, cb3)
+        
+        const cb4 = jest.fn()
+        tokenizationCb({
+            ...data,
+            additionalFields: {
+                ...data.additionalFields,
+                records: [{
+                    table: 'table',
+                    fields: {
+                        col: '123'
+                    }
+                }]
+            }
+        }, cb4)
+        setTimeout(() => {
+            expect(form).toBeDefined()
+            done()
+        }, 1000)
 
     })
 
