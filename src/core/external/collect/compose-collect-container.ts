@@ -84,6 +84,8 @@ class ComposableContainer extends Container {
 
   #tempElements: any = {};
 
+  #clientDomain: string = '';
+
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -105,10 +107,10 @@ class ComposableContainer extends Container {
     this.#options = options;
     this.#eventEmitter = new EventEmitter();
 
-    const clientDomain = this.#metaData.clientDomain || '';
+    this.#clientDomain = this.#metaData.clientDomain || '';
     const iframe = iframer({
-      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}:${btoa(clientDomain)}`,
-      referrer: clientDomain,
+      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`,
+      referrer: this.#clientDomain,
     });
     setAttributes(iframe, {
       src: getIframeSrc(),
@@ -171,7 +173,7 @@ class ComposableContainer extends Container {
       validations,
       elementName,
     });
-    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}`;
+    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`;
     return new ComposableElement(elementName, this.#eventEmitter, controllerIframeName);
   };
 

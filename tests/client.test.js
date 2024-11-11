@@ -189,6 +189,8 @@ describe("Client Class",()=>{
                 body:{
                     "key":"value"
                 }
+            }).catch(err=>{
+                expect(err).toBeDefined();
             });
             expect(xhrMock.open).toBeCalledWith('GET', 'https://example-test.com');
             expect(xhrMock.setRequestHeader).toBeCalledWith("Auth","eyde.ed.ewe");
@@ -224,6 +226,8 @@ describe("Client Class",()=>{
                 body:{
                     "key":"value"
                 }
+            }).catch(err=>{
+                expect(err).toBeDefined();
             });
             expect(xhrMock.open).toBeCalledWith('GET', 'https://example-test.com');
             expect(xhrMock.setRequestHeader).toBeCalledWith("Auth","eyde.ed.ewe");

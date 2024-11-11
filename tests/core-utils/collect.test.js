@@ -1,4 +1,5 @@
-import { getUpsertColumn, constructElementsInsertReq } from "../../src/core-utils/collect";
+import { getUpsertColumn, constructElementsInsertReq, checkForElementMatchRule, checkForValueMatch } from "../../src/core-utils/collect";
+import { ValidationRuleType } from "../../src/utils/common";
 import SKYFLOW_ERROR_CODE from "../../src/utils/constants";
 import { parameterizedString } from "../../src/utils/logs-helper";
 
@@ -97,4 +98,81 @@ describe("constructElementsInsertReq fn test", () => {
 }
 });
 
+});
+
+class MockIFrameFormElement {
+    state = { value: 'testValue' };
+
+    isMatchEqual(index, value, rule) {
+        return index % 2 === 0; 
+    }
+}
+
+describe('checkForElementMatchRule', () => {
+    it('should return false when validations array is null or undefined', () => {
+        expect(checkForElementMatchRule(null)).toBe(false);
+        expect(checkForElementMatchRule(undefined)).toBe(false);
+    });
+
+    it('should return false when validations array is empty', () => {
+        expect(checkForElementMatchRule([])).toBe(false);
+    });
+
+    it('should return true when an ELEMENT_VALUE_MATCH_RULE type is found', () => {
+        const validations = [
+            { type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE, params: {} },
+            { type: ValidationRuleType.ANOTHER_TYPE, params: {} },
+        ];
+        expect(checkForElementMatchRule(validations)).toBe(true);
+    });
+
+    it('should return false when no ELEMENT_VALUE_MATCH_RULE type is found', () => {
+        const validations = [
+            { type: ValidationRuleType.ANOTHER_TYPE, params: {} },
+            { type: ValidationRuleType.DIFFERENT_TYPE, params: {} },
+        ];
+        expect(checkForElementMatchRule(validations)).toBe(false);
+    });
+});
+
+describe('checkForValueMatch', () => {
+    let element;
+
+    beforeEach(() => {
+        element = new MockIFrameFormElement();
+    });
+
+    it('should return false when validations array is null or undefined', () => {
+        expect(checkForValueMatch(null, element)).toBe(false);
+        expect(checkForValueMatch(undefined, element)).toBe(false);
+    });
+
+    it('should return false when validations array is empty', () => {
+        expect(checkForValueMatch([], element)).toBe(false);
+    });
+
+    it('should return true when an ELEMENT_VALUE_MATCH_RULE type is found and isMatchEqual returns false', () => {
+        const validations = [
+            { type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE, params: {} },
+        ];
+        jest.spyOn(element, 'isMatchEqual').mockReturnValue(false);
+
+        expect(checkForValueMatch(validations, element)).toBe(true);
+    });
+
+    it('should return false when an ELEMENT_VALUE_MATCH_RULE type is found but isMatchEqual returns true', () => {
+        const validations = [
+            { type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE, params: {} },
+        ];
+        jest.spyOn(element, 'isMatchEqual').mockReturnValue(true);
+
+        expect(checkForValueMatch(validations, element)).toBe(false);
+    });
+
+    it('should return false when no ELEMENT_VALUE_MATCH_RULE type is found', () => {
+        const validations = [
+            { type: ValidationRuleType.ANOTHER_TYPE, params: {} },
+        ];
+        expect(checkForValueMatch(validations, element)).toBe(false);
+    });
 });
