@@ -16,6 +16,7 @@ import {
   DEFAULT_ERROR_TEXT_ELEMENT_TYPES,
   DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES,
   CardType,
+  ELEMENT_TYPES,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -192,7 +193,9 @@ export class IFrameFormElement extends EventEmitter {
 
   checkMatch(index: number, validation: IValidationRule): void {
     const elementName = validation?.params?.element;
-    const iframeName = formatFrameNameToId(elementName);
+    const iframeName = this.metaData.containerType === ELEMENT_TYPES.COMPOSE
+      ? validation?.params?.elementID
+      : formatFrameNameToId(elementName);
     // listen to on blur or main element
     bus.on(ELEMENT_EVENTS_TO_CLIENT.BLUR + iframeName, () => {
       let { value } = this.state;
