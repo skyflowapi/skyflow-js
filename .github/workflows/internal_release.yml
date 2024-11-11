@@ -59,8 +59,8 @@ jobs:
  
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
-        # with:
-        #   args: --acl public-read --delete
+        with:
+          args: --delete
         env:
           AWS_S3_BUCKET: ${{ secrets.BLITZ_AWS_BUCKET_NAME }}
           AWS_ACCESS_KEY_ID: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
