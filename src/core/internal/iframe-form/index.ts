@@ -203,7 +203,9 @@ export class IFrameFormElement extends EventEmitter {
       const isValid = this.isMatchEqual(index, value, validation);
       this.state.isValid = isValid;
       this.setValue(this.state.value, isValid, true);
-      this.onFocusChange(false);
+      if (!this.state.isFocused) {
+        this.onFocusChange(false);
+      }
     });
   }
 

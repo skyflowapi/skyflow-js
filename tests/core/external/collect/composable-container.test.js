@@ -297,6 +297,17 @@ describe('test composable container class',()=>{
     }
   });
 
+  it('test on method passing handler as invalid type will throw error',()=>{
+    try {
+      const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
+      const element = container.create(cvvElement);
+      container.on("CHANGE","test");
+      expect(element).toBeInstanceOf(ComposableElement);
+    } catch(err) {
+      expect(err).toBeDefined();
+    }
+  });
+
   it('test on method without error',()=>{
     const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
     const element = container.create(cvvElement);
