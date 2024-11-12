@@ -218,9 +218,10 @@ export const getValueAndItsUnit = (
   return [string.slice(0, index), string.slice(index)];
 };
 
-export const formatValidations = (validations?: IValidationRule[]): IValidationRule[] => {
+export const formatValidations = (validations?: IValidationRule[]):
+IValidationRule[] | undefined => {
   if (!validations || !Array.isArray(validations) || validations.length === 0) {
-    return [];
+    return validations;
   }
 
   return validations.map((validationRule: IValidationRule, index: number) => {
