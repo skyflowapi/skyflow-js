@@ -16,6 +16,7 @@ import {
   DEFAULT_ERROR_TEXT_ELEMENT_TYPES,
   DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES,
   CardType,
+  ELEMENT_TYPES,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -28,6 +29,7 @@ import {
 } from '../../../utils/validators';
 import {
   checkForElementMatchRule,
+  checkForValueMatch,
   constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
@@ -156,6 +158,70 @@ export class IFrameFormElement extends EventEmitter {
     this.collectBusEvents();
   }
 
+  isMatchEqual(index: number, value: string, validation: IValidationRule): boolean {
+    try {
+      const elementName = validation?.params?.element;
+      const elementIFrame = window.parent.frames[elementName];
+      if (!elementIFrame) return false;
+
+      if (elementName.startsWith(`${FRAME_ELEMENT}:`)) {
+        const elementId = elementName.includes('group:')
+          ? validation.params.elementID
+          : formatFrameNameToId(elementName);
+
+        const inputElement = elementIFrame.document.getElementById(elementId) as HTMLInputElement;
+        if (inputElement) {
+          let elementValue = inputElement?.value;
+
+          if (elementValue && this.fieldType === ElementType.CARD_NUMBER) {
+            elementValue = elementValue.replace(/[\s-]/g, '');
+          }
+
+          return elementValue === value;
+        }
+      }
+    } catch {
+      throw new SkyflowError(
+        SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE,
+        [`${index}`],
+        true,
+      );
+    }
+
+    return false;
+  }
+
+  checkMatch(index: number, validation: IValidationRule): void {
+    const elementName = validation?.params?.element;
+    const iframeName = this.metaData.containerType === ELEMENT_TYPES.COMPOSE
+      ? validation?.params?.elementID
+      : formatFrameNameToId(elementName);
+    // listen to on blur or main element
+    bus.on(ELEMENT_EVENTS_TO_CLIENT.BLUR + iframeName, () => {
+      let { value } = this.state;
+      if (value && this.fieldType === ElementType.CARD_NUMBER) {
+        value = value.replace(/[\s-]/g, '');
+      }
+      // Validate the match and update the state accordingly
+      const isValid = this.isMatchEqual(index, value, validation);
+      this.state.isValid = isValid;
+      this.setValue(this.state.value, isValid, true);
+      if (!this.state.isFocused) {
+        this.onFocusChange(false);
+      }
+    });
+  }
+
+  listenForMatchRule(): void {
+    if (!this.validations || this.validations.length === 0) return;
+
+    this.validations.forEach((validation, index) => {
+      if (validation.type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {
+        this.checkMatch(index, validation);
+      }
+    });
+  }
+
   onFocusChange = (focus: boolean) => {
     this.changeFocus(focus);
 
@@ -168,6 +234,7 @@ export class IFrameFormElement extends EventEmitter {
     });
 
     if (!focus) {
+      bus.emit(ELEMENT_EVENTS_TO_CLIENT.BLUR + this.iFrameName);
       this._emit(ELEMENT_EVENTS_TO_CLIENT.BLUR, {
         ...this.getStatus(),
         value: this.state.value,
@@ -235,6 +302,9 @@ export class IFrameFormElement extends EventEmitter {
     }
     if (validations) {
       this.validations = validations;
+      if (checkForElementMatchRule(validations)) {
+        this.listenForMatchRule();
+      }
     }
   }
 
@@ -471,35 +541,9 @@ export class IFrameFormElement extends EventEmitter {
               resp = false;
             }
             break;
-          case ValidationRuleType.ELEMENT_VALUE_MATCH_RULE: {
-            const elementName = this.validations[i].params.element;
-            let elementIFrame;
-            try {
-              elementIFrame = window.parent.frames[elementName];
-            } catch (err) {
-              throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE, [`${i}`], true);
-            }
-            let elementValue;
-            if (elementIFrame) {
-              if (elementName.startsWith(`${FRAME_ELEMENT}:`)) {
-                const elementId = elementName.includes('group:')
-                  ? this.validations[i].params.elementID
-                  : formatFrameNameToId(elementName);
-                const collectInputElement = elementIFrame
-                  .document.getElementById(elementId) as HTMLInputElement;
-                if (collectInputElement) {
-                  elementValue = collectInputElement.value;
-                  if (this.fieldType === ElementType.CARD_NUMBER) {
-                    elementValue = elementValue.replace(/[\s-]/g, '');
-                  }
-                }
-              }
-              if (elementValue !== value) {
-                resp = false;
-              }
-            }
+          case ValidationRuleType.ELEMENT_VALUE_MATCH_RULE:
+            resp = this.isMatchEqual(i, value, this.validations[i]);
             break;
-          }
           default:
             this.errorText = parameterizedString(logs.errorLogs.INVALID_VALIDATION_RULE_TYPE);
             resp = false;
@@ -1001,9 +1045,17 @@ export class IFrameForm {
       ) {
         const {
           state, doesClientHasError, clientErrorText, errorText, onFocusChange,
+          validations, setValue,
         } = this.iFrameFormElements[formElements[i]];
 
         if (state.isRequired || !state.isValid) {
+          onFocusChange(false);
+        }
+
+        if (validations
+          && checkForElementMatchRule(validations)
+          && checkForValueMatch(validations, this.iFrameFormElements[formElements[i]])) {
+          setValue(state.value);
           onFocusChange(false);
         }
 

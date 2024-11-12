@@ -218,45 +218,62 @@ export const getValueAndItsUnit = (
   return [string.slice(0, index), string.slice(index)];
 };
 
-export const formatValidations = (validations?: IValidationRule[]) => {
-  if (validations && Array.isArray(validations) && validations.length > 0) {
-    validations.forEach((validationRule: IValidationRule, index:number) => {
-      if (validationRule && validationRule.type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {
-        if (validationRule.params && !Object.prototype.hasOwnProperty.call(validationRule.params, 'element')) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
-        }
-        if (validationRule.params
-          && (validationRule.params.element == null
-            || !(validationRule.params.element instanceof CollectElement || ComposableElement))) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
-        }
-        if (validationRule.params
-          && validationRule.params.element
-          && (validationRule.params.element instanceof CollectElement || ComposableElement)) {
-          // if (!validationRule.params.element.isMounted()) {
-          //   throw new SkyflowError(
-          //     SKYFLOW_ERROR_CODE.ELEMENT_NOT_MOUNTED_IN_ELEMENT_MATCH_RULE, [`${index}`], true,
-          //   );
-          // }
-          validationRule.params.elementID = validationRule.params.element.getID();
-          validationRule.params.element = validationRule.params.element.iframeName();
-        }
-      } else if (validationRule && validationRule.type === ValidationRuleType.REGEX_MATCH_RULE) {
-        if (validationRule.params
-          && validationRule.params.regex
-          && !isValidRegExp(validationRule.params.regex)) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REGEX_IN_REGEX_MATCH_RULE, [`${index}`], true);
-        }
-        if (validationRule.params
-          && validationRule.params.regex
-          && isValidRegExp(validationRule.params.regex)) {
-          validationRule.params.regex = validationRule.params.regex.toString();
-        }
-      }
-    });
+export const formatValidations = (validations?: IValidationRule[]): IValidationRule[] => {
+  if (!validations || !Array.isArray(validations) || validations.length === 0) {
+    return [];
   }
 
-  return validations;
+  return validations.map((validationRule: IValidationRule, index: number) => {
+    if (!validationRule) return validationRule;
+
+    switch (validationRule.type) {
+      case ValidationRuleType.ELEMENT_VALUE_MATCH_RULE: {
+        const { params } = validationRule;
+        if (!params || !Object.prototype.hasOwnProperty.call(params, 'element')) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
+        }
+
+        const { element } = params;
+        if (!element || !(element instanceof CollectElement || ComposableElement)) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
+        }
+
+        return {
+          ...validationRule,
+          params: {
+            ...params,
+            elementID: element.getID(),
+            element: element.iframeName(),
+          },
+        };
+      }
+
+      case ValidationRuleType.REGEX_MATCH_RULE: {
+        const { params } = validationRule;
+        const { regex } = params || {};
+
+        if (regex && !isValidRegExp(regex)) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REGEX_IN_REGEX_MATCH_RULE, [`${index}`], true);
+        }
+
+        if (regex && isValidRegExp(regex)) {
+          return {
+            ...validationRule,
+            params: {
+              ...params,
+              regex: regex.toString(),
+            },
+          };
+        }
+        break;
+      }
+
+      default:
+        return validationRule;
+    }
+
+    return validationRule;
+  });
 };
 
 export const formatOptions = (elementType, options, logLevel) => {
