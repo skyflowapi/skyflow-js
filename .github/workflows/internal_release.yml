@@ -10,10 +10,7 @@ on:
       - "*.md"
     branches:
       - release/*
-  pull_request:
-    branches:
-      - main
-      - release/*
+
 jobs:
   build-sdk:
     runs-on: ubuntu-latest
