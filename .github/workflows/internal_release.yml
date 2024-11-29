@@ -61,6 +61,26 @@ jobs:
           IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
           IFRAME_SECURE_SITE: "v${{ env.INTERNAL_RELEASE_VERSION  }}/${{ secrets.IFRAME_SECURE_SITE }}"
 
+      - name: Set latest tag
+        run: |
+          mkdir tags
+          echo "v${{ env.INTERNAL_RELEASE_VERSION }}" > tags/latest
+
+      - name: Deploy latest tag to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.BLITZ_AWS_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
+          AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
+          SOURCE_DIR: "tags"
+
+      - name: Remove latest tag
+        run: |
+          rm -rf tags
+
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         with:
