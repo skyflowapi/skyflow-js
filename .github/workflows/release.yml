@@ -48,14 +48,34 @@ jobs:
         run: npm run build-browser-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: "v${{ steps.previoustag.outputs.tag }}/${{ secrets.PROD_IFRAME_SECURE_SITE }}"
 
       - name: npm build iframe
         run: npm run build-iframe
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
- 
+          IFRAME_SECURE_SITE: "v${{ steps.previoustag.outputs.tag }}/${{ secrets.PROD_IFRAME_SECURE_SITE }}"
+
+      - name: Set latest tag
+        run: |
+          mkdir tags
+          echo "v${{ steps.previoustag.outputs.tag }}" > tags/latest
+
+      - name: Deploy latest tag to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.PROD_AWS_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_ACCESS_KEY_SECRET }}
+          AWS_REGION: ${{ secrets.PROD_AWS_REGION }}
+          SOURCE_DIR: "tags"
+
+      - name: Remove latest tag
+        run: |
+          rm -rf tags
+
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         with:
@@ -66,12 +86,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_ACCESS_KEY_SECRET }}
           AWS_REGION: ${{ secrets.PROD_AWS_REGION }}
           SOURCE_DIR: "dist/v1"
-          DEST_DIR: "v1/"
+          DEST_DIR: "v${{ steps.previoustag.outputs.tag }}/"
 
       - name: build node-sdk
         env:
           IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_SITE: "v${{ steps.previoustag.outputs.tag }}/${{ secrets.PROD_IFRAME_SECURE_SITE }}"
         run: |
           npm run build:types 
           npm run build-node-sdk
