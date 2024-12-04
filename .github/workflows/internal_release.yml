@@ -11,7 +11,7 @@ on:
     branches:
       - release/*
 
-
+      
 jobs:
   build-sdk:
     runs-on: ubuntu-latest
@@ -106,50 +106,7 @@ jobs:
           
       - name: publish to jfrog
         run: |
-            npm publish
-
-  # build-latest-sdk:
-    # runs-on: ubuntu-latest
-    # steps:
-    #   - uses: actions/checkout@v2
-    #     with:
-    #       token: ${{ secrets.PAT_ACTIONS }}
-    #       fetch-depth: 0
-          
-    #   - uses: actions/setup-node@v1
-    #     with:
-    #       node-version: 14.17.6
-    #   - run: npm install
-
-    #   - name: Get Previous tag
-    #     id: previoustag
-    #     uses: WyriHaximus/github-action-get-previous-tag@v1
-    #     with:
-    #       fallback: 1.0.0
-
-    #   - name: npm build
-    #     run: npm run build-browser-sdk
-    #     env:
-    #       IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-    #       IFRAME_SECURE_SITE: "v2/${{ secrets.IFRAME_SECURE_SITE }}"
-
-    #   - name: npm build iframe
-    #     run: npm run build-iframe
-    #     env:
-    #       IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-    #       IFRAME_SECURE_SITE: "v2/${{ secrets.IFRAME_SECURE_SITE }}"
-
-    #   - name: Deploy to S3
-    #     uses: jakejarvis/s3-sync-action@master
-    #     with:
-    #       args: --acl public-read --delete
-    #     env:
-    #       AWS_S3_BUCKET: ${{ secrets.BLITZ_AWS_BUCKET_NAME }}
-    #       AWS_ACCESS_KEY_ID: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
-    #       AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
-    #       AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
-    #       SOURCE_DIR: "dist/v1"
-    #       DEST_DIR: "v2/"
+            npm publish 
 
   aws-cf-invalidate:
     runs-on: ubuntu-latest
