@@ -43,37 +43,29 @@ jobs:
           IFRAME_SECURE_ORGIN: ${{ secrets.SANDBOX_IFRAME_SECURE_ORIGIN }}
           IFRAME_SECURE_SITE: "v${{ steps.previoustag.outputs.tag }}/${{ secrets.SANDBOX_IFRAME_SECURE_SITE }}"
 
+      - name: Configure AWS credentials Sandbox account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_SECRET }}
+          aws-region: ${{ secrets.SANDBOX_AWS_REGION }}
+
       - name: Set latest tag
         run: |
           mkdir tags
           echo "v${{ steps.previoustag.outputs.tag }}" > tags/latest
 
       - name: Deploy latest tag to S3
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --delete
-        env:
-          AWS_S3_BUCKET: ${{ secrets.SANDBOX_AWS_BUCKET_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_SECRET }}
-          AWS_REGION: ${{ secrets.SANDBOX_AWS_REGION }}
-          SOURCE_DIR: "tags"
+        run:
+          aws s3 cp --recursive tags s3://${{secrets.SANDBOX_AWS_BUCKET_NAME}}/
 
       - name: Remove latest tag
         run: |
           rm -rf tags
 
       - name: Deploy to S3
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args:  --delete
-        env:
-          AWS_S3_BUCKET: ${{ secrets.SANDBOX_AWS_BUCKET_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_SECRET }}
-          AWS_REGION: ${{ secrets.SANDBOX_AWS_REGION }}
-          SOURCE_DIR: "dist/v1"
-          DEST_DIR: "v${{ steps.previoustag.outputs.tag }}/"
+        run:
+          aws s3 cp --recursive dist/v1 s3://${{secrets.SANDBOX_AWS_BUCKET_NAME}}/v${{ steps.previoustag.outputs.tag }}/
 
       - name: build node-sdk
         env:
