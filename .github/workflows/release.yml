@@ -47,13 +47,13 @@ jobs:
       - name: npm build
         run: npm run build-browser-sdk
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_ORIGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
           IFRAME_SECURE_SITE: "v${{ steps.previoustag.outputs.tag }}/${{ secrets.PROD_IFRAME_SECURE_SITE }}"
 
       - name: npm build iframe
         run: npm run build-iframe
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_ORIGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
           IFRAME_SECURE_SITE: "v${{ steps.previoustag.outputs.tag }}/${{ secrets.PROD_IFRAME_SECURE_SITE }}"
 
       - name: Configure AWS credentials Prod account
@@ -82,7 +82,7 @@ jobs:
 
       - name: build node-sdk
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_ORIGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
           IFRAME_SECURE_SITE: "v${{ steps.previoustag.outputs.tag }}/${{ secrets.PROD_IFRAME_SECURE_SITE }}"
         run: |
           npm run build:types 
