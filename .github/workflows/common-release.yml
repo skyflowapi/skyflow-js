@@ -1,0 +1,143 @@
+name: Common Release Workflow
+
+on:
+  workflow_call:
+    inputs:
+      TAG_TYPE:
+        required: true
+        type: string
+      NPM_TAG:
+        required: false
+        type: string
+      REGISTRY_URL:
+        required: false
+        type: string
+    secrets:
+        PAT_ACTIONS:
+            required: true
+        IFRAME_SECURE_ORIGIN:
+            required: true
+        IFRAME_SECURE_SITE:
+            required: true
+        AWS_SECRET_ACCESS_KEY:
+            required: true
+        AWS_ACCESS_KEY_ID:
+            required: true
+        AWS_REGION:
+            required: true
+        AWS_BUCKET_NAME:
+            required: true
+        CF_DISTRIBUTION_ID:
+            required: true
+        JFROG_USERNAME:
+            required: false
+        JFROG_PASSWORD:
+            required: false
+        NPM_TOKEN:
+            required: false
+
+jobs:
+  build-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT_ACTIONS }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14.17.6
+          registry-url: ${{ inputs.REGISTRY_URL }}
+            #'https://registry.npmjs.org'
+
+      - run: npm install
+
+      - name: Get Previous Tag
+        id: previoustag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+        with:
+          fallback: 1.0.0
+
+      - name: Set RELEASE_VERSION
+        run: |
+          if [ "${{ inputs.TAG_TYPE }}" = "dev" ]; then
+            echo "RELEASE_VERSION=${{ steps.previoustag.outputs.tag }}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
+          else
+            echo "RELEASE_VERSION=${{ steps.previoustag.outputs.tag }}" >> $GITHUB_ENV
+          fi
+
+      - name: Bump Version
+        if: ${{ inputs.TAG_TYPE != 'sandbox' }}
+        run: |
+          chmod +x ./scripts/bump_version.sh
+          ./scripts/bump_version.sh "${{ env.RELEASE_VERSION }}"
+
+      - name: Commit Changes
+        if: ${{ inputs.TAG_TYPE != 'sandbox' }}
+        run: |
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ github.actor }}@users.noreply.github.com
+          git add package.json
+          git commit -m "[AUTOMATED] Release - ${{ env.RELEASE_VERSION }}"
+          git push origin -f
+
+      - name: Build Browser SDK
+        run: npm run build-browser-sdk
+        env:
+          IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+
+      - name: Build Iframe
+        run: npm run build-iframe
+        env:
+          IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set Latest Tag
+        run: |
+          mkdir tags
+          echo "${{ env.RELEASE_VERSION }}" > tags/latest
+
+      - name: Deploy Latest Tag to S3
+        run: aws s3 cp --recursive tags s3://${{ secrets.AWS_BUCKET_NAME }}/
+
+      - name: Remove Latest Tag
+        run: rm -rf tags
+
+      - name: Deploy to S3
+        run: |
+          aws s3 cp --recursive dist/v1 s3://${{ secrets.AWS_BUCKET_NAME }}/v${{ env.RELEASE_VERSION }}/
+
+      - name: Build Node SDK
+        run: |
+          npm run build:types 
+          npm run build-node-sdk
+        env:
+          IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+
+      - name: Publish SDK
+        run: |
+          if [ "${{ inputs.TAG_TYPE }}" = "sandbox" ]; then
+            npm publish --tag ${{ inputs.NPM_TAG }}
+          elif [ "${{ inputs.TAG_TYPE }}" = "dev" ]; then
+            curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
+            npm config set registry ${{ inputs.REGISTRY_URL }}
+            npm config set unsafe-perm true
+            npm publish
+          else
+            npm publish
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Invalidate CloudFront Distribution
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} --paths "/*"
