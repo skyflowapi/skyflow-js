@@ -75,7 +75,7 @@ jobs:
 
       - name: Deploy latest tag to S3
         run:
-          aws s3 cp tags s3://${{secrets.BLITZ_AWS_BUCKET_NAME}}/
+          aws s3 cp --recursive tags s3://${{secrets.BLITZ_AWS_BUCKET_NAME}}/
 
       - name: Remove latest tag
         run: |
