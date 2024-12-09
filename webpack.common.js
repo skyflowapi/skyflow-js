@@ -26,7 +26,7 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env': JSON.stringify({
         IFRAME_SECURE_SITE: process.env.IFRAME_SECURE_SITE,
-        IFRAME_SECURE_ORGIN: process.env.IFRAME_SECURE_ORGIN,
+        IFRAME_SECURE_ORIGIN: process.env.IFRAME_SECURE_ORIGIN,
       }),
     }),
    ],
