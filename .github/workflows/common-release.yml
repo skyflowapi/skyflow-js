@@ -49,7 +49,6 @@ jobs:
         with:
           node-version: 14.17.6
           registry-url: ${{ inputs.REGISTRY_URL }}
-            #'https://registry.npmjs.org'
 
       - run: npm install
 
