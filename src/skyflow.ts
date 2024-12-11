@@ -41,6 +41,7 @@ import {
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
+import ThreeDS from './core/external/threeds/threeds';
 
 export enum ContainerType {
   COLLECT = 'COLLECT',
@@ -75,6 +76,8 @@ class Skyflow {
   #env:Env;
 
   #skyflowElements: any;
+
+  static ThreeDS:ThreeDS = ThreeDS;
 
   constructor(config: ISkyflow) {
     const localSDKversion = localStorage.getItem('sdk_version') || '';

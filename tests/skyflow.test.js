@@ -12,6 +12,7 @@ import ComposableContainer from '../src/core/external/collect/compose-collect-co
 import SkyflowContainer from '../src/core/external/skyflow-container';
 import Client from '../src/client'
 import logs from '../src/utils/logs';
+import ThreeDS from '../src/core/external/threeds/threeds';
 
 jest.mock('../src/utils/jwt-utils', () => ({
   __esModule: true,
@@ -1762,5 +1763,20 @@ describe('render file elements',()=>{
       expect(err).toBeDefined();
       done(err);
     }
+  });
+})
+describe('test 3DS helperFunction', ()=>{
+  test('test 3DS getBrowserDetails function', () => {
+    const browserDetails = ThreeDS.getBroswerDetails()
+    expect(browserDetails).toBeDefined()
+    expect(browserDetails.browser_accept_header).toEqual("application/json")
+    expect(browserDetails.browser_color_depth).toEqual("24")
+    expect(browserDetails.browser_screen_height).toEqual(0)
+    expect(browserDetails.browser_screen_width).toEqual(0)
+    expect(browserDetails.browser_user_agent).toEqual("Mozilla/5.0 (linux) AppleWebKit/537.36 (KHTML, like Gecko) jsdom/16.7.0")
+    expect(browserDetails.browser_java_enabled).toEqual(false)
+    expect(browserDetails.browser_language).toEqual("en-US")
+    expect(browserDetails.browser_tz).toEqual(-330)
+    expect(browserDetails.browser_javascript_enabled).toEqual(true)
   });
 })
