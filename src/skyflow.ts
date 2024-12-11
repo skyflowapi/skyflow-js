@@ -77,8 +77,6 @@ class Skyflow {
 
   #skyflowElements: any;
 
-  static ThreeDS:ThreeDS = ThreeDS;
-
   constructor(config: ISkyflow) {
     const localSDKversion = localStorage.getItem('sdk_version') || '';
     this.#metadata[SDK_VERSION] = localSDKversion;
@@ -285,6 +283,10 @@ class Skyflow {
 
   static get Error() {
     return SkyflowError;
+  }
+
+  static get ThreeDS() {
+    return ThreeDS;
   }
 }
 export default Skyflow;
