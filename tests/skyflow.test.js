@@ -1776,7 +1776,7 @@ describe('test 3DS helperFunction', ()=>{
     expect(browserDetails.browser_user_agent).toEqual("Mozilla/5.0 (linux) AppleWebKit/537.36 (KHTML, like Gecko) jsdom/16.7.0")
     expect(browserDetails.browser_java_enabled).toEqual(false)
     expect(browserDetails.browser_language).toEqual("en-US")
-    expect(browserDetails.browser_tz).toEqual(-330)
+    expect(browserDetails.browser_tz).toEqual((new Date()).getTimezoneOffset())
     expect(browserDetails.browser_javascript_enabled).toEqual(true)
   });
 })
