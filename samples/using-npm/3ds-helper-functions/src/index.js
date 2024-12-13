@@ -6,6 +6,7 @@ import Skyflow from 'skyflow-js';
 
 try {
   // getBrowserDetails for 3DS.
+  const actionButtons = document.getElementById("actionButtons")
   const getDetailsButton = document.getElementById("getBrowserDetails");
   if (getDetailsButton) {
     getDetailsButton.addEventListener("click", () => {
