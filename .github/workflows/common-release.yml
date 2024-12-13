@@ -61,7 +61,7 @@ jobs:
       - name: Set RELEASE_VERSION
         run: |
           if [ "${{ inputs.TAG_TYPE }}" = "dev" ]; then
-            echo "RELEASE_VERSION=2.0.0" >> $GITHUB_ENV
+            echo "RELEASE_VERSION=2.0.0-dev" >> $GITHUB_ENV
           else
             echo "RELEASE_VERSION=${{ steps.previoustag.outputs.tag }}" >> $GITHUB_ENV
           fi
