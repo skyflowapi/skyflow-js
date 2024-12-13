@@ -134,7 +134,7 @@ class Skyflow {
     };
 
     bus
-      .target(properties.IFRAME_SECURE_ORGIN)
+      .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + this.#uuid, cb);
     printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_LISTENER, CLASS_NAME), MessageType.LOG,
       this.#logLevel);

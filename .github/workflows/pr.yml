@@ -48,19 +48,19 @@ jobs:
       - name: Browser Build
         run: npm run build-browser-sdk
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: "v${{ secrets.TEST_IFRAME_SECURE_SITE }}"
 
       - name: Build iFrame
         run: npm run build-iframe
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: "v${{ secrets.TEST_IFRAME_SECURE_SITE }}"
 
       - name: Build Node SDK
         env:
-          IFRAME_SECURE_ORGIN: ${{ secrets.IFRAME_SECURE_ORGIN }}
-          IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
+          IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
+          IFRAME_SECURE_SITE: "v${{ secrets.TEST_IFRAME_SECURE_SITE }}"
         run: |
           npm run build:types 
           npm run build-node-sdk
