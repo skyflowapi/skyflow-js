@@ -48,6 +48,35 @@ describe("Utils/Bus Events",()=>{
             done();
         });
     });
+
+    test("GetAccessToken Without parameter Fn valid token,",(done)=>{
+        const response = getAccessToken();
+        const emitEventName = emitSpy.mock.calls[1][0];
+        const emitCb = emitSpy.mock.calls[1][2];
+        expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
+        emitCb({authToken:"access_Token"});
+        response.then((data)=>{
+            expect(data).toEqual("access_Token");
+            done();
+        }).catch((err)=>{
+            expect(err).toBeUndefined();
+            done();
+        });
+    });
+    test("GetAccessToken Without parameter Fn Invalid token",(done)=>{
+        const response = getAccessToken();
+        const emitEventName = emitSpy.mock.calls[1][0];
+        const emitCb = emitSpy.mock.calls[1][2];
+        expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN);
+        emitCb({error:"invalid_token"});
+        response.then((data)=>{
+            expect(data).toBeUndefined();
+            done();
+        }).catch((err)=>{
+            expect(err).toEqual("invalid_token");
+            done();
+        });
+    });
     
 
 });
