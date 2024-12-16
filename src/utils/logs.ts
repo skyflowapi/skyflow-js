@@ -298,6 +298,7 @@ const logs = {
     INVALID_ALLOWED_FILETYPE_ARRAY: 'Validation error. Invalid options value, allowedFileType array must contain only string elements.',
     INVALID_OPTION_CARD_METADATA: 'Validation error. container create - Invalid type, cardMetadata must be of non-empty object type.',
     INVALID_OPTION_CARD_SCHEME: 'Validation error. container create - Invalid options, scheme must be of string array type.',
+    INVALID_FIELD_SHOW_3DS_CHALLEGNGE: 'Invalid field \'%s1\'. Cannot initiate 3DS Challenge. Verify \'%s1\'',
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',

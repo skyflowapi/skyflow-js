@@ -41,6 +41,7 @@ import {
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
+import ThreeDS from './core/external/threeds/threeds';
 
 export enum ContainerType {
   COLLECT = 'COLLECT',
@@ -282,6 +283,10 @@ class Skyflow {
 
   static get Error() {
     return SkyflowError;
+  }
+
+  static get ThreeDS() {
+    return ThreeDS;
   }
 }
 export default Skyflow;

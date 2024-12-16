@@ -521,7 +521,10 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_OPTION_CARD_SCHEME,
   },
-
+  INVALID_FIELD_SHOW_3DS_CHALLEGNGE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_FIELD_SHOW_3DS_CHALLEGNGE,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;
