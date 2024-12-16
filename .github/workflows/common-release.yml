@@ -53,17 +53,15 @@ jobs:
       - run: npm install
 
       - name: Get Previous Tag
-        id: previoustag
-        uses: WyriHaximus/github-action-get-previous-tag@v1
-        with:
-          fallback: 1.0.0
+        run: |
+          echo "TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
 
       - name: Set RELEASE_VERSION
         run: |
           if [ "${{ inputs.TAG_TYPE }}" = "dev" ]; then
-            echo "RELEASE_VERSION=${{ steps.previoustag.outputs.tag }}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
+            echo "RELEASE_VERSION=${{ env.TAG }}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
           else
-            echo "RELEASE_VERSION=${{ steps.previoustag.outputs.tag }}" >> $GITHUB_ENV
+            echo "RELEASE_VERSION=${{ env.TAG }}" >> $GITHUB_ENV
           fi
 
       - name: Bump Version
