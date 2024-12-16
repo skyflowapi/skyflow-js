@@ -140,12 +140,12 @@ class ComposableContainer extends Container {
         );
 
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORIGIN)
           .off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
       }
     };
     bus
-      .target(properties.IFRAME_SECURE_ORGIN)
+      .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
     document.body.append(iframe);
     this.#updateListeners();
@@ -385,7 +385,7 @@ class ComposableContainer extends Container {
         validateUpsertOptions(options?.upsert);
       }
       bus
-      // .target(properties.IFRAME_SECURE_ORGIN)
+      // .target(properties.IFRAME_SECURE_ORIGIN)
         .emit(
           ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
           {
