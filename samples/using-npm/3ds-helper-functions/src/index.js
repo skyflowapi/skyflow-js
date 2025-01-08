@@ -10,7 +10,7 @@ try {
   const getDetailsButton = document.getElementById("getBrowserDetails");
   if (getDetailsButton) {
     getDetailsButton.addEventListener("click", () => {
-      const browserDetails = Skyflow.ThreeDS.getBroswerDetails();
+      const browserDetails = Skyflow.ThreeDS.getBrowserDetails();
       document.getElementById("threeDSBrowserDetails").innerHTML =
         JSON.stringify(browserDetails);
     });

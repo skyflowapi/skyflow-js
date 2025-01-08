@@ -19,7 +19,7 @@ export interface ThreeDSBrowserDetails {
 }
 
 class ThreeDS {
-  static getBroswerDetails(): ThreeDSBrowserDetails {
+  static getBrowserDetails(): ThreeDSBrowserDetails {
     const browserData: ThreeDSBrowserDetails = {
       browser_accept_header: 'application/json',
       browser_color_depth: String(window.screen.colorDepth),

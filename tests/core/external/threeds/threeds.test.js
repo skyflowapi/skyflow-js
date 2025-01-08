@@ -25,7 +25,7 @@ describe('test 3DS helperFunction', ()=>{
       jest.clearAllMocks
     })
     test('test 3DS getBrowserDetails function', () => {
-      const browserDetails = ThreeDS.getBroswerDetails()
+      const browserDetails = ThreeDS.getBrowserDetails()
       expect(browserDetails).toBeDefined()
       expect(browserDetails.browser_accept_header).toEqual("application/json")
       expect(browserDetails.browser_color_depth).toEqual("24")

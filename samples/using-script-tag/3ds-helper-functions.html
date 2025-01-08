@@ -40,7 +40,7 @@
         const actionButtons = document.getElementById("actionButtons")
         if (getDetailsButton) {
           getDetailsButton.addEventListener("click", () => {
-            const browserDetails = Skyflow.ThreeDS.getBroswerDetails();
+            const browserDetails = Skyflow.ThreeDS.getBrowserDetails();
             document.getElementById("threeDSBrowserDetails").innerHTML =
               JSON.stringify(browserDetails);
           });
