@@ -19,7 +19,7 @@ try {
     if (redirectButton) {
       redirectButton.addEventListener("click", () => {
         const challengeWindow = document.getElementById("challengeWindow");
-        const challengeIFrame = Skyflow.ThreeDS.showChallenege(
+        const challengeIFrame = Skyflow.ThreeDS.showChallenge(
           "<acs-url>",
           "<c-req>",
           "04",

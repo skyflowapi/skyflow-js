@@ -39,32 +39,32 @@ describe('test 3DS helperFunction', ()=>{
     });
   
     test('test 3DS showChallenge function: success', ()=>{
-      const challengeIFrame = ThreeDS.showChallenege("acsUrl","cReq",'01',document.body)
+      const challengeIFrame = ThreeDS.showChallenge("acsUrl","cReq",'01',document.body)
       expect(challengeIFrame).toBeDefined()
     })
   
     test('test 3DS showChallenge function: success with optional fields', ()=>{
-      const challengeIFrame = ThreeDS.showChallenege("acsUrl","cReq")
+      const challengeIFrame = ThreeDS.showChallenge("acsUrl","cReq")
       expect(challengeIFrame).toBeDefined()
     })
   
     test('test 3DS showChallenge function: success with different challengeWindowSizes', ()=>{
-      const challengeIFrame = ThreeDS.showChallenege("acsUrl","cReq",'02',document.body)
+      const challengeIFrame = ThreeDS.showChallenge("acsUrl","cReq",'02',document.body)
       expect(challengeIFrame).toBeDefined()
   
-      const challengeIFrame2 = ThreeDS.showChallenege("acsUrl","cReq",'03',document.body)
+      const challengeIFrame2 = ThreeDS.showChallenge("acsUrl","cReq",'03',document.body)
       expect(challengeIFrame2).toBeDefined()
   
-      const challengeIFrame3 = ThreeDS.showChallenege("acsUrl","cReq",'04',document.body)
+      const challengeIFrame3 = ThreeDS.showChallenge("acsUrl","cReq",'04',document.body)
       expect(challengeIFrame3).toBeDefined()
   
-      const challengeIFrame4 = ThreeDS.showChallenege("acsUrl","cReq",'05',document.body)
+      const challengeIFrame4 = ThreeDS.showChallenge("acsUrl","cReq",'05',document.body)
       expect(challengeIFrame4).toBeDefined()
     })
   
     test('test 3DS showChallenge function: acsUrl Error', ()=>{
       try{
-        const challengeIFrame = ThreeDS.showChallenege("","cReq",'01',document.body)
+        const challengeIFrame = ThreeDS.showChallenge("","cReq",'01',document.body)
       }catch(err){
         expect(err).toBeDefined()
         expect(err instanceof SkyflowError).toBeTruthy()
@@ -78,7 +78,7 @@ describe('test 3DS helperFunction', ()=>{
   
     test('test 3DS showChallenge function: cReq Error', ()=>{
       try{
-        const challengeIFrame = ThreeDS.showChallenege("acsUrl","",'01',document.body)
+        const challengeIFrame = ThreeDS.showChallenge("acsUrl","",'01',document.body)
       }catch(err){
         expect(err).toBeDefined()
         expect(err instanceof SkyflowError).toBeTruthy()
@@ -92,7 +92,7 @@ describe('test 3DS helperFunction', ()=>{
   
     test('test 3DS showChallenge function: challengeWindowSize Error', ()=>{
       try{
-        const challengeIFrame = ThreeDS.showChallenege("acsUrl","cReq",'abcd',document.body)
+        const challengeIFrame = ThreeDS.showChallenge("acsUrl","cReq",'abcd',document.body)
       }catch(err){
         expect(err).toBeDefined()
         expect(err instanceof SkyflowError).toBeTruthy()
@@ -106,7 +106,7 @@ describe('test 3DS helperFunction', ()=>{
   
     test('test 3DS showChallenge function: container Error', ()=>{
       try{
-        const challengeIFrame = ThreeDS.showChallenege("acsUrl","cReq",'01','abcd')
+        const challengeIFrame = ThreeDS.showChallenge("acsUrl","cReq",'01','abcd')
       }catch(err){
         expect(err).toBeDefined()
         expect(err instanceof SkyflowError).toBeTruthy()

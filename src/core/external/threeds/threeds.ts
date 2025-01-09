@@ -34,7 +34,7 @@ class ThreeDS {
     return browserData;
   }
 
-  static showChallenege = (
+  static showChallenge = (
     acsUrl: string,
     cReq: string,
     challengeWindowSize: string = '05',
