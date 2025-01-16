@@ -397,7 +397,7 @@ export function checkAndSetForCustomUrl(config: ISkyflow) {
     const protocol = url.protocol;
     const domain = url.hostname;
     const fullDomain = `${protocol}//${domain}`;
-    properties.IFRAME_SECURE_ORGIN = fullDomain;
+    properties.IFRAME_SECURE_ORIGIN = fullDomain;
     properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
   }
 }

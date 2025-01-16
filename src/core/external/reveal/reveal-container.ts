@@ -117,7 +117,7 @@ class RevealContainer extends Container {
         );
 
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORIGIN)
           .off(
             ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId,
             sub,
@@ -125,7 +125,7 @@ class RevealContainer extends Container {
       }
     };
     bus
-      .target(properties.IFRAME_SECURE_ORGIN)
+      .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId, sub);
 
     document.body.append(iframe);
@@ -194,7 +194,7 @@ class RevealContainer extends Container {
           });
           validateRevealElementRecords(this.#revealRecords);
           bus
-          // .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
               {
@@ -252,7 +252,7 @@ class RevealContainer extends Container {
           () => {
             clearTimeout(elementMountTimeOut);
             bus
-              // .target(properties.IFRAME_SECURE_ORGIN)
+              // .target(properties.IFRAME_SECURE_ORIGIN)
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
                 {
