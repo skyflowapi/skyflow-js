@@ -27,7 +27,7 @@ export function getAccessToken(clientId) {
 
 export function updateElementState(frameName: string, value: any) {
   if (frameName.startsWith(`${FRAME_ELEMENT}:`)) {
-    bus.target(properties.IFRAME_SECURE_ORGIN).emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
+    bus.target(properties.IFRAME_SECURE_ORIGIN).emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, {
       name: frameName,
       options: {
         value,

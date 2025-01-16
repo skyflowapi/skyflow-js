@@ -618,7 +618,7 @@ export class IFrameFormElement extends EventEmitter {
 
     // for connection
     // bus
-    //   .target(properties.IFRAME_SECURE_ORGIN)
+    //   .target(properties.IFRAME_SECURE_ORIGIN)
     //   .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data:any) => {
     //     if (data.name === this.iFrameName) {
     //       if (data.options.value !== undefined) {

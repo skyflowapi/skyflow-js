@@ -68,7 +68,7 @@ class SkyflowContainer {
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
     bus
-      .target(properties.IFRAME_SECURE_ORGIN)
+      .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, (data, callback) => {
         printLog(parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
           MessageType.LOG,
@@ -95,7 +95,7 @@ class SkyflowContainer {
 
           validateDetokenizeInput(detokenizeInput);
           bus
-          // .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -125,7 +125,7 @@ class SkyflowContainer {
 
         validateDetokenizeInput(detokenizeInput);
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
@@ -168,7 +168,7 @@ class SkyflowContainer {
           }
           validateInsertRecords(records, options);
           bus
-          // .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -211,7 +211,7 @@ class SkyflowContainer {
         }
         validateInsertRecords(records, options);
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
@@ -250,7 +250,7 @@ class SkyflowContainer {
           validateGetByIdInput(getByIdInput);
 
           bus
-          // .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -281,7 +281,7 @@ class SkyflowContainer {
 
         validateGetByIdInput(getByIdInput);
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
@@ -316,7 +316,7 @@ class SkyflowContainer {
             this.#context.logLevel);
           validateGetInput(getInput, options);
           bus
-          // .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -348,7 +348,7 @@ class SkyflowContainer {
 
         validateGetInput(getInput, options);
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
@@ -386,7 +386,7 @@ class SkyflowContainer {
 
           validateDeleteRecords(records, options);
           bus
-            // .target(properties.IFRAME_SECURE_ORGIN)
+            // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -421,7 +421,7 @@ class SkyflowContainer {
 
         validateDeleteRecords(records, options);
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus.emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
@@ -458,7 +458,7 @@ class SkyflowContainer {
             this.#context.logLevel);
           validateRenderElementRecord(recordData);
           bus
-          // .target(properties.IFRAME_SECURE_ORGIN)
+          // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#containerId,
               {
@@ -492,10 +492,10 @@ class SkyflowContainer {
           this.#context.logLevel);
         validateRenderElementRecord(recordData);
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus
-              // .target(properties.IFRAME_SECURE_ORGIN)
+              // .target(properties.IFRAME_SECURE_ORIGIN)
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#containerId,
                 {
