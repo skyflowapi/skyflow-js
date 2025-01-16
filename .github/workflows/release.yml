@@ -14,7 +14,7 @@ jobs:
     uses: ./.github/workflows/common-release.yml
     with:
       REGISTRY_URL: "https://registry.npmjs.org"
-      TAG_TYPE: "prod"
+      TAG: "public"
     secrets:
       IFRAME_SECURE_ORIGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
       IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}

@@ -14,8 +14,7 @@ jobs:
     uses: ./.github/workflows/common-release.yml
     with:
       REGISTRY_URL: "https://registry.npmjs.org"
-      TAG_TYPE: "sandbox"
-      NPM_TAG: "beta"
+      TAG: "beta"
     secrets:
       IFRAME_SECURE_ORIGIN: ${{ secrets.SANDBOX_IFRAME_SECURE_ORIGIN }}
       IFRAME_SECURE_SITE: ${{ secrets.SANDBOX_IFRAME_SECURE_SITE }}

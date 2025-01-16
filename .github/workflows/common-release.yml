@@ -3,11 +3,8 @@ name: Common Release Workflow
 on:
   workflow_call:
     inputs:
-      TAG_TYPE:
+      TAG:
         required: true
-        type: string
-      NPM_TAG:
-        required: false
         type: string
       REGISTRY_URL:
         required: false
@@ -58,20 +55,20 @@ jobs:
 
       - name: Set RELEASE_VERSION
         run: |
-          if [ "${{ inputs.TAG_TYPE }}" = "dev" ]; then
+          if [ "${{ inputs.TAG }}" == "internal" ]; then
             echo "RELEASE_VERSION=${{ env.TAG }}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
           else
             echo "RELEASE_VERSION=${{ env.TAG }}" >> $GITHUB_ENV
           fi
 
       - name: Bump Version
-        if: ${{ inputs.TAG_TYPE != 'sandbox' }}
+        if: ${{ inputs.TAG == 'internal' || inputs.TAG == 'public' }}
         run: |
           chmod +x ./scripts/bump_version.sh
           ./scripts/bump_version.sh "${{ env.RELEASE_VERSION }}"
 
       - name: Commit Changes
-        if: ${{ inputs.TAG_TYPE != 'sandbox' }}
+        if: ${{ inputs.TAG == 'internal' || inputs.TAG == 'public' }}
         run: |
           git config user.name ${{ github.actor }}
           git config user.email ${{ github.actor }}@users.noreply.github.com
@@ -123,9 +120,9 @@ jobs:
 
       - name: Publish SDK
         run: |
-          if [ "${{ inputs.TAG_TYPE }}" = "sandbox" ]; then
-            npm publish --tag ${{ inputs.NPM_TAG }}
-          elif [ "${{ inputs.TAG_TYPE }}" = "dev" ]; then
+          if [ "${{ inputs.TAG }}" == "beta" ]; then
+            npm publish --tag ${{ inputs.TAG }}
+          elif [ "${{ inputs.TAG }}" == "internal" ]; then
             curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
             npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
             npm config set unsafe-perm true
@@ -136,5 +133,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Invalidate CloudFront Distribution
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} --paths "/*"
+      - name: Invalidate CloudFront cache 10 times
+        run: |
+          for i in {1..10}; do
+            aws cloudfront create-invalidation \
+              --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} \
+              --paths "/*"
+            sleep 10
+          done

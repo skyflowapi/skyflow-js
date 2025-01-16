@@ -16,7 +16,7 @@ jobs:
   internal-release:
     uses: ./.github/workflows/common-release.yml
     with:
-      TAG_TYPE: "dev"
+      TAG: "internal"
     secrets:
       IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
       IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
