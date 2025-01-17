@@ -67,6 +67,22 @@ jobs:
           chmod +x ./scripts/bump_version.sh
           ./scripts/bump_version.sh "${{ env.RELEASE_VERSION }}"
 
+      - name: Resolve Branch for the Tagged Commit
+        id: resolve-branch
+        if: ${{ inputs.tag == 'beta' || inputs.tag == 'public' }} 
+        run: |
+          TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref_name }})
+
+          BRANCH_NAME=$(git branch -r --contains $TAG_COMMIT | grep -o 'origin/.*' | sed 's|origin/||' | head -n 1)
+
+          if [ -z "$BRANCH_NAME" ]; then
+            echo "Error: Could not resolve branch for the tag."
+            exit 1
+          fi
+
+          echo "Resolved Branch Name: $BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
+
       - name: Commit Changes
         if: ${{ inputs.TAG == 'internal' || inputs.TAG == 'public' }}
         run: |
@@ -74,7 +90,7 @@ jobs:
           git config user.email ${{ github.actor }}@users.noreply.github.com
           git add package.json
           git commit -m "[AUTOMATED] Release - ${{ env.RELEASE_VERSION }}"
-          git push origin -f
+          git push origin ${{ env.branch_name }} -f
 
       - name: Build Browser SDK
         run: npm run build-browser-sdk
