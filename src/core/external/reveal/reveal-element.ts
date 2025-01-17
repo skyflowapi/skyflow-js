@@ -158,7 +158,7 @@ class RevealElement extends SkyflowElement {
     if (this.#readyToMount) {
       this.#iframe.mount(domElementSelector);
       bus
-        .target(properties.IFRAME_SECURE_ORGIN)
+        .target(properties.IFRAME_SECURE_ORIGIN)
         .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
@@ -168,7 +168,7 @@ class RevealElement extends SkyflowElement {
       if (data?.containerId === this.#containerId) {
         this.#iframe.mount(domElementSelector);
         bus
-          .target(properties.IFRAME_SECURE_ORGIN)
+          .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
