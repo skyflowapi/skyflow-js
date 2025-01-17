@@ -30,7 +30,7 @@ on:
             required: false
         JFROG_PASSWORD:
             required: false
-        NPM_TOKEN:
+        NODE_AUTH_TOKEN:
             required: false
 
 jobs:
@@ -131,7 +131,7 @@ jobs:
             npm publish
           fi
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
       - name: Invalidate CloudFront cache 10 times
         run: |
