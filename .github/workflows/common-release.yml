@@ -62,7 +62,6 @@ jobs:
           fi
 
       - name: Bump Version
-        if: ${{ inputs.TAG == 'internal' || inputs.TAG == 'public' }}
         run: |
           chmod +x ./scripts/bump_version.sh
           ./scripts/bump_version.sh "${{ env.RELEASE_VERSION }}"
@@ -84,10 +83,10 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Commit Changes
-        if: ${{ inputs.TAG == 'internal' || inputs.TAG == 'public' }}
         run: |
           git config user.name ${{ github.actor }}
           git config user.email ${{ github.actor }}@users.noreply.github.com
+          git checkout ${{ env.branch_name }}
           git add package.json
           git commit -m "[AUTOMATED] Release - ${{ env.RELEASE_VERSION }}"
           git push origin ${{ env.branch_name }} -f
