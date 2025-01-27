@@ -42,6 +42,16 @@ const testRecord = {
 //     expect(_on).toHaveBeenCalledTimes(2);
 //   });
 // });
+global.window = Object.create(window);
+const defineUrl = (url) => {
+  Object.defineProperty(window, "location", {
+    value: {
+      href: url,
+    },
+    writable: true,
+  });
+};
+
 const on = jest.fn();
 const off = jest.fn();
 describe("Reveal Frame Class",()=>{
@@ -78,6 +88,7 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -106,10 +117,11 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
-    emitCb(data);
+    // emitCb(data);
 
     // reveal response ready
     const onRevealResponseName = on.mock.calls[0][0];
@@ -308,6 +320,7 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -484,6 +497,7 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
