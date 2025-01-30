@@ -29,6 +29,7 @@ import {
 } from '../../../utils/validators';
 import {
   checkForElementMatchRule,
+  checkForValueMatch,
   constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
@@ -1046,9 +1047,16 @@ export class IFrameForm {
           !== ELEMENTS.FILE_INPUT.name
         ) {
           const {
-            state, doesClientHasError, clientErrorText, errorText, onFocusChange,
+            state, doesClientHasError, clientErrorText, errorText, onFocusChange, validations,
+            setValue,
           } = inputElement.iFrameFormElement;
           if (state.isRequired || !state.isValid) {
+            onFocusChange(false);
+          }
+          if (validations
+            && checkForElementMatchRule(validations)
+            && checkForValueMatch(validations, inputElement.iFrameFormElement)) {
+            setValue(state.value);
             onFocusChange(false);
           }
           if (!state.isValid || !state.isComplete) {

@@ -77,7 +77,7 @@ describe('test frame elements', () => {
     beforeEach(() => {
         windowSpy = jest.spyOn(global, 'window', 'get');
         windowSpy.mockImplementation(() => ({
-            name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR`,
+            name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR:`,
             location: {
               href: `http://localhost/?${btoa(JSON.stringify({record:element}))}`,
             }
@@ -87,7 +87,7 @@ describe('test frame elements', () => {
     })
     test('FrameElements constructor : empty path', () => {
       windowSpy.mockImplementation(() => ({
-        name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR`,
+        name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('1234')}:ERROR:`,
         location: {
           href: `http://localhost`,
         }
@@ -162,7 +162,7 @@ describe('test composable frame elements', () => {
   beforeEach(() => {
       windowSpy = jest.spyOn(global, 'window', 'get');
       windowSpy.mockImplementation(() => ({
-          name: `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR`,
+          name: `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR:`,
           location: {
             href: `http://localhost/?${btoa(JSON.stringify({record:element}))}`,
           }
@@ -171,16 +171,19 @@ describe('test composable frame elements', () => {
       emitSpy = jest.spyOn(bus, 'emit');
   });
 
-  test('FrameElements constructor : empty path', () => {
+  test('FrameElements constructor with composable elements : empty path', () => {
     windowSpy.mockImplementation(() => ({
-      name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR`,
+      name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR:`,
       location: {
         href: `http://localhost`,
       }
-  }))
-    const onSpy = jest.spyOn(bus, 'on');
+    }))
+      const onSpy = jest.spyOn(bus, 'on');
+      FrameElements.group = [];
+      // FrameElements.setup();
 
       FrameElements.start()
+      
       const emitEventName = emitSpy.mock.calls[0][0];
       const emitCb = emitSpy.mock.calls[0][2];
       expect(emitEventName.includes(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY)).toBeTruthy()
@@ -206,8 +209,6 @@ describe('test composable frame elements', () => {
       })
       const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
   })
-
-  
 
     
   test('FrameElements init', () => {

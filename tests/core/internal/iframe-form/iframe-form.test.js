@@ -176,7 +176,7 @@ describe('test iframeFormelement', () => {
         const form = new IFrameForm("controllerId","",'ERROR')
         jest.spyOn(window,'parent','get').mockImplementation(()=>({
             frames:{
-                [`element:EXPIRATION_MONTH:${tableCol}:controllerId:ERROR`]:{
+                [`element:EXPIRATION_MONTH:${tableCol}:controllerId:ERROR:`]:{
                     document:{
                         getElementById:()=>({
                             iFrameFormElement:element
@@ -518,7 +518,8 @@ const data = {
         }]
     },
     tokens: true,
-    upsert: [{ table: '', column: '  ' }]
+    upsert: [{ table: '', column: '  ' }],
+    elementIds: []
 }
 const data2 = {
     additionalFields: {
@@ -669,7 +670,6 @@ describe('test iframeForm collect method', () => {
         const element = createFormElement(collect_element,undefined,undefined,true)
 
         const setErrorEvent = on.mock.calls.filter((data)=>data[0]===ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR)
-        console.log("setErrorEvent",setErrorEvent)
         const setErrorCb = setErrorEvent[0][1]
 
         setErrorCb({isTriggerError:true,clientErrorText:"Error",name:collect_element})
@@ -681,7 +681,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -697,7 +697,7 @@ describe('test iframeForm collect method', () => {
         tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2)
 
         setTimeout(() => {
-            expect(cb2.mock.calls[0][0].error.message).toBeDefined()
+            expect(cb2.mock.calls[0][0].error.error.description).toBeDefined()
             done()
         }, 1000)
 
@@ -764,7 +764,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -877,7 +877,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1001,7 +1001,7 @@ describe('test iframeForm collect method', () => {
         tokenizationCb(data, cb2)
 
         setTimeout(() => {
-            expect(cb2.mock.calls[0][0].error.message).toBeDefined()
+            expect(cb2.mock.calls[0][0].error.error.description).toBeDefined()
         }, 1000)
         element.setValue('123')
         const cb3 = jest.fn()
@@ -1081,7 +1081,7 @@ describe('test iframeForm collect method', () => {
         tokenizationCb(data, cb2)
 
         setTimeout(() => {
-            expect(cb2.mock.calls[0][0].error.message).toBeDefined()
+            expect(cb2.mock.calls[0][0].error.error.description).toBeDefined()
         }, 1000)
         element.setValue('123')
         const cb3 = jest.fn()
@@ -1151,7 +1151,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1249,7 +1249,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1294,7 +1294,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1357,7 +1357,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1413,7 +1413,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>(undefined)
                         }
@@ -1466,7 +1466,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1523,7 +1523,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1580,7 +1580,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${checkbox_element}:controllerId:ERROR`]:{
+                    [`${checkbox_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1644,7 +1644,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1710,7 +1710,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1773,7 +1773,7 @@ describe('test iframeForm collect method', () => {
         windowSpy.mockImplementation(() => ({
             parent: {
                 frames: {
-                    [`${collect_element}:controllerId:ERROR`]:{
+                    [`${collect_element}:controllerId:ERROR:`]:{
                         document:{
                             getElementById:()=>({
                                 iFrameFormElement:element
@@ -1972,7 +1972,6 @@ describe('test file Upload method', () => {
         fileUploadCb(fileData, cb2)
 
         setTimeout(() => {
-            console.log('cb2.mock.calls', cb2.mock.calls);
             expect(cb2.mock.calls[0][0].error).toBeDefined()
             done()
         }, 3000)
@@ -1989,7 +1988,6 @@ describe('test file Upload method', () => {
         fileUploadCb(fileData, cb3)
 
         setTimeout(() => {
-            console.log('cb3.mock.calls', cb3.mock.calls);
             expect(cb3.mock.calls[0][0].error).toBeDefined()
             done()
         }, 1000)
