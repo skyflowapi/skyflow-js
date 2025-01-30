@@ -1036,33 +1036,34 @@ export class IFrameForm {
     if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const insertResponseObject: any = {};
     const updateResponseObject: any = {};
-    const formElements = Object.keys(this.iFrameFormElements);
     let errorMessage = '';
-    for (let i = 0; i < formElements.length; i += 1) {
-      if (
-        this.iFrameFormElements[formElements[i]].fieldType
-        !== ELEMENTS.FILE_INPUT.name
-      ) {
-        const {
-          state, doesClientHasError, clientErrorText, errorText, onFocusChange,
-          validations, setValue,
-        } = this.iFrameFormElements[formElements[i]];
-
-        if (state.isRequired || !state.isValid) {
-          onFocusChange(false);
-        }
-
-        if (validations
-          && checkForElementMatchRule(validations)
-          && checkForValueMatch(validations, this.iFrameFormElements[formElements[i]])) {
-          setValue(state.value);
-          onFocusChange(false);
-        }
-
-        if (!state.isValid || !state.isComplete) {
-          if (doesClientHasError) {
-            errorMessage += `${state.name}:${clientErrorText}`;
-          } else { errorMessage += `${state.name}:${errorText} `; }
+    for (let i = 0; i < options.elementIds.length; i += 1) {
+      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${this.controllerId}:${this.logLevel}:${btoa(this.clientDomain)}`];
+      const inputElement = Frame.document
+        .getElementById(options.elementIds[i].elementId);
+      if (inputElement) {
+        if (
+          inputElement.iFrameFormElement.fieldType
+          !== ELEMENTS.FILE_INPUT.name
+        ) {
+          const {
+            state, doesClientHasError, clientErrorText, errorText, onFocusChange, validations,
+            setValue,
+          } = inputElement.iFrameFormElement;
+          if (state.isRequired || !state.isValid) {
+            onFocusChange(false);
+          }
+          if (validations
+            && checkForElementMatchRule(validations)
+            && checkForValueMatch(validations, inputElement.iFrameFormElement)) {
+            setValue(state.value);
+            onFocusChange(false);
+          }
+          if (!state.isValid || !state.isComplete) {
+            if (doesClientHasError) {
+              errorMessage += `${state.name}:${clientErrorText}`;
+            } else { errorMessage += `${state.name}:${errorText} `; }
+          }
         }
       }
     }
@@ -1071,69 +1072,73 @@ export class IFrameForm {
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
     }
 
-    for (let i = 0; i < formElements.length; i += 1) {
-      const {
-        state, tableName, validations, skyflowID,
-      } = this.iFrameFormElements[formElements[i]];
-      if (tableName) {
-        if (
-          this.iFrameFormElements[formElements[i]].fieldType
-        !== ELEMENTS.FILE_INPUT.name
-        ) {
+    for (let i = 0; i < options.elementIds.length; i += 1) {
+      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${this.controllerId}:${this.logLevel}:${btoa(this.clientDomain)}`];
+      const inputElement = Frame.document
+        .getElementById(options.elementIds[i].elementId);
+      if (inputElement) {
+        const {
+          state, tableName, validations, skyflowID,
+        } = inputElement.iFrameFormElement;
+        if (tableName) {
           if (
-            this.iFrameFormElements[formElements[i]].fieldType
-          === ELEMENTS.checkbox.name
+            inputElement.iFrameFormElement.fieldType
+        !== ELEMENTS.FILE_INPUT.name
           ) {
-            if (insertResponseObject[state.name]) {
-              insertResponseObject[state.name] = `${insertResponseObject[state.name]},${state.value
-              }`;
-            } else {
-              insertResponseObject[state.name] = state.value;
-            }
-          } else if (insertResponseObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
-            if (get(insertResponseObject[tableName], state.name)
+            if (
+              inputElement.iFrameFormElement.fieldType
+          === ELEMENTS.checkbox.name
+            ) {
+              if (insertResponseObject[state.name]) {
+                insertResponseObject[state.name] = `${insertResponseObject[state.name]},${state.value
+                }`;
+              } else {
+                insertResponseObject[state.name] = state.value;
+              }
+            } else if (insertResponseObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
+              if (get(insertResponseObject[tableName], state.name)
             && !(validations && checkForElementMatchRule(validations))) {
-              return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
-                [state.name, tableName], true));
-            }
-            set(
-              insertResponseObject[tableName],
-              state.name,
-              this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-            );
-          } else if (skyflowID || skyflowID === '') {
-            if (skyflowID === '' || skyflowID === null) {
-              return Promise.reject(new SkyflowError(
-                SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
-                [],
-              ));
-            }
-            if (updateResponseObject[skyflowID]) {
+                return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
+                  [state.name, tableName], true));
+              }
               set(
-                updateResponseObject[skyflowID],
+                insertResponseObject[tableName],
                 state.name,
-                this.iFrameFormElements[formElements[i]].getUnformattedValue(),
+                inputElement.iFrameFormElement.getUnformattedValue(),
               );
+            } else if (skyflowID || skyflowID === '') {
+              if (skyflowID === '' || skyflowID === null) {
+                return Promise.reject(new SkyflowError(
+                  SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
+                ));
+              }
+              if (updateResponseObject[skyflowID]) {
+                set(
+                  updateResponseObject[skyflowID],
+                  state.name,
+                  inputElement.iFrameFormElement.getUnformattedValue(),
+                );
+              } else {
+                updateResponseObject[skyflowID] = {};
+                set(
+                  updateResponseObject[skyflowID],
+                  state.name,
+                  inputElement.iFrameFormElement.getUnformattedValue(),
+                );
+                set(
+                  updateResponseObject[skyflowID],
+                  'table',
+                  tableName,
+                );
+              }
             } else {
-              updateResponseObject[skyflowID] = {};
+              insertResponseObject[tableName] = {};
               set(
-                updateResponseObject[skyflowID],
+                insertResponseObject[tableName],
                 state.name,
-                this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-              );
-              set(
-                updateResponseObject[skyflowID],
-                'table',
-                tableName,
+                inputElement.iFrameFormElement.getUnformattedValue(),
               );
             }
-          } else {
-            insertResponseObject[tableName] = {};
-            set(
-              insertResponseObject[tableName],
-              state.name,
-              this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-            );
           }
         }
       }
@@ -1280,7 +1285,7 @@ export class IFrameForm {
 
       try {
         if (
-          frame.location.href === window.location.href
+          frame.location.href.split('?')[0] === window.location.href
           && frame.name === frameGlobalName
         ) {
           frameInstance = frame;
