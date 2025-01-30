@@ -29,7 +29,6 @@ import {
 } from '../../../utils/validators';
 import {
   checkForElementMatchRule,
-  checkForValueMatch,
   constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
@@ -1038,7 +1037,7 @@ export class IFrameForm {
     const updateResponseObject: any = {};
     let errorMessage = '';
     for (let i = 0; i < options.elementIds.length; i += 1) {
-      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${this.controllerId}:${this.logLevel}`];
+      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${this.controllerId}:${this.logLevel}:${btoa(this.clientDomain)}`];
       const inputElement = Frame.document
         .getElementById(options.elementIds[i].elementId);
       if (inputElement) {
@@ -1066,7 +1065,7 @@ export class IFrameForm {
     }
 
     for (let i = 0; i < options.elementIds.length; i += 1) {
-      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${this.controllerId}:${this.logLevel}`];
+      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${this.controllerId}:${this.logLevel}:${btoa(this.clientDomain)}`];
       const inputElement = Frame.document
         .getElementById(options.elementIds[i].elementId);
       if (inputElement) {
