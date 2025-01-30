@@ -284,6 +284,8 @@ class CollectContainer extends Container {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
       const collectElements = Object.values(this.#elements);
+      const elementIds = Object.keys(this.#elements)
+        .map((element) => ({ frameId: element, elementId: element }));
       collectElements.forEach((element) => {
         if (!element.isMounted()) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
@@ -306,6 +308,7 @@ class CollectContainer extends Container {
           {
             ...options,
             tokens: options?.tokens !== undefined ? options.tokens : true,
+            elementIds,
           },
           (data: any) => {
             if (!data || data?.error) {
