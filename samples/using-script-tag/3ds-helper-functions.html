@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3DS Helper Functions</title>
+    <script src="https://js.skyflow.dev/v1/index.js"></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .empty-div {
+        height: 100px;
+        width: 350px;
+      }
+      .reveal-view {
+        margin-top: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="actionButtons">
+      <h3>3DS Browser Details</h3>
+      <!-- COllect Part -->
+      <div>
+        <button id="getBrowserDetails">Generate 3DS Browser Details</button>
+        <button id="redirectToChallenge">Redirect To Challenge</button>
+      </div>
+      <div></div>
+      <pre id="threeDSBrowserDetails"></pre>
+    </div>
+    <div id="challengeWindow"></div>
+
+    <script>
+      try {
+        // getBrowserDetails for 3DS.
+        const getDetailsButton = document.getElementById("getBrowserDetails");
+        const actionButtons = document.getElementById("actionButtons")
+        if (getDetailsButton) {
+          getDetailsButton.addEventListener("click", () => {
+            const browserDetails = Skyflow.ThreeDS.getBrowserDetails();
+            document.getElementById("threeDSBrowserDetails").innerHTML =
+              JSON.stringify(browserDetails);
+          });
+        }
+        //showChallenge for 3DS
+        const redirectButton = document.getElementById("redirectToChallenge");
+        if (redirectButton) {
+          redirectButton.addEventListener("click", () => {
+            const challengeWindow = document.getElementById("challengeWindow");
+            const challengeIFrame = Skyflow.ThreeDS.showChallenge(
+              "<acs-url>",
+              "<c-req>",
+              "04",
+              challengeWindow
+            );
+            challengeIFrame.addEventListener("load", function () {
+              if(actionButtons.hidden){
+                challengeIFrame.hidden = true
+                actionButtons.hidden = false
+              } else{
+                actionButtons.hidden = true
+              }
+            });
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    </script>
+  </body>
+</html>

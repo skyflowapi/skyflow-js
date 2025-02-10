@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3DS Helper functions</title>
+
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .empty-div {
+        height: 100px;
+        width: 350px;
+      }
+      .reveal-view {
+        margin-top: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="actionButtons">
+      <h3>3DS Browser Details</h3>
+      <!-- COllect Part -->
+      <div>
+        <button id="getBrowserDetails">Generate 3DS Browser Details</button>
+        <button id="redirectToChallenge">Redirect To Challenge</button>
+      </div>
+      <div></div>
+      <pre id="threeDSBrowserDetails"></pre>
+    </div>
+    <div id="challengeWindow"></div>
+    <script type="module" src="index.js"></script>
+  </body>
+</html>
