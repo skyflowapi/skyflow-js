@@ -42,6 +42,16 @@ const testRecord = {
 //     expect(_on).toHaveBeenCalledTimes(2);
 //   });
 // });
+global.window = Object.create(window);
+const defineUrl = (url) => {
+  Object.defineProperty(window, "location", {
+    value: {
+      href: url,
+    },
+    writable: true,
+  });
+};
+
 const on = jest.fn();
 const off = jest.fn();
 describe("Reveal Frame Class",()=>{
@@ -57,9 +67,7 @@ describe("Reveal Frame Class",()=>{
     });
   });
 
-  test("init callback before reveal",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
+  test("init callback before reveal : without path",()=>{
     const data = {
       record:{
         token:"1815-6223-1073-1425",
@@ -78,16 +86,40 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
-    const emittedEventName = emitSpy.mock.calls[0][0];
-    const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
-    emitCb(data);
+    defineUrl('http://localhost');
+    try{
+      RevealFrame.init()
+    }catch(e){
+      expect(e).toBeDefined()
+    }
+  });
 
+  test("init callback before reveal",()=>{
+    const data = {
+      record:{
+        token:"1815-6223-1073-1425",
+        label:"Card Number",
+        altText:"xxxx-xxxx-xxxx-xxxx",
+        inputStyles:{
+          base:{
+            color:"red"
+          }
+        },
+        labelStyles:{
+          base:{
+            color:"black"
+          }
+        }
+      },
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+    }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
+    const emittedEventName = emitSpy.mock.calls[0][0];
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
   });
 
   test("init callback after reveal with response value",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         token:"1815-6223-1073-1425",
@@ -106,10 +138,12 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
-    emitCb(data);
+    // emitCb(data);
 
     // reveal response ready
     const onRevealResponseName = on.mock.calls[0][0];
@@ -121,8 +155,6 @@ describe("Reveal Frame Class",()=>{
   });
 
   test("init callback after reveal with response value with mask value",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         token:"1815",
@@ -142,6 +174,8 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -155,8 +189,6 @@ describe("Reveal Frame Class",()=>{
     onRevealResponseCb({"1815":"1234"})
   });
   test("init callback after reveal without value",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         token:"1815-6223-1073-1425",
@@ -180,6 +212,8 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -195,8 +229,6 @@ describe("Reveal Frame Class",()=>{
   });
 
   test("reveal set error",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         token:"1815-6223-1073-1425",
@@ -223,6 +255,8 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -241,8 +275,6 @@ describe("Reveal Frame Class",()=>{
   });
 
   test("reveal reset error",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         token:"1815-6223-1073-1425",
@@ -266,6 +298,8 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -283,8 +317,6 @@ describe("Reveal Frame Class",()=>{
     
   });
   test("reveal set token",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         token:"1815-6223-1073-1425",
@@ -308,6 +340,8 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -324,8 +358,6 @@ describe("Reveal Frame Class",()=>{
     
   });
   test("reveal set altText",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         token:"1815-6223-1073-1425",
@@ -349,6 +381,8 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -366,8 +400,6 @@ describe("Reveal Frame Class",()=>{
     
   });
   test("reveal clearAltText",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         token:"1815-6223-1073-1425",
@@ -391,6 +423,8 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -408,8 +442,6 @@ describe("Reveal Frame Class",()=>{
     
   });
   test("copy icon in reveal elements",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         token:"1815-6223-1073-1425",
@@ -442,6 +474,8 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);
@@ -449,8 +483,6 @@ describe("Reveal Frame Class",()=>{
   })
 
   test("global style variant in reveal elements",()=>{
-    const testFrame = RevealFrame.init();
-    // const onCb = jest.fn();
     const data = {
       record:{
         token:"1815-6223-1073-1425",
@@ -484,6 +516,8 @@ describe("Reveal Frame Class",()=>{
       },
       context: { logLevel: LogLevel.ERROR,env:Env.PROD}
     }
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY);

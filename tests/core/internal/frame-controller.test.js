@@ -35,6 +35,8 @@ const on = jest.fn();
 
 const tableCol = btoa('table.col');
 const collect_element = `element:CVV:${tableCol}`;
+const collect_element_textarea = `element:${ELEMENTS.textarea.name}:${tableCol}`;
+const collect_element_dropdown = `element:${ELEMENTS.dropdown.name}:${tableCol}`;
 
 const context = {
   logLevel: LogLevel.ERROR,
@@ -295,6 +297,131 @@ describe('test frame controller', () => {
 
     expect(div.getElementsByTagName('select').length).toBe(0);
     expect(div.getElementsByTagName('img').length).toBe(1); // only cardicon
+
+    element.setupInputField();
+  });
+
+  test('FrameElement constructor : textarea', () => {
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(collect_element_textarea, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: false,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+
+    const setCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.SET_VALUE);
+    setCb[0][1]({
+      options: {
+        label: 'updatedLabel',
+        inputStyles,
+        labelStyles,
+        errorTextStyles,
+        table:'updatedTable',
+        column:'updateColumn',
+        placeholder:'XX',
+        validations:[
+          {
+            type:ValidationRuleType.LENGTH_MATCH_RULE,
+            params:{
+              min:2,
+            }
+          }
+        ],
+        skyflowID: 'updated-skyflow-id',
+      },
+    });
+
+    element.setupInputField();
+  });
+
+  test('FrameElement constructor : dropdown', () => {
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(collect_element_dropdown, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      options:["dummyOptions"]
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    const focusCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.FOCUS);
+
+    focusCb[0][1](state);
+
+    const blurCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.BLUR);
+
+
+    blurCb[0][1](state);
+
+    blurCb[0][1]({
+      ...state,
+      isValid: false,
+      isEmpty: false,
+    });
+
+    const changeCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_CLIENT.CHANGE);
+
+    changeCb[0][1](state);
+
+    const setCb = onSpy
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.SET_VALUE);
+    setCb[0][1]({
+      options: {
+        label: 'updatedLabel',
+        inputStyles,
+        labelStyles,
+        errorTextStyles,
+        table:'updatedTable',
+        column:'updateColumn',
+        placeholder:'XX',
+        validations:[
+          {
+            type:ValidationRuleType.LENGTH_MATCH_RULE,
+            params:{
+              min:2,
+            }
+          }
+        ],
+        skyflowID: 'updated-skyflow-id',
+      },
+    });
 
     element.setupInputField();
   });

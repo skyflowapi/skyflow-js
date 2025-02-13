@@ -64,11 +64,15 @@ export default class FrameElements {
     bus.emit(
       ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + getValueFromName(frameName, 3),
       { name: frameName },
-      (group: any) => {
+      () => {
         printLog(parameterizedString(logs.infoLogs.COLLECT_FRAME_READY_CB,
           CLASS_NAME, getElementName(frameName)), MessageType.LOG,
         logLevel);
-        FrameElements.group = group;
+        const url = window.location?.href;
+        const configIndex = url.indexOf('?');
+        const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
+        const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
+        FrameElements.group = parsedRecord?.record;
         if (FrameElements.frameElements) {
           printLog(parameterizedString(logs.infoLogs.SETUP_IN_START, CLASS_NAME),
             MessageType.LOG, logLevel);

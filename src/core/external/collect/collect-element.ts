@@ -246,12 +246,16 @@ class CollectElement extends SkyflowElement {
 
     const isComposable = this.#elements.length > 1;
     if (isComposable) {
-      this.#iframe.mount(domElement, this.#elementId);
+      this.#iframe.mount(domElement, this.#elementId, {
+        record: JSON.stringify({ record: this.#group }),
+      });
       this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
     } else {
       if (this.#readyToMount) {
-        this.#iframe.mount(domElement, this.#elementId);
+        this.#iframe.mount(domElement, this.#elementId, {
+          record: JSON.stringify({ record: this.#group }),
+        });
         this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
         return;
@@ -259,7 +263,9 @@ class CollectElement extends SkyflowElement {
       this.#groupEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED, (data) => {
         if (data?.containerId === this.containerId) {
           updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
-          this.#iframe.mount(domElement, this.#elementId);
+          this.#iframe.mount(domElement, this.#elementId, {
+            record: JSON.stringify({ record: this.#group }),
+          });
           this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
         }
       });
