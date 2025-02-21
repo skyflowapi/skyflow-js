@@ -31,7 +31,7 @@ jobs:
         run: |
          echo "Displaying raw Semgrep results..."
          cat pretty-results.json
-         
+
       - name: Add comment on PR if findings are found
         uses: actions/github-script@v6
         with:
@@ -39,13 +39,20 @@ jobs:
             const fs = require('fs');
             const prNumber = context.payload.pull_request.number;
             const results = JSON.parse(fs.readFileSync('pretty-results.json', 'utf8'));
+            
+            // Check for findings with severity "ERROR"
             const criticalVulnsFound = results.some(result => result.severity === "ERROR");
+            
             let comment;
             if (criticalVulnsFound) {
+              // Comment if critical vulnerabilities (ERROR severity) are found
               comment = `**Semgrep Findings:** Issues with Error level severity are found (Error is High severity in Semgrep), Please resolve the issues before merging.`;
             } else {
-              comment = `**Semgrep Findings:** No vulnerabilities found. Good to merge!`;
+              // Comment if no critical vulnerabilities are found
+              comment = `**Semgrep Findings:** No vulnerabilities found. Good to merge.`;
             }
+
+            // Ensure the comment is posted only if findings exist
             await github.rest.issues.createComment({
               ...context.repo,
               issue_number: prNumber,
