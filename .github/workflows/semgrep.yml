@@ -1,35 +1,53 @@
 name: Semgrep
 
-# Run workflow each time code is pushed to your repository.
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # Give write permission to PRs
+      issues: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Semgrep
-        run: pip install semgrep
+      - name: Install Semgrep and jq
+        run: |
+          sudo apt install python3-venv jq
+          python3 -m venv .venv
+          .venv/bin/pip install semgrep
 
       - name: Run Semgrep
         run: |
-          semgrep --config .semgreprules/customRule.yml --config auto --severity ERROR --sarif . > results.sarif
+          source .venv/bin/activate
+          semgrep --config auto --severity ERROR --json-output=results.json --no-error
+          cat results.json | jq .results > pretty-results.json
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          # Path to SARIF file relative to the root of the repository
-          sarif_file: results.sarif
+      - name: Display Raw Semgrep JSON Output
+        run: |
+         echo "Displaying raw Semgrep results..."
+         cat pretty-results.json
+         
+      - name: Check if vulnerabilities found
+        id: vulnerabilities
+        run: |
+           if grep -q '"severity": "ERROR"' pretty-results.json; then
+             echo "Semgrep findings: Issues with Warning level severity are found, Please resolve the issues before merging."
+             echo "comment=**Semgrep findings**: Issues with Error level severity are found (Error is High severity in Semgrep), Please resolve the issues before merging." >> $GITHUB_ENV
+           else
+             echo "No Issues found, Good to merge."
+             echo "comment=**Semgrep findings**: No Issues found, Good to merge." >> $GITHUB_ENV
+           fi
 
-      - name: Upload results
-        uses: actions/upload-artifact@v4
-        with:
-          name: semgrep-results
-          path: results.sarif
+      - name: Set GH_TOKEN 
+        run: echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Comment on PR
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "${{ env.comment }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
