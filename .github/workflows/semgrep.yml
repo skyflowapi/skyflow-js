@@ -35,11 +35,12 @@ jobs:
       - name: Check if vulnerabilities found
         id: vulnerabilities
         run: |
-           if grep -q '"severity": "ERROR"' pretty-results.json; then
-             echo "::set-output name=comment::**Semgrep-new findings**: Issues are found, Please resolve the issues before merging."
-           else
-             echo "::set-output name=comment::**Semgrep-new findings**: No Issues found, Good to merge."
-           fi
+          if grep -q '"severity": "ERROR"' pretty-results.json; then
+            echo "comment=**Semgrep-new findings**: Issues are found, Please resolve the issues before merging." >> $GITHUB_OUTPUT
+          else
+            echo "comment=**Semgrep-new findings**: No Issues found, Good to merge." >> $GITHUB_OUTPUT
+          fi
+
            
       - name: Add comment on PR
         uses: actions/github-script@v6
