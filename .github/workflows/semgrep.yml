@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write # Give write permission to PRs
-      issues: write
+      issues: write # Permission to write comments on PR
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -29,32 +30,36 @@ jobs:
 
       - name: Display Raw Semgrep JSON Output
         run: |
-         echo "Displaying raw Semgrep results..."
-         cat pretty-results.json
+          echo "Displaying raw Semgrep results..."
+          cat pretty-results.json
 
       - name: Add comment on PR if findings are found
         uses: actions/github-script@v6
         with:
           script: |
-            const fs = require('fs');
-            const prNumber = context.payload.pull_request.number;
-            const results = JSON.parse(fs.readFileSync('pretty-results.json', 'utf8'));
-            
-            // Check for findings with severity "ERROR"
-            const criticalVulnsFound = results.some(result => result.severity === "ERROR");
-            
-            let comment;
-            if (criticalVulnsFound) {
-              // Comment if critical vulnerabilities (ERROR severity) are found
-              comment = `**Semgrep Findings:** Issues with Error level severity are found (Error is High severity in Semgrep), Please resolve the issues before merging.`;
-            } else {
-              // Comment if no critical vulnerabilities are found
-              comment = `**Semgrep Findings:** No vulnerabilities found. Good to merge.`;
-            }
+            // Ensure the context has a pull_request
+            if (context.payload.pull_request) {
+              const prNumber = context.payload.pull_request.number;
+              const fs = require('fs');
+              const results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
+              const highFindings = results.results.filter(result => result.severity === 'ERROR'); // Adjust severity level based on Semgrep output
 
-            // Ensure the comment is posted only if findings exist
-            await github.rest.issues.createComment({
-              ...context.repo,
-              issue_number: prNumber,
-              body: comment
-            });
+              // Comment if high-severity findings are found
+              if (highFindings.length > 0) {
+                const comment = `**Semgrep Findings:** Vulnerabilities are found in the code. Please address them before merging.`;
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: prNumber,
+                  body: comment
+                });
+              } else {
+                const noIssuesComment = "**Semgrep:** No issues found, Good to merge.";
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: prNumber,
+                  body: noIssuesComment
+                });
+              }
+            } else {
+              console.log("This workflow wasn't triggered by a pull request, so no comment will be added.");
+            }
