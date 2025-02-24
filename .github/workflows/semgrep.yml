@@ -1,4 +1,4 @@
-name: Semgrep-new
+name: Semgrep Scan
 
 on:
   pull_request:
@@ -9,52 +9,56 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write  # Write permission to add comments on PRs
-      issues: write         # Write permission to add comments to PRs
-      
+      pull-requests: write # Give write permission to PRs
+      issues: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Install Semgrep and jq
         run: |
+          sudo apt install python3-venv jq
           python3 -m venv .venv
-          .venv/bin/pip install semgrep jq
-          
+          .venv/bin/pip install semgrep
+
       - name: Run Semgrep
         run: |
           source .venv/bin/activate
           semgrep --config auto --severity ERROR --json-output=results.json --no-error
-          jq .results results.json > pretty-results.json
-          
+          cat results.json | jq .results > pretty-results.json
+
       - name: Display Raw Semgrep JSON Output
         run: |
-          echo "Displaying raw Semgrep results..."
-          cat pretty-results.json
-          
-      - name: Check if vulnerabilities found
-        id: vulnerabilities
-        run: |
-          if grep -q '"severity": "ERROR"' pretty-results.json; then
-            echo "comment=**Semgrep-new findings**: Issues are found, Please resolve the issues before merging." >> $GITHUB_OUTPUT
-          else
-            echo "comment=**Semgrep-new findings**: No Issues found, Good to merge." >> $GITHUB_OUTPUT
-          fi
-
-           
-      - name: Add comment on PR
+         echo "Displaying raw Semgrep results..."
+         cat pretty-results.json
+         
+      - name: Add comment on PR if findings are found
         uses: actions/github-script@v6
         with:
           script: |
-            const prNumber = context.payload.pull_request.number;
-            const comment = '${{ steps.vulnerabilities.outputs.comment }}'; // Fetch the output from the previous step
-            if (comment) {
-              // Add the comment to the PR
-              await github.rest.issues.createComment({
-                ...context.repo,
-                issue_number: prNumber,
-                body: comment
-              });
+            // Ensure the context has a pull_request
+            if (context.payload.pull_request) {
+              const prNumber = context.payload.pull_request.number;
+              const fs = require('fs');
+              const results = JSON.parse(fs.readFileSync('pretty-results.json', 'utf8'));
+              const highFindings = results.filter(result => result.extra && result.extra.severity === 'ERROR');
+
+              // Comment if findings exist
+              if (highFindings.length > 0) {
+                const comment = `**Semgrep Findings:** Issues with Error level severity are found (Error is Highest severity in Semgrep), Please resolve the issues before merging.`;
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: prNumber,
+                  body: comment
+                });
+              } else {
+                const noIssuesComment = "**Semgrep findings:** No issues found, Good to merge.";
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: prNumber,
+                  body: noIssuesComment
+                });
+              }
             } else {
-              console.log("No comment found, nothing to post.");
+              console.log("This workflow wasn't triggered by a pull request, so no comment will be added.");
             }
