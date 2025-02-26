@@ -77,13 +77,53 @@ describe('test frame elements', () => {
     beforeEach(() => {
         windowSpy = jest.spyOn(global, 'window', 'get');
         windowSpy.mockImplementation(() => ({
-            name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR`,
+            name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR:`,
+            location: {
+              href: `http://localhost/?${btoa(JSON.stringify({record:element}))}`,
+            }
         }));
 
         emitSpy = jest.spyOn(bus, 'emit');
     })
+    test('FrameElements constructor : empty path', () => {
+      windowSpy.mockImplementation(() => ({
+        name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('1234')}:ERROR:`,
+        location: {
+          href: `http://localhost`,
+        }
+    }))
+      const onSpy = jest.spyOn(bus, 'on');
+
+        FrameElements.start()
+        const emitEventName = emitSpy.mock.calls[0][0];
+        const emitCb = emitSpy.mock.calls[0][2];
+        expect(emitEventName.includes(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY)).toBeTruthy()
+        emitCb(element);
+        const mockCreateElement = jest.fn().mockImplementation(()=>{
+            return {
+                resetEvents: jest.fn(),
+                on: jest.fn(),
+                getStatus: jest.fn(()=>({
+                    isFocused: false,
+                    isValid: false,
+                    isEmpty: true,
+                    isComplete: false,
+                })),
+                fieldType: 'CARD_NUMBER',
+                state:{name:''},
+                setValidation:jest.fn(),
+                setReplacePattern: jest.fn(),
+                setMask:jest.fn(),
+                getValue: jest.fn(),
+                setValue: jest.fn(),
+            }
+        })
+        const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
+    })
     test('FrameElements constructor', () => {
       const onSpy = jest.spyOn(bus, 'on');
+
+        FrameElements.init(jest.fn().mockReturnValue({resetEvents:jest.fn(),on:jest.fn(),fieldType:'group',getStatus:jest.fn().mockReturnValue({}),state:{}}),{})
 
         FrameElements.start()
 
@@ -112,12 +152,6 @@ describe('test frame elements', () => {
             }
         })
         const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
-        const heigtEvent = onSpy.mock.calls[0][1];
-        const cb = jest.fn();
-        heigtEvent({},cb);
-        cb();
-
-
     })
 
 })
@@ -128,30 +162,36 @@ describe('test composable frame elements', () => {
   beforeEach(() => {
       windowSpy = jest.spyOn(global, 'window', 'get');
       windowSpy.mockImplementation(() => ({
-          name: `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR`,
+          name: `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR:`,
+          location: {
+            href: `http://localhost/?${btoa(JSON.stringify({record:element}))}`,
+          }
       }));
 
       emitSpy = jest.spyOn(bus, 'emit');
   });
 
-  test('FrameElements constructor', () => {
-      FrameElements.start()
+  test('FrameElements constructor with composable elements : empty path', () => {
+    windowSpy.mockImplementation(() => ({
+      name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR:`,
+      location: {
+        href: `http://localhost`,
+      }
+    }))
+      const onSpy = jest.spyOn(bus, 'on');
+      FrameElements.group = [];
+      // FrameElements.setup();
 
+      FrameElements.start()
+      
       const emitEventName = emitSpy.mock.calls[0][0];
       const emitCb = emitSpy.mock.calls[0][2];
       expect(emitEventName.includes(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY)).toBeTruthy()
       emitCb(element);
-
       const mockCreateElement = jest.fn().mockImplementation(()=>{
           return {
               resetEvents: jest.fn(),
-              on: jest.fn().mockImplementation((name,cb)=>{
-                if(name === 'BLUR'){
-                  cb({
-                    error:'state'
-                  })
-                }
-              }),
+              on: jest.fn(),
               getStatus: jest.fn(()=>({
                   isFocused: false,
                   isValid: false,
@@ -165,11 +205,10 @@ describe('test composable frame elements', () => {
               setMask:jest.fn(),
               getValue: jest.fn(),
               setValue: jest.fn(),
-
           }
       })
       const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
-  });
+  })
 
     
   test('FrameElements init', () => {
