@@ -3,7 +3,6 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 /* eslint-disable no-underscore-dangle */
 import bus from 'framebus';
-import get from 'lodash/get';
 import Client from '../../../client';
 
 import {
@@ -29,14 +28,7 @@ import {
 } from '../../../utils/validators';
 import {
   checkForElementMatchRule,
-  checkForValueMatch,
-  constructElementsInsertReq,
-  constructInsertRecordRequest,
-  constructInsertRecordResponse,
-  constructUploadResponse,
-  updateRecordsBySkyflowID,
 } from '../../../core-utils/collect';
-import { getAccessToken } from '../../../utils/bus-events';
 import {
   printLog,
   parameterizedString,
@@ -48,7 +40,6 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import {
   Context,
-  IInsertResponse,
   IValidationRule,
   LogLevel,
   MessageType,
@@ -57,14 +48,12 @@ import {
 import {
   fileValidation,
   formatFrameNameToId,
-  generateUploadFileName,
   getReturnValue,
   removeSpaces,
   vaildateFileName,
 } from '../../../utils/helpers';
 import { ContainerType } from '../../../skyflow';
 
-const set = require('set-value');
 const RegexParser = require('regex-parser');
 
 export class IFrameFormElement extends EventEmitter {
@@ -879,7 +868,6 @@ export class IFrameForm {
     }
     return this.iFrameFormElements[frameName];
   };
-
 
   private initializeFrame = (root: Window, frameGlobalName: string) => {
     let frameInstance: any;

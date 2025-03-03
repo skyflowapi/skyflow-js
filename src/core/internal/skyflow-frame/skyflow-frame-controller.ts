@@ -2,8 +2,8 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import Client from '../../../client';
 import get from 'lodash/get';
+import Client from '../../../client';
 import {
   checkForElementMatchRule,
   checkForValueMatch,
@@ -22,7 +22,8 @@ import {
 import { getAccessToken } from '../../../utils/bus-events';
 import {
   CORALOGIX_DOMAIN,
-  DEFAULT_FILE_RENDER_ERROR, DOMAIN, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, PUREJS_TYPES, SDK_IFRAME_EVENT,
+  DEFAULT_FILE_RENDER_ERROR, DOMAIN, ELEMENT_EVENTS_TO_IFRAME,
+  ELEMENTS, PUREJS_TYPES, SDK_IFRAME_EVENT,
 } from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
@@ -38,7 +39,10 @@ import {
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
-import { fileValidation, generateUploadFileName, getAtobValue, getSDKNameAndVersion, getValueFromName, vaildateFileName } from '../../../utils/helpers';
+import {
+  fileValidation, generateUploadFileName, getAtobValue,
+  getSDKNameAndVersion, getValueFromName, vaildateFileName,
+} from '../../../utils/helpers';
 import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 
@@ -276,8 +280,9 @@ class SkyflowFrameController {
         this.handleTokenizationRequest);
 
     bus.target(this.#clientDomain).on(ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#clientId,
-      this.handleFileUpload);  
+      this.handleFileUpload);
   }
+
   // Tokenization Request Handler
   handleTokenizationRequest = async (data, callback) => {
     try {
@@ -311,6 +316,7 @@ class SkyflowFrameController {
       callback({ error });
     }
   };
+
   static init(clientId) {
     const trackingStatus = getValueFromName(window.name, 3) === 'true';
     if (trackingStatus) {
@@ -395,6 +401,7 @@ class SkyflowFrameController {
       }
     });
   }
+
   tokenize = (options) => {
     const id = options.containerId;
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
