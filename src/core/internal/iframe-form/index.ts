@@ -3,7 +3,6 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 /* eslint-disable no-underscore-dangle */
 import bus from 'framebus';
-import get from 'lodash/get';
 import Client from '../../../client';
 
 import {
@@ -29,14 +28,7 @@ import {
 } from '../../../utils/validators';
 import {
   checkForElementMatchRule,
-  checkForValueMatch,
-  constructElementsInsertReq,
-  constructInsertRecordRequest,
-  constructInsertRecordResponse,
-  constructUploadResponse,
-  updateRecordsBySkyflowID,
 } from '../../../core-utils/collect';
-import { getAccessToken } from '../../../utils/bus-events';
 import {
   printLog,
   parameterizedString,
@@ -48,7 +40,6 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import {
   Context,
-  IInsertResponse,
   IValidationRule,
   LogLevel,
   MessageType,
@@ -57,14 +48,12 @@ import {
 import {
   fileValidation,
   formatFrameNameToId,
-  generateUploadFileName,
   getReturnValue,
   removeSpaces,
   vaildateFileName,
 } from '../../../utils/helpers';
 import { ContainerType } from '../../../skyflow';
 
-const set = require('set-value');
 const RegexParser = require('regex-parser');
 
 export class IFrameFormElement extends EventEmitter {
@@ -831,43 +820,6 @@ export class IFrameForm {
       logLevel,
     );
 
-    bus
-      .target(this.clientDomain)
-      .on(
-        ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.controllerId,
-        (data, callback) => {
-          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
-          MessageType.LOG, this.context.logLevel);
-          // todo: Do we need to reset the data!?
-          this.tokenize(data)
-            .then((response) => {
-              callback(response);
-            })
-            .catch((error) => {
-              callback({ error });
-            });
-        },
-      );
-
-    bus
-      .target(this.clientDomain)
-      .on(
-        ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.controllerId,
-        (data, callback) => {
-          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
-          MessageType.LOG, this.context.logLevel);
-          this.paralleUploadFiles()
-            .then((response) => {
-              callback(response);
-            })
-            .catch((error) => {
-              callback({ error });
-            });
-        },
-      );
-
     bus.on(ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME, (data, callback) => {
       Object.keys(this.iFrameFormElements).forEach((iFrameFormElement) => {
         if (iFrameFormElement === data.name) {
@@ -917,362 +869,6 @@ export class IFrameForm {
     return this.iFrameFormElements[frameName];
   };
 
-  paralleUploadFiles = () => new Promise((rootResolve, rootReject) => {
-    const formElements = Object.keys(this.iFrameFormElements);
-
-    Promise.allSettled(
-      formElements.map(async (element) => {
-        let res;
-        if (
-          this.iFrameFormElements[element].fieldType
-          === ELEMENTS.FILE_INPUT.name
-        ) {
-          res = await this.uploadFiles(this.iFrameFormElements[element]);
-        }
-        return res;
-      }),
-
-    ).then((resultSet) => {
-      const fileUploadResponse: Record<string, any>[] = [];
-      const errorResponse: Record<string, any>[] = [];
-      resultSet.forEach((result) => {
-        if (result.status === 'fulfilled') {
-          if (result.value !== undefined) {
-            if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
-              errorResponse.push(result.value);
-            } else {
-              fileUploadResponse.push(result.value);
-            }
-          }
-        } else if (result.status === 'rejected') {
-          errorResponse.push(result.reason);
-        }
-      });
-      if (errorResponse.length === 0) {
-        rootResolve({ fileUploadResponse });
-      } else if (fileUploadResponse.length === 0) rootReject({ errorResponse });
-      else rootReject({ fileUploadResponse, errorResponse });
-    });
-  });
-
-  uploadFiles = (fileElement) => {
-    if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
-    const fileUploadObject: any = {};
-
-    const {
-      state, tableName, skyflowID, onFocusChange, preserveFileName,
-    } = fileElement;
-
-    if (state.isRequired) {
-      onFocusChange(false);
-    }
-    try {
-      fileValidation(state.value, state.isRequired, fileElement);
-    } catch (err) {
-      return Promise.reject(err);
-    }
-
-    const validatedFileState = fileValidation(state.value, state.isRequired, fileElement);
-
-    if (!validatedFileState) {
-      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true));
-    }
-    fileUploadObject[state.name] = state.value;
-
-    const formData = new FormData();
-
-    const column = Object.keys(fileUploadObject)[0];
-
-    const value: Blob = Object.values(fileUploadObject)[0] as Blob;
-
-    if (preserveFileName) {
-      const isValidFileName = vaildateFileName(state.value.name);
-      if (!isValidFileName) {
-        return Promise.reject(
-          new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true),
-        );
-      }
-      formData.append(column, value);
-    } else {
-      const generatedFileName = generateUploadFileName(state.value.name);
-      formData.append(column, new File([value], generatedFileName, { type: state.value.type }));
-    }
-
-    const { client } = this;
-    const sendRequest = () => new Promise((rootResolve, rootReject) => {
-      const clientId = client.toJSON()?.metaData?.uuid || '';
-      getAccessToken(clientId).then((authToken) => {
-        client
-          .request({
-            body: formData,
-            requestMethod: 'POST',
-            url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${tableName}/${skyflowID}/files`,
-            headers: {
-              authorization: `Bearer ${authToken}`,
-              'content-type': 'multipart/form-data',
-            },
-          })
-          .then((response: any) => {
-            rootResolve(constructUploadResponse(response));
-          })
-          .catch((error) => {
-            rootReject(error);
-          });
-      }).catch((err) => {
-        rootReject(err);
-      });
-    });
-
-    return new Promise((resolve, reject) => {
-      sendRequest()
-        .then((res) => resolve(res))
-        .catch((err) => {
-          reject(err);
-        });
-    });
-  };
-
-  tokenize = (options) => {
-    if (!this.client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
-    const insertResponseObject: any = {};
-    const updateResponseObject: any = {};
-    const formElements = Object.keys(this.iFrameFormElements);
-    let errorMessage = '';
-    for (let i = 0; i < formElements.length; i += 1) {
-      if (
-        this.iFrameFormElements[formElements[i]].fieldType
-        !== ELEMENTS.FILE_INPUT.name
-      ) {
-        const {
-          state, doesClientHasError, clientErrorText, errorText, onFocusChange,
-          validations, setValue,
-        } = this.iFrameFormElements[formElements[i]];
-
-        if (state.isRequired || !state.isValid) {
-          onFocusChange(false);
-        }
-
-        if (validations
-          && checkForElementMatchRule(validations)
-          && checkForValueMatch(validations, this.iFrameFormElements[formElements[i]])) {
-          setValue(state.value);
-          onFocusChange(false);
-        }
-
-        if (!state.isValid || !state.isComplete) {
-          if (doesClientHasError) {
-            errorMessage += `${state.name}:${clientErrorText}`;
-          } else { errorMessage += `${state.name}:${errorText} `; }
-        }
-      }
-    }
-
-    if (errorMessage.length > 0) {
-      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
-    }
-
-    for (let i = 0; i < formElements.length; i += 1) {
-      const {
-        state, tableName, validations, skyflowID,
-      } = this.iFrameFormElements[formElements[i]];
-      if (tableName) {
-        if (
-          this.iFrameFormElements[formElements[i]].fieldType
-        !== ELEMENTS.FILE_INPUT.name
-        ) {
-          if (
-            this.iFrameFormElements[formElements[i]].fieldType
-          === ELEMENTS.checkbox.name
-          ) {
-            if (insertResponseObject[state.name]) {
-              insertResponseObject[state.name] = `${insertResponseObject[state.name]},${state.value
-              }`;
-            } else {
-              insertResponseObject[state.name] = state.value;
-            }
-          } else if (insertResponseObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
-            if (get(insertResponseObject[tableName], state.name)
-            && !(validations && checkForElementMatchRule(validations))) {
-              return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
-                [state.name, tableName], true));
-            }
-            set(
-              insertResponseObject[tableName],
-              state.name,
-              this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-            );
-          } else if (skyflowID || skyflowID === '') {
-            if (skyflowID === '' || skyflowID === null) {
-              return Promise.reject(new SkyflowError(
-                SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
-                [],
-              ));
-            }
-            if (updateResponseObject[skyflowID]) {
-              set(
-                updateResponseObject[skyflowID],
-                state.name,
-                this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-              );
-            } else {
-              updateResponseObject[skyflowID] = {};
-              set(
-                updateResponseObject[skyflowID],
-                state.name,
-                this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-              );
-              set(
-                updateResponseObject[skyflowID],
-                'table',
-                tableName,
-              );
-            }
-          } else {
-            insertResponseObject[tableName] = {};
-            set(
-              insertResponseObject[tableName],
-              state.name,
-              this.iFrameFormElements[formElements[i]].getUnformattedValue(),
-            );
-          }
-        }
-      }
-    }
-    let finalInsertRequest;
-    let finalInsertRecords;
-    let finalUpdateRecords;
-    let insertResponse: IInsertResponse;
-    let updateResponse: IInsertResponse;
-    let insertErrorResponse: any;
-    let updateErrorResponse;
-    let insertDone = false;
-    let updateDone = false;
-    try {
-      [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
-        insertResponseObject, updateResponseObject, options,
-      );
-      finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
-    } catch (error:any) {
-      return Promise.reject({
-        error: error?.message,
-      });
-    }
-    const { client } = this;
-    const sendRequest = () => new Promise((rootResolve, rootReject) => {
-      const clientId = client.toJSON()?.metaData?.uuid || '';
-      getAccessToken(clientId).then((authToken) => {
-        if (finalInsertRequest.length !== 0) {
-          client
-            .request({
-              body: {
-                records: finalInsertRequest,
-              },
-              requestMethod: 'POST',
-              url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
-              headers: {
-                authorization: `Bearer ${authToken}`,
-                'content-type': 'application/json',
-              },
-            })
-            .then((response: any) => {
-              insertResponse = constructInsertRecordResponse(
-                response,
-                options.tokens,
-                finalInsertRecords.records,
-              );
-              insertDone = true;
-              if (finalUpdateRecords.updateRecords.length === 0) {
-                rootResolve(insertResponse);
-              }
-              if (updateDone && updateErrorResponse !== undefined) {
-                if (updateErrorResponse.records === undefined) {
-                  updateErrorResponse.records = insertResponse.records;
-                } else {
-                  updateErrorResponse.records = insertResponse.records
-                    .concat(updateErrorResponse.records);
-                }
-                rootReject(updateErrorResponse);
-              } else if (updateDone && updateResponse !== undefined) {
-                rootResolve({ records: insertResponse.records.concat(updateResponse.records) });
-              }
-            })
-            .catch((error) => {
-              insertDone = true;
-              if (finalUpdateRecords.updateRecords.length === 0) {
-                rootReject(error);
-              } else {
-                insertErrorResponse = {
-                  errors: [
-                    {
-                      error: {
-                        code: error?.error?.code,
-                        description: error?.error?.description,
-                      },
-                    },
-                  ],
-                };
-              }
-              if (updateDone && updateResponse !== undefined) {
-                const errors = insertErrorResponse.errors;
-                const records = updateResponse.records;
-                rootReject({ errors, records });
-              } else if (updateDone && updateErrorResponse !== undefined) {
-                updateErrorResponse.errors = updateErrorResponse.errors
-                  .concat(insertErrorResponse.errors);
-                rootReject(updateErrorResponse);
-              }
-            });
-        }
-        if (finalUpdateRecords.updateRecords.length !== 0) {
-          updateRecordsBySkyflowID(finalUpdateRecords, client, options)
-            .then((response: any) => {
-              updateResponse = {
-                records: response,
-              };
-              updateDone = true;
-              if (finalInsertRequest.length === 0) {
-                rootResolve(updateResponse);
-              }
-              if (insertDone && insertResponse !== undefined) {
-                rootResolve({ records: insertResponse.records.concat(updateResponse.records) });
-              } else if (insertDone && insertErrorResponse !== undefined) {
-                const errors = insertErrorResponse.errors;
-                const records = updateResponse.records;
-                rootReject({ errors, records });
-              }
-            }).catch((error) => {
-              updateErrorResponse = error;
-              updateDone = true;
-              if (finalInsertRequest.length === 0) {
-                rootReject(error);
-              }
-              if (insertDone && insertResponse !== undefined) {
-                if (updateErrorResponse.records === undefined) {
-                  updateErrorResponse.records = insertResponse.records;
-                } else {
-                  updateErrorResponse.records = insertResponse.records
-                    .concat(updateErrorResponse.records);
-                }
-                rootReject(updateErrorResponse);
-              } else if (insertDone && insertErrorResponse !== undefined) {
-                updateErrorResponse.errors = updateErrorResponse.errors
-                  .concat(insertErrorResponse.errors);
-                rootReject(updateErrorResponse);
-              }
-            });
-        }
-      }).catch((err) => {
-        rootReject(err);
-      });
-    });
-
-    return new Promise((resolve, reject) => {
-      sendRequest()
-        .then((res) => resolve(res))
-        .catch((err) => reject(err));
-    });
-  };
-
   private initializeFrame = (root: Window, frameGlobalName: string) => {
     let frameInstance: any;
     for (let i = 0; i < root.frames.length; i += 1) {
@@ -1280,7 +876,7 @@ export class IFrameForm {
 
       try {
         if (
-          frame.location.href === window.location.href
+          frame.location.href.split('?')[0] === window.location.href
           && frame.name === frameGlobalName
         ) {
           frameInstance = frame;
