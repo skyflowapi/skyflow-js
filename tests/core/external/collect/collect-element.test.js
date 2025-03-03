@@ -225,6 +225,55 @@ describe('collect element', () => {
     const mountCb = mountedEvent[0][1];
     const cb3 = jest.fn();
 
+    inputCb({
+      name: elementName,
+      event: ELEMENT_EVENTS_TO_CLIENT.READY,
+      value: {},
+    }, cb2);
+
+    expect(element.isMounted()).toBe(false);
+
+    mountCb({
+      name:elementName,
+    },cb3)
+
+    
+    setTimeout(()=>{
+        expect(element.isMounted()).toBe(true);
+    },0)
+    cb3();
+    const heightCb = emitSpy.mock.calls[1][2];
+      heightCb({
+        name: elementName,
+        height:'123'
+      })
+  });
+
+
+  it('constructor with element mounted for different element',  () => {
+    const onSpy = jest.spyOn(bus, 'on');
+
+    const element = new CollectElement(id,
+      {
+        elementName,
+        rows,
+      },
+      {},
+      {type:ContainerType.COLLECT,containerId:'containerId'},
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
+
+    const inputEvent = onSpy.mock.calls
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
+    const inputCb = inputEvent[0][1];
+    const cb2 = jest.fn();
+
+    const mountedEvent = onSpy.mock.calls
+      .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    const mountCb = mountedEvent[0][1];
+    const cb3 = jest.fn();
   
     inputCb({
       name: elementName,
@@ -346,6 +395,12 @@ describe('collect element', () => {
         expect(element.isMounted()).toBe(true);
     },0)
     cb3();
+
+    const heightCb = emitSpy.mock.calls[0][2];
+    heightCb({
+      name: elementName,
+      height:'123'
+    })
   
   });
 

@@ -177,16 +177,22 @@ class CollectElement extends SkyflowElement {
             this.#mounted = true;
           }
         });
+        this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+          {}, (payload:any) => {
+            this.#iframe.setIframeHeight(payload.height);
+          });
       } else if (data.name === this.#elements[0].elementName) {
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
         this.#elements[0].isMounted = true;
         this.#mounted = true;
+        this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+          {}, (payload:any) => {
+            if (data.name === formatFrameNameToId(payload.name)) {
+              this.#iframe.setIframeHeight(payload.height);
+            }
+          });
       }
-      this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-        {}, (payload:any) => {
-          this.#iframe.setIframeHeight(payload.height);
-        });
     });
   }
 
@@ -244,6 +250,14 @@ class CollectElement extends SkyflowElement {
       }
     };
 
+    if (typeof domElement === 'string') {
+      const targetElement = document.querySelector(domElement);
+      if (targetElement) {
+        this.resizeObserver?.observe(targetElement);
+      }
+    } else if (domElement instanceof HTMLElement) {
+      this.resizeObserver?.observe(domElement);
+    }
     const isComposable = this.#elements.length > 1;
     if (isComposable) {
       this.#iframe.mount(domElement, this.#elementId);
@@ -263,14 +277,6 @@ class CollectElement extends SkyflowElement {
           this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
         }
       });
-    }
-    if (typeof domElement === 'string') {
-      const targetElement = document.querySelector(domElement);
-      if (targetElement) {
-        this.resizeObserver?.observe(targetElement);
-      }
-    } else if (domElement instanceof HTMLElement) {
-      this.resizeObserver?.observe(domElement);
     }
   };
 
