@@ -304,11 +304,12 @@ class CollectContainer extends Container {
       bus
       // .target(properties.IFRAME_SECURE_ORIGIN)
         .emit(
-          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
+          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#metaData.uuid,
           {
             ...options,
             tokens: options?.tokens !== undefined ? options.tokens : true,
             elementIds,
+            containerId: this.#containerId,
           },
           (data: any) => {
             if (!data || data?.error) {
@@ -336,6 +337,8 @@ class CollectContainer extends Container {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
       const fileElements = Object.values(this.#elements);
+      const elementIds = Object.keys(this.#elements);
+
       fileElements.forEach((element) => {
         if (!element.isMounted()) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
@@ -345,9 +348,10 @@ class CollectContainer extends Container {
       bus
       // .target(properties.IFRAME_SECURE_ORIGIN)
         .emit(
-          ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#containerId,
+          ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#metaData.uuid,
           {
             ...options,
+            elementIds,
           },
           (data: any) => {
             if (!data || data?.error) {
