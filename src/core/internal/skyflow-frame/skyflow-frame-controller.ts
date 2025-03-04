@@ -328,7 +328,6 @@ class SkyflowFrameController {
   };
 
   // handleRevealRequest = async (data, callback) => {
-  //   console.log('reveal listener activated');
   //   printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
   //     CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
   //   MessageType.LOG, this.#context.logLevel);
@@ -353,35 +352,35 @@ class SkyflowFrameController {
     return new SkyflowFrameController(clientId);
   }
 
-  revealData(revealRecords: IRevealRecord[], containerId) {
-    const id = containerId;
-    return new Promise((resolve, reject) => {
-      fetchRecordsByTokenId(revealRecords, this.#client).then(
-        (resolvedResult) => {
-          const formattedResult = formatRecordsForIframe(resolvedResult);
-          bus
-            .target(properties.IFRAME_SECURE_SITE)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
-                + id,
-              formattedResult,
-            );
-          resolve(formatRecordsForClient(resolvedResult));
-        },
-        (rejectedResult) => {
-          const formattedResult = formatRecordsForIframe(rejectedResult);
-          bus
-            .target(properties.IFRAME_SECURE_SITE)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
-                + id,
-              formattedResult,
-            );
-          reject(formatRecordsForClient(rejectedResult));
-        },
-      );
-    });
-  }
+  // revealData(revealRecords: IRevealRecord[], containerId) {
+  //   const id = containerId;
+  //   return new Promise((resolve, reject) => {
+  //     fetchRecordsByTokenId(revealRecords, this.#client).then(
+  //       (resolvedResult) => {
+  //         const formattedResult = formatRecordsForIframe(resolvedResult);
+  //         bus
+  //           .target(properties.IFRAME_SECURE_SITE)
+  //           .emit(
+  //             ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
+  //               + id,
+  //             formattedResult,
+  //           );
+  //         resolve(formatRecordsForClient(resolvedResult));
+  //       },
+  //       (rejectedResult) => {
+  //         const formattedResult = formatRecordsForIframe(rejectedResult);
+  //         bus
+  //           .target(properties.IFRAME_SECURE_SITE)
+  //           .emit(
+  //             ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
+  //               + id,
+  //             formattedResult,
+  //           );
+  //         reject(formatRecordsForClient(rejectedResult));
+  //       },
+  //     );
+  //   });
+  // }
 
   insertData(records, options) {
     const requestBody = constructInsertRecordRequest(records, options);

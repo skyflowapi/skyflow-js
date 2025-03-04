@@ -119,35 +119,7 @@ class ComposableContainer extends Container {
     printLog(parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
       MessageType.LOG,
       this.#context.logLevel);
-
-    const sub = (data, callback) => {
-      if (data.name === COLLECT_FRAME_CONTROLLER + this.#containerId) {
-        callback({
-          ...metaData,
-          clientJSON: {
-            ...metaData.clientJSON,
-            config: {
-              ...metaData.clientJSON.config,
-            },
-          },
-          context,
-        });
-        this.#containerMounted = true;
-        // eslint-disable-next-line no-underscore-dangle
-        this.#eventEmitter._emit(
-          ELEMENT_EVENTS_TO_CONTAINER.COMPOSABLE_CONTAINER_MOUNTED + this.#containerId,
-          { containerId: this.#containerId },
-        );
-
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
-      }
-    };
-    bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
-    document.body.append(iframe);
+    this.#containerMounted = true;
     this.#updateListeners();
   }
 
@@ -393,11 +365,12 @@ class ComposableContainer extends Container {
       bus
       // .target(properties.IFRAME_SECURE_ORIGIN)
         .emit(
-          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
+          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#metaData.uuid,
           {
             ...options,
             tokens: options?.tokens !== undefined ? options.tokens : true,
             elementIds,
+            containerId: this.#containerId,
           },
           (data: any) => {
             if (!data || data?.error) {

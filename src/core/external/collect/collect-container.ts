@@ -31,7 +31,6 @@ import {
 import Container from '../common/container';
 import CollectElement from './collect-element';
 import EventEmitter from '../../../event-emitter';
-import properties from '../../../properties';
 
 export interface CollectElementInput {
   table?: string;
@@ -328,6 +327,7 @@ class CollectContainer extends Container {
           {
             ...options,
             elementIds,
+            containerId: this.#containerId,
           },
           (data: any) => {
             if (!data || data?.error) {
