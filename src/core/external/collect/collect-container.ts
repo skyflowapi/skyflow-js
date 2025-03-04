@@ -10,7 +10,6 @@ import {
 } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
-import properties from '../../../properties';
 import { ContainerType } from '../../../skyflow';
 import {
   IValidationRule, IInsertRecordInput, Context, MessageType,
@@ -27,11 +26,12 @@ import {
 import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CONTAINER,
+  ELEMENTS, FRAME_ELEMENT,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
 import EventEmitter from '../../../event-emitter';
+import properties from '../../../properties';
 
 export interface CollectElementInput {
   table?: string;
@@ -102,36 +102,13 @@ class CollectContainer extends Container {
     printLog(parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
       MessageType.LOG,
       this.#context.logLevel);
-
-    const sub = (data, callback) => {
-      if (data.name === COLLECT_FRAME_CONTROLLER + this.#containerId) {
-        callback({
-          ...metaData,
-          clientJSON: {
-            ...metaData.clientJSON,
-            config: {
-              ...metaData.clientJSON.config,
-            },
-          },
-          context,
-        });
-
-        this.#isMounted = true;
-        // eslint-disable-next-line no-underscore-dangle
-        this.#eventEmitter._emit(
-          ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED,
-          { containerId: this.#containerId },
-        );
-
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .off(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
-      }
-    };
-    bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.#containerId, sub);
-    document.body.append(iframe);
+    this.#isMounted = true;
+    // bus
+    //   .target(properties.IFRAME_SECURE_ORIGIN)
+    //   .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#metaData.uuid,
+    //     (data, callback) => {
+    //       callback('data');
+    //     });
   }
 
   create = (input: CollectElementInput, options: any = {
@@ -304,11 +281,12 @@ class CollectContainer extends Container {
       bus
       // .target(properties.IFRAME_SECURE_ORIGIN)
         .emit(
-          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#containerId,
+          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#metaData.uuid,
           {
             ...options,
             tokens: options?.tokens !== undefined ? options.tokens : true,
             elementIds,
+            containerId: this.#containerId,
           },
           (data: any) => {
             if (!data || data?.error) {
@@ -336,6 +314,7 @@ class CollectContainer extends Container {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
       const fileElements = Object.values(this.#elements);
+      const elementIds = Object.keys(this.#elements);
       fileElements.forEach((element) => {
         if (!element.isMounted()) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
@@ -345,9 +324,10 @@ class CollectContainer extends Container {
       bus
       // .target(properties.IFRAME_SECURE_ORIGIN)
         .emit(
-          ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#containerId,
+          ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#metaData.uuid,
           {
             ...options,
+            elementIds,
           },
           (data: any) => {
             if (!data || data?.error) {

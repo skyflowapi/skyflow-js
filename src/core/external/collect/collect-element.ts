@@ -4,7 +4,6 @@ Copyright (c) 2022 Skyflow, Inc.
 /* eslint-disable no-underscore-dangle */
 import {
   ELEMENT_EVENTS_TO_CLIENT,
-  ELEMENT_EVENTS_TO_CONTAINER,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
   EVENT_TYPES,
@@ -163,10 +162,6 @@ class CollectElement extends SkyflowElement {
 
     this.#readyToMount = container.isMounted;
 
-    this.#groupEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED, (data) => {
-      if (data?.containerId === this.containerId) { this.#readyToMount = true; }
-    });
-
     this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED, (data) => {
       if (container.type === ContainerType.COMPOSABLE) {
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
@@ -209,66 +204,33 @@ class CollectElement extends SkyflowElement {
     ) {
       pushElementEventWithTimeout(this.#elementId);
     }
-    const sub = (data, callback) => {
-      if (data.name === this.#iframe.name) {
-        callback(this.#group);
-        this.#onGroupEmitRemoveLocalValue();
-        const { name, ...elementState } = this.#states[0];
-        const isComposable = this.#elements.length > 1;
-        if (isComposable) {
-          this.#elements.forEach((element, index) => {
-            if (this.#groupEmitter) {
-              this.#groupEmitter._emit(`${ELEMENT_EVENTS_TO_CLIENT.READY}:${element.elementName}`, {
-                ...this.#states[index],
-                elementType: element.elementType,
-              });
-              updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, `${element.elementType}_${METRIC_TYPES.EVENTS.READY}`);
-            }
-          });
-        } else {
-          this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY, {
-            ...elementState,
-          });
-          updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
-        }
-
-        this.#bus.off(
-          ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId,
-          sub,
-        );
-        // this.#mounted = true;
-        printLog(`${parameterizedString(logs.infoLogs.ELEMENT_MOUNTED, CLASS_NAME, getElementName(this.#iframe.name))} `, MessageType.LOG,
-          this.#context.logLevel);
-        this.#updateCallbacks.forEach((func) => func());
-        this.#updateCallbacks = [];
-      }
-    };
 
     const isComposable = this.#elements.length > 1;
     if (isComposable) {
       this.#iframe.mount(domElement, this.#elementId, {
         record: JSON.stringify({ record: this.#group }),
+        containerId: this.containerId,
       });
-      this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
-      updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
-    } else {
-      if (this.#readyToMount) {
-        this.#iframe.mount(domElement, this.#elementId, {
-          record: JSON.stringify({ record: this.#group }),
-        });
-        this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
-        updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
-        return;
-      }
-      this.#groupEmitter?.on(ELEMENT_EVENTS_TO_CONTAINER.COLLECT_CONTAINER_MOUNTED, (data) => {
-        if (data?.containerId === this.containerId) {
-          updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
-          this.#iframe.mount(domElement, this.#elementId, {
-            record: JSON.stringify({ record: this.#group }),
+      this.#elements.forEach((element, index) => {
+        if (this.#groupEmitter) {
+          this.#groupEmitter._emit(`${ELEMENT_EVENTS_TO_CLIENT.READY}:${element.elementName}`, {
+            ...this.#states[index],
+            elementType: element.elementType,
           });
-          this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + this.containerId, sub);
+          updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, `${element.elementType}_${METRIC_TYPES.EVENTS.READY}`);
         }
       });
+      updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
+    } else if (this.#readyToMount) {
+      this.#iframe.mount(domElement, this.#elementId, {
+        record: JSON.stringify({
+          record: this.#group,
+          containerId: this.containerId,
+          metaData: this.#metaData,
+        }),
+      });
+      updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
+      return;
     }
     if (typeof domElement === 'string') {
       const targetElement = document.querySelector(domElement);
@@ -456,11 +418,16 @@ class CollectElement extends SkyflowElement {
       }
 
       if (data.elementType !== ElementType.CARD_NUMBER) delete data.selectedCardScheme;
-
       delete data.isComplete;
       delete data.name;
       handler(data);
     });
+    if (eventName === ELEMENT_EVENTS_TO_CLIENT.READY) {
+      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY, {
+        ready: this.#readyToMount,
+        name: this.iframeName(),
+      });
+    }
   }
 
   #onDestroy = (callback) => {
@@ -476,6 +443,14 @@ class CollectElement extends SkyflowElement {
   };
 
   #registerIFrameBusListener = () => {
+    this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY, (data) => {
+      if (data.ready && data.name === this.iframeName()) {
+        const { name, ...elementState } = this.#states[0];
+        this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY, {
+          ...elementState,
+        });
+      }
+    });
     this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, (data: any) => {
       if (
         this.#isSingleElementAPI
@@ -648,6 +623,7 @@ class CollectElement extends SkyflowElement {
         options: {
           ...this.#elements[0],
           value: elementValue,
+          ...this.#group,
         },
         isSingleElementAPI: true,
       });

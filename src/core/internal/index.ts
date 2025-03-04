@@ -2,14 +2,12 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import Client from '../../client';
 import { setAttributes } from '../../iframe-libs/iframer';
 import { validateElementOptions } from '../../libs/element-options';
 import {
   ELEMENTS,
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
-  COLLECT_FRAME_CONTROLLER,
   INPUT_STYLES,
   STYLE_TYPE,
   ERROR_TEXT_STYLES,
@@ -32,7 +30,7 @@ import {
   DROPDOWN_ICON_STYLES,
   CardTypeValues,
 } from '../constants';
-import { IFrameForm, IFrameFormElement } from './iframe-form';
+import IFrameFormElement from './iframe-form';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-styles';
 import { parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
@@ -43,67 +41,68 @@ import {
   appendMonthFourDigitYears,
   appendMonthTwoDigitYears,
   appendZeroToOne,
-  domReady, getAtobValue, getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
+  domReady, getMaskedOutput, handleCopyIconClick, styleToString,
 } from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
 
-export class FrameController {
-  controller?: FrameController;
+// export class FrameController {
+//   controller?: FrameController;
 
-  controllerId: string;
+//   controllerId: string;
 
-  #client?: Client;
+//   #client?: Client;
 
-  #iFrameForm: IFrameForm;
+//   // #iFrameForm: IFrameForm;
 
-  private clientDomain: string;
+//   private clientDomain: string;
 
-  private CLASS_NAME = 'FrameController';
+//   private CLASS_NAME = 'FrameController';
 
-  constructor(controllerId: string, logLevel: LogLevel) {
-    const encodedClientDomain = getValueFromName(window.name, 3);
-    const clientDomain = getAtobValue(encodedClientDomain);
-    this.clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
-    this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain, logLevel);
-    this.controllerId = controllerId;
-    printLog(
-      parameterizedString(
-        logs.infoLogs.EMIT_COLLECT_FRAME_CONTROLLER_EVENT,
-        this.CLASS_NAME,
-      ),
-      MessageType.LOG,
-      logLevel,
-    );
-    bus
-      // .target(this.clientDomain)
-      .emit(
-        ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
-        { name: COLLECT_FRAME_CONTROLLER + controllerId },
-        (data: any) => {
-          const { context, ...clientMetaData } = data;
-          printLog(
-            parameterizedString(
-              logs.infoLogs.EXECUTE_COLLECT_CONTROLLER_READY_CB,
-              this.CLASS_NAME,
-            ),
-            MessageType.LOG,
-            logLevel,
-          );
-          const { clientJSON } = clientMetaData;
-          this.#iFrameForm.setClientMetadata(clientMetaData);
-          this.#iFrameForm.setClient(Client.fromJSON(clientJSON));
-          this.#iFrameForm.setContext(context);
-          delete clientMetaData.clientJSON;
-        },
-      );
-  }
+//   constructor(controllerId: string, logLevel: LogLevel) {
+//     const encodedClientDomain = getValueFromName(window.name, 3);
+//     const clientDomain = getAtobValue(encodedClientDomain);
+//     this.clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
+//     // this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain, logLevel);
+//     this.controllerId = controllerId;
+//     printLog(
+//       parameterizedString(
+//         logs.infoLogs.EMIT_COLLECT_FRAME_CONTROLLER_EVENT,
+//         this.CLASS_NAME,
+//       ),
+//       MessageType.LOG,
+//       logLevel,
+//     );
+//     bus
+//       // .target(this.clientDomain)
+//       .emit(
+//         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
+//         { name: COLLECT_FRAME_CONTROLLER + controllerId },
+//         (data: any) => {
+//           console.log('controoler element frameready callled', data);
+//           const { context, ...clientMetaData } = data;
+//           printLog(
+//             parameterizedString(
+//               logs.infoLogs.EXECUTE_COLLECT_CONTROLLER_READY_CB,
+//               this.CLASS_NAME,
+//             ),
+//             MessageType.LOG,
+//             logLevel,
+//           );
+//           // const { clientJSON } = clientMetaData;
+//           // this.#iFrameForm.setClientMetadata(clientMetaData);
+//           // this.#iFrameForm.setClient(Client.fromJSON(clientJSON));
+//           // this.#iFrameForm.setContext(context);
+//           delete clientMetaData.clientJSON;
+//         },
+//       );
+//   }
 
-  static init(uuid: string, logLevel) {
-    return new FrameController(uuid, LogLevel[logLevel]);
-  }
-}
+//   static init(uuid: string, logLevel) {
+//     return new FrameController(uuid, LogLevel[logLevel]);
+//   }
+// }
 
-export class FrameElement {
+export default class FrameElement {
   // all html events like focus blur events will be handled here
   options: any;
 
@@ -581,7 +580,9 @@ export class FrameElement {
     this.htmlDivElement = newDiv;
     if (Object.prototype.hasOwnProperty.call(this.options, 'label') && this.options.label) this.htmlDivElement.append(this.labelDiv || '');
     this.htmlDivElement.append(this.inputParent || '');
-    if (this.iFrameFormElement.containerType === ContainerType.COLLECT) { this.htmlDivElement.append(this.domError || ''); }
+    if (this.iFrameFormElement.containerType === ContainerType.COLLECT) {
+      this.htmlDivElement.append(this.domError || '');
+    }
   };
 
   setValue = (value) => {
