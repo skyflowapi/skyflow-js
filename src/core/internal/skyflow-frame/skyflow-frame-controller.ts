@@ -18,8 +18,6 @@ import {
   fetchRecordsByTokenId,
   fetchRecordsBySkyflowID,
   getFileURLFromVaultBySkyflowID,
-  formatRecordsForClient,
-  formatRecordsForIframe,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
 import {

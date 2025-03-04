@@ -1025,7 +1025,7 @@ export default class IFrameFormElement extends EventEmitter {
 //     const updateResponseObject: any = {};
 //     let errorMessage = '';
 //     for (let i = 0; i < options.elementIds.length; i += 1) {
-//   // eslint-disable-next-line max-len
+// eslint-disable-next-line max-len
 //       const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${this.controllerId}:${this.logLevel}:${btoa(this.clientDomain)}`];
 //       const inputElement = Frame.document
 //         .getElementById(options.elementIds[i].elementId);
@@ -1056,11 +1056,12 @@ export default class IFrameFormElement extends EventEmitter {
 //     }
 
 //     if (errorMessage.length > 0) {
+// eslint-disable-next-line max-len
 //       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
 //     }
 
 //     for (let i = 0; i < options.elementIds.length; i += 1) {
-//   // eslint-disable-next-line max-len
+// eslint-disable-next-line max-len
 //       const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${this.controllerId}:${this.logLevel}:${btoa(this.clientDomain)}`];
 //       const inputElement = Frame.document
 //         .getElementById(options.elementIds[i].elementId);
@@ -1077,13 +1078,13 @@ export default class IFrameFormElement extends EventEmitter {
 //           === ELEMENTS.checkbox.name
 //             ) {
 //               if (insertResponseObject[state.name]) {
-//   // eslint-disable-next-line max-len
+// eslint-disable-next-line max-len
 //                 insertResponseObject[state.name] = `${insertResponseObject[state.name]},${state.value
 //                 }`;
 //               } else {
 //                 insertResponseObject[state.name] = state.value;
 //               }
-//   // eslint-disable-next-line max-len
+// eslint-disable-next-line max-len
 //             } else if (insertResponseObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
 //               if (get(insertResponseObject[tableName], state.name)
 //             && !(validations && checkForElementMatchRule(validations))) {
