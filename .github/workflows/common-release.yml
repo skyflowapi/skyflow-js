@@ -72,7 +72,7 @@ jobs:
         run: |
           TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref_name }})
 
-          BRANCH_NAME=$(git branch -r --contains $TAG_COMMIT | grep -o 'origin/.*' | sed 's|origin/||' | head -n 1)
+          BRANCH_NAME=$(git branch -r --contains $TAG_COMMIT | grep -v 'HEAD ->' | grep -o 'origin/.*' | sed 's|origin/||' | head -n 1)
 
           if [ -z "$BRANCH_NAME" ]; then
             echo "Error: Could not resolve branch for the tag."
