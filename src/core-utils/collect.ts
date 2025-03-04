@@ -13,7 +13,7 @@ import {
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
-import { IFrameFormElement } from '../core/internal/iframe-form';
+import IFrameFormElement from '../core/internal/iframe-form';
 
 export interface IUpsertOptions{
   table: string,
