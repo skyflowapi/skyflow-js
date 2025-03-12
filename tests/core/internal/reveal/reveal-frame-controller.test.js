@@ -268,8 +268,9 @@ describe('test render file request', () => {
 
     const responseEvent = ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
     bus.emit(responseEvent, {url: "url"}, emitterCb);
-    const emitEventName2 = emitSpy.mock.calls[2][0];
-    const emitCb2 = emitSpy.mock.calls[2][2];
+    const emitEventName2 = emitSpy.mock.calls[3][0];
+    const emitCb2 = emitSpy.mock.calls[3][2];
+    console.log('events in emitter', emitSpy.mock.calls);
     expect(emitEventName2).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY);
     emitCb2(clientData);
   });
@@ -312,8 +313,8 @@ describe('test render file request', () => {
     const responseEvent = ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
     bus.emit(responseEvent, DEFAULT_FILE_RENDER_ERROR, emitterCb);
 
-    const emitEventName2 = emitSpy.mock.calls[2][0];
-    const emitCb2 = emitSpy.mock.calls[2][2];
+    const emitEventName2 = emitSpy.mock.calls[3][0];
+    const emitCb2 = emitSpy.mock.calls[3][2];
     expect(emitEventName2).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY);
     emitCb2({DEFAULT_FILE_RENDER_ERROR});
   });
