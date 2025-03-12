@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import FrameElements from './../../../src/core/internal/frame-elements';
+import FrameElementInit from './../../../src/core/internal/frame-element-init';
 import {
     FRAME_ELEMENT,
     ELEMENT_EVENTS_TO_IFRAME
@@ -50,11 +50,12 @@ const stylesOptions = {
     }
   };
 const element = {
-    elementName: `element:CARD_NUMBER:${btoa('123')}`,
+    elementName: `element:CARD_NUMBER:123`,
     rows: [{
         elements: [
             {
                 elementType: 'CARD_NUMBER',
+                elementName: `element:CARD_NUMBER:123`,
                 table: 'patients',
                 column: 'card_number',
                 ...stylesOptions
@@ -69,7 +70,8 @@ const element = {
       global:{
         '@import':'https://font-url.com/Inter'
       }
-    }
+    },
+    clientDomain: 'https://demo.com'
 }
 describe('test frame elements', () => {
     let emitSpy;
@@ -77,28 +79,24 @@ describe('test frame elements', () => {
     beforeEach(() => {
         windowSpy = jest.spyOn(global, 'window', 'get');
         windowSpy.mockImplementation(() => ({
-            name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR:`,
+            name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
             location: {
-              href: `http://localhost/?${btoa(JSON.stringify({record:element}))}`,
+              href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
             }
         }));
 
         emitSpy = jest.spyOn(bus, 'emit');
     })
-    test('FrameElements constructor : empty path', () => {
+    test('FrameElementInit constructor : empty path', () => {
+      windowSpy = jest.spyOn(global, 'window', 'get');
       windowSpy.mockImplementation(() => ({
-        name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('1234')}:ERROR:`,
+        name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
         location: {
-          href: `http://localhost`,
+          href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
         }
-    }))
-      const onSpy = jest.spyOn(bus, 'on');
-
-        FrameElements.start()
-        const emitEventName = emitSpy.mock.calls[0][0];
-        const emitCb = emitSpy.mock.calls[0][2];
-        expect(emitEventName.includes(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY)).toBeTruthy()
-        emitCb(element);
+      }))
+        const onSpy = jest.spyOn(bus, 'on');
+        FrameElementInit.startFrameElement('123')
         const mockCreateElement = jest.fn().mockImplementation(()=>{
             return {
                 resetEvents: jest.fn(),
@@ -118,20 +116,12 @@ describe('test frame elements', () => {
                 setValue: jest.fn(),
             }
         })
-        const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
+        const frameElement = new FrameElementInit(mockCreateElement, {}, 'ERROR')
     })
-    test('FrameElements constructor', () => {
+    test('FrameElementInit constructor', () => {
       const onSpy = jest.spyOn(bus, 'on');
 
-        FrameElements.init(jest.fn().mockReturnValue({resetEvents:jest.fn(),on:jest.fn(),fieldType:'group',getStatus:jest.fn().mockReturnValue({}),state:{}}),{})
-
-        FrameElements.start()
-
-        const emitEventName = emitSpy.mock.calls[0][0];
-        const emitCb = emitSpy.mock.calls[0][2];
-        expect(emitEventName.includes(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY)).toBeTruthy()
-        emitCb(element);
-
+        FrameElementInit.startFrameElement()
         const mockCreateElement = jest.fn().mockImplementation(()=>{
             return {
                 resetEvents: jest.fn(),
@@ -151,7 +141,7 @@ describe('test frame elements', () => {
                 setValue: jest.fn(),
             }
         })
-        const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
+        const frameElement = new FrameElementInit(mockCreateElement, {}, 'ERROR')
     })
 
 })
@@ -164,30 +154,24 @@ describe('test composable frame elements', () => {
       windowSpy.mockImplementation(() => ({
           name: `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR:`,
           location: {
-            href: `http://localhost/?${btoa(JSON.stringify({record:element}))}`,
+            href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
           }
       }));
 
       emitSpy = jest.spyOn(bus, 'emit');
   });
 
-  test('FrameElements constructor with composable elements : empty path', () => {
+  test('FrameElementInit constructor with composable elements : empty path', () => {
     windowSpy.mockImplementation(() => ({
       name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR:`,
       location: {
-        href: `http://localhost`,
+        href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
       }
     }))
       const onSpy = jest.spyOn(bus, 'on');
-      FrameElements.group = [];
-      // FrameElements.setup();
+      FrameElementInit.group = [];
 
-      FrameElements.start()
-      
-      const emitEventName = emitSpy.mock.calls[0][0];
-      const emitCb = emitSpy.mock.calls[0][2];
-      expect(emitEventName.includes(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY)).toBeTruthy()
-      emitCb(element);
+      FrameElementInit.startFrameElement()
       const mockCreateElement = jest.fn().mockImplementation(()=>{
           return {
               resetEvents: jest.fn(),
@@ -207,17 +191,12 @@ describe('test composable frame elements', () => {
               setValue: jest.fn(),
           }
       })
-      const frameElement = new FrameElements(mockCreateElement, {}, 'ERROR')
+      const frameElement = new FrameElementInit(mockCreateElement, {}, 'ERROR')
   })
 
     
-  test('FrameElements init', () => {
-    FrameElements.start()
-
-    const emitEventName = emitSpy.mock.calls[0][0];
-    const emitCb = emitSpy.mock.calls[0][2];
-    expect(emitEventName.includes(ELEMENT_EVENTS_TO_IFRAME.FRAME_READY)).toBeTruthy()
-    emitCb(element);
+  test('FrameElementInit init', () => {
+    FrameElementInit.startFrameElement()
 
     const mockCreateElement = jest.fn().mockImplementation(()=>{
         return {
@@ -238,7 +217,7 @@ describe('test composable frame elements', () => {
             setValue: jest.fn(),
         }
     })
-    const frameElement = FrameElements.init(mockCreateElement, {}, 'ERROR')
-});
+    const frameElement = new FrameElementInit(mockCreateElement, {}, 'ERROR')
+  });
 
 })

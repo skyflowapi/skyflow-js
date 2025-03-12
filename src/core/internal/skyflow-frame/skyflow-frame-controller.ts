@@ -21,6 +21,7 @@ import {
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
 import {
+  COLLECT_TYPES,
   CORALOGIX_DOMAIN,
   DEFAULT_FILE_RENDER_ERROR, DOMAIN,
   ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, PUREJS_TYPES, SDK_IFRAME_EVENT,
@@ -274,11 +275,58 @@ class SkyflowFrameController {
             CLASS_NAME, PUREJS_TYPES[key]), MessageType.LOG, this.#context.logLevel);
         });
       });
-    // bus
-    //   .emit(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#clientId,
-    //     {}, (data) => {
-    //       console.log('controller ready skyflow', data);
-    //     });
+    bus
+      .target(this.#clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#clientId, (data, callback) => {
+        printLog(
+          parameterizedString(
+            logs.infoLogs.CAPTURE_PURE_JS_REQUEST,
+            CLASS_NAME,
+            data.type,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
+        if (data.type === COLLECT_TYPES.COLLECT) {
+          printLog(
+            parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
+          this.tokenize(data)
+            .then((response) => {
+              callback(response);
+            })
+            .catch((error) => {
+              callback({ error });
+            });
+        } else if (data.type === COLLECT_TYPES.FILE_UPLOAD) {
+          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
+          MessageType.LOG, this.#context.logLevel);
+          this.parallelUploadFiles(data)
+            .then((response) => {
+              callback(response);
+            })
+            .catch((error) => {
+              callback({ error });
+            });
+        }
+      });
+    bus
+      .emit(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#clientId,
+        {}, (data: any) => {
+          this.#context = data.context;
+          data.client.config = {
+            ...data.client.config,
+          };
+          this.#client = Client.fromJSON(data.client) as any;
+          Object.keys(COLLECT_TYPES).forEach((key) => {
+            printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+              CLASS_NAME, COLLECT_TYPES[key]), MessageType.LOG, this.#context.logLevel);
+          });
+        });
     // bus
     //   .target(this.#clientDomain)
     //   .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#clientId, this.handleRevealRequest);
@@ -318,7 +366,7 @@ class SkyflowFrameController {
         this.#context.logLevel,
       );
 
-      const response = await this.paralleUploadFiles(data);
+      const response = await this.parallelUploadFiles(data);
       callback(response);
     } catch (error) {
       callback({ error });
@@ -702,7 +750,7 @@ class SkyflowFrameController {
     });
   };
 
-  paralleUploadFiles = (options) => new Promise((rootResolve, rootReject) => {
+  parallelUploadFiles = (options) => new Promise((rootResolve, rootReject) => {
     const id = options.containerId;
     const promises: Promise<unknown>[] = [];
     for (let i = 0; i < options.elementIds.length; i += 1) {

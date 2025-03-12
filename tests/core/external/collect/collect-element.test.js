@@ -110,7 +110,7 @@ const destroyCallback = jest.fn();
 const updateCallback = jest.fn();
 
 const groupEmittFn = jest.fn();
-let groupOnCb;
+// let groupOnCb;
 const groupEmiitter = {
   _emit: groupEmittFn,
   on:jest.fn().mockImplementation((args,cb)=>{
@@ -155,7 +155,7 @@ describe('collect element', () => {
       { logLevel: LogLevel.ERROR, env: Env.PROD });
 
     const inputEvent = onSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
     const inputCb = inputEvent[0][1];
     const cb2 = jest.fn();
 
@@ -216,7 +216,7 @@ describe('collect element', () => {
       { logLevel: LogLevel.ERROR, env: Env.PROD });
 
     const inputEvent = onSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
     const inputCb = inputEvent[0][1];
     const cb2 = jest.fn();
 
@@ -243,7 +243,7 @@ describe('collect element', () => {
         expect(element.isMounted()).toBe(true);
     },0)
     cb3();
-    const heightCb = emitSpy.mock.calls[1][2];
+    const heightCb = emitSpy.mock.calls[0][2];
       heightCb({
         height:'123'
       })
@@ -267,7 +267,7 @@ describe('collect element', () => {
       );
 
     const inputEvent = onSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
     const inputCb = inputEvent[0][1];
     const cb2 = jest.fn();
 
@@ -319,7 +319,7 @@ describe('collect element', () => {
       );
 
     const inputEvent = onSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
+    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
     const inputCb = inputEvent[0][1];
     const cb2 = jest.fn();
 
@@ -360,7 +360,7 @@ describe('collect element', () => {
     destroyCallback,
     updateCallback,
     { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
-    groupOnCb({containerId:'containerId'});
+    // groupOnCb({containerId:'containerId'});
     expect(() => { element.mount('#123'); }).not.toThrow(SkyflowError);
 
   });
@@ -401,15 +401,15 @@ describe('collect element', () => {
 
     expect(element.isMounted()).toBe(false);
 
-    groupOnCb({containerId:'containerId'});
+    // groupOnCb({containerId:'containerId'});
     element.mount(div);
-    const frameReayEvent = onSpy.mock.calls
-      .filter((data) => data[0] === `${ELEMENT_EVENTS_TO_IFRAME.FRAME_READY}containerId`);
-    const frameReadyCb = frameReayEvent[0][1];
-    const cb2 = jest.fn();
-    frameReadyCb({
-      name: `${elementName}:containerId` + `:ERROR:${btoa(clientDomain)}`,
-    }, cb2);
+    // const frameReayEvent = onSpy.mock.calls
+    //   .filter((data) => data[0] === `${ELEMENT_EVENTS_TO_IFRAME.FRAME_READY}containerId`);
+    // const frameReadyCb = frameReayEvent[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: `${elementName}:containerId` + `:ERROR:${btoa(clientDomain)}`,
+    // }, cb2);
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
     },0);  
@@ -435,15 +435,15 @@ describe('collect element', () => {
 
     expect(element.isMounted()).toBe(false);
 
-    groupOnCb({containerId:'containerId'});
+    // groupOnCb({containerId:'containerId'});
     element.mount(div);
-    const frameReayEvent = onSpy.mock.calls
-      .filter((data) => data[0] === `${ELEMENT_EVENTS_TO_IFRAME.FRAME_READY}containerId`);
-    const frameReadyCb = frameReayEvent[0][1];
-    const cb2 = jest.fn();
-    frameReadyCb({
-      name: `${elementName}:containerId` + `:ERROR:${btoa(clientDomain)}`,
-    }, cb2);
+    // const frameReayEvent = onSpy.mock.calls
+    //   .filter((data) => data[0] === `${ELEMENT_EVENTS_TO_IFRAME.FRAME_READY}containerId`);
+    // const frameReadyCb = frameReayEvent[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: `${elementName}:containerId` + `:ERROR:${btoa(clientDomain)}`,
+    // }, cb2);
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
     },0);  
@@ -472,14 +472,14 @@ describe('collect element', () => {
 
     
     element.mount(div);
-    const frameReayEvent = onSpy.mock.calls
-      .filter((data) => data[0] === `${ELEMENT_EVENTS_TO_IFRAME.FRAME_READY}containerId`);
-    const frameReadyCb = frameReayEvent[0][1];
-    const cb2 = jest.fn();
-    frameReadyCb({
-      name: `${elementName}:containerId` + ':ERROR',
-    }, cb2);
-    groupOnCb({containerId:'containerId'});
+    // const frameReayEvent = onSpy.mock.calls
+    //   .filter((data) => data[0] === `${ELEMENT_EVENTS_TO_IFRAME.FRAME_READY}containerId`);
+    // const frameReadyCb = frameReayEvent[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: `${elementName}:containerId` + ':ERROR',
+    // }, cb2);
+    // groupOnCb({containerId:'containerId'});
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
     },0);  
@@ -507,7 +507,7 @@ describe('collect element', () => {
    
     element.mount(div);
 
-    groupOnCb({containerId:'containerId'});
+    // groupOnCb({containerId:'containerId'});
     setTimeout(()=>{
       expect(element.isMounted()).toBe(true);
     },0);  
@@ -545,7 +545,7 @@ describe('collect element', () => {
     );
 
     const inputEvent = onSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
     const inputCb = inputEvent[0][1];
     const cb2 = jest.fn();
 
@@ -596,7 +596,7 @@ describe('collect element', () => {
     );
 
     const inputEvent = onSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
+      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
     const inputCb = inputEvent[0][1];
     const cb2 = jest.fn();
 

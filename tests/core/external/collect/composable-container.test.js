@@ -10,6 +10,7 @@ import CollectElement from '../../../../src/core/external/collect/collect-elemen
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import EventEmitter from '../../../../src/event-emitter';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
+import { SKYFLOW_FRAME_CONTROLLER_READY } from '../../../../src/core/constants';
 
 const bus = require('framebus');
 
@@ -156,10 +157,9 @@ describe('test composable container class',()=>{
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: COLLECT_FRAME_CONTROLLER + mockUuid
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
     }, cb2)
     expect(cb2).toHaveBeenCalled()
-    expect(document.querySelector('iframe')).toBeTruthy();
     expect(container).toBeInstanceOf(ComposableContainer);
   });
 
@@ -274,9 +274,8 @@ describe('test composable container class',()=>{
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: COLLECT_FRAME_CONTROLLER + mockUuid
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
     }, cb2)
-    emitterSpy();
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     setTimeout(()=>{

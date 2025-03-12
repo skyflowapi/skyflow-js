@@ -45,63 +45,6 @@ import {
 } from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
 
-// export class FrameController {
-//   controller?: FrameController;
-
-//   controllerId: string;
-
-//   #client?: Client;
-
-//   // #iFrameForm: IFrameForm;
-
-//   private clientDomain: string;
-
-//   private CLASS_NAME = 'FrameController';
-
-//   constructor(controllerId: string, logLevel: LogLevel) {
-//     const encodedClientDomain = getValueFromName(window.name, 3);
-//     const clientDomain = getAtobValue(encodedClientDomain);
-//     this.clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
-//     // this.#iFrameForm = new IFrameForm(controllerId, this.clientDomain, logLevel);
-//     this.controllerId = controllerId;
-//     printLog(
-//       parameterizedString(
-//         logs.infoLogs.EMIT_COLLECT_FRAME_CONTROLLER_EVENT,
-//         this.CLASS_NAME,
-//       ),
-//       MessageType.LOG,
-//       logLevel,
-//     );
-//     bus
-//       // .target(this.clientDomain)
-//       .emit(
-//         ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + controllerId,
-//         { name: COLLECT_FRAME_CONTROLLER + controllerId },
-//         (data: any) => {
-//           console.log('controoler element frameready callled', data);
-//           const { context, ...clientMetaData } = data;
-//           printLog(
-//             parameterizedString(
-//               logs.infoLogs.EXECUTE_COLLECT_CONTROLLER_READY_CB,
-//               this.CLASS_NAME,
-//             ),
-//             MessageType.LOG,
-//             logLevel,
-//           );
-//           // const { clientJSON } = clientMetaData;
-//           // this.#iFrameForm.setClientMetadata(clientMetaData);
-//           // this.#iFrameForm.setClient(Client.fromJSON(clientJSON));
-//           // this.#iFrameForm.setContext(context);
-//           delete clientMetaData.clientJSON;
-//         },
-//       );
-//   }
-
-//   static init(uuid: string, logLevel) {
-//     return new FrameController(uuid, LogLevel[logLevel]);
-//   }
-// }
-
 export default class FrameElement {
   // all html events like focus blur events will be handled here
   options: any;
@@ -369,7 +312,8 @@ export default class FrameElement {
       }
     });
 
-    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE
+      + this.iFrameFormElement.iFrameName, (data) => {
       if (data.options) {
         const {
           validations,
@@ -434,7 +378,8 @@ export default class FrameElement {
       }
     });
 
-    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR, (data) => {
+    this.iFrameFormElement.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR
+      + this.iFrameFormElement.iFrameName, (data) => {
       if (this.domError && data.isTriggerError && data.clientErrorText) {
         this.domError.innerText = data.clientErrorText;
       } else if (this.domError && (!data.isTriggerError)) {
@@ -449,7 +394,8 @@ export default class FrameElement {
     });
 
     this.iFrameFormElement.on(
-      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE,
+      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE
+        + this.iFrameFormElement.iFrameName,
       (data) => {
         if (
           this.domError && data.customErrorText
@@ -675,7 +621,7 @@ export default class FrameElement {
 
   onSubmit = () => {
     bus
-      .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT, {
+      .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameFormElement.iFrameName, {
         name: this.iFrameFormElement.iFrameName,
         event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
       });

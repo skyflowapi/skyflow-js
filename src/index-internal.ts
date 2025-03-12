@@ -2,8 +2,6 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import 'core-js/stable';
-// import { FrameController } from './core/internal';
-// import FrameElements from './core/internal/frame-elements';
 import RevealFrame from './core/internal/reveal/reveal-frame';
 import {
   FRAME_ELEMENT,
@@ -21,6 +19,7 @@ import {
 } from './utils/logs-helper';
 import { getAtobValue, getValueFromName } from './utils/helpers';
 import FrameElementInit from './core/internal/frame-element-init';
+import RevealFrameController from './core/internal/reveal/reveal-frame-controller';
 
 (function init(root: any) {
   try {
@@ -28,7 +27,7 @@ import FrameElementInit from './core/internal/frame-element-init';
     const frameType = getValueFromName(frameName, 0);
     const frameId = getValueFromName(frameName, 1);
     if (frameType === REVEAL_FRAME_CONTROLLER && frameId) {
-      // RevealFrameController.init(frameId);
+      RevealFrameController.init(frameId);
     } else if (frameType === SKYFLOW_FRAME_CONTROLLER) {
       SkyflowFrameController.init(frameId);
     } else if (frameType === FRAME_ELEMENT) {
@@ -43,7 +42,7 @@ import FrameElementInit from './core/internal/frame-element-init';
         LogLevel[logLevel],
       );
       root.Skyflow = FrameElementInit;
-      FrameElementInit.startFrameElement(frameId);
+      FrameElementInit.startFrameElement();
     } else if (frameType === FRAME_REVEAL) {
       const logLevel = getValueFromName(frameName, 3) || LogLevel.ERROR;
       printLog(

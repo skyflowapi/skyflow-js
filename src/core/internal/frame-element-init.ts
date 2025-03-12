@@ -30,8 +30,7 @@ export default class FrameElementInit {
 
   group: any;
 
-  constructor(frameId) {
-    console.log('initiallise the frameElement', frameId);
+  constructor() {
     // this.createIframeElement(frameName, label, skyflowID, isRequired);
     this.context = { logLevel: LogLevel.INFO, env: Env.DEV }; // client level
     this.containerId = '';
@@ -53,9 +52,10 @@ export default class FrameElementInit {
     this.clientMetaData = parsedRecord.metaData;
     this.group = parsedRecord.record;
     this.containerId = parsedRecord.containerId;
+
     bus
       .target(this.clientMetaData.clientDomain)
-      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE, (data) => {
+      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE + frameName, (data) => {
         if (data.name === frameName) {
           if (data.options !== undefined) {
             this.createContainerDiv(data.options);
@@ -72,8 +72,8 @@ export default class FrameElementInit {
     return this.iframeFormElement;
   };
 
-  static startFrameElement = (frameId) => {
-    FrameElementInit.frameEle = new FrameElementInit(frameId);
+  static startFrameElement = () => {
+    FrameElementInit.frameEle = new FrameElementInit();
   };
 
   createContainerDiv = (newGroup) => {
@@ -86,10 +86,8 @@ export default class FrameElementInit {
     const {
       rows, styles, errorTextStyles,
     } = this.group;
-
     const isComposableContainer = getContainerType(window.name) === ContainerType.COMPOSABLE;
     this.group.spacing = getValueAndItsUnit(this.group.spacing).join('');
-
     const rootDiv = document.createElement('div');
     rootDiv.className = 'container';
     const containerStylesByClassName = getFlexGridStyles({
@@ -178,11 +176,6 @@ export default class FrameElementInit {
           element.skyflowID,
           element.required,
         );
-        // const iFrameFormElement =  new IFrameFormElement(element.elementName, element.label, {
-        //     ...this.clientMetaData,
-        //     element.required,
-        //   }, this.context, element.skyflowID);
-
         this.frameElement = new FrameElement(
           iFrameFormElement,
           element,
