@@ -410,7 +410,7 @@ class CollectContainer extends Container {
                   printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
                     this.#context.logLevel);
-    
+
                   resolve(data);
                 }
               },

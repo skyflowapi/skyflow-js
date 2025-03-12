@@ -73,6 +73,7 @@ const emit = jest.fn();
 describe('FrameElementInit Additional Test Cases', () => {
     let emitSpy;
     let windowSpy;
+    let targetSpy;
 
     beforeEach(() => {
         windowSpy = jest.spyOn(global, 'window', 'get');
