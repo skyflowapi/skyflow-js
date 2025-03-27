@@ -19,16 +19,13 @@ import {
 } from './utils/logs-helper';
 import { getAtobValue, getValueFromName } from './utils/helpers';
 import FrameElementInit from './core/internal/frame-element-init';
-import RevealFrameController from './core/internal/reveal/reveal-frame-controller';
 
 (function init(root: any) {
   try {
     const frameName = root.name;
     const frameType = getValueFromName(frameName, 0);
     const frameId = getValueFromName(frameName, 1);
-    if (frameType === REVEAL_FRAME_CONTROLLER && frameId) {
-      RevealFrameController.init(frameId);
-    } else if (frameType === SKYFLOW_FRAME_CONTROLLER) {
+    if (frameType === SKYFLOW_FRAME_CONTROLLER) {
       SkyflowFrameController.init(frameId);
     } else if (frameType === FRAME_ELEMENT) {
       const logLevel = getValueFromName(frameName, 4) || LogLevel.ERROR;

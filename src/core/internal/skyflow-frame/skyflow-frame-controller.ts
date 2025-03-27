@@ -18,13 +18,15 @@ import {
   fetchRecordsByTokenId,
   fetchRecordsBySkyflowID,
   getFileURLFromVaultBySkyflowID,
+  formatRecordsForClient,
+  formatRecordsForIframe,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
 import {
   COLLECT_TYPES,
   CORALOGIX_DOMAIN,
   DEFAULT_FILE_RENDER_ERROR, DOMAIN,
-  ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, PUREJS_TYPES, SDK_IFRAME_EVENT,
+  ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, PUREJS_TYPES, REVEAL_TYPES, SDK_IFRAME_EVENT,
 } from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
@@ -244,24 +246,6 @@ class SkyflowFrameController {
           }
         },
       );
-    const sub2 = (data, callback) => {
-      printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-        CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-      MessageType.LOG, this.#context.logLevel);
-      this.renderFile(data.records, data.containerId, data.iframeName).then(
-        (resolvedResult) => {
-          callback(
-            resolvedResult,
-          );
-        },
-        (rejectedResult) => {
-          callback({ errors: rejectedResult });
-        },
-      );
-    };
-    bus
-      .target(this.#clientDomain)
-      .on(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#clientId, sub2);
     bus
       // .target(this.#clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#clientId, {}, (data: any) => {
@@ -327,9 +311,47 @@ class SkyflowFrameController {
               CLASS_NAME, COLLECT_TYPES[key]), MessageType.LOG, this.#context.logLevel);
           });
         });
-    // bus
-    //   .target(this.#clientDomain)
-    //   .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#clientId, this.handleRevealRequest);
+    bus
+      .target(this.#clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#clientId, (data, callback) => {
+        printLog(
+          parameterizedString(
+            logs.infoLogs.CAPTURE_PURE_JS_REQUEST,
+            CLASS_NAME,
+            data.type,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
+        if (data.type === REVEAL_TYPES.REVEAL) {
+          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
+          MessageType.LOG, this.#context.logLevel);
+          this.revealData(data.records as any, data.containerId).then(
+            (resolvedResult) => {
+              callback(resolvedResult);
+            },
+            (rejectedResult) => {
+              callback({ error: rejectedResult });
+            },
+          );
+        } else if (data.type === REVEAL_TYPES.RENDER_FILE) {
+          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
+          MessageType.LOG, this.#context.logLevel);
+          this.renderFile(data.records, data.iframeName).then(
+            (resolvedResult) => {
+              callback(
+                resolvedResult,
+              );
+            },
+            (rejectedResult) => {
+              callback({ errors: rejectedResult });
+            },
+          );
+        }
+      });
+
     bus
       .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#clientId,
@@ -373,21 +395,6 @@ class SkyflowFrameController {
     }
   };
 
-  // handleRevealRequest = async (data, callback) => {
-  //   printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-  //     CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
-  //   MessageType.LOG, this.#context.logLevel);
-
-  //   this.revealData(data.records as any, data.containerId).then(
-  //     (resolvedResult) => {
-  //       callback(resolvedResult);
-  //     },
-  //     (rejectedResult) => {
-  //       callback({ error: rejectedResult });
-  //     },
-  //   );
-  // };
-
   static init(clientId) {
     const trackingStatus = getValueFromName(window.name, 3) === 'true';
     if (trackingStatus) {
@@ -398,35 +405,35 @@ class SkyflowFrameController {
     return new SkyflowFrameController(clientId);
   }
 
-  // revealData(revealRecords: IRevealRecord[], containerId) {
-  //   const id = containerId;
-  //   return new Promise((resolve, reject) => {
-  //     fetchRecordsByTokenId(revealRecords, this.#client).then(
-  //       (resolvedResult) => {
-  //         const formattedResult = formatRecordsForIframe(resolvedResult);
-  //         bus
-  //           .target(properties.IFRAME_SECURE_SITE)
-  //           .emit(
-  //             ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
-  //               + id,
-  //             formattedResult,
-  //           );
-  //         resolve(formatRecordsForClient(resolvedResult));
-  //       },
-  //       (rejectedResult) => {
-  //         const formattedResult = formatRecordsForIframe(rejectedResult);
-  //         bus
-  //           .target(properties.IFRAME_SECURE_SITE)
-  //           .emit(
-  //             ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
-  //               + id,
-  //             formattedResult,
-  //           );
-  //         reject(formatRecordsForClient(rejectedResult));
-  //       },
-  //     );
-  //   });
-  // }
+  revealData(revealRecords: IRevealRecord[], containerId) {
+    const id = containerId;
+    return new Promise((resolve, reject) => {
+      fetchRecordsByTokenId(revealRecords, this.#client).then(
+        (resolvedResult) => {
+          const formattedResult = formatRecordsForIframe(resolvedResult);
+          bus
+            .target(properties.IFRAME_SECURE_SITE)
+            .emit(
+              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
+                + id,
+              formattedResult,
+            );
+          resolve(formatRecordsForClient(resolvedResult));
+        },
+        (rejectedResult) => {
+          const formattedResult = formatRecordsForIframe(rejectedResult);
+          bus
+            .target(properties.IFRAME_SECURE_SITE)
+            .emit(
+              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
+                + id,
+              formattedResult,
+            );
+          reject(formatRecordsForClient(rejectedResult));
+        },
+      );
+    });
+  }
 
   insertData(records, options) {
     const requestBody = constructInsertRecordRequest(records, options);
@@ -462,7 +469,7 @@ class SkyflowFrameController {
     });
   }
 
-  renderFile(data: IRevealRecord, containerId, iframeName) {
+  renderFile(data, iframeName) {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowID(data, this.#client)
@@ -475,7 +482,7 @@ class SkyflowFrameController {
               .target(properties.IFRAME_SECURE_SITE)
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
-                + containerId,
+                + iframeName,
                 {
                   url,
                   iframeName,
@@ -489,7 +496,7 @@ class SkyflowFrameController {
               .target(properties.IFRAME_SECURE_SITE)
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
-                + containerId,
+                + iframeName,
                 {
                   error: DEFAULT_FILE_RENDER_ERROR,
                   iframeName,
