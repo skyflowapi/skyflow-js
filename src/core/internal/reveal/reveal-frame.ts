@@ -73,7 +73,7 @@ class RevealFrame {
     const skyflowContainerId = parsedRecord.clientJSON.metaData.uuid;
     RevealFrame.revealFrame = new RevealFrame(parsedRecord.record,
       parsedRecord.context, skyflowContainerId);
-    }
+  }
 
   constructor(record, context, id) {
     this.#skyflowContainerId = id;
@@ -212,11 +212,13 @@ class RevealFrame {
         sub,
       );
 
-    bus.target(this.#clientDomain).on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#name, (data) => {
-      if (this.#name === data.name) {
-        if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
-      }
-    });
+    bus
+      .target(this.#clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#name, (data) => {
+        if (this.#name === data.name) {
+          if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
+        }
+      });
     this.updateRevealElementOptions();
 
     const sub2 = (responseUrl) => {
@@ -310,7 +312,7 @@ class RevealFrame {
 
   private updateRevealElementOptions() {
     bus
-    .target(this.#clientDomain)
+      .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#name, (data) => {
         if (data.name === this.#name) {
           if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT) {

@@ -7,7 +7,6 @@ import {
   FRAME_ELEMENT,
   FRAME_REVEAL,
   SKYFLOW_FRAME_CONTROLLER,
-  REVEAL_FRAME_CONTROLLER,
 } from './core/constants';
 import SkyflowFrameController from './core/internal/skyflow-frame/skyflow-frame-controller';
 import logs from './utils/logs';

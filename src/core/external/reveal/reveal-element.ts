@@ -104,9 +104,9 @@ class RevealElement extends SkyflowElement {
         });
         this.#isSkyflowFrameReady = true;
       });
-      bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name, (data) => {
-        this.#iframe.setIframeHeight(data.height);
-      });
+    bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name, (data) => {
+      this.#iframe.setIframeHeight(data.height);
+    });
   }
 
   getID() {
@@ -133,6 +133,7 @@ class RevealElement extends SkyflowElement {
           context: this.#context,
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
         if (this.#recordData.skyflowID) {
           bus
@@ -179,45 +180,43 @@ class RevealElement extends SkyflowElement {
         }),
       });
       bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {  
-      this.#isMounted = true;
-      if (this.#recordData.skyflowID) {
-        bus
-        // .target(location.origin)
-          .emit(
-            ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
-            {
-              skyflowID: this.#recordData.skyflowID,
-              containerId: this.#containerId,
-            },
-          );
-        updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
-        updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
-      } else {
-        bus
-        // .target(location.origin)
-          .emit(
-            ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
-            {
-              id: this.#recordData.token,
-              containerId: this.#containerId,
-            },
-          );
-        updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
-        updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
-      }
-      if (Object.prototype.hasOwnProperty.call(this.#recordData, 'skyflowID')) {
-        bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-          {}, (payload:any) => {
-            this.#iframe.setIframeHeight(payload.height);
-          });
-      }
-
-    });
+        .target(properties.IFRAME_SECURE_ORIGIN)
+        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
+          this.#isMounted = true;
+          if (this.#recordData.skyflowID) {
+            bus
+            // .target(location.origin)
+              .emit(
+                ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
+                {
+                  skyflowID: this.#recordData.skyflowID,
+                  containerId: this.#containerId,
+                },
+              );
+            updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
+            updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
+          } else {
+            bus
+            // .target(location.origin)
+              .emit(
+                ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
+                {
+                  id: this.#recordData.token,
+                  containerId: this.#containerId,
+                },
+              );
+            updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
+            updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
+          }
+          if (Object.prototype.hasOwnProperty.call(this.#recordData, 'skyflowID')) {
+            bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+              {}, (payload:any) => {
+                this.#iframe.setIframeHeight(payload.height);
+              });
+          }
+        });
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
-      return;
     }
   }
 
@@ -227,7 +226,7 @@ class RevealElement extends SkyflowElement {
       altText = this.#recordData.altText;
     }
     this.setAltText('loading...');
-   const loglevel = this.#context.logLevel;
+    const loglevel = this.#context.logLevel;
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {
         try {
@@ -355,7 +354,7 @@ class RevealElement extends SkyflowElement {
   }
 
   setErrorOverride(clientErrorText: string) {
-    if(this.#isMounted) {
+    if (this.#isMounted) {
       bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
         name: this.#iframe.name,
         isTriggerError: true,
@@ -363,15 +362,14 @@ class RevealElement extends SkyflowElement {
       });
     } else {
       bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-        bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
-          name: this.#iframe.name,
-          isTriggerError: true,
-          clientErrorText,
+        .target(properties.IFRAME_SECURE_ORIGIN)
+        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
+          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
+            name: this.#iframe.name,
+            isTriggerError: true,
+            clientErrorText,
+          });
         });
-  
-      })
     }
     this.#isClientSetError = true;
   }
@@ -385,37 +383,35 @@ class RevealElement extends SkyflowElement {
       });
     } else {
       bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-      this.#isMounted = true;
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
-        name: this.#iframe.name,
-        isTriggerError: true,
-        clientErrorText,
-      });
-
-    })
+        .target(properties.IFRAME_SECURE_ORIGIN)
+        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
+          this.#isMounted = true;
+          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
+            name: this.#iframe.name,
+            isTriggerError: true,
+            clientErrorText,
+          });
+        });
     }
     this.#isClientSetError = true;
   }
 
   resetError() {
-    if (this.#isMounted){
+    if (this.#isMounted) {
       bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
         name: this.#iframe.name,
         isTriggerError: false,
       });
     } else {
       bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-      this.#isMounted = true;
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
-        name: this.#iframe.name,
-        isTriggerError: false,
-      });
-
-    })
+        .target(properties.IFRAME_SECURE_ORIGIN)
+        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
+          this.#isMounted = true;
+          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
+            name: this.#iframe.name,
+            isTriggerError: false,
+          });
+        });
     }
     this.#isClientSetError = false;
   }
@@ -429,18 +425,17 @@ class RevealElement extends SkyflowElement {
       });
     } else {
       bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-      this.#isMounted = true;
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-        name: this.#iframe.name,
-        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
-        updatedValue: altText,
-      });
-
-    })
+        .target(properties.IFRAME_SECURE_ORIGIN)
+        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
+          this.#isMounted = true;
+          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
+            name: this.#iframe.name,
+            updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
+            updatedValue: altText,
+          });
+        });
+    }
   }
-}
 
   clearAltText() {
     if (this.#isMounted) {
@@ -451,17 +446,16 @@ class RevealElement extends SkyflowElement {
       });
     } else {
       bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-      this.#isMounted = true;
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-        name: this.#iframe.name,
-        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
-        updatedValue: null,
-      });
-  
-    })
-  }
+        .target(properties.IFRAME_SECURE_ORIGIN)
+        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
+          this.#isMounted = true;
+          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
+            name: this.#iframe.name,
+            updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
+            updatedValue: null,
+          });
+        });
+    }
   }
 
   setToken(token:string) {
@@ -477,16 +471,15 @@ class RevealElement extends SkyflowElement {
       });
     } else {
       bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-      this.#isMounted = true;
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-        name: this.#iframe.name,
-        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN,
-        updatedValue: token,
-      });
-
-    });
+        .target(properties.IFRAME_SECURE_ORIGIN)
+        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
+          this.#isMounted = true;
+          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
+            name: this.#iframe.name,
+            updateType: REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN,
+            updatedValue: token,
+          });
+        });
     }
   }
 
@@ -512,16 +505,15 @@ class RevealElement extends SkyflowElement {
       });
     } else {
       bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-      this.#isMounted = true;
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-        name: this.#iframe.name,
-        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
-        updatedValue: options,
-      });
-
-    });
+        .target(properties.IFRAME_SECURE_ORIGIN)
+        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
+          this.#isMounted = true;
+          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
+            name: this.#iframe.name,
+            updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
+            updatedValue: options,
+          });
+        });
     }
   }
 }
