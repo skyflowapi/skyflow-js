@@ -242,7 +242,7 @@ describe('collect element', () => {
         expect(element.isMounted()).toBe(true);
     },0)
     cb3();
-    const heightCb = emitSpy.mock.calls[1][2];
+    const heightCb = emitSpy.mock.calls[0][2];
       heightCb({
         name: elementName,
         height:'123'
@@ -264,10 +264,11 @@ describe('collect element', () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD });
+    console.log('emitSpy', emitSpy.mock.calls, 'heightCb', onSpy.mock.calls);
 
-    const inputEvent = onSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
-    const inputCb = inputEvent[0][1];
+    const inputCb = onSpy.mock.calls[1][1];
+    const inputEvent = onSpy.mock.calls[1][0]
+    expect(inputEvent).toBe(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
     const cb2 = jest.fn();
 
     const mountedEvent = onSpy.mock.calls

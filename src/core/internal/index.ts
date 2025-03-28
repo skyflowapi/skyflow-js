@@ -432,7 +432,7 @@ export default class FrameElement {
     this.updateParentDiv(this.htmlDivElement);
 
     bus
-      .emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED, {
+      .emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.iFrameFormElement.iFrameName, {
         name: this.iFrameFormElement.iFrameName,
       });
 
