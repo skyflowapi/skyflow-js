@@ -131,7 +131,7 @@ class RevealContainer extends Container {
     bus
       .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
-        + this.#metaData.uuid, (data, callback) => {
+        + this.#metaData.uuid, (_, callback) => {
         printLog(parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
           MessageType.LOG,
           this.#context.logLevel); // add proper logs

@@ -125,50 +125,6 @@ class RevealElement extends SkyflowElement {
       pushElementEventWithTimeout(this.#elementId);
     }
 
-    const sub = (data, callback) => {
-      if (data.name === this.#iframe.name) {
-        callback({
-          ...this.#metaData,
-          record: this.#recordData,
-          context: this.#context,
-        });
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        bus.off(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY, sub);
-        if (this.#recordData.skyflowID) {
-          bus
-          // .target(location.origin)
-            .emit(
-              ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
-              {
-                skyflowID: this.#recordData.skyflowID,
-                containerId: this.#containerId,
-              },
-            );
-          updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
-          updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
-        } else {
-          bus
-          // .target(location.origin)
-            .emit(
-              ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
-              {
-                id: this.#recordData.token,
-                containerId: this.#containerId,
-              },
-            );
-          updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
-          updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
-        }
-        // this.#isMounted = true;
-        // if (Object.prototype.hasOwnProperty.call(this.#recordData, 'skyflowID')) {
-        //   bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-        //     {}, (payload:any) => {
-        //       this.#iframe.setIframeHeight(payload.height);
-        //     });
-        // }
-      }
-    };
     this.#readyToMount = true;
     if (this.#readyToMount) {
       this.#iframe.mount(domElementSelector, undefined, {
@@ -488,6 +444,7 @@ class RevealElement extends SkyflowElement {
       this.#isMounted = false;
       this.#iframe.container?.remove();
     }
+    this.#isMounted = false;
     this.#iframe.unmount();
   }
 
