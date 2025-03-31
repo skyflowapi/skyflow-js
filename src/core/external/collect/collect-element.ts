@@ -162,7 +162,8 @@ class CollectElement extends SkyflowElement {
 
     this.#readyToMount = container.isMounted;
 
-    this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED, (data) => {
+    this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+      + formatFrameNameToId(this.#iframe.name), (data) => {
       if (container.type === ContainerType.COMPOSABLE) {
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
         this.#elements.forEach((element) => {

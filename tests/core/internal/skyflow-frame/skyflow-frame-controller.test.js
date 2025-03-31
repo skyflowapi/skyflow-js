@@ -2,17 +2,24 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES } from '../../../../src/core/constants';
+import { COLLECT_TYPES, ELEMENT_EVENTS_TO_IFRAME, ELEMENT_TYPES, ElementType, PUREJS_TYPES, REVEAL_TYPES } from '../../../../src/core/constants';
 import clientModule from '../../../../src/client';
 import * as busEvents from '../../../../src/utils/bus-events';
 import { LogLevel, Env, RedactionType } from '../../../../src/utils/common';
 import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
 import RevealFrame from '../../../../src/core/internal/reveal/reveal-frame';
+import uuid from '../../../../src/libs/uuid';
+// import IFrame from '../../../../src/core/external/common/iframe';
+import CollectContainer from '../../../../src/core/external/collect/collect-container';
+// import CollectElement from '../../../../src/core/external/collect/collect-element';
 
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();
 const emit = jest.fn();
-
+jest.mock('../../../../src/libs/uuid', () => ({
+  __esModule: true,
+  default: jest.fn(() => (mockUuid)),
+}));
 const mockUuid = '1244'
 const skyflowConfig = {
   vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
@@ -23,7 +30,9 @@ const skyflowConfig = {
 const clientData = {
   client: {
     config: { ...skyflowConfig },
-    metadata: {},
+    metadata: {
+      uuid: mockUuid,
+    },
   },
   context: { logLevel: LogLevel.ERROR, env: Env.PROD },
 };
@@ -736,7 +745,6 @@ describe('Retrieving data using get', () => {
 
     let reqArg;
     const clientReq = jest.fn((arg) =>{ 
-      console.log(arg)
       reqArg = arg;
       return Promise.resolve(getByIdRes)});
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
@@ -996,8 +1004,8 @@ describe('Deleting records from the vault', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit
     });
-
     busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
   });
 
@@ -1073,6 +1081,7 @@ describe('getAcessToken error delete', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit
     });
   });
   
@@ -1106,60 +1115,166 @@ describe('getAcessToken error delete', () => {
   });
 });
 
-// describe('test render file request', () => { 
+describe('test render file request', () => { 
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+      emit
+    });
+    busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
+  });
 
-//   let emitSpy;
-//   let targetSpy;
-//   let onSpy;
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//     jest.mock("../../../../src/core-utils/reveal",()=>({
-//       __esModule: true,
-//       getFileURLFromVaultBySkyflowID: jest.fn()
-//     }));
-//     emitSpy = jest.spyOn(bus, 'emit');
-//     targetSpy = jest.spyOn(bus, 'target');
-//     targetSpy.mockReturnValue({
-//       on,
-//     });
-//     onSpy = jest.spyOn(bus, 'on');
-//     // jest.clearAllMocks();
-//     // emitSpy = jest.spyOn(bus, 'emit');
-//     onSpy = jest.spyOn(bus, 'on');
-//     // targetSpy = jest.spyOn(bus, 'target');
-//     targetSpy.mockReturnValue({
-//       on,
-//       emit
-//     });
-//     busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
+  test("render files error case",()=>{
+    const clientReq = jest.fn(() => Promise.reject({
+      errors:[{skyflowID:"1815-6223-1073-1425","error":{"code":404,"description":"id not found"}}]
+    }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+    SkyflowFrameController.init(); 
 
-//   });
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    const revelRequestEventName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS;
+    const data = {
+      "records":[
+        {
+          skyflowID: "1815-6223-1073-1425",
+          column: 'file',
+          table: 'table1',
+        }
+      ]
+    }
+    const data1 = {
+      type: REVEAL_TYPES.RENDER_FILE,
+      records: data,
+      containerId: '123',
+      iframeName: '123',
+    };
+    const emitterCb = jest.fn();
 
-//   test.only("render files",()=>{
-//     const clientReq = jest.fn(() => Promise.reject({
-//       errors:[{skyflowID:"1815-6223-1073-1425","error":{"code":404,"description":"id not found"}}]
-//     }));
-//     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq })); 
-//     SkyflowFrameController.init(); 
+    const onCbName = on.mock.calls[2][0];
+    expect(onCbName).toBe(revelRequestEventName);
+    const onCb =  on.mock.calls[2][1];
+    onCb(data1,emitterCb);
+    setTimeout(() => {
+      expect(emitterCb.mock.calls[0][0].error).toBeDefined();
+      expect(emitterCb.mock.calls[0][0].error).toEqual({code:404,description:"id not found"});
+      done();
+    }, 10000);
+  });
 
-//     console.log("on mock", on.mock.calls, 'emit mock', emitSpy.mock.calls);  
-//     const emitEventName = emitSpy.mock.calls[0][0];
-//     const emitCb = emitSpy.mock.calls[0][2];
-//     expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
-//     emitCb(clientData);
-//     const revelRequestEventName = ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST;
-//     const data = {
-//       "records":[
-//         {
-//           skyflowID: "1815-6223-1073-1425",
-//         }
-//       ]
-//     }
-//     const emitterCb = jest.fn();
-//     bus.emit(revelRequestEventName, data, emitterCb);
-//     const onCbName = on.mock.calls[1][0];
-//     expect(onCbName).toBe(revelRequestEventName);
-//     const onCb =  on.mock.calls[1][1];
-//     onCb(data,emitterCb);
-//   });
-// })
+  test("render files succes case",()=>{
+    const clientReq = jest.fn(() => Promise.resolve({ fields: { skyflow_id: '1815-6223-1073-1425', file: 'https://demo.com' }, tokens: null }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init(); 
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    const revelRequestEventName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS;
+    const data = {
+      skyflowID: "1815-6223-1073-1425",
+      column: 'file',
+      table: 'table1',
+    }
+    const data1 = {
+      type: REVEAL_TYPES.RENDER_FILE,
+      records: data,
+      containerId: '123',
+      iframeName: '123',
+    };
+    const emitterCb = jest.fn();
+    const onCbName = on.mock.calls[2][0];
+    expect(onCbName).toBe(revelRequestEventName);
+    const onCb =  on.mock.calls[2][1];
+    onCb(data1,emitterCb);
+  });
+})
+
+describe('test reveal request', () => { 
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+      emit
+    });
+    busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
+  });
+
+  test("reveal data error case",()=>{
+    const clientReq = jest.fn(() => Promise.reject({
+      errors:[{token:"1815-6223-1073-1425","error":{"code":404,"description":"token not found"}}]
+    }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+    SkyflowFrameController.init(); 
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    const revelRequestEventName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS;
+    const data = {
+      "records":[
+        {
+          token: "1815-6223-1073-1425",
+        }
+      ]
+    }
+    const data1 = {
+      type: REVEAL_TYPES.REVEAL,
+      records: data,
+      containerId: '123',
+      iframeName: '123',
+    };
+    const emitterCb = jest.fn();
+
+    const onCbName = on.mock.calls[2][0];
+    expect(onCbName).toBe(revelRequestEventName);
+    const onCb =  on.mock.calls[2][1];
+    onCb(data1,emitterCb);
+    setTimeout(() => {
+      expect(emitterCb.mock.calls[0][0].error).toBeDefined();
+      expect(emitterCb.mock.calls[0][0].error).toEqual({code:404,description:"token not found"});
+      done();
+    }, 10000);
+  });
+
+  test("reveal succes case",()=>{
+    const clientReq = jest.fn(() => Promise.resolve({"records":[{"token":"7402-2242-2342-232","value":"231", "valueType" : "STRING"}] }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init(); 
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    const revelRequestEventName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS;
+    const data = [
+        {
+          token: "1815-6223-1073-1425",
+        }
+      ]
+    const data1 = {
+      type: REVEAL_TYPES.REVEAL,
+      records: data,
+      containerId: '123',
+      iframeName: '123',
+    };
+    const emitterCb = jest.fn();
+    const onCbName = on.mock.calls[2][0];
+    expect(onCbName).toBe(revelRequestEventName);
+    const onCb =  on.mock.calls[2][1];
+    onCb(data1,emitterCb);
+  });
+})
+

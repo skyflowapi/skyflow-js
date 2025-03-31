@@ -310,6 +310,10 @@ class SkyflowFrameController {
             printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
               CLASS_NAME, COLLECT_TYPES[key]), MessageType.LOG, this.#context.logLevel);
           });
+          Object.keys(REVEAL_TYPES).forEach((key) => {
+            printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+              CLASS_NAME, REVEAL_TYPES[key]), MessageType.LOG, this.#context.logLevel);
+          });
         });
     bus
       .target(this.#clientDomain)
@@ -357,12 +361,12 @@ class SkyflowFrameController {
       .on(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#clientId,
         this.handleTokenizationRequest);
 
-    bus.target(this.#clientDomain).on(ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#clientId,
-      this.handleFileUpload);
+    // bus.target(this.#clientDomain).on(ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#clientId,
+    //   this.handleFileUpload);
   }
 
   // Tokenization Request Handler
-  handleTokenizationRequest = async (data, callback) => {
+  handleTokenizationRequest = (data, callback) => {
     try {
       printLog(
         parameterizedString(logs.infoLogs.CAPTURE_EVENT,
@@ -371,7 +375,7 @@ class SkyflowFrameController {
         this.#context.logLevel,
       );
 
-      const response = await this.tokenize(data);
+      const response = this.tokenize(data);
       callback(response);
     } catch (error) {
       callback({ error });
@@ -379,7 +383,7 @@ class SkyflowFrameController {
   };
 
   // File Upload Handler
-  handleFileUpload = async (data, callback) => {
+  handleFileUpload = (data, callback) => {
     try {
       printLog(
         parameterizedString(logs.infoLogs.CAPTURE_EVENT,
@@ -388,7 +392,7 @@ class SkyflowFrameController {
         this.#context.logLevel,
       );
 
-      const response = await this.parallelUploadFiles(data);
+      const response = this.parallelUploadFiles(data);
       callback(response);
     } catch (error) {
       callback({ error });
