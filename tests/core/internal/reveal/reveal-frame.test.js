@@ -52,7 +52,12 @@ const defineUrl = (url) => {
     },
     writable: true,
   });
+  Object.defineProperty(window, "name", {
+    value: "reveal:1234",
+    writable: true,
+  });
 };
+const elementName = "reveal:1234"
 
 const on = jest.fn();
 const off = jest.fn();
@@ -91,7 +96,8 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
     defineUrl('http://localhost');
     try{
@@ -123,13 +129,14 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     console.log("testFrame===>",emitSpy.mock.calls);
     const emittedEventName = emitSpy.mock.calls[0][0];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
   });
 
   test("init callback after reveal with response value",()=>{
@@ -154,13 +161,14 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     // 
 
     // reveal response ready
@@ -195,13 +203,14 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     // reveal response ready
@@ -238,13 +247,14 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     // reveal response ready
@@ -286,21 +296,22 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+      name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);
     
 
     const onSetErrorName = on.mock.calls[1][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onSetErrorName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR);
+    expect(onSetErrorName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR+ elementName);
     const onSetErrorCb = on.mock.calls[1][1];
     onSetErrorCb({
-      name:"",
+      name:elementName,
       isTriggerError: true,
       clientErrorText:"errorText",
     });
@@ -334,22 +345,23 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+      name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     // reveal response ready
     const onRevealResponseName = on.mock.calls[1][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR+ elementName);;
     const onRevealResponseCb = on.mock.calls[1][1];
     onRevealResponseCb({
-      name: "",
+      name: elementName,
       isTriggerError: false,
     });
     
@@ -381,20 +393,21 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+      name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
     const onRevealResponseName = on.mock.calls[2][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS+ elementName);
     const onRevealResponseCb = on.mock.calls[2][1];
     onRevealResponseCb({
-      name: "",
+      name: elementName,
       updateType:REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN,
       updatedValue:"121-43sfsdaf31-3sa1a321"
     });
@@ -427,21 +440,22 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+      name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     const onRevealResponseName = on.mock.calls[2][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS+ elementName);
     const onRevealResponseCb = on.mock.calls[2][1];
     onRevealResponseCb({
-      name: "",
+      name: elementName,
       updateType:REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
       updatedValue:"test_altText"
     });
@@ -474,21 +488,22 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+      name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     const onRevealResponseName = on.mock.calls[2][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS+ elementName);
     const onRevealResponseCb = on.mock.calls[2][1];
     onRevealResponseCb({
-      name: "",
+      name: elementName,
       updateType:REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
       updatedValue:null
     });
@@ -530,13 +545,14 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+      name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
   })
 
@@ -577,13 +593,14 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+      name: elementName,
     }
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
   })
 
@@ -616,7 +633,8 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
 
     const testUpdateOptions = {
@@ -651,14 +669,14 @@ describe("Reveal Frame Class",()=>{
 
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     const onRevealResponseName = on.mock.calls[2][0];
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS+ elementName);
     const onRevealResponseCb = on.mock.calls[2][1];
     onRevealResponseCb({
-      name: "",
+      name: elementName,
       updateType:REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
       updatedValue:testUpdateOptions,
     });
@@ -686,20 +704,21 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
 
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     const eventRenderResponse = on.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'');
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+ elementName);
     const callback = on.mock.calls[3][1];
     callback(
       { url: "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
-      iframeName: '',
+      iframeName: elementName,
   });
 
   const heightRequest = ELEMENT_EVENTS_TO_CLIENT.HEIGHT
@@ -738,19 +757,20 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     const eventRenderResponse = on.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'');
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+ elementName);
     const callback = on.mock.calls[3][1];
     callback({
       url:  "https://url?response-content-disposition=inline%3B%20filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
-      iframeName: '',
+      iframeName: elementName,
   });
   })
   test('render success response event for img tag when input style not passed', () => {
@@ -762,19 +782,20 @@ describe("Reveal Frame Class",()=>{
         label:"Card Number",
         altText:"xxxx-xxxx-xxxx-xxxx",
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     const eventRenderResponse = on.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'');
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+ elementName);
     const callback = on.mock.calls[3][1];
     callback({
       url:  "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
-      iframeName: '',
+      iframeName: elementName,
   });
   })
   test('render success response event for embed tag', () => {
@@ -801,19 +822,20 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     const eventRenderResponse = on.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'');
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+ elementName);
     const callback = on.mock.calls[3][1];
     callback({
       url: "https://fileurl?filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
-      iframeName: '',
+      iframeName: elementName,
     });
   })
 
@@ -841,19 +863,20 @@ describe("Reveal Frame Class",()=>{
           uuid: '1234',
         }
       },
-      context: { logLevel: LogLevel.ERROR,env:Env.PROD}
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+name: elementName,
     }
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
     const eventRenderResponse = on.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+'');
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+ elementName);
     const callback = on.mock.calls[3][1];
     callback({
       error: DEFAULT_FILE_RENDER_ERROR,
-      iframeName: ''
+      iframeName: elementName,
     }
     );
   })
@@ -938,7 +961,7 @@ describe("Reveal Frame Class", () => {
     const testFrame = RevealFrame.init();
     expect(emitSpy).toHaveBeenCalled();
     const emittedEventName = emitSpy.mock.calls[0][0];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
   });
 
   test("init callback after reveal with response value", () => {
@@ -968,7 +991,7 @@ describe("Reveal Frame Class", () => {
     defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     console.log('======>>>>>>>>>', emitSpy.mock.calls, onMock.mock.calls);
     // Verify reveal response ready
     const onRevealResponseName = onMock.mock.calls[0][0];
@@ -1005,13 +1028,13 @@ describe("Reveal Frame Class", () => {
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     const eventRenderResponse = onMock.mock.calls[3][0];
-    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + "");
+    expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + elementName);
     const callback = onMock.mock.calls[3][1];
     callback({
       error: DEFAULT_FILE_RENDER_ERROR,
-      iframeName: "",
+      iframeName: elementName,
     });
   });
 
@@ -1053,7 +1076,7 @@ describe("Reveal Frame Class", () => {
     const emittedEventName = emitSpy.mock.calls[0][0];
     console.log("testFrame===>", emitSpy.mock.calls);
     const emittedData = emitSpy.mock.calls[0][1];
-    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
-    expect(emittedData).toEqual({name :''})
+    expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
+    expect(emittedData).toEqual({name : elementName})
   });
 });
