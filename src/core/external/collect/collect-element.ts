@@ -247,7 +247,6 @@ class CollectElement extends SkyflowElement {
         }),
       });
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
-      return;
     }
   };
 
