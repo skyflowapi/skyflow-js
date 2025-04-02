@@ -7,9 +7,12 @@ import clientModule from '../../../../src/client';
 import * as busEvents from '../../../../src/utils/bus-events';
 import { LogLevel, Env, RedactionType } from '../../../../src/utils/common';
 import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
+import RevealFrame from '../../../../src/core/internal/reveal/reveal-frame';
 
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();
+const emit = jest.fn();
+
 const mockUuid = '1244'
 const skyflowConfig = {
   vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
@@ -1120,7 +1123,14 @@ describe('test render file request', () => {
       on,
     });
     onSpy = jest.spyOn(bus, 'on');
-
+    // jest.clearAllMocks();
+    // emitSpy = jest.spyOn(bus, 'emit');
+    onSpy = jest.spyOn(bus, 'on');
+    // targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+      emit
+    });
     busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 
   });
@@ -1145,7 +1155,7 @@ describe('test render file request', () => {
       ]
     }
     const emitterCb = jest.fn();
-    bus.emit(revelRequestEventName,data,emitterCb);
+    bus.emit(revelRequestEventName, data, emitterCb);
     const onCbName = on.mock.calls[1][0];
     expect(onCbName).toBe(revelRequestEventName);
     const onCb =  on.mock.calls[1][1];

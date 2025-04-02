@@ -10,6 +10,7 @@ import CollectElement from '../../../../src/core/external/collect/collect-elemen
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import EventEmitter from '../../../../src/event-emitter';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
+import { SKYFLOW_FRAME_CONTROLLER_READY } from '../../../../src/core/constants';
 
 const bus = require('framebus');
 
@@ -26,13 +27,17 @@ jest.mock('../../../../src/libs/uuid', () => ({
 const mockUnmount = jest.fn();
 const updateMock = jest.fn();
 jest.mock('../../../../src/core/external/collect/collect-element');
-CollectElement.mockImplementation(()=>({
+CollectElement.mockImplementation((_,tempElements)=>{
+  tempElements.rows[0].elements.forEach((element)=>{
+    element.isMounted = true;
+  })
+  return {
   isMounted : ()=>(true),
   mount: jest.fn(),
   isValidElement: ()=>(true),
   unmount:mockUnmount,
   updateElement:updateMock
-}))
+}})
 
 jest.mock('../../../../src/event-emitter');
 const emitMock = jest.fn();
@@ -152,10 +157,9 @@ describe('test composable container class',()=>{
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: COLLECT_FRAME_CONTROLLER + mockUuid
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
     }, cb2)
     expect(cb2).toHaveBeenCalled()
-    expect(document.querySelector('iframe')).toBeTruthy();
     expect(container).toBeInstanceOf(ComposableContainer);
   });
 
@@ -185,6 +189,10 @@ describe('test composable container class',()=>{
   });
 
   it('test collect',()=>{
+    let readyCb;
+    on.mockImplementation((name,cb)=>{
+      readyCb = cb;
+    })
     const div = document.createElement('div');
     div.id = 'composable'
     document.body.append(div);
@@ -192,9 +200,13 @@ describe('test composable container class',()=>{
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
+    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+    
     container.mount('#composable');
    
     container.collect();
+
+    on.mockImplementation((name,cb)=>{emitterSpy = cb})
   });
 
   it('test collect without mounting the container',(done)=>{
@@ -262,9 +274,8 @@ describe('test composable container class',()=>{
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: COLLECT_FRAME_CONTROLLER + mockUuid
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
     }, cb2)
-    emitterSpy();
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     setTimeout(()=>{

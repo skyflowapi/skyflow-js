@@ -2,17 +2,13 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import 'core-js/stable';
-import { FrameController } from './core/internal';
-import FrameElements from './core/internal/frame-elements';
 import RevealFrame from './core/internal/reveal/reveal-frame';
 import {
-  COLLECT_FRAME_CONTROLLER,
   FRAME_ELEMENT,
   FRAME_REVEAL,
   SKYFLOW_FRAME_CONTROLLER,
   REVEAL_FRAME_CONTROLLER,
 } from './core/constants';
-import RevealFrameController from './core/internal/reveal/reveal-frame-controller';
 import SkyflowFrameController from './core/internal/skyflow-frame/skyflow-frame-controller';
 import logs from './utils/logs';
 import { MessageType, LogLevel } from './utils/common';
@@ -22,26 +18,15 @@ import {
   getElementName,
 } from './utils/logs-helper';
 import { getAtobValue, getValueFromName } from './utils/helpers';
+import FrameElementInit from './core/internal/frame-element-init';
+import RevealFrameController from './core/internal/reveal/reveal-frame-controller';
 
 (function init(root: any) {
   try {
     const frameName = root.name;
     const frameType = getValueFromName(frameName, 0);
     const frameId = getValueFromName(frameName, 1);
-    if (frameType === COLLECT_FRAME_CONTROLLER && frameId) {
-      const logLevel = getValueFromName(frameName, 2) || LogLevel.ERROR;
-      printLog(
-        parameterizedString(
-          logs.infoLogs.COLLECT_CONTROLLER_START,
-          'index-internal',
-          'collect container',
-        ),
-        MessageType.LOG,
-        LogLevel[logLevel],
-      );
-      root.Skyflow = FrameController;
-      FrameController.init(frameId, logLevel);
-    } else if (frameType === REVEAL_FRAME_CONTROLLER && frameId) {
+    if (frameType === REVEAL_FRAME_CONTROLLER && frameId) {
       RevealFrameController.init(frameId);
     } else if (frameType === SKYFLOW_FRAME_CONTROLLER) {
       SkyflowFrameController.init(frameId);
@@ -56,8 +41,8 @@ import { getAtobValue, getValueFromName } from './utils/helpers';
         MessageType.LOG,
         LogLevel[logLevel],
       );
-      root.Skyflow = FrameElements;
-      FrameElements.start();
+      root.Skyflow = FrameElementInit;
+      FrameElementInit.startFrameElement();
     } else if (frameType === FRAME_REVEAL) {
       const logLevel = getValueFromName(frameName, 3) || LogLevel.ERROR;
       printLog(

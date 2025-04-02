@@ -6,6 +6,7 @@ import {
   ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENT_EVENTS_TO_CONTAINER,
+  SKYFLOW_FRAME_CONTROLLER_READY
 } from '../../../../src/core/constants';
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
@@ -180,17 +181,15 @@ describe('Collect container', () => {
     });
   });
 
-  it('contructor', async () => {
+  it('skyflow controller event when container is created', async () => {
     const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
     await new Promise((r) => setTimeout(r, 2000));
-
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: COLLECT_FRAME_CONTROLLER + mockUuid
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
     }, cb2)
     expect(cb2).toHaveBeenCalled()
-    expect(document.querySelector('iframe')).toBeTruthy();
   });
 
   it('Invalid element type', () => {
@@ -417,10 +416,15 @@ describe('Collect container', () => {
 
   it("container collect", () => {
     let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
-    container.collect();
-    const collectCb = emitSpy.mock.calls[0][2];
-    collectCb(collectResponse)
-    collectCb({ error: 'Error occured' })
+    const frameReadyCb = on.mock.calls[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    }, cb2)
+    expect(cb2).toHaveBeenCalled()
+    container.collect().then().catch(err => {
+      expect(err).toBeDefined();
+    })
   });
   it("container create options", () => {
     let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
@@ -707,10 +711,15 @@ describe('Collect container', () => {
         column: 'column'
       }]
     }
-    container.collect(options);
-    const collectCb = emitSpy.mock.calls[0][2];
-    collectCb(collectResponse)
-    collectCb({ error: 'Error occured' })
+    const frameReadyCb = on.mock.calls[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    }, cb2)
+    expect(cb2).toHaveBeenCalled()
+    container.collect(options).then().catch(err => {
+      expect(err).toBeDefined();
+    })
   });
   it("container collect options error case 2", () => {
     let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
@@ -780,8 +789,13 @@ describe('Collect container', () => {
         column: 'column'
       }]
     }
-    container.collect(options);
-    const emitCb = emitSpy.mock.calls[0][2];
-    emitCb({error:{code:404,description:"Not Found"}});
+    const frameReadyCb = on.mock.calls[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    }, cb2)
+    expect(cb2).toHaveBeenCalled()
+    container.collect(options).then().catch(err => {
+      expect(err).toBeDefined();});
   });
 });
