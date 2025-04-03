@@ -43,7 +43,6 @@ const testRecord = {
 //     expect(_on).toHaveBeenCalledTimes(4);
 //   });
 // });
-
 global.window = Object.create(window);
 const defineUrl = (url) => {
   Object.defineProperty(window, "location", {
