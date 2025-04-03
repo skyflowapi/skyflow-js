@@ -214,15 +214,15 @@ describe('collect element', () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD });
-
-    const inputEvent = onSpy.mock.calls
-    .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
-    const inputCb = inputEvent[0][1];
+    
+    const inputEvent = onSpy.mock.calls[1][0] 
+    expect(inputEvent).toBe(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName); 
+    const inputCb = onSpy.mock.calls[1][1];
     const cb2 = jest.fn();
 
-    const mountedEvent = onSpy.mock.calls
-      .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
-    const mountCb = mountedEvent[0][1];
+    const mountEvent = onSpy.mock.calls[2][0] 
+    expect(mountEvent).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName); 
+    const mountCb = onSpy.mock.calls[2][1];
     const cb3 = jest.fn();
 
     inputCb({
@@ -242,7 +242,7 @@ describe('collect element', () => {
         expect(element.isMounted()).toBe(true);
     },0)
     cb3();
-    const heightCb = emitSpy.mock.calls[1][2];
+    const heightCb = emitSpy.mock.calls[0][2];
       heightCb({
         name: elementName,
         height:'123'
@@ -265,13 +265,13 @@ describe('collect element', () => {
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD });
 
-    const inputEvent = onSpy.mock.calls
-      .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT);
-    const inputCb = inputEvent[0][1];
+    const inputCb = onSpy.mock.calls[1][1];
+    const inputEvent = onSpy.mock.calls[1][0]
+    expect(inputEvent).toBe(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
     const cb2 = jest.fn();
 
     const mountedEvent = onSpy.mock.calls
-      .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+      .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED + elementName);
     const mountCb = mountedEvent[0][1];
     const cb3 = jest.fn();
   
@@ -373,7 +373,7 @@ describe('collect element', () => {
     const cb2 = jest.fn();
 
     const mountedEvent = onSpy.mock.calls
-    .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+    .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);
   const mountCb = mountedEvent[0][1];
   const cb3 = jest.fn();
 
@@ -605,7 +605,7 @@ describe('collect element', () => {
     const cb2 = jest.fn();
 
     const mountedEvent = onSpy.mock.calls
-      .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+      .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED +  elementName);
     const mountCb = mountedEvent[0][1];
     const cb3 = jest.fn();
 
@@ -656,7 +656,7 @@ describe('collect element', () => {
     const cb2 = jest.fn();
 
     const mountedEvent = onSpy.mock.calls
-      .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED);
+      .filter((data)=> data[0] === ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName );
     const mountCb = mountedEvent[0][1];
     const cb3 = jest.fn();
 
@@ -968,7 +968,6 @@ describe('collect element validations', () => {
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD });
     } catch (err) {
-      console.log(err);
       expect(err).toBeUndefined();
     }
   });

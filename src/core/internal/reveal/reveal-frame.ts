@@ -63,22 +63,20 @@ class RevealFrame {
 
   private isRevealCalled?: boolean;
 
+  #skyflowContainerId: string = '';
+
   static init() {
-    bus
-      // .target(document.referrer.split("/").slice(0, 3).join("/"))
-      .emit(
-        ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY,
-        { name: window.name },
-        () => {},
-      );
     const url = window.location?.href;
     const configIndex = url.indexOf('?');
     const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
     const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
-    RevealFrame.revealFrame = new RevealFrame(parsedRecord.record, parsedRecord.context);
+    const skyflowContainerId = parsedRecord.clientJSON.metaData.uuid;
+    RevealFrame.revealFrame = new RevealFrame(parsedRecord.record,
+      parsedRecord.context, skyflowContainerId);
   }
 
-  constructor(record, context) {
+  constructor(record, context, id) {
+    this.#skyflowContainerId = id;
     this.#name = window.name;
     this.#containerId = getValueFromName(this.#name, 2);
     const encodedClientDomain = getValueFromName(this.#name, 4);
@@ -172,6 +170,8 @@ class RevealFrame {
 
     document.body.append(this.#elementContainer);
 
+    bus.emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#name, { name: this.#name });
+
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (_, callback) => {
       callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
     });
@@ -212,11 +212,13 @@ class RevealFrame {
         sub,
       );
 
-    bus.target(this.#clientDomain).on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR, (data) => {
-      if (this.#name === data.name) {
-        if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
-      }
-    });
+    bus
+      .target(this.#clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#name, (data) => {
+        if (this.#name === data.name) {
+          if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
+        }
+      });
     this.updateRevealElementOptions();
 
     const sub2 = (responseUrl) => {
@@ -243,7 +245,7 @@ class RevealFrame {
     bus
       .target(window.location.origin)
       .on(
-        ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#containerId,
+        ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#name,
         sub2,
       );
   }
@@ -309,8 +311,9 @@ class RevealFrame {
   }
 
   private updateRevealElementOptions() {
-    bus.target(this.#clientDomain)
-      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS, (data) => {
+    bus
+      .target(this.#clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#name, (data) => {
         if (data.name === this.#name) {
           if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT) {
             if (data.updatedValue) {
