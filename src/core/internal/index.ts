@@ -417,9 +417,9 @@ export class FrameElement {
         if (cardMetadata?.scheme) {
           if (Array.isArray(cardMetadata.scheme) && cardMetadata.scheme.length >= 2) {
             this.appendDropdown(cardMetadata.scheme);
-            if (this.domImg) {
-              this.domImg.src = CARD_ENCODED_ICONS[cardMetadata.scheme[0]]
-              || CARD_ENCODED_ICONS.DEFAULT;
+            if (this.domImg && CARD_ENCODED_ICONS[cardMetadata.scheme[0]]) {
+              this.domImg.src = CARD_ENCODED_ICONS[cardMetadata.scheme[0]];
+              // Fire change event to update selectedCardScheme
               this.iFrameFormElement.onDropdownSelect(cardMetadata.scheme[0]);
             }
           } else if (this.dropdownIcon && this.dropdownSelect && this.domInput && this.domImg) {

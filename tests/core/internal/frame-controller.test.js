@@ -299,7 +299,7 @@ describe('test frame controller', () => {
       },
     });
 
-    // Verfiy updated icon, should be default since fist option provided in cardMetadata scheme is wrong
+    // Should be SDK detected card type since fist option provided in cardMetadata scheme is not supported
     expect(element.domImg.src).toContain(CARD_ENCODED_ICONS.DEFAULT); 
 
     setCb[0][1]({
