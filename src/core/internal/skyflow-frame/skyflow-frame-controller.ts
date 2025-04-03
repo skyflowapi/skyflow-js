@@ -360,9 +360,6 @@ class SkyflowFrameController {
       .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#clientId,
         this.handleTokenizationRequest);
-
-    // bus.target(this.#clientDomain).on(ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#clientId,
-    //   this.handleFileUpload);
   }
 
   // Tokenization Request Handler
@@ -385,13 +382,6 @@ class SkyflowFrameController {
   // File Upload Handler
   handleFileUpload = (data, callback) => {
     try {
-      printLog(
-        parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-          CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
-        MessageType.LOG,
-        this.#context.logLevel,
-      );
-
       const response = this.parallelUploadFiles(data);
       callback(response);
     } catch (error) {

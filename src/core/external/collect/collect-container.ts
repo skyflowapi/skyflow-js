@@ -396,8 +396,9 @@ class CollectContainer extends Container {
           bus
             // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#metaData.uuid,
+              ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
               {
+                type: COLLECT_TYPES.FILE_UPLOAD,
                 ...options,
                 elementIds,
                 containerId: this.#containerId,
@@ -441,8 +442,9 @@ class CollectContainer extends Container {
             bus
               // .target(properties.IFRAME_SECURE_ORIGIN)
               .emit(
-                ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + this.#metaData.uuid,
+                ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
                 {
+                  type: COLLECT_TYPES.FILE_UPLOAD,
                   ...options,
                   elementIds,
                   containerId: this.#containerId,

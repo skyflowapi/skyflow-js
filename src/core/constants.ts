@@ -76,7 +76,6 @@ export const PUREJS_TYPES = {
   GET_BY_SKYFLOWID: 'GET_BY_SKYFLOWID',
   GET: 'GET',
   DELETE: 'DELETE',
-  FILE_RENDER: 'FILE_RENDER',
 };
 
 export const COLLECT_TYPES = {
