@@ -813,7 +813,7 @@ class SkyflowFrameController {
           .request({
             body: formData,
             requestMethod: 'POST',
-            url: `vault/v1/vaults/${client.config.vaultID}/${tableName}/${skyflowID}/files`,
+            url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${tableName}/${skyflowID}/files`,
             headers: {
               authorization: `Bearer ${authToken}`,
               'content-type': 'multipart/form-data',
