@@ -355,39 +355,7 @@ class SkyflowFrameController {
           );
         }
       });
-
-    bus
-      .target(this.#clientDomain)
-      .on(ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#clientId,
-        this.handleTokenizationRequest);
   }
-
-  // Tokenization Request Handler
-  handleTokenizationRequest = (data, callback) => {
-    try {
-      printLog(
-        parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-          CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
-        MessageType.LOG,
-        this.#context.logLevel,
-      );
-
-      const response = this.tokenize(data);
-      callback(response);
-    } catch (error) {
-      callback({ error });
-    }
-  };
-
-  // File Upload Handler
-  handleFileUpload = (data, callback) => {
-    try {
-      const response = this.parallelUploadFiles(data);
-      callback(response);
-    } catch (error) {
-      callback({ error });
-    }
-  };
 
   static init(clientId) {
     const trackingStatus = getValueFromName(window.name, 3) === 'true';

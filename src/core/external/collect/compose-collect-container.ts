@@ -30,6 +30,7 @@ import {
   ElementType, COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER,
+  COLLECT_TYPES,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
@@ -127,14 +128,11 @@ class ComposableContainer extends Container {
       .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
       + this.#metaData.uuid, (data, callback) => {
-      // printLog(parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
-      //   MessageType.LOG,
-      //   this.#context.logLevel); // add proper logs
+        this.#isSkyflowFrameReady = true;
         callback({
           client: this.#metaData.clientJSON,
           context,
         });
-        this.#isSkyflowFrameReady = true;
       });
   }
 
@@ -326,17 +324,7 @@ class ComposableContainer extends Container {
       this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
       this.#containerElement.mount(domElement);
       this.#isMounted = true;
-      return;
     }
-
-    this.#eventEmitter.on(
-      ELEMENT_EVENTS_TO_CONTAINER.COMPOSABLE_CONTAINER_MOUNTED + this.#containerId,
-      () => {
-        this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
-        this.#containerElement.mount(domElement);
-        this.#isMounted = true;
-      },
-    );
   };
 
   unmount = () => {
@@ -381,8 +369,9 @@ class ComposableContainer extends Container {
           bus
           // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
-              ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#metaData.uuid,
+              ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
               {
+                type: COLLECT_TYPES.COLLECT,
                 ...options,
                 tokens: options?.tokens !== undefined ? options.tokens : true,
                 elementIds,
@@ -445,27 +434,32 @@ class ComposableContainer extends Container {
           });
         });
         bus
-        // .target(properties.IFRAME_SECURE_ORIGIN)
-          .emit(
-            ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + this.#metaData.uuid,
-            {
-              ...options,
-              tokens: options?.tokens !== undefined ? options.tokens : true,
-              elementIds,
-              containerId: this.#containerId,
-            },
-            (data: any) => {
-              if (!data || data?.error) {
-                printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                reject(data?.error);
-              } else {
-                printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                  MessageType.LOG,
-                  this.#context.logLevel);
-                resolve(data);
-              }
-            },
-          );
+          .target(properties.IFRAME_SECURE_ORIGIN)
+          .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
+            bus
+            // .target(properties.IFRAME_SECURE_ORIGIN)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
+                {
+                  type: COLLECT_TYPES.COLLECT,
+                  ...options,
+                  tokens: options?.tokens !== undefined ? options.tokens : true,
+                  elementIds,
+                  containerId: this.#containerId,
+                },
+                (data: any) => {
+                  if (!data || data?.error) {
+                    printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                    reject(data?.error);
+                  } else {
+                    printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                      MessageType.LOG,
+                      this.#context.logLevel);
+                    resolve(data);
+                  }
+                },
+              );
+          });
         printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
           CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
         MessageType.LOG, this.#context.logLevel);
