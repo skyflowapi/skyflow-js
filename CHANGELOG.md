@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.3] - 2025-04-07
+### Added
+- Flexibility to display the desired card brand scheme for card brand choice.
+
+## [2.1.2] - 2025-03-03
+### Fixed
+- Resize observer logic for skyflow elements.
+
+## [2.1.1] - 2025-03-03
+### Fixed
+- Resize observer logic for skyflow elements.
+
+## [2.1.0] - 2025-02-10
+### Added
+- Support for 3DS helper functions.
+
+## [2.0.0] - 2025-01-20
+### Added
+- Support for iframe versioning.
+
+## [1.38.2] - 2024-11-12
+### Fixed
+- Bug for validations.
+
+## [1.38.1] - 2024-11-12
+### Fixed
+- Element validations for element value match rule.
+
+## [1.38.0] - 2024-09-11
+### Chnages
+- Error messages for various scenarios.
+
+## [1.37.1] - 2024-09-03
+### Added
+- React support for coralogix iframe metrics.
+
+## [1.37.0] - 2024-09-03
+### Added
+- Support for coralogix iframe metrics.
+
+## [1.36.5] - 2024-08-27
+### Fixed
+- Fixed safari bug.
+
 ## [1.36.4] - 2024-08-20
 ### Fixed
 - Custom validation rule `ELEMENT_VALUE_MATCH_RULE` not working for Composable Elements.
@@ -63,15 +107,15 @@ All notable changes to this project will be documented in this file.
 - ExpiryMonth Element's invalid input styles issue
 
 ## [1.33.4] - 2023-12-07
-## Fixed
+### Fixed
 - jQuery dependency replacement changes.
 
 ## [1.33.3] - 2023-11-15
-## Fixed
+### Fixed
 -  Patch fix for reverting changes for internal jQuery dependency changes.
 
 ## [1.33.2] - 2023-11-13
-## Changed
+### Changed
 - Replace internal jQuery dependency with custom implementation.
 
 ## [1.33.1] - 2023-11-10
