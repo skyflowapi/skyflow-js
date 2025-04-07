@@ -425,9 +425,6 @@ export const formatOptions = (elementType, options, logLevel) => {
     } else {
       formattedOptions = { ...formattedOptions, masking: options.masking, maskChar: '#' }; // default value ;
     }
-    if (Object.prototype.hasOwnProperty.call(options, 'maskRange') && Array.isArray(options.maskRange)) {
-      formattedOptions = { ...formattedOptions, maskRange: options.maskRange };
-    }
   }
 
   return formattedOptions;
