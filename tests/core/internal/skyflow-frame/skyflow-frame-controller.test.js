@@ -1276,5 +1276,94 @@ describe('test reveal request', () => {
     const onCb =  on.mock.calls[2][1];
     onCb(data1,emitterCb);
   });
+
+  test("reveal data with redaction type",()=>{
+    const clientReq = jest.fn(() => Promise.resolve({"records":[{"token":"7402-2242-2342-232","value":"231", "valueType" : "STRING"}] }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init(); 
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    const revelRequestEventName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS;
+    const data = [
+        {
+          token: "1815-6223-1073-1425",
+          redaction: RedactionType.MASKED
+        }
+      ]
+    const data1 = {
+      type: REVEAL_TYPES.REVEAL,
+      records: data,
+      containerId: '123',
+      iframeName: '123',
+    };
+    const emitterCb = jest.fn();
+    const onCbName = on.mock.calls[2][0];
+    expect(onCbName).toBe(revelRequestEventName);
+    const onCb =  on.mock.calls[2][1];
+    onCb(data1,emitterCb);
+  });
+
+  test("reveal data with redaction type and without token",()=>{
+    const clientReq = jest.fn(() => Promise.resolve({"records":[{"token":"7402-2242-2342-232","value":"231", "valueType" : "STRING"}] }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init(); 
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    const revelRequestEventName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS;
+    const data = [
+        {
+          token: "1815-6223-1073-1425",
+          redaction: RedactionType.MASKED
+        }
+      ]
+    const data1 = {
+      type: REVEAL_TYPES.REVEAL,
+      records: data,
+      containerId: '123',
+      iframeName: '123',
+      options : {tokens : false}
+    };
+    const emitterCb = jest.fn();
+    const onCbName = on.mock.calls[2][0];
+    expect(onCbName).toBe(revelRequestEventName);
+    const onCb =  on.mock.calls[2][1];
+    onCb(data1,emitterCb);
+  });
+
+  test("reveal data with redaction type and without token and without tokenization",()=>{
+    const clientReq = jest.fn(() => Promise.resolve({"records":[{"token":"7402-2242-2342-232","value":"231", "valueType" : "STRING"}] }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
+
+    SkyflowFrameController.init(); 
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    const revelRequestEventName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS;
+    const data = [
+        {
+          token: "1815-6223-1073-1425",
+          redaction: RedactionType.MASKED
+        }
+      ]
+    const data1 = {
+      type: REVEAL_TYPES.REVEAL,
+      records: data,
+      containerId: '123',
+      iframeName: '123',
+      options : {tokens : false}
+    };
+    const emitterCb = jest.fn();
+    const onCbName = on.mock.calls[2][0];
+    expect(onCbName).toBe(revelRequestEventName);
+    const onCb =  on.mock.calls[2][1];
+    onCb(data1,emitterCb);
+  });
 })
 
