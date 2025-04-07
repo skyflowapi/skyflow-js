@@ -685,7 +685,7 @@ export class FrameElement {
           } else if (this.selectionStart !== undefined && this.selectionEnd !== undefined && this.selectedData !== undefined && cursorPosition != null) {
             const startIgnoreCount = this.countExcludedDigits(excludeFormatIndex, currentValue.slice(0, this.selectionStart).length - 1);
             const count = this.countExcludedDigits(excludeFormatIndex, currentValue.slice(0, this.selectionEnd).length - 1);
-            const actualEnd = this.countExcludedDigits(excludeFormatIndex, currentValue.length - 1);
+            // const actualEnd = this.countExcludedDigits(excludeFormatIndex, currentValue.length - 1);
             const newActual = this.actualValue.substring(0, this.selectionStart - startIgnoreCount)
                                       + this.selectedData
                                       + this.actualValue.substring(this.selectionEnd - count);
