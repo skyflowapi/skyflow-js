@@ -412,5 +412,20 @@ export const formatOptions = (elementType, options, logLevel) => {
     }
   }
 
+  if (Object.prototype.hasOwnProperty.call(options, 'masking')) {
+    if (!validateBooleanOptions(options.masking)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['masking'], true);
+    }
+    if (Object.prototype.hasOwnProperty.call(options, 'maskChar') && typeof options.maskChar === 'string') {
+      formattedOptions = {
+        ...formattedOptions,
+        masking: options.masking,
+        maskChar: options.maskChar,
+      };
+    } else {
+      formattedOptions = { ...formattedOptions, masking: options.masking, maskChar: '#' }; // default value ;
+    }
+  }
+
   return formattedOptions;
 };
