@@ -1,5 +1,6 @@
 import {
-  COLLECT_FRAME_CONTROLLER
+  COLLECT_FRAME_CONTROLLER,
+  ELEMENT_EVENTS_TO_IFRAME
 } from '../../../../src/core/constants';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
@@ -11,6 +12,7 @@ import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import EventEmitter from '../../../../src/event-emitter';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
 import { SKYFLOW_FRAME_CONTROLLER_READY } from '../../../../src/core/constants';
+import SkyflowError from '../../../../src/libs/skyflow-error';
 
 const bus = require('framebus');
 
@@ -188,6 +190,111 @@ describe('test composable container class',()=>{
     container.mount('#composable');
   });
 
+  it('test collect with success and error scenarios', async () => {
+    let readyCb;
+    on.mockImplementation((name, cb) => {
+      readyCb = cb;
+    });
+  
+    const div = document.createElement('div');
+    div.id = 'composable';
+    document.body.append(div);
+  
+    const container = new ComposableContainer(
+      { layout: [2], styles: { base: { width: '100px' } } },
+      metaData,
+      {},
+      context
+    );
+  
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+  
+    emitterSpy();
+    readyCb({ name: `${COLLECT_FRAME_CONTROLLER}1234` }, jest.fn());
+  
+    container.mount('#composable');
+  
+    const options = {
+      tokens: true,
+      additionalFields: {
+        records: [
+          {
+            table: 'string',
+            fields: {
+              column1: 'value',
+            },
+          },
+        ],
+      },
+      upsert: [
+        {
+          table: 'table',
+          column: 'column',
+        },
+      ],
+    };
+  
+    const collectPromiseSuccess = container.collect(options);
+  
+    const collectCb1 = emitSpy.mock.calls[0][2];
+    collectCb1(collectResponse);
+  
+    const successResult = await collectPromiseSuccess;
+    expect(successResult).toEqual(collectResponse);
+  
+    const collectPromiseError = container.collect(options);
+    const collectCb2 = emitSpy.mock.calls[1][2];
+    collectCb2({ error: 'Error occurred' });
+  
+    await expect(collectPromiseError).rejects.toEqual('Error occurred');
+  });
+  it('test collect when isMount is false', async () => {
+    let readyCb;
+    on.mockImplementation((name,cb)=>{
+      readyCb = cb;
+    })
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    emitterSpy();
+    
+    container.mount('#composable');
+    Object.defineProperty(container, '#isMounted', {
+      value: false,
+      writable: true,
+    });
+   
+    container.collect();
+
+    on.mockImplementation((name,cb)=>{emitterSpy = cb})
+  });
+
+  it('test collect with invalid domElement', (done)=>{
+    let readyCb;
+    on.mockImplementation((name,cb)=>{
+      readyCb = cb;
+    })
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    emitterSpy();
+    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+    try {
+      container.mount(null);
+      done.fail('Expected mount(null) to throw, but it did not');
+    } catch (err) {
+      expect(err).toBeInstanceOf(SkyflowError);
+      done();
+    }
+  });
+
   it('test collect',()=>{
     let readyCb;
     on.mockImplementation((name,cb)=>{
@@ -325,4 +432,5 @@ describe('test composable container class',()=>{
     container.on("CHANGE",()=>{});
     expect(element).toBeInstanceOf(ComposableElement);
   });
+
 });

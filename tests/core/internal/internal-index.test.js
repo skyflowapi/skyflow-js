@@ -5,6 +5,171 @@ import * as helpers from '../../../src/utils/helpers';
 import { getMaskedOutput, domReady } from '../../../src/utils/helpers';
 import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, CARD_ENCODED_ICONS, INPUT_KEYBOARD_EVENTS, ELEMENT_EVENTS_TO_CLIENT } from '../../../src/core/constants';
 
+describe('domReady function - FrameElement', () => {
+  let mockIFrameFormElement;
+  let mockOptions;
+  let mockHtmlDivElement;
+  let frameElement;
+
+  let emitSpy;
+  let targetSpy;
+  let on = jest.fn()
+  let windowSpy
+  let onSpy;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const mockState = {
+      value: undefined,
+      isFocused: false,
+      isValid: false,
+      isEmpty: true,
+      isComplete: false,
+      name: '',
+      isRequired: false,
+      isTouched: false,
+      selectedCardScheme: '',
+    };
+
+    jest.clearAllMocks();
+    emitSpy = jest.spyOn(bus, 'emit');
+    onSpy = jest.spyOn(bus, 'on');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+        on,
+    });
+    windowSpy = jest.spyOn(window,'parent','get');
+
+    mockIFrameFormElement = {
+      resetEvents: jest.fn(),
+      on: jest.fn(),
+      setValue: jest.fn(),
+      setMask: jest.fn(),
+      setValidation: jest.fn(),
+      setReplacePattern: jest.fn(),
+      setFormat: jest.fn(),
+      setMask: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({
+        isFocused: false,
+        isValid: true,
+        isEmpty: true,
+        isComplete: false,
+        isRequired: false,
+        isTouched: false,
+        value: '',
+      }),
+      getValue: jest.fn().mockReturnValue(''),
+      getUnformattedValue: jest.fn().mockReturnValue('4111111111111111'),
+      onFocusChange: jest.fn(),
+      onDropdownSelect: jest.fn(),
+      fieldType: ELEMENTS.CARD_NUMBER.name,
+      iFrameName: 'mockFrameName',
+      cardType: 'DEFAULT',
+      state: { ...mockState },
+      mask: ['#### #### #### ####'],
+      replacePattern: '####',
+    };
+
+    mockOptions = {
+      enableCardIcon: true,
+      enableCopy: true,
+      inputStyles: {
+        cardIcon: { color: 'red' },
+        dropdownIcon: { color: 'blue' },
+        dropdown: { color: 'green' },
+        copyIcon: { color: 'yellow' },
+      },
+      elementName: 'mockElement',
+      required: true,
+      preserveFileName: false,
+      allowedFileType: ['pdf',],
+    };
+
+    mockHtmlDivElement = document.createElement('div');
+
+
+    frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  it('should call domReady function in updateOptions when element type is EXPIRATION_DATE', (done) => {
+    const mockOptions = {
+      elementType: 'EXPIRATION_DATE',
+      inputStyles: {
+        base: { color: 'blue' },
+      },
+    };
+  
+    mockIFrameFormElement.mask = ['####', '-', { '#': /\d/ }];
+  
+    const originalReadyState = document.readyState;
+  
+    const readyEvent = new Event('DOMContentLoaded');
+  
+    const frameElement1 = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+  
+    setTimeout(() => {
+      document.dispatchEvent(readyEvent);
+        setTimeout(() => {
+        done();
+      }, 0);
+    }, 0);
+  });
+
+  it('should call domReady function in updateOptions when element type is EXPIRATION_YEAR', (done) => {
+    const mockOptions = {
+        elementType: 'EXPIRATION_YEAR',
+        inputStyles: {
+          base: { color: 'blue' },
+        },
+      };
+    
+      mockIFrameFormElement.mask = ['####', '-', { '#': /\d/ }];
+    
+      const originalReadyState = document.readyState;
+    
+      const readyEvent = new Event('DOMContentLoaded');
+    
+      const frameElement1 = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+    
+      setTimeout(() => {
+        document.dispatchEvent(readyEvent);
+        setTimeout(() => {
+          done();
+        }, 0);
+      }, 0);
+  });
+
+  it('should call domReady function in updateOptions when element type is CARD_NUMBER', (done) => {
+    const mockOptions = {
+      elementType: 'CARD_NUMBER',
+      inputStyles: {
+        base: { color: 'blue' },
+      },
+    };
+  
+    mockIFrameFormElement.mask = ['####', '-', { '#': /\d/ }];
+  
+    const originalReadyState = document.readyState;
+  
+    const readyEvent = new Event('DOMContentLoaded');
+  
+    const frameElement1 = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+  
+    setTimeout(() => {
+      document.dispatchEvent(readyEvent);
+  
+      setTimeout(() => {
+        done();
+      }, 0);
+    }, 0);
+  });
+});
+
 describe('FrameElement', () => {
   let mockIFrameFormElement;
   let mockOptions;
@@ -46,6 +211,9 @@ describe('FrameElement', () => {
       setValue: jest.fn(),
       setMask: jest.fn(),
       setValidation: jest.fn(),
+      setReplacePattern: jest.fn(),
+      setFormat: jest.fn(),
+      setMask: jest.fn(),
       getStatus: jest.fn().mockReturnValue({
         isFocused: false,
         isValid: true,
@@ -64,6 +232,7 @@ describe('FrameElement', () => {
       cardType: 'DEFAULT',
       state: { ...mockState },
       mask: ['#### #### #### ####'],
+      replacePattern: '####',
     };
 
     mockOptions = {
@@ -83,7 +252,13 @@ describe('FrameElement', () => {
 
     mockHtmlDivElement = document.createElement('div');
 
+
     frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should initialize properties and call mount in the constructor', () => {
@@ -103,7 +278,11 @@ describe('FrameElement', () => {
   });
 
   it('should initialize DOM elements when cardType is AMEX', () => {
+    jest.mock('../../../src/utils/helpers', () => ({
+      domReady: jest.fn(),
+    }));
     mockIFrameFormElement.cardType = CARD_ENCODED_ICONS.AMEX
+
     frameElement.mount();
 
     expect(mockIFrameFormElement.resetEvents).toHaveBeenCalled();
