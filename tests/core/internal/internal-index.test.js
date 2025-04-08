@@ -57,6 +57,7 @@ describe('FrameElement', () => {
       getValue: jest.fn().mockReturnValue(''),
       getUnformattedValue: jest.fn().mockReturnValue('4111111111111111'),
       onFocusChange: jest.fn(),
+      onDropdownSelect: jest.fn(),
       fieldType: ELEMENTS.CARD_NUMBER.name,
       iFrameName: 'mockFrameName',
       cardType: 'DEFAULT',
