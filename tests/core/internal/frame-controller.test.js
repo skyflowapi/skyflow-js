@@ -2281,4 +2281,49 @@ describe('test frame controller', () => {
 
     element.setupInputField();
   });
+
+  test('should test on applyMask without setting actual mask', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      "target": {
+        checkValidity: jest.fn(),
+        "value": "4111111111111111"
+      }
+    }
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setValue("4111111111111111");
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+    }, div);
+
+    element.applyMask();
+  });
+
+  test('should test on applyMask when masking is true', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+  
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setMask([
+      "XXXX XXXX XXXX XXXX XXX",
+      {
+        X: {},
+      },
+    ]);
+    formElement.setValue("4111111111111111");
+  
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      masking: true,
+      maskingChar: '*',
+    }, div);
+    element.applyMask();
+  });
 });
