@@ -700,8 +700,7 @@ export class FrameElement {
             this.selectedData = undefined;
             this.selectionStart = undefined;
             this.selectionEnd = undefined;
-          }
-          else if (cursorPosition != null) {
+          } else if (cursorPosition != null) {
             // if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
             input.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
             // }
