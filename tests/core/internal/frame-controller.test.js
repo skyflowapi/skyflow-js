@@ -1449,6 +1449,7 @@ describe('test frame controller', () => {
         value: "4111111111111111",
         selectionStart: 16,
         selectionEnd: 16,
+        setSelectionRange: jest.fn(),
       },
     };
   
@@ -1484,6 +1485,7 @@ describe('test frame controller', () => {
       value: "4111111111111111",
       selectionStart: 0,
       selectionEnd: 16,
+      setSelectionRange: jest.fn(),
       },
       inputType: "insertFromPaste", // Simulate paste event
     };
@@ -1514,6 +1516,7 @@ describe('test frame controller', () => {
         value: "4150580996517927",
         selectionStart: 16,
         selectionEnd: 16,
+        setSelectionRange : jest.fn(),
       },
       inputType: "insertFromPaste", // Simulate paste event
     };
@@ -1532,6 +1535,7 @@ describe('test frame controller', () => {
       target: {
         checkValidity: jest.fn(),
         value: "123",
+        setSelectionRange : jest.fn(),
       },
     };
   
@@ -1558,7 +1562,8 @@ describe('test frame controller', () => {
         checkValidity: jest.fn(),
         value: "t",
         selectionStart: 1,
-        selectionEnd: 1
+        selectionEnd: 1,
+        setSelectionRange : jest.fn(),
       },
     };
   
@@ -1588,7 +1593,8 @@ describe('test frame controller', () => {
         checkValidity: jest.fn(),
         value: "te",
         selectionStart: 1,
-        selectionEnd: 1
+        selectionEnd: 1,
+        setSelectionRange : jest.fn(),
       },
     };
   
@@ -1617,7 +1623,8 @@ describe('test frame controller', () => {
         checkValidity: jest.fn(),
         value: "te",
         selectionStart: 1,
-        selectionEnd: 1
+        selectionEnd: 1,
+        setSelectionRange : jest.fn(),
       },
     };
   
@@ -1638,7 +1645,8 @@ describe('test frame controller', () => {
         checkValidity: jest.fn(),
         value: "t",
         selectionStart: 2,
-        selectionEnd: 2
+        selectionEnd: 2,
+        setSelectionRange : jest.fn(),
       },
     };
   
@@ -1749,6 +1757,7 @@ describe('test frame controller', () => {
         value: "4",
         selectionStart: 1,
         selectionEnd: 1,
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(firstInputEvent);
@@ -1764,6 +1773,7 @@ describe('test frame controller', () => {
         value: "41",
         selectionStart: 2,
         selectionEnd: 2,
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(secondInputEvent);
@@ -1779,6 +1789,7 @@ describe('test frame controller', () => {
         value: "411",
         selectionStart: 3,
         selectionEnd: 3,
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(thirdInputEvent);
@@ -1817,6 +1828,7 @@ describe('test frame controller', () => {
         value: "4",
         selectionStart: 1,
         selectionEnd: 1,
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(firstInputEvent);
@@ -1832,6 +1844,7 @@ describe('test frame controller', () => {
         value: "41",
         selectionStart: 2,
         selectionEnd: 2,
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(secondInputEvent);
@@ -1847,6 +1860,7 @@ describe('test frame controller', () => {
         value: "4",
         selectionStart: 1,
         selectionEnd: 1,
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(backspaceEvent);
@@ -1885,6 +1899,7 @@ describe('test frame controller', () => {
         value: "",
         selectionStart: 0,
         selectionEnd: 0,
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(deleteEvent);
@@ -1923,6 +1938,7 @@ describe('test frame controller', () => {
         value: "41112",
         selectionStart: 5,
         selectionEnd: 5,
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(typingEvent);
@@ -1952,6 +1968,8 @@ describe('test frame controller', () => {
       target: {
         checkValidity: jest.fn(),
         value: "12",
+        setSelectionRange: jest.fn(),
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(firstInputEvent);
@@ -1961,6 +1979,7 @@ describe('test frame controller', () => {
       target: {
         checkValidity: jest.fn(),
         value: "123",
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(secondInputEvent);
@@ -1970,6 +1989,7 @@ describe('test frame controller', () => {
       target: {
         checkValidity: jest.fn(),
         value: "1",
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(backspaceEvent);
@@ -1996,6 +2016,7 @@ describe('test frame controller', () => {
       target: {
         checkValidity: jest.fn(),
         value: "4",
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(firstInputEvent);
@@ -2005,6 +2026,7 @@ describe('test frame controller', () => {
       target: {
         checkValidity: jest.fn(),
         value: "41",
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(secondInputEvent);
@@ -2014,6 +2036,7 @@ describe('test frame controller', () => {
       target: {
         checkValidity: jest.fn(),
         value: "411",
+        setSelectionRange: jest.fn(),
       },
     };
     element.onInputChange(thirdInputEvent);
@@ -2325,5 +2348,78 @@ describe('test frame controller', () => {
       maskingChar: '*',
     }, div);
     element.applyMask();
+  });
+
+  test('card_number Input With masking enabled FrameElement (simulate typing and backspace)', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+    const formElement = new IFrameFormElement(card_element, {}, context);
+  
+    formElement.setMask([
+      "XXXX XXXX XXXX XXXX XXX",
+      {
+        X: {},
+      },
+    ]);
+    formElement.setValue("");
+
+    const mockPrevent = jest.fn();
+  
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      masking: true,
+      maskingChar: '*',
+    }, div);
+  
+    // Simulate typing the first character
+    const firstInputEvent = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "4",
+        selectionStart: 1,
+        selectionEnd: 1,
+        setSelectionRange: jest.fn(),
+      },
+    };
+    element.onInputChange(firstInputEvent);
+  
+    // Assert after typing the first character
+    expect(formElement.getValue()).toBe("4");
+    expect(firstInputEvent.target.value).toBe("*");
+  
+    // Simulate typing the second character
+    const secondInputEvent = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "41",
+        selectionStart: 2,
+        selectionEnd: 2,
+        setSelectionRange: jest.fn(),
+      },
+    };
+    element.onInputChange(secondInputEvent);
+  
+    // Assert after typing the second character
+    expect(formElement.getValue()).toBe("41");
+    expect(secondInputEvent.target.value).toBe("**");
+  
+    // Simulate backspace to remove the second character
+    const backspaceEvent = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "4",
+        selectionStart: 1,
+        selectionEnd: 1,
+        setSelectionRange: jest.fn(),
+      },
+    };
+    element.onInputChange(backspaceEvent);
+
+    expect(formElement.getValue()).toBe("4");
+    expect(backspaceEvent.target.value).toBe("*");
+    // expect(backspaceEvent.target.setSelectionRange).toHaveBeenCalledWith(1, 1);
   });
 });

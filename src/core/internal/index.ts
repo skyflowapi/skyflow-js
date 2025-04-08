@@ -700,10 +700,11 @@ export class FrameElement {
             this.selectedData = undefined;
             this.selectionStart = undefined;
             this.selectionEnd = undefined;
-          } else if (cursorPosition != null) {
-            if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
+          } 
+          else if (cursorPosition != null) {
+            // if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
               input.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
-            }
+            // }
             const removedCount = rangeMaskedOutput.length - currentValue.length;
             this.actualValue = this.handleDeletion(this.actualValue, rangeMaskedOutput, excludeFormatIndex, cursorPosition, cursorPosition + removedCount);
           }
@@ -718,9 +719,9 @@ export class FrameElement {
             const newCursorPosition = isCursorAtEnd
               ? newFormattedOutput.length
               : cursorPosition + (newFormattedOutput.length - formattedOutput.length);
-            if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
+            // if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
               input.setSelectionRange(newCursorPosition, newCursorPosition);
-            }
+            // }
           }
           if (newFormattedOutput.length >= value.length) {
             this.iFrameFormElement.setValue(newFormattedOutput, target?.checkValidity());
@@ -770,9 +771,9 @@ export class FrameElement {
             }
           }
           input.value = this.options.maskingChar.repeat(this.actualValue.length);
-          if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
+          // if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
             input.setSelectionRange(cursorPosition, cursorPosition);
-          }
+          // }
           this.iFrameFormElement.setValue(this.actualValue, target?.checkValidity());
         } else {
           this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
