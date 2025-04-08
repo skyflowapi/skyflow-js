@@ -1187,4 +1187,3 @@ export class FrameElement {
     }
   }
 }
-
