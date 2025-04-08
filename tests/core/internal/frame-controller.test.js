@@ -1475,6 +1475,56 @@ describe('test frame controller', () => {
     expect(inputEvent.target.value).toBe("**** **** **** ****");
   });
 
+  test('card_number Input With masking enabled paste input', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      target: {
+      checkValidity: jest.fn(),
+      value: "4111111111111111",
+      selectionStart: 0,
+      selectionEnd: 16,
+      },
+      inputType: "insertFromPaste", // Simulate paste event
+    };
+  
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setMask([
+      "XXXX XXXX XXXX XXXX XXX",
+      {
+        X: {},
+      },
+    ]);
+    formElement.setValue("4111111111111111");
+  
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      masking: true,
+      maskingChar: '*',
+    }, div);
+    element.onInputChange(inputEvent);
+    // element.onInputChange(inputEvent);
+
+    const inputEvent1 = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "4150580996517927",
+        selectionStart: 16,
+        selectionEnd: 16,
+      },
+      inputType: "insertFromPaste", // Simulate paste event
+    };
+    formElement.setValue("");
+    element.onInputChange(inputEvent1);
+    element.onInputChange(inputEvent1);
+  
+    expect(formElement.getValue()).toBe("4150 5809 9651 7927");
+    expect(inputEvent.target.value).toBe("**** **** **** ****");
+  });
+
   test('cvv Input With masking enabled FrameElement', () => {
     const card_element = `element:CVV:${tableCol}`;
     const div = document.createElement('div');
@@ -1498,6 +1548,103 @@ describe('test frame controller', () => {
     }, div);
   
     element.onInputChange(inputEvent);
+  });
+
+  test('name Input With masking enabled FrameElement', () => {  //keep
+    const card_element = `element:CARDHOLDER_NAME:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "t",
+        selectionStart: 1,
+        selectionEnd: 1
+      },
+    };
+  
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setValue("t");
+  
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      masking: true,
+      maskingChar: '*',
+    }, div);
+  
+    element.onInputChange(inputEvent);
+
+    expect(formElement.getValue()).toBe("t");
+
+  });
+
+  test('name Input With masking enabled FrameElement and simulate input twice', () => {  //keep
+    const card_element = `element:CARDHOLDER_NAME:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "te",
+        selectionStart: 1,
+        selectionEnd: 1
+      },
+    };
+  
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setValue("te");
+  
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      masking: true,
+      maskingChar: '*',
+    }, div);
+  
+    element.onInputChange(inputEvent);
+    element.onInputChange(inputEvent);
+
+  });
+
+  test('name Input With masking enabled FrameElement and simulate input twice', () => {
+    const card_element = `element:CARDHOLDER_NAME:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "te",
+        selectionStart: 1,
+        selectionEnd: 1
+      },
+    };
+  
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setValue("te");
+  
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      masking: true,
+      maskingChar: '*',
+    }, div);
+
+    const inputEvent1 = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "t",
+        selectionStart: 2,
+        selectionEnd: 2
+      },
+    };
+  
+    element.onInputChange(inputEvent);
+    element.onInputChange(inputEvent1);
+
   });
 
   test('handleDeletion should correctly update actualValue after deletion', () => {
@@ -1533,8 +1680,8 @@ describe('test frame controller', () => {
     const actualValue = "4111111111111111";
     const maskedValue = "**** **** **** ****";
     const excludeFormatIndexes = [4, 9, 14]; // Spaces in the masked value
-    const selectionStart = 5; // Start of the deletion range
-    const selectionEnd = 7; // End of the deletion range
+    const selectionStart = 0; // Start of the deletion range
+    const selectionEnd = 16; // End of the deletion range
   
     const result = element.handleDeletion(
       actualValue,
