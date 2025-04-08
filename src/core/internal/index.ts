@@ -626,7 +626,7 @@ export class FrameElement {
         && this.iFrameFormElement.mask
       ) {
         let cardType = '';
-        if (Object.prototype.hasOwnProperty.call(this.options, 'masking')) {
+        if (Object.prototype.hasOwnProperty.call(this.options, 'masking') && (this.options.masking === true)) {
           if (this.actualValue === '' && value.length > 0) {
             cardType = detectCardType(value);
           } else {
@@ -654,7 +654,7 @@ export class FrameElement {
         if (value.length === 0 && this.actualValue.length > 0) {
           this.actualValue = '';
         }
-        if (Object.prototype.hasOwnProperty.call(this.options, 'masking') && this.actualValue !== undefined) {
+        if (Object.prototype.hasOwnProperty.call(this.options, 'masking') && (this.options.masking === true) && this.actualValue !== undefined) {
           const excludeFormatIndex = this.getNonTranslatedIndexes(updatedMask[0], translation);
           this.excludeFormatIndex = excludeFormatIndex;
           const input = target;
@@ -666,7 +666,7 @@ export class FrameElement {
             this.actualValue,
             updatedMask[0],
             translation,
-            this.options.maskChar,
+            this.options.maskingChar,
           );
 
           rangeMaskedOutput = previousMaskedValue;
@@ -677,7 +677,7 @@ export class FrameElement {
             this.actualValue = currentValue;
           } else if (currentValue.length > formattedOutput.length && cursorPosition != null && currentValue.length <= updatedMask[0].length) {
             const addedChar = currentValue[cursorPosition - 1];
-            const count = this.countExcludedDigits(excludeFormatIndex, currentValue.slice(0, cursorPosition - 1).length - 1);
+            const count = this.countExcludedDigits(excludeFormatIndex, currentValue.slice(0, cursorPosition - 1).length);
             cursorPosition -= count;
             this.actualValue = this.actualValue.substring(0, cursorPosition - 1)
             + addedChar
@@ -711,7 +711,7 @@ export class FrameElement {
             this.actualValue,
             updatedMask[0],
             translation,
-            this.options.maskChar,
+            this.options.maskingChar,
           );
           rangeMaskedOutput = newMaskedOutput;
           if (cursorPosition != null) {
@@ -744,7 +744,7 @@ export class FrameElement {
         }
       } else {
         // eslint-disable-next-line no-lonely-if
-        if (Object.prototype.hasOwnProperty.call(this.options, 'masking')) {
+        if (Object.prototype.hasOwnProperty.call(this.options, 'masking') && (this.options.masking === true)) {
           const input = event.target as HTMLInputElement;
           const cursorPosition = input.selectionStart;
           const currentValue = input.value;
@@ -769,7 +769,7 @@ export class FrameElement {
                     + this.actualValue.substring(cursorPosition + removedCount);
             }
           }
-          input.value = this.options.maskChar.repeat(this.actualValue.length);
+          input.value = this.options.maskingChar.repeat(this.actualValue.length);
           if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
             input.setSelectionRange(cursorPosition, cursorPosition);
           }
@@ -1143,9 +1143,9 @@ export class FrameElement {
             this.actualValue = '';
           }
 
-          if (Object.prototype.hasOwnProperty.call(this.options, 'masking')) {
+          if (Object.prototype.hasOwnProperty.call(this.options, 'masking') && (this.options.masking === true)) {
             // eslint-disable-next-line @typescript-eslint/no-shadow, prefer-const
-            let { maskedOutput } = getMaskedOutput(this.actualValue, mask[0], translation, this.options.maskChar);
+            let { maskedOutput } = getMaskedOutput(this.actualValue, mask[0], translation, this.options.maskingChar);
             this.domInput.value = maskedOutput;
           } else {
             const { formattedOutput } = getMaskedOutput(value, mask[0], translation);

@@ -120,7 +120,7 @@ export const getMaskedOutput = (
   input: string,
   format: string,
   translation: any,
-  maskChar: string = '',
+  maskingChar: string = '',
 ) => {
   if (!input) {
     return { formattedOutput: '', maskedOutput: '' };
@@ -148,9 +148,9 @@ export const getMaskedOutput = (
         const characterString = character.toString();
         if (regex.test(characterString)) {
           formattedOutput += characterString;
-          // Append the maskChar or the original character if no maskChar provided
+          // Append the maskingChar or the original character if no maskingChar provided
           // eslint-disable-next-line no-unneeded-ternary
-          maskedOutput += maskChar ? maskChar : '*';
+          maskedOutput += maskingChar ? maskingChar : '#';
           j += 1;
         }
       }

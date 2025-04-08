@@ -1467,7 +1467,7 @@ describe('test frame controller', () => {
       labelStyles,
       errorTextStyles,
       masking: true,
-      maskChar: '*',
+      maskingChar: '*',
     }, div);
     element.onInputChange(inputEvent);
   
@@ -1494,7 +1494,7 @@ describe('test frame controller', () => {
       labelStyles,
       errorTextStyles,
       masking: true,
-      maskChar: '*',
+      maskingChar: '*',
     }, div);
   
     element.onInputChange(inputEvent);
@@ -1527,7 +1527,7 @@ describe('test frame controller', () => {
       labelStyles,
       errorTextStyles,
       masking: true,
-      maskChar: '*',
+      maskingChar: '*',
     }, div);
   
     const actualValue = "4111111111111111";
@@ -1564,7 +1564,7 @@ describe('test frame controller', () => {
       labelStyles,
       errorTextStyles,
       masking: true,
-      maskChar: '*',
+      maskingChar: '*',
     }, div);
   
     const excludeFormatIndex = [2, 4, 6, 8];
@@ -1592,7 +1592,7 @@ describe('test frame controller', () => {
       labelStyles,
       errorTextStyles,
       masking: true,
-      maskChar: '*',
+      maskingChar: '*',
     }, div);
   
     // Simulate typing the first character
@@ -1660,7 +1660,7 @@ describe('test frame controller', () => {
       labelStyles,
       errorTextStyles,
       masking: true,
-      maskChar: '*',
+      maskingChar: '*',
     }, div);
   
     // Simulate typing the first character
@@ -1728,7 +1728,7 @@ describe('test frame controller', () => {
       labelStyles,
       errorTextStyles,
       masking: true,
-      maskChar: '*',
+      maskingChar: '*',
     }, div);
 
     // Simulate deleting all characters
@@ -1766,7 +1766,7 @@ describe('test frame controller', () => {
       labelStyles,
       errorTextStyles,
       masking: true,
-      maskChar: '*',
+      maskingChar: '*',
     }, div);
 
     // Simulate typing after masking
@@ -1797,7 +1797,7 @@ describe('test frame controller', () => {
       labelStyles,
       errorTextStyles,
       masking: true,
-      maskChar: '*',
+      maskingChar: '*',
     }, div);
   
     // Simulate typing the first two characters
@@ -1841,7 +1841,7 @@ describe('test frame controller', () => {
       labelStyles,
       errorTextStyles,
       masking: true,
-      maskChar: '*',
+      maskingChar: '*',
     }, div);
   
     // Simulate typing the first character

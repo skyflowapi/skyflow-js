@@ -416,14 +416,14 @@ export const formatOptions = (elementType, options, logLevel) => {
     if (!validateBooleanOptions(options.masking)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['masking'], true);
     }
-    if (Object.prototype.hasOwnProperty.call(options, 'maskChar') && typeof options.maskChar === 'string') {
+    if (Object.prototype.hasOwnProperty.call(options, 'maskingChar') && typeof options.maskingChar === 'string') {
       formattedOptions = {
         ...formattedOptions,
         masking: options.masking,
-        maskChar: options.maskChar,
+        maskingChar: options.maskingChar,
       };
     } else {
-      formattedOptions = { ...formattedOptions, masking: options.masking, maskChar: '#' }; // default value ;
+      formattedOptions = { ...formattedOptions, masking: options.masking, maskingChar: '#' }; // default value ;
     }
   }
 
