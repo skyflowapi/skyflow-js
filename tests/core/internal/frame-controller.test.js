@@ -2422,4 +2422,54 @@ describe('test frame controller', () => {
     expect(backspaceEvent.target.value).toBe("*");
     // expect(backspaceEvent.target.setSelectionRange).toHaveBeenCalledWith(1, 1);
   });
+
+  test('card_number Input With masking enabled paste input', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      target: {
+      checkValidity: jest.fn(),
+      value: "4111111111111111",
+      selectionStart: 19,
+      selectionEnd: 19,
+      setSelectionRange: jest.fn(),
+      },
+      inputType: "insertFromPaste", // Simulate paste event
+    };
+  
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setMask([
+      "XXXX XXXX XXXX XXXX XXX",
+      {
+        X: {},
+      },
+    ]);
+    formElement.setValue("4111111111111111");
+  
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      masking: true,
+      maskingChar: '*',
+    }, div);
+    element.onInputChange(inputEvent);
+
+    const inputEvent1 = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "4150580996517927",
+        selectionStart: 19,
+        selectionEnd: 19,
+        setSelectionRange : jest.fn(),
+      },
+      inputType: "insertFromPaste", // Simulate paste event
+    };
+    formElement.setValue("");
+    element.onInputChange(inputEvent1);
+  
+    expect(formElement.getValue()).toBe("4150 5809 9651 7927");
+    expect(inputEvent.target.value).toBe("**** **** **** ****");
+  });
 });

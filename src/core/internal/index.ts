@@ -916,8 +916,8 @@ export class FrameElement {
     }
   };
 
-  focusChange = (focus: boolean) => {
-    if (focus) this.domInput?.focus();
+  focusChange = (isFocus: boolean) => {
+    if (isFocus) this.domInput?.focus();
     else this.domInput?.blur();
   };
 
@@ -1163,24 +1163,29 @@ export class FrameElement {
 
   private appendDropdown(cardBrandList:any) {
     if (this.dropdownSelect) {
-      this.dropdownSelect.innerHTML = '';
-      const defaultOption = document.createElement('option');
-      defaultOption.value = 'unknown';
-      defaultOption.text = 'Select card brand (optional)';
+      this.dropdownSelect.innerHTML = "";
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "unknown";
+      defaultOption.text = "Select card brand (optional)";
       defaultOption.disabled = true;
       this.dropdownSelect.append(defaultOption);
 
       cardBrandList.forEach((cardOption) => {
-        const option = document.createElement('option');
+        const option = document.createElement("option");
         option.value = cardOption;
         option.text = CardTypeValues[cardOption];
         this.dropdownSelect?.append(option);
       });
 
-      if (this.inputParent && this.dropdownIcon && this.domInput && this.domImg) {
+      if (
+        this.inputParent &&
+        this.dropdownIcon &&
+        this.domInput &&
+        this.domImg
+      ) {
         this.dropdownSelect.selectedIndex = 0;
-        this.domInput.style.textIndent = '48px';
-        this.dropdownIcon.style.display = 'block';
+        this.domInput.style.textIndent = "48px";
+        this.dropdownIcon.style.display = "block";
         this.inputParent.append(this.dropdownIcon);
         this.inputParent.append(this.dropdownSelect);
       }
