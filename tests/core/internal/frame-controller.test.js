@@ -513,6 +513,38 @@ describe('test frame controller', () => {
 
   })
 
+  test("file element validator should return false, for invalid file name when allowedFileType is provided", () => {
+    const month_element = `element:FILE_INPUT:${tableCol}`;
+    const div = document.createElement("div");
+
+    const formElement = new IFrameFormElement(month_element, {}, context);
+    const element = new FrameElement(
+      formElement,
+      {
+        label: "label",
+        inputStyles,
+        labelStyles,
+        errorTextStyles,
+        preserveFileName: true,
+        allowedFileType: ['jpg', 'pdf'],
+      },
+      div
+    );
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+
+    expect(
+      formElement.validator({
+        lastModified: "",
+        lastModifiedDate: "",
+        name: "sample@ #2 @@1.png", // invalid file name
+        size: 48848,
+        type: "image/jpeg",
+        webkitRelativePath: "",
+      })
+    ).toBe(false);
+  });
 
   test('expiration date FrameElement with YYYY/MM format', () => {
 
@@ -777,6 +809,7 @@ describe('test frame controller', () => {
       inputStyles,
       labelStyles,
       errorTextStyles,
+      enableCardIcon: true
     }, div);
 
     element.onInputChange(inputEvent);
@@ -793,6 +826,7 @@ describe('test frame controller', () => {
       inputStyles,
       labelStyles,
       errorTextStyles,
+      enableCardIcon: false
     }, div);
 
     const inst = EventEmitter.mock.instances[0];
@@ -2472,4 +2506,48 @@ describe('test frame controller', () => {
     expect(formElement.getValue()).toBe("4150 5809 9651 7927");
     expect(inputEvent.target.value).toBe("**** **** **** ****");
   });
+
+  test('updateParentDiv Input FrameElement', () => {
+    const card_element = `element:CARD_NUMBER:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      "target": {
+        checkValidity: jest.fn(),
+        "value": "4111111111111111"
+      }
+    }
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setValue("4111111111111111");
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      enableCardIcon: true
+    }, div);
+
+    element.updateParentDiv(div);
+  })
+
+  test('onInputChange for file element', () => {
+    const card_element = `element:FILE_INPUT:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      "target": {
+        checkValidity: jest.fn(),
+        "value": "",
+        files: ["test.jpg"]
+      }
+    }
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      enableCardIcon: true
+    }, div);
+
+    element.onInputChange(inputEvent)
+  })
 });
