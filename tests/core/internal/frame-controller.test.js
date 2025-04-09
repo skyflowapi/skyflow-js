@@ -1474,7 +1474,7 @@ describe('test frame controller', () => {
     element.setupInputField();
   });
 
-  test('card_number Input With masking enabled FrameElement', () => {
+  test('should verify card_number Input With masking enabled', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
     const inputEvent = {
@@ -1510,7 +1510,7 @@ describe('test frame controller', () => {
     expect(inputEvent.target.value).toBe("**** **** **** ****");
   });
 
-  test('card_number Input With masking enabled paste input', () => {
+  test('verify card_number Input With masking enabled paste input', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
     const inputEvent = {
@@ -1542,7 +1542,6 @@ describe('test frame controller', () => {
       maskingChar: '*',
     }, div);
     element.onInputChange(inputEvent);
-    // element.onInputChange(inputEvent);
 
     const inputEvent1 = {
       target: {
@@ -1562,7 +1561,7 @@ describe('test frame controller', () => {
     expect(inputEvent.target.value).toBe("**** **** **** ****");
   });
 
-  test('cvv Input With masking enabled FrameElement', () => {
+  test('should verify cvv Input With masking enabled', () => {
     const card_element = `element:CVV:${tableCol}`;
     const div = document.createElement('div');
     const inputEvent = {
@@ -1588,7 +1587,7 @@ describe('test frame controller', () => {
     element.onInputChange(inputEvent);
   });
 
-  test('name Input With masking enabled FrameElement', () => {  //keep
+  test('should verify name Input With masking enabled', () => {
     const card_element = `element:CARDHOLDER_NAME:${tableCol}`;
     const div = document.createElement('div');
     const inputEvent = {
@@ -1619,7 +1618,7 @@ describe('test frame controller', () => {
 
   });
 
-  test('name Input With masking enabled FrameElement and simulate input twice', () => {  //keep
+  test('should verify name Input With masking enabled FrameElement and simulate input twice', () => {
     const card_element = `element:CARDHOLDER_NAME:${tableCol}`;
     const div = document.createElement('div');
     const inputEvent = {
@@ -1649,7 +1648,7 @@ describe('test frame controller', () => {
 
   });
 
-  test('name Input With masking enabled FrameElement and simulate input twice', () => {
+  test('verify name Input With masking enabled FrameElement and simulate and backspace', () => {
     const card_element = `element:CARDHOLDER_NAME:${tableCol}`;
     const div = document.createElement('div');
     const inputEvent = {
@@ -1689,7 +1688,7 @@ describe('test frame controller', () => {
 
   });
 
-  test('handleDeletion should correctly update actualValue after deletion', () => {
+  test('verify handleDeletion update actualValue after deletion', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
     const inputEvent = {
@@ -1734,7 +1733,7 @@ describe('test frame controller', () => {
     );
   });
 
-  test('countExcludedDigits should return the correct count of excluded digits', () => {
+  test('should verify countExcludedDigits return the correct count of excluded digits', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
   
@@ -1762,7 +1761,7 @@ describe('test frame controller', () => {
     expect(result).toBe(3);
   });
 
-  test('card_number Input With masking enabled FrameElement (simulate typing 2 characters)', () => {
+  test('should verify card_number Input With masking enabled FrameElement (simulate typing 2 characters)', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
     const formElement = new IFrameFormElement(card_element, {}, context);
@@ -1833,7 +1832,7 @@ describe('test frame controller', () => {
     expect(thirdInputEvent.target.value).toBe("***");
   });
 
-  test('card_number Input With masking enabled FrameElement (simulate typing and backspace)', () => {
+  test('should verify card_number Input With masking enabled (simulate typing and backspace)', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
     const formElement = new IFrameFormElement(card_element, {}, context);
@@ -1904,7 +1903,7 @@ describe('test frame controller', () => {
     expect(backspaceEvent.target.value).toBe("*");
   });
 
-  test('card_number Input With masking enabled FrameElement (simulate deleting all characters)', () => {
+  test('should verify card_number Input With masking enabled (simulate deleting all characters)', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
     const formElement = new IFrameFormElement(card_element, {}, context);
@@ -1943,7 +1942,7 @@ describe('test frame controller', () => {
     expect(deleteEvent.target.value).toBe("");
   });
 
-  test('card_number Input With masking enabled FrameElement (simulate typing after masking)', () => {
+  test('should verify card_number Input With masking enabled (simulate typing after masking)', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
     const formElement = new IFrameFormElement(card_element, {}, context);
@@ -1982,7 +1981,7 @@ describe('test frame controller', () => {
     expect(typingEvent.target.value).toBe("**** *");
   });
   
-  test('card_number Input With masking enabled FrameElement (simulate typing and backspace)', () => {
+  test('should verify card_number Input With masking enabled (simulate typing and backspace)', () => {
     const card_element = `element:CVV:${tableCol}`;
     const div = document.createElement('div');
     const formElement = new IFrameFormElement(card_element, {}, context);
@@ -2029,7 +2028,7 @@ describe('test frame controller', () => {
     element.onInputChange(backspaceEvent);
   });
   
-  test('cvv Input With masking enabled FrameElement (simulate typing 2 characters)', () => {
+  test('should verify cvv Input With masking enabled (simulate typing 2 characters)', () => {
     const card_element = `element:CVV:${tableCol}`;
     const div = document.createElement('div');
     const formElement = new IFrameFormElement(card_element, {}, context);
@@ -2384,7 +2383,7 @@ describe('test frame controller', () => {
     element.applyMask();
   });
 
-  test('card_number Input With masking enabled FrameElement (simulate typing and backspace)', () => {
+  test('should verify card_number Input With masking enabled (simulate typing and backspace)', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
     const formElement = new IFrameFormElement(card_element, {}, context);
@@ -2454,10 +2453,9 @@ describe('test frame controller', () => {
 
     expect(formElement.getValue()).toBe("4");
     expect(backspaceEvent.target.value).toBe("*");
-    // expect(backspaceEvent.target.setSelectionRange).toHaveBeenCalledWith(1, 1);
   });
 
-  test('card_number Input With masking enabled paste input', () => {
+  test('should verify card_number Input With masking enabled paste input', () => {
     const card_element = `element:CARD_NUMBER:${tableCol}`;
     const div = document.createElement('div');
     const inputEvent = {

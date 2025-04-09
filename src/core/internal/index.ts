@@ -685,7 +685,6 @@ export class FrameElement {
           } else if (this.selectionStart !== undefined && this.selectionEnd !== undefined && this.selectedData !== undefined && cursorPosition != null) {
             const startIgnoreCount = this.countExcludedDigits(excludeFormatIndex, currentValue.slice(0, this.selectionStart).length - 1);
             const count = this.countExcludedDigits(excludeFormatIndex, currentValue.slice(0, this.selectionEnd).length - 1);
-            // const actualEnd = this.countExcludedDigits(excludeFormatIndex, currentValue.length - 1);
             const newActual = this.actualValue.substring(0, this.selectionStart - startIgnoreCount)
                                       + this.selectedData
                                       + this.actualValue.substring(this.selectionEnd - count);
@@ -701,9 +700,7 @@ export class FrameElement {
             this.selectionStart = undefined;
             this.selectionEnd = undefined;
           } else if (cursorPosition != null) {
-            // if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
             input.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
-            // }
             const removedCount = rangeMaskedOutput.length - currentValue.length;
             this.actualValue = this.handleDeletion(this.actualValue, rangeMaskedOutput, excludeFormatIndex, cursorPosition, cursorPosition + removedCount);
           }
@@ -718,9 +715,7 @@ export class FrameElement {
             const newCursorPosition = isCursorAtEnd
               ? newFormattedOutput.length
               : cursorPosition + (newFormattedOutput.length - formattedOutput.length);
-            // if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
             input.setSelectionRange(newCursorPosition, newCursorPosition);
-            // }
           }
           if (newFormattedOutput.length >= value.length) {
             this.iFrameFormElement.setValue(newFormattedOutput, target?.checkValidity());
@@ -770,9 +765,7 @@ export class FrameElement {
             }
           }
           input.value = this.options.maskingChar.repeat(this.actualValue.length);
-          // if (input instanceof HTMLInputElement && typeof input.setSelectionRange === 'function') {
           input.setSelectionRange(cursorPosition, cursorPosition);
-          // }
           this.iFrameFormElement.setValue(this.actualValue, target?.checkValidity());
         } else {
           this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
@@ -916,8 +909,8 @@ export class FrameElement {
     }
   };
 
-  focusChange = (isFocus: boolean) => {
-    if (isFocus) this.domInput?.focus();
+  focusChange = (focus: boolean) => {
+    if (focus) this.domInput?.focus();
     else this.domInput?.blur();
   };
 
@@ -1177,12 +1170,7 @@ export class FrameElement {
         this.dropdownSelect?.append(option);
       });
 
-      if (
-        this.inputParent
-        && this.dropdownIcon
-        && this.domInput
-        && this.domImg
-      ) {
+      if (this.inputParent && this.dropdownIcon && this.domInput && this.domImg) {
         this.dropdownSelect.selectedIndex = 0;
         this.domInput.style.textIndent = '48px';
         this.dropdownIcon.style.display = 'block';
