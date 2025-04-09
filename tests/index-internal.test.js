@@ -91,7 +91,7 @@ describe('test index-internal', () => {
       }));
 
       const mock = jest.fn()
-      jest.mock( './../src/core/internal/frame-elements', () => {
+      jest.mock( './../src/core/internal/frame-element-init.ts', () => {
           return {
               start: mock
           }
