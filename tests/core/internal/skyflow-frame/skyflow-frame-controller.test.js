@@ -1367,4 +1367,3 @@ describe('test reveal request', () => {
     onCb(data1,emitterCb);
   });
 })
-

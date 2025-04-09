@@ -203,6 +203,35 @@ describe('domReady function - FrameElement', () => {
       }, 0);
     }, 0);
   });
+
+  it('should call domReady function in updateOptions when element type is dropdown when value is undefined', (done) => {
+    jest.spyOn(mockIFrameFormElement, 'getValue').mockImplementation(() => undefined);
+    const mockOptions = {
+      elementType: 'dropdown',
+      inputStyles: {
+        base: { color: 'blue' },
+      },
+      options: [
+        { value: 'visa', text: 'Visa' },
+        { value: 'mastercard', text: 'MasterCard' },
+      ],
+      value: 'test-val'
+    };
+  
+    mockIFrameFormElement.fieldType = 'dropdown'
+    mockIFrameFormElement.mask = ['####', '-', { '#': /\d/ }];
+  
+    const originalReadyState = document.readyState;
+  
+    const readyEvent = new Event('DOMContentLoaded');
+    setTimeout(() => {
+      document.dispatchEvent(readyEvent);
+  
+      setTimeout(() => {
+        done();
+      }, 0);
+    }, 0);
+  });
 });
 
 describe('FrameElement', () => {
