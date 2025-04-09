@@ -6,7 +6,6 @@ import EventEmitter from '../../../event-emitter';
 import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe-libs/iframer';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
-import properties from '../../../properties';
 import { ContainerType } from '../../../skyflow';
 import { Context, MessageType, RedactionType } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
@@ -15,9 +14,11 @@ import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateInputFormatOptions, validateRevealElementRecords } from '../../../utils/validators';
 import {
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
+  REVEAL_TYPES,
 } from '../../constants';
 import Container from '../common/container';
 import RevealElement from './reveal-element';
+import properties from '../../../properties';
 
 export interface IRevealElementInput {
   token?: string;
@@ -64,6 +65,8 @@ class RevealContainer extends Container {
 
   type:string = ContainerType.REVEAL;
 
+  #isSkyflowFrameReady: boolean = false;
+
   constructor(metaData, skyflowElements, context, options = {}) {
     super();
     this.#metaData = {
@@ -96,39 +99,6 @@ class RevealContainer extends Container {
       MessageType.LOG,
       this.#context.logLevel);
 
-    const sub = (data, callback) => {
-      if (data.name === REVEAL_FRAME_CONTROLLER) {
-        callback({
-          ...metaData,
-          clientJSON: {
-            ...metaData.clientJSON,
-            config: {
-              ...metaData.clientJSON?.config,
-            },
-            context,
-          },
-        });
-
-        this.#isMounted = true;
-        // eslint-disable-next-line no-underscore-dangle
-        this.#eventEmmiter._emit(
-          ELEMENT_EVENTS_TO_CONTAINER.REVEAL_CONTAINER_MOUNTED,
-          { containerId: this.#containerId },
-        );
-
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .off(
-            ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId,
-            sub,
-          );
-      }
-    };
-    bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_FRAME_READY + this.#containerId, sub);
-
-    document.body.append(iframe);
     bus
       .target(window.location.origin)
       .on(
@@ -158,6 +128,19 @@ class RevealContainer extends Container {
           }
         },
       );
+    bus
+      .target(properties.IFRAME_SECURE_ORIGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
+        + this.#metaData.uuid, (_, callback) => {
+        printLog(parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
+          MessageType.LOG,
+          this.#context.logLevel); // add proper logs
+        callback({
+          client: this.#metaData.clientJSON,
+          context,
+        });
+        this.#isSkyflowFrameReady = true;
+      });
   }
 
   create(record: IRevealElementInput, options?: IRevealElementOptions) {
@@ -169,6 +152,7 @@ class RevealContainer extends Container {
         containerId: this.#containerId,
         isMounted: this.#isMounted,
         eventEmitter: this.#eventEmmiter,
+        isSkyflowFrameReady: this.#isSkyflowFrameReady,
       }, elementId, this.#context);
     this.#revealElements.push(revealElement);
     this.#skyflowElements[elementId] = revealElement;
@@ -177,112 +161,93 @@ class RevealContainer extends Container {
 
   reveal() {
     this.#isRevealCalled = true;
-    if (this.#isElementsMounted) {
-      return new Promise((resolve, reject) => {
-        try {
-          validateInitConfig(this.#metaData.clientJSON.config);
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
-            MessageType.LOG,
-            this.#context.logLevel);
-          this.#revealElements.forEach((currentElement) => {
-            if (currentElement.isClientSetError()) {
-              throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
-            }
-            if (!currentElement.getRecordData().skyflowID) {
-              this.#revealRecords.push(currentElement.getRecordData());
-            }
-          });
-          validateRevealElementRecords(this.#revealRecords);
-          bus
-          // .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
-              {
-                records: this.#revealRecords,
-              },
-              (revealData: any) => {
-                this.#mountedRecords = [];
-                this.#revealRecords = [];
-                if (revealData.error) {
-                  printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL), MessageType.ERROR,
-                    this.#context.logLevel);
+    this.#revealRecords = [];
 
-                  reject(revealData.error);
-                } else {
-                  printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
-                    MessageType.LOG,
-                    this.#context.logLevel);
-                  resolve(revealData);
-                }
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
-          MessageType.LOG, this.#context.logLevel);
-        } catch (err:any) {
-          printLog(`Error: ${err.message}`, MessageType.ERROR,
-            this.#context.logLevel);
-          reject(err);
-        }
-      });
-    }
     return new Promise((resolve, reject) => {
       try {
+        // Validate configuration
         validateInitConfig(this.#metaData.clientJSON.config);
         printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
           MessageType.LOG,
           this.#context.logLevel);
-        const elementMountTimeOut = setTimeout(() => {
-          printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL, MessageType.ERROR,
-            this.#context.logLevel);
-          reject(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL);
-        }, 30000);
+
+        // Collect records
         this.#revealElements.forEach((currentElement) => {
           if (currentElement.isClientSetError()) {
-            clearTimeout(elementMountTimeOut);
             throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
           }
           if (!currentElement.getRecordData().skyflowID) {
             this.#revealRecords.push(currentElement.getRecordData());
           }
         });
+
+        // Validate records
         validateRevealElementRecords(this.#revealRecords);
-        this.#eventEmmiter.on(
-          ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
-          () => {
-            clearTimeout(elementMountTimeOut);
-            bus
-              // .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST + this.#containerId,
-                {
-                  records: this.#revealRecords,
-                },
-                (revealData: any) => {
-                  this.#revealRecords = [];
-                  this.#mountedRecords = [];
-                  if (revealData.error) {
-                    printLog(logs.errorLogs.FAILED_REVEAL, MessageType.ERROR,
-                      this.#context.logLevel);
-                    reject(revealData.error);
-                  } else {
-                    printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
-                      MessageType.LOG,
-                      this.#context.logLevel);
 
-                    resolve(revealData);
-                  }
-                },
-              );
-          },
-        );
-      } catch (err:any) {
-        printLog(err.message, MessageType.ERROR,
-          this.#context.logLevel);
+        // Wait for elements to be mounted and frame to be ready
+        if (!this.#isElementsMounted) {
+          this.#waitForMount(resolve, reject);
+          return;
+        } if (!this.#isSkyflowFrameReady) {
+          this.#waitForSkyflowFrameReady(resolve, reject);
+          return;
+        }
 
+        // Emit reveal request
+        this.#emitRevealRequest(resolve, reject);
+      } catch (err: any) {
+        printLog(`Error: ${err.message}`, MessageType.ERROR, this.#context.logLevel);
         reject(err);
       }
     });
+  }
+
+  #waitForMount(resolve, reject) {
+    const timeout = setTimeout(() => {
+      printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
+        MessageType.ERROR, this.#context.logLevel);
+      reject(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL));
+    }, 10000);
+
+    this.#eventEmmiter.on(
+      ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
+      () => {
+        clearTimeout(timeout);
+        this.#emitRevealRequest(resolve, reject);
+      },
+    );
+  }
+
+  #waitForSkyflowFrameReady(response, reject) {
+    bus
+      .target(properties.IFRAME_SECURE_ORIGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#metaData.uuid, () => {
+        this.#emitRevealRequest(response, reject);
+      });
+  }
+
+  #emitRevealRequest(resolve, reject) {
+    bus.emit(
+      ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
+      {
+        type: REVEAL_TYPES.REVEAL,
+        records: this.#revealRecords,
+        containerId: this.#containerId,
+      },
+      (revealData: any) => {
+        this.#mountedRecords = [];
+        if (revealData.error) {
+          printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
+            MessageType.ERROR, this.#context.logLevel);
+          reject(revealData.error);
+        } else {
+          printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
+            MessageType.LOG,
+            this.#context.logLevel);
+          resolve(revealData);
+        }
+      },
+    );
   }
 }
 export default RevealContainer;
