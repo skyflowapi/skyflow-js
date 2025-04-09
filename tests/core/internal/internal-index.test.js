@@ -83,6 +83,11 @@ describe('domReady function - FrameElement', () => {
       required: true,
       preserveFileName: false,
       allowedFileType: ['pdf',],
+      value: 'test-value',
+      options: [
+        { value: 'visa', text: 'Visa' },
+        { value: 'mastercard', text: 'MasterCard' }
+      ]
     };
 
     mockHtmlDivElement = document.createElement('div');
@@ -152,6 +157,36 @@ describe('domReady function - FrameElement', () => {
       },
     };
   
+    mockIFrameFormElement.mask = ['####', '-', { '#': /\d/ }];
+  
+    const originalReadyState = document.readyState;
+  
+    const readyEvent = new Event('DOMContentLoaded');
+  
+    const frameElement1 = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+  
+    setTimeout(() => {
+      document.dispatchEvent(readyEvent);
+  
+      setTimeout(() => {
+        done();
+      }, 0);
+    }, 0);
+  });
+
+  it('should call domReady function in updateOptions when element type is dropdown', (done) => {
+    const mockOptions = {
+      elementType: 'dropdown',
+      inputStyles: {
+        base: { color: 'blue' },
+      },
+      options: [
+        { value: 'visa', text: 'Visa' },
+        { value: 'mastercard', text: 'MasterCard' },
+      ],
+    };
+  
+    mockIFrameFormElement.fieldType = 'dropdown'
     mockIFrameFormElement.mask = ['####', '-', { '#': /\d/ }];
   
     const originalReadyState = document.readyState;

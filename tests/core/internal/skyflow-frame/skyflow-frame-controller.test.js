@@ -130,6 +130,7 @@ describe('push event', () => {
     targetSpy.mockReturnValue({
       on,
     });
+    busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
   });
 
   test('before send function in init',(done) => {

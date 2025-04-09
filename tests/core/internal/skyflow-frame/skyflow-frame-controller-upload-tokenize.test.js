@@ -320,6 +320,61 @@ describe('Uploading files to the vault', () => {
       }, 1000);
     });
 
+    test('successful insert and update requests', async () => {
+      testValue.iFrameFormElement.skyflowID = 'test-id'
+        windowSpy.mockImplementation(()=>({
+          frames:{
+            'frame1:container123:ERROR:':{document:{
+                getElementById:()=>(testValue)
+            }},
+            'frame2:container123:ERROR:':{document:{
+                getElementById:()=>(testValue)
+            }}
+          }
+        }));
+      const insertResponse = {
+        records: [{ skyflow_id: 'inserted-id' }],
+      };
+      const updateResponse = {
+        records: [{ skyflow_id: 'updated-id' }],
+      };
+  
+      const clientReq = jest.fn((arg) => {
+        return Promise.resolve(updateResponse);
+      });
+  
+      jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+        ...clientData.client,
+        request: clientReq,
+        toJSON: toJson
+      }));
+  
+      SkyflowFrameController.init();
+  
+      const emitEventName = emitSpy.mock.calls[1][0];
+      const emitCb = emitSpy.mock.calls[1][2];
+      expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+      emitCb(clientData);
+  
+      const onCb = on.mock.calls[1][1];
+      const data = {
+        type: 'COLLECT',
+        elementIds: [
+          { frameId: 'frame1', elementId: 'element1' },
+          { frameId: 'frame2', elementId: 'element2' },
+        ],
+        containerId: 'container123',
+      };
+      const cb2 = jest.fn();
+      onCb(data, cb2);
+      onCb(data, cb2);
+  
+      setTimeout(() => {
+        expect(cb2.mock.calls[0][0].records.length).toBeDefined()
+        expect(cb2.mock.calls[0][0].error).toBeUndefined();
+      }, 1000);
+    });
+
     test('should successfully tokenize data when fieldType is checkbox', async () => {
         testValue.iFrameFormElement.fieldType = 'checkbox';
         windowSpy.mockImplementation(() => ({
