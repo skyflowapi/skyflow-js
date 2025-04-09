@@ -44,9 +44,15 @@ CollectElement.mockImplementation((_,tempElements)=>{
 jest.mock('../../../../src/event-emitter');
 const emitMock = jest.fn();
 let emitterSpy;
+let composableUpdateSpy;
 EventEmitter.mockImplementation(()=>({
-  on: jest.fn().mockImplementation((name,cb)=>{emitterSpy = cb}),
-  _emit: jest.fn()
+  on: jest.fn().mockImplementation((name,cb)=>{
+    if (name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS){
+      composableUpdateSpy = cb;
+    }
+    emitterSpy = cb
+  }),
+  _emit: emitMock
 }));
 
 
@@ -143,9 +149,11 @@ describe('test composable container class',()=>{
   let emitSpy;
   let targetSpy;
   let onSpy;
+  let eventEmitterSpy;
   beforeEach(() => {
     emitSpy = jest.spyOn(bus, 'emit');
     targetSpy = jest.spyOn(bus, 'target');
+    eventEmitterSpy = jest.spyOn(EventEmitter.prototype, 'on');
     onSpy = jest.spyOn(bus, 'on');
     targetSpy.mockReturnValue({
       on,
@@ -295,6 +303,43 @@ describe('test composable container class',()=>{
     }
   });
 
+  it('test collect with invalid options', async ()=>{
+    let readyCb;
+    on.mockImplementation((name,cb)=>{
+      readyCb = cb;
+    })
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    emitterSpy();
+    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+    
+    container.mount('#composable');
+
+    const options = {
+      tokens: 'token',
+      additionalFields: {
+        records: [
+          {
+            table: "string",
+            fields: {
+              column1: "value",
+            }
+          }
+        ]
+      },
+      upsert: [{
+        table: 'table',
+        column: 'column'
+      }]
+    }
+   
+    await expect(container.collect(options)).rejects.toBeDefined();
+  });
+
   it('test collect',()=>{
     let readyCb;
     on.mockImplementation((name,cb)=>{
@@ -311,6 +356,31 @@ describe('test composable container class',()=>{
     
     container.mount('#composable');
    
+    container.collect();
+
+    on.mockImplementation((name,cb)=>{emitterSpy = cb})
+  });
+
+  it('test updateListeners function ',()=>{
+    let readyCb;
+    on.mockImplementation((name,cb)=>{
+      readyCb = cb;
+    })
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    emitterSpy();
+    composableUpdateSpy({elementName: 'element:CARD_NUMBER:MTIzNA=='});
+
+    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+
+    container.mount('#composable');
+
     container.collect();
 
     on.mockImplementation((name,cb)=>{emitterSpy = cb})
