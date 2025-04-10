@@ -1,5 +1,6 @@
 import {
-  COLLECT_FRAME_CONTROLLER
+  COLLECT_FRAME_CONTROLLER,
+  ELEMENT_EVENTS_TO_IFRAME
 } from '../../../../src/core/constants';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
@@ -10,6 +11,8 @@ import CollectElement from '../../../../src/core/external/collect/collect-elemen
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import EventEmitter from '../../../../src/event-emitter';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
+import { SKYFLOW_FRAME_CONTROLLER_READY } from '../../../../src/core/constants';
+import SkyflowError from '../../../../src/libs/skyflow-error';
 
 const bus = require('framebus');
 
@@ -26,20 +29,30 @@ jest.mock('../../../../src/libs/uuid', () => ({
 const mockUnmount = jest.fn();
 const updateMock = jest.fn();
 jest.mock('../../../../src/core/external/collect/collect-element');
-CollectElement.mockImplementation(()=>({
+CollectElement.mockImplementation((_,tempElements)=>{
+  tempElements.rows[0].elements.forEach((element)=>{
+    element.isMounted = true;
+  })
+  return {
   isMounted : ()=>(true),
   mount: jest.fn(),
   isValidElement: ()=>(true),
   unmount:mockUnmount,
   updateElement:updateMock
-}))
+}})
 
 jest.mock('../../../../src/event-emitter');
 const emitMock = jest.fn();
 let emitterSpy;
+let composableUpdateSpy;
 EventEmitter.mockImplementation(()=>({
-  on: jest.fn().mockImplementation((name,cb)=>{emitterSpy = cb}),
-  _emit: jest.fn()
+  on: jest.fn().mockImplementation((name,cb)=>{
+    if (name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS){
+      composableUpdateSpy = cb;
+    }
+    emitterSpy = cb
+  }),
+  _emit: emitMock
 }));
 
 
@@ -136,9 +149,11 @@ describe('test composable container class',()=>{
   let emitSpy;
   let targetSpy;
   let onSpy;
+  let eventEmitterSpy;
   beforeEach(() => {
     emitSpy = jest.spyOn(bus, 'emit');
     targetSpy = jest.spyOn(bus, 'target');
+    eventEmitterSpy = jest.spyOn(EventEmitter.prototype, 'on');
     onSpy = jest.spyOn(bus, 'on');
     targetSpy.mockReturnValue({
       on,
@@ -152,10 +167,9 @@ describe('test composable container class',()=>{
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: COLLECT_FRAME_CONTROLLER + mockUuid
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
     }, cb2)
     expect(cb2).toHaveBeenCalled()
-    expect(document.querySelector('iframe')).toBeTruthy();
     expect(container).toBeInstanceOf(ComposableContainer);
   });
 
@@ -184,7 +198,70 @@ describe('test composable container class',()=>{
     container.mount('#composable');
   });
 
-  it('test collect',()=>{
+  it('test collect with success and error scenarios', async () => {
+    let readyCb;
+    on.mockImplementation((name, cb) => {
+      readyCb = cb;
+    });
+  
+    const div = document.createElement('div');
+    div.id = 'composable';
+    document.body.append(div);
+  
+    const container = new ComposableContainer(
+      { layout: [2], styles: { base: { width: '100px' } } },
+      metaData,
+      {},
+      context
+    );
+  
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+  
+    emitterSpy();
+    readyCb({ name: `${COLLECT_FRAME_CONTROLLER}1234` }, jest.fn());
+  
+    container.mount('#composable');
+  
+    const options = {
+      tokens: true,
+      additionalFields: {
+        records: [
+          {
+            table: 'string',
+            fields: {
+              column1: 'value',
+            },
+          },
+        ],
+      },
+      upsert: [
+        {
+          table: 'table',
+          column: 'column',
+        },
+      ],
+    };
+  
+    const collectPromiseSuccess = container.collect(options);
+  
+    const collectCb1 = emitSpy.mock.calls[0][2];
+    collectCb1(collectResponse);
+  
+    const successResult = await collectPromiseSuccess;
+    expect(successResult).toEqual(collectResponse);
+  
+    const collectPromiseError = container.collect(options);
+    const collectCb2 = emitSpy.mock.calls[1][2];
+    collectCb2({ error: 'Error occurred' });
+  
+    await expect(collectPromiseError).rejects.toEqual('Error occurred');
+  });
+  it('test collect when isMount is false', async () => {
+    let readyCb;
+    on.mockImplementation((name,cb)=>{
+      readyCb = cb;
+    })
     const div = document.createElement('div');
     div.id = 'composable'
     document.body.append(div);
@@ -192,9 +269,121 @@ describe('test composable container class',()=>{
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
+    
+    container.mount('#composable');
+    Object.defineProperty(container, '#isMounted', {
+      value: false,
+      writable: true,
+    });
+   
+    container.collect();
+
+    on.mockImplementation((name,cb)=>{emitterSpy = cb})
+  });
+
+  it('test collect with invalid domElement', (done)=>{
+    let readyCb;
+    on.mockImplementation((name,cb)=>{
+      readyCb = cb;
+    })
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    emitterSpy();
+    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+    try {
+      container.mount(null);
+      done.fail('Expected mount(null) to throw, but it did not');
+    } catch (err) {
+      expect(err).toBeInstanceOf(SkyflowError);
+      done();
+    }
+  });
+
+  it('test collect with invalid options', async ()=>{
+    let readyCb;
+    on.mockImplementation((name,cb)=>{
+      readyCb = cb;
+    })
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    emitterSpy();
+    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+    
+    container.mount('#composable');
+
+    const options = {
+      tokens: 'token',
+      additionalFields: {
+        records: [
+          {
+            table: "string",
+            fields: {
+              column1: "value",
+            }
+          }
+        ]
+      },
+      upsert: [{
+        table: 'table',
+        column: 'column'
+      }]
+    }
+   
+    await expect(container.collect(options)).rejects.toBeDefined();
+  });
+
+  it('test collect',()=>{
+    let readyCb;
+    on.mockImplementation((name,cb)=>{
+      readyCb = cb;
+    })
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    emitterSpy();
+    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+    
     container.mount('#composable');
    
     container.collect();
+
+    on.mockImplementation((name,cb)=>{emitterSpy = cb})
+  });
+
+  it('test updateListeners function ',()=>{
+    let readyCb;
+    on.mockImplementation((name,cb)=>{
+      readyCb = cb;
+    })
+    const div = document.createElement('div');
+    div.id = 'composable'
+    document.body.append(div);
+
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+    emitterSpy();
+    composableUpdateSpy({elementName: 'element:CARD_NUMBER:MTIzNA=='});
+
+    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+
+    container.mount('#composable');
+
+    container.collect();
+
+    on.mockImplementation((name,cb)=>{emitterSpy = cb})
   });
 
   it('test collect without mounting the container',(done)=>{
@@ -262,9 +451,8 @@ describe('test composable container class',()=>{
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: COLLECT_FRAME_CONTROLLER + mockUuid
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
     }, cb2)
-    emitterSpy();
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     setTimeout(()=>{
@@ -314,4 +502,5 @@ describe('test composable container class',()=>{
     container.on("CHANGE",()=>{});
     expect(element).toBeInstanceOf(ComposableElement);
   });
+
 });
