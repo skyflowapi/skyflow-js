@@ -762,10 +762,10 @@ export class FrameElement {
             if (removedCount > 0 && cursorPosition !== null) {
               this.actualValue = this.actualValue.substring(0, cursorPosition)
                     + this.actualValue.substring(cursorPosition + removedCount);
-              if(currentValue.length >= this.actualValue.length && (event['inputType']=="insertText" || event['inputType']=="insertFromPaste") && input.selectionEnd!==null) {
-                this.actualValue = this.actualValue.substring(0, cursorPosition-1)
+              if (currentValue.length >= this.actualValue.length && ((<InputEvent>event).inputType === 'insertText' || (<InputEvent>event).inputType === 'insertFromPaste') && input.selectionEnd !== null) {
+                this.actualValue = this.actualValue.substring(0, cursorPosition - 1)
                       + currentValue.substring(cursorPosition - 1, input.selectionEnd)
-                      + this.actualValue.substring(input.selectionEnd , this.actualValue.length); 
+                      + this.actualValue.substring(input.selectionEnd, this.actualValue.length);
               }
             }
           }
