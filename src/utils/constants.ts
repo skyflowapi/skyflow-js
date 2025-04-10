@@ -498,6 +498,10 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_BOOLEAN_OPTIONS,
   },
+  INVALID_MASKING_CHARACTER: {
+    code: 400,
+    description: logs.errorLogs.INVALID_MASKING_CHARACTER,
+  },
 
   EMPTY_COLLECT_CUSTOM_FORMAT: {
     code: 400,

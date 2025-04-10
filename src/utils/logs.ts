@@ -290,6 +290,7 @@ const logs = {
     INVALID_COMPOSABLE_CONTAINER_OPTIONS: 'Mount failed. Invalid options object. Specify a valid options object.',
     COMPOSABLE_CONTAINER_NOT_MOUNTED: 'Mount elements first. Make sure all elements are mounted before calling \'collect\' on the container.',
     INVALID_BOOLEAN_OPTIONS: 'Validation error. Invalid %s1 found in collect options. Specify a value of type boolean instead.',
+    INVALID_MASKING_CHARACTER: 'Validation error. Invalid masking character. Specify a valid masking character. ',
     INVALID_INPUT_OPTIONS_FORMAT: 'Mount failed. Format must be a non-empty string. Specify a valid format.',
     INVALID_INPUT_OPTIONS_TRANSLATION: 'Mount failed. Translation must be a non-empty object. Specify a valid translation.',
     EMPTY_COLLECT_CUSTOM_FORMAT: 'Mount failed. \'%s1\' can not be an empty object. Specify a valid object.',

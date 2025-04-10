@@ -118,6 +118,46 @@ describe('test formatOptions function with format and translation', () => {
         }
     });
 
+    test('should return masking in format options when masking is true',(done)=>{
+        try{
+            formatOptions(ElementType.CARD_NUMBER,{masking: true},LogLevel.ERROR);
+            done();
+        }catch(err){
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, 'preserveFileName'))
+            done();
+        }
+    });
+
+    test('should throw error when masking not of boolean type',(done)=>{
+        try{
+            formatOptions(ElementType.CARD_NUMBER,{required:true,masking: 'test'},LogLevel.ERROR);
+            done();
+        }catch(err){
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, ['masking'], true))
+            done();
+        }
+    });
+
+    test('should return masking and maskingChar in format options when masking is true',(done)=>{
+        try{
+            formatOptions(ElementType.CARD_NUMBER,{required:true,masking: true, maskingChar: '*'},LogLevel.ERROR);
+            done();
+        }catch(err){
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, 'preserveFileName'))
+            done();
+        }
+    });
+
+    test('should throw error when maskingChar is of length one',(done)=>{
+        try{
+            formatOptions(ElementType.CVV,{required:true,masking: true, maskingChar:'**'},LogLevel.ERROR);
+            done();
+        }catch(err){
+            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_MASKING_CHARACTER.description, [], true)
+            done();
+        }
+    });
+
     test('should throw errror for cardMetadata provied as not of object type',(done)=>{
         try{
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:true},LogLevel.ERROR);
