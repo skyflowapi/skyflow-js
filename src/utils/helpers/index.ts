@@ -150,7 +150,7 @@ export const getMaskedOutput = (
           formattedOutput += characterString;
           // Append the maskingChar or the original character if no maskingChar provided
           // eslint-disable-next-line no-unneeded-ternary
-          maskedOutput += maskingChar ? maskingChar : '#';
+          maskedOutput += maskingChar ? maskingChar : '*';
           j += 1;
         }
       }

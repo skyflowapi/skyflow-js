@@ -423,7 +423,7 @@ export const formatOptions = (elementType, options, logLevel) => {
         maskingChar: options.maskingChar,
       };
     } else {
-      formattedOptions = { ...formattedOptions, masking: options.masking, maskingChar: '#' }; // default value ;
+      formattedOptions = { ...formattedOptions, masking: options.masking, maskingChar: '*' };
     }
   }
 
