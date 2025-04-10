@@ -74,9 +74,11 @@ class ComposableElement {
 
   update = (options) => {
     this.#isUpdateCalled = true;
+    console.log("In element update: ", this.#isMounted);
     if (this.#isMounted) {
       options.validations = formatValidations(options.validations);
       // eslint-disable-next-line no-underscore-dangle
+      
       this.#eventEmitter
         ._emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, {
           elementName: this.#elementName,

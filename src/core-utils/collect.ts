@@ -13,7 +13,7 @@ import {
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
-import { IFrameFormElement } from '../core/internal/iframe-form';
+import IFrameFormElement from '../core/internal/iframe-form';
 
 export interface IUpsertOptions{
   table: string,
@@ -278,6 +278,7 @@ export const updateRecordsBySkyflowID = async (
 });
 
 export const checkForElementMatchRule = (validations: IValidationRule[]) => {
+  console.log("validations : ", validations);
   if (!validations) return false;
   for (let i = 0; i < validations.length; i += 1) {
     if (validations[i].type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {
