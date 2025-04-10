@@ -148,6 +148,16 @@ describe('test formatOptions function with format and translation', () => {
         }
     });
 
+    test('should throw error when maskingChar is of length one',(done)=>{
+        try{
+            formatOptions(ElementType.CVV,{required:true,masking: true, maskingChar:'**'},LogLevel.ERROR);
+            done();
+        }catch(err){
+            expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_MASKING_CHARACTER.description, [], true)
+            done();
+        }
+    });
+
     test('should throw errror for cardMetadata provied as not of object type',(done)=>{
         try{
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:true},LogLevel.ERROR);
