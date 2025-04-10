@@ -2548,4 +2548,45 @@ describe('test frame controller', () => {
 
     element.onInputChange(inputEvent)
   })
+
+  test('verify name Input With masking enabled and simulate backspace', () => {
+    const card_element = `element:CARDHOLDER_NAME:${tableCol}`;
+    const div = document.createElement('div');
+    const inputEvent = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "te",
+        selectionStart: 2,
+        selectionEnd: 2,
+        setSelectionRange : jest.fn(),
+      },
+    };
+  
+    const formElement = new IFrameFormElement(card_element, {}, context);
+    formElement.setValue("te");
+  
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      masking: true,
+      maskingChar: '*',
+    }, div);
+
+    const inputEvent1 = {
+      target: {
+        checkValidity: jest.fn(),
+        value: "t",
+        selectionStart: 1,
+        selectionEnd: 1,
+        setSelectionRange : jest.fn(),
+        inputType: "deleteContentBackward",
+      },
+    };
+  
+    element.onInputChange(inputEvent);
+    element.onInputChange(inputEvent1);
+
+  });
 });
