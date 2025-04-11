@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Collect Element Listeners</title>
+    <script src="https://js.skyflow.com/v2/index.js"></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .empty-div {
+        height: 100px;
+        width: 350px;
+      }
+      .reveal-view {
+        margin-top: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Collect Elements</h3>
+    <!-- Collect Part -->
+    <div style="height: 100vh;">
+      <div id="collectCardNumber" class="empty-div"></div>
+      <div id="collectCvv" class="empty-div"></div>
+      <div id="collectExpiryDate" class="empty-div"></div>
+      <div id="collectCardholderName" class="empty-div"></div>
+      <div id="inputfield" class="empty-div"></div>
+      <div>
+        <button id="collectPCIData">Collect PCI Data</button>
+
+      </div>
+      <div>
+        <pre id="collectResponse"></pre>
+      </div>
+    </div>
+
+    <script>
+      try {
+        const skyflow = Skyflow.init({
+         vaultID: '<VAULT_ID>',
+         vaultURL: '<VAULT_URL>',
+         getBearerToken: () => {
+          return new Promise((resolve, reject) => {
+            const Http = new XMLHttpRequest();
+    
+            Http.onreadystatechange = () => {
+              if (Http.readyState === 4 && Http.status === 200) {
+                const response = JSON.parse(Http.responseText);
+                resolve(response.accessToken);
+              }
+            };
+            const url = '<TOKEN_END_POINT_URL>';
+            Http.open('GET', url);
+            Http.send();
+          });
+         },
+         options: {
+          logLevel: Skyflow.LogLevel.DEBUG,
+          env: Skyflow.Env.DEV,
+         }
+      });
+
+      
+        // Create collect Container.
+        const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+      
+        // Custom styles for collect elements.
+        const collectStylesOptions = {
+          inputStyles: {
+            base: {
+              border: '1px solid #eae8ee',
+              padding: '10px 16px',
+              borderRadius: '4px',
+              color: '#1d1d1d',
+              marginTop: '4px',
+            },
+            complete: {
+              color: '#4caf50',
+            },
+            empty: {},
+            focus: {},
+            invalid: {
+              color: '#f44336',
+            },
+          },
+          labelStyles: {
+            base: {
+              fontSize: '16px',
+              fontWeight: 'bold',
+            },
+          },
+          errorTextStyles: {
+            base: {
+              color: '#f44336',
+            },
+          },
+        };
+      
+        // Create collect elements.
+        const cardNumberElement = collectContainer.create({
+          table: 'cards',
+          column: 'card_number',
+          ...collectStylesOptions,
+          placeholder: 'card number',
+          label: 'Card Number',
+          type: Skyflow.ElementType.CARD_NUMBER,
+        }, {
+          enableCopy: true, 
+          masking: true,
+        });
+      
+        const cvvElement = collectContainer.create({
+          table: 'cards',
+          column: 'card_cvv',
+          ...collectStylesOptions,
+          label: 'Cvv',
+          placeholder: 'cvv',
+          type: Skyflow.ElementType.CVV,
+        }, {
+          masking: true,
+          maskingChar: '#', 
+        });
+      
+        const expiryDateElement = collectContainer.create({
+          table: 'cards',
+          column: 'expiration_date',
+          ...collectStylesOptions,
+          label: 'Expiry Date',
+          placeholder: 'MM/YY',
+          type: Skyflow.ElementType.EXPIRATION_DATE,
+        }, { 
+          format: 'MM/YY',
+          masking: true,
+        });
+      
+        const cardHolderNameElement = collectContainer.create({
+          table: 'cards',
+          column: 'cardholder_name',
+          ...collectStylesOptions,
+          label: 'Card Holder Name',
+          placeholder: 'cardholder name',
+          type: Skyflow.ElementType.CARDHOLDER_NAME,
+        },{ 
+            masking: true,
+            maskingChar: '*',
+        });
+      
+        // Mount the elements.
+        cardNumberElement.mount('#collectCardNumber');
+        cvvElement.mount('#collectCvv');
+        expiryDateElement.mount('#collectExpiryDate');
+        cardHolderNameElement.mount('#collectCardholderName');
+        
+      
+        // Add BLUR EVENT Listener.
+        cardNumberElement.on(Skyflow.EventName.CHANGE, changeState => {
+          console.log('Number: ', changeState);
+        });
+
+        expiryDateElement.on(Skyflow.EventName.CHANGE, changeState => {
+          console.log('Date: ', changeState);
+        });
+
+        cvvElement.on(Skyflow.EventName.CHANGE, blurState => {
+          console.log('CVV: ', blurState);
+        });
+      
+        cardHolderNameElement.on(Skyflow.EventName.CHANGE, blurState => {
+          console.log('Name: ', blurState);
+        });
+      
+        // Collect all elements data.
+        const collectButton = document.getElementById('collectPCIData');
+        if (collectButton) {
+          collectButton.addEventListener('click', () => {
+            console.log('clicked')
+            const collectResponse = collectContainer.collect();
+            collectResponse
+              .then(response => {
+                document.getElementById('collectResponse').innerHTML = JSON.stringify(
+                  response,
+                  null,
+                  2
+                );
+              })
+              .catch(err => {
+                console.log(err);
+              });
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }      
+    </script>
+  </body>
+</html>
