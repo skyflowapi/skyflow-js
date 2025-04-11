@@ -421,6 +421,60 @@ const options = {
 User input: "B1234121234"
 Value displayed in INPUT_FIELD: "AB 12-341-2123"
 
+`masking` : A boolean value for whether to mask the input of the element. When masking is enabled, user input will be replaced with a masking character.
+The default masking character is `*`, but you can customize masking character using the maskingChar property.
+
+`maskingChar`: A single character used to mask the input when masking is enabled. Defaults to `*`, but can be customized to any character of your choice.
+
+Collect Element Options examples with masking:
+
+Example for CVV:
+```js
+const options = {
+  required: true,
+  enableCopy: false, 
+  masking: true, 
+  maskingChar: '•',
+}
+```
+User input: "1234" 
+Value displayed in CVV: "••••"
+
+Example for CARDHOLDER_NAME:
+```js
+const options = {
+  required: true,
+  enableCopy: false, 
+  masking: true, 
+}
+```
+User input: "Raj kumar" 
+Value displayed in CARDHOLDER_NAME: "*********"
+
+Example for CARD_NUMBER:
+```js
+const options = {
+  required: true,
+  enableCopy: false, 
+  masking: true, 
+  maskingChar: '#'
+}
+```
+User input: "4111 1111 1111 1111" 
+Value displayed in CARD_NUMBER: "#### #### #### ####"
+
+Example for PIN:
+```js
+const options = {
+  required: true,
+  enableCopy: false, 
+  masking: true, 
+  maskingChar: '&'
+}
+```
+User input: "98364721" 
+Value displayed in PIN: "&&&&&&&&"
+
 Once the Element object and options has been defined, add it to the container using the `create(element, options)` method as shown below. The `element` param takes a Skyflow Element object and options as defined above:
 
 ```javascript
