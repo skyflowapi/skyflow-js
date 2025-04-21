@@ -215,6 +215,38 @@ describe('test file validation', () => {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description))
     }
   })
+  test('invalid file size for 4 size', () => {
+    const file = {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.pdf",
+      size: 4,
+      type: "application/pdf",
+      webkitRelativePath: ""
+    }
+    try {
+      fileValidation(file, false, {});
+    } catch (err) {
+      throw new Error('Expected no error to be thrown, but got: ' + JSON.stringify(err));
+    }
+  })
+  test('invalid file size for 0 size', () => {
+    const file = {
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.pdf",
+      size: 0,
+      type: "application/pdf",
+      webkitRelativePath: ""
+    }
+    expect(() => {
+      fileValidation(file, false, {});
+    }).toThrowError(expect.objectContaining({
+      error: expect.objectContaining({
+        description: parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description)
+      })
+    }));
+  })
   test('no file selected', () => {
     const file = {}
       const isValid = fileValidation(file, false, {});
