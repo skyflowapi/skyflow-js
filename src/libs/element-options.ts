@@ -410,6 +410,15 @@ export const formatOptions = (elementType, options, logLevel) => {
     if (Object.prototype.hasOwnProperty.call(options, 'allowedFileType')) {
       formattedOptions = { ...formattedOptions, allowedFileType: options.allowedFileType };
     }
+    if (Object.prototype.hasOwnProperty.call(options, 'blockEmptyFiles') && !validateBooleanOptions(options.blockEmptyFiles)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['blockEmptyFiles'], true);
+    }
+    if (Object.prototype.hasOwnProperty.call(options, 'blockEmptyFiles')) {
+      formattedOptions = {
+        ...formattedOptions,
+        blockEmptyFiles: formattedOptions.blockEmptyFiles,
+      };
+    }
   }
 
   if (Object.prototype.hasOwnProperty.call(options, 'masking')) {

@@ -1145,6 +1145,33 @@ describe('test file Upload method', () => {
         const cb3 = jest.fn()
         fileUploadCb(fileData, cb3)
     });
+    test('validate for file input - valid blockZeroSizeFile boolean', () => {
+        const elementType = ELEMENTS.FILE_INPUT.name;
+        var options = { blockEmptyFiles: true};
+        const logLevel = LogLevel.ERROR;
+      
+        expect(() => {
+            const options1 = formatOptions(elementType, options, logLevel)
+        }).not.toThrow();
+      });
+      test('validate for file input - valid false blockZeroSizeFile boolean', () => {
+        const elementType = ELEMENTS.FILE_INPUT.name;
+        const options = { blockEmptyFiles: false };
+        const logLevel = LogLevel.ERROR;
+      
+        expect(()=>{
+            const options1 = formatOptions(elementType, options, logLevel);
+        }).not.toThrow();
+      });
+      test('validate for file input - invalid blockZeroSizeFile boolean', () => {
+        const elementType = ELEMENTS.FILE_INPUT.name;
+        const options = { blockEmptyFiles: "hello" };
+        const logLevel = LogLevel.ERROR;
+      
+        expect(()=>{
+            formatOptions(elementType, options, logLevel)
+        }).toThrowError(parameterizedString(logs.errorLogs.INVALID_BOOLEAN_OPTIONS, "blockEmptyFiles"));
+      });  
     test('validate for file input - valid allowedFileType array', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
         const options = { allowedFileType: [".pdf", ".png"] };

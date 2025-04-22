@@ -163,6 +163,9 @@ export class FrameElement {
     if (Object.prototype.hasOwnProperty.call(options, 'allowedFileType')) {
       this.iFrameFormElement.allowedFileType = options?.allowedFileType;
     }
+    if (Object.prototype.hasOwnProperty.call(options, 'blockEmptyFiles')) {
+      this.iFrameFormElement.blockEmptyFiles = options?.blockEmptyFiles;
+    }
   }
 
   // mount element onto dom
