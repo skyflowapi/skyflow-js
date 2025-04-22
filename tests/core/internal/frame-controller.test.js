@@ -482,6 +482,56 @@ describe('test frame controller', () => {
 
 
   })
+  test('file element validator should return false, for invalid value when blockZeroSizeFil is true', () => {
+
+    const month_element = `element:FILE_INPUT:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(month_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      blockZeroSizeFiles:true
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+    expect(formElement.validator({
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.png", 
+      size: 0,  // size zero
+      type: "image/jpeg",
+      webkitRelativePath: ""
+  })).toBe(false)
+  })
+  test('file element validator should return true, for 0 size file when blockZeroSizeFil is false', () => {
+
+    const month_element = `element:FILE_INPUT:${tableCol}`;
+    const div = document.createElement('div');
+
+    const formElement = new IFrameFormElement(month_element, {}, context);
+    const element = new FrameElement(formElement, {
+      label: 'label',
+      inputStyles,
+      labelStyles,
+      errorTextStyles,
+      blockZeroSizeFiles:false
+    }, div);
+
+    const inst = EventEmitter.mock.instances[0];
+    const onSpy = inst.on.mock.calls;
+    expect(formElement.validator({
+      lastModified: '',
+      lastModifiedDate: '',
+      name: "sample.png", 
+      size: 0,  // size zero
+      type: "image/jpeg",
+      webkitRelativePath: ""
+  })).toBe(true)
+  })
 
   test('file element validator should return false, for invalid file name when preserveFileName is true', () => {
 
