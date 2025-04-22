@@ -407,8 +407,17 @@ export const formatOptions = (elementType, options, logLevel) => {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_FILETYPE_ARRAY, [], true);
       }
     }
+    if (Object.prototype.hasOwnProperty.call(formattedOptions, 'blockZeroSizeFiles') && !validateBooleanOptions(formattedOptions.blockZeroSizeFiles)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['blockZeroSizeFiles'], true);
+    }
     if (Object.prototype.hasOwnProperty.call(options, 'allowedFileType')) {
       formattedOptions = { ...formattedOptions, allowedFileType: options.allowedFileType };
+    }
+    if (Object.prototype.hasOwnProperty.call(formattedOptions, 'blockZeroSizeFiles')) {
+      formattedOptions = {
+        ...formattedOptions,
+        blockZeroSizeFiles: formattedOptions.blockZeroSizeFiles,
+      };
     }
   }
 
