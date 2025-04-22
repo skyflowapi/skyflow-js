@@ -230,7 +230,7 @@ describe('test file validation', () => {
       throw new Error('Expected no error to be thrown, but got: ' + JSON.stringify(err));
     }
   })
-  test('invalid file size for 0 size when blockZeroSizeFiles is enabled', () => {
+  test('invalid file size for 0 size when blockEmptyFiles is enabled', () => {
     const file = {
       lastModified: '',
       lastModifiedDate: '',
@@ -240,14 +240,14 @@ describe('test file validation', () => {
       webkitRelativePath: ""
     }
     expect(() => {
-      fileValidation(file, false, {blockZeroSizeFiles: true});
+      fileValidation(file, false, {blockEmptyFiles: true});
     }).toThrowError(expect.objectContaining({
       error: expect.objectContaining({
         description: parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description)
       })
     }));
   })
-  test('invalid file size for 0 size when blockZeroSizeFiles is disabled', () => {
+  test('invalid file size for 0 size when blockEmptyFiles is disabled', () => {
     const file = {
       lastModified: '',
       lastModifiedDate: '',
@@ -256,10 +256,10 @@ describe('test file validation', () => {
       type: "application/pdf",
       webkitRelativePath: ""
     }
-    const isValid = fileValidation(file, false, {blockZeroSizeFiles: false});
+    const isValid = fileValidation(file, false, {blockEmptyFiles: false});
     expect(isValid).toBe(true);
   })
-  test('invalid file size for 0 size when blockZeroSizeFiles is not passed', () => {
+  test('invalid file size for 0 size when blockEmptyFiles is not passed', () => {
     const file = {
       lastModified: '',
       lastModifiedDate: '',

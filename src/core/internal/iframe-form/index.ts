@@ -125,7 +125,7 @@ export class IFrameFormElement extends EventEmitter {
 
   allowedFileType: any;
 
-  blockZeroSizeFiles: boolean = false;
+  blockEmptyFiles: boolean = false;
 
   constructor(name: string, label: string, metaData, context: Context, skyflowID?: string) {
     super();
@@ -478,7 +478,7 @@ export class IFrameFormElement extends EventEmitter {
       try {
         resp = fileValidation(value, this.state.isRequired, {
           allowedFileType: this.allowedFileType,
-          blockZeroSizeFiles: this.blockZeroSizeFiles,
+          blockEmptyFiles: this.blockEmptyFiles,
         });
       } catch (err) {
         resp = false;

@@ -1147,7 +1147,7 @@ describe('test file Upload method', () => {
     });
     test('validate for file input - valid blockZeroSizeFile boolean', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
-        var options = { blockZeroSizeFiles: true};
+        var options = { blockEmptyFiles: true};
         const logLevel = LogLevel.ERROR;
       
         expect(() => {
@@ -1156,7 +1156,7 @@ describe('test file Upload method', () => {
       });
       test('validate for file input - valid false blockZeroSizeFile boolean', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
-        const options = { blockZeroSizeFiles: false };
+        const options = { blockEmptyFiles: false };
         const logLevel = LogLevel.ERROR;
       
         expect(()=>{
@@ -1165,12 +1165,12 @@ describe('test file Upload method', () => {
       });
       test('validate for file input - invalid blockZeroSizeFile boolean', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
-        const options = { blockZeroSizeFiles: "hello" };
+        const options = { blockEmptyFiles: "hello" };
         const logLevel = LogLevel.ERROR;
       
         expect(()=>{
             formatOptions(elementType, options, logLevel)
-        }).toThrowError(parameterizedString(logs.errorLogs.INVALID_BOOLEAN_OPTIONS, "blockZeroSizeFiles"));
+        }).toThrowError(parameterizedString(logs.errorLogs.INVALID_BOOLEAN_OPTIONS, "blockEmptyFiles"));
       });  
     test('validate for file input - valid allowedFileType array', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;

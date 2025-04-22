@@ -493,7 +493,7 @@ describe('test frame controller', () => {
       inputStyles,
       labelStyles,
       errorTextStyles,
-      blockZeroSizeFiles:true
+      blockEmptyFiles:true
     }, div);
 
     const inst = EventEmitter.mock.instances[0];
@@ -518,7 +518,7 @@ describe('test frame controller', () => {
       inputStyles,
       labelStyles,
       errorTextStyles,
-      blockZeroSizeFiles:false
+      blockEmptyFiles:false
     }, div);
 
     const inst = EventEmitter.mock.instances[0];
