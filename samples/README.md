@@ -102,6 +102,8 @@ This sample shows you how to use event listeners with Skyflow Elements.
 
 From your browser, navigate to `http://localhost:8000/` to view the page.
 
+> **Note:** This HTML file must be served via a web server for the script-tag-based Skyflow sample to work correctly. Opening the file directly in a browser (using the `file://` protocol) may prevent the SDK from loading as expected. You can use a simple local server like `live-server` to run the file.
+
 ### Skyflow-Elements
 This sample shows you how to collect and reveal data with Skyflow Elements.
 
