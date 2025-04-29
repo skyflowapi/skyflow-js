@@ -159,6 +159,9 @@ class Skyflow {
     return skyflow;
   }
 
+  container(type: ContainerType.COLLECT, options?: Record<string, any>): CollectContainer;
+  container(type: ContainerType.COMPOSABLE, options?: Record<string, any>): ComposableContainer;
+  container(type: ContainerType.REVEAL, options?: Record<string, any>): RevealContainer;
   container(type: ContainerType, options?: Record<string, any>) {
     switch (type) {
       case ContainerType.COLLECT: {
