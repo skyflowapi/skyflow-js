@@ -7,6 +7,10 @@ Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal
 [![GitHub release](https://img.shields.io/github/v/release/skyflowapi/skyflow-js.svg)](https://www.npmjs.com/package/skyflow-js)
 [![License](https://img.shields.io/github/license/skyflowapi/skyflow-android)](https://github.com/skyflowapi/skyflow-js/blob/main/LICENSE)
 
+## Browsers support
+
+| <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="34px" height="34px" /><br/> IE / Edge | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="34px" height="34px" /><br/>Firefox | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="34px" height="34px" /><br/>Chrome | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="34px" height="34px" /><br/>Safari
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------| --------- | --------- |-------------------------------------------------------------------------------------------------------------------------------------------------------|
 # Table of Contents
 - [**Including Skyflow.js**](#including-skyflowjs) 
 - [**Initializing Skyflow.js**](#initializing-skyflowjs)
