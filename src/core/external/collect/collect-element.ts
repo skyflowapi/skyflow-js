@@ -189,7 +189,7 @@ class CollectElement extends SkyflowElement {
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
         this.#elements[0].isMounted = true;
         this.#mounted = true;
-        this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+        this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + formatFrameNameToId(this.#iframe.name),
           {}, (payload:any) => {
             if (data.name === formatFrameNameToId(payload.name)) {
               this.#iframe.setIframeHeight(payload.height);
