@@ -171,11 +171,9 @@ class CollectElement extends SkyflowElement {
             element.isMounted = true;
             this.#mounted = true;
             this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
-              + formatFrameNameToId(element.elementName),
+              + this.#iframe.name,
             {}, (payload:any) => {
-              if (data.name === formatFrameNameToId(element.elementName)) {
-                this.#iframe.setIframeHeight(payload.height);
-              }
+              this.#iframe.setIframeHeight(payload.height);
             });
           }
         });
@@ -528,8 +526,10 @@ class CollectElement extends SkyflowElement {
               else this.#states[index].value = undefined;
 
               emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
+              const frameName = isComposable ? this.#iframe.name
+                : formatFrameNameToId(this.#iframe.name);
               this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
-                + formatFrameNameToId(this.#iframe.name),
+                + frameName,
               {}, (payload:any) => {
                 this.#iframe.setIframeHeight(payload.height);
               });
