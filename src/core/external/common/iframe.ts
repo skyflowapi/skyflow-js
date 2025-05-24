@@ -29,7 +29,7 @@ export default class IFrame {
     });
   }
 
-  mount = (domElement, elementId?: string) => {
+  mount = (domElement, elementId?: string, data?: any) => {
     this.unmount();
     try {
       if (typeof domElement === 'string') {
@@ -49,7 +49,7 @@ export default class IFrame {
       // throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_SELECTOR, [], true);
     }
 
-    setAttributes(this.iframe, { src: getIframeSrc() });
+    setAttributes(this.iframe, { src: `${getIframeSrc()}${data ? `?${btoa(data?.record)}` : ''}` });
 
     this.container?.appendChild(this.iframe);
   };
