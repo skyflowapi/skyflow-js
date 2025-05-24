@@ -288,6 +288,7 @@ export default class IFrameFormElement extends EventEmitter {
     }
     if (validations) {
       this.validations = validations;
+
       if (checkForElementMatchRule(validations)) {
         this.listenForMatchRule();
       }
