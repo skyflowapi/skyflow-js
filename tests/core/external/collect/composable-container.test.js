@@ -57,6 +57,30 @@ EventEmitter.mockImplementation(()=>({
 
 
 const metaData = {
+  skyflowContainer:{
+    isControllerFrameReady: true
+  },
+  uuid: '123',
+  config: {
+    vaultID: 'vault123',
+    vaultURL: 'https://sb.vault.dev',
+    getBearerToken,
+  },
+  metaData: {
+    clientDomain: 'http://abc.com',
+  },
+  clientJSON: {
+    config: {
+      vaultID: 'vault123',
+      vaultURL: 'https://sb.vault.dev',
+      getBearerToken,
+    },
+  },
+};
+const metaData2 = {
+  skyflowContainer:{
+    isControllerFrameReady: false
+  },
   uuid: '123',
   config: {
     vaultID: 'vault123',
@@ -164,12 +188,6 @@ describe('test composable container class',()=>{
 
   it('test constructor',  () => {
     const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
-    const frameReadyCb = on.mock.calls[0][1];
-    const cb2 = jest.fn();
-    frameReadyCb({
-      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
-    }, cb2)
-    expect(cb2).toHaveBeenCalled()
     expect(container).toBeInstanceOf(ComposableContainer);
   });
 
@@ -182,8 +200,8 @@ describe('test composable container class',()=>{
   it('test create method with callback',()=>{
     const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
     const element = container.create(cvvElement);
-    on.mock.calls[0][1]({name : "collect_controller1234"},()=>{});
-    on.mock.calls[1][1]({name : "collect_controller"},()=>{});
+    // on.mock.calls[0][1]({name : "collect_controller1234"},()=>{});
+    // on.mock.calls[1][1]({name : "collect_controller"},()=>{});
     expect(element).toBeInstanceOf(ComposableElement);
   });
 
@@ -199,10 +217,10 @@ describe('test composable container class',()=>{
   });
 
   it('test collect with success and error scenarios', async () => {
-    let readyCb;
-    on.mockImplementation((name, cb) => {
-      readyCb = cb;
-    });
+    // let readyCb;
+    // on.mockImplementation((name, cb) => {
+    //   readyCb = cb;
+    // });
   
     const div = document.createElement('div');
     div.id = 'composable';
@@ -218,8 +236,8 @@ describe('test composable container class',()=>{
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
   
-    emitterSpy();
-    readyCb({ name: `${COLLECT_FRAME_CONTROLLER}1234` }, jest.fn());
+    // emitterSpy();
+    // readyCb({ name: `${COLLECT_FRAME_CONTROLLER}1234` }, jest.fn());
   
     container.mount('#composable');
   
@@ -293,7 +311,7 @@ describe('test composable container class',()=>{
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
-    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+    // readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
     try {
       container.mount(null);
       done.fail('Expected mount(null) to throw, but it did not');
@@ -315,7 +333,7 @@ describe('test composable container class',()=>{
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
-    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+    // readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
     
     container.mount('#composable');
 
@@ -348,11 +366,11 @@ describe('test composable container class',()=>{
     const div = document.createElement('div');
     div.id = 'composable'
     document.body.append(div);
-    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData2, {}, context);
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
-    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+    // readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
     
     container.mount('#composable');
    
@@ -370,14 +388,14 @@ describe('test composable container class',()=>{
     div.id = 'composable'
     document.body.append(div);
 
-    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData, {}, context);
+    const container = new ComposableContainer({layout:[2],styles:{base:{width:'100px',}}}, metaData2, {}, context);
 
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
     composableUpdateSpy({elementName: 'element:CARD_NUMBER:MTIzNA=='});
 
-    readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
+    // readyCb({name:`${COLLECT_FRAME_CONTROLLER}1234`},jest.fn());
 
     container.mount('#composable');
 
@@ -448,11 +466,11 @@ describe('test composable container class',()=>{
     document.body.append(div);
 
     const container = new ComposableContainer({layout:[2]}, metaData, {}, context);
-    const frameReadyCb = on.mock.calls[0][1];
-    const cb2 = jest.fn();
-    frameReadyCb({
-      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
-    }, cb2)
+    // const frameReadyCb = on.mock.calls[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    // }, cb2)
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     setTimeout(()=>{

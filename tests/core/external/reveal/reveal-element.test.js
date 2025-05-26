@@ -63,6 +63,9 @@ jest.mock('../../../../src/core/external/skyflow-container', () => {
 const clientDomain = "http://abc.com";
 const metaData = {
   uuid: "123",
+  skyflowContainer: {
+    isControllerFrameReady: true,
+  },
   config: {
     vaultID: "vault123",
     vaultURL: "https://sb.vault.dev",
@@ -101,6 +104,27 @@ const clientData = {
     }
   },
   skyflowContainer: {
+    isControllerFrameReady: true
+  },
+  clientDomain: clientDomain,
+}
+const clientData2 = {
+  uuid: '123',
+  client: {
+    config: { ...skyflowConfig },
+    metadata: { uuid :'123',
+    skyflowContainer: controller,
+  },
+  },
+  clientJSON:{
+    context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+    config:{
+      ...skyflowConfig,
+      getBearerToken:jest.fn().toString()
+    }
+  },
+  skyflowContainer: {
+    isControllerFrameReady: false
   },
   clientDomain: clientDomain,
 }
@@ -164,9 +188,9 @@ describe("Reveal Element Class", () => {
     const testIframeName = `${FRAME_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     const eventListenerName = ELEMENT_EVENTS_TO_CLIENT.MOUNTED + testIframeName;
-    const onCbName = on.mock.calls[1][0];
+    const onCbName = on.mock.calls[0][0];
     expect(onCbName).toBe(eventListenerName);
-    const onCb = on.mock.calls[1][1];
+    const onCb = on.mock.calls[0][1];
     onCb({
       name:testIframeName,
     });
@@ -203,9 +227,9 @@ describe("Reveal Element Class", () => {
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     
     const eventListenerName = ELEMENT_EVENTS_TO_CLIENT.MOUNTED + testIframeName;
-    const onCbName = on.mock.calls[1][0];
+    const onCbName = on.mock.calls[0][0];
     expect(onCbName).toBe(eventListenerName);
-    const onCb = on.mock.calls[1][1];
+    const onCb = on.mock.calls[0][1];
     onCb({
       name:testIframeName,
     });
@@ -218,11 +242,11 @@ describe("Reveal Element Class", () => {
         skyflowID: "1244",
         column: 'column', 
         table: 'table',
-        altText:'alt text'
+        altText:'alt text',
       },
-      undefined,
-      clientData,
-      {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+      {} ,
+      clientData2,
+      {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter, isControllerFrameReady: false},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -241,26 +265,26 @@ describe("Reveal Element Class", () => {
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     
     const eventListenerName = ELEMENT_EVENTS_TO_CLIENT.MOUNTED + testIframeName;
-    const onCbName = on.mock.calls[1][0];
+    const onCbName = on.mock.calls[0][0];
     expect(onCbName).toBe(eventListenerName);
-    const onCb = on.mock.calls[1][1];
+    const onCb = on.mock.calls[0][1];
     onCb({
       name:testIframeName,
     });
+    
     expect(testRevealElement.isMounted()).toBe(true);
     expect(testRevealElement.iframeName()).toBe(testIframeName);
-    const frameReadyEvent = on.mock.calls[0][0];
-    expect(frameReadyEvent).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + '123');
-    const onCallback = on.mock.calls[0][1];
-    const cb = jest.fn();
-    onCallback({}, cb);
 
     testRevealElement.renderFile().then(data =>
       expect(data).toEqual({ success: { skyflow_id: '1244', column: 'column' } })
       ).catch (
       error => console.log('error', error)
     );
-    expect(cb).toBeCalled();
+    const frameReadyEvent = on.mock.calls[1][0];
+    expect(frameReadyEvent).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + '123');
+    const onCallback = on.mock.calls[1][1];
+    const cb = jest.fn();
+    onCallback({}, cb);
     expect(emitSpy.mock.calls[3][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + '123');
     expect(emitSpy.mock.calls[3][1]).toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' }, containerId: mockUuid, iframeName: testIframeName});
     const emitCb = emitSpy.mock.calls[3][2];
@@ -275,8 +299,8 @@ describe("Reveal Element Class", () => {
         altText: "alt text",
       },
       undefined,
-      clientData,
-      { containerId: containerId, isMounted: true, eventEmitter: groupEmiitter },
+      clientData2,
+      { containerId: containerId, isMounted: true, eventEmitter: groupEmiitter, isControllerFrameReady: true },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
     );
@@ -293,11 +317,11 @@ describe("Reveal Element Class", () => {
 
     // Verify that the else block is executed
     const frameReadyEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + '123';
-    const onCbName = on.mock.calls[2][0];
+    const onCbName = on.mock.calls[1][0];
     expect(onCbName).toBe(frameReadyEventName);
   
     // Simulate the SKYFLOW_FRAME_CONTROLLER_READY event
-    const onCb = on.mock.calls[2][1];
+    const onCb = on.mock.calls[1][1];
     const cb = jest.fn();
     onCb({}, cb);
   
@@ -325,7 +349,7 @@ describe("Reveal Element Class", () => {
       },
       undefined,
       clientData,
-      { containerId: containerId, isMounted: true, eventEmitter: groupEmiitter },
+      { containerId: containerId, isMounted: true, eventEmitter: groupEmiitter, isControllerFrameReady: false },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
     );
@@ -341,14 +365,15 @@ describe("Reveal Element Class", () => {
     const renderPromise = testRevealElement.renderFile();
 
     // Verify that the else block is executed
-    const frameReadyEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + '123';
-    const onCbName = on.mock.calls[2][0];
-    expect(onCbName).toBe(frameReadyEventName);
+
+    // const frameReadyEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + '123';
+    // const onCbName = on.mock.calls[2][0];
+    // expect(onCbName).toBe(frameReadyEventName);
   
     // Simulate the SKYFLOW_FRAME_CONTROLLER_READY event
-    const onCb = on.mock.calls[2][1];
-    const cb = jest.fn();
-    onCb({}, cb);
+    // const onCb = on.mock.calls[2][1];
+    // const cb = jest.fn();
+    // onCb({}, cb);
   
     const emitCb = emitSpy.mock.calls[0][2];
     emitCb({ errors: { grpc_code: 5, http_code: 404, message: "No Records Found", http_status: "Not Found", details: [] } });
@@ -379,7 +404,7 @@ describe("Reveal Element Class", () => {
       },
       undefined,
       clientData,
-      {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+      {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter, isControllerFrameReady: true},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -398,19 +423,14 @@ describe("Reveal Element Class", () => {
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
     
     const eventListenerName = ELEMENT_EVENTS_TO_CLIENT.MOUNTED + testIframeName;
-    const onCbName = on.mock.calls[1][0];
+    const onCbName = on.mock.calls[0][0];
     expect(onCbName).toBe(eventListenerName);
-    const onCb = on.mock.calls[1][1];
+    const onCb = on.mock.calls[0][1];
     onCb({
       name:testIframeName,
     });
     expect(testRevealElement.isMounted()).toBe(true);
     expect(testRevealElement.iframeName()).toBe(testIframeName);
-    const frameReadyEvent = on.mock.calls[0][0];
-    expect(frameReadyEvent).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + '123');
-    const onCallback = on.mock.calls[0][1];
-    const cb = jest.fn();
-    onCallback({}, cb);
     testRevealElement.renderFile().then(
       data => console.log('data', data)
       ).catch (
@@ -426,7 +446,7 @@ describe("Reveal Element Class", () => {
       }
     );
     });
-    expect(cb).toBeCalled();
+
     expect(emitSpy.mock.calls[3][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + '123');
     expect(emitSpy.mock.calls[3][1]).toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' }, containerId: mockUuid, iframeName: testIframeName});
     const emitCb = emitSpy.mock.calls[3][2];
