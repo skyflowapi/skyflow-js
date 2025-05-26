@@ -165,6 +165,7 @@ class RevealElement extends SkyflowElement {
   }
 
   renderFile() {
+    this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     let altText = '';
     if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
       altText = this.#recordData.altText;

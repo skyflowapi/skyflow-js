@@ -384,6 +384,7 @@ class CollectContainer extends Container {
   };
 
   uploadFiles = (options) :Promise<any> => {
+    this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {
         try {

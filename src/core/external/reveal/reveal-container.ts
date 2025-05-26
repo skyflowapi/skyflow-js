@@ -140,7 +140,6 @@ class RevealContainer extends Container {
         containerId: this.#containerId,
         isMounted: this.#isMounted,
         eventEmitter: this.#eventEmmiter,
-        isSkyflowFrameReady: this.#isSkyflowFrameReady,
       }, elementId, this.#context);
     this.#revealElements.push(revealElement);
     this.#skyflowElements[elementId] = revealElement;
@@ -150,6 +149,7 @@ class RevealContainer extends Container {
   reveal() {
     this.#isRevealCalled = true;
     this.#revealRecords = [];
+    this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
 
     return new Promise((resolve, reject) => {
       try {
