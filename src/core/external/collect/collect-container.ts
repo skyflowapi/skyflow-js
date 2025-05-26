@@ -274,6 +274,13 @@ class CollectContainer extends Container {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#metaData.clientJSON.config);
+          if (Object.keys(this.#elements).length > 0) {
+            Object.entries(this.#elements).forEach(([key, element]) => {
+              if (element.isMounted() && window.parent.frames[element.iframeName()] === undefined) {
+                delete this.#elements[key];
+              }
+            });
+          }
           const collectElements = Object.values(this.#elements);
           const elementIds = Object.keys(this.#elements)
             .map((element) => ({ frameId: element, elementId: element }));
@@ -327,6 +334,13 @@ class CollectContainer extends Container {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#metaData.clientJSON.config);
+        if (Object.keys(this.#elements).length > 0) {
+          Object.entries(this.#elements).forEach(([key, element]) => {
+            if (element.isMounted() && window.parent.frames[element.iframeName()] === undefined) {
+              delete this.#elements[key];
+            }
+          });
+        }
         const collectElements = Object.values(this.#elements);
         const elementIds = Object.keys(this.#elements)
           .map((element) => ({ frameId: element, elementId: element }));
