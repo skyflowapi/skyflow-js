@@ -17,7 +17,6 @@ import {
   validateGetByIdInput,
   validateUpsertOptions,
   validateDeleteRecords,
-  validateRenderElementRecord,
 } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
@@ -41,7 +40,6 @@ import {
   IDeleteRecordInput,
   IGetOptions,
 } from '../../utils/common';
-import { formatForRenderClient } from '../../core-utils/reveal';
 
 const CLASS_NAME = 'SkyflowContainer';
 class SkyflowContainer {
@@ -49,7 +47,7 @@ class SkyflowContainer {
 
   #client: Client;
 
-  #isControllerFrameReady: boolean = false;
+  isControllerFrameReady: boolean = false;
 
   #context: Context;
 
@@ -77,7 +75,7 @@ class SkyflowContainer {
           client: this.#client,
           context,
         });
-        this.#isControllerFrameReady = true;
+        this.isControllerFrameReady = true;
       });
     printLog(parameterizedString(logs.infoLogs.PUREJS_CONTROLLER_INITIALIZED, CLASS_NAME),
       MessageType.LOG,
@@ -85,7 +83,7 @@ class SkyflowContainer {
   }
 
   detokenize(detokenizeInput: IDetokenizeInput): Promise<any> {
-    if (this.#isControllerFrameReady) {
+    if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#client.config);
@@ -150,7 +148,7 @@ class SkyflowContainer {
   }
 
   insert(records, options?:IInsertOptions): Promise<any> {
-    if (this.#isControllerFrameReady) {
+    if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
@@ -239,7 +237,7 @@ class SkyflowContainer {
   }
 
   getById(getByIdInput: IGetByIdInput) {
-    if (this.#isControllerFrameReady) {
+    if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
@@ -307,7 +305,7 @@ class SkyflowContainer {
   }
 
   get(getInput: IGetInput, options?: IGetOptions) {
-    if (this.#isControllerFrameReady) {
+    if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
@@ -375,7 +373,7 @@ class SkyflowContainer {
   }
 
   delete(records: IDeleteRecordInput, options?: IDeleteOptions) {
-    if (this.#isControllerFrameReady) {
+    if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
@@ -444,84 +442,6 @@ class SkyflowContainer {
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);
-      }
-    });
-  }
-
-  renderFile(recordData, metaData, containerId, iframeName) {
-    if (this.#isControllerFrameReady) {
-      return new Promise((resolve, reject) => {
-        try {
-          validateInitConfig(this.#client.config);
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
-            MessageType.LOG,
-            this.#context.logLevel);
-          validateRenderElementRecord(recordData);
-          bus
-          // .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#containerId,
-              {
-                records: recordData,
-                containerId,
-                iframeName,
-              },
-              (revealData: any) => {
-                if (revealData.errors) {
-                  reject(formatForRenderClient(revealData, recordData.column as string));
-                } else {
-                  resolve(revealData);
-                }
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-          MessageType.LOG, this.#context.logLevel);
-        } catch (err: any) {
-          printLog(`Error: ${err.message}`, MessageType.ERROR,
-            this.#context.logLevel);
-          reject(err);
-        }
-      });
-    }
-    return new Promise((resolve, reject) => {
-      try {
-        validateInitConfig(metaData.clientJSON.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
-          MessageType.LOG,
-          this.#context.logLevel);
-        validateRenderElementRecord(recordData);
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
-            bus
-              // .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + this.#containerId,
-                {
-                  records: recordData,
-                  containerId,
-                  iframeName,
-                },
-                (revealData: any) => {
-                  if (revealData.errors) {
-                    reject(formatForRenderClient(revealData, recordData.column as string));
-                  } else {
-                    resolve(revealData);
-                  }
-                },
-              );
-            printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-            MessageType.LOG, this.#context.logLevel);
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-          CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-        MessageType.LOG, this.#context.logLevel);
-      } catch (err: any) {
-        printLog(`Error: ${err.message}`, MessageType.ERROR,
-          this.#context.logLevel);
-        reject(err);
       }
     });
   }

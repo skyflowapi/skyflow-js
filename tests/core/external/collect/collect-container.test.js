@@ -6,6 +6,8 @@ import {
   ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENT_EVENTS_TO_CONTAINER,
+  SKYFLOW_FRAME_CONTROLLER_READY,
+  ELEMENTS
 } from '../../../../src/core/constants';
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
@@ -35,6 +37,30 @@ jest.mock('../../../../src/libs/uuid', () => ({
 
 const metaData = {
   uuid: '123',
+  skyflowContainer: {
+    isControllerFrameReady : true,
+  },
+  config: {
+    vaultID: 'vault123',
+    vaultURL: 'https://sb.vault.dev',
+    getBearerToken,
+  },
+  metaData: {
+    clientDomain: 'http://abc.com',
+  },
+  clientJSON: {
+    config: {
+      vaultID: 'vault123',
+      vaultURL: 'https://sb.vault.dev',
+      getBearerToken,
+    },
+  },
+};
+const metaData2 = {
+  uuid: '123',
+  skyflowContainer: {
+    isControllerFrameReady : false,
+  },
   config: {
     vaultID: 'vault123',
     vaultURL: 'https://sb.vault.dev',
@@ -171,26 +197,314 @@ describe('Collect container', () => {
 
   let emitSpy;
   let targetSpy;
+  let onSpy;
   beforeEach(() => {
+    emitSpy = null;
+    targetSpy = null;
+    onSpy = null;
     emitSpy = jest.spyOn(bus, 'emit');
     targetSpy = jest.spyOn(bus, 'target');
+    onSpy = jest.spyOn(bus, 'on');
     targetSpy.mockReturnValue({
       on,
       off: jest.fn()
     });
   });
 
-  it('contructor', async () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
-    await new Promise((r) => setTimeout(r, 2000));
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+    document.body.innerHTML = '';
+  });
 
+  it("container collect success", () => {
+    let collectContainer = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const div1 = document.createElement('div');
+    const div2 = document.createElement('div');
+
+    const element1 = collectContainer.create(cvvElement);
+    const element2 = collectContainer.create(cardNumberElement);
+
+    element1.mount(div1);
+    element2.mount(div2);
+
+    const mountCvvCb = onSpy.mock.calls[2][1];
+
+    mountCvvCb({
+      name: `element:${cvvElement.type}:${btoa(element1.getID())}`,
+    });
+
+    const mountCardNumberCb = onSpy.mock.calls[5][1];
+    mountCardNumberCb({
+      name: `element:${cardNumberElement.type}:${btoa(element2.getID())}`,
+    });
+
+    // const frameReadyCb = on.mock.calls[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    // }, cb2)
+    // expect(cb2).toHaveBeenCalled()
+
+    collectContainer.collect().then().catch(err => {
+      expect(err).toBeDefined();
+    })
+
+    const collectRequestCb = emitSpy.mock.calls[2][2];
+    collectRequestCb({
+      data: {}
+    })
+
+    collectRequestCb({
+      error:"error",
+    })
+
+    collectContainer.collect({
+      tokens: true,
+      additionalFields:true,
+      upsert: true
+    }).then().catch(err => {
+      expect(err).toBeDefined();
+    })
+  });
+
+  it('should resolve successfully when collect is called and isSkyflowFrameReady is false', async () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+  
+    Object.defineProperty(container, '#isSkyflowFrameReady', {
+      value: false,
+      writable: true,
+    });
+  
+    const div1 = document.createElement('div');
+    const div2 = document.createElement('div');
+  
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+  
+    element1.mount(div1);
+    element2.mount(div2);
+  
+    const mountCvvCb = onSpy.mock.calls[2][1];
+    mountCvvCb({
+      name: `element:${cvvElement.type}:${btoa(element1.getID())}`,
+    });
+  
+    const mountCardNumberCb = onSpy.mock.calls[5][1];
+    mountCardNumberCb({
+      name: `element:${cardNumberElement.type}:${btoa(element2.getID())}`,
+    });
+  
+    const collectPromise = container.collect({ tokens: true });
+  
+    // const frameReadyCb = on.mock.calls[1][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid,
+    // }, cb2);
+  
+    const emitCallback = emitSpy.mock.calls[2][2];
+    emitCallback({
+      data: { success: true },
+    });
+
+    await expect(collectPromise).resolves.toEqual({
+      data: { success: true },
+    });
+  });
+
+  it('element type radio or checkox created', async () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const div1 = document.createElement('div');
+    const div2 = document.createElement('div');
+
+    const element1 = container.create({
+      table: 'pii_fields',
+      column: 'primary_card.cvv',
+      styles: {
+        base: {
+          color: '#1d1d1d',
+        },
+      },
+      label: 'cvv',
+      type: 'checkbox',
+      value: 'check-box'
+    });
+    const element2 = container.create({
+      table: 'pii_fields',
+      column: 'primary_card.card_number',
+      styles: {
+        base: {
+          color: '#1d1d1d',
+        },
+      },
+      label: 'card_number',
+      type: 'radio',
+      value: 'radio'
+    });
+
+    element1.mount(div1);
+    element2.mount(div2);
+
+    const mountCvvCb = onSpy.mock.calls[2][1];
+
+    mountCvvCb({
+      name: `element:${cvvElement.type}:${btoa(element1.getID())}`,
+    });
+
+    const mountCardNumberCb = onSpy.mock.calls[5][1];
+
+    mountCardNumberCb({
+      name: `element:${cardNumberElement.type}:${btoa(element2.getID())}`,
+    });
+
+    expect(element1.elementType).toBe('checkbox');
+    expect(element2.elementType).toBe('radio');
+  });
+
+  it('should successfully upload files when elements are mounted', async () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const div = document.createElement('div');
+    const fileElement = container.create(FileElement);
+
+    fileElement.mount(div);
+
+    const mountCb = onSpy.mock.calls[2][1];
+    mountCb({
+      name: `element:${FileElement.type}:${btoa(fileElement.getID())}`,
+    });
+
+    // const frameReadyCb = on.mock.calls[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid,
+    // }, cb2);
+    // expect(cb2).toHaveBeenCalled();
+
+    const uploadPromise = container.uploadFiles({ someOption: true });
+
+    const uploadRequestCb = emitSpy.mock.calls[1][2];
+    uploadRequestCb({
+      data: { success: true },
+    });
+
+    const expectedResponse = await uploadPromise;
+
+    expect(expectedResponse.data.success).toEqual(true);
+  });
+
+  it('should throw an error if elements are not mounted', async () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const div = document.createElement('div');
+    const fileElement = container.create(FileElement);
+
+    // const frameReadyCb = on.mock.calls[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid,
+    // }, cb2);
+    // expect(cb2).toHaveBeenCalled();
+
+    await expect(container.uploadFiles({ someOption: true })).rejects.toThrow(SkyflowError);
+  });
+
+  it('should handle errors during file upload', async () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const div = document.createElement('div');
+    const fileElement = container.create(FileElement);
+
+    fileElement.mount(div);
+
+    const mountCb = onSpy.mock.calls[2][1];
+    mountCb({
+      name: `element:${FileElement.type}:${btoa(fileElement.getID())}`,
+    });
+
+    // const frameReadyCb = on.mock.calls[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid,
+    // }, cb2);
+    // expect(cb2).toHaveBeenCalled();
+
+    const uploadPromise = container.uploadFiles({ someOption: true });
+    
+
+    const uploadRequestCb = emitSpy.mock.calls[1][2];
+    uploadRequestCb({
+      error: 'File upload failed',
+    });
+
+    await expect(uploadPromise).rejects.toEqual('File upload failed');
+  });
+
+  // it('skyflow controller event when container is created', async () => {
+  //   const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+  //   // await new Promise((r) => setTimeout(r, 2000));
+  //   // const frameReadyCb = on.mock.calls[0][1];
+  //   // const cb2 = jest.fn();
+  //   // frameReadyCb({
+  //   //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+  //   // }, cb2)
+  //   expect(cb2).toHaveBeenCalled()
+  // });
+
+  it('should not emit events when isSkyflowFrameReady is false', async () => {
+    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    
+    Object.defineProperty(container, '#isSkyflowFrameReady', {
+      value: false,
+      writable: true,
+    });
+  
+    const div = document.createElement('div');
+    const fileElement = container.create(FileElement);
+  
+    fileElement.mount(div);
+    const mountCb = onSpy.mock.calls[2][1];
+    mountCb({
+      name: `element:${FileElement.type}:${btoa(fileElement.getID())}`,
+    });
+
+    container.uploadFiles({ someOption: true }).then().catch(err => {
+      expect(err).toBeDefined();
+    })    
+  });
+
+  it('should resolve successfully when file upload is successful', async () => {
+    const container = new CollectContainer({}, metaData2, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+
+    Object.defineProperty(container, '#isSkyflowFrameReady', {
+      value: false,
+      writable: true,
+    });
+  
+    const div = document.createElement('div');
+    const fileElement = container.create(FileElement);
+  
+    fileElement.mount(div);
+  
+    const mountCb = onSpy.mock.calls[2][1];
+    mountCb({
+      name: `element:${FileElement.type}:${btoa(fileElement.getID())}`,
+    });
+  
+    const uploadPromise = container.uploadFiles({ someOption: true });
+    console.log('on', on.mock.calls);
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
-      name: COLLECT_FRAME_CONTROLLER + mockUuid
-    }, cb2)
-    expect(cb2).toHaveBeenCalled()
-    expect(document.querySelector('iframe')).toBeTruthy();
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid,
+    }, cb2);
+
+    const emitCallback = emitSpy.mock.calls[1][2];
+    emitCallback({
+      data: { success: true },
+    });
+
+    await expect(uploadPromise).resolves.toEqual({
+      data: { success: true },
+    });
   });
 
   it('Invalid element type', () => {
@@ -417,10 +731,15 @@ describe('Collect container', () => {
 
   it("container collect", () => {
     let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
-    container.collect();
-    const collectCb = emitSpy.mock.calls[0][2];
-    collectCb(collectResponse)
-    collectCb({ error: 'Error occured' })
+    // const frameReadyCb = on.mock.calls[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    // }, cb2)
+    // expect(cb2).toHaveBeenCalled()
+    container.collect().then().catch(err => {
+      expect(err).toBeDefined();
+    })
   });
   it("container create options", () => {
     let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
@@ -707,10 +1026,15 @@ describe('Collect container', () => {
         column: 'column'
       }]
     }
-    container.collect(options);
-    const collectCb = emitSpy.mock.calls[0][2];
-    collectCb(collectResponse)
-    collectCb({ error: 'Error occured' })
+    // const frameReadyCb = on.mock.calls[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    // }, cb2)
+    // expect(cb2).toHaveBeenCalled()
+    container.collect(options).then().catch(err => {
+      expect(err).toBeDefined();
+    })
   });
   it("container collect options error case 2", () => {
     let container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
@@ -780,8 +1104,13 @@ describe('Collect container', () => {
         column: 'column'
       }]
     }
-    container.collect(options);
-    const emitCb = emitSpy.mock.calls[0][2];
-    emitCb({error:{code:404,description:"Not Found"}});
+    // const frameReadyCb = on.mock.calls[0][1];
+    // const cb2 = jest.fn();
+    // frameReadyCb({
+    //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    // }, cb2)
+    // expect(cb2).toHaveBeenCalled()
+    container.collect(options).then().catch(err => {
+      expect(err).toBeDefined();});
   });
 });

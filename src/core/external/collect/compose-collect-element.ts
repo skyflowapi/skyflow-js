@@ -23,6 +23,7 @@ class ComposableElement {
     this.#elementName = name;
     this.#iframeName = iframeName;
     this.#eventEmitter = eventEmitter;
+
     this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
       this.#isMounted = true;
     });
