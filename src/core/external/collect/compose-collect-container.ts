@@ -324,6 +324,7 @@ class ComposableContainer extends Container {
   };
 
   collect = (options: ICollectOptions = { tokens: true }) :Promise<any> => {
+    this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {
         try {
