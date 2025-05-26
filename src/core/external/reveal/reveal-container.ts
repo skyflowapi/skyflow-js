@@ -69,6 +69,7 @@ class RevealContainer extends Container {
 
   constructor(metaData, skyflowElements, context, options = {}) {
     super();
+    this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
     this.#metaData = {
       ...metaData,
       clientJSON: {
@@ -128,19 +129,6 @@ class RevealContainer extends Container {
           }
         },
       );
-    bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
-        + this.#metaData.uuid, (_, callback) => {
-        printLog(parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
-          MessageType.LOG,
-          this.#context.logLevel); // add proper logs
-        callback({
-          client: this.#metaData.clientJSON,
-          context,
-        });
-        this.#isSkyflowFrameReady = true;
-      });
   }
 
   create(record: IRevealElementInput, options?: IRevealElementOptions) {
@@ -221,7 +209,8 @@ class RevealContainer extends Container {
   #waitForSkyflowFrameReady(response, reject) {
     bus
       .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#metaData.uuid, () => {
+      .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
+         + this.#metaData.uuid, () => {
         this.#emitRevealRequest(response, reject);
       });
   }

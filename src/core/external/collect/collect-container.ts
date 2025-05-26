@@ -75,6 +75,7 @@ class CollectContainer extends Container {
 
   constructor(options, metaData, skyflowElements, context) {
     super();
+    this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
     this.#containerId = uuid();
     this.#metaData = {
       ...metaData,
@@ -107,19 +108,6 @@ class CollectContainer extends Container {
       this.#context.logLevel);
 
     this.#isMounted = true;
-    bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
-        + this.#metaData.uuid, (data, callback) => {
-        // printLog(parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
-        //   MessageType.LOG,
-        //   this.#context.logLevel); // add proper logs
-        callback({
-          client: this.#metaData.clientJSON,
-          context,
-        });
-        this.#isSkyflowFrameReady = true;
-      });
   }
 
   create = (input: CollectElementInput, options: any = {
@@ -269,6 +257,7 @@ class CollectContainer extends Container {
   };
 
   collect = (options: ICollectOptions = { tokens: true }) :Promise<any> => {
+    this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       // eslint-disable-next-line @typescript-eslint/no-shadow
       return new Promise((resolve, reject) => {

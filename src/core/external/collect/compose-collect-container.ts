@@ -105,6 +105,8 @@ class ComposableContainer extends Container {
         },
       },
     };
+    this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
+
     this.#skyflowElements = skyflowElements;
     this.#context = context;
     this.#options = options;
@@ -124,16 +126,6 @@ class ComposableContainer extends Container {
       this.#context.logLevel);
     this.#containerMounted = true;
     this.#updateListeners();
-    bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
-      + this.#metaData.uuid, (data, callback) => {
-        this.#isSkyflowFrameReady = true;
-        callback({
-          client: this.#metaData.clientJSON,
-          context,
-        });
-      });
   }
 
   create = (input: CollectElementInput, options: any = {

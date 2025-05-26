@@ -47,7 +47,7 @@ class SkyflowContainer {
 
   #client: Client;
 
-  #isControllerFrameReady: boolean = false;
+  isControllerFrameReady: boolean = false;
 
   #context: Context;
 
@@ -75,7 +75,7 @@ class SkyflowContainer {
           client: this.#client,
           context,
         });
-        this.#isControllerFrameReady = true;
+        this.isControllerFrameReady = true;
       });
     printLog(parameterizedString(logs.infoLogs.PUREJS_CONTROLLER_INITIALIZED, CLASS_NAME),
       MessageType.LOG,
@@ -83,7 +83,7 @@ class SkyflowContainer {
   }
 
   detokenize(detokenizeInput: IDetokenizeInput): Promise<any> {
-    if (this.#isControllerFrameReady) {
+    if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#client.config);
@@ -148,7 +148,7 @@ class SkyflowContainer {
   }
 
   insert(records, options?:IInsertOptions): Promise<any> {
-    if (this.#isControllerFrameReady) {
+    if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
@@ -237,7 +237,7 @@ class SkyflowContainer {
   }
 
   getById(getByIdInput: IGetByIdInput) {
-    if (this.#isControllerFrameReady) {
+    if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
@@ -305,7 +305,7 @@ class SkyflowContainer {
   }
 
   get(getInput: IGetInput, options?: IGetOptions) {
-    if (this.#isControllerFrameReady) {
+    if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
@@ -373,7 +373,7 @@ class SkyflowContainer {
   }
 
   delete(records: IDeleteRecordInput, options?: IDeleteOptions) {
-    if (this.#isControllerFrameReady) {
+    if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {

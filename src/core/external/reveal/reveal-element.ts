@@ -91,19 +91,7 @@ class RevealElement extends SkyflowElement {
     this.#domSelecter = '';
     this.#isFrameReady = false;
     this.#readyToMount = true;
-    bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
-      + this.#metaData.uuid, (_, callback) => {
-        printLog(parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
-          MessageType.LOG,
-          this.#context.logLevel); // add proper logs
-        callback({
-          client: this.#metaData.clientJSON,
-          context,
-        });
-        this.#isSkyflowFrameReady = true;
-      });
+    this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name, (data) => {
       this.#iframe.setIframeHeight(data.height);
     });
