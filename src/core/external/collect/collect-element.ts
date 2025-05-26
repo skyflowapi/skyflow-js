@@ -187,11 +187,9 @@ class CollectElement extends SkyflowElement {
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
         this.#elements[0].isMounted = true;
         this.#mounted = true;
-        this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + formatFrameNameToId(this.#iframe.name),
+        this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
           {}, (payload:any) => {
-            if (data.name === formatFrameNameToId(payload.name)) {
-              this.#iframe.setIframeHeight(payload.height);
-            }
+            this.#iframe.setIframeHeight(payload.height);
           });
       }
     });
@@ -204,7 +202,7 @@ class CollectElement extends SkyflowElement {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
     }
     this.resizeObserver = new ResizeObserver(() => {
-      this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + formatFrameNameToId(this.#iframe.name),
+      this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
         {}, (payload:any) => {
           this.#iframe.setIframeHeight(payload.height);
         });
@@ -526,10 +524,9 @@ class CollectElement extends SkyflowElement {
               else this.#states[index].value = undefined;
 
               emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
-              const frameName = isComposable ? this.#iframe.name
-                : formatFrameNameToId(this.#iframe.name);
+
               this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
-                + frameName,
+                + this.#iframe.name,
               {}, (payload:any) => {
                 this.#iframe.setIframeHeight(payload.height);
               });
