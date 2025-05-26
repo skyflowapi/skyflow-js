@@ -2,7 +2,7 @@
   "name": "skyflow-js",
   "preferGlobal": true,
   "analyze": false,
-  "version": "2.1.3-beta.2-dev.560a792",
+  "version": "2.1.3-beta.2-dev.de2fead",
   "author": "Skyflow",
   "description": "Skyflow JavaScript SDK",
   "homepage": "https://github.com/skyflowapi/skyflow-js",
