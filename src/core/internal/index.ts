@@ -487,7 +487,6 @@ export default class FrameElement {
     setAttributes(this.domInput, attr);
 
     let newInputValue = this.iFrameFormElement.getValue();
-
     // HTML don't support validity on radio
     if (this.iFrameFormElement.getValue() === undefined) {
       if (
@@ -501,7 +500,6 @@ export default class FrameElement {
         newInputValue = this.options.value;
       }
     }
-
     if (
       newValue
       && this.iFrameFormElement.fieldType !== ELEMENTS.checkbox.name

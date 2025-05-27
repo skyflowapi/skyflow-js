@@ -249,8 +249,9 @@ describe('Collect container', () => {
     collectContainer.collect().then().catch(err => {
       expect(err).toBeDefined();
     })
+    console.log('emit', emitSpy.mock.calls);
 
-    const collectRequestCb = emitSpy.mock.calls[2][2];
+    const collectRequestCb = emitSpy.mock.calls[0][2];
     collectRequestCb({
       data: {}
     })
@@ -303,7 +304,7 @@ describe('Collect container', () => {
     //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid,
     // }, cb2);
   
-    const emitCallback = emitSpy.mock.calls[2][2];
+    const emitCallback = emitSpy.mock.calls[0][2];
     emitCallback({
       data: { success: true },
     });
@@ -383,7 +384,7 @@ describe('Collect container', () => {
 
     const uploadPromise = container.uploadFiles({ someOption: true });
 
-    const uploadRequestCb = emitSpy.mock.calls[1][2];
+    const uploadRequestCb = emitSpy.mock.calls[0][2];
     uploadRequestCb({
       data: { success: true },
     });
@@ -430,7 +431,7 @@ describe('Collect container', () => {
     const uploadPromise = container.uploadFiles({ someOption: true });
     
 
-    const uploadRequestCb = emitSpy.mock.calls[1][2];
+    const uploadRequestCb = emitSpy.mock.calls[0][2];
     uploadRequestCb({
       error: 'File upload failed',
     });
@@ -490,14 +491,12 @@ describe('Collect container', () => {
     });
   
     const uploadPromise = container.uploadFiles({ someOption: true });
-    console.log('on', on.mock.calls);
     const frameReadyCb = on.mock.calls[0][1];
     const cb2 = jest.fn();
     frameReadyCb({
       name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid,
     }, cb2);
-
-    const emitCallback = emitSpy.mock.calls[1][2];
+    const emitCallback = emitSpy.mock.calls[0][2];
     emitCallback({
       data: { success: true },
     });
