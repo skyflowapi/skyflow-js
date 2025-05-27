@@ -187,10 +187,10 @@ class CollectElement extends SkyflowElement {
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
         this.#elements[0].isMounted = true;
         this.#mounted = true;
-        this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-          {}, (payload:any) => {
-            this.#iframe.setIframeHeight(payload.height);
-          });
+        // this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+        //   {}, (payload:any) => {
+        //     this.#iframe.setIframeHeight(payload.height);
+        //   });
       }
     });
   }
@@ -525,11 +525,11 @@ class CollectElement extends SkyflowElement {
 
               emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
 
-              this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
-                + this.#iframe.name,
-              {}, (payload:any) => {
-                this.#iframe.setIframeHeight(payload.height);
-              });
+              // this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
+              //   + this.#iframe.name,
+              // {}, (payload:any) => {
+              //   this.#iframe.setIframeHeight(payload.height);
+              // });
 
               this.#updateState();
               const emitData = {
@@ -666,6 +666,7 @@ class CollectElement extends SkyflowElement {
         options: {
           ...this.#elements[0],
           value: '',
+          ...this.#group,
         },
         isSingleElementAPI: true,
       });
