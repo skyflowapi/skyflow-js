@@ -329,10 +329,12 @@ class ComposableContainer extends Container {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#metaData.clientJSON.config);
+          if (!this.#elementsList || this.#elementsList.length === 0) {
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE, [], true);
+          }
           if (!this.#isMounted) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED, [], true);
           }
-
           const containerElements = getElements(this.#tempElements);
           containerElements.forEach((element:any) => {
             if (!element?.isMounted) {
@@ -395,6 +397,9 @@ class ComposableContainer extends Container {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#metaData.clientJSON.config);
+        if (!this.#elementsList || this.#elementsList.length === 0) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE, [], true);
+        }
         if (!this.#isMounted) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED, [], true);
         }

@@ -263,6 +263,9 @@ class CollectContainer extends Container {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#metaData.clientJSON.config);
+          if (Object.keys(this.#elements).length === 0) {
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
+          }
           if (Object.keys(this.#elements).length > 0) {
             Object.entries(this.#elements).forEach(([key, element]) => {
               if (element.isMounted() && window.parent.frames[element.iframeName()] === undefined) {
@@ -323,6 +326,9 @@ class CollectContainer extends Container {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#metaData.clientJSON.config);
+        if (Object.keys(this.#elements).length === 0) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
+        }
         if (Object.keys(this.#elements).length > 0) {
           Object.entries(this.#elements).forEach(([key, element]) => {
             if (element.isMounted() && window.parent.frames[element.iframeName()] === undefined) {
@@ -389,6 +395,9 @@ class CollectContainer extends Container {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#metaData.clientJSON.config);
+          if (Object.keys(this.#elements).length === 0) {
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
+          }
           const fileElements = Object.values(this.#elements);
           const elementIds = Object.keys(this.#elements);
           fileElements.forEach((element) => {
@@ -435,6 +444,9 @@ class CollectContainer extends Container {
         .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
           try {
             validateInitConfig(this.#metaData.clientJSON.config);
+            if (Object.keys(this.#elements).length === 0) {
+              throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
+            }
             const fileElements = Object.values(this.#elements);
             const elementIds = Object.keys(this.#elements);
             fileElements.forEach((element) => {
