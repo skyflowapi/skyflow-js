@@ -525,12 +525,13 @@ class CollectElement extends SkyflowElement {
 
               emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
 
-              // this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
-              //   + this.#iframe.name,
-              // {}, (payload:any) => {
-              //   this.#iframe.setIframeHeight(payload.height);
-              // });
-
+              if (isComposable) {
+                this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
+                + this.#iframe.name,
+                {}, (payload:any) => {
+                  this.#iframe.setIframeHeight(payload.height);
+                });
+              }
               this.#updateState();
               const emitData = {
                 ...this.#states[index],
