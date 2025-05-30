@@ -2406,7 +2406,7 @@ const cardNumberElement = container.create({
   },
   label: 'card_number',
   altText: 'XXXX XXXX XXXX XXXX',
-  redaction: SKyflow.RedactionType.MASKED
+  redaction: Skyflow.RedactionType.MASKED
 });
 
 const cvvElement = container.create({
