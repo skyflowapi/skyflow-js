@@ -9,6 +9,8 @@ import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
+import SkyflowError from "../../../../src/libs/skyflow-error";
+import logs from "../../../../src/utils/logs";
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 const mockUuid = '1234'; 
@@ -40,7 +42,7 @@ describe("Reveal Container Class", () => {
     uuid: "123",
     config: {
       vaultID: "vault123",
-      vaultURL: "sb.vault.dev",
+      vaultURL: "https://sb.vault.dev.com",
       getBearerToken,
     },
     metaData: {
@@ -86,6 +88,17 @@ describe("Reveal Container Class", () => {
       },
     },
   };
+  test("reveal should throw error with no elements", (done) => {
+    const container = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    container.reveal().catch((error) => {
+      done();
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.error.code).toEqual(400);
+      expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_REVEAL);
+    })
+  });
+
   const testRevealContainer = new RevealContainer(testMetaData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
   test("constructor", () => {
     expect(testRevealContainer).toBeInstanceOf(RevealContainer);
@@ -94,7 +107,6 @@ describe("Reveal Container Class", () => {
     expect(testRevealContainer).toHaveProperty("reveal");
     expect(testRevealContainer).toHaveProperty("type");
   });
-
   test("create() will return a Reveal Element", () => {
     const testRevealElement = testRevealContainer.create(testRecord);
     expect(testRevealElement).toBeInstanceOf(RevealElement);

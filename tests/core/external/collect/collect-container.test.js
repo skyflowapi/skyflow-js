@@ -216,6 +216,38 @@ describe('Collect container', () => {
     jest.restoreAllMocks();
     document.body.innerHTML = '';
   });
+  it('should throw error when collect call made with no elements ', () => {
+    const collectContainer = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    expect(collectContainer).toBeDefined();
+    collectContainer.collect().then().catch(err => {
+      expect(err).toBeDefined();
+      expect(err instanceof SkyflowError).toBeTruthy();
+    })
+  });
+    it('should throw error when collect call made with no elements case2 ', () => {
+    const collectContainer = new CollectContainer({}, metaData2, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    expect(collectContainer).toBeDefined();
+    collectContainer.collect().then().catch(err => {
+      expect(err).toBeDefined();
+      expect(err instanceof SkyflowError).toBeTruthy();
+    })
+  });
+    it('should throw error when uploadfiles call made with no elements ', () => {
+    const collectContainer = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    expect(collectContainer).toBeDefined();
+    collectContainer.uploadFiles().then().catch(err => {
+      expect(err).toBeDefined();
+      expect(err instanceof SkyflowError).toBeTruthy();
+    })
+  });
+      it('should throw error when uploadfiles call made with no elements ', () => {
+    const collectContainer = new CollectContainer({}, metaData2, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    expect(collectContainer).toBeDefined();
+    collectContainer.uploadFiles().then().catch(err => {
+      expect(err).toBeDefined();
+      expect(err instanceof SkyflowError).toBeTruthy();
+    })
+  });
 
   it("container collect success", () => {
     let collectContainer = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });

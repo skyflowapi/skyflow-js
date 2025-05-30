@@ -16,6 +16,7 @@ export interface ThreeDSBrowserDetails {
   challenge_window_size?: string;
   browser_java_enabled?: boolean;
   browser_javascript_enabled?: boolean;
+  accept_language: string[]
 }
 
 class ThreeDS {
@@ -30,6 +31,7 @@ class ThreeDS {
       browser_language: window.navigator.language,
       browser_tz: new Date().getTimezoneOffset(),
       browser_javascript_enabled: true,
+      accept_language: [...navigator.languages],
     };
     return browserData;
   }

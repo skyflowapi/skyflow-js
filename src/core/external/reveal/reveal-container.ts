@@ -168,6 +168,9 @@ class RevealContainer extends Container {
             this.#revealRecords.push(currentElement.getRecordData());
           }
         });
+        if (this.#revealRecords.length === 0) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_REVEAL, [], true);
+        }
 
         // Validate records
         validateRevealElementRecords(this.#revealRecords);
