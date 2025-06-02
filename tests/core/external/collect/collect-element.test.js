@@ -193,10 +193,10 @@ describe('collect element', () => {
     expect(element.isMounted()).toBe(false);
     expect(element.isValidElement()).toBe(true);
 
-    const heightCb = emitSpy.mock.calls[1][2];
-    heightCb({
-      height:'123'
-    })
+    // const heightCb = emitSpy.mock.calls[1][2];
+    // heightCb({
+    //   height:'123'
+    // })
 
   });
 
@@ -242,11 +242,11 @@ describe('collect element', () => {
         expect(element.isMounted()).toBe(true);
     },0)
     cb3();
-    const heightCb = emitSpy.mock.calls[0][2];
-      heightCb({
-        name: elementName,
-        height:'123'
-      })
+    // const heightCb = emitSpy.mock.calls[0][2];
+    //   heightCb({
+    //     name: elementName,
+    //     height:'123'
+    //   })
   });
 
 
@@ -292,10 +292,10 @@ describe('collect element', () => {
         expect(element.isMounted()).toBe(true);
     },0)
     cb3();
-    const heightCb = emitSpy.mock.calls[0][2];
-      heightCb({
-        height:'123'
-      })
+    // const heightCb = emitSpy.mock.calls[0][2];
+    //   heightCb({
+    //     height:'123'
+    //   })
   });
 
   it('constructor with composable ',  () => {

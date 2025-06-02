@@ -4,7 +4,7 @@ import { getValueAndItsUnit, validateAndSetupGroupOptions } from '../../libs/ele
 import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
 import { Context, Env, LogLevel } from '../../utils/common';
-import { getContainerType } from '../../utils/helpers';
+import { formatFrameNameToId, getContainerType } from '../../utils/helpers';
 import {
   ALLOWED_MULTIPLE_FIELDS_STYLES,
   ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ERROR_TEXT_STYLES, STYLE_TYPE,
@@ -41,6 +41,16 @@ export default class FrameElementInit {
     };
     this.updateGroupData();
     this.createContainerDiv(this.group);
+    const frameName = window.name;
+    bus
+      .target(this.clientMetaData.clientDomain)
+      .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE + formatFrameNameToId(frameName), (data) => {
+        if (data.name === frameName) {
+          if (data.options !== undefined) {
+            this.createContainerDiv(data.options);
+          }
+        }
+      });
   }
 
   updateGroupData = () => {
