@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import RevealContainer from "../../../../src/core/external/reveal/reveal-container";
-import { ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER, REVEAL_TYPES } from "../../../../src/core/constants";
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER, REVEAL_TYPES } from "../../../../src/core/constants";
 import bus from "framebus";
 import { LogLevel,Env } from "../../../../src/utils/common";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
@@ -322,12 +322,16 @@ describe("Reveal Container Class", () => {
     expect(onCbName).toBe(eventName);
     const onCb = on.mock.calls[0][1];
     onCb(data);
-
     testRevealContainer.reveal();
-    // const emitEventName = emitSpy.mock.calls[1][0];
-    // const emitCb = emitSpy.mock.calls[1][2];
-    // expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
-    // emitCb({"success":[{token:"1815-6223-1073-1425"}]});
+    const frameEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    const onframeEvent = on.mock.calls[1][0];
+    expect(frameEventName).toBe(onframeEvent);
+    const onCbFrame = on.mock.calls[1][1];
+    onCbFrame({});
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+    emitCb({"success":[{token:"1815-6223-1073-1425"}]});
   });
 
   test("on container mounted else call back",()=>{
@@ -349,6 +353,12 @@ describe("Reveal Container Class", () => {
     expect(onCbName).toBe(eventName);
     const onCb = on.mock.calls[0][1];
     onCb(data);
+
+    const frameEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    const onframeEvent = on.mock.calls[1][0];
+    expect(frameEventName).toBe(onframeEvent);
+    const onCbFrame = on.mock.calls[1][1];
+    onCbFrame({});
 
     const emitEventName = emitSpy.mock.calls[1][0];
     const emitCb = emitSpy.mock.calls[1][2];
@@ -374,6 +384,11 @@ describe("Reveal Container Class", () => {
     expect(onCbName).toBe(eventName);
     const onCb = on.mock.calls[0][1];
     onCb(data);
+    const frameEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    const onframeEvent = on.mock.calls[1][0];
+    expect(frameEventName).toBe(onframeEvent);
+    const onCbFrame = on.mock.calls[1][1];
+    onCbFrame({});
 
     const emitEventName = emitSpy.mock.calls[1][0];
     const emitCb = emitSpy.mock.calls[1][2];
