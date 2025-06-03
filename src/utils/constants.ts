@@ -529,6 +529,18 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_FIELD_SHOW_3DS_CHALLEGNGE,
   },
+  NO_ELEMENTS_IN_COLLECT: {
+    code: 400,
+    description: logs.errorLogs.NO_ELEMENTS_IN_COLLECT,
+  },
+  NO_ELEMENTS_IN_COMPOSABLE: {
+    code: 400,
+    description: logs.errorLogs.NO_ELEMENTS_IN_COMPOSABLE,
+  },
+  NO_ELEMENTS_IN_REVEAL: {
+    code: 400,
+    description: logs.errorLogs.NO_ELEMENTS_IN_REVEAL,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;

@@ -196,6 +196,29 @@ describe('test composable container class',()=>{
     const element = container.create(cvvElement);
     expect(element).toBeInstanceOf(ComposableElement);
   });
+  it('should throw error when create method is called with no element',(done)=>{
+    const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
+      container.collect().catch((err) => {
+        done();
+        expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(SkyflowError);
+        expect(err.error.code).toBe(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE.code);
+        expect(err.error.description).toBe(parameterizedString(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE.description));
+
+      });
+  
+  })
+    it('should throw error when create method is called with no element case 2',(done)=>{
+    const container = new ComposableContainer({layout:[1]}, metaData2, {}, context);
+      container.collect().catch((err) => {
+        done();
+        expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(SkyflowError);
+        expect(err.error.code).toBe(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE.code);
+        expect(err.error.description).toBe(parameterizedString(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE.description));
+      });
+  
+  })
 
   it('test create method with callback',()=>{
     const container = new ComposableContainer({layout:[1]}, metaData, {}, context);
