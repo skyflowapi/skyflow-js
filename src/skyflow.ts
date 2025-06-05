@@ -21,7 +21,6 @@ import SkyflowError from './libs/skyflow-error';
 import logs from './utils/logs';
 import SKYFLOW_ERROR_CODE from './utils/constants';
 import {
-  IRevealResponseType,
   RequestMethod,
   IInsertRecordInput,
   IDetokenizeInput,
@@ -37,6 +36,12 @@ import {
   IDeleteRecordInput,
   IDeleteOptions,
   IGetOptions,
+  InsertResponse,
+  GetResponse,
+  GetByIdResponse,
+  DeleteResponse,
+  ContainerOptions,
+  DetokenizeResponse,
 } from './utils/common';
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
@@ -159,10 +164,10 @@ class Skyflow {
     return skyflow;
   }
 
-  container(type: ContainerType.COLLECT, options?: Record<string, any>): CollectContainer;
-  container(type: ContainerType.COMPOSABLE, options?: Record<string, any>): ComposableContainer;
-  container(type: ContainerType.REVEAL, options?: Record<string, any>): RevealContainer;
-  container(type: ContainerType, options?: Record<string, any>) {
+  container(type: ContainerType.COLLECT, options?: ContainerOptions): CollectContainer;
+  container(type: ContainerType.COMPOSABLE, options?: ContainerOptions): ComposableContainer;
+  container(type: ContainerType.REVEAL, options?: ContainerOptions): RevealContainer;
+  container(type: ContainerType, options?: ContainerOptions) {
     switch (type) {
       case ContainerType.COLLECT: {
         const collectContainer = new CollectContainer(options, {
@@ -219,32 +224,32 @@ class Skyflow {
   insert(
     records: IInsertRecordInput,
     options?: IInsertOptions,
-  ) {
+  ): Promise<InsertResponse> {
     printLog(parameterizedString(logs.infoLogs.INSERT_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
     return this.#skyflowContainer.insert(records, options);
   }
 
-  detokenize(detokenizeInput: IDetokenizeInput): Promise<IRevealResponseType> {
+  detokenize(detokenizeInput: IDetokenizeInput): Promise<DetokenizeResponse> {
     printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.detokenize(detokenizeInput);
   }
 
-  getById(getByIdInput: IGetByIdInput) {
+  getById(getByIdInput: IGetByIdInput): Promise<GetByIdResponse> {
     printLog(logs.warnLogs.GET_BY_ID_DEPRECATED, MessageType.WARN, this.#logLevel);
     printLog(parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.getById(getByIdInput);
   }
 
-  get(getInput: IGetInput, options?: IGetOptions) {
+  get(getInput: IGetInput, options?: IGetOptions): Promise<GetResponse> {
     printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.get(getInput, options);
   }
 
-  delete(records: IDeleteRecordInput, options?: IDeleteOptions) {
+  delete(records: IDeleteRecordInput, options?: IDeleteOptions): Promise<DeleteResponse> {
     printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
     return this.#skyflowContainer.delete(records, options);
