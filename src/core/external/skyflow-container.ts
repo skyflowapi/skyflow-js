@@ -39,6 +39,12 @@ import {
   IDeleteOptions,
   IDeleteRecordInput,
   IGetOptions,
+  InsertResponse,
+  GetByIdResponse,
+  GetResponse,
+  DeleteResponse,
+  IInsertRecordInput,
+  DetokenizeResponse,
 } from '../../utils/common';
 
 const CLASS_NAME = 'SkyflowContainer';
@@ -82,7 +88,7 @@ class SkyflowContainer {
       this.#context.logLevel);
   }
 
-  detokenize(detokenizeInput: IDetokenizeInput): Promise<any> {
+  detokenize(detokenizeInput: IDetokenizeInput): Promise<DetokenizeResponse> {
     if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         try {
@@ -147,7 +153,7 @@ class SkyflowContainer {
     });
   }
 
-  insert(records, options?:IInsertOptions): Promise<any> {
+  insert(records: IInsertRecordInput, options?:IInsertOptions): Promise<InsertResponse> {
     if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
@@ -236,7 +242,7 @@ class SkyflowContainer {
     });
   }
 
-  getById(getByIdInput: IGetByIdInput) {
+  getById(getByIdInput: IGetByIdInput): Promise<GetByIdResponse> {
     if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
@@ -304,7 +310,7 @@ class SkyflowContainer {
     });
   }
 
-  get(getInput: IGetInput, options?: IGetOptions) {
+  get(getInput: IGetInput, options?: IGetOptions): Promise<GetResponse> {
     if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
@@ -372,7 +378,7 @@ class SkyflowContainer {
     });
   }
 
-  delete(records: IDeleteRecordInput, options?: IDeleteOptions) {
+  delete(records: IDeleteRecordInput, options?: IDeleteOptions): Promise<DeleteResponse> {
     if (this.isControllerFrameReady) {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);

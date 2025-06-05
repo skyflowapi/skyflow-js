@@ -27,6 +27,7 @@ import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import {
+  CollectElementInput,
   Context, Env, EventName, MessageType,
 } from '../../../utils/common';
 import {
@@ -197,7 +198,7 @@ class CollectElement extends SkyflowElement {
 
   getID = () => this.#elementId;
 
-  mount = (domElement) => {
+  mount = (domElement: HTMLElement | string) => {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
     }
@@ -338,7 +339,7 @@ class CollectElement extends SkyflowElement {
     });
   };
 
-  update = (options) => {
+  update = (options: CollectElementInput) => {
     this.#isUpdateCalled = true;
     if (this.#mounted) {
       options.validations = formatValidations(options.validations);
@@ -417,7 +418,7 @@ class CollectElement extends SkyflowElement {
 
   // listening to element events and error messages on iframe
   // todo: off methods
-  on(eventName: string, handler) {
+  on(eventName: string, handler: Function) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER, [], true);
     }

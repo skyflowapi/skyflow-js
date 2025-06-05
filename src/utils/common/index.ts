@@ -1,3 +1,6 @@
+import { IUpsertOptions } from '../../core-utils/collect';
+import { CardType, ElementType } from '../../core/constants';
+
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
@@ -147,7 +150,7 @@ export interface IDeleteRecord {
 export interface IDeleteOptions {}
 
 export interface IDeleteRecordInput {
-  options?: IDeleteOptions;
+  // options?: IDeleteOptions;
   records: IDeleteRecord[];
 }
 
@@ -181,4 +184,124 @@ export interface MeticsObjectType {
 
 export interface SharedMeticsObjectType {
   records: MeticsObjectType[];
+}
+
+export interface InsertResponse {
+  records?: InsertResponseRecords[],
+  errors?: ErrorRecord[];
+}
+
+export interface CollectResponse extends InsertResponse {}
+export interface DetokenizeResponse extends IRevealResponseType {}
+
+export interface InsertResponseRecords {
+  fields: Record<string, any>,
+  table: string;
+}
+
+export interface ErrorRecord {
+  code: number,
+  description: string;
+}
+
+export interface GetByIdResponse {
+  records?: GetByIdResponseRecord[],
+  errors?: ErrorRecord[];
+}
+
+export interface GetByIdResponseRecord {
+  fields: Record<string, any>,
+  table: string;
+}
+
+export interface GetResponse {
+  records?: GetResponseRecord[],
+  errors?: ErrorRecord[];
+}
+
+export interface GetResponseRecord {
+  fields: Record<string, any>,
+  table: string;
+}
+
+export interface DeleteResponse {
+  records?: DeleteResponseRecord[],
+  errors?: DeleteErrorRecords[];
+}
+export interface DeleteResponseRecord {
+  skyflow_id: string,
+  deleted: boolean;
+}
+
+export interface DeleteErrorRecords {
+  id: string,
+  error: ErrorRecord;
+}
+
+export interface ContainerOptions {
+  layout: number[],
+  styles?: InputStyles, // check implementation below
+  errorTextStyles?: ErrorTextStyles, // check implementation below
+}
+
+export interface ErrorTextStyles {
+  base?: object,
+  global?: object;
+}
+
+export interface LabelStyles extends ErrorTextStyles {
+  focus?: object,
+  requiredAsterisk?: object;
+}
+
+export interface InputStyles extends ErrorTextStyles {
+  focus?: object,
+  complete?: object,
+  empty?: object,
+  invalid?: object,
+  cardIcon?: object,
+  copyIcon?: object
+}
+
+export interface CollectElementOptions {
+  required: boolean,
+  format?: string,
+  translation?: Record<string, string>,
+  enableCardIcon?: boolean,
+  enableCopy?: boolean,
+  cardMetadata?: CardMetadata,
+  preserveFileName?: boolean,
+  allowedFileType?: string[],
+  blockEmptyFiles?: boolean,
+  masking?: boolean,
+  maskingChar?: string,
+}
+
+export interface CardMetadata {
+  scheme: CardType[]
+}
+
+export interface CollectElementInput {
+  table?: string;
+  column?: string;
+  label?: string;
+  inputStyles?: InputStyles;
+  labelStyles?: LabelStyles;
+  errorTextStyles?: ErrorTextStyles;
+  placeholder?: string;
+  type: ElementType;
+  altText?: string;
+  validations?: IValidationRule[]
+  skyflowID?: string;
+}
+
+export interface ICollectOptions {
+  tokens?: boolean;
+  additionalFields?: IInsertRecordInput;
+  upsert?: Array<IUpsertOptions>
+}
+
+export interface UploadFilesResponse {
+  fileUploadResponse: [skyflow_id: string],
+  errorResponse: [error: ErrorRecord]
 }
