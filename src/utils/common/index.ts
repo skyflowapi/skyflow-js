@@ -245,22 +245,22 @@ export interface ContainerOptions {
 }
 
 export interface ErrorTextStyles {
-  base?: object,
-  global?: object;
+  base?: Record<string, string>,
+  global?: Record<string, string>;
 }
 
 export interface LabelStyles extends ErrorTextStyles {
-  focus?: object,
-  requiredAsterisk?: object;
+  focus?: Record<string, string>,
+  requiredAsterisk?: Record<string, string>;
 }
 
 export interface InputStyles extends ErrorTextStyles {
-  focus?: object,
-  complete?: object,
-  empty?: object,
-  invalid?: object,
-  cardIcon?: object,
-  copyIcon?: object
+  focus?: Record<string, string>,
+  complete?: Record<string, string>,
+  empty?: Record<string, string>,
+  invalid?: Record<string, string>,
+  cardIcon?: Record<string, string>,
+  copyIcon?: Record<string, string>
 }
 
 export interface CollectElementOptions {
