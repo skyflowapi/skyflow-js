@@ -101,7 +101,7 @@ class RevealElement extends SkyflowElement {
     return this.#elementId;
   }
 
-  mount(domElementSelector) {
+  mount(domElementSelector: HTMLElement | string) {
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
@@ -437,7 +437,7 @@ class RevealElement extends SkyflowElement {
     this.#iframe.unmount();
   }
 
-  update(options) {
+  update(options: IRevealElementInput) {
     this.#recordData = {
       ...this.#recordData,
       ...options,
