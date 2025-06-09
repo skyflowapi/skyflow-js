@@ -1,0 +1,18 @@
+{
+  "name": "skyflow-elements-update-records",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel src/index.html --open",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "dependencies": {
+    "skyflow-js": "^2.3.1"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.1"
+  }
+}

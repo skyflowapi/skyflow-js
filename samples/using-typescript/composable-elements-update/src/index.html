@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skyflow Elements</title>
+    <script src="https://js.skyflow.com/v1/index.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .empty-div {
+            height: 200px;
+            width: 100%;
+        }
+
+        .reveal-view {
+            margin-top: 48px;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Composable Elements</h3>
+    <div>
+        <div>
+            <div id="composableContainer" class="empty-div"></div>
+            <button id="collectPCIData">Collect PCI Data</button>
+            <button id="updateElements">Update Elements Properties</button>
+        </div>
+
+        <div>
+            <pre id="collectResponse"></pre>
+        </div>
+    </div>
+    <!-- Reveal Part-->
+    <div id="revealView" class="reveal-view">
+        <h3>Reveal Elements</h3>
+        <div id="revealCardNumber" class="empty-div"></div>
+        <div id="revealCvv" class="empty-div"></div>
+        <div id="revealExpiryDate" class="empty-div"></div>
+        <div id="revealCardholderName" class="empty-div"></div>
+        <div>
+            <button id="revealPCIData">Reveal PCI Data</button>
+        </div>
+    </div>
+
+    <script type="module" src="index.js"></script>
+</body>
+
+</html>
