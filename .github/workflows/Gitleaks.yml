@@ -31,7 +31,7 @@ jobs:
       - name: Run Gitleaks on PR changes via Docker
         run: |
           docker run --rm -v $(pwd):/repo -w /repo zricethezav/gitleaks:latest detect \
-            --config="Rules/gtileaks.toml" \
+            --config="./Rules/gtileaks.toml" \
             --log-opts="--no-merges $BASE_SHA..$HEAD_SHA" \
             --verbose \
             --exit-code=0 \
