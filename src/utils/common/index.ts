@@ -302,6 +302,17 @@ export interface ICollectOptions {
 }
 
 export interface UploadFilesResponse {
-  fileUploadResponse: [skyflow_id: string],
-  errorResponse: [error: ErrorRecord]
+  fileUploadResponse: [{ skyflow_id: string }],
+  errorResponse: [{ error: ErrorRecord }]
+}
+
+export interface RevealResponse {
+  success?: {
+    token: string,
+    valueType: string,
+  },
+  errors?: {
+    error: ErrorRecord
+    token: string,
+  }
 }
