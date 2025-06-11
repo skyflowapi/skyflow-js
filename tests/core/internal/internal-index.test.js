@@ -3,8 +3,10 @@ import FrameElement from '../../../src/core/internal/index';
 import * as validators from '../../../src/utils/validators';
 import * as helpers from '../../../src/utils/helpers';
 import { getMaskedOutput, domReady } from '../../../src/utils/helpers';
-import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, CARD_ENCODED_ICONS, INPUT_KEYBOARD_EVENTS, ELEMENT_EVENTS_TO_CLIENT } from '../../../src/core/constants';
+import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, CARD_ENCODED_ICONS, INPUT_KEYBOARD_EVENTS, ELEMENT_EVENTS_TO_CLIENT, ElementType, STYLE_TYPE } from '../../../src/core/constants';
 import IFrameFormElement from '../../../src/core/internal/iframe-form';
+import { ValidationRuleType } from '../../../src/utils/common';
+import { get } from 'lodash';
 
 describe('domReady function - FrameElement', () => {
   let mockIFrameFormElement;
@@ -165,7 +167,7 @@ describe('domReady function - FrameElement', () => {
     const readyEvent = new Event('DOMContentLoaded');
   
     const frameElement1 = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
-  
+    
     setTimeout(() => {
       document.dispatchEvent(readyEvent);
   
@@ -271,6 +273,7 @@ describe('FrameElement', () => {
     windowSpy = jest.spyOn(window,'parent','get');
 
     mockIFrameFormElement = {
+      actualValue: '',
       resetEvents: jest.fn(),
       on: jest.fn(),
       setValue: jest.fn(),
@@ -313,6 +316,7 @@ describe('FrameElement', () => {
       required: true,
       preserveFileName: false,
       allowedFileType: ['pdf',],
+      masking: true
     };
 
     mockHtmlDivElement = document.createElement('div');
@@ -744,6 +748,10 @@ describe('FrameElement', () => {
     }
   
     expect(frameElement.updateStyleClasses).toHaveBeenCalledWith(mockState);
+    mockState.isFocused = true;
+    changeEventHandler(mockState);
+    expect(frameElement.updateStyleClasses).toHaveBeenCalledWith(mockState);
+
   });
   
   it('should set the correct input type based on fieldType', () => {
@@ -1088,6 +1096,9 @@ describe('FrameElement', () => {
     mockIFrameFormElement.getValue = jest.fn(() => '4111');
     mockIFrameFormElement.fieldType = 'CARD_NUMBER';
     mockIFrameFormElement.context = { logLevel: 'ERROR' };
+    mockIFrameFormElement.options = {
+      masking: true
+    }
     mockIFrameFormElement.mask = [
       '9999-9999-9999-9999',
       null,
@@ -1098,8 +1109,16 @@ describe('FrameElement', () => {
 
     (frameElement).applyMask();
 
-    expect(mockInput.value).toBe('4111');
+    expect(mockInput.value).toBe('');
     expect(mockInput.getAttribute('maxlength')).toBe('19');
+
+    mockInput.value = ''
+    frameElement.domInput = mockInput;
+    (frameElement).applyMask();
+    frameElement.actualValue = 'demo'
+    mockIFrameFormElement.mask = [['####'], null, '['];
+    frameElement.iFrameFormElement = mockIFrameFormElement;
+    frameElement.applyMask();
 
   });
 
@@ -1217,7 +1236,10 @@ describe('FrameElement', () => {
   });
 
   it('should set domError.innerText to state.error when custom validation fails and validations are present', () => {
-    frameElement.iFrameFormElement.validations = ['required'];
+    frameElement.iFrameFormElement.validations = [{
+              type: ValidationRuleType.LENGTH_MATCH_RULE,
+              params: {}
+            }]
     frameElement.iFrameFormElement.isCustomValidationFailed = true;
   
     const mockData = {
@@ -1230,12 +1252,42 @@ describe('FrameElement', () => {
       },
     };
   
+
     mockIFrameFormElement.on.mock.calls.find(
       ([eventType]) =>
         eventType === ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE + 'mockFrameName'
     )[1](mockData);
   
     expect(frameElement.domError.innerText).toBe('Validation failed');
+
+    // Reset state for next test
+    frameElement.iFrameFormElement.isCustomValidationFailed = false;
+    frameElement.iFrameFormElement.validations = null;
+    mockIFrameFormElement.on.mock.calls.find(
+      ([eventType]) =>
+        eventType === ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE + 'mockFrameName'
+    )[1](mockData);
+    expect(frameElement.domError.innerText).toBe('Custom error');
+
+    // Reset state for next test
+    mockData.state.error = null;
+    frameElement.iFrameFormElement.isCustomValidationFailed = false;
+    frameElement.iFrameFormElement.validations = null;
+    mockIFrameFormElement.on.mock.calls.find(
+      ([eventType]) =>
+        eventType === ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE + 'mockFrameName'
+    )[1](mockData);
+    expect(frameElement.domError.innerText).toBe('Custom error');
+
+    // empty error and valid state
+    mockData.state.isValid = true;
+    frameElement.iFrameFormElement.isCustomValidationFailed = false;
+    frameElement.iFrameFormElement.validations = null;
+    mockIFrameFormElement.on.mock.calls.find(
+      ([eventType]) =>
+        eventType === ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE + 'mockFrameName'
+    )[1](mockData);
+    expect(frameElement.domError.innerText).toBe('');
   });
 
   it('should clear domError.innerText when state is empty or valid', () => {
@@ -1262,12 +1314,21 @@ describe('FrameElement', () => {
       inputStyles: {
         base: { color: 'blue' },
       },
+      enableCardIcon: true
     };
   
     frameElement.updateOptions(mockOptions);
   
     expect(frameElement.options.inputStyles.base.color).toBe('blue');
   });
+    it('should update input styles when enablecardicon are provided', () => {
+    const mockOptions = {
+      enableCardIcon: true,
+      elementType: ElementType.CARD_NUMBER
+    };
+  
+    frameElement.updateOptions(mockOptions);
+    });
 
   it('should update input styles with card icon styles when elementType is CARD_NUMBER and enableCardIcon is true', () => {
     const mockOptions = {
@@ -1299,6 +1360,15 @@ describe('FrameElement', () => {
       label: 'Test Label',
       labelStyles: {
         base: { color: 'red' },
+        focus: { color: 'blue' },
+        requiredAsterisk: { color: 'green' },
+        global: { color: 'yellow' },
+      },
+      errorTextStyles: {
+        base: { color: 'red' },
+        focus: { color: 'blue' },
+        requiredAsterisk: { color: 'green' },
+        global: { color: 'yellow' },
       },
     };
   
@@ -1390,6 +1460,7 @@ describe('FrameElement', () => {
       required: true,
       preserveFileName: false,
       allowedFileType: ['pdf',],
+      blockEmptyFiles: true,
     };
 
     const mockHtmlDivElement = document.createElement('div');
@@ -1897,4 +1968,82 @@ describe('FrameElement - onInputChange Tests for other field', () => {
       expect(() => frameElement.onInputChange(mockEvent)).not.toThrow();
     });
   });
+});
+
+describe('Paste Event Tests', () => {
+  let frameElement;
+  let mockIFrameFormElement;
+  let mockHtmlDivElement;
+
+  beforeEach(() => {
+    mockIFrameFormElement = {
+      fieldType: ELEMENTS.CARD_NUMBER.name,
+      setValue: jest.fn(),
+      getValue: jest.fn(),
+      setMask: jest.fn(),
+      resetEvents: jest.fn(),
+      on: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({
+        isFocused: false,
+        isValid: true,      
+        isEmpty: true,
+        isComplete: false,
+        isRequired: false,
+        isTouched: false,
+        value: '',
+      }),
+      getUnformattedValue: jest.fn().mockReturnValue('4111111111111111'),
+      onFocusChange: jest.fn(),
+      onDropdownSelect: jest.fn(),
+      iFrameName: 'mockFrameName',
+      cardType: 'DEFAULT',
+      state: {
+        value: '',
+        isFocused: false,
+        isValid: true,
+        isEmpty: true,
+        isComplete: false,
+        name: '',
+        isRequired: false,
+        isTouched: false,
+        selectedCardScheme: '',
+      },
+      mask: ['#### #### #### ####', null, { '#': /\d/ }]
+    };
+
+
+    mockHtmlDivElement = document.createElement('div');
+    frameElement = new FrameElement(mockIFrameFormElement, {}, mockHtmlDivElement);
+    frameElement.mount();
+  });
+
+  it('should handle paste events correctly', () => {
+    // Create input element and setup paste event
+    const input = document.createElement('input');
+    input.value = '4111111111111111';
+    input.selectionStart = 4;
+    input.selectionEnd = 8;
+    frameElement.domInput = input;
+
+    // Create clipboard data
+    const mockClipboardData = {
+      getData: jest.fn().mockReturnValue('5555')
+    };
+
+    // Create and dispatch paste event
+    const pasteEvent = new Event('paste');
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      value: mockClipboardData
+    });
+    Object.defineProperty(pasteEvent, 'target', {
+      value: {
+        selectionStart: 4,
+        selectionEnd: 8
+      }
+    });
+
+    // Trigger paste event
+    input.dispatchEvent(pasteEvent);
+  });
+
 });

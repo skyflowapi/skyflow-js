@@ -1110,7 +1110,7 @@ describe('Collect container', () => {
         ...cvvElement,
         column: undefined,
         validations: [{
-          type: ValidationRuleType.ELEMENT_MATCH_RULE,
+          type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
           params: {}
         }]
       });
