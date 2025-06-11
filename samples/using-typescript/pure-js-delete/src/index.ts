@@ -1,10 +1,15 @@
 /*
   Copyright (c) 2025 Skyflow, Inc.
 */
-import Skyflow, { DeleteResponse } from "skyflow-js";
+import Skyflow, { 
+  DeleteResponse,
+  IDeleteRecordInput,
+  IDeleteRecord,
+  ISkyflow,
+} from "skyflow-js";
 
 try {
-  const skyflow = Skyflow.init({
+  const config: ISkyflow = {
     vaultID: "<VAULT_ID>",
     vaultURL: "<VAULT_URL>",
     getBearerToken: () => {
@@ -22,35 +27,38 @@ try {
         Http.send();
       });
     },
-  });
+  }
+  const skyflow = Skyflow.init(config);
 
   // form delete request
   const deleteButton = document.getElementById("deleteButton");
   if (deleteButton) {
     deleteButton.addEventListener("click", () => {
-      const response: Promise<DeleteResponse> = skyflow.delete({
-        records: [
-          { id: "<SKYFLOW_ID_1>", table: "<TABLE_NAME>" },
-          { id: "<SKYFLOW_ID_2>", table: "<TABLE_NAME>" },
-        ],
-      });
+      const deleteRecords: Array<IDeleteRecord> = [
+        { id: "<SKYFLOW_ID_1>", table: "<TABLE_NAME>" },
+        { id: "<SKYFLOW_ID_2>", table: "<TABLE_NAME>" },
+      ];
+      const deleteRecordsInput: IDeleteRecordInput = {
+        records: deleteRecords
+      };
+      const response: Promise<DeleteResponse> = skyflow.delete(deleteRecordsInput);
 
       response
         .then(
-          (res) => {
+          (res: DeleteResponse) => {
             const element = document.getElementById("deleteResponse");
             if (element) {
               element.innerHTML = JSON.stringify(res, null, 2);
             }
           },
-          (err) => {
+          (err: DeleteResponse) => {
             const element = document.getElementById("deleteResponse");
             if (element) {
               element.innerHTML = JSON.stringify(err, null, 2);
             }
           }
         )
-        .catch((err) => {
+        .catch((err: DeleteResponse) => {
           const element = document.getElementById("deleteResponse");
           if (element) {
             element.innerHTML = JSON.stringify(err, null, 2);

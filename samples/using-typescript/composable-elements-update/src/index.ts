@@ -3,10 +3,16 @@
 */
 
 import Skyflow, {
+    CollectElementInput,
+    CollectResponse,
     ComposableContainer,
     ComposableElement,
-    CollectResponse,
     ContainerOptions,
+    ErrorTextStyles,
+    ISkyflow,
+    InputStyles,
+    IValidationRule,
+    LabelStyles,
     RevealContainer,
     RevealElement,
     RevealResponse,
@@ -17,29 +23,30 @@ try {
     if (revealView) {
         revealView.style.visibility = 'hidden';
     }
-    const skyflow = Skyflow.init({
-        vaultID: '<VAULT_ID>',
-        vaultURL: '<VAULT_URL>',
-        getBearerToken: () => {
-            return new Promise((resolve, reject) => {
-                const Http = new XMLHttpRequest();
+	const config: ISkyflow = {
+		vaultID: '<VAULT_ID>',
+		vaultURL: '<VAULT_URL>',
+		getBearerToken: () => {
+			return new Promise((resolve, reject) => {
+				const Http = new XMLHttpRequest();
 
-                Http.onreadystatechange = () => {
-                    if (Http.readyState === 4 && Http.status === 200) {
-                        const response = JSON.parse(Http.responseText);
-                        resolve(response.accessToken);
-                    }
-                };
-                const url = '<TOKEN_END_POINT_URL>';
-                Http.open('GET', url);
-                Http.send();
-            });
-        },
-        options: {
-            logLevel: Skyflow.LogLevel.ERROR,
-            env: Skyflow.Env.PROD,
-        },
-    });
+				Http.onreadystatechange = () => {
+					if (Http.readyState === 4 && Http.status === 200) {
+						const response = JSON.parse(Http.responseText);
+						resolve(response.accessToken);
+					}
+				};
+				const url = '<TOKEN_END_POINT_URL>';
+				Http.open('GET', url);
+				Http.send();
+			});
+		},
+		options: {
+			logLevel: Skyflow.LogLevel.ERROR,
+			env: Skyflow.Env.PROD,
+		},
+	}
+	const skyflow = Skyflow.init(config);
 
     //custom styles for collect elements
     const cardholderStyles = {
@@ -52,11 +59,11 @@ try {
                 lineHeight: '21px',
                 width: '294px'
             },
-        },
+        } as InputStyles,
         labelStyles: {
-        },
+        } as LabelStyles,
         errorTextStyles: {
-        },
+        } as ErrorTextStyles,
     };
 
     const cardNumberStyles = {
@@ -70,11 +77,11 @@ try {
                 width: '294px',
                 paddingLeft: '18px'
             },
-        },
+        } as InputStyles,
         labelStyles: {
-        },
+        } as LabelStyles,
         errorTextStyles: {
-        },
+        } as ErrorTextStyles,
     };
 
     const expiryDateStyles = {
@@ -87,11 +94,11 @@ try {
                 lineHeight: '21px',
                 width: '49px'
             },
-        },
+        } as InputStyles,
         labelStyles: {
-        },
+        } as LabelStyles,
         errorTextStyles: {
-        },
+        } as ErrorTextStyles,
     };
 
     const cvvStyles = {
@@ -104,14 +111,14 @@ try {
                 lineHeight: '21px',
                 width: '30px'
             },
-        },
+        } as InputStyles,
         labelStyles: {
-        },
+        } as LabelStyles,
         errorTextStyles: {
             base: {
                 color: 'red'
             }
-        },
+        } as ErrorTextStyles,
     };
 
     const containerOptions: ContainerOptions = {
@@ -134,39 +141,42 @@ try {
     // create collect Container
     const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions) as ComposableContainer;
 
-    const cardHolderNameElement: ComposableElement = composableContainer.create({
+    const cardHolderNameInput: CollectElementInput = {
         table: 'pii_fields',
         column: 'first_name',
         ...cardholderStyles,
         label: 'Cardholder Name',
         placeholder: 'cardholder name',
         type: Skyflow.ElementType.CARDHOLDER_NAME,
-    });
+    }
+    const cardHolderNameElement: ComposableElement = composableContainer.create(cardHolderNameInput);
 
-    const cardNumberElement: ComposableElement = composableContainer.create({
+    const cardNumberInput: CollectElementInput = {
         table: 'pii_fields',
         column: 'primary_card.card_number',
         ...cardNumberStyles,
         type: Skyflow.ElementType.CARD_NUMBER,
         placeholder: 'XXXX XXXX XXXX XXXX'
-    });
+    }
+    const cardNumberElement: ComposableElement = composableContainer.create(cardNumberInput);
 
-    const expiryDateElement: ComposableElement = composableContainer.create({
+    const expiryDateInput: CollectElementInput = {
         table: 'cards',
         column: 'expiry_date',
         ...expiryDateStyles,
         placeholder: 'MM/YY',
         type: Skyflow.ElementType.EXPIRATION_DATE,
-    });
+    }
+    const expiryDateElement: ComposableElement = composableContainer.create(expiryDateInput);
 
-
-    const cvvElement: ComposableElement = composableContainer.create({
+    const cvvInput: CollectElementInput = {
         table: 'pii_fields',
         column: 'primary_card.cvv',
         ...cvvStyles,
         placeholder: 'CVC',
         type: Skyflow.ElementType.CVV,
-    });
+    }
+    const cvvElement: ComposableElement = composableContainer.create(cvvInput);
 
     // mount the container
     composableContainer.mount('#composableContainer');
@@ -186,7 +196,7 @@ try {
     };
 
     // Validation rules for cvv element.
-    const length3Rule = {
+    const length3Rule: IValidationRule = {
         type: Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
         params: {
             max: 3,
@@ -194,7 +204,7 @@ try {
         },
     };
 
-    const length4Rule = {
+    const length4Rule: IValidationRule = {
         type: Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
         params: {
             min: 4,
@@ -208,10 +218,13 @@ try {
         if (state.isValid && state.value) {
             // update cvv element validation rule.
             if (findCvvLength(state.value) === 3) {
-                cvvElement.update({ validations: [length3Rule] });
+                const updateOptions: CollectElementInput = { validations: [length3Rule] }
+                cvvElement.update(updateOptions);
             }
-            else
-                cvvElement.update({ validations: [length4Rule] });
+            else {
+                const updateOptions: CollectElementInput = { validations: [length4Rule] }
+                cvvElement.update(updateOptions);
+            }
         }
     });
 
@@ -219,12 +232,11 @@ try {
     const updateElementsButton = document.getElementById('updateElements');
     if (updateElementsButton) {
         updateElementsButton.addEventListener('click', () => {
-            
             // update label,placeholder on cardholderName,
             cardHolderNameElement.update({
                 label: 'CARDHOLDER NAME',
                 placeholder: 'Eg: John'
-            });
+            } as CollectElementInput);
 
             // update styles on card number
             cardNumberElement.update({
@@ -233,13 +245,13 @@ try {
                         color: 'blue'
                     }
                 }
-            });
+            } as CollectElementInput);
 
             // update table,coloumn on expiry date
             expiryDateElement.update({
                 table: 'pii_fields',
                 column: 'primary_card.expiry_date',
-            });
+            } as CollectElementInput);
 
         });
     }
@@ -250,7 +262,7 @@ try {
         collectButton.addEventListener('click', () => {
             const collectResponse: Promise<CollectResponse> = composableContainer.collect();
             collectResponse
-                .then(response => {
+                .then((response: CollectResponse) => {
                     console.log(response);
                     response = response;
                     const responseElement = document.getElementById('collectResponse');
@@ -271,18 +283,18 @@ try {
                                 color: '#1d1d1d',
                                 marginTop: '4px',
                             },
-                        },
+                        } as InputStyles,
                         labelStyles: {
                             base: {
                                 fontSize: '16px',
                                 fontWeight: 'bold',
                             },
-                        },
+                        } as LabelStyles,
                         errorTextStyles: {
                             base: {
                                 color: '#f44336',
                             },
-                        },
+                        } as ErrorTextStyles,
                     };
 
                     // Create Reveal Elements With Tokens.
@@ -294,7 +306,6 @@ try {
                         token: fieldsTokenData.primary_card.card_number,
                         label: 'Card Number',
                         ...revealStyleOptions,
-
                     });
                     revealCardNumberElement.mount('#revealCardNumber');
 
@@ -302,7 +313,6 @@ try {
                         token: fieldsTokenData.primary_card.cvv,
                         label: 'Cvv',
                         ...revealStyleOptions,
-
                     });
                     revealCardCvvElement.mount('#revealCvv');
 
@@ -325,22 +335,20 @@ try {
                     if (revealButton) {
                         revealButton.addEventListener('click', () => {
                             const revealResonse: Promise<RevealResponse> = revealContainer.reveal();
-                            revealResonse.then(res => {
+                            revealResonse.then((res: RevealResponse) => {
                                 console.log(res);
                             })
-                            .catch(err => {
+                            .catch((err: RevealResponse) => {
                                 console.log(err);
                             });
                         });
                     }
                 })
-                .catch(err => {
+                .catch((err: CollectResponse) => {
                     console.log(err);
                 });
         });
     }
-
-
 } catch (err: unknown) {
     console.error(err);
 }

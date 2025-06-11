@@ -4,12 +4,18 @@
 import Skyflow, {
   CollectContainer, 
   CollectElement,
+  CollectElementInput,
+  CollectElementOptions,
   CollectResponse,
+  ErrorTextStyles,
+  InputStyles,
+  ISkyflow,  
+  LabelStyles,
 } from "skyflow-js";
 
 try {
 
-  const skyflow = Skyflow.init({
+  const config: ISkyflow = {
     vaultID: '<VAULT_ID>',
     vaultURL: '<VAULT_URL>',
     getBearerToken: () => {
@@ -31,7 +37,8 @@ try {
       logLevel: Skyflow.LogLevel.ERROR,
       env: Skyflow.Env.PROD,
     }
-  });
+  }
+  const skyflow = Skyflow.init(config);
 
   // Create collect Container.
   const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
@@ -54,68 +61,85 @@ try {
       invalid: {
         color: '#f44336',
       },
-    },
+    } as InputStyles,
     labelStyles: {
       base: {
         fontSize: '16px',
         fontWeight: 'bold',
       },
-    },
+    } as LabelStyles,
     errorTextStyles: {
       base: {
         color: '#f44336',
       },
-    },
+    } as ErrorTextStyles,
   };
 
   // Create collect elements.
-  const cardNumberElement: CollectElement = collectContainer.create({
+  const cardNumberInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'primary_card.card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
     type: Skyflow.ElementType.CARD_NUMBER,
-  }, {
+  };
+  const cardNumberOptions: CollectElementOptions = {
     format: 'XXXX-XXXX-XXXX-XXXX' // inbuilt format
-  });
+  };
+  const cardNumberElement: CollectElement = collectContainer.create(
+    cardNumberInput, 
+    cardNumberOptions
+  );
 
-  const ssnElement: CollectElement = collectContainer.create({
+  const ssnInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'ssn',
     ...collectStylesOptions,
     label: 'SSN',
     placeholder: 'ssn',
     type: Skyflow.ElementType.INPUT_FIELD,
-  }, {
+  };
+  const ssnOptions: CollectElementOptions = {
     format: 'XXX-XX-XXXX',
     translation: { X: '[0-9]' } // translates each 'X' in format string accepts a digit ranging from 0-9.
-  });
+  };
+  const ssnElement: CollectElement = collectContainer.create(ssnInput, ssnOptions);
 
-  const expiryDateElement: CollectElement = collectContainer.create({
+  const expiryDateInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'primary_card.expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
     type: Skyflow.ElementType.EXPIRATION_DATE,
-  }, {
+  };
+  const ExpiryDateOptions: CollectElementOptions =  {
     format: 'MM/YYYY' // inbuilt format.
-  });
+  };
+  const expiryDateElement: CollectElement = collectContainer.create(
+    expiryDateInput,
+    ExpiryDateOptions,
+  );
 
-  const passportNumberElement: CollectElement = collectContainer.create({
+  const passportNumberInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'passport_number',
     ...collectStylesOptions,
     label: 'Passport Number',
     placeholder: 'passport number',
     type: Skyflow.ElementType.INPUT_FIELD,
-  }, {
+  };
+  const passportNumberOptions: CollectElementOptions = {
     format: 'XXYYYYYYY',
     translation: { X: '[A-Z]', Y: '[0-9]' }
     // translates each 'X' in format string accepts a uppercase alphabet A to Z.
     // and each 'Y' in format string accepts a digit ranging from 0-9.
-  });
+  };
+  const passportNumberElement: CollectElement = collectContainer.create(
+    passportNumberInput,
+    passportNumberOptions,
+  );
 
   // Mount the elements.
   cardNumberElement.mount('#collectCardNumber');
@@ -129,7 +153,7 @@ try {
     collectButton.addEventListener('click', () => {
       const collectResponse: Promise<CollectResponse> = collectContainer.collect();
       collectResponse
-        .then((response) => {
+        .then((response: CollectResponse) => {
           console.log(response);
           response = response;
           const responseElement = document.getElementById('collectResponse');
@@ -137,7 +161,7 @@ try {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
-        .catch((err) => {
+        .catch((err: CollectResponse) => {
           const errorElement = document.getElementById('collectResponse');
           if (errorElement){
             errorElement.innerHTML = JSON.stringify(err, null, 2);
@@ -146,6 +170,6 @@ try {
         });
     });
   }
-} catch (err) {
+} catch (err: unknown) {
   console.log(err);
 }

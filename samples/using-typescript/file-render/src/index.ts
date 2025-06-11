@@ -2,13 +2,16 @@
   Copyright (c) 2025 Skyflow, Inc.
 */
 import Skyflow, {
+  ErrorTextStyles,
+  ISkyflow,
+  InputStyles,
+  IRevealElementInput,
   RevealContainer,
   RevealElement,
-  RenderFileResponse,
 } from "skyflow-js";
 
 try {
-  const skyflow = Skyflow.init({
+  const config: ISkyflow = {
     vaultID: "<VAULT_ID>",
     vaultURL: "<VAULT_URL>",
     getBearerToken: () => {
@@ -26,7 +29,8 @@ try {
         Http.send();
       });
     },
-  });
+  }
+  const skyflow = Skyflow.init(config);
 
   const renderStyleOptions = {
     inputStyles: {
@@ -39,12 +43,12 @@ try {
         height: "250px",
         width: "400px",
       },
-    },
+    } as InputStyles,
     errorTextStyles: {
       base: {
         color: "#f44336",
       },
-    },
+    } as ErrorTextStyles,
   };
 
   const renderStyleOptions2 = {
@@ -58,32 +62,34 @@ try {
         height: "260px",
         width: "400px",
       },
-    },
+    } as InputStyles,
     errorTextStyles: {
       base: {
         color: "yellow",
       },
-    },
+    } as ErrorTextStyles,
   };
 
   const renderContainer = skyflow.container(Skyflow.ContainerType.REVEAL) as RevealContainer;
 
-  const renderFileElement1: RevealElement = renderContainer.create({
+  const renderFileInput1: IRevealElementInput = {
     ...renderStyleOptions,
     skyflowID: "<SKYFLOW_ID1>",
     column: "<COLUMN_NAME1>",
     table: "<TABLE1>",
     altText: "Alt text 1",
-  });
+  }
+  const renderFileElement1: RevealElement = renderContainer.create(renderFileInput1);
   renderFileElement1.mount("#renderFileElement1");
 
-  const renderFileElement2: RevealElement = renderContainer.create({
+  const renderFileInput2: IRevealElementInput = {
     ...renderStyleOptions2,
     skyflowID: "<SKYFLOW_ID2>",
     column: "<COLUMN_NAME2>",
     table: "<TABLE2>",
     altText: "Alt text 2",
-  });
+  }
+  const renderFileElement2: RevealElement = renderContainer.create(renderFileInput2);
 
   renderFileElement2.mount("#renderFileElement2");
 
@@ -92,22 +98,22 @@ try {
   if (renderButton) {
     renderButton.addEventListener("click", () => {
       const renderFile1Response = renderFileElement1.renderFile();
-      renderFile1Response.then((res) => {
+      renderFile1Response.then((res: any) => {
         console.log("response 1", res);
       })
-      .catch((err) => {
+      .catch((err: any) => {
         console.log("Error 1", err);
       });
 
       const renderFile2Response = renderFileElement2.renderFile();
-      renderFile2Response.then((res) => {
+      renderFile2Response.then((res: any) => {
         console.log("response 2", res);
       })
-      .catch((err) => {
+      .catch((err: any) => {
         console.log("Error 2", err);
       });
     });
   }
-} catch (err) {
+} catch (err: unknown) {
   console.log(err);
 }

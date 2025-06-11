@@ -4,7 +4,15 @@
 import Skyflow, {
   CollectContainer, 
   CollectElement,
+  CollectElementInput,
+  CollectElementOptions,
   CollectResponse,
+  ErrorTextStyles,
+  InputStyles,
+  IRevealElementInput,
+  ISkyflow,
+  IValidationRule,
+  LabelStyles,
   RevealContainer,
   RevealElement,
   RevealResponse,
@@ -16,7 +24,7 @@ try {
     revealView.style.visibility = "hidden";
   }
   let response;
-  const skyflow = Skyflow.init({
+  const config: ISkyflow = {
     vaultID: "<VAULT_ID>",
     vaultURL: "<VAULT_URL>",
     getBearerToken: () => {
@@ -38,7 +46,8 @@ try {
       logLevel: Skyflow.LogLevel.ERROR,
       env: Skyflow.Env.PROD,
     },
-  });
+  }
+  const skyflow = Skyflow.init(config);
 
   // Create collect Container.
   const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
@@ -66,7 +75,7 @@ try {
         "@import":
           'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
       },
-    },
+    } as InputStyles,
     labelStyles: {
       base: {
         fontSize: "16px",
@@ -80,7 +89,7 @@ try {
       requiredAsterisk: {
         color: "red",
       },
-    },
+    } as LabelStyles,
     errorTextStyles: {
       base: {
         color: "#f44336",
@@ -90,50 +99,55 @@ try {
         "@import":
           'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
       },
-    },
+    } as ErrorTextStyles,
   };
 
   // Create collect elements.
+  const cardNumberInput: CollectElementInput = {
+    table: "pii_fields",
+    column: "card_number",
+    ...collectStylesOptions,
+    placeholder: "card number",
+    label: "Card Number",
+    type: Skyflow.ElementType.CARD_NUMBER,
+  };
+  const cardNumberOptions: CollectElementOptions = {
+    required: true,
+  };
   const cardNumberElement: CollectElement = collectContainer.create(
-    {
-      table: "pii_fields",
-      column: "card_number",
-      ...collectStylesOptions,
-      placeholder: "card number",
-      label: "Card Number",
-      type: Skyflow.ElementType.CARD_NUMBER,
-    },
-    {
-      required: true,
-    }
+    cardNumberInput,
+    cardNumberOptions
   );
 
-  const cvvElement: CollectElement = collectContainer.create({
+  const cvvInput: CollectElementInput = {
     table: "pii_fields",
     column: "cvv",
     ...collectStylesOptions,
     label: "Cvv",
     placeholder: "cvv",
     type: Skyflow.ElementType.CVV,
-  });
+  }
+  const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
-  const expiryDateElement: CollectElement = collectContainer.create({
+  const expiryDateInput: CollectElementInput = {
     table: "pii_fields",
     column: "primary_card.expiry_date",
     ...collectStylesOptions,
     label: "Expiry Date",
     placeholder: "MM/YYYY",
     type: Skyflow.ElementType.EXPIRATION_DATE,
-  });
+  }
+  const expiryDateElement: CollectElement = collectContainer.create(expiryDateInput);
 
-  const cardHolderNameElement: CollectElement = collectContainer.create({
+  const cardholderNameInput: CollectElementInput = {
     table: "pii_fields",
     column: "name",
     ...collectStylesOptions,
     label: "Card Holder Name",
     placeholder: "cardholder name",
     type: Skyflow.ElementType.CARDHOLDER_NAME,
-  });
+  }
+  const cardHolderNameElement: CollectElement = collectContainer.create(cardholderNameInput);
 
   // Mount the elements.
   cardNumberElement.mount("#collectCardNumber");
@@ -142,14 +156,13 @@ try {
   cardHolderNameElement.mount("#collectCardholderName");
 
   // Sample helper function to determine cvv length.
-  const findCvvLength = (cardBinValue) => {
-    console.log("Came here..!");
+  const findCvvLength = (cardBinValue: string) => {
     const amexRegex = /^3[78][0-9]{4}$/;
     return amexRegex.test(cardBinValue.slice(0, 6)) ? 4 : 3;
   };
 
   // Validation rules for cvv element.
-  const length3Rule = {
+  const length3Rule: IValidationRule = {
     type: Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
     params: {
       max: 3,
@@ -157,7 +170,7 @@ try {
     },
   };
 
-  const length4Rule = {
+  const length4Rule: IValidationRule = {
     type: Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
     params: {
       min: 4,
@@ -166,13 +179,17 @@ try {
   };
 
   // OnChange listener for cardNumber element.
-  cardNumberElement.on(Skyflow.EventName.CHANGE, (state) => {
+  cardNumberElement.on(Skyflow.EventName.CHANGE, (state: any) => {
     console.log("update validation", state);
     if (state.isValid) {
       // update cvv element validation rule.
       if (findCvvLength(state.value) === 3) {
-        cvvElement.update({ validations: [length3Rule] });
-      } else cvvElement.update({ validations: [length4Rule] });
+        const updateOptions: CollectElementInput = { validations: [length3Rule] };
+        cvvElement.update(updateOptions);
+      } else {
+        const updateOptions: CollectElementInput = { validations: [length4Rule] };
+        cvvElement.update(updateOptions);
+      }
     }
   });
 
@@ -187,7 +204,7 @@ try {
         label: "CARDHOLDER NAME",
         placeholder: "Eg: John",
         type: Skyflow.ElementType.PIN,
-      });
+      } as CollectElementInput);
 
       // update styles on card number
       cardNumberElement.update({
@@ -196,13 +213,13 @@ try {
             color: "blue",
           },
         },
-      });
+      } as CollectElementInput);
 
       // update table,coloumn on expiry date
       expiryDateElement.update({
         table: "pii_fields",
         column: "expiration_date",
-      });
+      } as CollectElementInput);
     });
   }
 
@@ -212,7 +229,7 @@ try {
     collectButton.addEventListener("click", () => {
       const collectResponse: Promise<CollectResponse> = collectContainer.collect();
       collectResponse
-        .then((response) => {
+        .then((response: CollectResponse) => {
           console.log(response);
           response = response;
           const responseElement = document.getElementById('collectResponse');
@@ -220,7 +237,7 @@ try {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
-        .catch((err) => {
+        .catch((err: CollectResponse) => {
           const errorElement = document.getElementById('collectResponse');
           if (errorElement){
             errorElement.innerHTML = JSON.stringify(err, null, 2);
@@ -246,7 +263,7 @@ try {
         "@import":
           'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
       },
-    },
+    } as InputStyles,
     labelStyles: {
       base: {
         fontSize: "16px",
@@ -257,7 +274,7 @@ try {
         "@import":
           'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
       },
-    },
+    } as LabelStyles,
     errorTextStyles: {
       base: {
         color: "#f44336",
@@ -268,40 +285,44 @@ try {
         "@import":
           'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
       },
-    },
+    } as ErrorTextStyles,
   };
 
   // Create Reveal Elements With Tokens.
   const fieldsTokenData = response.records[0].fields;
   const revealContainer = skyflow.container(Skyflow.ContainerType.REVEAL) as RevealContainer;
   
-  const revealCardNumberElement: RevealElement = revealContainer.create({
+  const revealCardNumberInput: IRevealElementInput = {
     token: fieldsTokenData.card_number,
     label: "Card Number",
     ...revealStyleOptions,
-  });
+  };
+  const revealCardNumberElement: RevealElement = revealContainer.create(revealCardNumberInput);
   revealCardNumberElement.mount("#revealCardNumber");
 
-  const revealCardCvvElement: RevealElement = revealContainer.create({
+  const revealCardCvvInput: IRevealElementInput = {
     token: fieldsTokenData.cvv,
     label: "CVV",
     ...revealStyleOptions,
     altText: "###",
-  });
+  };
+  const revealCardCvvElement: RevealElement = revealContainer.create(revealCardCvvInput);
   revealCardCvvElement.mount("#revealCvv");
 
-  const revealCardExpiryElement: RevealElement = revealContainer.create({
+  const revealCardExpiryInput: IRevealElementInput = {
     token: fieldsTokenData.expiration_date,
     label: "Card Expiry Date",
     ...revealStyleOptions,
-  });
+  };
+  const revealCardExpiryElement: RevealElement = revealContainer.create(revealCardExpiryInput);
   revealCardExpiryElement.mount("#revealExpiryDate");
 
-  const revealCardholderNameElement: RevealElement = revealContainer.create({
+  const revealCardholderNameInput: IRevealElementInput = {
     token: fieldsTokenData.name,
     label: "Card Holder Name",
     ...revealStyleOptions,
-  });
+  };
+  const revealCardholderNameElement: RevealElement = revealContainer.create(revealCardholderNameInput);
   revealCardholderNameElement.mount("#revealCardholderName");
 
   const revealButton = document.getElementById("revealPCIData");
@@ -320,7 +341,7 @@ try {
             color: "#aa11aa",
           },
         },
-      });
+      } as IRevealElementInput);
 
       // update label,labelSyles on card number
       revealCardNumberElement.update({
@@ -330,7 +351,7 @@ try {
             borderWidth: "5px",
           },
         },
-      });
+      } as IRevealElementInput);
 
       // update redaction,inputStyles on expiry date
       revealCardExpiryElement.update({
@@ -341,7 +362,7 @@ try {
             color: "#fff",
           },
         },
-      });
+      } as IRevealElementInput);
 
       // update altText,token,inputStyles,errorTextStyles on cvv
       revealCardCvvElement.update({
@@ -361,21 +382,21 @@ try {
             border: "1px #f00 solid",
           },
         },
-      });
+      } as IRevealElementInput);
     });
   }
 
   if (revealButton) {
     revealButton.addEventListener("click", () => {
       const revealResponse: Promise<RevealResponse> = revealContainer.reveal();
-        revealResponse.then((res) => {
+        revealResponse.then((res: RevealResponse) => {
           console.log(res);
         })
-        .catch((err) => {
+        .catch((err: RevealResponse) => {
           console.log(err);
         });
     });
   }
-} catch (err) {
+} catch (err: unknown) {
   console.log(err);
 }

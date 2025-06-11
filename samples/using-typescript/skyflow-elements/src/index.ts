@@ -4,7 +4,14 @@
 import Skyflow, {
   CollectContainer,
   CollectElement,
+  CollectElementInput,
+  CollectElementOptions,
   CollectResponse,
+  ErrorTextStyles,
+  ISkyflow,
+  InputStyles,
+  IRevealElementInput,
+  LabelStyles,
   RevealContainer,
   RevealElement,
   RevealResponse,
@@ -15,7 +22,7 @@ try {
   if (revealView) {
     revealView.style.visibility = 'hidden';
   }
-  const skyflow = Skyflow.init({
+  const config: ISkyflow = {
     vaultID: '<VAULT_ID>',
     vaultURL: '<VAULT_URL>',
     getBearerToken: () => {
@@ -37,7 +44,8 @@ try {
       logLevel: Skyflow.LogLevel.ERROR,
       env: Skyflow.Env.PROD,
     }
-  });
+  }
+  const skyflow = Skyflow.init(config);
 
   // Create collect Container.
   const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
@@ -64,7 +72,7 @@ try {
       global: {
         '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
       }
-    },
+    } as InputStyles,
     labelStyles: {
       base: {
         fontSize: '16px',
@@ -77,7 +85,7 @@ try {
       requiredAsterisk:{
         color: 'red'
       }
-    },
+    } as LabelStyles,
     errorTextStyles: {
       base: {
         color: '#f44336',
@@ -86,47 +94,52 @@ try {
       global: {
         '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
       }
-    },
+    } as ErrorTextStyles,
   };
 
   // Create collect elements.
-  const cardNumberElement: CollectElement = collectContainer.create({
+  const cardNumberInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'primary_card.card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
     type: Skyflow.ElementType.CARD_NUMBER,
-  },{
+  }
+  const cardNumberOptions: CollectElementOptions = {
     required: true
-  });
+  }
+  const cardNumberElement: CollectElement = collectContainer.create(cardNumberInput, cardNumberOptions);
 
-  const cvvElement: CollectElement = collectContainer.create({
+  const cvvInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'primary_card.cvv',
     ...collectStylesOptions,
     label: 'Cvv',
     placeholder: 'cvv',
     type: Skyflow.ElementType.CVV,
-  });
+  }
+  const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
-  const expiryDateElement: CollectElement = collectContainer.create({
+  const expiryDateInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'primary_card.expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
     type: Skyflow.ElementType.EXPIRATION_DATE,
-  });
+  }
+  const expiryDateElement: CollectElement = collectContainer.create(expiryDateInput);
 
-  const cardHolderNameElement: CollectElement = collectContainer.create({
+  const cardholderNameInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'first_name',
     ...collectStylesOptions,
     label: 'Card Holder Name',
     placeholder: 'cardholder name',
     type: Skyflow.ElementType.CARDHOLDER_NAME,
-  });
+  }
+  const cardHolderNameElement: CollectElement = collectContainer.create(cardholderNameInput);
 
   // Mount the elements.
   cardNumberElement.mount('#collectCardNumber');
@@ -140,7 +153,7 @@ try {
     collectButton.addEventListener('click', () => {
       const collectResponse: Promise<CollectResponse> = collectContainer.collect();
       collectResponse
-        .then((response) => {
+        .then((response: CollectResponse) => {
           console.log(response);
           response = response;
           const responseElement = document.getElementById('collectResponse');
@@ -192,35 +205,40 @@ try {
           const revealContainer = skyflow.container(
             Skyflow.ContainerType.REVEAL
           ) as RevealContainer;
-          const revealCardNumberElement: RevealElement = revealContainer.create({
+          
+          const revealCardNumberInput: IRevealElementInput = {
             token: fieldsTokenData.primary_card.card_number,
             label: 'Card Number',
             redaction: Skyflow.RedactionType.MASKED,
             ...revealStyleOptions,
-          });
+          }
+          const revealCardNumberElement: RevealElement = revealContainer.create(revealCardNumberInput);
           revealCardNumberElement.mount('#revealCardNumber');
 
-          const revealCardCvvElement: RevealElement = revealContainer.create({
+          const revealCardCvvInput: IRevealElementInput = {
             token: fieldsTokenData.primary_card.cvv,
             label: 'CVV',
             redaction: Skyflow.RedactionType.REDACTED,
             ...revealStyleOptions,
             altText: '###',
-          });
+          }
+          const revealCardCvvElement: RevealElement = revealContainer.create(revealCardCvvInput);
           revealCardCvvElement.mount('#revealCvv');
 
-          const revealCardExpiryElement: RevealElement = revealContainer.create({
+          const revealCardExpiryInput: IRevealElementInput = {
             token: fieldsTokenData.primary_card.expiry_date,
             label: 'Card Expiry Date',
             ...revealStyleOptions,
-          });
+          }
+          const revealCardExpiryElement: RevealElement = revealContainer.create(revealCardExpiryInput);
           revealCardExpiryElement.mount('#revealExpiryDate');
 
-          const revealCardholderNameElement: RevealElement = revealContainer.create({
+          const revealCardholderNameInput: IRevealElementInput = {
             token: fieldsTokenData.first_name,
             label: 'Card Holder Name',
             ...revealStyleOptions,
-          });
+          }
+          const revealCardholderNameElement: RevealElement = revealContainer.create(revealCardholderNameInput);
           revealCardholderNameElement.mount('#revealCardholderName');
 
           const revealButton = document.getElementById('revealPCIData');
@@ -228,19 +246,19 @@ try {
           if (revealButton) {
             revealButton.addEventListener('click', () => {
               const revealResponse: Promise<RevealResponse> = revealContainer.reveal()
-              revealResponse.then((res) => {
+              revealResponse.then((res: RevealResponse) => {
                 console.log(res);
-              }).catch((err) => {
+              }).catch((err: RevealResponse) => {
                 console.log(err);
               });
             });
           }
         })
-        .catch((err) => {
+        .catch((err: CollectResponse) => {
           console.log(err);
         });
     });
   }
-} catch (err) {
+} catch (err: unknown) {
   console.log(err);
 }

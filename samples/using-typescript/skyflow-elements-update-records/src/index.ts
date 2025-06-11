@@ -4,10 +4,18 @@
 import Skyflow, { 
   CollectContainer,
   CollectElement,
+  CollectElementInput,
   CollectResponse,
+  ErrorTextStyles,
+  ICollectOptions,
+  IInsertRecordInput,
+  IInsertRecord,
+  InputStyles,
+  ISkyflow,
+  LabelStyles,
 } from 'skyflow-js';
 try {
-  const skyflow = Skyflow.init({
+  const config: ISkyflow = {
     vaultID: '<VAULT_ID>',
     vaultURL: '<VAULT_URL>',
     getBearerToken: () => {
@@ -29,7 +37,8 @@ try {
       logLevel: Skyflow.LogLevel.ERROR,
       env: Skyflow.Env.PROD,
     },
-  });
+  }
+  const skyflow = Skyflow.init(config);
   // Create collect Container.
   const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
 
@@ -51,22 +60,22 @@ try {
       invalid: {
         color: '#f44336',
       },
-    },
+    } as InputStyles,
     labelStyles: {
       base: {
         fontSize: '16px',
         fontWeight: 'bold',
       },
-    },
+    } as LabelStyles,
     errorTextStyles: {
       base: {
         color: '#f44336',
       },
-    },
+    } as ErrorTextStyles,
   };
 
   // Create collect elements.
-  const cardNumberElement: CollectElement = collectContainer.create({
+  const cardNumberInput: CollectElementInput = {
     table: 'table1',
     column: 'card_number',
     ...collectStylesOptions,
@@ -74,9 +83,10 @@ try {
     label: 'Card Number',
     skyflowID: '',
     type: Skyflow.ElementType.CARD_NUMBER,
-  });
+  };
+  const cardNumberElement: CollectElement = collectContainer.create(cardNumberInput);
 
-  const cvvElement: CollectElement = collectContainer.create({
+  const cvvInput: CollectElementInput = {
     table: 'table1',
     column: 'cvv',
     ...collectStylesOptions,
@@ -84,9 +94,10 @@ try {
     placeholder: 'cvv',
     type: Skyflow.ElementType.CVV,
     skyflowID: '',
-  });
+  };
+  const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
-  const expiryDateElement: CollectElement = collectContainer.create({
+  const expiryDateInput: CollectElementInput = {
     table: 'table1',
     column: 'expiry_date',
     ...collectStylesOptions,
@@ -94,16 +105,18 @@ try {
     placeholder: 'MM/YYYY',
     type: Skyflow.ElementType.EXPIRATION_DATE,
     skyflowID: '',
-  });
+  };
+  const expiryDateElement: CollectElement = collectContainer.create(expiryDateInput);
 
-  const cardHolderNameElement: CollectElement = collectContainer.create({
+  const cardHolderNameInput: CollectElementInput = {
     table: 'table2',
     column: 'name',
     ...collectStylesOptions,
     label: 'Card Holder Name',
     placeholder: 'cardholder name',
     type: Skyflow.ElementType.CARDHOLDER_NAME,
-  });
+  };
+  const cardHolderNameElement: CollectElement = collectContainer.create(cardHolderNameInput);
 
   // Mount the elements.
   cardNumberElement.mount('#collectCardNumber');
@@ -113,38 +126,40 @@ try {
 
   // Collect all elements data.
   const collectButton = document.getElementById('collectPCIData');
-  const records = {
-    tokens: true,
-    additionalFields: {
-      records: [
-        {
-          table: 'table1',
-          fields: {
-            skyflowID: '',
-            gender: 'MALE',
-          },
-        },
-        {
-          table: 'table2',
-          fields: {
-            gender: 'MALE',
-          },
-        },
-      ],
+  const records: Array<IInsertRecord> = [
+    {
+      table: 'table1',
+      fields: {
+        skyflowID: '',
+        gender: 'MALE',
+      },
     },
+    {
+      table: 'table2',
+      fields: {
+        gender: 'MALE',
+      },
+    },
+  ];
+  const additionalFields: IInsertRecordInput = {
+    records: records,
+  };
+  const collectOptions: ICollectOptions = {
+    tokens: true,
+    additionalFields: additionalFields,
   };
   if (collectButton) {
     collectButton.addEventListener('click', () => {
-      const collectResponse: Promise<CollectResponse> = collectContainer.collect(records);
+      const collectResponse: Promise<CollectResponse> = collectContainer.collect(collectOptions);
       collectResponse
-        .then((response) => {
+        .then((response: CollectResponse) => {
           console.log(response);
           const responseElement = document.getElementById('collectResponse');
           if (responseElement) {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
-        .catch((err) => {
+        .catch((err: CollectResponse) => {
           const errorElement = document.getElementById('collectResponse');
           if (errorElement){
             errorElement.innerHTML = JSON.stringify(err, null, 2);
@@ -153,6 +168,6 @@ try {
         });
     });
   }
-} catch (err) {
+} catch (err: unknown) {
   console.log(err);
 }

@@ -3,7 +3,7 @@
   Copyright (c) 2025 Skyflow, Inc.
 */
 
-import Skyflow from 'skyflow-js';
+import Skyflow, { ThreeDSBrowserDetails } from 'skyflow-js';
 
 try {
   const actionButtons = document.getElementById("actionButtons") as HTMLElement;
@@ -11,7 +11,7 @@ try {
   
   if (getDetailsButton) {
     getDetailsButton.addEventListener("click", () => {
-      const browserDetails = Skyflow.ThreeDS.getBrowserDetails();
+      const browserDetails: ThreeDSBrowserDetails = Skyflow.ThreeDS.getBrowserDetails();
       const detailsElement = document.getElementById("threeDSBrowserDetails");
       if (detailsElement) {
         detailsElement.innerHTML = JSON.stringify(browserDetails);

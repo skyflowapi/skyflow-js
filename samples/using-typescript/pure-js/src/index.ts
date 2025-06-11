@@ -2,8 +2,13 @@
   Copyright (c) 2025 Skyflow, Inc.
 */
 import Skyflow, { 
-  InsertResponse, 
   DetokenizeResponse,
+  IDetokenizeInput,
+  IInsertRecordInput,
+  IInsertRecords as IInsertRecord,
+  InsertResponse,
+  IRevealRecord,
+  ISkyflow,
 } from 'skyflow-js';
 
 try {
@@ -12,7 +17,7 @@ try {
     revealView.style.visibility = 'hidden';
   }
 
-  const skyflow = Skyflow.init({
+  const config: ISkyflow = {
     vaultID: '<VAULT_ID>',
     vaultURL: '<VAULT_URL>',
     getBearerToken: () => {
@@ -30,10 +35,10 @@ try {
         Http.send();
       });
     },
-  });
+  }
+  const skyflow = Skyflow.init(config);
 
   // form insert request
-
   const insertButton = document.getElementById('insertButton');
   if (insertButton) {
     insertButton.addEventListener('click', () => {
@@ -52,22 +57,24 @@ try {
       const cardExpiryData = cardExpiryElement.value;
       const cardholderNameData = cardholderNameElement.value;
 
-      const response: Promise<InsertResponse> = skyflow.insert({
-        records: [
-          {
-            fields: {
-              primary_card: {
-                cvv: cardCvvData,
-                card_number: cardNumberData,
-                expiry_date: cardExpiryData,
-              },
-              first_name: cardholderNameData,
-
+      const insertRecords: Array<IInsertRecord> = [
+        {
+          fields: {
+            primary_card: {
+              cvv: cardCvvData,
+              card_number: cardNumberData,
+              expiry_date: cardExpiryData,
             },
-            table: 'pii_fields',
+            first_name: cardholderNameData,
+
           },
-        ],
-      });
+          table: 'pii_fields',
+        },
+      ];
+      const insertRecordsInput: IInsertRecordInput = {
+        records: insertRecords,
+      };
+      const response: Promise<InsertResponse> = skyflow.insert(insertRecordsInput);
 
       response
         .then(
@@ -110,31 +117,34 @@ try {
             const revealButton = document.getElementById('revealButton');
             if (revealButton) {
               revealButton.addEventListener('click', () => {
-                const revealResult: Promise<DetokenizeResponse> = skyflow.detokenize({
-                  records: [
-                    {
-                      token: fieldsTokenData.primary_card.card_number,
-                      redaction: Skyflow.RedactionType.MASKED
-                    },
-                    {
-                      token: fieldsTokenData.primary_card.cvv,
-                      redaction: Skyflow.RedactionType.REDACTED
-                    },
-                    {
-                      token: fieldsTokenData.primary_card.expiry_date,
-                    },
-                    {
-                      token: fieldsTokenData.first_name,
-                    },
-                  ],
-                });
-                revealResult
+                const detokenizeRecords: Array<IRevealRecord> = [
+                  {
+                    token: fieldsTokenData.primary_card.card_number,
+                    redaction: Skyflow.RedactionType.MASKED
+                  },
+                  {
+                    token: fieldsTokenData.primary_card.cvv,
+                    redaction: Skyflow.RedactionType.REDACTED
+                  },
+                  {
+                    token: fieldsTokenData.primary_card.expiry_date,
+                  },
+                  {
+                    token: fieldsTokenData.first_name,
+                  },
+                ];
+                const detokenizeInput: IDetokenizeInput = {
+                  records: detokenizeRecords
+                };
+                const detokenizeResult: Promise<DetokenizeResponse> = skyflow.detokenize(detokenizeInput);
+
+                detokenizeResult
                   .then((res: DetokenizeResponse) => {
                     const revealResponseElement = document.getElementById('revealResponse');
                     if (revealResponseElement) {
                       revealResponseElement.innerHTML = JSON.stringify(res, null, 2);
                     }
-                    res.records.map((record) => {
+                    res.records.map((record: Record<string, any>) => {
                       const recordKey = record['token'];
                       const ele = document.getElementById(recordKey);
                       if (ele) {
@@ -142,7 +152,7 @@ try {
                       }
                     });
                   })
-                  .catch((err) => {
+                  .catch((err: DetokenizeResponse) => {
                     const revealResponseElement = document.getElementById('revealResponse');
                     if (revealResponseElement) {
                       revealResponseElement.innerHTML = JSON.stringify(err, null, 2);
@@ -152,14 +162,14 @@ try {
               });
             }
           },
-          (err) => {
+          (err: InsertResponse) => {
             const element = document.getElementById('insertResponse');
             if (element) {
               element.innerHTML = JSON.stringify(err, null, 2);
             }
           }
         )
-        .catch((err) => {
+        .catch((err: InsertResponse) => {
           const element = document.getElementById('insertResponse');
           if (element) {
             element.innerHTML = JSON.stringify(err, null, 2);
@@ -167,6 +177,6 @@ try {
         });
     });
   }
-} catch (err) {
+} catch (err: unknown) {
   console.error(err);
 }
