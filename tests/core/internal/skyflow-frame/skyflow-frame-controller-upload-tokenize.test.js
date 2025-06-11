@@ -424,6 +424,7 @@ describe('SkyflowFrameController - tokenize function', () => {
   let targetSpy;
   let windowSpy;
   let testValue;
+  let testValue2;
 
   beforeEach(() => {
     emitSpy = jest.spyOn(bus, 'emit');
@@ -446,11 +447,30 @@ describe('SkyflowFrameController - tokenize function', () => {
           isTouched: false,
         },
         tableName: 'test-table-name',
-        skyflowID: '',
         onFocusChange: jest.fn(),
         getUnformattedValue: jest.fn(() => 'unformatted-value'),
       },
     };
+    testValue2 = {
+      iFrameFormElement: {
+        fieldType: 'TEXT_INPUT',
+        state: {
+          value: 'test-value2',
+          isFocused: false,
+          isValid: true,
+          isEmpty: false,
+          isComplete: true,
+          name: 'test-name2',
+          isRequired: true,
+          isTouched: false,
+        },
+        tableName: 'test-table-name2',
+        skyflowID: 'id',
+        onFocusChange: jest.fn(),
+        getUnformattedValue: jest.fn(() => 'unformatted-value2'),
+      },
+    };
+
 
     windowSpy = jest.spyOn(window, 'parent', 'get');
     windowSpy.mockImplementation(() => ({
@@ -481,7 +501,7 @@ describe('SkyflowFrameController - tokenize function', () => {
       },
     }));
 
-    const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }] }));
+    const clientReq = jest.fn(() => Promise.resolve({responses: [{ records: [{ skyflow_id: 'id1' }] },{ fields: { card_number: 'token1' } }] }));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => null);
 
 
@@ -523,10 +543,37 @@ describe('SkyflowFrameController - tokenize function', () => {
             getElementById: jest.fn(() => testValue),
           },
         },
+        'frameId2:containerId:ERROR:': {
+          document: {
+            getElementById: jest.fn(() => testValue2),
+          },
+        },
       },
     }));
 
-    const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }] }));
+    const insertResponse = {
+      responses: [
+        { records: [{ skyflow_id: 'id1' }] },
+        { fields: { card_number: 'token1', '*': 'ignored' } },
+        // { records: [{ skyflow_id: 'id' }] }, 
+        // { fields: { card_number: 'token1', '*': 'ignored' } },
+      ]
+    };
+    const updateError = { 
+      errors: [{ error: { code: 404, description: 'Record not found' } }]
+    };
+    
+    let requestCount = 0;
+    const clientReq = jest.fn((arg) => {
+      requestCount++;
+      if (arg.requestMethod === 'PUT') {
+        return Promise.reject(updateError);
+      }
+      if (arg.requestMethod === 'POST' && !arg.url.includes('/files')) {
+        return Promise.resolve(insertResponse);
+      }
+      return Promise.resolve(insertResponse);
+    });
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
       ...clientData.client,
       request: clientReq,
@@ -551,6 +598,91 @@ describe('SkyflowFrameController - tokenize function', () => {
           frameId: 'frameId',
           elementId: 'elementId',
         },
+        {
+          frameId: 'frameId2',
+          elementId: 'elementId2',
+        }
+      ],
+    };
+
+    const cb2 = jest.fn();
+
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      console.log('=======================>>>', cb2.mock.calls);
+      expect(cb2.mock.calls[0][0].records).toBeDefined();
+    }, 1000);
+  });
+  test('should tokenize data successfully case 2', async () => {
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        'frameId:containerId:ERROR:': {
+          document: {
+            getElementById: jest.fn(() => testValue),
+          },
+        },
+        'frameId2:containerId:ERROR:': {
+          document: {
+            getElementById: jest.fn(() => testValue2),
+          },
+        },
+      },
+    }));
+
+    const insertResponse = {
+      responses: [
+        { records: [{ skyflow_id: 'id1' }] },
+        { fields: { card_number: 'token1', '*': 'ignored' } },
+      ]
+    };
+    const updateRes = { records: [{ skyflow_id: 'id',
+      fields: {
+        card_number: '4111-xxxx-xxxx-1111',
+        cvv: '123',
+      },     
+    }] }
+    
+    let requestCount = 0;
+    const clientReq = jest.fn((arg) => {
+      // console.log('Request Count:', requestCount, 'Arg:', arg);
+      requestCount++;
+      if (arg.requestMethod === 'PUT') {
+        return Promise.resolve(updateRes);
+      }
+      if (arg.requestMethod === 'POST' && !arg.url.includes('/files')) {
+        return Promise.resolve(insertResponse);
+      }
+      return Promise.resolve(insertResponse);
+    });
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+      ...clientData.client,
+      request: clientReq,
+      toJSON: toJson
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    
+    const onCb = on.mock.calls[1][1];
+
+    const data = {
+      containerId: 'containerId',
+      tokens: true,
+      type: 'COLLECT',
+      elementIds: [
+        {
+          frameId: 'frameId',
+          elementId: 'elementId',
+        },
+        {
+          frameId: 'frameId2',
+          elementId: 'elementId2',
+        }
       ],
     };
 
@@ -562,7 +694,202 @@ describe('SkyflowFrameController - tokenize function', () => {
       expect(cb2.mock.calls[0][0].records).toBeDefined();
     }, 1000);
   });
+  test('should tokenize data successfully case 3', async () => {
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        'frameId2:containerId:ERROR:': {
+          document: {
+            getElementById: jest.fn(() => testValue2),
+          },
+        },
+      },
+    }));
 
+    const insertResponse = {
+      responses: [
+        { records: [{ skyflow_id: 'id1' }] },
+        { fields: { card_number: 'token1', '*': 'ignored' } },
+      ]
+    };
+    const updateRes = { records: [{ skyflow_id: 'id',
+      fields: {
+        card_number: '4111-xxxx-xxxx-1111',
+        cvv: '123',
+      },     
+    }] }
+    
+    let requestCount = 0;
+    const clientReq = jest.fn((arg) => {
+      console.log('Request Count:', requestCount, 'Arg:', arg);
+      requestCount++;
+      if (arg.requestMethod === 'PUT') {
+        return Promise.resolve(updateRes);
+      }
+      if (arg.requestMethod === 'POST' && !arg.url.includes('/files')) {
+        return Promise.resolve(insertResponse);
+      }
+      return Promise.resolve(insertResponse);
+    });
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+      ...clientData.client,
+      request: clientReq,
+      toJSON: toJson
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    
+    const onCb = on.mock.calls[1][1];
+
+    const data = {
+      containerId: 'containerId',
+      tokens: true,
+      type: 'COLLECT',
+      elementIds: [
+        {
+          frameId: 'frameId2',
+          elementId: 'elementId2',
+        }
+      ],
+    };
+
+    const cb2 = jest.fn();
+
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].records).toBeDefined();
+    }, 1000);
+  });
+  test('should tokenize data error case 1', async () => {
+    testValue2.iFrameFormElement.skyflowID = '';
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        'frameId2:containerId:ERROR:': {
+          document: {
+            getElementById: jest.fn(() => testValue2),
+          },
+        },
+      },
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    
+    const onCb = on.mock.calls[1][1];
+
+    const data = {
+      containerId: 'containerId',
+      tokens: true,
+      type: 'COLLECT',
+      elementIds: [
+        {
+          frameId: 'frameId2',
+          elementId: 'elementId2',
+        }
+      ],
+    };
+
+    const cb2 = jest.fn();
+
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].errors).toBeDefined();
+    }, 1000);
+  });
+  test('should tokenize data error case 2', async () => {
+    testValue2.iFrameFormElement.skyflowID = null;
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        'frameId2:containerId:ERROR:': {
+          document: {
+            getElementById: jest.fn(() => testValue2),
+          },
+        },
+      },
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    
+    const onCb = on.mock.calls[1][1];
+
+    const data = {
+      containerId: 'containerId',
+      tokens: true,
+      type: 'COLLECT',
+      elementIds: [
+        {
+          frameId: 'frameId2',
+          elementId: 'elementId2',
+        }
+      ],
+    };
+
+    const cb2 = jest.fn();
+
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].errors).toBeDefined();
+    }, 1000);
+  });
+  test('should tokenize data error case 2', async () => {
+    testValue2.iFrameFormElement.skyflowID = 'null';
+    testValue2.iFrameFormElement.state.isValid = false;
+    testValue2.iFrameFormElement.state.isRequired = false;
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        'frameId2:containerId:ERROR:': {
+          document: {
+            getElementById: jest.fn(() => testValue2),
+          },
+        },
+      },
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    
+    const onCb = on.mock.calls[1][1];
+
+    const data = {
+      containerId: 'containerId',
+      tokens: true,
+      type: 'COLLECT',
+      elementIds: [
+        {
+          frameId: 'frameId2',
+          elementId: 'elementId2',
+        }
+      ],
+    };
+
+    const cb2 = jest.fn();
+
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].errors).toBeDefined();
+    }, 1000);
+  });
   test('should tokenize data partial successfully', async () => {
     windowSpy.mockImplementation(() => ({
       frames: {
@@ -574,7 +901,14 @@ describe('SkyflowFrameController - tokenize function', () => {
       },
     }));
 
-    const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }], error: 'Partial error' }));
+    const clientReq = jest.fn(() => Promise.resolve(
+      {
+      responses: [
+        { records: [{ skyflow_id: 'id1' }] },
+        { fields: { card_number: 'token1', '*': 'ignored' } },
+      ]
+    }
+    ));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
       ...clientData.client,
       request: clientReq,
@@ -610,7 +944,71 @@ describe('SkyflowFrameController - tokenize function', () => {
       expect(cb2.mock.calls[0][0].records).toBeDefined();
     }, 1000);
   });
+  test('should tokenize data partial successfully case 2', async () => {
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        'frameId:containerId:ERROR:': {
+          document: {
+            getElementById: jest.fn(() => testValue),
+          },
+        },
+      },
+    }));
+    const mockResponseBody = {
+      responses: [
+        { records: [{ skyflow_id: 'id1' }] },
+        { fields: { card_number: 'token1', '*': 'ignored' } },
+      ]
+    };
+    let requestCount = 0;
+    const clientReq = jest.fn((arg) => {
+      console.log('Request Count:', requestCount, 'Arg:', arg);
+      requestCount++;
+      // if (arg.requestMethod === 'PUT') {
+      //   return Promise.resolve(updateRes);
+      // }
+      if (arg.requestMethod === 'POST' && !arg.url.includes('/files')) {
+        return Promise.resolve(mockResponseBody);
+      }
+      // return Promise.resolve(insertResponse);
+    });
 
+    // const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }], error: 'Partial error' }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+      ...clientData.client,
+      request: clientReq,
+      toJSON: toJson
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    
+    const onCb = on.mock.calls[1][1];
+
+    const data = {
+      containerId: 'containerId',
+      tokens: true,
+      type: 'COLLECT',
+      elementIds: [
+        {
+          frameId: 'frameId',
+          elementId: 'elementId',
+        },
+      ],
+    };
+
+    const cb2 = jest.fn();
+
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].records).toBeDefined();
+    }, 1000);
+  });
 
   test('should handle validations and set value when all conditions are met', async () => {
     testValue.iFrameFormElement.validations = [{ rule: 'regex', value: '.*' }];
@@ -641,7 +1039,7 @@ describe('SkyflowFrameController - tokenize function', () => {
         ];
       });
   
-    const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }] }));
+    const clientReq = jest.fn(() => Promise.resolve({responses: [{ records: [{ skyflow_id: 'id1' }] },{ fields: { card_number: 'token1' } }] }));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
       ...clientData.client,
       request: clientReq,
@@ -695,8 +1093,11 @@ describe('SkyflowFrameController - tokenize function', () => {
     const insertResponse = {
       records: [{ skyflow_id: 'inserted-id' }],
     };
-    const updateResponse = {
-      records: [{ skyflow_id: 'updated-id' }],
+    const updateResponse =  {
+      tokens: {
+        card_number: 'token123',
+        cvv: 'token456'
+      }
     };
 
     const clientReq = jest.fn((arg) => {
@@ -972,7 +1373,7 @@ describe('SkyflowFrameController - tokenize function', () => {
         },
       }));
   
-      const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }] }));
+      const clientReq = jest.fn(() => Promise.resolve({responses: [{ records: [{ skyflow_id: 'id1' }] },{ fields: { card_number: 'token1' } }] }));
       jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
         ...clientData.client,
         request: clientReq,
@@ -1026,7 +1427,7 @@ describe('SkyflowFrameController - tokenize function', () => {
         },
       }));
   
-      const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }] }));
+      const clientReq = jest.fn(() => Promise.resolve({responses: [{ records: [{ skyflow_id: 'id1' }] },{ fields: { card_number: 'token1' } }] }));
       jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
         ...clientData.client,
         request: clientReq,
@@ -1081,7 +1482,7 @@ describe('SkyflowFrameController - tokenize function', () => {
         },
       }));
   
-      const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }] }));
+      const clientReq = jest.fn(() => Promise.resolve({responses: [{ records: [{ skyflow_id: 'id1' }] },{ fields: { card_number: 'token1' } }] }));
       jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
         ...clientData.client,
         request: clientReq,
@@ -1135,7 +1536,7 @@ describe('SkyflowFrameController - tokenize function', () => {
       },
     }));
 
-    const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }] }));
+    const clientReq = jest.fn(() => Promise.resolve({responses: [{ records: [{ skyflow_id: 'id1' }] },{ fields: { card_number: 'token1' } }] }));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
       ...clientData.client,
       request: clientReq,
@@ -1185,7 +1586,7 @@ describe('SkyflowFrameController - tokenize function', () => {
       },
     }));
 
-    const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }] }));
+    const clientReq = jest.fn(() => Promise.resolve({responses: [{ records: [{ skyflow_id: 'id1' }] },{ fields: { card_number: 'token1' } }] }));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
       ...clientData.client,
       request: clientReq,
@@ -1235,7 +1636,7 @@ describe('SkyflowFrameController - tokenize function', () => {
       },
     }));
 
-    const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }] }));
+    const clientReq = jest.fn(() => Promise.resolve({responses: [{ records: [{ skyflow_id: 'id1' }] },{ fields: { card_number: 'token1' } }] }));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
       ...clientData.client,
       request: clientReq,
