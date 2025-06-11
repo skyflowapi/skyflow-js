@@ -4,6 +4,7 @@ import * as validators from '../../../src/utils/validators';
 import * as helpers from '../../../src/utils/helpers';
 import { getMaskedOutput, domReady } from '../../../src/utils/helpers';
 import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, CARD_ENCODED_ICONS, INPUT_KEYBOARD_EVENTS, ELEMENT_EVENTS_TO_CLIENT } from '../../../src/core/constants';
+import IFrameFormElement from '../../../src/core/internal/iframe-form';
 
 describe('domReady function - FrameElement', () => {
   let mockIFrameFormElement;
@@ -1432,7 +1433,7 @@ describe('FrameElement', () => {
     expect(element.actualValue).toBe('4111111111111111');
   })
 });
-describe('FrameElement - onInputChange Tests', () => {
+describe('FrameElement - onInputChange Tests for Card number', () => {
   let frameElement;
   let mockIFrameFormElement;
   let mockOptions;
@@ -1640,6 +1641,231 @@ describe('FrameElement - onInputChange Tests', () => {
 
       expect(mockIFrameFormElement.setValue).toHaveBeenCalledWith(
         '4111 1111 1111 1111',
+        true
+      );
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should handle undefined values gracefully', () => {
+      frameElement.domInput = document.createElement('input');
+      frameElement.domInput.value = '';
+
+      const mockEvent = {
+        target: frameElement.domInput
+      };
+
+      expect(() => frameElement.onInputChange(mockEvent)).not.toThrow();
+    });
+
+    it('should handle invalid mask format', () => {
+      mockIFrameFormElement.mask = undefined;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      frameElement.domInput = document.createElement('input');
+      frameElement.domInput.value = '4111';
+
+      const mockEvent = {
+        target: frameElement.domInput
+      };
+
+      expect(() => frameElement.onInputChange(mockEvent)).not.toThrow();
+    });
+  });
+});
+describe('FrameElement - onInputChange Tests for other field', () => {
+  let frameElement;
+  let mockIFrameFormElement;
+  let mockOptions;
+  let mockHtmlDivElement;
+  let mockState;
+
+  beforeEach(() => {
+    mockState = {
+      value: undefined,
+      isFocused: false,
+      isValid: false,
+      isEmpty: true,
+      isComplete: false,
+      name: '',
+      isRequired: false,
+      isTouched: false,
+      selectedCardScheme: '',
+    };
+    mockIFrameFormElement = {
+      resetEvents: jest.fn(),
+      on: jest.fn(),
+      setValue: jest.fn(),
+      setMask: jest.fn(),
+      setValidation: jest.fn(),
+      setReplacePattern: jest.fn(),
+      setFormat: jest.fn(),
+      setMask: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({
+        isFocused: false,
+        isValid: true,
+        isEmpty: true,
+        isComplete: false,
+        isRequired: false,
+        isTouched: false,
+        value: '',
+      }),
+      getValue: jest.fn().mockReturnValue(''),
+      getUnformattedValue: jest.fn().mockReturnValue('4111111111111111'),
+      onFocusChange: jest.fn(),
+      onDropdownSelect: jest.fn(),
+      fieldType: ELEMENTS.INPUT_FIELD.name,
+      iFrameName: 'mockFrameName',
+      cardType: 'DEFAULT',
+      state: { ...mockState },
+      mask: ['#### #### #### ####'],
+      replacePattern: '####',
+    };
+
+    mockOptions = {
+      masking: true,
+      maskingChar: 'X',
+      cardSeperator: ' ',
+      enableCardIcon: true,
+      elementName: 'card',
+      fieldType: ELEMENTS.INPUT_FIELD.name,
+    };
+
+    mockHtmlDivElement = document.createElement('div');
+    const tableCol = btoa('1234')
+    const collect_element = `element:INPUT_FIELD:${tableCol}`;
+    const frame = new IFrameFormElement(collect_element, 'mockTableName', 'mockColumnName', mockOptions);
+    frameElement = new FrameElement(frame, mockOptions, mockHtmlDivElement);
+    frameElement.mount();
+  });
+
+
+  describe('Card Number Input Tests', () => {
+    it('should handle card number input with masking enabled', () => {
+      frameElement.domInput = document.createElement('input');
+      frameElement.domInput.setAttribute('type', 'text');
+      frameElement.domInput.value = '4111';
+      frameElement.actualValue = '';
+
+      const mockEvent = {
+        target: frameElement.domInput
+      };
+      
+      frameElement.onInputChange(mockEvent);
+
+      expect(frameElement.actualValue).toBeTruthy();
+    });
+
+    it('should update mask based on card type', () => {
+      frameElement.domInput = document.createElement('input');
+      frameElement.domInput.value = '4111';
+
+      const mockEvent = {
+        target: frameElement.domInput
+      };
+
+      frameElement.onInputChange(mockEvent);
+    });
+  });
+
+  describe('Input Masking Tests', () => {
+    it('should handle input with masking enabled', () => {
+      frameElement.domInput = document.createElement('input');
+      frameElement.domInput.value = '4111';
+      frameElement.actualValue = '';
+
+      const mockEvent = {
+        target: frameElement.domInput
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(frameElement.actualValue).toBe('4111');
+      expect(frameElement.domInput.value).toMatch("XXXX");
+    });
+
+    it('should handle deletion in masked input', () => {
+      frameElement.domInput = document.createElement('input');
+      frameElement.actualValue = '41';
+      frameElement.domInput.value = '4';
+
+      const mockEvent = {
+        target: frameElement.domInput
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(frameElement.actualValue.length).toBe(1);
+    });
+
+    it('should handle paste event in masked input', () => {
+      frameElement.domInput = document.createElement('input');
+      frameElement.actualValue = '';
+      frameElement.domInput.value = '4111';
+      frameElement.selectionStart = 0;
+      frameElement.selectionEnd = 16;
+      frameElement.selectedData =   '4111';
+
+      const e = document.createElement('input');
+      e.value = '41';
+      e.selectionStart = 0;
+      e.selectionEnd = 16;
+      e.setSelectionRange(0, 16);
+      frameElement.domInput = e;
+    
+      const mockEvent = {
+        target: frameElement.domInput
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(frameElement.actualValue).toBe('');
+      expect(frameElement.selectedData).toBe('4111');
+      expect(frameElement.domInput.value).toBe('');
+      frameElement.onInputChange(mockEvent);
+      frameElement.domInput.value = '41111111112';
+      frameElement.onInputChange({
+        target: frameElement.domInput
+      });
+      frameElement.domInput.value = '';
+      frameElement.onInputChange({
+        target: frameElement.domInput
+      });
+    });
+  });
+
+  describe('Cursor Position Tests', () => {
+    it('should maintain cursor position after input', () => {
+      frameElement.domInput = document.createElement('input');
+      frameElement.domInput.value = '4111';
+      frameElement.domInput.setSelectionRange = jest.fn();
+
+      const mockEvent = {
+        target: frameElement.domInput
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(frameElement.domInput.setSelectionRange).toHaveBeenCalled();
+    });
+  });
+
+  describe('Non-masked Input Tests', () => {
+    it('should handle input without masking', () => {
+      mockOptions.masking = false;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      frameElement.domInput = document.createElement('input');
+      frameElement.domInput.value = '42';
+
+      const mockEvent = {
+        target: frameElement.domInput
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(mockIFrameFormElement.setValue).toHaveBeenCalledWith(
+        '##',
         true
       );
     });

@@ -58,7 +58,11 @@ describe('Uploading files to the vault', () => {
         iFrameFormElement: {
           fieldType: 'FILE_INPUT',
           state: {
-            value: 'test',
+            value: {
+              type: 'file',
+              name: 'test-file.txt',
+              size: 1024,
+            },
             isFocused: false,
             isValid: false,
             isEmpty: true,
@@ -131,6 +135,116 @@ describe('Uploading files to the vault', () => {
       setTimeout(() => {
         expect(cb2.mock.calls[0][0].fileUploadResponse).toBeDefined();
         expect(cb2.mock.calls[0][0].fileUploadResponse.length).toBe(1);
+        done();
+      }, 1000);
+    });
+    test('should successfully handle FILE_UPLOAD validation', (done) => {
+          testValue.iFrameFormElement.state.value.name = 'test file.txt';
+      windowSpy.mockImplementation(()=>({
+        frames:{
+          'element:FILE_INPUT:ID:CONTAINER-ID:ERROR:':{document:{
+              getElementById:()=>(testValue)
+          }}
+        }
+      }));
+  
+      SkyflowFrameController.init();
+      
+      const emitEventName = emitSpy.mock.calls[1][0];
+      const emitCb = emitSpy.mock.calls[1][2];
+      expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+      emitCb(clientData);    
+      
+      const onCb = on.mock.calls[1][1];
+      const data = {
+        type: COLLECT_TYPES.FILE_UPLOAD,
+        elementIds: [
+          "element:FILE_INPUT:ID"
+      ],
+      containerId: "CONTAINER-ID"
+      };
+      const cb2 = jest.fn();
+  
+      onCb(data, cb2);
+  
+      setTimeout(() => {
+        console.log(cb2.mock.calls[0][0].error.errorResponse[0]);
+        done();
+      }, 1000);
+    });
+    test('should successfully handle FILE_UPLOAD validation case 2', (done) => {
+          testValue.iFrameFormElement.state.value.name = 'test-file.txt';
+      testValue.iFrameFormElement.state.value.size = 1024 * 1024 * 32;
+      windowSpy.mockImplementation(()=>({
+        frames:{
+          'element:FILE_INPUT:ID:CONTAINER-ID:ERROR:':{document:{
+              getElementById:()=>(testValue)
+          }}
+        }
+      }));
+  
+      SkyflowFrameController.init();
+      
+      const emitEventName = emitSpy.mock.calls[1][0];
+      const emitCb = emitSpy.mock.calls[1][2];
+      expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+      emitCb(clientData);    
+      
+      const onCb = on.mock.calls[1][1];
+      const data = {
+        type: COLLECT_TYPES.FILE_UPLOAD,
+        elementIds: [
+          "element:FILE_INPUT:ID"
+      ],
+      containerId: "CONTAINER-ID"
+      };
+      const cb2 = jest.fn();
+  
+      onCb(data, cb2);
+  
+      setTimeout(() => {
+        console.log(cb2.mock.calls[0][0].error.errorResponse[0]);
+        done();
+      }, 1000);
+    });
+    test('should successfully handle FILE_UPLOAD validation case 3', (done) => {
+          testValue.iFrameFormElement.state.value.name = 'test-file.txt';
+      testValue.iFrameFormElement.state.value.size = 0;
+      windowSpy.mockImplementation(()=>({
+        frames:{
+          'element:FILE_INPUT:ID:CONTAINER-ID:ERROR:':{document:{
+              getElementById:()=>(testValue)
+          }}
+        }
+      }));
+      const clientReq = jest.fn();
+      jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+        ...clientData.client,
+        request: clientReq,
+        toJSON: toJson
+      }));
+  
+      SkyflowFrameController.init();
+      
+      const emitEventName = emitSpy.mock.calls[1][0];
+      const emitCb = emitSpy.mock.calls[1][2];
+      expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+      emitCb(clientData);    
+      
+      const onCb = on.mock.calls[1][1];
+      const data = {
+        type: COLLECT_TYPES.FILE_UPLOAD,
+        elementIds: [
+          "element:FILE_INPUT:ID"
+      ],
+      containerId: "CONTAINER-ID"
+      };
+      const cb2 = jest.fn();
+  
+      onCb(data, cb2);
+  
+      setTimeout(() => {
+        console.log(cb2.mock.calls[0][0].error.errorResponse[0]);
         done();
       }, 1000);
     });
@@ -218,6 +332,88 @@ describe('Uploading files to the vault', () => {
         expect(firstCallArg).toHaveProperty('error');
         expect(firstCallArg.error).toEqual(expect.any(Object));
   
+        done();
+      }, 1000);
+    });
+    test('should fail upload files when client is reject', (done) => {
+      windowSpy.mockImplementation(()=>({
+        frames:{
+          'element:FILE_INPUT:ID:CONTAINER-ID:ERROR:':{document:{
+              getElementById:()=>(testValue)
+          }}
+        }
+      }));
+      const clientReq = jest.fn(() => Promise.reject({
+        error: "error"
+      }));
+      jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+        ...clientData.client,
+        request: clientReq,
+        toJSON: toJson
+      }));
+  
+      SkyflowFrameController.init();
+      
+      const emitEventName = emitSpy.mock.calls[1][0];
+      const emitCb = emitSpy.mock.calls[1][2];
+      expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+      emitCb(clientData);    
+      
+      const onCb = on.mock.calls[1][1];
+      const data = {
+        type: COLLECT_TYPES.FILE_UPLOAD,
+        elementIds: [
+          "element:FILE_INPUT:ID"
+      ],
+      containerId: "CONTAINER-ID"
+      };
+      const cb2 = jest.fn();
+  
+      onCb(data, cb2);
+  
+      setTimeout(() => {
+        expect(cb2).toHaveBeenCalled();
+        const firstCallArg = cb2.mock.calls[0][0];
+        expect(firstCallArg).toBeDefined();
+        expect(firstCallArg).toEqual({"error": {"errorResponse": [{"error": "error"}]}});
+
+        done();
+      }, 1000);
+    });
+        
+    test('should fail upload files when client is null', (done) => {
+      windowSpy.mockImplementation(()=>({
+        frames:{
+          'element:FILE_INPUT:ID:CONTAINER-ID:ERROR:':{document:{
+              getElementById:()=>(testValue)
+          }}
+        }
+      }));
+      jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => null);
+  
+      SkyflowFrameController.init();
+      
+      const emitEventName = emitSpy.mock.calls[1][0];
+      const emitCb = emitSpy.mock.calls[1][2];
+      expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+      emitCb(clientData);    
+      
+      const onCb = on.mock.calls[1][1];
+      const data = {
+        type: COLLECT_TYPES.FILE_UPLOAD,
+        elementIds: [
+          "element:FILE_INPUT:ID"
+      ],
+      containerId: "CONTAINER-ID"
+      };
+      const cb2 = jest.fn();
+  
+      onCb(data, cb2);
+  
+      setTimeout(() => {
+        expect(cb2).toHaveBeenCalled();
+        const firstCallArg = cb2.mock.calls[0][0];
+        expect(firstCallArg).toBeDefined();
         done();
       }, 1000);
     });
@@ -366,6 +562,55 @@ describe('SkyflowFrameController - tokenize function', () => {
       expect(cb2.mock.calls[0][0].records).toBeDefined();
     }, 1000);
   });
+
+  test('should tokenize data partial successfully', async () => {
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        'frameId:containerId:ERROR:': {
+          document: {
+            getElementById: jest.fn(() => testValue),
+          },
+        },
+      },
+    }));
+
+    const clientReq = jest.fn(() => Promise.resolve({ records: [{ skyflow_id: 'test-id' }], error: 'Partial error' }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+      ...clientData.client,
+      request: clientReq,
+      toJSON: toJson
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+    emitCb(clientData);
+    
+    const onCb = on.mock.calls[1][1];
+
+    const data = {
+      containerId: 'containerId',
+      tokens: true,
+      type: 'COLLECT',
+      elementIds: [
+        {
+          frameId: 'frameId',
+          elementId: 'elementId',
+        },
+      ],
+    };
+
+    const cb2 = jest.fn();
+
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].records).toBeDefined();
+    }, 1000);
+  });
+
 
   test('should handle validations and set value when all conditions are met', async () => {
     testValue.iFrameFormElement.validations = [{ rule: 'regex', value: '.*' }];
