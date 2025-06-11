@@ -1,0 +1,97 @@
+name: Gitleaks secrets scan
+
+on:
+  pull_request:
+    branches:
+      - main
+
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required to get full commit history for diffing
+
+          
+      - name: Get base and head commit SHAs
+        run: |
+          echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> $GITHUB_ENV
+          echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+
+  
+      - name: Run Gitleaks on PR changes via Docker
+        run: |
+          docker run --rm -v $(pwd):/repo -w /repo zricethezav/gitleaks:latest detect \
+            --config="/repo/Rule/gitleaks.toml" \
+            --log-opts="--no-merges $BASE_SHA..$HEAD_SHA" \
+            --verbose \
+            --exit-code=0 \
+            --report-format=json \
+            --report-path="/repo/gitleaks-report.json" \
+            --redact
+
+      - name: Upload Gitleaks report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+
+      - name: Format and comment findings on PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f gitleaks-report.json ]; then
+            echo "Report file not found!"
+            exit 1
+          fi
+
+          FINDINGS_JSON=$(cat gitleaks-report.json)
+          COUNT=$(echo "$FINDINGS_JSON" | jq 'length')
+          SHA="${{ github.event.pull_request.head.sha }}"
+          REPO="${{ github.repository }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          MAX=10
+
+          if [ "$COUNT" -gt 0 ]; then
+            COMMENT="**🔐 Gitleaks Findings: $COUNT issue(s) detected**\n\n"
+            i=0
+            while [ "$i" -lt "$COUNT" ] && [ "$i" -lt "$MAX" ]; do
+              ITEM=$(echo "$FINDINGS_JSON" | jq ".[$i]")
+              RULE=$(echo "$ITEM" | jq -r '.RuleID')
+              DESC=$(echo "$ITEM" | jq -r '.Description')
+              FILE=$(echo "$ITEM" | jq -r '.File')
+              LINE=$(echo "$ITEM" | jq -r '.Line')
+              LINK="https://github.com/$REPO/blob/$SHA/$FILE#L$LINE"
+              SECRET_MASKED="**********"
+              COMMENT+="🔸 **Rule**: \`$RULE\`\n"
+              COMMENT+="📄 **File**: \`$FILE:$LINE\`\n"
+              COMMENT+="📝 **Description**: $DESC\n"
+              COMMENT+="🔑 **Secret**: \`$SECRET_MASKED\`\n"
+              COMMENT+="🔗 **Path**: [$FILE:$LINE]($LINK)\n\n"
+              i=$((i + 1))
+            done
+
+            if [ "$COUNT" -gt "$MAX" ]; then
+              COMMENT+="...and more. Only showing first $MAX findings.\n"
+            fi
+          else
+            COMMENT="✅ **Gitleaks Findings:** No secrets detected. Safe to proceed!"
+          fi
+
+          # Escape newlines for GitHub API
+          COMMENT=$(echo "$COMMENT" | sed ':a;N;$!ba;s/\n/\\n/g')
+
+          curl -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"body\":\"$COMMENT\"}" \
+            "https://api.github.com/repos/${REPO}/issues/${PR_NUMBER}/comments"
