@@ -120,29 +120,6 @@ const FileElement: CollectElementInput = {
 
 const on = jest.fn();
 
-// const collectResponse: CollectResponse = {
-//   records: [
-//     {
-//       table: "table",
-//       fields: {
-//         first_name: "token1",
-//         primary_card: {
-//           card_number: "token2",
-//           cvv: "token3",
-//         },
-//       },
-//     },
-//   ],
-// };
-// const collectResponse2: CollectResponse = {
-//   errors: [
-//     {
-//       description: "error",
-//       code: 200,
-//     },
-//   ],
-// };
-
 const options: ICollectOptions = {
   tokens: true,
   additionalFields: {
@@ -162,9 +139,6 @@ describe("Collect container", () => {
   let targetSpy: jest.SpyInstance;
   let onSpy: jest.SpyInstance;
   beforeEach(() => {
-    // emitSpy = null;
-    // targetSpy = null;
-    // onSpy = null;
     emitSpy = jest.spyOn(bus, "emit");
     targetSpy = jest.spyOn(bus, "target");
     onSpy = jest.spyOn(bus, "on");
