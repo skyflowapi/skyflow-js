@@ -188,7 +188,7 @@ export interface SharedMeticsObjectType {
 
 export interface InsertResponse {
   records?: InsertResponseRecords[],
-  errors?: ErrorRecord[];
+  errors?: ErrorRecord[],
 }
 
 export interface CollectResponse extends InsertResponse {}
@@ -196,46 +196,46 @@ export interface DetokenizeResponse extends IRevealResponseType {}
 
 export interface InsertResponseRecords {
   fields: Record<string, any>,
-  table: string;
+  table: string,
 }
 
 export interface ErrorRecord {
   code: number,
-  description: string;
+  description: string,
 }
 
 export interface GetByIdResponse {
   records?: GetByIdResponseRecord[],
-  errors?: ErrorRecord[];
+  errors?: ErrorRecord[],
 }
 
 export interface GetByIdResponseRecord {
   fields: Record<string, any>,
-  table: string;
+  table: string,
 }
 
 export interface GetResponse {
   records?: GetResponseRecord[],
-  errors?: ErrorRecord[];
+  errors?: ErrorRecord[],
 }
 
 export interface GetResponseRecord {
   fields: Record<string, any>,
-  table: string;
+  table: string,
 }
 
 export interface DeleteResponse {
   records?: DeleteResponseRecord[],
-  errors?: DeleteErrorRecords[];
+  errors?: DeleteErrorRecords[],
 }
 export interface DeleteResponseRecord {
   skyflow_id: string,
-  deleted: boolean;
+  deleted: boolean,
 }
 
 export interface DeleteErrorRecords {
   id: string,
-  error: ErrorRecord;
+  error: ErrorRecord,
 }
 
 export interface ContainerOptions {
@@ -246,12 +246,12 @@ export interface ContainerOptions {
 
 export interface ErrorTextStyles {
   base?: Record<string, string>,
-  global?: Record<string, string>;
+  global?: Record<string, string>,
 }
 
 export interface LabelStyles extends ErrorTextStyles {
   focus?: Record<string, string>,
-  requiredAsterisk?: Record<string, string>;
+  requiredAsterisk?: Record<string, string>,
 }
 
 export interface InputStyles extends ErrorTextStyles {
@@ -260,7 +260,7 @@ export interface InputStyles extends ErrorTextStyles {
   empty?: Record<string, string>,
   invalid?: Record<string, string>,
   cardIcon?: Record<string, string>,
-  copyIcon?: Record<string, string>
+  copyIcon?: Record<string, string>,
 }
 
 export interface CollectElementOptions {
@@ -278,30 +278,41 @@ export interface CollectElementOptions {
 }
 
 export interface CardMetadata {
-  scheme: CardType[]
+  scheme: CardType[],
 }
 
 export interface CollectElementInput {
-  table?: string;
-  column?: string;
-  label?: string;
-  inputStyles?: InputStyles;
-  labelStyles?: LabelStyles;
-  errorTextStyles?: ErrorTextStyles;
-  placeholder?: string;
-  type: ElementType;
-  altText?: string;
-  validations?: IValidationRule[]
-  skyflowID?: string;
+  table?: string,
+  column?: string,
+  label?: string,
+  inputStyles?: InputStyles,
+  labelStyles?: LabelStyles,
+  errorTextStyles?: ErrorTextStyles,
+  placeholder?: string,
+  type: ElementType,
+  altText?: string,
+  validations?: IValidationRule[],
+  skyflowID?: string,
 }
 
 export interface ICollectOptions {
-  tokens?: boolean;
-  additionalFields?: IInsertRecordInput;
-  upsert?: Array<IUpsertOptions>
+  tokens?: boolean,
+  additionalFields?: IInsertRecordInput,
+  upsert?: Array<IUpsertOptions>,
 }
 
 export interface UploadFilesResponse {
-  fileUploadResponse: [skyflow_id: string],
-  errorResponse: [error: ErrorRecord]
+  fileUploadResponse: [{ skyflow_id: string }],
+  errorResponse: [{ error: ErrorRecord }],
+}
+
+export interface RevealResponse {
+  success?: {
+    token: string,
+    valueType: string,
+  },
+  errors?: {
+    error: ErrorRecord,
+    token: string,
+  }
 }
