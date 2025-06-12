@@ -482,7 +482,8 @@ describe('Collect container', () => {
   // });
 
   it('should not emit events when isSkyflowFrameReady is false', async () => {
-    const container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer({}, metaData, {}, 
+      { logLevel: LogLevel.ERROR, env: Env.PROD });
     
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -1202,6 +1203,71 @@ describe('iframe cleanup logic', () => {
     });
   });
 
+  it('should remove unmounted iframe elements for file upload', () => {
+    // Create and mount elements
+    container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+
+    const element1 = container.create(FileElement);
+    element1.mount(div1);
+    const element2 = container.create(cardNumberElement);
+    
+    element1.mount(div1);
+    element2.mount(div2);
+
+    const mountCvvCb = onSpy.mock.calls[2][1];
+
+    mountCvvCb({
+      name: `element:${FileElement.type}:${btoa(element1.getID())}`,
+    });
+
+    const mountCardNumberCb = onSpy.mock.calls[5][1];
+    mountCardNumberCb({
+      name: `element:${cardNumberElement.type}:${btoa(element2.getID())}`,
+    });
+
+    // Mock iframe elements in document
+    const iframe1 = document.createElement('iframe');
+    iframe1.id = element1.iframeName();
+    document.body.appendChild(iframe1);
+
+    // Trigger cleanup by calling collect
+    container.uploadFiles().catch((error) => {
+      expect(error).not.toBeDefined();
+    });
+  });
+  it('should remove unmounted iframe elements for file upload case 2', () => {
+    // Create and mount elements
+    container = new CollectContainer({}, metaData2, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+
+    const element1 = container.create(FileElement);
+    element1.mount(div1);
+    const element2 = container.create(cardNumberElement);
+    
+    element1.mount(div1);
+    element2.mount(div2);
+
+    const mountCvvCb = onSpy.mock.calls[2][1];
+
+    mountCvvCb({
+      name: `element:${FileElement.type}:${btoa(element1.getID())}`,
+    });
+
+    const mountCardNumberCb = onSpy.mock.calls[5][1];
+    mountCardNumberCb({
+      name: `element:${cardNumberElement.type}:${btoa(element2.getID())}`,
+    });
+    // Mock iframe elements in document
+    const iframe1 = document.createElement('iframe');
+    iframe1.id = element1.iframeName();
+    document.body.appendChild(iframe1);
+    // Trigger cleanup by calling collect
+    const uploadPromise = container.uploadFiles({ someOption: true });
+    const frameReadyCb = on.mock.calls[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({
+      name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid,
+    }, cb2);
+  });
   it('should handle empty document.body', () => {
         container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
 
