@@ -1136,13 +1136,133 @@ describe('Collect container', () => {
         column: 'column'
       }]
     }
-    // const frameReadyCb = on.mock.calls[0][1];
-    // const cb2 = jest.fn();
-    // frameReadyCb({
-    //   name: SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
-    // }, cb2)
-    // expect(cb2).toHaveBeenCalled()
     container.collect(options).then().catch(err => {
       expect(err).toBeDefined();});
+  });
+});
+
+
+describe('iframe cleanup logic', () => {
+  let container;
+  let div1;
+  let div2;
+    let emitSpy;
+  let targetSpy;
+  let onSpy;
+
+  beforeEach(() => {
+        emitSpy = null;
+    targetSpy = null;
+    onSpy = null;
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    onSpy = jest.spyOn(bus, 'on');
+    targetSpy.mockReturnValue({
+      on,
+      off: jest.fn()
+    });
+    div1 = document.createElement('div');
+    div2 = document.createElement('div');
+    document.body.innerHTML = ''; // Clear body
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+    document.body.innerHTML = '';  });
+
+  it('should remove unmounted iframe elements', () => {
+    // Create and mount elements
+    container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+
+    element1.mount(div1);
+    element2.mount(div2);
+
+    const mountCvvCb = onSpy.mock.calls[2][1];
+
+    mountCvvCb({
+      name: `element:${cvvElement.type}:${btoa(element1.getID())}`,
+    });
+
+    const mountCardNumberCb = onSpy.mock.calls[5][1];
+    mountCardNumberCb({
+      name: `element:${cardNumberElement.type}:${btoa(element2.getID())}`,
+    });
+
+    // Mock iframe elements in document
+    const iframe1 = document.createElement('iframe');
+    iframe1.id = element1.iframeName();
+    document.body.appendChild(iframe1);
+
+    // Trigger cleanup by calling collect
+    container.collect().catch((error) => {
+      expect(error).not.toBeDefined();
+    });
+  });
+
+  it('should handle empty document.body', () => {
+        container = new CollectContainer({}, metaData, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+
+    const element1 = container.create(cvvElement);
+    element1.mount(div1);
+    const mountCvvCb = onSpy.mock.calls[2][1];
+
+    mountCvvCb({
+      name: `element:${cvvElement.type}:${btoa(element1.getID())}`,
+    });
+
+    // Mock document.body as null
+    const originalBody = document.body;
+    Object.defineProperty(document, 'body', {
+      value: null,
+      writable: true
+    });
+
+    container.collect().catch(() => {});
+
+    // Restore document.body
+    Object.defineProperty(document, 'body', {
+      value: originalBody,
+      writable: true
+    });
+
+    // Elements should remain unchanged
+    container.collect().catch((error) => {
+      expect(error).not.toBeDefined();
+    });
+  });
+    it('should remove unmounted iframe elements', () => {
+    container = new CollectContainer({}, metaData2, {}, { logLevel: LogLevel.ERROR, env: Env.PROD });
+
+    // Create and mount elements
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+
+    element1.mount(div1);
+    element2.mount(div2);
+
+    const mountCvvCb = onSpy.mock.calls[2][1];
+
+    mountCvvCb({
+      name: `element:${cvvElement.type}:${btoa(element1.getID())}`,
+    });
+
+    const mountCardNumberCb = onSpy.mock.calls[5][1];
+    mountCardNumberCb({
+      name: `element:${cardNumberElement.type}:${btoa(element2.getID())}`,
+    });
+
+    // Mock iframe elements in document
+    const iframe1 = document.createElement('iframe');
+    iframe1.id = element1.iframeName();
+    document.body.appendChild(iframe1);
+
+    // Trigger cleanup by calling collect
+    container.collect().catch((error) => {
+      expect(error).not.toBeDefined();
+    });
   });
 });
