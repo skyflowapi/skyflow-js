@@ -431,6 +431,29 @@ class CollectContainer extends Container {
           if (Object.keys(this.#elements).length === 0) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
           }
+          try {
+            if (Object.keys(this.#elements).length > 0) {
+              const body = document.body;
+              if (body !== null && body !== undefined) {
+                const elements = body.getElementsByTagName('iframe');
+                if (elements !== undefined && elements !== null) {
+                  const list: string[] = [];
+                  Array.from(elements).forEach((iframe) => {
+                    list.push(iframe.id);
+                  });
+                  if (list.length > 0) {
+                    Object.entries(this.#elements).forEach(([key, element]) => {
+                      if (element.isMounted() && !list.includes(element.iframeName())) {
+                        delete this.#elements[key];
+                      }
+                    });
+                  }
+                }
+              }
+            }
+          // eslint-disable-next-line no-empty
+          } catch (error) {
+          }
           const fileElements = Object.values(this.#elements);
           const elementIds = Object.keys(this.#elements);
           fileElements.forEach((element) => {
@@ -479,6 +502,29 @@ class CollectContainer extends Container {
             validateInitConfig(this.#metaData.clientJSON.config);
             if (Object.keys(this.#elements).length === 0) {
               throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
+            }
+            try {
+              if (Object.keys(this.#elements).length > 0) {
+                const body = document.body;
+                if (body !== null && body !== undefined) {
+                  const elements = body.getElementsByTagName('iframe');
+                  if (elements !== undefined && elements !== null) {
+                    const list: string[] = [];
+                    Array.from(elements).forEach((iframe) => {
+                      list.push(iframe.id);
+                    });
+                    if (list.length > 0) {
+                      Object.entries(this.#elements).forEach(([key, element]) => {
+                        if (element.isMounted() && !list.includes(element.iframeName())) {
+                          delete this.#elements[key];
+                        }
+                      });
+                    }
+                  }
+                }
+              }
+              // eslint-disable-next-line no-empty
+            } catch (error) {
             }
             const fileElements = Object.values(this.#elements);
             const elementIds = Object.keys(this.#elements);
