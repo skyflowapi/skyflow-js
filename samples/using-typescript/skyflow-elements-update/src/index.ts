@@ -47,7 +47,7 @@ try {
       env: Skyflow.Env.PROD,
     },
   }
-  const skyflow = Skyflow.init(config);
+  const skyflow: Skyflow = Skyflow.init(config);
 
   // Create collect Container.
   const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
@@ -180,7 +180,6 @@ try {
 
   // OnChange listener for cardNumber element.
   cardNumberElement.on(Skyflow.EventName.CHANGE, (state: any) => {
-    console.log("update validation", state);
     if (state.isValid) {
       // update cvv element validation rule.
       if (findCvvLength(state.value) === 3) {

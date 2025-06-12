@@ -45,7 +45,7 @@ try {
       env: Skyflow.Env.PROD,
     }
   }
-  const skyflow = Skyflow.init(config);
+  const skyflow: Skyflow = Skyflow.init(config);
 
   // Create collect Container.
   const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;

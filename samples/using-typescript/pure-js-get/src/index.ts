@@ -33,7 +33,7 @@ try {
       env: Skyflow.Env.PROD,
     },
   }
-  const skyflow = Skyflow.init(config);
+  const skyflow: Skyflow = Skyflow.init(config);
   // form get request
   const getButton = document.getElementById("getButton");
   if (getButton) {

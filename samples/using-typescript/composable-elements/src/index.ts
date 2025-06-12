@@ -46,10 +46,9 @@ try {
 			env: Skyflow.Env.PROD,
 		},
 	}
-	const skyflow = Skyflow.init(config);
+	const skyflow: Skyflow = Skyflow.init(config);
 
 	//custom styles for collect elements
-
 	const cardholderStyles = {
 		inputStyles: {
 			base: {
@@ -124,7 +123,7 @@ try {
 				margin: '12px 2px',
 				boxShadow: '8px'
 			}
-		},
+		} as InputStyles,
 		errorTextStyles: {
 			base: {
 				color: 'red',
@@ -133,7 +132,7 @@ try {
 			global: {
 				'@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
 			}
-		}
+		} as ErrorTextStyles,
 	}
 	// create collect Container
 	const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions) as ComposableContainer;

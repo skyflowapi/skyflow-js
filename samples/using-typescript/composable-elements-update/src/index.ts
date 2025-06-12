@@ -11,6 +11,7 @@ import Skyflow, {
     ErrorTextStyles,
     ISkyflow,
     InputStyles,
+    IRevealElementInput,
     IValidationRule,
     LabelStyles,
     RevealContainer,
@@ -46,7 +47,7 @@ try {
 			env: Skyflow.Env.PROD,
 		},
 	}
-	const skyflow = Skyflow.init(config);
+	const skyflow: Skyflow = Skyflow.init(config);
 
     //custom styles for collect elements
     const cardholderStyles = {
@@ -131,12 +132,12 @@ try {
                 margin: '12px 2px',
                 boxShadow: '8px'
             }
-        },
+        } as InputStyles,
         errorTextStyles: {
             base: {
                 color: 'red'
             }
-        }
+        } as ErrorTextStyles,
     }
     // create collect Container
     const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions) as ComposableContainer;
@@ -302,32 +303,36 @@ try {
                     const revealContainer = skyflow.container(
                         Skyflow.ContainerType.REVEAL
                     ) as RevealContainer;
-                    const revealCardNumberElement: RevealElement = revealContainer.create({
+                    const revealCardNumberInput: IRevealElementInput = {
                         token: fieldsTokenData.primary_card.card_number,
                         label: 'Card Number',
                         ...revealStyleOptions,
-                    });
+                    };
+                    const revealCardNumberElement: RevealElement = revealContainer.create(revealCardNumberInput);
                     revealCardNumberElement.mount('#revealCardNumber');
 
-                    const revealCardCvvElement: RevealElement = revealContainer.create({
+                    const revealCardCvvInput: IRevealElementInput = {
                         token: fieldsTokenData.primary_card.cvv,
                         label: 'Cvv',
                         ...revealStyleOptions,
-                    });
+                    };
+                    const revealCardCvvElement: RevealElement = revealContainer.create(revealCardCvvInput);
                     revealCardCvvElement.mount('#revealCvv');
 
-                    const revealCardExpiryElement: RevealElement = revealContainer.create({
+                    const revealCardExpiryInput: IRevealElementInput = {
                         token: fieldsTokenData.primary_card.expiry_date,
                         label: 'Card Expiry Date',
                         ...revealStyleOptions,
-                    });
+                    };
+                    const revealCardExpiryElement: RevealElement = revealContainer.create(revealCardExpiryInput);
                     revealCardExpiryElement.mount('#revealExpiryDate');
 
-                    const revealCardholderNameElement: RevealElement = revealContainer.create({
+                    const revealCardholderNameInput: IRevealElementInput = {
                         token: fieldsTokenData.first_name,
                         label: 'Card Holder Name',
                         ...revealStyleOptions,
-                    });
+                    };
+                    const revealCardholderNameElement: RevealElement = revealContainer.create(revealCardholderNameInput);
                     revealCardholderNameElement.mount('#revealCardholderName');
 
                     const revealButton = document.getElementById('revealPCIData');

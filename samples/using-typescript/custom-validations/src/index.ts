@@ -36,7 +36,7 @@ try{
         env:Skyflow.Env.PROD,
       }
     }
-    const skyflow = Skyflow.init(config);
+    const skyflow: Skyflow = Skyflow.init(config);
 
       // Create collect Container.
     const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
@@ -124,11 +124,11 @@ try{
       // ELEMENT VALUE MATCH RULE validates that element value matches the provied element.
 	    type: Skyflow.ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
 	    params: {
-            // Specify with which element value should be matched.
-	        element: passwordElement,
-            // Specify what error text should be displayed 
-            // when this validation rule failed
-            error: 'password doesn’t match'
+        // Specify with which element value should be matched.
+        element: passwordElement,
+        // Specify what error text should be displayed 
+        // when this validation rule failed
+        error: 'password doesn’t match'
 	    }
     }
 

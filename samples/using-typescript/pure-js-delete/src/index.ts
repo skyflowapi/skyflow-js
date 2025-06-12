@@ -28,7 +28,7 @@ try {
       });
     },
   }
-  const skyflow = Skyflow.init(config);
+  const skyflow: Skyflow = Skyflow.init(config);
 
   // form delete request
   const deleteButton = document.getElementById("deleteButton");

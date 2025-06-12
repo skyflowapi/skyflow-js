@@ -39,7 +39,7 @@ try {
   const skyflow = Skyflow.init(config);
 
   // form insert request
-  const insertButton = document.getElementById('insertButton');
+  const insertButton = document.getElementById('insertButton') as HTMLElement;
   if (insertButton) {
     insertButton.addEventListener('click', () => {
       const cardNumberElement = document.getElementById('cardNumber') as HTMLInputElement;
@@ -52,10 +52,10 @@ try {
         return;
       }
 
-      const cardNumberData = cardNumberElement.value;
-      const cardCvvData = cardCvvElement.value;
-      const cardExpiryData = cardExpiryElement.value;
-      const cardholderNameData = cardholderNameElement.value;
+      const cardNumberData: string = cardNumberElement.value;
+      const cardCvvData: string = cardCvvElement.value;
+      const cardExpiryData: string = cardExpiryElement.value;
+      const cardholderNameData: string = cardholderNameElement.value;
 
       const insertRecords: Array<IInsertRecord> = [
         {
@@ -90,25 +90,25 @@ try {
             const fieldsTokenData = res.records[0].fields;
 
             // Fill tokens.
-            const revealCardNumberElement = document.getElementById('card_number');
+            const revealCardNumberElement = document.getElementById('card_number') as HTMLElement;
             if (revealCardNumberElement) {
               revealCardNumberElement.innerText = fieldsTokenData.primary_card.card_number;
               revealCardNumberElement.setAttribute('id', fieldsTokenData.primary_card.card_number);
             }
 
-            const revealCardCvvElement = document.getElementById('cvv');
+            const revealCardCvvElement = document.getElementById('cvv') as HTMLElement;
             if (revealCardCvvElement) {
               revealCardCvvElement.innerText = fieldsTokenData.primary_card.cvv;
               revealCardCvvElement.setAttribute('id', fieldsTokenData.primary_card.cvv);
             }
 
-            const revealExpiryDateElement = document.getElementById('expiry_date');
+            const revealExpiryDateElement = document.getElementById('expiry_date') as HTMLElement;
             if (revealExpiryDateElement) {
               revealExpiryDateElement.innerText = fieldsTokenData.primary_card.expiry_date;
               revealExpiryDateElement.setAttribute('id', fieldsTokenData.primary_card.expiry_date);
             }
 
-            const revealFirstNameElement = document.getElementById('first_name');
+            const revealFirstNameElement = document.getElementById('first_name') as HTMLElement;
             if (revealFirstNameElement) {
               revealFirstNameElement.innerText = fieldsTokenData.first_name;
               revealFirstNameElement.setAttribute('id', fieldsTokenData.first_name);

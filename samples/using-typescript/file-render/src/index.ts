@@ -30,7 +30,7 @@ try {
       });
     },
   }
-  const skyflow = Skyflow.init(config);
+  const skyflow: Skyflow = Skyflow.init(config);
 
   const renderStyleOptions = {
     inputStyles: {
