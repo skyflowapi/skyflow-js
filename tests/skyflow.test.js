@@ -266,6 +266,25 @@ describe('skyflow insert', () => {
     } catch (err) {
     }
   });
+  test('insert error 2', (done) => {
+    const frameReayEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReayEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+    const options = {
+      tokens: true,
+      upsert: [],
+    };
+    try {
+      const res = skyflow.insert(records, options);
+      res.catch((err) => {
+        expect(err).toBeDefined();
+        done();
+      });
+    } catch (err) {
+    }
+  });
   test('insert success else', (done) => {
     try {
       const res = skyflow.insert(records);
@@ -287,6 +306,47 @@ describe('skyflow insert', () => {
         expect(data.error).toBeUndefined();
         done();
       }, 1000);
+    } catch (err) {
+    }
+  });
+    test('insert success else case 2', (done) => {
+    try {
+      const options = {
+        tokens: true,
+      }
+      const res = skyflow.insert(records, options);
+
+      const frameReayEvent = on.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+      const frameReadyCb = frameReayEvent[1][1];
+      frameReadyCb();
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb({
+        error: {
+          message: "resource doesn't exist",
+          code: 404,
+        },
+      });
+      res.catch((err) => {
+        expect(err).toBeDefined();
+        done();
+      });
+    } catch (err) {
+    }
+  });
+  test('insert success else upsert case', (done) => {
+    try {
+      const options = {
+        tokens: true,
+        upsert: []
+      }
+      const res = skyflow.insert(records, options);
+      res.catch((err) => {
+        expect(err).toBeDefined();
+        done();
+      });
     } catch (err) {
     }
   });
