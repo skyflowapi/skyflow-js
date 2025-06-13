@@ -10,6 +10,7 @@ import {
   RedactionType,
   IRenderResponseType,
   IGetOptions,
+  RenderFileResponse,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
 import { FILE_DOWNLOAD_URL_PARAM } from '../core/constants';
@@ -251,15 +252,23 @@ export const formatRecordsForRender = (response : IRenderResponseType, column, s
 };
 
 // eslint-disable-next-line consistent-return
-export const formatForRenderClient = (response: IRenderResponseType, column: string) => {
+export const formatForRenderClient = (response: IRenderResponseType, column: string)
+: RenderFileResponse => {
+  const formattedResponse: RenderFileResponse = {};
   if (response.fields) {
     const successRecord = {
       skyflow_id: response.fields.skyflow_id,
       column,
     };
-    return { success: successRecord };
+    formattedResponse.success = successRecord;
+  } else if (response.errors) {
+    formattedResponse.errors = {
+      skyflowId: response.errors.skyflowId,
+      column: response.errors.column,
+      error: response.errors.error,
+    };
   }
-  return response;
+  return formattedResponse;
 };
 
 export const formatRecordsForClient = (response: IRevealResponseType) => {

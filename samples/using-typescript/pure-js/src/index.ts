@@ -3,21 +3,21 @@
 */
 import Skyflow, { 
   DetokenizeResponse,
-  IDetokenizeInput,
-  IInsertRecordInput,
-  IInsertRecords as IInsertRecord,
+  DetokenizeRequest,
+  InsertRequest,
+  InsertRecord,
   InsertResponse,
-  IRevealRecord,
-  ISkyflow,
+  RevealRecord,
+  SkyflowConfig,
 } from 'skyflow-js';
 
 try {
-  const revealView = document.getElementById('revealView');
+  const revealView = document.getElementById('revealView') as HTMLElement;
   if (revealView) {
     revealView.style.visibility = 'hidden';
   }
 
-  const config: ISkyflow = {
+  const config: SkyflowConfig = {
     vaultID: '<VAULT_ID>',
     vaultURL: '<VAULT_URL>',
     getBearerToken: () => {
@@ -36,10 +36,10 @@ try {
       });
     },
   }
-  const skyflow = Skyflow.init(config);
+  const skyflowClient: Skyflow = Skyflow.init(config);
 
   // form insert request
-  const insertButton = document.getElementById('insertButton') as HTMLElement;
+  const insertButton = document.getElementById('insertButton') as HTMLButtonElement;
   if (insertButton) {
     insertButton.addEventListener('click', () => {
       const cardNumberElement = document.getElementById('cardNumber') as HTMLInputElement;
@@ -57,7 +57,7 @@ try {
       const cardExpiryData: string = cardExpiryElement.value;
       const cardholderNameData: string = cardholderNameElement.value;
 
-      const insertRecords: Array<IInsertRecord> = [
+      const insertRecords: Array<InsertRecord> = [
         {
           fields: {
             primary_card: {
@@ -71,10 +71,10 @@ try {
           table: 'pii_fields',
         },
       ];
-      const insertRecordsInput: IInsertRecordInput = {
+      const insertRequest: InsertRequest = {
         records: insertRecords,
       };
-      const response: Promise<InsertResponse> = skyflow.insert(insertRecordsInput);
+      const response: Promise<InsertResponse> = skyflowClient.insert(insertRequest);
 
       response
         .then(
@@ -82,12 +82,12 @@ try {
             if (revealView) {
               revealView.style.visibility = 'visible';
             }
-            const insertResponseElement = document.getElementById('insertResponse');
+            const insertResponseElement = document.getElementById('insertResponse') as HTMLElement;
             if (insertResponseElement) {
               insertResponseElement.innerHTML = JSON.stringify(res, null, 2);
             }
 
-            const fieldsTokenData = res.records[0].fields;
+            const fieldsTokenData = res.records![0].fields;
 
             // Fill tokens.
             const revealCardNumberElement = document.getElementById('card_number') as HTMLElement;
@@ -114,10 +114,10 @@ try {
               revealFirstNameElement.setAttribute('id', fieldsTokenData.first_name);
             }
 
-            const revealButton = document.getElementById('revealButton');
+            const revealButton = document.getElementById('revealButton') as HTMLButtonElement;
             if (revealButton) {
               revealButton.addEventListener('click', () => {
-                const detokenizeRecords: Array<IRevealRecord> = [
+                const detokenizeRecords: Array<RevealRecord> = [
                   {
                     token: fieldsTokenData.primary_card.card_number,
                     redaction: Skyflow.RedactionType.MASKED
@@ -133,27 +133,27 @@ try {
                     token: fieldsTokenData.first_name,
                   },
                 ];
-                const detokenizeInput: IDetokenizeInput = {
+                const detokenizeRequest: DetokenizeRequest = {
                   records: detokenizeRecords
                 };
-                const detokenizeResult: Promise<DetokenizeResponse> = skyflow.detokenize(detokenizeInput);
+                const detokenizeResult: Promise<DetokenizeResponse> = skyflowClient.detokenize(detokenizeRequest);
 
                 detokenizeResult
                   .then((res: DetokenizeResponse) => {
-                    const revealResponseElement = document.getElementById('revealResponse');
+                    const revealResponseElement = document.getElementById('revealResponse') as HTMLElement;
                     if (revealResponseElement) {
                       revealResponseElement.innerHTML = JSON.stringify(res, null, 2);
                     }
-                    res.records.map((record: Record<string, any>) => {
+                    res.records!.map((record: Record<string, any>) => {
                       const recordKey = record['token'];
-                      const ele = document.getElementById(recordKey);
+                      const ele = document.getElementById(recordKey) as HTMLElement;
                       if (ele) {
                         ele.innerText = record['value'];
                       }
                     });
                   })
                   .catch((err: DetokenizeResponse) => {
-                    const revealResponseElement = document.getElementById('revealResponse');
+                    const revealResponseElement = document.getElementById('revealResponse') as HTMLElement;
                     if (revealResponseElement) {
                       revealResponseElement.innerHTML = JSON.stringify(err, null, 2);
                     }
@@ -163,14 +163,14 @@ try {
             }
           },
           (err: InsertResponse) => {
-            const element = document.getElementById('insertResponse');
+            const element = document.getElementById('insertResponse') as HTMLElement;
             if (element) {
               element.innerHTML = JSON.stringify(err, null, 2);
             }
           }
         )
         .catch((err: InsertResponse) => {
-          const element = document.getElementById('insertResponse');
+          const element = document.getElementById('insertResponse') as HTMLElement;
           if (element) {
             element.innerHTML = JSON.stringify(err, null, 2);
           }

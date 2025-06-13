@@ -192,6 +192,7 @@ export interface InsertResponse {
 }
 
 export interface CollectResponse extends InsertResponse {}
+export interface DetokenizeRecord extends IRevealRecord {}
 export interface DetokenizeResponse extends IRevealResponseType {}
 
 export interface InsertResponseRecords {
@@ -264,7 +265,7 @@ export interface InputStyles extends ErrorTextStyles {
 }
 
 export interface CollectElementOptions {
-  required: boolean,
+  required?: boolean,
   format?: string,
   translation?: Record<string, string>,
   enableCardIcon?: boolean,
@@ -281,7 +282,7 @@ export interface CardMetadata {
   scheme: CardType[],
 }
 
-export interface CollectElementInput {
+export interface CollectElementUpdateOptions {
   table?: string,
   column?: string,
   label?: string,
@@ -289,10 +290,12 @@ export interface CollectElementInput {
   labelStyles?: LabelStyles,
   errorTextStyles?: ErrorTextStyles,
   placeholder?: string,
-  type: ElementType,
   altText?: string,
   validations?: IValidationRule[],
   skyflowID?: string,
+}
+export interface CollectElementInput extends CollectElementUpdateOptions {
+  type: ElementType,
 }
 
 export interface ICollectOptions {
@@ -315,4 +318,25 @@ export interface RevealResponse {
     error: ErrorRecord,
     token: string,
   }
+}
+
+export interface RenderFileResponse {
+  success?: {
+    skyflow_id: string,
+    column: string,
+  },
+  errors?: {
+    skyflowId: string,
+    error: ErrorRecord,
+    column: string,
+  },
+}
+
+export interface ElementState {
+  isEmpty: boolean,
+  isValid: boolean,
+  isFocused: boolean,
+  value: string | Object | Blob | undefined,
+  isRequired: boolean,
+  selectedCardScheme?: string,
 }

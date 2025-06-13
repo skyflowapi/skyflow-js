@@ -6,23 +6,23 @@
 import Skyflow, { ThreeDSBrowserDetails } from 'skyflow-js';
 
 try {
-  const actionButtons = document.getElementById("actionButtons") as HTMLElement;
-  const getDetailsButton = document.getElementById("getBrowserDetails") as HTMLElement;
+  const actionButtons = document.getElementById("actionButtons") as HTMLButtonElement;
+  const getDetailsButton = document.getElementById("getBrowserDetails") as HTMLButtonElement;
   
   if (getDetailsButton) {
     getDetailsButton.addEventListener("click", () => {
       const browserDetails: ThreeDSBrowserDetails = Skyflow.ThreeDS.getBrowserDetails();
-      const detailsElement = document.getElementById("threeDSBrowserDetails");
+      const detailsElement = document.getElementById("threeDSBrowserDetails") as HTMLElement;
       if (detailsElement) {
         detailsElement.innerHTML = JSON.stringify(browserDetails);
       }
     });
 
-    const redirectButton = document.getElementById("redirectToChallenge");
+    const redirectButton = document.getElementById("redirectToChallenge") as HTMLButtonElement;
     if (redirectButton) {
       redirectButton.addEventListener("click", () => {
         const challengeWindow = document.getElementById("challengeWindow") as HTMLElement;
-        const challengeIFrame = Skyflow.ThreeDS.showChallenge(
+        const challengeIFrame: HTMLIFrameElement = Skyflow.ThreeDS.showChallenge(
           "<acs-url>",
           "<c-req>",
           "04",
@@ -40,8 +40,6 @@ try {
       });
     }
   }
-} catch (err) {
-  if (err instanceof Error) {
-    console.error(err.message);
-  }
+} catch (err: unknown) {
+  console.error(err);
 }

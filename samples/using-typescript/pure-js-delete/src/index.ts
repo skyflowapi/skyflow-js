@@ -3,13 +3,13 @@
 */
 import Skyflow, { 
   DeleteResponse,
-  IDeleteRecordInput,
-  IDeleteRecord,
-  ISkyflow,
+  DeleteRequest,
+  DeleteRecord,
+  SkyflowConfig,
 } from "skyflow-js";
 
 try {
-  const config: ISkyflow = {
+  const config: SkyflowConfig = {
     vaultID: "<VAULT_ID>",
     vaultURL: "<VAULT_URL>",
     getBearerToken: () => {
@@ -28,20 +28,20 @@ try {
       });
     },
   }
-  const skyflow: Skyflow = Skyflow.init(config);
+  const skyflowClient: Skyflow = Skyflow.init(config);
 
   // form delete request
-  const deleteButton = document.getElementById("deleteButton");
+  const deleteButton = document.getElementById("deleteButton") as HTMLButtonElement;
   if (deleteButton) {
     deleteButton.addEventListener("click", () => {
-      const deleteRecords: Array<IDeleteRecord> = [
+      const deleteRecords: Array<DeleteRecord> = [
         { id: "<SKYFLOW_ID_1>", table: "<TABLE_NAME>" },
         { id: "<SKYFLOW_ID_2>", table: "<TABLE_NAME>" },
       ];
-      const deleteRecordsInput: IDeleteRecordInput = {
+      const deleteRecordsInput: DeleteRequest = {
         records: deleteRecords
       };
-      const response: Promise<DeleteResponse> = skyflow.delete(deleteRecordsInput);
+      const response: Promise<DeleteResponse> = skyflowClient.delete(deleteRecordsInput);
 
       response
         .then(

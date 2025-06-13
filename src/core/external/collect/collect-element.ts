@@ -27,7 +27,7 @@ import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import {
-  CollectElementInput,
+  CollectElementUpdateOptions,
   Context, Env, EventName, MessageType,
 } from '../../../utils/common';
 import {
@@ -339,7 +339,7 @@ class CollectElement extends SkyflowElement {
     });
   };
 
-  update = (options: CollectElementInput) => {
+  update = (options: CollectElementUpdateOptions) => {
     this.#isUpdateCalled = true;
     if (this.#mounted) {
       options.validations = formatValidations(options.validations);

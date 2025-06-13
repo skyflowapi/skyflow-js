@@ -8,12 +8,14 @@ import Skyflow, {
   CollectResponse,
   ErrorTextStyles,
   InputStyles,
-  ISkyflow,
+  SkyflowConfig,
   LabelStyles,
+  CollectElementInput,
+  ElementState,
 } from 'skyflow-js';
 
 try {
-  const config: ISkyflow = {
+  const config: SkyflowConfig = {
     vaultID: '<VAULT_ID>',
     vaultURL: '<VAULT_URL>',
     getBearerToken: () => {
@@ -38,10 +40,10 @@ try {
       env: Skyflow.Env.DEV,
     }
   }
-  const skyflow: Skyflow = Skyflow.init(config);
+  const skyflowClient: Skyflow = Skyflow.init(config);
 
   // Create collect Container
-  const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
+  const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
 
   // Custom styles for collect elements
   const inputStyles: InputStyles = {
@@ -74,7 +76,7 @@ try {
   }
   
   // Create collect elements
-  const cardNumberElement: CollectElement = collectContainer.create({
+  const cardNumberInput : CollectElementInput = {
     table: 'pii_fields',
     column: 'primary_card.card_number',
     inputStyles: inputStyles,
@@ -83,9 +85,10 @@ try {
     placeholder: 'card number',
     label: 'Card Number',
     type: Skyflow.ElementType.CARD_NUMBER,
-  });
+  };
+  const cardNumberElement: CollectElement = collectContainer.create(cardNumberInput);
 
-  const cvvElement: CollectElement = collectContainer.create({
+  const cvvInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'primary_card.cvv',
     inputStyles: inputStyles,
@@ -94,9 +97,10 @@ try {
     label: 'Cvv',
     placeholder: 'cvv',
     type: Skyflow.ElementType.CVV,
-  });
+  };
+  const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
-  const expiryDateElement: CollectElement = collectContainer.create({
+  const expiryDateInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'expiry_date',
     inputStyles: inputStyles,
@@ -105,9 +109,10 @@ try {
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
     type: Skyflow.ElementType.EXPIRATION_DATE,
-  });
+  };
+  const expiryDateElement: CollectElement = collectContainer.create(expiryDateInput);
 
-  const cardHolderNameElement: CollectElement = collectContainer.create({
+  const cardHolderNameInput: CollectElementInput = {
     table: 'pii_fields',
     column: 'first_name',
     inputStyles: inputStyles,
@@ -116,7 +121,8 @@ try {
     label: 'Card Holder Name',
     placeholder: 'cardholder name',
     type: Skyflow.ElementType.CARDHOLDER_NAME,
-  });
+  };
+  const cardHolderNameElement: CollectElement = collectContainer.create(cardHolderNameInput);
 
   // Mount the elements.
   cardNumberElement.mount('#collectCardNumber');
@@ -127,39 +133,44 @@ try {
   // Add listeners to Collect Elements.
 
   // Add READY EVENT Listener.
-  cardNumberElement.on(Skyflow.EventName.READY, (readyState: any) => {
+  cardNumberElement.on(Skyflow.EventName.READY, (readyState: ElementState) => {
     console.log('Ready Event Triggered', readyState);
   });
 
   // Add CHANGE EVENT Listener.
-  cvvElement.on(Skyflow.EventName.CHANGE, (changeState: any) => {
+  cvvElement.on(Skyflow.EventName.CHANGE, (changeState: ElementState) => {
     console.log('CHANGE Event Triggered', changeState);
   });
 
   // Add FOCUS EVENT Listener.
-  expiryDateElement.on(Skyflow.EventName.FOCUS, (focusState: any) => {
+  expiryDateElement.on(Skyflow.EventName.FOCUS, (focusState: ElementState) => {
     console.log('FOCUS Event Triggered', focusState);
   });
 
   // Add BLUR EVENT Listener.
-  cardHolderNameElement.on(Skyflow.EventName.BLUR, (blurState: any) => {
+  cardHolderNameElement.on(Skyflow.EventName.BLUR, (blurState: ElementState) => {
     console.log('BLUR Event Triggered', blurState);
   });
 
   // Collect all elements data.
-  const collectButton = document.getElementById('collectPCIData');
+  const collectButton = document.getElementById('collectPCIData') as HTMLButtonElement;
   if (collectButton) {
     collectButton.addEventListener('click', () => {
       const collectResponse: Promise<CollectResponse> = collectContainer.collect();
       collectResponse
         .then((response: CollectResponse) => {
-          const responseElement = document.getElementById('collectResponse');
+          console.log(response);
+          const responseElement = document.getElementById('collectResponse') as HTMLElement;
           if (responseElement) {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
         .catch((err: CollectResponse) => {
-          console.error(err);
+          console.log(err);
+          const responseElement = document.getElementById('collectResponse') as HTMLElement;
+          if (responseElement) {
+            responseElement.innerHTML = JSON.stringify(err, null, 2);
+          }
         });
     });
   }

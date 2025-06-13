@@ -7,15 +7,16 @@ import Skyflow, {
   CollectElementInput,
   CollectResponse,
   ErrorTextStyles,
-  ICollectOptions,
-  IInsertRecordInput,
-  IInsertRecord,
+  CollectOptions,
+  InsertRequest,
+  InsertRecord,
   InputStyles,
-  ISkyflow,
   LabelStyles,
+  SkyflowConfig,
 } from 'skyflow-js';
+
 try {
-  const config: ISkyflow = {
+  const config: SkyflowConfig = {
     vaultID: '<VAULT_ID>',
     vaultURL: '<VAULT_URL>',
     getBearerToken: () => {
@@ -38,9 +39,9 @@ try {
       env: Skyflow.Env.PROD,
     },
   }
-  const skyflow: Skyflow = Skyflow.init(config);
+  const skyflowClient: Skyflow = Skyflow.init(config);
   // Create collect Container.
-  const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
+  const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
 
   // Custom styles for collect elements.
   const collectStylesOptions = {
@@ -125,8 +126,8 @@ try {
   cardHolderNameElement.mount('#collectCardholderName');
 
   // Collect all elements data.
-  const collectButton = document.getElementById('collectPCIData');
-  const records: Array<IInsertRecord> = [
+  const collectButton = document.getElementById('collectPCIData') as HTMLButtonElement;
+  const records: Array<InsertRecord> = [
     {
       table: 'table1',
       fields: {
@@ -141,10 +142,10 @@ try {
       },
     },
   ];
-  const additionalFields: IInsertRecordInput = {
+  const additionalFields: InsertRequest = {
     records: records,
   };
-  const collectOptions: ICollectOptions = {
+  const collectOptions: CollectOptions = {
     tokens: true,
     additionalFields: additionalFields,
   };
@@ -154,13 +155,13 @@ try {
       collectResponse
         .then((response: CollectResponse) => {
           console.log(response);
-          const responseElement = document.getElementById('collectResponse');
+          const responseElement = document.getElementById('collectResponse') as HTMLElement;
           if (responseElement) {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
         .catch((err: CollectResponse) => {
-          const errorElement = document.getElementById('collectResponse');
+          const errorElement = document.getElementById('collectResponse') as HTMLElement;
           if (errorElement){
             errorElement.innerHTML = JSON.stringify(err, null, 2);
           }
