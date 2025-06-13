@@ -1,30 +1,31 @@
 /*
-Copyright (c) 2022 Skyflow, Inc.
+Copyright (c) 2025 Skyflow, Inc.
 */
 import Skyflow from './skyflow';
 
 export {
-  IInsertRecordInput,
-  IInsertRecord,
-  IInsertOptions,
+  IInsertRecordInput as InsertRequest,
+  IInsertRecord as InsertRecord,
+  IInsertOptions as InsertOptions,
   InsertResponse,
-  IDetokenizeInput,
-  IRevealRecord,
+  IDetokenizeInput as DetokenizeRequest,
+  DetokenizeRecord,
   DetokenizeResponse,
-  IDeleteRecordInput,
-  IDeleteRecord,
-  IDeleteOptions,
+  IDeleteRecordInput as DeleteRequest,
+  IDeleteRecord as DeleteRecord,
+  IDeleteOptions as DeleteOptions,
   DeleteResponse,
-  IGetInput,
-  IGetRecord,
-  IGetOptions,
+  IGetInput as GetRequest,
+  IGetRecord as GetRecord,
+  IGetOptions as GetOptions,
   GetResponse,
-  IGetByIdInput,
+  IGetByIdInput as GetByIdRequest,
   GetByIdResponse,
   ContainerOptions,
   CollectElementInput,
+  CollectElementUpdateOptions,
   CollectElementOptions,
-  ICollectOptions,
+  ICollectOptions as CollectOptions,
   CollectResponse,
   UploadFilesResponse,
   CardMetadata,
@@ -32,17 +33,20 @@ export {
   LabelStyles,
   ErrorTextStyles,
   RedactionType,
+  IRevealRecord as RevealRecord,
   RevealResponse,
-  IValidationRule,
+  RenderFileResponse,
+  IValidationRule as ValidationRule,
   ValidationRuleType,
   EventName,
   LogLevel,
   Env,
+  ElementState,
 } from './utils/common';
 
 export {
-  IRevealElementInput,
-  IRevealElementOptions,
+  IRevealElementInput as RevealElementInput,
+  IRevealElementOptions as RevealElementOptions,
 } from './core/external/reveal/reveal-container';
 
 export { ThreeDSBrowserDetails } from './core/external/threeds/threeds';
@@ -52,7 +56,10 @@ export {
   ElementType,
 } from './core/constants';
 
-export { ContainerType, ISkyflow } from './skyflow';
+export {
+  ContainerType,
+  ISkyflow as SkyflowConfig,
+} from './skyflow';
 
 export { default as CollectElement } from './core/external/collect/collect-element';
 export { default as CollectContainer } from './core/external/collect/collect-container';
