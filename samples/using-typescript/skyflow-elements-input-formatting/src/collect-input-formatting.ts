@@ -9,13 +9,13 @@ import Skyflow, {
   CollectResponse,
   ErrorTextStyles,
   InputStyles,
-  ISkyflow,  
+  SkyflowConfig,  
   LabelStyles,
 } from "skyflow-js";
 
 try {
 
-  const config: ISkyflow = {
+  const config: SkyflowConfig = {
     vaultID: '<VAULT_ID>',
     vaultURL: '<VAULT_URL>',
     getBearerToken: () => {
@@ -38,10 +38,10 @@ try {
       env: Skyflow.Env.PROD,
     }
   }
-  const skyflow: Skyflow = Skyflow.init(config);
+  const skyflowClient: Skyflow = Skyflow.init(config);
 
   // Create collect Container.
-  const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
+  const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
 
   // Custom styles for collect elements.
   const collectStylesOptions = {
@@ -85,6 +85,7 @@ try {
     type: Skyflow.ElementType.CARD_NUMBER,
   };
   const cardNumberOptions: CollectElementOptions = {
+    required: false,
     format: 'XXXX-XXXX-XXXX-XXXX' // inbuilt format
   };
   const cardNumberElement: CollectElement = collectContainer.create(
@@ -101,6 +102,7 @@ try {
     type: Skyflow.ElementType.INPUT_FIELD,
   };
   const ssnOptions: CollectElementOptions = {
+    required: false,
     format: 'XXX-XX-XXXX',
     translation: { X: '[0-9]' } // translates each 'X' in format string accepts a digit ranging from 0-9.
   };
@@ -114,12 +116,13 @@ try {
     placeholder: 'MM/YYYY',
     type: Skyflow.ElementType.EXPIRATION_DATE,
   };
-  const ExpiryDateOptions: CollectElementOptions =  {
+  const expiryDateOptions: CollectElementOptions =  {
+    required: false,
     format: 'MM/YYYY' // inbuilt format.
   };
   const expiryDateElement: CollectElement = collectContainer.create(
     expiryDateInput,
-    ExpiryDateOptions,
+    expiryDateOptions,
   );
 
   const passportNumberInput: CollectElementInput = {
@@ -131,6 +134,7 @@ try {
     type: Skyflow.ElementType.INPUT_FIELD,
   };
   const passportNumberOptions: CollectElementOptions = {
+    required: false,
     format: 'XXYYYYYYY',
     translation: { X: '[A-Z]', Y: '[0-9]' }
     // translates each 'X' in format string accepts a uppercase alphabet A to Z.
@@ -148,7 +152,7 @@ try {
   passportNumberElement.mount('#collectCardholderName');
 
   // Collect all elements data.
-  const collectButton = document.getElementById('collectPCIData');
+  const collectButton = document.getElementById('collectPCIData') as HTMLButtonElement;
   if (collectButton) {
     collectButton.addEventListener('click', () => {
       const collectResponse: Promise<CollectResponse> = collectContainer.collect();
@@ -156,13 +160,13 @@ try {
         .then((response: CollectResponse) => {
           console.log(response);
           response = response;
-          const responseElement = document.getElementById('collectResponse');
+          const responseElement = document.getElementById('collectResponse') as HTMLElement;
           if (responseElement) {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
         .catch((err: CollectResponse) => {
-          const errorElement = document.getElementById('collectResponse');
+          const errorElement = document.getElementById('collectResponse') as HTMLElement;
           if (errorElement){
             errorElement.innerHTML = JSON.stringify(err, null, 2);
           }

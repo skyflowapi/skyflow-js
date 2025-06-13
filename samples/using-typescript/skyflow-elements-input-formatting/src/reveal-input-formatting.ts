@@ -4,9 +4,9 @@
 import Skyflow, {
   ErrorTextStyles,
   InputStyles,
-  IRevealElementOptions,
-  IRevealElementInput,
-  ISkyflow,
+  RevealElementOptions,
+  RevealElementInput,
+  SkyflowConfig,
   LabelStyles,
   RevealContainer, 
   RevealElement,
@@ -14,7 +14,7 @@ import Skyflow, {
 } from "skyflow-js";
 
 try {
-  const config: ISkyflow = {
+  const config: SkyflowConfig = {
     vaultID: '<VAULT_ID>',
     vaultURL: '<VAULT_URL>',
     getBearerToken: () => {
@@ -37,7 +37,7 @@ try {
       env: Skyflow.Env.PROD,
     }
   }
-  const skyflow: Skyflow = Skyflow.init(config);
+  const skyflowClient: Skyflow = Skyflow.init(config);
 
   const revealStyleOptions = {
     inputStyles: {
@@ -62,13 +62,13 @@ try {
     } as ErrorTextStyles,
   };
 
-  const revealContainer = skyflow.container(Skyflow.ContainerType.REVEAL) as RevealContainer;
-  const revealCardNumberInput: IRevealElementInput = {
+  const revealContainer = skyflowClient.container(Skyflow.ContainerType.REVEAL) as RevealContainer;
+  const revealCardNumberInput: RevealElementInput = {
     token: '<TOKEN 1>',
     label: 'Card Number',
     ...revealStyleOptions,
   };
-  const revealCardNumberOptions: IRevealElementOptions = {
+  const revealCardNumberOptions: RevealElementOptions = {
     format: 'XXXX-XXXX-XXXX-XXXX',
     translation: { X: '[0-9]' }
   };
@@ -78,13 +78,13 @@ try {
   );
   revealCardNumberElement.mount('#revealCardNumber');
 
-  const revealSSNInput: IRevealElementInput = {
+  const revealSSNInput: RevealElementInput = {
     token: '<TOKEN 2>',
     label: 'SSN',
     ...revealStyleOptions,
     altText: '###',
   };
-  const revealSSNOptions: IRevealElementOptions = {
+  const revealSSNOptions: RevealElementOptions = {
     format: 'XX-XXX-XXXX',
   };
   const revealSSNElement: RevealElement = revealContainer.create(
@@ -93,12 +93,12 @@ try {
   );
   revealSSNElement.mount('#revealCvv');
 
-  const revealPhoneNumberInput: IRevealElementInput = {
+  const revealPhoneNumberInput: RevealElementInput = {
     token: '<TOKEN 3>',
     label: 'Phone Number',
     ...revealStyleOptions,
   }
-  const revealPhoneNumberOptions: IRevealElementOptions = {
+  const revealPhoneNumberOptions: RevealElementOptions = {
     format: '(XXX) XXX-XXXX',
     translation: { X: '[0-9]' }
   }
@@ -108,12 +108,12 @@ try {
   );
   revealPhoneNumberElement.mount('#revealExpiryDate');
 
-  const revealDrivingLicenseInput: IRevealElementInput = {
+  const revealDrivingLicenseInput: RevealElementInput = {
     token: '<TOKEN 4>',
     label: 'Driving License',
     ...revealStyleOptions,
   };
-  const revealDrivingLicenseOptions: IRevealElementOptions = {
+  const revealDrivingLicenseOptions: RevealElementOptions = {
     format: 'YXX XXXX XXXX',
     translation: { Y: '[A-Z]', X: '[0-9]' }
   }
@@ -123,11 +123,11 @@ try {
   );
   revealDrivingLicenseElement.mount('#revealCardholderName');
 
-  const revealButton = document.getElementById('revealPCIData');
+  const revealButton = document.getElementById('revealPCIData') as HTMLButtonElement;
 
   if (revealButton) {
     revealButton.addEventListener('click', () => {
-      const revealResponse: Promise<RevealResponse> = revealContainer.reveal()
+      const revealResponse: Promise<RevealResponse> = revealContainer.reveal();
       revealResponse.then((res: RevealResponse) => {
         console.log(res);
       }).catch((err: RevealResponse) => {
