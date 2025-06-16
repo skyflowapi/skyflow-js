@@ -65,6 +65,30 @@ describe('Validation card number and Expiry Date', () => {
     expect(validateExpiryDate(expiryDate, "MM/YY")).toBe(false);
   });
 
+  test('validate expired date, MM/YY', () => {
+    const currentDate = new Date();
+    const expiryDate = `${currentDate.getMonth()}/${currentDate.getFullYear().toString().slice(-2)}`;
+    console.log("Current Date: ", currentDate, expiryDate);
+
+    expect(validateExpiryDate(expiryDate, "MM/YY")).toBe(false);
+  });
+
+  test('validate expiry date with current month, MM/YY', () => {
+    const currentDate = new Date();
+    const expiryDate = `${currentDate.getMonth()+1}/${currentDate.getFullYear().toString().slice(-2)}`;
+    console.log("Current Date: ", currentDate, expiryDate);
+
+    expect(validateExpiryDate(expiryDate, "MM/YY")).toBe(true);
+  });
+
+  test('validate expiry date with next month, MM/YY', () => {
+    const currentDate = new Date();
+    const expiryDate = `${currentDate.getMonth()+2}/${currentDate.getFullYear().toString().slice(-2)}`;
+    console.log("Current Date: ", currentDate, expiryDate);
+
+    expect(validateExpiryDate(expiryDate, "MM/YY")).toBe(true);
+  });
+
   test('empty expirydateformat', () => {
     expect(isValidExpiryDateFormat(null)).toBe(false);
   })
