@@ -3,14 +3,14 @@ Copyright (c) 2025 Skyflow, Inc.
 */
 import Skyflow, { 
   GetResponse,
-  IGetInput,
-  IGetOptions,
-  IGetRecord,
-  ISkyflow,
+  GetRequest,
+  GetOptions,
+  GetRecord,
+  SkyflowConfig,
 } from "skyflow-js";
 
 try {
-  const config: ISkyflow = {
+  const config: SkyflowConfig = {
     vaultID: "<VAULT_ID>",
     vaultURL: "<VAULT_URL>",
     getBearerToken: () => {
@@ -33,12 +33,12 @@ try {
       env: Skyflow.Env.PROD,
     },
   }
-  const skyflow: Skyflow = Skyflow.init(config);
+  const skyflowClient: Skyflow = Skyflow.init(config);
   // form get request
-  const getButton = document.getElementById("getButton");
+  const getButton = document.getElementById("getButton") as HTMLButtonElement;
   if (getButton) {
     getButton.addEventListener("click", () => {
-      const getRecords: Array<IGetRecord> = [
+      const getRecords: Array<GetRecord> = [
         {
           ids: ["<SKYFLOW_ID1>", "<SKYFLOW_ID2>"],
           table: "<TABLE_NAME>",
@@ -51,20 +51,20 @@ try {
           redaction: Skyflow.RedactionType.PLAIN_TEXT,
         },
       ];
-      const getRecordsInput: IGetInput = {
+      const getRecordsInput: GetRequest = {
         records: getRecords
       };
-      const response: Promise<GetResponse> = skyflow.get(getRecordsInput);
+      const response: Promise<GetResponse> = skyflowClient.get(getRecordsInput);
 
       response
         .then((res: GetResponse) => {
-          const getResponseElement = document.getElementById("getResponse");
+          const getResponseElement = document.getElementById("getResponse") as HTMLElement;
           if (getResponseElement) {
             getResponseElement.innerHTML = JSON.stringify(res, null, 2);
           }
         })
         .catch((err: GetResponse) => {
-          const getResponseElement = document.getElementById("getResponse");
+          const getResponseElement = document.getElementById("getResponse") as HTMLElement;
           if (getResponseElement) {
             getResponseElement.innerHTML = JSON.stringify(err, null, 2);
           }
@@ -73,33 +73,33 @@ try {
     });
   }
 
-  const getTokensButton = document.getElementById("getTokens");
+  const getTokensButton = document.getElementById("getTokens") as HTMLButtonElement;
   if (getTokensButton) {
     getTokensButton.addEventListener("click", () => {
-      const getRecords: Array<IGetRecord> = [
+      const getRecords: Array<GetRecord> = [
         {
           ids: ["<SKYFLOW_ID1>", "<SKYFLOW_ID2>"],
           table: "<TABLE_NAME>",
         },
       ];
-      const getRecordsInput: IGetInput = {
+      const getRecordsInput: GetRequest = {
         records: getRecords
       };
-      const getOptions: IGetOptions = { tokens: true }
-      const response: Promise<GetResponse> = skyflow.get(
+      const getOptions: GetOptions = { tokens: true }
+      const response: Promise<GetResponse> = skyflowClient.get(
         getRecordsInput,
         getOptions,
       );
 
       response
         .then((res: GetResponse) => {
-          const getResponseElement = document.getElementById("getResponse");
+          const getResponseElement = document.getElementById("getResponse") as HTMLElement;
           if (getResponseElement) {
             getResponseElement.innerHTML = JSON.stringify(res, null, 2);
           }
         })
         .catch((err: GetResponse) => {
-          const getResponseElement = document.getElementById("getResponse");
+          const getResponseElement = document.getElementById("getResponse") as HTMLElement;
           if (getResponseElement) {
             getResponseElement.innerHTML = JSON.stringify(err, null, 2);
           }

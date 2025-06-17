@@ -3,15 +3,16 @@
 */
 import Skyflow, {
   ErrorTextStyles,
-  ISkyflow,
+  SkyflowConfig,
   InputStyles,
-  IRevealElementInput,
+  RevealElementInput,
   RevealContainer,
   RevealElement,
+  RenderFileResponse,
 } from "skyflow-js";
 
 try {
-  const config: ISkyflow = {
+  const config: SkyflowConfig = {
     vaultID: "<VAULT_ID>",
     vaultURL: "<VAULT_URL>",
     getBearerToken: () => {
@@ -30,7 +31,7 @@ try {
       });
     },
   }
-  const skyflow: Skyflow = Skyflow.init(config);
+  const skyflowClient: Skyflow = Skyflow.init(config);
 
   const renderStyleOptions = {
     inputStyles: {
@@ -70,9 +71,9 @@ try {
     } as ErrorTextStyles,
   };
 
-  const renderContainer = skyflow.container(Skyflow.ContainerType.REVEAL) as RevealContainer;
+  const renderContainer = skyflowClient.container(Skyflow.ContainerType.REVEAL) as RevealContainer;
 
-  const renderFileInput1: IRevealElementInput = {
+  const renderFileInput1: RevealElementInput = {
     ...renderStyleOptions,
     skyflowID: "<SKYFLOW_ID1>",
     column: "<COLUMN_NAME1>",
@@ -82,7 +83,7 @@ try {
   const renderFileElement1: RevealElement = renderContainer.create(renderFileInput1);
   renderFileElement1.mount("#renderFileElement1");
 
-  const renderFileInput2: IRevealElementInput = {
+  const renderFileInput2: RevealElementInput = {
     ...renderStyleOptions2,
     skyflowID: "<SKYFLOW_ID2>",
     column: "<COLUMN_NAME2>",
@@ -93,20 +94,20 @@ try {
 
   renderFileElement2.mount("#renderFileElement2");
 
-  const renderButton = document.getElementById("renderFiles");
+  const renderButton = document.getElementById("renderFiles") as HTMLButtonElement;
 
   if (renderButton) {
     renderButton.addEventListener("click", () => {
-      const renderFile1Response = renderFileElement1.renderFile();
-      renderFile1Response.then((res: any) => {
+      const renderFile1Response: Promise<RenderFileResponse> = renderFileElement1.renderFile();
+      renderFile1Response.then((res: RenderFileResponse) => {
         console.log("response 1", res);
       })
       .catch((err: any) => {
         console.log("Error 1", err);
       });
 
-      const renderFile2Response = renderFileElement2.renderFile();
-      renderFile2Response.then((res: any) => {
+      const renderFile2Response: Promise<RenderFileResponse> = renderFileElement2.renderFile();
+      renderFile2Response.then((res: RenderFileResponse) => {
         console.log("response 2", res);
       })
       .catch((err: any) => {

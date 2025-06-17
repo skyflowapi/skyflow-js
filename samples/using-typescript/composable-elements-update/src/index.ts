@@ -9,10 +9,10 @@ import Skyflow, {
     ComposableElement,
     ContainerOptions,
     ErrorTextStyles,
-    ISkyflow,
+    SkyflowConfig,
     InputStyles,
-    IRevealElementInput,
-    IValidationRule,
+    RevealElementInput,
+    ValidationRule,
     LabelStyles,
     RevealContainer,
     RevealElement,
@@ -20,11 +20,11 @@ import Skyflow, {
 } from 'skyflow-js';
 
 try {
-    const revealView = document.getElementById('revealView');
+    const revealView = document.getElementById('revealView') as HTMLElement;
     if (revealView) {
         revealView.style.visibility = 'hidden';
     }
-	const config: ISkyflow = {
+	const config: SkyflowConfig = {
 		vaultID: '<VAULT_ID>',
 		vaultURL: '<VAULT_URL>',
 		getBearerToken: () => {
@@ -47,7 +47,7 @@ try {
 			env: Skyflow.Env.PROD,
 		},
 	}
-	const skyflow: Skyflow = Skyflow.init(config);
+	const skyflowClient: Skyflow = Skyflow.init(config);
 
     //custom styles for collect elements
     const cardholderStyles = {
@@ -140,7 +140,7 @@ try {
         } as ErrorTextStyles,
     }
     // create collect Container
-    const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions) as ComposableContainer;
+    const composableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions) as ComposableContainer;
 
     const cardHolderNameInput: CollectElementInput = {
         table: 'pii_fields',
@@ -197,7 +197,7 @@ try {
     };
 
     // Validation rules for cvv element.
-    const length3Rule: IValidationRule = {
+    const length3Rule: ValidationRule = {
         type: Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
         params: {
             max: 3,
@@ -205,7 +205,7 @@ try {
         },
     };
 
-    const length4Rule: IValidationRule = {
+    const length4Rule: ValidationRule = {
         type: Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
         params: {
             min: 4,
@@ -230,7 +230,7 @@ try {
     });
 
     // update composable elements
-    const updateElementsButton = document.getElementById('updateElements');
+    const updateElementsButton = document.getElementById('updateElements') as HTMLButtonElement;
     if (updateElementsButton) {
         updateElementsButton.addEventListener('click', () => {
             // update label,placeholder on cardholderName,
@@ -258,7 +258,7 @@ try {
     }
 
     // collect all elements data
-    const collectButton = document.getElementById('collectPCIData');
+    const collectButton = document.getElementById('collectPCIData') as HTMLButtonElement;
     if (collectButton) {
         collectButton.addEventListener('click', () => {
             const collectResponse: Promise<CollectResponse> = composableContainer.collect();
@@ -266,7 +266,7 @@ try {
                 .then((response: CollectResponse) => {
                     console.log(response);
                     response = response;
-                    const responseElement = document.getElementById('collectResponse');
+                    const responseElement = document.getElementById('collectResponse') as HTMLElement;
                     if (responseElement) {
                         responseElement.innerHTML = JSON.stringify(response, null, 2);
                     }
@@ -300,10 +300,10 @@ try {
 
                     // Create Reveal Elements With Tokens.
                     const fieldsTokenData = response.records[0].fields;
-                    const revealContainer = skyflow.container(
+                    const revealContainer = skyflowClient.container(
                         Skyflow.ContainerType.REVEAL
                     ) as RevealContainer;
-                    const revealCardNumberInput: IRevealElementInput = {
+                    const revealCardNumberInput: RevealElementInput = {
                         token: fieldsTokenData.primary_card.card_number,
                         label: 'Card Number',
                         ...revealStyleOptions,
@@ -311,7 +311,7 @@ try {
                     const revealCardNumberElement: RevealElement = revealContainer.create(revealCardNumberInput);
                     revealCardNumberElement.mount('#revealCardNumber');
 
-                    const revealCardCvvInput: IRevealElementInput = {
+                    const revealCardCvvInput: RevealElementInput = {
                         token: fieldsTokenData.primary_card.cvv,
                         label: 'Cvv',
                         ...revealStyleOptions,
@@ -319,7 +319,7 @@ try {
                     const revealCardCvvElement: RevealElement = revealContainer.create(revealCardCvvInput);
                     revealCardCvvElement.mount('#revealCvv');
 
-                    const revealCardExpiryInput: IRevealElementInput = {
+                    const revealCardExpiryInput: RevealElementInput = {
                         token: fieldsTokenData.primary_card.expiry_date,
                         label: 'Card Expiry Date',
                         ...revealStyleOptions,
@@ -327,7 +327,7 @@ try {
                     const revealCardExpiryElement: RevealElement = revealContainer.create(revealCardExpiryInput);
                     revealCardExpiryElement.mount('#revealExpiryDate');
 
-                    const revealCardholderNameInput: IRevealElementInput = {
+                    const revealCardholderNameInput: RevealElementInput = {
                         token: fieldsTokenData.first_name,
                         label: 'Card Holder Name',
                         ...revealStyleOptions,
@@ -335,7 +335,7 @@ try {
                     const revealCardholderNameElement: RevealElement = revealContainer.create(revealCardholderNameInput);
                     revealCardholderNameElement.mount('#revealCardholderName');
 
-                    const revealButton = document.getElementById('revealPCIData');
+                    const revealButton = document.getElementById('revealPCIData') as HTMLButtonElement;
 
                     if (revealButton) {
                         revealButton.addEventListener('click', () => {

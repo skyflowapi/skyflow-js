@@ -6,14 +6,14 @@ import Skyflow, {
   CollectElement,
   CollectElementInput,
   ErrorTextStyles,
-  ISkyflow,
+  SkyflowConfig,
   InputStyles,
-  IValidationRule,
+  ValidationRule,
   LabelStyles,
 } from 'skyflow-js';
 
 try{
-    const config: ISkyflow = {
+    const config: SkyflowConfig = {
       vaultID: '<VAULT_ID>',
       vaultURL: '<VAULT_URL>',
       getBearerToken: () => {
@@ -36,10 +36,10 @@ try{
         env:Skyflow.Env.PROD,
       }
     }
-    const skyflow: Skyflow = Skyflow.init(config);
+    const skyflowClient: Skyflow = Skyflow.init(config);
 
       // Create collect Container.
-    const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
+    const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
 
     // Custom styles for collect elements.
     const collectStylesOptions = {
@@ -74,7 +74,7 @@ try{
     };
 
       // Create a validation rule.
-    const regexRule: IValidationRule = {
+    const regexRule: ValidationRule = {
       // REGEX Rule will validate the element value with the given regex
       type:Skyflow.ValidationRuleType.REGEX_MATCH_RULE ,
       params:{
@@ -86,7 +86,7 @@ try{
       }
     }
     // Creating a length rule.
-    const lengthRule: IValidationRule = {
+    const lengthRule: ValidationRule = {
       // LENGTH match rule will validate whether the element value length matches with given length.  
       type:Skyflow.ValidationRuleType.LENGTH_MATCH_RULE,
       params:{
@@ -120,7 +120,7 @@ try{
     }
     const passwordElement: CollectElement = collectContainer.create(passwordInput);
 
-    const elementMatchRule: IValidationRule = {
+    const elementMatchRule: ValidationRule = {
       // ELEMENT VALUE MATCH RULE validates that element value matches the provied element.
 	    type: Skyflow.ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
 	    params: {
