@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, FRAME_ELEMENT } from '../../../../src/core/constants';
+import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, FRAME_ELEMENT } from '../../../../src/core/constants';
 import { Env, LogLevel, ValidationRuleType } from '../../../../src/utils/common';
 import IFrameFormElement from '../../../../src/core/internal/iframe-form'
 import * as busEvents from '../../../../src/utils/bus-events';
@@ -116,6 +116,43 @@ describe('test iframeFormelement', () => {
         })
 
     })
+    test('iframeFormElement get value for dob', () => {
+        const element = new IFrameFormElement(collect_element, {}, context)
+        Object.defineProperty(element, 'fieldType', {
+            get: () => 'dob',
+            set: () => {}
+        });
+        element.setValue('2020-12-30')
+        expect(element.getValue()).toBe('2020-12-30')
+    });
+
+    test('iframeFormelement should throw error for sensitive', () => {
+        const element = new IFrameFormElement(collect_element, '', {containerType:ContainerType.COLLECT}, context);
+        element.setSensitive(true);
+    
+        expect(() => {
+            element.setSensitive(false);
+        }).toThrow('Sensitivity is not backward compatible');
+    });
+    test('iframeFormelement should not throw error for sensitive', () => {
+        const element = new IFrameFormElement(collect_element, '', {containerType:ContainerType.COLLECT}, context);
+        Object.defineProperty(element, 'sensitive', {
+            get: () => false,
+            set: () => {}
+        });
+        element.setSensitive(true);
+    });
+    test('iframeformelment test the unformatted value', () => {
+        const element = new IFrameFormElement(test_collect_element, '', {containerType:ContainerType.COLLECT}, context);
+        element.setFormat('XXXX XXXX XXXX XXXX');
+        element.setValue('4111 1111 1111 1111');
+        element.setMask(["XXXX XXXX XXXX XXXX", { X: "[0-9]" }]);
+        element.state.value = '4111 1111 1111 1111';
+        expect(element.getUnformattedValue()).toBe('4111111111111111')
+        element.state.selectedCardScheme = 'visa';
+        expect(element.getStatus().selectedCardScheme).toBe('visa');
+        expect(element.validateCustomValidations()).toBe(true);
+    })
 
     test('is match equal tests',()=>{
         const validation = {
@@ -150,6 +187,122 @@ describe('test iframeFormelement', () => {
         expect(element.replacePattern).toBe(undefined);
     });
 
+    test('set mask with no translation',()=>{
+        const spy = jest.spyOn(console, 'warn'); 
+        const element = new IFrameFormElement(collect_element, '',{} ,context);
+        element.setReplacePattern(null);
+        element.setMask(["XXX"]);
+        expect(element.mask).toBe(undefined)
+        expect(element.replacePattern).toBe(undefined);
+        expect(spy).not.toBeCalledTimes(1);
+    });
+    test('collect bus event', () => {
+        const element = new IFrameFormElement(collect_element, '',{clientDomain :'*'} ,context);
+        // input events
+        const eventName = `${ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT}${collect_element}`;
+        expect(on.mock.calls[0][0]).toBe(eventName);
+        expect(on.mock.calls[0][1]).toBeDefined();
+        const callback = on.mock.calls[0][1];
+        expect(callback).toBeInstanceOf(Function);
+        callback({
+            name: collect_element,
+            options: {
+                value: '123',
+                isFocused: true,
+                isValid: true,
+                isEmpty: false,
+                isComplete: true,
+            },
+            event: ELEMENT_EVENTS_TO_CLIENT.FOCUS,
+        });
+        expect(element.state.isFocused).toBe(true);
+        callback({
+            name: collect_element,
+            options: {
+                value: '123',
+                isFocused: true,
+                isValid: true,
+                isEmpty: false,
+                isComplete: true,
+            },
+            event: ELEMENT_EVENTS_TO_CLIENT.BLUR,
+        });
+        expect(element.state.isFocused).toBe(false);
+        // set value
+        const setEventName = `${ELEMENT_EVENTS_TO_IFRAME.SET_VALUE}${collect_element}`;
+        expect(on.mock.calls[1][0]).toBe(setEventName);
+        const callback2 = on.mock.calls[1][1];
+        expect(callback2).toBeInstanceOf(Function);
+        callback2({
+            name: collect_element,
+            options: {
+                value: '123',
+                isFocused: true,
+                isValid: true,
+                isEmpty: false,
+                isComplete: true,
+                elementName: collect_element,
+            },
+            event: ELEMENT_EVENTS_TO_CLIENT.SET_VALUE,
+        });
+        callback2({
+            name: collect_element,
+            options: {
+                isFocused: true,
+                isValid: true,
+                isEmpty: false,
+                isComplete: true,
+                elementName: collect_element,
+            },
+            event: ELEMENT_EVENTS_TO_CLIENT.SET_VALUE,
+            isSingleElementAPI: true,
+        });
+        // COLLECT_ELEMENT_SET_ERROR_OVERRIDE
+        const setErrorEventName = `${ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE}${collect_element}`;
+        expect(on.mock.calls[2][0]).toBe(setErrorEventName);
+        const callback3 = on.mock.calls[2][1];
+        callback3({
+            name: collect_element,
+            options: {
+                value: '123',
+                isFocused: true,
+                isValid: true,
+                isEmpty: false,
+                isComplete: true,
+                elementName: collect_element,
+            },
+        });
+        // COLLECT_ELEMENT_SET_ERROR
+        const setErrorEventName2 = `${ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR}${collect_element}`;
+        expect(on.mock.calls[3][0]).toBe(setErrorEventName2);
+        const callback4 = on.mock.calls[3][1];
+        callback4({
+            name: collect_element,
+            isTriggerError: true,
+            clientErrorText: 'Invalid cvv',
+            options: {
+                value: '123',
+                isFocused: true,
+                isValid: true,
+                isEmpty: false,
+                isComplete: true,
+                elementName: collect_element,
+            },
+        });
+        callback4({
+            name: collect_element,
+            isTriggerError: false,
+            options: {
+                value: '123',
+                isFocused: true,
+                isValid: true,
+                isEmpty: false,
+                isComplete: true,
+                elementName: collect_element,
+            },
+        });
+    });
+
     test('set mask  should throw warining invalid regex in translation mask',()=>{
         const spy = jest.spyOn(console, 'warn'); 
         const element = new IFrameFormElement(collect_element, '',{} ,{logLevel:LogLevel.WARN,env:Env.PROD});
@@ -173,6 +326,18 @@ describe('test iframeFormelement', () => {
         element.setValue('12')
         expect(element.state.value).toBe('12')
     })
+    test('test setValue for checkbox element', () => {
+        const element = new IFrameFormElement(checkbox_element, {}, context)
+        element.setValue(true)
+        expect(element.state.value).toBe(true)
+
+        element.setValue(true)
+        expect(element.state.value).toBe('')
+
+        element.setValue(false)
+        expect(element.state.value).toBe(false)
+    });
+
     // test('test tokenize error case', () => {
     //     const element = new IFrameFormElement(`element:EXPIRATION_MONTH:${tableCol}`, {}, context)
     //     const form = new IFrameForm("controllerId","",'ERROR')
@@ -206,6 +371,7 @@ describe('test iframeFormelement', () => {
         element.setValue('2070/2')
         expect(element.state.value).toBe('2070/02')
 
+        element.setValue(' ')
         element.setValue('2070/1')
         expect(element.state.value).toBe('2070/1')
 

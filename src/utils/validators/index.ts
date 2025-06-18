@@ -75,13 +75,15 @@ export const validateExpiryDate = (date: string, format: string) => {
   if (!date.includes('/')) return false;
   const { month, year } = getYearAndMonthBasedOnFormat(date, format);
   if (format.endsWith('YYYY') && year.length !== 4) { return false; }
-  const expiryDate = new Date(`${year}-${month}-01`);
+  const expiryDate = new Date(year, month, 0);
+  expiryDate.setHours(23, 59, 59, 999);
   const today = new Date();
 
   const maxDate = new Date();
   maxDate.setFullYear(today.getFullYear() + 50);
+  maxDate.setMonth(today.getMonth() + 1);
 
-  return expiryDate > today && expiryDate <= maxDate;
+  return expiryDate >= today && expiryDate <= maxDate;
 };
 
 export const validateExpiryYear = (year: string, format: string) => {

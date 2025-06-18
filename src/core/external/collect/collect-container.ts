@@ -251,13 +251,7 @@ class CollectContainer extends Container {
           if (Object.keys(this.#elements).length === 0) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
           }
-          if (Object.keys(this.#elements).length > 0) {
-            Object.entries(this.#elements).forEach(([key, element]) => {
-              if (element.isMounted() && window.parent.frames[element.iframeName()] === undefined) {
-                delete this.#elements[key];
-              }
-            });
-          }
+          this.#removeStaleElements();
           const collectElements = Object.values(this.#elements);
           const elementIds = Object.keys(this.#elements)
             .map((element) => ({ frameId: element, elementId: element }));
@@ -314,13 +308,7 @@ class CollectContainer extends Container {
         if (Object.keys(this.#elements).length === 0) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
         }
-        if (Object.keys(this.#elements).length > 0) {
-          Object.entries(this.#elements).forEach(([key, element]) => {
-            if (element.isMounted() && window.parent.frames[element.iframeName()] === undefined) {
-              delete this.#elements[key];
-            }
-          });
-        }
+        this.#removeStaleElements();
         const collectElements = Object.values(this.#elements);
         const elementIds = Object.keys(this.#elements)
           .map((element) => ({ frameId: element, elementId: element }));
@@ -383,6 +371,7 @@ class CollectContainer extends Container {
           if (Object.keys(this.#elements).length === 0) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
           }
+          this.#removeStaleElements();
           const fileElements = Object.values(this.#elements);
           const elementIds = Object.keys(this.#elements);
           fileElements.forEach((element) => {
@@ -432,6 +421,7 @@ class CollectContainer extends Container {
             if (Object.keys(this.#elements).length === 0) {
               throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
             }
+            this.#removeStaleElements();
             const fileElements = Object.values(this.#elements);
             const elementIds = Object.keys(this.#elements);
             fileElements.forEach((element) => {
@@ -473,5 +463,46 @@ class CollectContainer extends Container {
         });
     });
   };
+
+  #removeStaleElements = (): void => {
+    try {
+      if (this.#hasNoElements()) return;
+
+      const mountedIframeIds = this.#getMountedIframeIds();
+      if (!mountedIframeIds.length) return;
+
+      this.#removeUnmountedElements(mountedIframeIds);
+    } catch (error) {
+      printLog(`${error}`, MessageType.LOG, this.#context.logLevel);
+    }
+  };
+
+  #hasNoElements = (): boolean => Object.keys(this.#elements).length === 0;
+
+  #getMountedIframeIds = (): string[] => {
+    const body = document?.body;
+    if (!body) return [];
+
+    const iframes = body.getElementsByTagName('iframe');
+    if (!iframes?.length) return [];
+
+    return Array.from(iframes).map((iframe) => iframe.id);
+  };
+
+  #removeUnmountedElements = (mountedIframeIds: string[]): void => {
+    Object.entries(this.#elements).forEach(([key, element]) => {
+      if (this.#shouldRemoveElement(element, mountedIframeIds)) {
+        delete this.#elements[key];
+      }
+    });
+  };
+
+  #shouldRemoveElement = (
+    element: CollectElement,
+    mountedIframeIds: string[],
+  ): boolean => (
+    element.isMounted()
+    && !mountedIframeIds.includes(element.iframeName())
+  );
 }
 export default CollectContainer;
