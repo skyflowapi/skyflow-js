@@ -4,7 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
-import { Context, MessageType } from '../../../utils/common';
+import { Context, MessageType, RenderFileResponse } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
   // eslint-disable-next-line max-len
@@ -101,7 +101,7 @@ class RevealElement extends SkyflowElement {
     return this.#elementId;
   }
 
-  mount(domElementSelector) {
+  mount(domElementSelector: HTMLElement | string) {
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
@@ -164,7 +164,7 @@ class RevealElement extends SkyflowElement {
     }
   }
 
-  renderFile() {
+  renderFile(): Promise<RenderFileResponse> {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     let altText = '';
     if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
@@ -437,7 +437,7 @@ class RevealElement extends SkyflowElement {
     this.#iframe.unmount();
   }
 
-  update(options) {
+  update(options: IRevealElementInput) {
     this.#recordData = {
       ...this.#recordData,
       ...options,

@@ -2,7 +2,6 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import { IUpsertOptions } from '../../../core-utils/collect';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
 import {
@@ -12,7 +11,12 @@ import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import { ContainerType } from '../../../skyflow';
 import {
-  IValidationRule, IInsertRecordInput, Context, MessageType,
+  Context, MessageType,
+  CollectElementInput,
+  CollectElementOptions,
+  CollectResponse,
+  ICollectOptions,
+  UploadFilesResponse,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
@@ -24,7 +28,7 @@ import {
   validateBooleanOptions,
 } from '../../../utils/validators';
 import {
-  ElementType, COLLECT_FRAME_CONTROLLER,
+  COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS, FRAME_ELEMENT,
   COLLECT_TYPES,
@@ -34,25 +38,6 @@ import CollectElement from './collect-element';
 import EventEmitter from '../../../event-emitter';
 import properties from '../../../properties';
 
-export interface CollectElementInput {
-  table?: string;
-  column?: string;
-  inputStyles?: object;
-  label?: string;
-  labelStyles?: object;
-  errorTextStyles?: object;
-  placeholder?: string;
-  type: ElementType;
-  altText?: string;
-  validations?: IValidationRule[]
-  skyflowID?: string;
-}
-
-interface ICollectOptions {
-  tokens?: boolean;
-  additionalFields?: IInsertRecordInput;
-  upsert?: Array<IUpsertOptions>
-}
 const CLASS_NAME = 'CollectContainer';
 class CollectContainer extends Container {
   #containerId: string;
@@ -110,7 +95,7 @@ class CollectContainer extends Container {
     this.#isMounted = true;
   }
 
-  create = (input: CollectElementInput, options: any = {
+  create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
   }) => {
     validateCollectElementInput(input, this.#context.logLevel);
@@ -217,7 +202,7 @@ class CollectContainer extends Container {
       elements.forEach((iElement) => {
         const name = iElement.elementName;
         if (!this.#elements[name]) {
-          this.#elements[name] = this.create(iElement.elementType, element);
+          this.#elements[name] = this.create(iElement.elementType, iElement);
         } else {
           this.#elements[name].updateElementGroup(iElement);
         }
@@ -256,7 +241,7 @@ class CollectContainer extends Container {
     return false;
   };
 
-  collect = (options: ICollectOptions = { tokens: true }) :Promise<any> => {
+  collect = (options: ICollectOptions = { tokens: true }): Promise<CollectResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -377,7 +362,7 @@ class CollectContainer extends Container {
     });
   };
 
-  uploadFiles = (options) :Promise<any> => {
+  uploadFiles = (options: ICollectOptions) :Promise<UploadFilesResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {

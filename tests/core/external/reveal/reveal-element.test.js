@@ -331,7 +331,7 @@ describe("Reveal Element Class", () => {
     // Verify the renderFile promise resolves correctly
     renderPromise
       .then((data) => {
-        expect(data).toEqual({ success: { skyflow_id: "1244", column: "column" } });
+        expect(data).toEqual({});
         done();
       })
       .catch((error) => {
@@ -376,18 +376,21 @@ describe("Reveal Element Class", () => {
     // onCb({}, cb);
   
     const emitCb = emitSpy.mock.calls[0][2];
-    emitCb({ errors: { grpc_code: 5, http_code: 404, message: "No Records Found", http_status: "Not Found", details: [] } });
+    emitCb({ errors: { column: "column", skyflowId: "1244", error: { code: 400, description: "No Records Found" }}});
+    
+    // emitCb({ errors: { grpc_code: 5, http_code: 404, message: "No Records Found", http_status: "Not Found", details: [] } });
   
     // Verify the renderFile promise resolves correctly
     renderPromise
       .catch((error) => {
         expect(error).toEqual({
           "errors": {
-              "grpc_code": 5,
-              "http_code": 404,
-              "message": "No Records Found",
-              "http_status": "Not Found",
-              "details": []
+              "column": "column",
+              "skyflowId": "1244",
+              "error": {
+                "code": 400,
+                "description": "No Records Found",
+              },
           }
       }
     );

@@ -2,7 +2,7 @@ import EventEmitter from '../../../event-emitter';
 import { formatValidations } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
-import { EventName } from '../../../utils/common';
+import { CollectElementUpdateOptions, EventName } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '../../constants';
 
@@ -29,7 +29,7 @@ class ComposableElement {
     });
   }
 
-  on(eventName: string, handler: any) {
+  on(eventName: string, handler: Function) {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(
         SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER,
@@ -73,7 +73,7 @@ class ComposableElement {
     return this.#elementName;
   }
 
-  update = (options) => {
+  update = (options: CollectElementUpdateOptions) => {
     this.#isUpdateCalled = true;
     if (this.#isMounted) {
       options.validations = formatValidations(options.validations);

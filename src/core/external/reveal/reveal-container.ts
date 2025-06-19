@@ -7,7 +7,10 @@ import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import { ContainerType } from '../../../skyflow';
-import { Context, MessageType, RedactionType } from '../../../utils/common';
+import {
+  Context, MessageType,
+  RedactionType, RevealResponse,
+} from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
@@ -146,7 +149,7 @@ class RevealContainer extends Container {
     return revealElement;
   }
 
-  reveal() {
+  reveal(): Promise<RevealResponse> {
     this.#isRevealCalled = true;
     this.#revealRecords = [];
     if (this.#metaData.skyflowContainer.isControllerFrameReady) {

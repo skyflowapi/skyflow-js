@@ -5,7 +5,6 @@ Copyright (c) 2023 Skyflow, Inc.
 */
 import bus from 'framebus';
 import sum from 'lodash/sum';
-import { IUpsertOptions } from '../../../core-utils/collect';
 import EventEmitter from '../../../event-emitter';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
@@ -17,7 +16,11 @@ import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
 import { ContainerType } from '../../../skyflow';
 import {
-  IValidationRule, IInsertRecordInput, Context, MessageType,
+  Context, MessageType,
+  CollectElementInput,
+  CollectElementOptions,
+  ICollectOptions,
+  CollectResponse,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
@@ -27,7 +30,7 @@ import {
   validateUpsertOptions,
 } from '../../../utils/validators';
 import {
-  ElementType, COLLECT_FRAME_CONTROLLER,
+  COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER,
   COLLECT_TYPES,
@@ -36,25 +39,6 @@ import Container from '../common/container';
 import CollectElement from './collect-element';
 import ComposableElement from './compose-collect-element';
 
-export interface CollectElementInput {
-  table?: string;
-  column?: string;
-  inputStyles?: object;
-  label?: string;
-  labelStyles?: object;
-  errorTextStyles?: object;
-  placeholder?: string;
-  type: ElementType;
-  altText?: string;
-  validations?: IValidationRule[]
-  skyflowID?: string;
-}
-
-interface ICollectOptions {
-  tokens?: boolean;
-  additionalFields?: IInsertRecordInput;
-  upsert?: Array<IUpsertOptions>
-}
 const CLASS_NAME = 'CollectContainer';
 class ComposableContainer extends Container {
   #containerId: string;
@@ -128,7 +112,7 @@ class ComposableContainer extends Container {
     this.#updateListeners();
   }
 
-  create = (input: CollectElementInput, options: any = {
+  create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
   }) => {
     validateCollectElementInput(input, this.#context.logLevel);
@@ -250,7 +234,7 @@ class ComposableContainer extends Container {
     return false;
   };
 
-  on = (eventName:string, handler:any) => {
+  on = (eventName:string, handler:Function) => {
     if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
       throw new SkyflowError(
         SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER,
@@ -278,7 +262,7 @@ class ComposableContainer extends Container {
     });
   };
 
-  mount = (domElement) => {
+  mount = (domElement: HTMLElement | string) => {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT,
         ['CollectElement'], true);
@@ -323,7 +307,7 @@ class ComposableContainer extends Container {
     this.#containerElement.unmount();
   };
 
-  collect = (options: ICollectOptions = { tokens: true }) :Promise<any> => {
+  collect = (options: ICollectOptions = { tokens: true }) :Promise<CollectResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {

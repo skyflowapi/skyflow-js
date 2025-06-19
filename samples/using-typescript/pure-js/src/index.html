@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pure Js Insert and Reveal</title>
+    <style>
+      .field {
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h3>Insert</h3>
+      <form>
+        <div id="cardNumberContainer" class="field">
+          <label for="cardNumber">Card Number</label>
+          <br />
+          <input
+            id="cardNumber"
+            type="text"
+            placeholder="card number"
+            name="cardNumber"
+          />
+        </div>
+        <div id="cardCvvContainer" class="field">
+          <label for="cardCvv">CVV</label>
+          <br />
+          <input id="cardCvv" type="text" placeholder="cvv" minlength="4" />
+        </div>
+        <div id="cardExpiryDateContainer" class="field">
+          <label>Expiry Date</label>
+          <br />
+          <input id="cardExpiry" type="text" placeholder="MM/YYYY" />
+        </div>
+        <div id="cardHolderNameContainer" class="field">
+          <label>Card Holder Name</label>
+          <br />
+          <input
+            id="cardHolderName"
+            type="text"
+            placeholder="card holder name"
+          />
+        </div>
+        <br />
+        <br />
+        <button id="insertButton" type="button">Insert</button>
+      </form>
+      <div>
+        <h3>Insert Response</h3>
+        <pre id="insertResponse"></pre>
+      </div>
+    </div>
+    <br />
+    <div id="revealView">
+      <h3>Reveal</h3>
+      <div>
+        <p>Card Number</p>
+        <p id="card_number"></p>
+      </div>
+      <div>
+        <p>Card CVV</p>
+        <p id="cvv"></p>
+      </div>
+      <div>
+        <p>Card Expiry Date</p>
+        <p id="expiry_date"></p>
+      </div>
+      <div>
+        <p>CardHolder Name</p>
+        <p id="first_name"></p>
+      </div>
+      <div>
+        <button id="revealButton">Detokenize</button>
+      </div>
+      <div>
+        <h3>Detokenize Response</h3>
+        <pre id="revealResponse"></pre>
+      </div>
+    </div>
+    <script type="module" src="index.ts"></script>
+  </body>
+</html>
