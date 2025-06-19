@@ -17,6 +17,7 @@ import Skyflow, {
     RevealContainer,
     RevealElement,
     RevealResponse,
+    CollectElementUpdateOptions,
 } from 'skyflow-js';
 
 try {
@@ -55,7 +56,7 @@ try {
             base: {
                 fontFamily: 'Inter',
                 fontStyle: 'normal',
-                fontWeight: 400,
+                fontWeight: '400',
                 fontSize: '14px',
                 lineHeight: '21px',
                 width: '294px'
@@ -72,7 +73,7 @@ try {
             base: {
                 fontFamily: 'Inter',
                 fontStyle: 'normal',
-                fontWeight: 400,
+                fontWeight: '400',
                 fontSize: '14px',
                 lineHeight: '21px',
                 width: '294px',
@@ -90,7 +91,7 @@ try {
             base: {
                 fontFamily: 'Inter',
                 fontStyle: 'normal',
-                fontWeight: 400,
+                fontWeight: '400',
                 fontSize: '14px',
                 lineHeight: '21px',
                 width: '49px'
@@ -107,7 +108,7 @@ try {
             base: {
                 fontFamily: 'Inter',
                 fontStyle: 'normal',
-                fontWeight: 400,
+                fontWeight: '400',
                 fontSize: '14px',
                 lineHeight: '21px',
                 width: '30px'
@@ -191,7 +192,6 @@ try {
 
     // Sample helper function to determine cvv length. 
     const findCvvLength = (cardBinValue: string): number => {
-        console.log('Came here..!');
         const amexRegex = /^3[47][0-9]{4}$/
         return amexRegex.test(cardBinValue.slice(0, 6)) ? 4 : 3
     };
@@ -219,11 +219,11 @@ try {
         if (state.isValid && state.value) {
             // update cvv element validation rule.
             if (findCvvLength(state.value) === 3) {
-                const updateOptions: CollectElementInput = { validations: [length3Rule] }
+                const updateOptions: CollectElementUpdateOptions = { validations: [length3Rule] }
                 cvvElement.update(updateOptions);
             }
             else {
-                const updateOptions: CollectElementInput = { validations: [length4Rule] }
+                const updateOptions: CollectElementUpdateOptions = { validations: [length4Rule] }
                 cvvElement.update(updateOptions);
             }
         }
@@ -237,7 +237,7 @@ try {
             cardHolderNameElement.update({
                 label: 'CARDHOLDER NAME',
                 placeholder: 'Eg: John'
-            } as CollectElementInput);
+            } as CollectElementUpdateOptions);
 
             // update styles on card number
             cardNumberElement.update({
@@ -246,13 +246,13 @@ try {
                         color: 'blue'
                     }
                 }
-            } as CollectElementInput);
+            } as CollectElementUpdateOptions);
 
             // update table,coloumn on expiry date
             expiryDateElement.update({
                 table: 'pii_fields',
                 column: 'primary_card.expiry_date',
-            } as CollectElementInput);
+            } as CollectElementUpdateOptions);
 
         });
     }
@@ -299,7 +299,7 @@ try {
                     };
 
                     // Create Reveal Elements With Tokens.
-                    const fieldsTokenData = response.records[0].fields;
+                    const fieldsTokenData = response.records![0].fields;
                     const revealContainer = skyflowClient.container(
                         Skyflow.ContainerType.REVEAL
                     ) as RevealContainer;
