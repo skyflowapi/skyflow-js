@@ -282,7 +282,7 @@ export interface CardMetadata {
   scheme?: CardType[],
 }
 
-export interface CollectElementUpdateOptions {
+interface CollectElementCommonProps {
   table?: string,
   column?: string,
   label?: string,
@@ -294,7 +294,12 @@ export interface CollectElementUpdateOptions {
   validations?: IValidationRule[],
   skyflowID?: string,
 }
-export interface CollectElementInput extends CollectElementUpdateOptions {
+
+export interface CollectElementUpdateOptions extends CollectElementCommonProps {
+  cardMetadata?: CardMetadata,
+}
+
+export interface CollectElementInput extends CollectElementCommonProps {
   type: ElementType,
 }
 
