@@ -279,7 +279,7 @@ export interface CollectElementOptions {
 }
 
 export interface CardMetadata {
-  scheme: CardType[],
+  scheme?: CardType[],
 }
 
 export interface CollectElementUpdateOptions {

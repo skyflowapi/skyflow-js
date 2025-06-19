@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.1] - 2025-06-19
+### Fixed
+- Make `scheme` optional in `CardMetadata`.
+
 ## [2.4.0] - 2025-06-19
 ### Added
 - Typescript support for public interfaces.
