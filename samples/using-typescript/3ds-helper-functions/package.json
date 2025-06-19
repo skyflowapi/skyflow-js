@@ -2,14 +2,13 @@
   "name": "3dshelperfunctions",
   "version": "1.0.0",
   "description": "A Sample on how to add event listeners on Collect Elements ",
-  "main": "index.js",
   "scripts": {
     "start": "parcel src/index.html --open",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "license": "ISC",
   "dependencies": {
-    "skyflow-js": "^2.3.1"
+    "skyflow-js": "^2.4.0"
   },
   "devDependencies": {
     "parcel": "^2.0.1"

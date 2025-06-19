@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "skyflow-js": "^2.3.1"
+    "skyflow-js": "^2.4.0"
   },
   "devDependencies": {
     "parcel": "^2.0.1"
