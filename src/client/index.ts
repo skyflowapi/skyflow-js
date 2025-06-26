@@ -3,7 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import { ContentType, SKY_METADATA_HEADER } from '../core/constants';
 import SkyflowError from '../libs/skyflow-error';
-import { ISkyflow } from '../skyflow';
+import { ISkyflow, Metadata } from '../skyflow';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
 import sdkDetails from '../../package.json';
@@ -12,7 +12,7 @@ import {
 } from '../utils/helpers';
 
 export interface IClientRequest {
-  body?: any;
+  body?: Document | XMLHttpRequestBodyInit | null;
   headers?: Record<string, string>;
   requestMethod:
   | 'GET'
@@ -30,24 +30,36 @@ export interface SdkInfo {
   sdkName: string;
   sdkVersion: string;
 }
+
+export interface ClientMetadata {
+  sdkLanguageAndVersion: string;
+  sdkName: string;
+  sdkVersion: string;
+}
+
+export interface ClientToJSON {
+  config: ISkyflow;
+  metaData: Metadata;
+}
+
 class Client {
   config: ISkyflow;
 
-  #metaData: any;
+  #metaData: Metadata;
 
-  constructor(config: ISkyflow, metadata) {
+  constructor(config: ISkyflow, metadata: Metadata) {
     this.config = config;
     this.#metaData = metadata;
   }
 
-  toJSON() {
+  toJSON(): ClientToJSON {
     return {
       config: this.config,
       metaData: this.#metaData,
     };
   }
 
-  static fromJSON(json) {
+  static fromJSON(json: ClientToJSON) {
     return new Client(json.config, json.metaData);
   }
 
@@ -63,7 +75,7 @@ class Client {
     if (request.headers) {
       const metaDataObject = getMetaObject(sdkDetails, this.#metaData, navigator);
       request.headers[SKY_METADATA_HEADER] = JSON.stringify(metaDataObject);
-      const { headers } = request;
+      const headers = request.headers;
       Object.keys(request.headers).forEach((key) => {
         if (!(key === 'content-type' && headers[key] && headers[key].includes(ContentType.FORMDATA))) {
           httpRequest.setRequestHeader(key, headers[key]);
@@ -75,7 +87,11 @@ class Client {
       || request.headers?.['content-type']?.includes(ContentType.FORMDATA)) {
       httpRequest.send(request.body);
     } else {
-      httpRequest.send(JSON.stringify({ ...request.body }));
+      /* Earlier we were stringifying here, but due to TS, we're stringifying
+        at the point where we are creating the request. Since the body parameter
+        doesn't accept JSON object.
+      */
+      httpRequest.send(request.body);
     }
 
     httpRequest.onload = () => {

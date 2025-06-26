@@ -53,19 +53,40 @@ export enum ContainerType {
   REVEAL = 'REVEAL',
   COMPOSABLE = 'COMPOSABLE',
 }
+export interface SkyflowConfigOptions {
+  logLevel?: LogLevel;
+  env?: Env;
+  trackingKey?: string;
+  trackMetrics?: boolean;
+  customElementsURL?: string;
+}
 export interface ISkyflow {
   vaultID?: string;
   vaultURL?: string;
   getBearerToken: () => Promise<string>;
-  options?: Record<string, any>;
+  options?: SkyflowConfigOptions;
 }
+export interface SkyflowElementProps {
+  id: string;
+  type: ElementType;
+  element: HTMLElement;
+  container: CollectContainer | RevealContainer | ComposableContainer;
+}
+
+export interface Metadata {
+  uuid: string,
+  clientDomain: string,
+  sdkVersion?: string;
+  sessionId?: string;
+}
+
 const CLASS_NAME = 'Skyflow';
 class Skyflow {
   #client: Client;
 
   #uuid: string = uuid();
 
-  #metadata = {
+  #metadata: Metadata = {
     uuid: this.#uuid,
     clientDomain: window.location.origin,
   };
@@ -80,7 +101,7 @@ class Skyflow {
 
   #env:Env;
 
-  #skyflowElements: any;
+  #skyflowElements: Array<SkyflowElementProps>;
 
   constructor(config: ISkyflow) {
     const localSDKversion = localStorage.getItem('sdk_version') || '';
@@ -94,11 +115,11 @@ class Skyflow {
     );
     this.#logLevel = config?.options?.logLevel || LogLevel.ERROR;
     this.#env = config?.options?.env || Env.PROD;
-    this.#skyflowElements = {};
+    this.#skyflowElements = [];
     this.#skyflowContainer = new SkyflowContainer(this.#client,
       { logLevel: this.#logLevel, env: this.#env });
 
-    const cb = (data, callback) => {
+    const cb = (data, callback: Function) => {
       printLog(parameterizedString(logs.infoLogs.CAPTURED_BEARER_TOKEN_EVENT, CLASS_NAME),
         MessageType.LOG,
         this.#logLevel);
@@ -170,7 +191,7 @@ class Skyflow {
   container(type: ContainerType, options?: ContainerOptions) {
     switch (type) {
       case ContainerType.COLLECT: {
-        const collectContainer = new CollectContainer(options, {
+        const collectContainer = new CollectContainer(options!, {
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
           containerType: type,

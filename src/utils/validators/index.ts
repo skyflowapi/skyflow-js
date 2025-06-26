@@ -22,6 +22,7 @@ import {
   IDeleteRecordInput,
   IGetOptions,
   CollectElementInput,
+  LogLevel,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { appendZeroToOne } from '../helpers';
@@ -547,7 +548,7 @@ export const validateInitConfig = (initConfig: ISkyflow) => {
   }
 };
 
-export const validateCollectElementInput = (input: CollectElementInput, logLevel) => {
+export const validateCollectElementInput = (input: CollectElementInput, logLevel: LogLevel) => {
   if (!Object.prototype.hasOwnProperty.call(input, 'type')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_ELEMENT_TYPE, [], true);
   }

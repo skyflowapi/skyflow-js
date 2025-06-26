@@ -198,6 +198,7 @@ export interface DetokenizeResponse extends IRevealResponseType {}
 export interface InsertResponseRecords {
   fields: Record<string, any>,
   table: string,
+  skyflow_id?: string,
 }
 
 export interface ErrorRecord {
@@ -310,19 +311,19 @@ export interface ICollectOptions {
 }
 
 export interface UploadFilesResponse {
-  fileUploadResponse: [{ skyflow_id: string }],
-  errorResponse: [{ error: ErrorRecord }],
+  fileUploadResponse?: { skyflow_id: string }[],
+  errorResponse?: { error: ErrorRecord }[],
 }
 
 export interface RevealResponse {
-  success?: {
+  success?: Array<{
     token: string,
     valueType: string,
-  },
-  errors?: {
+  }>,
+  errors?: Array<{
     error: ErrorRecord,
     token: string,
-  }
+  }>
 }
 
 export interface RenderFileResponse {

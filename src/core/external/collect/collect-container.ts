@@ -9,7 +9,7 @@ import {
 } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
-import { ContainerType } from '../../../skyflow';
+import { ContainerType, Metadata, SkyflowElementProps } from '../../../skyflow';
 import {
   Context, MessageType,
   CollectElementInput,
@@ -17,6 +17,7 @@ import {
   CollectResponse,
   ICollectOptions,
   UploadFilesResponse,
+  ContainerOptions,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
@@ -32,11 +33,46 @@ import {
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS, FRAME_ELEMENT,
   COLLECT_TYPES,
+  ElementType,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
 import EventEmitter from '../../../event-emitter';
 import properties from '../../../properties';
+import { ClientToJSON } from '../../../client';
+import SkyflowContainer from '../skyflow-container';
+
+export interface CollectContainerMetadata extends Metadata {
+  clientJSON: ClientToJSON;
+  containerType: ContainerType;
+  skyflowContainer: SkyflowContainer;
+}
+
+export interface ICollectElement {
+  elementType: ElementType;
+  elementName: string;
+  name: string;
+  table?: string;
+  column?: string;
+  sensitive?: boolean;
+  replacePattern?: RegExp;
+  mask?: string[];
+  value?: string;
+  isMounted: boolean;
+  [key: string]: unknown;
+}
+
+interface ElementGroupItem extends CollectElementInput, CollectElementOptions {
+  elementType: ElementType;
+  name?: string;
+  accept?: string[];
+}
+
+export interface ElementGroup {
+  rows: Array<{
+    elements: Array<ElementGroupItem>;
+  }>;
+}
 
 const CLASS_NAME = 'CollectContainer';
 class CollectContainer extends Container {
@@ -44,11 +80,11 @@ class CollectContainer extends Container {
 
   #elements: Record<string, CollectElement> = {};
 
-  #metaData: any;
+  #metaData: CollectContainerMetadata;
 
-  #context:Context;
+  #context: Context;
 
-  #skyflowElements:any;
+  #skyflowElements: Array<SkyflowElementProps>;
 
   type:string = ContainerType.COLLECT;
 
@@ -58,7 +94,8 @@ class CollectContainer extends Container {
 
   #isSkyflowFrameReady: boolean = false;
 
-  constructor(options, metaData, skyflowElements, context) {
+  constructor(options: ContainerOptions, metaData: CollectContainerMetadata,
+    skyflowElements: Array<SkyflowElementProps>, context: Context) {
     super();
     this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
     this.#containerId = uuid();
@@ -101,7 +138,7 @@ class CollectContainer extends Container {
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input.validations);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
-    const elementGroup = {
+    const elementGroup: ElementGroup = {
       rows: [
         {
           elements: [
@@ -362,7 +399,7 @@ class CollectContainer extends Container {
     });
   };
 
-  uploadFiles = (options: ICollectOptions) :Promise<UploadFilesResponse> => {
+  uploadFiles = (options?: ICollectOptions): Promise<UploadFilesResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {

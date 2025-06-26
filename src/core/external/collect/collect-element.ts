@@ -41,6 +41,8 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
+import { CollectContainerMetadata } from './collect-container';
+import { ContainerProps, InternalState } from '../../internal/internal-types';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
@@ -54,7 +56,7 @@ class CollectElement extends SkyflowElement {
 
   #isSingleElementAPI: boolean = false;
 
-  #states: any[];
+  #states: InternalState[];
 
   #elements: any[];
 
@@ -72,7 +74,7 @@ class CollectElement extends SkyflowElement {
 
   #group: any;
 
-  #metaData: any;
+  #metaData: CollectContainerMetadata;
 
   #eventEmitter: EventEmitter = new EventEmitter();
 
@@ -97,8 +99,8 @@ class CollectElement extends SkyflowElement {
   constructor(
     elementId: string,
     elementGroup: any,
-    metaData: any,
-    container: any,
+    metaData: CollectContainerMetadata,
+    container: ContainerProps,
     isSingleElementAPI: boolean = false,
     destroyCallback: Function,
     updateCallback: Function,
