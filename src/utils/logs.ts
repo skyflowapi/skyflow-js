@@ -91,6 +91,7 @@ const logs = {
     VALIDATE_GET_BY_ID_INPUT: '%s1 - Validating getByID input.',
   },
   errorLogs: {
+    FRAME_COLLECT_EMIT_TIMEOUT: 'Collect frame emit timeout. Make sure to Emit all elements events before invoking \'collect\' function.',
     NO_ELEMENTS_IN_COLLECT: 'Validation error. No elements found in collect container',
     NO_ELEMENTS_IN_COMPOSABLE: 'Validation error. No elements found in composable container',
     NO_ELEMENTS_IN_REVEAL: 'Validation error. No elements found in reveal container',

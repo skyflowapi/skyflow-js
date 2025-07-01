@@ -82,7 +82,8 @@ describe('test frame elements', () => {
             name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
             location: {
               href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-            }
+            },
+            addEventListener: jest.fn(),
         }));
 
         emitSpy = jest.spyOn(bus, 'emit');
@@ -93,7 +94,8 @@ describe('test frame elements', () => {
         name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
         location: {
           href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-        }
+        },
+        addEventListener: jest.fn(),
       }))
         const onSpy = jest.spyOn(bus, 'on');
         FrameElementInit.startFrameElement('123')
@@ -155,7 +157,8 @@ describe('test composable frame elements', () => {
           name: `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR:`,
           location: {
             href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-          }
+          },
+          addEventListener: jest.fn(),
       }));
 
       emitSpy = jest.spyOn(bus, 'emit');
@@ -166,7 +169,8 @@ describe('test composable frame elements', () => {
       name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR:`,
       location: {
         href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-      }
+      },
+      addEventListener: jest.fn(),
     }))
       const onSpy = jest.spyOn(bus, 'on');
       FrameElementInit.group = [];

@@ -96,18 +96,19 @@ describe('FrameElementInit Additional Test Cases', () => {
           name: ``,
           location: {
             href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'http://localhost.com'}}))}`,
-          }
+          }, 
+          addEventListener: jest.fn()    
         }))
           const onSpy = jest.spyOn(bus, 'on');
           const frameElement = new FrameElementInit('CARD_NUMBER')
           expect(() => FrameElementInit.startFrameElement('CARD_NUMBER')).not.toThrow();
-          console.log('mock calsss====', on.mock.calls)
     });
 
     test('should handle invalid base64 encoded URL data', () => {
         windowSpy.mockImplementation(() => ({
           name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
-          location: { href: 'http://localhost/?invalid_base64_data' }
+          location: { href: 'http://localhost/?invalid_base64_data' },
+          addEventListener: jest.fn()
         }));
 
         expect(() => FrameElementInit.startFrameElement()).toThrowError({'message':'The string to be decoded contains invalid characters.'});
@@ -121,7 +122,8 @@ describe('FrameElementInit Additional Test Cases', () => {
           name: id, // Fix constant reference
           location: {
               href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`,
-          }
+          },
+          addEventListener: jest.fn()
       }));
   
       FrameElementInit.startFrameElement();
@@ -143,7 +145,8 @@ describe('FrameElementInit Additional Test Cases', () => {
 
         windowSpy.mockImplementation(() => ({
             name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
-            location: { href: `http://localhost/?${btoa(JSON.stringify(mockData))}` }
+            location: { href: `http://localhost/?${btoa(JSON.stringify(mockData))}` },
+            addEventListener: jest.fn()
         }));
 
         expect(() => FrameElementInit.startFrameElement()).not.toThrow();
@@ -158,7 +161,8 @@ describe('FrameElementInit Additional Test Cases', () => {
                 href: `http://localhost/?${btoa(
                     JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } })
                 )}`
-            }
+            },
+            addEventListener: jest.fn()
         }));
 
         expect(() => FrameElementInit.startFrameElement()).not.toThrow();
@@ -167,7 +171,8 @@ describe('FrameElementInit Additional Test Cases', () => {
     test('should throw error for incorrect element type', () => {
         windowSpy.mockImplementation(() => ({
             name: `${FRAME_ELEMENT}:UNKNOWN_TYPE:123:ERROR:`,
-            location: { href: `http://localhost/?${btoa(JSON.stringify({ record: {}, metaData: {} }))}` }
+            location: { href: `http://localhost/?${btoa(JSON.stringify({ record: {}, metaData: {} }))}` },
+            addEventListener: jest.fn()
         }));
         expect(() => FrameElementInit.startFrameElement()).toThrow(TypeError);
       });
@@ -179,7 +184,8 @@ describe('FrameElementInit Additional Test Cases', () => {
             href: `http://localhost/?${btoa(
                 JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } })
             )}`
-          }
+          },
+          addEventListener: jest.fn()
         }));
         FrameElementInit.startFrameElement();
 
@@ -193,7 +199,8 @@ describe('FrameElementInit Additional Test Cases', () => {
     test('should handle malformed window name', () => {
         windowSpy.mockImplementation(() => ({
             name: 'INVALID_NAME_FORMAT',
-            location: { href: 'http://localhost/' }
+            location: { href: 'http://localhost/' },
+            addEventListener: jest.fn()
         }));
 
         expect(() => FrameElementInit.startFrameElement()).toThrow(TypeError);
