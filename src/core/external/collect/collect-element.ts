@@ -202,6 +202,7 @@ class CollectElement extends SkyflowElement {
   getID = () => this.#elementId;
 
   mount = (domElement: HTMLElement | string) => {
+    this.#mounted = true;
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
     }
