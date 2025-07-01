@@ -265,6 +265,7 @@ class CollectElement extends SkyflowElement {
 
   getShadowRoot = () => this.#shadowRoot;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   emitEventFromShadowRoot = (eventName: string, options?: Record<string, any>, callback?: any) => {
     if (this.#shadowRoot) {
       const iframe = this.#shadowRoot.getElementById(this.#iframe.name) as HTMLIFrameElement;
