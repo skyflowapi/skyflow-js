@@ -75,6 +75,7 @@ class SkyflowContainer {
               },
               metaData: this.#client.toJSON()?.metaData || {},
             },
+            context: this.#context,
           },
         }, '*');
       }

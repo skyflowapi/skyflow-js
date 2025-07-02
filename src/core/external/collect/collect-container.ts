@@ -285,16 +285,19 @@ class CollectContainer extends Container {
             }, '*');
           }
           window.addEventListener('message', (event) => {
-            if (event.data.type === 'COLLECT_SUCCESS') {
+            if (event.data && event.data.type === 'COLLECT_SUCCESS') {
               const data = event.data.data;
               if (!data || data?.error) {
                 printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
                 reject(data?.error);
-              } else {
+              } else if (data.records) {
                 printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                   MessageType.LOG,
                   this.#context.logLevel);
                 resolve(data);
+              } else {
+                printLog(`${JSON.stringify({ error: data })}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data);
               }
             }
           });

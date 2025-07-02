@@ -64,7 +64,7 @@ class SkyflowFrameController {
   constructor(clientId: string) {
     window.addEventListener('message', (event) => {
       // console.log('SDK controller iframe inside received message:', event);
-      if (event.data.data.type === 'COLLECT') {
+      if (event.data && event.data.data && event.data.data.type === 'COLLECT') {
         this.tokenize(event.data.data)
           .then((response) => {
             window.parent.postMessage({
@@ -84,8 +84,9 @@ class SkyflowFrameController {
       // Handle the message if needed
     });
     window.addEventListener('message', (event) => {
-      if (event.data.type === 'SKYFLOW_FRAME_READY') {
+      if (event.data && event.data.type === 'SKYFLOW_FRAME_READY') {
         this.#client = event.data.data.client;
+        this.#context = event.data.data.context || 'DEBUG';
       }
     });
 
@@ -508,7 +509,7 @@ class SkyflowFrameController {
     for (let i = 0; i < options.elementIds.length; i += 1) {
       let Frame;
       try {
-        Frame = window.parent.frames[`${options.elementIds[i].frameId}:${id}:DEBUG:${btoa(this.#clientDomain)}`];
+        Frame = window.parent.frames[`${options.elementIds[i].frameId}:${id}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`];
       } catch (error) {
         console.error('Error in tokenize:', error);
       }
@@ -547,7 +548,7 @@ class SkyflowFrameController {
     }
 
     for (let i = 0; i < options.elementIds.length; i += 1) {
-      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${id}:DEBUG:${btoa(this.#clientDomain)}`];
+      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${id}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`];
       const inputElement = Frame.document
         .getElementById(options.elementIds[i].elementId);
       if (inputElement) {
