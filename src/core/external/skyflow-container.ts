@@ -59,6 +59,22 @@ class SkyflowContainer {
 
   constructor(client, context) {
     this.#client = client;
+    console.log('SkyflowContainer client:', this.#client);
+    setTimeout(() => {
+      const skyflowFrame = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement;
+      console.log('Found iframe:', skyflowFrame);
+      if (skyflowFrame.contentWindow) {
+        skyflowFrame.contentWindow.postMessage({
+          type: 'SKYFLOW_FRAME_READY',
+          data: {
+            client: {
+              config: this.#client.config,
+              metaData: this.#client.toJSON()?.metaData || {},
+            },
+          },
+        }, '*');
+      }
+    }, 2000);
     this.#containerId = this.#client.toJSON()?.metaData?.uuid || '';
     this.#context = context;
     const clientDomain = window.location.origin || '';
@@ -81,6 +97,7 @@ class SkyflowContainer {
           client: this.#client,
           context,
         });
+
         this.isControllerFrameReady = true;
       });
     printLog(parameterizedString(logs.infoLogs.PUREJS_CONTROLLER_INITIALIZED, CLASS_NAME),

@@ -84,7 +84,7 @@ class CollectElement extends SkyflowElement {
 
   #updateCallbacks: Function[] = [];
 
-  #mounted = false;
+  #mounted = true;
 
   #context:Context;
 

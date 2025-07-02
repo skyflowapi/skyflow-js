@@ -56,7 +56,7 @@ class CollectContainer extends Container {
 
   #isMounted: boolean = false;
 
-  #isSkyflowFrameReady: boolean = false;
+  #isSkyflowFrameReady: boolean = true;
 
   constructor(options, metaData, skyflowElements, context) {
     super();
@@ -242,8 +242,9 @@ class CollectContainer extends Container {
   };
 
   collect = (options: ICollectOptions = { tokens: true }): Promise<CollectResponse> => {
-    this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
-    if (this.#isSkyflowFrameReady) {
+    // this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
+    if (true) {
+      console.log('Skyflow frame is ready:', this.#isSkyflowFrameReady);
       // eslint-disable-next-line @typescript-eslint/no-shadow
       return new Promise((resolve, reject) => {
         try {
@@ -269,6 +270,21 @@ class CollectContainer extends Container {
           }
           if (options?.upsert) {
             validateUpsertOptions(options?.upsert);
+          }
+
+          const skyflowFrame = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement;
+          console.log('Found iframe:', skyflowFrame);
+          if (skyflowFrame.contentWindow) {
+            skyflowFrame.contentWindow.postMessage({
+              type: ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
+              data: {
+                type: COLLECT_TYPES.COLLECT,
+                ...options,
+                tokens: options?.tokens !== undefined ? options.tokens : true,
+                elementIds,
+                containerId: this.#containerId,
+              },
+            }, '*');
           }
           bus
           // .target(properties.IFRAME_SECURE_ORIGIN)
