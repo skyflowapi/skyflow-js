@@ -1,5 +1,10 @@
+import { ClientToJSON } from '../../../client';
+import EventEmitter from '../../../event-emitter';
+import { CollectContainer, ComposableContainer, RevealContainer } from '../../../index-node';
+import { ContainerType } from '../../../skyflow';
 import { CollectElementOptions, ICollectOptions } from '../../../utils/common';
 import { ElementType } from '../../constants';
+import SkyflowContainer from '../../external/skyflow-container';
 
 export interface ElementInfo {
   frameId: string;
@@ -35,6 +40,12 @@ export interface ContainerProps {
   type: string;
 }
 
+export interface RevealContainerProps {
+  containerId: string;
+  isMounted: boolean;
+  eventEmitter: EventEmitter;
+}
+
 export interface InternalState {
   isEmpty: boolean,
   isValid: boolean,
@@ -49,4 +60,24 @@ export interface InternalState {
 
 export interface FormattedCollectElementOptions extends CollectElementOptions {
   [key: string]: any;
+}
+
+export interface SkyflowElementProps {
+  id: string;
+  type: ElementType;
+  element: HTMLElement;
+  container: CollectContainer | RevealContainer | ComposableContainer;
+}
+
+export interface ClientMetadata {
+  uuid: string,
+  clientDomain: string,
+  sdkVersion?: string;
+  sessionId?: string;
+}
+
+export interface Metadata extends ClientMetadata {
+  clientJSON: ClientToJSON;
+  containerType: ContainerType;
+  skyflowContainer: SkyflowContainer;
 }

@@ -36,7 +36,6 @@ import {
   MessageType,
   Context,
   ISkyflowIdRecord,
-  IDeleteRecord,
   IGetOptions,
   IInsertRecordInput,
   IInsertOptions,
@@ -45,6 +44,11 @@ import {
   ErrorRecord,
   InsertResponse,
   CollectResponse,
+  IRevealResponseType,
+  GetResponse,
+  GetByIdResponse,
+  IDeleteResponseType,
+  IDeleteRecordInput,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
@@ -131,7 +135,7 @@ class SkyflowFrameController {
               data.records as IRevealRecord[],
               this.#client,
             ).then(
-              (resolvedResult) => {
+              (resolvedResult: IRevealResponseType) => {
                 printLog(
                   parameterizedString(
                     logs.infoLogs.FETCH_RECORDS_RESOLVED,
@@ -142,7 +146,7 @@ class SkyflowFrameController {
                 );
                 callback(resolvedResult);
               },
-              (rejectedResult) => {
+              (rejectedResult: IRevealResponseType) => {
                 printLog(
                   parameterizedString(logs.errorLogs.FETCH_RECORDS_REJECTED),
                   MessageType.ERROR,
@@ -154,7 +158,7 @@ class SkyflowFrameController {
             );
           } else if (data.type === PUREJS_TYPES.INSERT) {
             this.insertData(data.records as IInsertRecordInput, data.options as IInsertOptions)
-              .then((result) => {
+              .then((result: InsertResponse) => {
                 printLog(
                   parameterizedString(
                     logs.infoLogs.INSERT_RECORDS_RESOLVED,
@@ -165,7 +169,7 @@ class SkyflowFrameController {
                 );
                 callback(result);
               })
-              .catch((error) => {
+              .catch((error: InsertResponse) => {
                 printLog(
                   parameterizedString(logs.errorLogs.INSERT_RECORDS_REJECTED),
                   MessageType.ERROR,
@@ -177,7 +181,7 @@ class SkyflowFrameController {
             fetchRecordsGET(
               data.records as IGetRecord[], this.#client, data.options as IGetOptions,
             ).then(
-              (resolvedResult) => {
+              (resolvedResult: GetResponse) => {
                 printLog(
                   parameterizedString(logs.infoLogs.GET_RESOLVED, CLASS_NAME),
                   MessageType.LOG,
@@ -186,7 +190,7 @@ class SkyflowFrameController {
 
                 callback(resolvedResult);
               },
-              (rejectedResult) => {
+              (rejectedResult: GetResponse) => {
                 printLog(parameterizedString(
                   logs.errorLogs.GET_REJECTED,
                 ),
@@ -201,7 +205,7 @@ class SkyflowFrameController {
               data.records as ISkyflowIdRecord[],
               this.#client,
             ).then(
-              (resolvedResult) => {
+              (resolvedResult: GetByIdResponse) => {
                 printLog(
                   parameterizedString(
                     logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED,
@@ -213,7 +217,7 @@ class SkyflowFrameController {
 
                 callback(resolvedResult);
               },
-              (rejectedResult) => {
+              (rejectedResult: GetByIdResponse) => {
                 printLog(
                   parameterizedString(logs.errorLogs.GET_BY_SKYFLOWID_REJECTED),
                   MessageType.ERROR,
@@ -225,11 +229,11 @@ class SkyflowFrameController {
             );
           } else if (data.type === PUREJS_TYPES.DELETE) {
             deleteData(
-              data.records as IDeleteRecord[],
-              data.options,
+              data.records as IDeleteRecordInput,
+              data.options || {},
               this.#client,
             ).then(
-              (resolvedResult) => {
+              (resolvedResult: IDeleteResponseType) => {
                 printLog(
                   parameterizedString(
                     logs.infoLogs.DELETE_RESOLVED,
@@ -241,7 +245,7 @@ class SkyflowFrameController {
 
                 callback(resolvedResult);
               },
-            ).catch((rejectedResult) => {
+            ).catch((rejectedResult: IDeleteResponseType) => {
               printLog(
                 parameterizedString(
                   logs.errorLogs.DELETE_RECORDS_REJECTED,
@@ -294,10 +298,10 @@ class SkyflowFrameController {
             containerId: data.containerId as string,
           };
           this.tokenize(tokenizeDataInput)
-            .then((response) => {
+            .then((response: CollectResponse) => {
               callback(response);
             })
-            .catch((error) => {
+            .catch((error: CollectResponse) => {
               callback({ error });
             });
         } else if (data.type === COLLECT_TYPES.FILE_UPLOAD) {
@@ -311,10 +315,10 @@ class SkyflowFrameController {
             containerId: data.containerId as string,
           };
           this.parallelUploadFiles(uploadFilesDataInput)
-            .then((response) => {
+            .then((response: UploadFilesResponse) => {
               callback(response);
             })
-            .catch((error) => {
+            .catch((error: UploadFilesResponse) => {
               callback({ error });
             });
         }

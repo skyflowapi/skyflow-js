@@ -3,13 +3,14 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import { ContentType, SKY_METADATA_HEADER } from '../core/constants';
 import SkyflowError from '../libs/skyflow-error';
-import { ISkyflow, Metadata } from '../skyflow';
+import { ISkyflow } from '../skyflow';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
 import sdkDetails from '../../package.json';
 import {
   getMetaObject,
 } from '../utils/helpers';
+import { ClientMetadata } from '../core/internal/internal-types';
 
 export interface IClientRequest {
   body?: Document | XMLHttpRequestBodyInit | null;
@@ -31,23 +32,17 @@ export interface SdkInfo {
   sdkVersion: string;
 }
 
-export interface ClientMetadata {
-  sdkLanguageAndVersion: string;
-  sdkName: string;
-  sdkVersion: string;
-}
-
 export interface ClientToJSON {
   config: ISkyflow;
-  metaData: Metadata;
+  metaData: ClientMetadata;
 }
 
 class Client {
   config: ISkyflow;
 
-  #metaData: Metadata;
+  #metaData: ClientMetadata;
 
-  constructor(config: ISkyflow, metadata: Metadata) {
+  constructor(config: ISkyflow, metadata: ClientMetadata) {
     this.config = config;
     this.#metaData = metadata;
   }

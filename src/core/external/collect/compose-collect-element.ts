@@ -19,7 +19,7 @@ class ComposableElement {
 
   #isUpdateCalled = false;
 
-  constructor(name, eventEmitter, iframeName) {
+  constructor(name: string, eventEmitter: EventEmitter, iframeName: string) {
     this.#elementName = name;
     this.#iframeName = iframeName;
     this.#eventEmitter = eventEmitter;

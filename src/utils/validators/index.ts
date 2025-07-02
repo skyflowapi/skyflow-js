@@ -23,6 +23,7 @@ import {
   IGetOptions,
   CollectElementInput,
   LogLevel,
+  ContainerOptions,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { appendZeroToOne } from '../helpers';
@@ -60,7 +61,7 @@ export const detectCardType = (cardNumber: string = '') => {
   return detectedType;
 };
 
-const getYearAndMonthBasedOnFormat = (cardDate, format: string) => {
+const getYearAndMonthBasedOnFormat = (cardDate: string, format: string) => {
   const [part1, part2] = cardDate.split('/');
   switch (format) {
     case 'MM/YY': return { month: appendZeroToOne(part1).value, year: 2000 + Number(part2) };
@@ -75,8 +76,8 @@ export const validateExpiryDate = (date: string, format: string) => {
   if (date.trim().length === 0) return true;
   if (!date.includes('/')) return false;
   const { month, year } = getYearAndMonthBasedOnFormat(date, format);
-  if (format.endsWith('YYYY') && year.length !== 4) { return false; }
-  const expiryDate = new Date(year, month, 0);
+  if (format.endsWith('YYYY') && year.toString().length !== 4) { return false; }
+  const expiryDate = new Date(Number(year), Number(month), 0);
   expiryDate.setHours(23, 59, 59, 999);
   const today = new Date();
 
@@ -638,7 +639,7 @@ export const validateUpsertOptions = (upsertOptions) => {
   });
 };
 
-export const validateComposableContainerOptions = (options) => {
+export const validateComposableContainerOptions = (options: ContainerOptions) => {
   if (!options) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_COMPOSABLE_CONTAINER_OPTIONS, [], true);
   }

@@ -1,9 +1,9 @@
+/*
+Copyright (c) 2025 Skyflow, Inc.
+*/
 import { IUpsertOptions } from '../../core-utils/collect';
 import { CardType, ElementType } from '../../core/constants';
 
-/*
-Copyright (c) 2022 Skyflow, Inc.
-*/
 declare global {
   interface Window {
     CoralogixRum: any;
