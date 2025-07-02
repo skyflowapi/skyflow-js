@@ -65,6 +65,7 @@ class SkyflowFrameController {
     window.addEventListener('message', (event) => {
       // console.log('SDK controller iframe inside received message:', event);
       if (event.data && event.data.data && event.data.data.type === 'COLLECT') {
+        console.log('collect call done');
         this.tokenize(event.data.data)
           .then((response) => {
             window.parent.postMessage({
@@ -290,6 +291,7 @@ class SkyflowFrameController {
     bus
       // .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#clientId, (data, callback) => {
+        console.log('Collect call request received: in bus', data);
         printLog(
           parameterizedString(
             logs.infoLogs.CAPTURE_PURE_JS_REQUEST,
@@ -306,13 +308,13 @@ class SkyflowFrameController {
             MessageType.LOG,
             this.#context.logLevel,
           );
-          this.tokenize(data)
-            .then((response) => {
-              callback(response);
-            })
-            .catch((error) => {
-              callback({ error });
-            });
+          // this.tokenize(data)
+          //   .then((response) => {
+          //     callback(response);
+          //   })
+          //   .catch((error) => {
+          //     callback({ error });
+          //   });
         } else if (data.type === COLLECT_TYPES.FILE_UPLOAD) {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
