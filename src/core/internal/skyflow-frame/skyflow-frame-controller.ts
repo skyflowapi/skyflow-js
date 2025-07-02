@@ -63,16 +63,21 @@ class SkyflowFrameController {
 
   constructor(clientId: string) {
     window.addEventListener('message', (event) => {
-      console.log('SDK controller iframe inside received message:', event);
+      // console.log('SDK controller iframe inside received message:', event);
       if (event.data.data.type === 'COLLECT') {
-        console.log('SDK controller iframe insde received message:', event.data);
         this.tokenize(event.data.data)
           .then((response) => {
-            console.log('SDK controller iframe insde response:', response);
+            window.parent.postMessage({
+              type: 'COLLECT_SUCCESS',
+              data: response,
+            }, '*');
           // callback(response);
           })
           .catch((error) => {
-            console.log('SDK controller iframe insde error:', error);
+            window.parent.postMessage({
+              type: 'COLLECT_SUCCESS',
+              data: error,
+            }, '*');
           });
       }
 
@@ -81,10 +86,9 @@ class SkyflowFrameController {
     window.addEventListener('message', (event) => {
       if (event.data.type === 'SKYFLOW_FRAME_READY') {
         this.#client = event.data.data.client;
-        console.log('SkyflowFrameController client:', event.data.data.client);
-        console.log(this.#client.config);
       }
     });
+
     this.#clientId = clientId || '';
     const encodedClientDomain = getValueFromName(window.name, 2);
     const clientDomain = getAtobValue(encodedClientDomain);
@@ -496,7 +500,6 @@ class SkyflowFrameController {
   }
 
   tokenize = (options) => {
-    console.log('lakl', options);
     const id = options.containerId;
     // if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const insertResponseObject: any = {};
@@ -646,7 +649,7 @@ class SkyflowFrameController {
             requestMethod: 'POST',
             url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
             headers: {
-              authorization: 'Bearer <sample_token>',
+              authorization: `Bearer ${client.config.token}`,
               'content-type': 'application/json',
             },
           })

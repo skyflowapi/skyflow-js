@@ -244,7 +244,6 @@ class CollectContainer extends Container {
   collect = (options: ICollectOptions = { tokens: true }): Promise<CollectResponse> => {
     // this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (true) {
-      console.log('Skyflow frame is ready:', this.#isSkyflowFrameReady);
       // eslint-disable-next-line @typescript-eslint/no-shadow
       return new Promise((resolve, reject) => {
         try {
@@ -273,7 +272,6 @@ class CollectContainer extends Container {
           }
 
           const skyflowFrame = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement;
-          console.log('Found iframe:', skyflowFrame);
           if (skyflowFrame.contentWindow) {
             skyflowFrame.contentWindow.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
@@ -286,6 +284,20 @@ class CollectContainer extends Container {
               },
             }, '*');
           }
+          window.addEventListener('message', (event) => {
+            if (event.data.type === 'COLLECT_SUCCESS') {
+              const data = event.data.data;
+              if (!data || data?.error) {
+                printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data?.error);
+              } else {
+                printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                  MessageType.LOG,
+                  this.#context.logLevel);
+                resolve(data);
+              }
+            }
+          });
           bus
           // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(

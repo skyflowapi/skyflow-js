@@ -57,6 +57,7 @@ export interface ISkyflow {
   vaultID?: string;
   vaultURL?: string;
   getBearerToken: () => Promise<string>;
+  token: string;
   options?: Record<string, any>;
 }
 const CLASS_NAME = 'Skyflow';

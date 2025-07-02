@@ -71,13 +71,14 @@ class SkyflowContainer {
               config: {
                 vaultID: this.#client.toJSON()?.config?.vaultID || '',
                 vaultURL: this.#client.toJSON()?.config?.vaultURL || '',
+                token: this.#client.toJSON()?.config?.token || '',
               },
               metaData: this.#client.toJSON()?.metaData || {},
             },
           },
         }, '*');
       }
-    }, 2000);
+    }, 1000);
     this.#containerId = this.#client.toJSON()?.metaData?.uuid || '';
     this.#context = context;
     const clientDomain = window.location.origin || '';
