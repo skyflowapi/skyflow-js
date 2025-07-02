@@ -65,7 +65,12 @@ class SkyflowFrameController {
     window.addEventListener('message', (event) => {
       // console.log('SDK controller iframe inside received message:', event);
       if (event.data && event.data.data && event.data.data.type === 'COLLECT') {
-        console.log('collect call done');
+        if (this.#context === undefined) {
+          this.#context = event.data.data2.context || {};
+        }
+        if (this.#client === undefined) {
+          this.#client = event.data.data2.client;
+        }
         this.tokenize(event.data.data)
           .then((response) => {
             window.parent.postMessage({
@@ -642,7 +647,7 @@ class SkyflowFrameController {
     const client = new Client(this.#client.config, {});
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
       // const clientId = client.toJSON()?.metaData?.uuid || '';
-      // getAccessToken(clientId).then((authToken) => {
+      // getAccessToken(this.#clientId).then((authToken) => {
       if (finalInsertRequest.length !== 0) {
         client
           .request({

@@ -59,27 +59,28 @@ class SkyflowContainer {
 
   constructor(client, context) {
     this.#client = client;
-    console.log('SkyflowContainer client:', this.#client);
-    setTimeout(() => {
-      const skyflowFrame = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement;
-      console.log('Found iframe:', skyflowFrame);
-      if (skyflowFrame.contentWindow) {
-        skyflowFrame.contentWindow.postMessage({
-          type: 'SKYFLOW_FRAME_READY',
-          data: {
-            client: {
-              config: {
-                vaultID: this.#client.toJSON()?.config?.vaultID || '',
-                vaultURL: this.#client.toJSON()?.config?.vaultURL || '',
-                token: this.#client.toJSON()?.config?.token || '',
-              },
-              metaData: this.#client.toJSON()?.metaData || {},
-            },
-            context: this.#context,
-          },
-        }, '*');
-      }
-    }, 1000);
+    // console.log('SkyflowContainer client:', this.#client);
+    // setTimeout(() => {
+    // eslint-disable-next-line max-len
+    //   const skyflowFrame = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement;
+    //   console.log('Found iframe:', skyflowFrame);
+    //   if (skyflowFrame.contentWindow) {
+    //     skyflowFrame.contentWindow.postMessage({
+    //       type: 'SKYFLOW_FRAME_READY',
+    //       data: {
+    //         client: {
+    //           config: {
+    //             vaultID: this.#client.toJSON()?.config?.vaultID || '',
+    //             vaultURL: this.#client.toJSON()?.config?.vaultURL || '',
+    //             token: this.#client.toJSON()?.config?.token || '',
+    //           },
+    //           metaData: this.#client.toJSON()?.metaData || {},
+    //         },
+    //         context: this.#context,
+    //       },
+    //     }, '*');
+    //   }
+    // }, 1000);
     this.#containerId = this.#client.toJSON()?.metaData?.uuid || '';
     this.#context = context;
     const clientDomain = window.location.origin || '';

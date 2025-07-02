@@ -282,6 +282,17 @@ class CollectContainer extends Container {
                 elementIds,
                 containerId: this.#containerId,
               },
+              data2: {
+                client: {
+                  config: {
+                    vaultID: this.#metaData.clientJSON.config.vaultID || '',
+                    vaultURL: this.#metaData.clientJSON.config.vaultURL || '',
+                    token: this.#metaData.clientJSON.config.token || '',
+                  },
+                  // metaData: this.#metaData || {},
+                },
+                context: this.#context,
+              },
             }, '*');
           }
           window.addEventListener('message', (event) => {
