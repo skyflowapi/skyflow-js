@@ -247,6 +247,23 @@ class CollectContainer extends Container {
   };
 
   collect = (options: ICollectOptions = { tokens: true }): Promise<CollectResponse> => {
+    // window.addEventListener('message', (event) => {
+    //   // Always check origin if security is a concern
+    //   console.log('Received from iframe:', event.data);
+    // });
+    const iframe2 = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement | null;
+    console.log('Found iframe:', iframe2);
+    if (iframe2 && iframe2.contentWindow) {
+      iframe2.contentWindow.postMessage({
+        type: 'collectData2',
+        payload: {
+          cardNumber: '',
+          cvv: '',
+          expiryDate: '',
+          cardHolderName: '',
+        },
+      }, '*');
+    }
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     const transId = uuid();
     if (this.#isSkyflowFrameReady) {
