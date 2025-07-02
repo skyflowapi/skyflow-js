@@ -81,7 +81,7 @@ class SkyflowFrameController {
     window.addEventListener('message', (event) => {
       if (event.data.type === 'SKYFLOW_FRAME_READY') {
         this.#client = event.data.data.client;
-        console.log('SkyflowFrameController client:', event.data.client);
+        console.log('SkyflowFrameController client:', event.data.data.client);
         console.log(this.#client.config);
       }
     });
@@ -635,7 +635,7 @@ class SkyflowFrameController {
     }
     const client = new Client(this.#client.config, {});
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
-      const clientId = client.toJSON()?.metaData?.uuid || '';
+      // const clientId = client.toJSON()?.metaData?.uuid || '';
       // getAccessToken(clientId).then((authToken) => {
       if (finalInsertRequest.length !== 0) {
         client

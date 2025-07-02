@@ -68,7 +68,10 @@ class SkyflowContainer {
           type: 'SKYFLOW_FRAME_READY',
           data: {
             client: {
-              config: this.#client.config,
+              config: {
+                vaultID: this.#client.toJSON()?.config?.vaultID || '',
+                vaultURL: this.#client.toJSON()?.config?.vaultURL || '',
+              },
               metaData: this.#client.toJSON()?.metaData || {},
             },
           },
