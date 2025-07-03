@@ -45,6 +45,7 @@ import {
   domReady, getMaskedOutput, handleCopyIconClick, styleToString,
 } from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
+import EventWrapper from '../../utils/bus-events/event-wrapper';
 
 export default class FrameElement {
   // all html events like focus blur events will be handled here
@@ -115,6 +116,8 @@ export default class FrameElement {
 
   // mount element onto dom
   mount = () => {
+    const eventWrapper = new EventWrapper();
+
     this.iFrameFormElement.resetEvents();
     this.labelDiv = document.createElement('div');
 
@@ -450,10 +453,13 @@ export default class FrameElement {
 
     this.updateParentDiv(this.htmlDivElement);
 
+    const mountedEventData = {
+      name: this.iFrameFormElement.iFrameName,
+    };
     bus
-      .emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.iFrameFormElement.iFrameName, {
-        name: this.iFrameFormElement.iFrameName,
-      });
+      .emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.iFrameFormElement.iFrameName, mountedEventData);
+
+    eventWrapper.emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.iFrameFormElement.iFrameName, mountedEventData, () => {}, true, '', window, true);
 
     this.updateStyleClasses(this.iFrameFormElement.getStatus());
   };

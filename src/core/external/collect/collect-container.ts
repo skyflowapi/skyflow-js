@@ -201,6 +201,7 @@ class CollectContainer extends Container {
           containerId: this.#containerId,
           isMounted: this.#isMounted,
           type: this.type,
+          shadowDom: this.isShadowDom,
         },
         isSingleElementAPI,
         this.#destroyCallback,
