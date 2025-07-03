@@ -65,6 +65,9 @@ class CollectContainer extends Container {
 
   #skyflowFrameControllerId: string;
 
+  // returns a promise with the bearer token
+  #getSkyflowBearerToken: () => Promise<string> | undefined;
+
   constructor(options, metaData, skyflowElements, context, isShadowDom = true) {
     super();
     this.eventWrapper = new EventWrapper(isShadowDom);
@@ -85,6 +88,7 @@ class CollectContainer extends Container {
       },
     };
     this.isShadowDom = isShadowDom;
+    this.#getSkyflowBearerToken = metaData.getSkyflowBearerToken;
     this.#skyflowElements = skyflowElements;
     this.#context = context;
     this.#eventEmitter = new EventEmitter();
@@ -251,7 +255,7 @@ class CollectContainer extends Container {
     return false;
   };
 
- #sendCollectMessage(options: ICollectOptions, elementIds: any[]) {
+ #sendCollectMessage(options: ICollectOptions, elementIds: any[], bearerToken:string) {
     const payload = {
       type: ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUEST + this.#metaData.uuid,
       data: {
@@ -266,8 +270,8 @@ class CollectContainer extends Container {
           config: {
             vaultID: this.#metaData.clientJSON.config.vaultID || '',
             vaultURL: this.#metaData.clientJSON.config.vaultURL || '',
-            token: this.#metaData.clientJSON.config.token || '',
           },
+          bearerToken,
         },
         context: this.#context,
       },
@@ -326,13 +330,18 @@ class CollectContainer extends Container {
            validateUpsertOptions(options?.upsert);
          }
          if (this.isShadowDom) {
-           this.#sendCollectMessage(options, elementIds);
-           const messageHandler = (event: MessageEvent) => {
-             this.#handleCollectSuccess(event, resolve, reject);
-           };
-           this.eventWrapper
-             .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS
-               + this.#metaData.uuid, () => {}, true, window, messageHandler);
+           this.#getSkyflowBearerToken()?.then((token:string) => {
+             this.#sendCollectMessage(options, elementIds, token);
+             const messageHandler = (event: MessageEvent) => {
+               this.#handleCollectSuccess(event, resolve, reject);
+             };
+             this.eventWrapper
+               .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS
+                 + this.#metaData.uuid, () => {}, true, window, messageHandler);
+           }).catch((tokenError) => {
+             printLog(`${JSON.stringify(tokenError)}`, MessageType.ERROR, this.#context.logLevel);
+             reject(tokenError);
+           });
          } else {
            bus
            // .target(properties.IFRAME_SECURE_ORIGIN)
@@ -393,13 +402,18 @@ class CollectContainer extends Container {
          validateUpsertOptions(options?.upsert);
        }
        if (this.isShadowDom) {
-         this.#sendCollectMessage(options, elementIds);
-         const messageHandler = (event: MessageEvent) => {
-           this.#handleCollectSuccess(event, resolve, reject);
-         };
-         this.eventWrapper
-           .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS + this.#metaData.uuid,
-             () => {}, true, window, messageHandler);
+         this.#getSkyflowBearerToken()?.then((token:string) => {
+           this.#sendCollectMessage(options, elementIds, token);
+           const messageHandler = (event: MessageEvent) => {
+             this.#handleCollectSuccess(event, resolve, reject);
+           };
+           this.eventWrapper
+             .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS + this.#metaData.uuid,
+               () => {}, true, window, messageHandler);
+         }).catch((tokenError) => {
+           printLog(`${JSON.stringify(tokenError)}`, MessageType.ERROR, this.#context.logLevel);
+           reject(tokenError);
+         });
        } else {
          bus
            .target(properties.IFRAME_SECURE_ORIGIN)
