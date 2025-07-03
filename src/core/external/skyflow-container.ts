@@ -48,6 +48,7 @@ import {
 } from '../../utils/common';
 
 const CLASS_NAME = 'SkyflowContainer';
+
 class SkyflowContainer {
   #containerId: string;
 
@@ -59,28 +60,6 @@ class SkyflowContainer {
 
   constructor(client, context) {
     this.#client = client;
-    // console.log('SkyflowContainer client:', this.#client);
-    // setTimeout(() => {
-    // eslint-disable-next-line max-len
-    //   const skyflowFrame = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement;
-    //   console.log('Found iframe:', skyflowFrame);
-    //   if (skyflowFrame.contentWindow) {
-    //     skyflowFrame.contentWindow.postMessage({
-    //       type: 'SKYFLOW_FRAME_READY',
-    //       data: {
-    //         client: {
-    //           config: {
-    //             vaultID: this.#client.toJSON()?.config?.vaultID || '',
-    //             vaultURL: this.#client.toJSON()?.config?.vaultURL || '',
-    //             token: this.#client.toJSON()?.config?.token || '',
-    //           },
-    //           metaData: this.#client.toJSON()?.metaData || {},
-    //         },
-    //         context: this.#context,
-    //       },
-    //     }, '*');
-    //   }
-    // }, 1000);
     this.#containerId = this.#client.toJSON()?.metaData?.uuid || '';
     this.#context = context;
     const clientDomain = window.location.origin || '';
@@ -109,6 +88,14 @@ class SkyflowContainer {
     printLog(parameterizedString(logs.infoLogs.PUREJS_CONTROLLER_INITIALIZED, CLASS_NAME),
       MessageType.LOG,
       this.#context.logLevel);
+    const iframe2 = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement | null;
+    if (iframe2 && iframe2.contentWindow) {
+      window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'SKYFLOW_CONTROLLER_READY') {
+          this.isControllerFrameReady = true;
+        }
+      });
+    }
   }
 
   detokenize(detokenizeInput: IDetokenizeInput): Promise<DetokenizeResponse> {

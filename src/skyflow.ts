@@ -139,10 +139,72 @@ class Skyflow {
         callback({ authToken: this.#bearerToken });
       }
     };
-
+    // get the skyflow frame controller
+    const iframe2 = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement | null;
+    console.log('Found iframe:', iframe2);
     bus
       .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + this.#uuid, cb);
+    window.addEventListener('message', (event) => {
+      console.log('frame event tokemn', event.data, event.data.type, '=>', window.name);
+      if (event.data && event.data.data
+        && event.data.type === ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN) {
+        console.log('generate token 1');
+        if (
+          this.#client.config.getBearerToken
+        && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
+        ) {
+          console.log('generate token 2');
+          this.#client.config
+            .getBearerToken()
+            .then((bearerToken) => {
+              if (isTokenValid(bearerToken)) {
+                printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+                  MessageType.LOG,
+                  this.#logLevel);
+                this.#bearerToken = bearerToken;
+                iframe2?.contentWindow?.postMessage({
+                  type: ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN_BACK,
+                  data: {
+                    authToken: this.#bearerToken,
+                  },
+                }, '*');
+              } else {
+                printLog(parameterizedString(
+                  logs.errorLogs.INVALID_BEARER_TOKEN,
+                ), MessageType.ERROR, this.#logLevel);
+                iframe2?.contentWindow?.postMessage({
+                  type: ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN_BACK,
+                  data: {
+                    error: parameterizedString(
+                      logs.errorLogs.INVALID_BEARER_TOKEN,
+                    ),
+                  },
+                }, '*');
+              }
+            })
+            .catch((err) => {
+              printLog(parameterizedString(logs.errorLogs.BEARER_TOKEN_REJECTED), MessageType.ERROR,
+                this.#logLevel);
+              iframe2?.contentWindow?.postMessage({
+                type: ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN_BACK,
+                data: { error: err },
+              }, '*');
+              // callback({ error: err });
+            });
+        } else {
+          printLog(parameterizedString(logs.infoLogs.REUSE_BEARER_TOKEN, CLASS_NAME),
+            MessageType.LOG,
+            this.#logLevel);
+          iframe2?.contentWindow?.postMessage({
+            type: ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN_BACK,
+            data: {
+              authToken: this.#bearerToken,
+            },
+          }, '*');
+        }
+      }
+    });
     printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_LISTENER, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
     printLog(parameterizedString(logs.infoLogs.CURRENT_ENV, CLASS_NAME, this.#env),
@@ -178,7 +240,7 @@ class Skyflow {
           skyflowContainer: this.#skyflowContainer,
         },
         this.#skyflowElements,
-        { logLevel: this.#logLevel, env: this.#env });
+        { logLevel: this.#logLevel, env: this.#env }, true);
         printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);

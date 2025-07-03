@@ -7,6 +7,23 @@ import properties from '../../properties';
 
 export function getAccessToken(clientId) {
   return new Promise((resolve, reject) => {
+    window.parent.postMessage({
+      type: ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN,
+      data: {
+      },
+    }, '*');
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.data
+         && event.data.type === ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN_BACK) {
+        if (event.data.data.error) {
+          reject(event.data.data.error);
+        } else if (event.data.data.authToken) {
+          resolve(event.data.data.authToken);
+        } else {
+          reject(new Error('No auth token received'));
+        }
+      }
+    });
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + clientId, {},
       (data:any) => {
         if (data?.error) {
