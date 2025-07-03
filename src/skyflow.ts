@@ -231,7 +231,7 @@ class Skyflow {
           getSkyflowBearerToken: this.#getSkyflowBearerToken,
         },
         this.#skyflowElements,
-        { logLevel: this.#logLevel }, options);
+        { logLevel: this.#logLevel }, options, true);
         printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);

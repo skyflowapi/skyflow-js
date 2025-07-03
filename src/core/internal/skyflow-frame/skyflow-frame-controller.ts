@@ -73,6 +73,9 @@ class SkyflowFrameController {
     this.eventWrapper.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT
        + this.#clientId, () => {}, true, window, this.handleCollectMessage);
 
+    this.eventWrapper.on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_WINDOW_REQUEST + this.#clientId,
+      () => {}, true, window, this.handleRevealMessage);
+
     const encodedClientDomain = getValueFromName(window.name, 2);
     const clientDomain = getAtobValue(encodedClientDomain);
     this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
@@ -130,6 +133,8 @@ class SkyflowFrameController {
             fetchRecordsByTokenId(
               data.records as IRevealRecord[],
               this.#client,
+              '',
+              'detokenize',
             ).then(
               (resolvedResult) => {
                 printLog(
@@ -342,7 +347,7 @@ class SkyflowFrameController {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
           MessageType.LOG, this.#context.logLevel);
-          this.revealData(data.records as any, data.containerId).then(
+          this.revealData(data.records as any, data.containerId, '').then(
             (resolvedResult) => {
               callback(resolvedResult);
             },
@@ -378,30 +383,55 @@ class SkyflowFrameController {
     return new SkyflowFrameController(clientId);
   }
 
-  revealData(revealRecords: IRevealRecord[], containerId) {
+  revealData(revealRecords: IRevealRecord[], containerId, bearerToken: string, type: string = '') {
     const id = containerId;
     return new Promise((resolve, reject) => {
-      fetchRecordsByTokenId(revealRecords, this.#client).then(
+      fetchRecordsByTokenId(revealRecords, this.#client, bearerToken, 'reveal').then(
         (resolvedResult) => {
           const formattedResult = formatRecordsForIframe(resolvedResult);
-          bus
-            .target(properties.IFRAME_SECURE_SITE)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
+          if (type === 'window') {
+            // iframe response
+            revealRecords.forEach((record: any) => {
+              const frame = window.parent.frames[record.iframeName] as Window;
+              if (frame) {
+                frame.postMessage({
+                  type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_WINDOW_CLIENT_RESPONSES + id,
+                  data: formattedResult,
+                }, '*');
+              }
+            });
+          } else {
+            bus
+              .target(properties.IFRAME_SECURE_SITE)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
                 + id,
-              formattedResult,
-            );
+                formattedResult,
+              );
+          }
           resolve(formatRecordsForClient(resolvedResult));
         },
         (rejectedResult) => {
           const formattedResult = formatRecordsForIframe(rejectedResult);
-          bus
-            .target(properties.IFRAME_SECURE_SITE)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
+          if (type === 'window') {
+            revealRecords.forEach((record: any) => {
+              const frame = window.parent.frames[record.iframeName] as Window;
+              if (frame) {
+                frame.postMessage({
+                  type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_WINDOW_CLIENT_RESPONSES + id,
+                  data: formattedResult,
+                }, '*');
+              }
+            });
+          } else {
+            bus
+              .target(properties.IFRAME_SECURE_SITE)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
                 + id,
-              formattedResult,
-            );
+                formattedResult,
+              );
+          }
           reject(formatRecordsForClient(rejectedResult));
         },
       );
@@ -860,12 +890,8 @@ class SkyflowFrameController {
     if (event.data
       && event.data?.type === ELEMENT_EVENTS_TO_IFRAME.COLLECT + this.#clientId) {
       // Set context and client if undefined
-      if (this.#context === undefined) {
-        this.#context = event.data.data.skyflowConfig.context || {};
-      }
-      if (this.#client === undefined) {
-        this.#client = event.data.data.skyflowConfig.client;
-      }
+      this.#client = event.data.data.skyflowConfig.client;
+      this.#context = event.data.data.skyflowConfig.context || {};
       const bearerToken = event.data.data.skyflowConfig.client.bearerToken || '';
 
       // Process tokenization
@@ -878,6 +904,30 @@ class SkyflowFrameController {
         .catch((error) => {
           this.sendCollectResponse(
             ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS + this.#clientId, error,
+          );
+        });
+    }
+  };
+
+  handleRevealMessage = (event: MessageEvent) => {
+    if (event.data
+      && event.data?.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_WINDOW_REQUEST
+       + this.#clientId) {
+      // Set context and client if undefined
+      this.#context = event.data.data.skyflowConfig.context || {};
+      this.#client = event.data.data.skyflowConfig.client;
+      const bearerToken = event.data.data.skyflowConfig.client.bearerToken || '';
+      this.#client = new Client(this.#client.config, {});
+      // Process reveal data
+      this.revealData(event.data.data.data.records, event.data.data.data.containerId, bearerToken, 'window')
+        .then((response) => {
+          this.sendCollectResponse(
+            ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_WINDOW_RESPONSE + this.#clientId, response,
+          );
+        })
+        .catch((error) => {
+          this.sendCollectResponse(
+            ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_WINDOW_RESPONSE + this.#clientId, { error },
           );
         });
     }

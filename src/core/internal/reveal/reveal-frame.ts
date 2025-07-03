@@ -26,6 +26,7 @@ import {
   constructMaskTranslation,
   getAtobValue, getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
+import EventWrapper from '../../../utils/bus-events/event-wrapper';
 
 const { getType } = require('mime');
 
@@ -65,6 +66,8 @@ class RevealFrame {
 
   #skyflowContainerId: string = '';
 
+  eventWrapper: EventWrapper;
+
   static init() {
     const url = window.location?.href;
     const configIndex = url.indexOf('?');
@@ -76,6 +79,7 @@ class RevealFrame {
   }
 
   constructor(record, context, id) {
+    this.eventWrapper = new EventWrapper();
     this.#skyflowContainerId = id;
     this.#name = window.name;
     this.#containerId = getValueFromName(this.#name, 2);
@@ -172,6 +176,9 @@ class RevealFrame {
 
     bus.emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#name, { name: this.#name });
 
+    this.eventWrapper.emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+        + this.#name, { name: this.#name }, undefined, true, '', window, true);
+
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (_, callback) => {
       callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
     });
@@ -205,6 +212,18 @@ class RevealFrame {
       }
       // this.updateDataView();
     };
+    const handlerReveal = (event: MessageEvent) => {
+      if (event.data
+        && event.data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_WINDOW_CLIENT_RESPONSES
+         + this.#containerId) {
+        sub(event.data.data);
+      }
+    };
+    window.addEventListener('message', handlerReveal);
+    this.eventWrapper.on(
+      ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_WINDOW_CLIENT_RESPONSES
+       + this.#containerId, () => {}, true, window, handlerReveal,
+    );
 
     bus
       .target(window.location.origin)
