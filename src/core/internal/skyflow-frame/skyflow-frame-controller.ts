@@ -48,6 +48,7 @@ import {
 } from '../../../utils/helpers';
 import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
+import EventWrapper from '../../../utils/bus-events/event-wrapper';
 
 const set = require('set-value');
 
@@ -61,12 +62,17 @@ class SkyflowFrameController {
 
   #context!: Context;
 
-  constructor(clientId: string) {
-    this.sendCollectResponse('SKYFLOW_CONTROLLER_READY', {});
-    window.addEventListener('message', this.handleCollectMessage);
-    // window.addEventListener('message', this.handleFrameReadyMessage);
+  eventWrapper: EventWrapper;
 
+  constructor(clientId: string) {
     this.#clientId = clientId || '';
+    this.eventWrapper = new EventWrapper();
+    this.sendCollectResponse(
+      ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_CONTROLLER_READY + this.#clientId, {},
+    );
+    this.eventWrapper.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT
+       + this.#clientId, () => {}, true, window, this.handleCollectMessage);
+
     const encodedClientDomain = getValueFromName(window.name, 2);
     const clientDomain = getAtobValue(encodedClientDomain);
     this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
@@ -266,7 +272,6 @@ class SkyflowFrameController {
     bus
       // .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#clientId, (data, callback) => {
-        console.log('Collect call request received: in bus', data);
         printLog(
           parameterizedString(
             logs.infoLogs.CAPTURE_PURE_JS_REQUEST,
@@ -283,13 +288,13 @@ class SkyflowFrameController {
             MessageType.LOG,
             this.#context.logLevel,
           );
-          // this.tokenize(data)
-          //   .then((response) => {
-          //     callback(response);
-          //   })
-          //   .catch((error) => {
-          //     callback({ error });
-          //   });
+          this.tokenize(data)
+            .then((response) => {
+              callback(response);
+            })
+            .catch((error) => {
+              callback({ error });
+            });
         } else if (data.type === COLLECT_TYPES.FILE_UPLOAD) {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
@@ -855,28 +860,29 @@ class SkyflowFrameController {
       && event.data?.type === ELEMENT_EVENTS_TO_IFRAME.COLLECT + this.#clientId) {
       // Set context and client if undefined
       if (this.#context === undefined) {
-        this.#context = event.data.data.data2.context || {};
+        this.#context = event.data.data.skyflowConfig.context || {};
       }
       if (this.#client === undefined) {
-        this.#client = event.data.data.data2.client;
+        this.#client = event.data.data.skyflowConfig.client;
       }
 
       // Process tokenization
       this.tokenize(event.data.data.data)
         .then((response) => {
-          this.sendCollectResponse(ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS, response);
+          this.sendCollectResponse(
+            ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS + this.#clientId, response,
+          );
         })
         .catch((error) => {
-          this.sendCollectResponse(ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS, error);
+          this.sendCollectResponse(
+            ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS + this.#clientId, error,
+          );
         });
     }
   };
 
   private sendCollectResponse = (etype: string, data: any) => {
-    window.parent.postMessage({
-      type: etype,
-      data,
-    }, '*');
+    this.eventWrapper.emit(etype, data, () => {}, true, '', window, true);
   };
 }
 export default SkyflowFrameController;

@@ -63,6 +63,8 @@ class EventWrapper {
     callback?: FramebusReplyHandler,
     isShadowMode?: boolean,
     skyflowFrameName?: string,
+    window?: Window,
+    parent?: boolean,
   ) {
     this.isShadowMode = isShadowMode || false;
     if (this.isShadowMode) {
@@ -74,6 +76,16 @@ class EventWrapper {
             data,
           }, '*');
         }
+      } else if (parent === true) {
+        window?.parent.postMessage({
+          type: eventName,
+          data,
+        }, '*');
+      } else {
+        window?.postMessage({
+          type: eventName,
+          data,
+        }, '*');
       }
     }
   }

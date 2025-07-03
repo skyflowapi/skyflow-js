@@ -39,27 +39,6 @@ import EventEmitter from '../../../event-emitter';
 import properties from '../../../properties';
 import EventWrapper from '../../../utils/bus-events/event-wrapper';
 
-// interface IMessagePayload {
-//   type: string;
-//   data: {
-//     type: string;
-//     tokens: boolean;
-//     elementIds: Array<{ frameId: string; elementId: string }>;
-//     containerId: string;
-//     [key: string]: any;
-//   };
-//   data2: {
-//     client: {
-//       config: {
-//         vaultID: string;
-//         vaultURL: string;
-//         token: string;
-//       };
-//     };
-//     context: Context;
-//   };
-// }
-
 const CLASS_NAME = 'CollectContainer';
 class CollectContainer extends Container {
   #containerId: string;
@@ -84,10 +63,13 @@ class CollectContainer extends Container {
 
   eventWrapper: EventWrapper;
 
+  #skyflowFrameControllerId: string;
+
   constructor(options, metaData, skyflowElements, context, isShadowDom = true) {
     super();
     this.eventWrapper = new EventWrapper(isShadowDom);
     this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
+    this.#skyflowFrameControllerId = metaData.skyflowContainer.skyflowFrameControllerName;
     this.#containerId = uuid();
     this.#metaData = {
       ...metaData,
@@ -271,7 +253,7 @@ class CollectContainer extends Container {
 
  #sendCollectMessage(options: ICollectOptions, elementIds: any[]) {
     const payload = {
-      type: ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
+      type: ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUEST + this.#metaData.uuid,
       data: {
         type: COLLECT_TYPES.COLLECT,
         ...options,
@@ -279,7 +261,7 @@ class CollectContainer extends Container {
         elementIds,
         containerId: this.#containerId,
       },
-      data2: {
+      skyflowConfig: {
         client: {
           config: {
             vaultID: this.#metaData.clientJSON.config.vaultID || '',
@@ -291,11 +273,12 @@ class CollectContainer extends Container {
       },
     };
 
-    this.eventWrapper.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT + this.#metaData.uuid, payload, undefined, true, 'skyflow_controller');
+    this.eventWrapper.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT + this.#metaData.uuid,
+      payload, undefined, true, this.#skyflowFrameControllerId, undefined, false);
   }
 
  #handleCollectSuccess = (event: MessageEvent, resolve: Function, reject: Function): void => {
-   if (event.data?.type === 'COLLECT_SUCCESS') {
+   if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS + this.#metaData.uuid) {
      const data = event.data.data;
      if (!data || data?.error) {
        printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
@@ -348,7 +331,8 @@ class CollectContainer extends Container {
              this.#handleCollectSuccess(event, resolve, reject);
            };
            this.eventWrapper
-             .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS, () => {}, true, window, messageHandler);
+             .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS
+               + this.#metaData.uuid, () => {}, true, window, messageHandler);
          } else {
            bus
            // .target(properties.IFRAME_SECURE_ORIGIN)
@@ -414,7 +398,8 @@ class CollectContainer extends Container {
            this.#handleCollectSuccess(event, resolve, reject);
          };
          this.eventWrapper
-           .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS, () => {}, true, window, messageHandler);
+           .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_SUCCESS + this.#metaData.uuid,
+             () => {}, true, window, messageHandler);
        } else {
          bus
            .target(properties.IFRAME_SECURE_ORIGIN)

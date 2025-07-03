@@ -141,20 +141,16 @@ class Skyflow {
     };
     // get the skyflow frame controller
     const iframe2 = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement | null;
-    console.log('Found iframe:', iframe2);
     bus
       .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + this.#uuid, cb);
     window.addEventListener('message', (event) => {
-      console.log('frame event tokemn', event.data, event.data.type, '=>', window.name);
       if (event.data && event.data.data
         && event.data.type === ELEMENT_EVENTS_TO_IFRAME.GET_ACCESS_TOKEN) {
-        console.log('generate token 1');
         if (
           this.#client.config.getBearerToken
         && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
         ) {
-          console.log('generate token 2');
           this.#client.config
             .getBearerToken()
             .then((bearerToken) => {
