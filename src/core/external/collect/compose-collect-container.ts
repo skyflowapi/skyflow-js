@@ -73,6 +73,8 @@ class ComposableContainer extends Container {
 
   #isSkyflowFrameReady: boolean = false;
 
+  #getSkyflowBearerToken: () => Promise<string> | undefined;
+
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -90,6 +92,7 @@ class ComposableContainer extends Container {
       },
     };
     this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
+    this.#getSkyflowBearerToken = metaData.getSkyflowBearerToken;
 
     this.#skyflowElements = skyflowElements;
     this.#context = context;
@@ -345,6 +348,13 @@ class ComposableContainer extends Container {
               elementId: element.elementName,
             });
           });
+          let bearerToken = '';
+          this.#getSkyflowBearerToken()?.then((token:string) => {
+            bearerToken = token;
+          }).catch((tokenError) => {
+            printLog(`${JSON.stringify(tokenError)}`, MessageType.ERROR, this.#context.logLevel);
+            reject(tokenError);
+          });
           bus
           // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
@@ -355,6 +365,7 @@ class ComposableContainer extends Container {
                 tokens: options?.tokens !== undefined ? options.tokens : true,
                 elementIds,
                 containerId: this.#containerId,
+                token: bearerToken,
               },
               (data: any) => {
                 if (!data || data?.error) {
@@ -415,6 +426,13 @@ class ComposableContainer extends Container {
             elementId: element.elementName,
           });
         });
+        let bearerToken = '';
+        this.#getSkyflowBearerToken()?.then((token:string) => {
+          bearerToken = token;
+        }).catch((tokenError) => {
+          printLog(`${JSON.stringify(tokenError)}`, MessageType.ERROR, this.#context.logLevel);
+          reject(tokenError);
+        });
         bus
           .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
@@ -428,6 +446,7 @@ class ComposableContainer extends Container {
                   tokens: options?.tokens !== undefined ? options.tokens : true,
                   elementIds,
                   containerId: this.#containerId,
+                  token: bearerToken,
                 },
                 (data: any) => {
                   if (!data || data?.error) {
