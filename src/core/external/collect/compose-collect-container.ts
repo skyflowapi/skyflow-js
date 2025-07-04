@@ -351,7 +351,6 @@ class ComposableContainer extends Container {
                 elementId: element.elementName,
               });
             });
-            console.log('this.#containerId', bearerTok);
             bus
             // .target(properties.IFRAME_SECURE_ORIGIN)
               .emit(
