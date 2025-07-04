@@ -32,6 +32,7 @@ import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { formatForRenderClient } from '../../../core-utils/reveal';
 import properties from '../../../properties';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
+import EventWrapper from '../../../utils/bus-events/event-wrapper';
 
 const CLASS_NAME = 'RevealElement';
 
@@ -64,10 +65,13 @@ class RevealElement extends SkyflowElement {
 
   #isSkyflowFrameReady: boolean = false;
 
+  eventWrapper: EventWrapper;
+
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
     metaData: any, container: any, elementId: string, context: Context) {
     super();
+    this.eventWrapper = new EventWrapper();
     this.#elementId = elementId;
     this.#metaData = metaData;
     this.#clientId = this.#metaData.uuid;
@@ -95,6 +99,10 @@ class RevealElement extends SkyflowElement {
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name, (data) => {
       this.#iframe.setIframeHeight(data.height);
     });
+    this.#recordData = {
+      ...this.#recordData,
+      iframeName: this.iframeName(),
+    };
   }
 
   getID() {
@@ -123,6 +131,23 @@ class RevealElement extends SkyflowElement {
           containerId: this.#containerId,
         }),
       });
+      const messageHandler = (event: MessageEvent) => {
+        this.#isMounted = true;
+        if (event.data && event.data.type
+          && event.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name) {
+          // eslint-disable-next-line no-underscore-dangle
+          this.#eventEmitter._emit(
+            ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
+            {
+              skyflowID: this.#recordData.skyflowID,
+              containerId: this.#containerId,
+              iframeName: this.#iframe.name,
+            },
+          );
+        }
+      };
+      this.eventWrapper.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+         + this.#iframe.name, () => {}, true, window, messageHandler);
       bus
         .target(properties.IFRAME_SECURE_ORIGIN)
         .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {

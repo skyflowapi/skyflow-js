@@ -536,15 +536,15 @@ export const validateInitConfig = (initConfig: ISkyflow) => {
   if (!Object.prototype.hasOwnProperty.call(initConfig, 'vaultURL')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.VAULTURL_IS_REQUIRED, [], true);
   }
-  if (!initConfig.vaultURL) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT, [], true);
-  }
-  if (initConfig.vaultURL && !isValidURL(initConfig.vaultURL)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VAULTURL_IN_INIT, [], true);
-  }
-  if (!Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED, [], true);
-  }
+  // if (!initConfig.vaultURL) {
+  //   throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT, [], true);
+  // }
+  // if (initConfig.vaultURL && !isValidURL(initConfig.vaultURL)) {
+  //   throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VAULTURL_IN_INIT, [], true);
+  // }
+  // if (!Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken')) {
+  //   throw new SkyflowError(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED, [], true);
+  // }
 };
 
 export const validateCollectElementInput = (input: CollectElementInput, logLevel) => {

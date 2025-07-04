@@ -138,10 +138,10 @@ class Skyflow {
         callback({ authToken: this.#bearerToken });
       }
     };
-
     bus
       .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + this.#uuid, cb);
+
     printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_LISTENER, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
     printLog(parameterizedString(logs.infoLogs.CURRENT_ENV, CLASS_NAME, this.#env),
@@ -164,6 +164,44 @@ class Skyflow {
     return skyflow;
   }
 
+  #getSkyflowBearerToken = () => new Promise((resolve, reject) => {
+    if (
+      this.#client.config.getBearerToken
+        && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
+    ) {
+      this.#client.config
+        .getBearerToken()
+        .then((bearerToken) => {
+          if (isTokenValid(bearerToken)) {
+            printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+              MessageType.LOG,
+              this.#logLevel);
+            this.#bearerToken = bearerToken;
+            resolve(this.#bearerToken);
+          } else {
+            printLog(parameterizedString(
+              logs.errorLogs.INVALID_BEARER_TOKEN,
+            ), MessageType.ERROR, this.#logLevel);
+            reject({
+              error: parameterizedString(
+                logs.errorLogs.INVALID_BEARER_TOKEN,
+              ),
+            });
+          }
+        })
+        .catch((err) => {
+          printLog(parameterizedString(logs.errorLogs.BEARER_TOKEN_REJECTED), MessageType.ERROR,
+            this.#logLevel);
+          reject({ error: err });
+        });
+    } else {
+      printLog(parameterizedString(logs.infoLogs.REUSE_BEARER_TOKEN, CLASS_NAME),
+        MessageType.LOG,
+        this.#logLevel);
+      resolve(this.#bearerToken);
+    }
+  });
+
   container(type: ContainerType.COLLECT, options?: ContainerOptions): CollectContainer;
   container(type: ContainerType.COMPOSABLE, options?: ContainerOptions): ComposableContainer;
   container(type: ContainerType.REVEAL, options?: ContainerOptions): RevealContainer;
@@ -175,9 +213,10 @@ class Skyflow {
           clientJSON: this.#client.toJSON(),
           containerType: type,
           skyflowContainer: this.#skyflowContainer,
+          getSkyflowBearerToken: this.#getSkyflowBearerToken,
         },
         this.#skyflowElements,
-        { logLevel: this.#logLevel, env: this.#env });
+        { logLevel: this.#logLevel, env: this.#env }, true);
         printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);
@@ -189,9 +228,10 @@ class Skyflow {
           clientJSON: this.#client.toJSON(),
           containerType: type,
           skyflowContainer: this.#skyflowContainer,
+          getSkyflowBearerToken: this.#getSkyflowBearerToken,
         },
         this.#skyflowElements,
-        { logLevel: this.#logLevel }, options);
+        { logLevel: this.#logLevel }, options, true);
         printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);
@@ -204,6 +244,7 @@ class Skyflow {
           clientJSON: this.#client.toJSON(),
           containerType: type,
           skyflowContainer: this.#skyflowContainer,
+          getSkyflowBearerToken: this.#getSkyflowBearerToken,
         },
         this.#skyflowElements,
         { logLevel: this.#logLevel, env: this.#env });

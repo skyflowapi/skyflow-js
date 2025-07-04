@@ -180,16 +180,17 @@ export const getFileURLFromVaultBySkyflowID = (
 export const fetchRecordsByTokenId = (
   tokenIdRecords: IRevealRecord[],
   client: Client,
+  bearerToken: string,
+  type: string = 'reveal',
 ): Promise<IRevealResponseType> => new Promise((rootResolve, rootReject) => {
-  const clientId = client.toJSON()?.metaData?.uuid || '';
-  getAccessToken(clientId).then((authToken) => {
+  if (type === 'reveal') {
     const vaultResponseSet: Promise<any>[] = tokenIdRecords.map(
       (tokenRecord) => new Promise((resolve) => {
         const apiResponse: any = [];
         const redaction: RedactionType = tokenRecord.redaction ? tokenRecord.redaction
           : RedactionType.PLAIN_TEXT;
         // eslint-disable-next-line max-len
-        getTokenRecordsFromVault(tokenRecord.token as string, redaction, client, authToken as string)
+        getTokenRecordsFromVault(tokenRecord.token as string, redaction, client, bearerToken as string)
           .then(
             (response: IApiSuccessResponse) => {
               const fieldsData = formatForPureJsSuccess(response);
@@ -226,9 +227,56 @@ export const fetchRecordsByTokenId = (
       } else if (recordsResponse.length === 0) rootReject({ errors: errorResponse });
       else rootReject({ records: recordsResponse, errors: errorResponse });
     });
-  }).catch((err) => {
-    rootReject(err);
-  });
+  } else if (type === 'detokenize') {
+    const clientId = client.toJSON()?.metaData?.uuid || '';
+    getAccessToken(clientId).then((authToken) => {
+      const vaultResponseSet: Promise<any>[] = tokenIdRecords.map(
+        (tokenRecord) => new Promise((resolve) => {
+          const apiResponse: any = [];
+          const redaction: RedactionType = tokenRecord.redaction ? tokenRecord.redaction
+            : RedactionType.PLAIN_TEXT;
+          // eslint-disable-next-line max-len
+          getTokenRecordsFromVault(tokenRecord.token as string, redaction, client, authToken as string)
+            .then(
+              (response: IApiSuccessResponse) => {
+                const fieldsData = formatForPureJsSuccess(response);
+                apiResponse.push(...fieldsData);
+              },
+              (cause: any) => {
+                const errorData = formatForPureJsFailure(cause, tokenRecord.token as string);
+                printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
+                apiResponse.push(errorData);
+              },
+            )
+            .finally(() => {
+              resolve(apiResponse);
+            });
+        }),
+      );
+
+      Promise.allSettled(vaultResponseSet).then((resultSet) => {
+        const recordsResponse: Record<string, any>[] = [];
+        const errorResponse: Record<string, any>[] = [];
+        resultSet.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            result.value.forEach((res: Record<string, any>) => {
+              if (Object.prototype.hasOwnProperty.call(res, 'error')) {
+                errorResponse.push(res);
+              } else {
+                recordsResponse.push(res);
+              }
+            });
+          }
+        });
+        if (errorResponse.length === 0) {
+          rootResolve({ records: recordsResponse });
+        } else if (recordsResponse.length === 0) rootReject({ errors: errorResponse });
+        else rootReject({ records: recordsResponse, errors: errorResponse });
+      });
+    }).catch((err) => {
+      rootReject(err);
+    });
+  }
 });
 export const formatRecordsForIframe = (response: IRevealResponseType) => {
   const result: Record<string, string> = {};
