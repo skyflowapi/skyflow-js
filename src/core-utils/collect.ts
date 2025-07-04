@@ -6,7 +6,6 @@ import omit from 'lodash/omit';
 import get from 'lodash/get';
 import Client from '../client';
 import SkyflowError from '../libs/skyflow-error';
-import { getAccessToken } from '../utils/bus-events';
 import {
   IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
   MessageType, LogLevel,

@@ -312,8 +312,90 @@ class ComposableContainer extends Container {
 
   collect = (options: ICollectOptions = { tokens: true }) :Promise<CollectResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
+    let bearerTok = '';
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {
+        this.#getSkyflowBearerToken()?.then((token) => {
+          bearerTok = token;
+          try {
+            validateInitConfig(this.#metaData.clientJSON.config);
+            if (!this.#elementsList || this.#elementsList.length === 0) {
+              throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE, [], true);
+            }
+            if (!this.#isMounted) {
+              throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED, [], true);
+            }
+            const containerElements = getElements(this.#tempElements);
+            containerElements.forEach((element:any) => {
+              if (!element?.isMounted) {
+                throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
+              }
+            });
+            const elementIds:{ frameId:string, elementId:string }[] = [];
+            const collectElements = Object.values(this.#elements);
+            collectElements.forEach((element) => {
+              element.isValidElement();
+            });
+            if (options && options.tokens && typeof options.tokens !== 'boolean') {
+              throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
+            }
+            if (options?.additionalFields) {
+              validateAdditionalFieldsInCollect(options.additionalFields);
+            }
+            if (options?.upsert) {
+              validateUpsertOptions(options?.upsert);
+            }
+            this.#elementsList.forEach((element) => {
+              elementIds.push({
+                frameId: this.#tempElements.elementName,
+                elementId: element.elementName,
+              });
+            });
+            console.log('this.#containerId', bearerTok);
+            bus
+            // .target(properties.IFRAME_SECURE_ORIGIN)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
+                {
+                  type: COLLECT_TYPES.COLLECT,
+                  ...options,
+                  tokens: options?.tokens !== undefined ? options.tokens : true,
+                  elementIds,
+                  containerId: this.#containerId,
+                  token: bearerTok,
+                },
+                (data: any) => {
+                  if (!data || data?.error) {
+                    printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                    reject(data?.error);
+                  } else {
+                    printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                      MessageType.LOG,
+                      this.#context.logLevel);
+
+                    resolve(data);
+                  }
+                },
+              );
+            printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
+              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+            MessageType.LOG, this.#context.logLevel);
+          } catch (err:any) {
+            printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+            reject(err);
+          }
+        }).catch((tokenError) => {
+          printLog(`${JSON.stringify(tokenError)}`, MessageType.ERROR, this.#context.logLevel);
+          reject(tokenError);
+        });
+      });
+    }
+    return new Promise((resolve, reject) => {
+      this.#getSkyflowBearerToken()?.then((token:string) => {
+        bearerTok = token;
+        printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+          MessageType.LOG,
+          this.#context.logLevel);
         try {
           validateInitConfig(this.#metaData.clientJSON.config);
           if (!this.#elementsList || this.#elementsList.length === 0) {
@@ -322,6 +404,7 @@ class ComposableContainer extends Container {
           if (!this.#isMounted) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED, [], true);
           }
+
           const containerElements = getElements(this.#tempElements);
           containerElements.forEach((element:any) => {
             if (!element?.isMounted) {
@@ -333,6 +416,7 @@ class ComposableContainer extends Container {
           collectElements.forEach((element) => {
             element.isValidElement();
           });
+
           if (options && options.tokens && typeof options.tokens !== 'boolean') {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
           }
@@ -348,38 +432,35 @@ class ComposableContainer extends Container {
               elementId: element.elementName,
             });
           });
-          let bearerToken = '';
-          this.#getSkyflowBearerToken()?.then((token:string) => {
-            bearerToken = token;
-          }).catch((tokenError) => {
-            printLog(`${JSON.stringify(tokenError)}`, MessageType.ERROR, this.#context.logLevel);
-            reject(tokenError);
-          });
           bus
-          // .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
-              {
-                type: COLLECT_TYPES.COLLECT,
-                ...options,
-                tokens: options?.tokens !== undefined ? options.tokens : true,
-                elementIds,
-                containerId: this.#containerId,
-                token: bearerToken,
-              },
-              (data: any) => {
-                if (!data || data?.error) {
-                  printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                  reject(data?.error);
-                } else {
-                  printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                    MessageType.LOG,
-                    this.#context.logLevel);
-
-                  resolve(data);
-                }
-              },
-            );
+            .target(properties.IFRAME_SECURE_ORIGIN)
+            .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
+              bus
+              // .target(properties.IFRAME_SECURE_ORIGIN)
+                .emit(
+                  ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
+                  {
+                    type: COLLECT_TYPES.COLLECT,
+                    ...options,
+                    tokens: options?.tokens !== undefined ? options.tokens : true,
+                    elementIds,
+                    containerId: this.#containerId,
+                    token: bearerTok,
+                  },
+                  (data: any) => {
+                    if (!data || data?.error) {
+                      printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                      reject(data?.error);
+                    } else {
+                      // eslint-disable-next-line max-len
+                      printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                        MessageType.LOG,
+                        this.#context.logLevel);
+                      resolve(data);
+                    }
+                  },
+                );
+            });
           printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
           MessageType.LOG, this.#context.logLevel);
@@ -387,87 +468,10 @@ class ComposableContainer extends Container {
           printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
           reject(err);
         }
+      }).catch((tokenError) => {
+        printLog(`${JSON.stringify(tokenError)}`, MessageType.ERROR, this.#context.logLevel);
+        reject(tokenError);
       });
-    }
-    return new Promise((resolve, reject) => {
-      try {
-        validateInitConfig(this.#metaData.clientJSON.config);
-        if (!this.#elementsList || this.#elementsList.length === 0) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE, [], true);
-        }
-        if (!this.#isMounted) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED, [], true);
-        }
-
-        const containerElements = getElements(this.#tempElements);
-        containerElements.forEach((element:any) => {
-          if (!element?.isMounted) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
-          }
-        });
-        const elementIds:{ frameId:string, elementId:string }[] = [];
-        const collectElements = Object.values(this.#elements);
-        collectElements.forEach((element) => {
-          element.isValidElement();
-        });
-
-        if (options && options.tokens && typeof options.tokens !== 'boolean') {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
-        }
-        if (options?.additionalFields) {
-          validateAdditionalFieldsInCollect(options.additionalFields);
-        }
-        if (options?.upsert) {
-          validateUpsertOptions(options?.upsert);
-        }
-        this.#elementsList.forEach((element) => {
-          elementIds.push({
-            frameId: this.#tempElements.elementName,
-            elementId: element.elementName,
-          });
-        });
-        let bearerToken = '';
-        this.#getSkyflowBearerToken()?.then((token:string) => {
-          bearerToken = token;
-        }).catch((tokenError) => {
-          printLog(`${JSON.stringify(tokenError)}`, MessageType.ERROR, this.#context.logLevel);
-          reject(tokenError);
-        });
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
-            bus
-            // .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
-                {
-                  type: COLLECT_TYPES.COLLECT,
-                  ...options,
-                  tokens: options?.tokens !== undefined ? options.tokens : true,
-                  elementIds,
-                  containerId: this.#containerId,
-                  token: bearerToken,
-                },
-                (data: any) => {
-                  if (!data || data?.error) {
-                    printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                    reject(data?.error);
-                  } else {
-                    printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                      MessageType.LOG,
-                      this.#context.logLevel);
-                    resolve(data);
-                  }
-                },
-              );
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-          CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
-        MessageType.LOG, this.#context.logLevel);
-      } catch (err:any) {
-        printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
-        reject(err);
-      }
     });
   };
 

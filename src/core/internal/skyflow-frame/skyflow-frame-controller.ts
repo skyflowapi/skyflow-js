@@ -294,7 +294,7 @@ class SkyflowFrameController {
             this.#context.logLevel,
           );
           // TODO: Update bearerToken when Default shadowDom is removed.
-          this.tokenize(data, data.bearerToken)
+          this.tokenize(data, data.token)
             .then((response) => {
               callback(response);
             })
