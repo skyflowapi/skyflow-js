@@ -83,7 +83,7 @@ class Skyflow {
   #skyflowElements: any;
 
   constructor(config: ISkyflow) {
-    const localSDKversion = localStorage.getItem('sdk_version') || '';
+    const localSDKversion = 'skyflow-js';
     this.#metadata[SDK_VERSION] = localSDKversion;
     this.#metadata[SESSION_ID] = uuid();
     this.#client = new Client(
