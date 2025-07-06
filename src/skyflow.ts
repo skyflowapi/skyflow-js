@@ -47,6 +47,7 @@ import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
 import ThreeDS from './core/external/threeds/threeds';
+import { ClientMetadata, SkyflowElementProps } from './core/internal/internal-types';
 
 export enum ContainerType {
   COLLECT = 'COLLECT',
@@ -66,19 +67,6 @@ export interface ISkyflow {
   getBearerToken: () => Promise<string>;
   options?: SkyflowConfigOptions;
 }
-export interface SkyflowElementProps {
-  id: string;
-  type: ElementType;
-  element: HTMLElement;
-  container: CollectContainer | RevealContainer | ComposableContainer;
-}
-
-export interface Metadata {
-  uuid: string,
-  clientDomain: string,
-  sdkVersion?: string;
-  sessionId?: string;
-}
 
 const CLASS_NAME = 'Skyflow';
 class Skyflow {
@@ -86,7 +74,7 @@ class Skyflow {
 
   #uuid: string = uuid();
 
-  #metadata: Metadata = {
+  #metadata: ClientMetadata = {
     uuid: this.#uuid,
     clientDomain: window.location.origin,
   };
@@ -191,14 +179,14 @@ class Skyflow {
   container(type: ContainerType, options?: ContainerOptions) {
     switch (type) {
       case ContainerType.COLLECT: {
-        const collectContainer = new CollectContainer(options!, {
+        const collectContainer = new CollectContainer({
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
           containerType: type,
           skyflowContainer: this.#skyflowContainer,
         },
         this.#skyflowElements,
-        { logLevel: this.#logLevel, env: this.#env });
+        { logLevel: this.#logLevel, env: this.#env }, options);
         printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);
@@ -212,26 +200,29 @@ class Skyflow {
           skyflowContainer: this.#skyflowContainer,
         },
         this.#skyflowElements,
-        { logLevel: this.#logLevel }, options);
+        { logLevel: this.#logLevel, env: this.#env }, options);
         printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);
         return revealContainer;
       }
       case ContainerType.COMPOSABLE: {
-        validateComposableContainerOptions(options);
-        const collectContainer = new ComposableContainer(options, {
-          ...this.#metadata,
-          clientJSON: this.#client.toJSON(),
-          containerType: type,
-          skyflowContainer: this.#skyflowContainer,
-        },
-        this.#skyflowElements,
-        { logLevel: this.#logLevel, env: this.#env });
+        validateComposableContainerOptions(options!);
+        const composableContainer = new ComposableContainer(
+          {
+            ...this.#metadata,
+            clientJSON: this.#client.toJSON(),
+            containerType: type,
+            skyflowContainer: this.#skyflowContainer,
+          },
+          this.#skyflowElements,
+          { logLevel: this.#logLevel, env: this.#env },
+          options!,
+        );
         printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);
-        return collectContainer;
+        return composableContainer;
       }
 
       default:

@@ -9,7 +9,7 @@ import {
 } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
-import { ContainerType, Metadata, SkyflowElementProps } from '../../../skyflow';
+import { ContainerType } from '../../../skyflow';
 import {
   Context, MessageType,
   CollectElementInput,
@@ -39,14 +39,7 @@ import Container from '../common/container';
 import CollectElement from './collect-element';
 import EventEmitter from '../../../event-emitter';
 import properties from '../../../properties';
-import { ClientToJSON } from '../../../client';
-import SkyflowContainer from '../skyflow-container';
-
-export interface CollectContainerMetadata extends Metadata {
-  clientJSON: ClientToJSON;
-  containerType: ContainerType;
-  skyflowContainer: SkyflowContainer;
-}
+import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
 
 export interface ICollectElement {
   elementType: ElementType;
@@ -62,10 +55,11 @@ export interface ICollectElement {
   [key: string]: unknown;
 }
 
-interface ElementGroupItem extends CollectElementInput, CollectElementOptions {
+export interface ElementGroupItem extends CollectElementInput, CollectElementOptions {
   elementType: ElementType;
   name?: string;
   accept?: string[];
+  elementName?: string;
 }
 
 export interface ElementGroup {
@@ -80,7 +74,7 @@ class CollectContainer extends Container {
 
   #elements: Record<string, CollectElement> = {};
 
-  #metaData: CollectContainerMetadata;
+  #metaData: Metadata;
 
   #context: Context;
 
@@ -94,8 +88,12 @@ class CollectContainer extends Container {
 
   #isSkyflowFrameReady: boolean = false;
 
-  constructor(options: ContainerOptions, metaData: CollectContainerMetadata,
-    skyflowElements: Array<SkyflowElementProps>, context: Context) {
+  constructor(
+    metaData: Metadata,
+    skyflowElements: Array<SkyflowElementProps>,
+    context: Context,
+    options?: ContainerOptions,
+  ) {
     super();
     this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
     this.#containerId = uuid();
@@ -134,35 +132,34 @@ class CollectContainer extends Container {
 
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
-  }) => {
+  }): CollectElement => {
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input.validations);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
+
     const elementGroup: ElementGroup = {
-      rows: [
-        {
-          elements: [
-            {
-              elementType: input.type,
-              name: input.column,
-              accept: options.allowedFileType,
-              ...input,
-              ...formattedOptions,
-              validations,
-            },
-          ],
-        },
-      ],
+      rows: [{
+        elements: [{
+          elementType: input.type,
+          name: input.column,
+          accept: options.allowedFileType,
+          ...input,
+          ...formattedOptions,
+          validations,
+        }],
+      }],
     };
+
     return this.#createMultipleElement(elementGroup, true);
   };
 
   #createMultipleElement = (
-    multipleElements: any,
+    multipleElements: ElementGroup,
     isSingleElementAPI: boolean = false,
-  ) => {
+  ): CollectElement => {
     const elements: any[] = [];
     const tempElements = deepClone(multipleElements);
+
     tempElements.rows.forEach((row) => {
       row.elements.forEach((element) => {
         const options = element;
@@ -509,7 +506,7 @@ class CollectContainer extends Container {
       if (!mountedIframeIds.length) return;
 
       this.#removeUnmountedElements(mountedIframeIds);
-    } catch (error) {
+    } catch (error: unknown) {
       printLog(`${error}`, MessageType.LOG, this.#context.logLevel);
     }
   };

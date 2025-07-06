@@ -41,8 +41,7 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
-import { CollectContainerMetadata } from './collect-container';
-import { ContainerProps, InternalState } from '../../internal/internal-types';
+import { Metadata, ContainerProps, InternalState } from '../../internal/internal-types';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
@@ -74,7 +73,7 @@ class CollectElement extends SkyflowElement {
 
   #group: any;
 
-  #metaData: CollectContainerMetadata;
+  #metaData: Metadata;
 
   #eventEmitter: EventEmitter = new EventEmitter();
 
@@ -99,7 +98,7 @@ class CollectElement extends SkyflowElement {
   constructor(
     elementId: string,
     elementGroup: any,
-    metaData: CollectContainerMetadata,
+    metaData: Metadata,
     container: ContainerProps,
     isSingleElementAPI: boolean = false,
     destroyCallback: Function,
@@ -320,7 +319,7 @@ class CollectElement extends SkyflowElement {
     }
   };
 
-  #onUpdate = (callback) => {
+  #onUpdate = (callback: Function) => {
     // todo: us bus if else there will be an infinite loop
     if (!this.#isSingleElementAPI) {
       this.#eventEmitter.on(
@@ -333,7 +332,7 @@ class CollectElement extends SkyflowElement {
     }
   };
 
-  updateElement = (elementOptions) => {
+  updateElement = (elementOptions: { elementName: string } & CollectElementUpdateOptions) => {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE + elementOptions.elementName, {
       name: elementOptions.elementName,
       options: elementOptions,
@@ -448,7 +447,7 @@ class CollectElement extends SkyflowElement {
     }
   }
 
-  #onDestroy = (callback) => {
+  #onDestroy = (callback: Function) => {
     this.#eventEmitter.on(
       ELEMENT_EVENTS_TO_IFRAME.DESTROY_FRAME,
       () => {

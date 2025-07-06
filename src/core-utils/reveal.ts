@@ -11,6 +11,11 @@ import {
   IRenderResponseType,
   IGetOptions,
   RenderFileResponse,
+  RevealResponse,
+  GetResponse,
+  GetResponseRecord,
+  GetByIdResponse,
+  GetByIdResponseRecord,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
 import { FILE_DOWNLOAD_URL_PARAM } from '../core/constants';
@@ -52,7 +57,7 @@ const getRecordsFromVault = (
   client: Client,
   authToken:string,
   options?: IGetOptions,
-) => {
+): Promise<GetResponse> => {
   let paramList: string = '';
 
   skyflowIdRecord.ids?.forEach((skyflowId) => {
@@ -81,13 +86,13 @@ const getRecordsFromVault = (
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',
     },
-  });
+  }) as Promise<GetResponse>;
 };
 const getSkyflowIdRecordsFromVault = (
   skyflowIdRecord: ISkyflowIdRecord,
   client: Client,
   authToken:string,
-) => {
+): Promise<GetByIdResponse> => {
   let paramList: string = '';
 
   skyflowIdRecord.ids.forEach((skyflowId) => {
@@ -103,7 +108,7 @@ const getSkyflowIdRecordsFromVault = (
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',
     },
-  });
+  }) as Promise<GetByIdResponse>;
 };
 const getTokenRecordsFromVault = (
   token:string,
@@ -120,14 +125,14 @@ const getTokenRecordsFromVault = (
       'content-type': 'application/json',
     },
     body:
-      {
+      JSON.stringify({
         detokenizationParameters: [
           {
             token,
             redaction,
           },
         ],
-      },
+      }),
   });
 };
 
@@ -271,36 +276,43 @@ export const formatForRenderClient = (response: IRenderResponseType, column: str
   return formattedResponse;
 };
 
-export const formatRecordsForClient = (response: IRevealResponseType) => {
+export const formatRecordsForClient = (response: IRevealResponseType): RevealResponse => {
+  const revealResponse: RevealResponse = {};
   if (response.records) {
     const successRecords = response.records.map((record) => ({
       token: record.token,
       valueType: record.valueType,
     }));
-    if (response.errors) return { success: successRecords, errors: response.errors };
-    return { success: successRecords };
+    revealResponse.success = successRecords;
   }
-  return { errors: response.errors };
+  if (response.errors) {
+    const errorRecords = response.errors.map((errorRecord) => ({
+      token: errorRecord.token,
+      error: errorRecord.error,
+    }));
+    revealResponse.errors = errorRecords;
+  }
+  return revealResponse;
 };
 
 export const fetchRecordsGET = async (
   skyflowIdRecords: IGetRecord[],
   client: Client,
   options?: IGetOptions,
-) => new Promise((rootResolve, rootReject) => {
+): Promise<GetResponse> => new Promise((rootResolve, rootReject) => {
   let vaultResponseSet: Promise<any>[];
   const clientId = client.toJSON()?.metaData?.uuid || '';
   getAccessToken(clientId).then((authToken) => {
     vaultResponseSet = skyflowIdRecords.map(
-      (skyflowIdRecord) => new Promise((resolve, reject) => {
+      (skyflowIdRecord: IGetRecord) => new Promise((resolve, reject) => {
         getRecordsFromVault(skyflowIdRecord, client, authToken as string, options)
           .then(
-            (resolvedResult: any) => {
-              const response: any[] = [];
-              const recordsData: any[] = resolvedResult.records;
+            (resolvedResult: GetResponse) => {
+              const response: GetResponseRecord[] = [];
+              const recordsData: GetResponseRecord[] = resolvedResult.records || [];
               recordsData.forEach((fieldData) => {
                 const id = fieldData.fields.skyflow_id;
-                const currentRecord = {
+                const currentRecord: GetResponseRecord = {
                   fields: {
                     id,
                     ...fieldData.fields,
@@ -329,7 +341,7 @@ export const fetchRecordsGET = async (
               reject(errorResponse);
             },
           )
-          .catch((error) => {
+          .catch((error: unknown) => {
             reject(error);
           });
       }),
@@ -358,20 +370,20 @@ export const fetchRecordsGET = async (
 export const fetchRecordsBySkyflowID = async (
   skyflowIdRecords: ISkyflowIdRecord[],
   client: Client,
-) => new Promise((rootResolve, rootReject) => {
+): Promise<GetByIdResponse> => new Promise((rootResolve, rootReject) => {
   let vaultResponseSet: Promise<any>[];
   const clientId = client.toJSON()?.metaData?.uuid || '';
   getAccessToken(clientId).then((authToken) => {
     vaultResponseSet = skyflowIdRecords.map(
-      (skyflowIdRecord) => new Promise((resolve, reject) => {
+      (skyflowIdRecord: ISkyflowIdRecord) => new Promise((resolve, reject) => {
         getSkyflowIdRecordsFromVault(skyflowIdRecord, client, authToken as string)
           .then(
-            (resolvedResult: any) => {
+            (resolvedResult: GetByIdResponse) => {
               const response: any[] = [];
-              const recordsData: any[] = resolvedResult.records;
+              const recordsData: GetByIdResponseRecord[] = resolvedResult.records || [];
               recordsData.forEach((fieldData) => {
                 const id = fieldData.fields.skyflow_id;
-                const currentRecord = {
+                const currentRecord: GetByIdResponseRecord = {
                   fields: {
                     id,
                     ...fieldData.fields,
