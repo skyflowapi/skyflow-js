@@ -36,9 +36,19 @@ import {
   MessageType,
   Context,
   ISkyflowIdRecord,
-  IDeleteRecord,
   IGetOptions,
-  IInsertResponse,
+  IInsertRecordInput,
+  IInsertOptions,
+  UploadFilesResponse,
+  RevealResponse,
+  ErrorRecord,
+  InsertResponse,
+  CollectResponse,
+  IRevealResponseType,
+  GetResponse,
+  GetByIdResponse,
+  IDeleteResponseType,
+  IDeleteRecordInput,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
@@ -48,6 +58,10 @@ import {
 } from '../../../utils/helpers';
 import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
+import {
+  BatchInsertRequestBody, ElementInfo, TokenizeDataInput, UploadFileDataInput,
+} from '../internal-types';
+import IFrameFormElement from '../iframe-form';
 
 const set = require('set-value');
 
@@ -121,7 +135,7 @@ class SkyflowFrameController {
               data.records as IRevealRecord[],
               this.#client,
             ).then(
-              (resolvedResult) => {
+              (resolvedResult: IRevealResponseType) => {
                 printLog(
                   parameterizedString(
                     logs.infoLogs.FETCH_RECORDS_RESOLVED,
@@ -132,7 +146,7 @@ class SkyflowFrameController {
                 );
                 callback(resolvedResult);
               },
-              (rejectedResult) => {
+              (rejectedResult: IRevealResponseType) => {
                 printLog(
                   parameterizedString(logs.errorLogs.FETCH_RECORDS_REJECTED),
                   MessageType.ERROR,
@@ -143,8 +157,8 @@ class SkyflowFrameController {
               },
             );
           } else if (data.type === PUREJS_TYPES.INSERT) {
-            this.insertData(data.records, data.options)
-              .then((result) => {
+            this.insertData(data.records as IInsertRecordInput, data.options as IInsertOptions)
+              .then((result: InsertResponse) => {
                 printLog(
                   parameterizedString(
                     logs.infoLogs.INSERT_RECORDS_RESOLVED,
@@ -153,10 +167,9 @@ class SkyflowFrameController {
                   MessageType.LOG,
                   this.#context.logLevel,
                 );
-
                 callback(result);
               })
-              .catch((error) => {
+              .catch((error: InsertResponse) => {
                 printLog(
                   parameterizedString(logs.errorLogs.INSERT_RECORDS_REJECTED),
                   MessageType.ERROR,
@@ -168,7 +181,7 @@ class SkyflowFrameController {
             fetchRecordsGET(
               data.records as IGetRecord[], this.#client, data.options as IGetOptions,
             ).then(
-              (resolvedResult) => {
+              (resolvedResult: GetResponse) => {
                 printLog(
                   parameterizedString(logs.infoLogs.GET_RESOLVED, CLASS_NAME),
                   MessageType.LOG,
@@ -177,7 +190,7 @@ class SkyflowFrameController {
 
                 callback(resolvedResult);
               },
-              (rejectedResult) => {
+              (rejectedResult: GetResponse) => {
                 printLog(parameterizedString(
                   logs.errorLogs.GET_REJECTED,
                 ),
@@ -192,7 +205,7 @@ class SkyflowFrameController {
               data.records as ISkyflowIdRecord[],
               this.#client,
             ).then(
-              (resolvedResult) => {
+              (resolvedResult: GetByIdResponse) => {
                 printLog(
                   parameterizedString(
                     logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED,
@@ -204,7 +217,7 @@ class SkyflowFrameController {
 
                 callback(resolvedResult);
               },
-              (rejectedResult) => {
+              (rejectedResult: GetByIdResponse) => {
                 printLog(
                   parameterizedString(logs.errorLogs.GET_BY_SKYFLOWID_REJECTED),
                   MessageType.ERROR,
@@ -216,11 +229,11 @@ class SkyflowFrameController {
             );
           } else if (data.type === PUREJS_TYPES.DELETE) {
             deleteData(
-              data.records as IDeleteRecord[],
-              data.options,
+              data.records as IDeleteRecordInput,
+              data.options || {},
               this.#client,
             ).then(
-              (resolvedResult) => {
+              (resolvedResult: IDeleteResponseType) => {
                 printLog(
                   parameterizedString(
                     logs.infoLogs.DELETE_RESOLVED,
@@ -232,7 +245,7 @@ class SkyflowFrameController {
 
                 callback(resolvedResult);
               },
-            ).catch((rejectedResult) => {
+            ).catch((rejectedResult: IDeleteResponseType) => {
               printLog(
                 parameterizedString(
                   logs.errorLogs.DELETE_RECORDS_REJECTED,
@@ -278,22 +291,34 @@ class SkyflowFrameController {
             MessageType.LOG,
             this.#context.logLevel,
           );
-          this.tokenize(data)
-            .then((response) => {
+          const tokenizeDataInput: TokenizeDataInput = {
+            ...data,
+            type: data.type,
+            elementIds: data.elementIds as Array<ElementInfo>,
+            containerId: data.containerId as string,
+          };
+          this.tokenize(tokenizeDataInput)
+            .then((response: CollectResponse) => {
               callback(response);
             })
-            .catch((error) => {
+            .catch((error: CollectResponse) => {
               callback({ error });
             });
         } else if (data.type === COLLECT_TYPES.FILE_UPLOAD) {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
           MessageType.LOG, this.#context.logLevel);
-          this.parallelUploadFiles(data)
-            .then((response) => {
+          const uploadFilesDataInput = {
+            ...data,
+            type: data.type,
+            elementIds: data.elementIds as string[],
+            containerId: data.containerId as string,
+          };
+          this.parallelUploadFiles(uploadFilesDataInput)
+            .then((response: UploadFilesResponse) => {
               callback(response);
             })
-            .catch((error) => {
+            .catch((error: UploadFilesResponse) => {
               callback({ error });
             });
         }
@@ -331,7 +356,7 @@ class SkyflowFrameController {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
           MessageType.LOG, this.#context.logLevel);
-          this.revealData(data.records as any, data.containerId).then(
+          this.revealData(data.records as IRevealRecord[], data.containerId as string).then(
             (resolvedResult) => {
               callback(resolvedResult);
             },
@@ -343,7 +368,7 @@ class SkyflowFrameController {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
           MessageType.LOG, this.#context.logLevel);
-          this.renderFile(data.records, data.iframeName).then(
+          this.renderFile(data.records as IRevealRecord, data.iframeName as string).then(
             (resolvedResult) => {
               callback(
                 resolvedResult,
@@ -357,7 +382,7 @@ class SkyflowFrameController {
       });
   }
 
-  static init(clientId) {
+  static init(clientId: string): SkyflowFrameController {
     const trackingStatus = getValueFromName(window.name, 3) === 'true';
     if (trackingStatus) {
       const scriptTag = document.createElement('script');
@@ -367,7 +392,7 @@ class SkyflowFrameController {
     return new SkyflowFrameController(clientId);
   }
 
-  revealData(revealRecords: IRevealRecord[], containerId) {
+  revealData(revealRecords: IRevealRecord[], containerId: string): Promise<RevealResponse> {
     const id = containerId;
     return new Promise((resolve, reject) => {
       fetchRecordsByTokenId(revealRecords, this.#client).then(
@@ -397,13 +422,15 @@ class SkyflowFrameController {
     });
   }
 
-  insertData(records, options) {
-    const requestBody = constructInsertRecordRequest(records, options);
+  insertData(records: IInsertRecordInput, options: IInsertOptions): Promise<InsertResponse> {
+    const requestBody: Array<BatchInsertRequestBody> = constructInsertRecordRequest(
+      records, options,
+    );
     return new Promise((rootResolve, rootReject) => {
       getAccessToken(this.#clientId).then((authToken) => {
         this.#client
           .request({
-            body: { records: requestBody },
+            body: JSON.stringify({ records: requestBody }),
             requestMethod: 'POST',
             url:
             `${this.#client.config.vaultURL}/v1/vaults/${
@@ -417,7 +444,7 @@ class SkyflowFrameController {
             rootResolve(
               constructInsertRecordResponse(
                 response,
-                options?.tokens,
+                options?.tokens ?? true,
                 records?.records,
               ),
             );
@@ -431,7 +458,7 @@ class SkyflowFrameController {
     });
   }
 
-  renderFile(data, iframeName) {
+  renderFile(data: IRevealRecord, iframeName: string): Promise<any> {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowID(data, this.#client)
@@ -472,8 +499,8 @@ class SkyflowFrameController {
     });
   }
 
-  tokenize = (options) => {
-    const id = options.containerId;
+  tokenize = (options: TokenizeDataInput): Promise<CollectResponse> => {
+    const id: string = options.containerId;
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const insertResponseObject: any = {};
     const updateResponseObject: any = {};
@@ -584,11 +611,11 @@ class SkyflowFrameController {
         }
       }
     }
-    let finalInsertRequest;
+    let finalInsertRequest: Array<BatchInsertRequestBody>;
     let finalInsertRecords;
     let finalUpdateRecords;
-    let insertResponse: IInsertResponse;
-    let updateResponse: IInsertResponse;
+    let insertResponse: InsertResponse;
+    let updateResponse: InsertResponse;
     let insertErrorResponse: any;
     let updateErrorResponse;
     let insertDone = false;
@@ -604,15 +631,13 @@ class SkyflowFrameController {
       });
     }
     const client = this.#client;
-    const sendRequest = () => new Promise((rootResolve, rootReject) => {
+    const sendRequest = (): Promise<InsertResponse> => new Promise((rootResolve, rootReject) => {
       const clientId = client.toJSON()?.metaData?.uuid || '';
       getAccessToken(clientId).then((authToken) => {
         if (finalInsertRequest.length !== 0) {
           client
             .request({
-              body: {
-                records: finalInsertRequest,
-              },
+              body: JSON.stringify({ records: finalInsertRequest }),
               requestMethod: 'POST',
               url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
               headers: {
@@ -623,7 +648,7 @@ class SkyflowFrameController {
             .then((response: any) => {
               insertResponse = constructInsertRecordResponse(
                 response,
-                options.tokens,
+                options.tokens ?? true,
                 finalInsertRecords.records,
               );
               insertDone = true;
@@ -634,12 +659,14 @@ class SkyflowFrameController {
                 if (updateErrorResponse.records === undefined) {
                   updateErrorResponse.records = insertResponse.records;
                 } else {
-                  updateErrorResponse.records = insertResponse.records
+                  updateErrorResponse.records = (insertResponse.records || [])
                     .concat(updateErrorResponse.records);
                 }
                 rootReject(updateErrorResponse);
               } else if (updateDone && updateResponse !== undefined) {
-                rootResolve({ records: insertResponse.records.concat(updateResponse.records) });
+                rootResolve(
+                  { records: (insertResponse.records || []).concat(updateResponse.records || []) },
+                );
               }
             })
             .catch((error) => {
@@ -680,7 +707,9 @@ class SkyflowFrameController {
                 rootResolve(updateResponse);
               }
               if (insertDone && insertResponse !== undefined) {
-                rootResolve({ records: insertResponse.records.concat(updateResponse.records) });
+                rootResolve(
+                  { records: (insertResponse.records || []).concat(updateResponse.records || []) },
+                );
               } else if (insertDone && insertErrorResponse !== undefined) {
                 const errors = insertErrorResponse.errors;
                 const records = updateResponse.records;
@@ -696,7 +725,7 @@ class SkyflowFrameController {
                 if (updateErrorResponse.records === undefined) {
                   updateErrorResponse.records = insertResponse.records;
                 } else {
-                  updateErrorResponse.records = insertResponse.records
+                  updateErrorResponse.records = (insertResponse.records || [])
                     .concat(updateErrorResponse.records);
                 }
                 rootReject(updateErrorResponse);
@@ -719,7 +748,8 @@ class SkyflowFrameController {
     });
   };
 
-  parallelUploadFiles = (options) => new Promise((rootResolve, rootReject) => {
+  parallelUploadFiles = (options: UploadFileDataInput):
+  Promise<UploadFilesResponse> => new Promise((rootResolve, rootReject) => {
     const id = options.containerId;
     const promises: Promise<unknown>[] = [];
     for (let i = 0; i < options.elementIds.length; i += 1) {
@@ -740,16 +770,13 @@ class SkyflowFrameController {
     Promise.allSettled(
       promises,
     ).then((resultSet) => {
-      const fileUploadResponse: Record<string, any>[] = [];
-      const errorResponse: Record<string, any>[] = [];
+      const fileUploadResponse: { skyflow_id: string }[] = [];
+      const errorResponse: { error: ErrorRecord }[] = [];
       resultSet.forEach((result) => {
         if (result.status === 'fulfilled') {
           if (result.value !== undefined && result.value !== null) {
-            if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
-              errorResponse.push(result.value);
-            } else {
-              fileUploadResponse.push(result.value);
-            }
+            const parsedResultValue = JSON.parse(result.value as string);
+            fileUploadResponse.push({ skyflow_id: parsedResultValue.skyflow_id });
           }
         } else if (result.status === 'rejected') {
           errorResponse.push(result.reason);
@@ -762,7 +789,7 @@ class SkyflowFrameController {
     });
   });
 
-  uploadFiles = (fileElement) => {
+  uploadFiles = (fileElement: IFrameFormElement) => {
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const fileUploadObject: any = {};
 
@@ -806,7 +833,8 @@ class SkyflowFrameController {
     }
 
     const client = this.#client;
-    const sendRequest = () => new Promise((rootResolve, rootReject) => {
+    const sendRequest = ():
+    Promise<UploadFilesResponse> => new Promise((rootResolve, rootReject) => {
       const clientId = client.toJSON()?.metaData?.uuid || '';
       getAccessToken(clientId).then((authToken) => {
         client

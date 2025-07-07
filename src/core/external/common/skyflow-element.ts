@@ -2,19 +2,19 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 abstract class SkyflowElement {
-  abstract mount(domElementSelector);
+  abstract mount(domElementSelector: HTMLElement | string): void;
 
-  abstract unmount();
+  abstract unmount(): void;
 
-  abstract setError(clientErrorText:string);
+  abstract setError(clientErrorText: string): void;
 
-  abstract resetError();
+  abstract resetError(): void;
 
-  abstract setErrorOverride(customErrorText:string);
+  abstract setErrorOverride(customErrorText: string): void;
 
-  abstract iframeName();
+  abstract iframeName(): string;
 
-  abstract getID();
+  abstract getID(): string;
 }
 
 export default SkyflowElement;

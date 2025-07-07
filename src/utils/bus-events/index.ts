@@ -5,7 +5,7 @@ import bus from 'framebus';
 import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT } from '../../core/constants';
 import properties from '../../properties';
 
-export function getAccessToken(clientId) {
+export function getAccessToken(clientId: string) {
   return new Promise((resolve, reject) => {
     bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + clientId, {},
       (data:any) => {
