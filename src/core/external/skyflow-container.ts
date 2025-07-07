@@ -63,6 +63,8 @@ class SkyflowContainer {
 
   skyflowFrameControllerName: string;
 
+  frameId: string;
+
   constructor(client, context) {
     this.#client = client;
     this.#containerId = this.#client.toJSON()?.metaData?.uuid || '';
@@ -79,6 +81,9 @@ class SkyflowContainer {
     this.skyflowFrameControllerName = iframe.id;
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
+    this.frameId = iframe.id;
+    console.log('SkyflowContainer is inside the shadow DOM: first method', this.detectShadowRootByElement());
+    console.log('SkyflowContainer is inside the shadow DOM: second method', this.detectShadowRoot());
     bus
       .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, (data, callback) => {
@@ -102,6 +107,67 @@ class SkyflowContainer {
       ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_CONTROLLER_READY
         + this.#containerId, () => {}, true, window, messageHandler,
     );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  detectShadowRoot(): boolean {
+    let parentElement = window.frameElement || document.body;
+    let ancestorLevel = 0;
+
+    while (parentElement && ancestorLevel < 5) {
+      const root = parentElement.getRootNode();
+
+      if (Object.prototype.toString.call(root) === '[object ShadowRoot]') {
+        return true;
+      }
+
+      const nextParent = root.getRootNode();
+      if (nextParent instanceof HTMLElement) {
+        parentElement = nextParent;
+      }
+      // eslint-disable-next-line @typescript-eslint/indent
+      ancestorLevel += 1;
+    }
+    return false;
+  }
+
+  detectShadowRootByElement(): boolean {
+    try {
+      // Get the iframe element from document
+      const iframe = document.getElementById(this.frameId) as HTMLIFrameElement;
+      if (!iframe) {
+        return false;
+      }
+
+      let currentNode: Node | null = iframe;
+      let level = 0;
+
+      while (currentNode && level < 5) {
+        const root = currentNode.getRootNode();
+        const parentNode = currentNode.parentNode;
+
+        // Check if parent is a shadow root
+        if (parentNode instanceof ShadowRoot
+            || Object.prototype.toString.call(parentNode) === '[object ShadowRoot]') {
+          return true;
+        }
+
+        // Move up to the next parent
+        if (root instanceof ShadowRoot) {
+          currentNode = root.host;
+        } else if (parentNode) {
+          currentNode = parentNode;
+        } else {
+          break;
+        }
+
+        level += 1;
+      }
+
+      return false;
+    } catch (error) {
+      return false;
+    }
   }
 
   detokenize(detokenizeInput: IDetokenizeInput): Promise<DetokenizeResponse> {
