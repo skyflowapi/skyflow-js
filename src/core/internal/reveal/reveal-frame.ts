@@ -183,6 +183,35 @@ class RevealFrame {
       callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
     });
 
+    this.eventWrapper.emit(
+      ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+      { height: this.#elementContainer.scrollHeight, name: this.#name },
+      undefined,
+      true,
+      '',
+      window,
+      true,
+    );
+
+    const handleHeightWithWindow = (event: MessageEvent) => {
+      if (event.data && event.data.type === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name) {
+        if (event.data.data && event.data.data.height) {
+          this.eventWrapper.emit(
+            ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+            { height: event.data.data.height, name: this.#name },
+            undefined,
+            true,
+            '',
+            window,
+            true,
+          );
+        }
+      }
+    };
+
+    this.eventWrapper.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+      () => {}, true, window, handleHeightWithWindow);
+
     const sub = (data) => {
       if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
         const responseValue = data[this.#record.token] as string;
@@ -212,13 +241,49 @@ class RevealFrame {
       }
       // this.updateDataView();
     };
+    const sub2 = (responseUrl) => {
+      if (responseUrl.iframeName === this.#name) {
+        if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
+          this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
+          if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
+            this.#dataElememt.innerText = this.#record.altText;
+          }
+          this.eventWrapper.emit(
+            ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+            { height: this.#elementContainer.scrollHeight, name: this.#name },
+            undefined,
+            true,
+            '',
+            window,
+            true,
+          );
+          bus
+            .emit(
+              ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+              {
+                height: this.#elementContainer.scrollHeight,
+              }, () => {
+              },
+            );
+        } else {
+          const ext = this.getExtension(responseUrl.url);
+          this.addFileRender(responseUrl.url, ext);
+        }
+      }
+    };
+
     const handlerReveal = (event: MessageEvent) => {
       if (event.data
         && event.data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_WINDOW_CLIENT_RESPONSES
          + this.#containerId) {
         sub(event.data.data);
+      } else if (event.data
+        && event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_CALL_WINDOW_CLIENT_RESPONSES
+         + this.#name) {
+        sub2(event.data.data);
       }
     };
+
     window.addEventListener('message', handlerReveal);
     this.eventWrapper.on(
       ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_WINDOW_CLIENT_RESPONSES
@@ -241,33 +306,16 @@ class RevealFrame {
       });
     this.updateRevealElementOptions();
 
-    const sub2 = (responseUrl) => {
-      if (responseUrl.iframeName === this.#name) {
-        if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
-          this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
-          if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
-            this.#dataElememt.innerText = this.#record.altText;
-          }
-          bus
-            .emit(
-              ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
-              {
-                height: this.#elementContainer.scrollHeight,
-              }, () => {
-              },
-            );
-        } else {
-          const ext = this.getExtension(responseUrl.url);
-          this.addFileRender(responseUrl.url, ext);
-        }
-      }
-    };
     bus
       .target(window.location.origin)
       .on(
         ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#name,
         sub2,
       );
+    this.eventWrapper.on(
+      ELEMENT_EVENTS_TO_IFRAME.RENDER_CALL_WINDOW_CLIENT_RESPONSES
+       + this.#name, () => {}, true, window, handlerReveal,
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this
