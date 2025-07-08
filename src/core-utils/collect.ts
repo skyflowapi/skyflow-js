@@ -6,7 +6,6 @@ import omit from 'lodash/omit';
 import get from 'lodash/get';
 import Client from '../client';
 import SkyflowError from '../libs/skyflow-error';
-import { getAccessToken } from '../utils/bus-events';
 import {
   IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
   MessageType, LogLevel,
@@ -226,55 +225,57 @@ export const updateRecordsBySkyflowID = async (
   skyflowIdRecords,
   client: Client,
   options,
+  bearerToken,
 ) => new Promise((rootResolve, rootReject) => {
   let updateResponseSet: Promise<any>[];
-  const clientId = client.toJSON()?.metaData?.uuid || '';
-  getAccessToken(clientId).then((authToken) => {
-    updateResponseSet = skyflowIdRecords.updateRecords.map(
-      (skyflowIdRecord: IInsertRecord) => new Promise((resolve, reject) => {
-        updateRecordsInVault(skyflowIdRecord, client, authToken as string, options)
-          .then((resolvedResult: any) => {
-            const resp = constructFinalUpdateRecordResponse(
-              resolvedResult, options?.tokens, skyflowIdRecord,
-            );
-            resolve(resp);
-          },
-          (rejectedResult) => {
-            let errorResponse = rejectedResult;
-            if (rejectedResult && rejectedResult.error) {
-              errorResponse = {
-                error: {
-                  code: rejectedResult?.error?.code,
-                  description: rejectedResult?.error?.description,
-                },
-              };
-            }
-            printLog(rejectedResult.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
-            reject(errorResponse);
-          }).catch((error) => {
-            reject(error);
-          });
-      }),
-    );
-    Promise.allSettled(updateResponseSet).then((resultSet: any) => {
-      const recordsResponse: any[] = [];
-      const errorsResponse: any[] = [];
-      resultSet.forEach((result: { status: string; value: any; reason?: any; }) => {
-        if (result.status === 'fulfilled') {
-          recordsResponse.push(result.value);
-        } else {
-          errorsResponse.push(result.reason);
-        }
-      });
-
-      if (errorsResponse.length === 0) {
-        rootResolve(recordsResponse);
-      } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
-      else rootReject({ records: recordsResponse, errors: errorsResponse });
+  // const clientId = client.toJSON()?.metaData?.uuid || '';
+  // getAccessToken(clientId).then((authToken) => {
+  // eslint-disable-next-line prefer-const
+  updateResponseSet = skyflowIdRecords.updateRecords.map(
+    (skyflowIdRecord: IInsertRecord) => new Promise((resolve, reject) => {
+      updateRecordsInVault(skyflowIdRecord, client, bearerToken as string, options)
+        .then((resolvedResult: any) => {
+          const resp = constructFinalUpdateRecordResponse(
+            resolvedResult, options?.tokens, skyflowIdRecord,
+          );
+          resolve(resp);
+        },
+        (rejectedResult) => {
+          let errorResponse = rejectedResult;
+          if (rejectedResult && rejectedResult.error) {
+            errorResponse = {
+              error: {
+                code: rejectedResult?.error?.code,
+                description: rejectedResult?.error?.description,
+              },
+            };
+          }
+          printLog(rejectedResult.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
+          reject(errorResponse);
+        }).catch((error) => {
+          reject(error);
+        });
+    }),
+  );
+  Promise.allSettled(updateResponseSet).then((resultSet: any) => {
+    const recordsResponse: any[] = [];
+    const errorsResponse: any[] = [];
+    resultSet.forEach((result: { status: string; value: any; reason?: any; }) => {
+      if (result.status === 'fulfilled') {
+        recordsResponse.push(result.value);
+      } else {
+        errorsResponse.push(result.reason);
+      }
     });
-  }).catch((err) => {
-    rootReject(err);
+
+    if (errorsResponse.length === 0) {
+      rootResolve(recordsResponse);
+    } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
+    else rootReject({ records: recordsResponse, errors: errorsResponse });
   });
+  // }).catch((err) => {
+  //   rootReject(err);
+  // });
 });
 
 export const checkForElementMatchRule = (validations: IValidationRule[]) => {

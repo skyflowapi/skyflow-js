@@ -41,6 +41,7 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
+import EventWrapper from '../../../utils/bus-events/event-wrapper';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
@@ -94,6 +95,8 @@ class CollectElement extends SkyflowElement {
 
   #isUpdateCalled = false;
 
+  #eventWrapper: EventWrapper;
+
   constructor(
     elementId: string,
     elementGroup: any,
@@ -124,6 +127,8 @@ class CollectElement extends SkyflowElement {
     this.elementType = this.#isSingleElementAPI
       ? this.#elements[0].elementType
       : 'group';
+
+    this.#eventWrapper = new EventWrapper(container.shadowDom);
 
     initalizeMetricObject(metaData, elementId);
     this.#states = [];
@@ -181,9 +186,9 @@ class CollectElement extends SkyflowElement {
       });
     }
 
-    this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED
-      + formatFrameNameToId(this.#iframe.name), (data) => {
-      if (data.name === this.#elements[0].elementName) {
+    const shadowDomMountedCallback = (event) => {
+      const eventData = event?.data?.data;
+      if (eventData && eventData.name === this.#elements[0].elementName) {
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
         this.#elements[0].isMounted = true;
@@ -193,7 +198,26 @@ class CollectElement extends SkyflowElement {
             this.#iframe.setIframeHeight(payload.height);
           });
       }
-    });
+    };
+
+    if (container.shadowDom) {
+      // eslint-disable-next-line max-len
+      this.#eventWrapper.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + formatFrameNameToId(this.#iframe.name), () => {}, true, window, shadowDomMountedCallback);
+    } else {
+      this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+      + formatFrameNameToId(this.#iframe.name), (data) => {
+        if (data.name === this.#elements[0].elementName) {
+          updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_END_TIME, Date.now());
+          updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
+          this.#elements[0].isMounted = true;
+          this.#mounted = true;
+          this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+            {}, (payload:any) => {
+              this.#iframe.setIframeHeight(payload.height);
+            });
+        }
+      });
+    }
   }
 
   getID = () => this.#elementId;
