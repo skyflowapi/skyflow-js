@@ -397,7 +397,6 @@ class RevealElement extends SkyflowElement {
        + this.#metaData.uuid) {
       const revealData = event.data.data;
       if (revealData.error) {
-        console.error('Error in renderFile', revealData.error);
         printLog(parameterizedString(
           logs.errorLogs.FAILED_RENDER,
         ), MessageType.ERROR,
