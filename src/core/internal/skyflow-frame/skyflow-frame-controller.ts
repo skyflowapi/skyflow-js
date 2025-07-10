@@ -79,10 +79,7 @@ class SkyflowFrameController {
     const encodedClientDomain = getValueFromName(window.name, 2);
     const clientDomain = getAtobValue(encodedClientDomain);
     this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
-    window.addEventListener('message', (event) => {
-      console.log('SDK controller iframe insde received message:', event.data);
-      // Handle the message if needed
-    });
+
     bus
       .on(
         ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + this.#clientId,

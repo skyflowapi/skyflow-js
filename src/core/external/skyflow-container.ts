@@ -71,19 +71,6 @@ class SkyflowContainer {
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
-    const iframe2 = document.querySelector('iframe[id*="skyflow_controller"]') as HTMLIFrameElement | null;
-    console.log('Found iframe:', iframe2);
-    if (iframe2 && iframe2.contentWindow) {
-      iframe2.contentWindow.postMessage({
-        type: 'collectData1',
-        payload: {
-          cardNumber: '',
-          cvv: '',
-          expiryDate: '',
-          cardHolderName: '',
-        },
-      }, '*');
-    }
 
     bus
       .target(properties.IFRAME_SECURE_ORIGIN)
