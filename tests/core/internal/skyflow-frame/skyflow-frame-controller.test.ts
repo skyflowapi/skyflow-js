@@ -1236,9 +1236,6 @@ describe("Deleting records from the vault", () => {
 
     setTimeout(() => {
       try {
-        console.log("cb2 mock calls ", cb2.mock.calls);
-        console.log("cb2 mock calls 0 ", cb2.mock.calls[0]);
-        console.log("cb2 mock calls 0 0", cb2.mock.calls[0][0]);
         expect(cb2.mock.calls[0][0].records.length).toBe(2);
         expect(cb2.mock.calls[0][0].records[0].deleted).toBeTruthy();
         expect(cb2.mock.calls[0][0].records[1].deleted).toBeTruthy();

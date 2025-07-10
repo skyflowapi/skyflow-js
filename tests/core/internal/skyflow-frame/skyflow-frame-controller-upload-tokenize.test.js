@@ -128,7 +128,6 @@ describe('Uploading files to the vault', () => {
       onCb(data, cb2);
   
       setTimeout(() => {
-        console.log('cb2 mock calls\t', JSON.stringify(cb2.mock.calls[0], null, 2));
         expect(cb2).toHaveBeenCalled();
         expect(cb2.mock.calls[0][0]).toBeDefined();
         expect(cb2.mock.calls[0][0].fileUploadResponse).toBeDefined();
