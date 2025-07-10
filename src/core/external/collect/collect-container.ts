@@ -17,6 +17,7 @@ import {
   CollectResponse,
   ICollectOptions,
   UploadFilesResponse,
+  ContainerOptions,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
@@ -32,11 +33,40 @@ import {
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS, FRAME_ELEMENT,
   COLLECT_TYPES,
+  ElementType,
 } from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
 import EventEmitter from '../../../event-emitter';
 import properties from '../../../properties';
+import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
+
+export interface ICollectElement {
+  elementType: ElementType;
+  elementName: string;
+  name: string;
+  table?: string;
+  column?: string;
+  sensitive?: boolean;
+  replacePattern?: RegExp;
+  mask?: string[];
+  value?: string;
+  isMounted: boolean;
+  [key: string]: unknown;
+}
+
+export interface ElementGroupItem extends CollectElementInput, CollectElementOptions {
+  elementType: ElementType;
+  name?: string;
+  accept?: string[];
+  elementName?: string;
+}
+
+export interface ElementGroup {
+  rows: Array<{
+    elements: Array<ElementGroupItem>;
+  }>;
+}
 
 const CLASS_NAME = 'CollectContainer';
 class CollectContainer extends Container {
@@ -44,11 +74,11 @@ class CollectContainer extends Container {
 
   #elements: Record<string, CollectElement> = {};
 
-  #metaData: any;
+  #metaData: Metadata;
 
-  #context:Context;
+  #context: Context;
 
-  #skyflowElements:any;
+  #skyflowElements: Array<SkyflowElementProps>;
 
   type:string = ContainerType.COLLECT;
 
@@ -58,7 +88,12 @@ class CollectContainer extends Container {
 
   #isSkyflowFrameReady: boolean = false;
 
-  constructor(options, metaData, skyflowElements, context) {
+  constructor(
+    metaData: Metadata,
+    skyflowElements: Array<SkyflowElementProps>,
+    context: Context,
+    options?: ContainerOptions,
+  ) {
     super();
     this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
     this.#containerId = uuid();
@@ -97,35 +132,34 @@ class CollectContainer extends Container {
 
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
-  }) => {
+  }): CollectElement => {
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input.validations);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
-    const elementGroup = {
-      rows: [
-        {
-          elements: [
-            {
-              elementType: input.type,
-              name: input.column,
-              accept: options.allowedFileType,
-              ...input,
-              ...formattedOptions,
-              validations,
-            },
-          ],
-        },
-      ],
+
+    const elementGroup: ElementGroup = {
+      rows: [{
+        elements: [{
+          elementType: input.type,
+          name: input.column,
+          accept: options.allowedFileType,
+          ...input,
+          ...formattedOptions,
+          validations,
+        }],
+      }],
     };
+
     return this.#createMultipleElement(elementGroup, true);
   };
 
   #createMultipleElement = (
-    multipleElements: any,
+    multipleElements: ElementGroup,
     isSingleElementAPI: boolean = false,
-  ) => {
+  ): CollectElement => {
     const elements: any[] = [];
     const tempElements = deepClone(multipleElements);
+
     tempElements.rows.forEach((row) => {
       row.elements.forEach((element) => {
         const options = element;
@@ -362,7 +396,7 @@ class CollectContainer extends Container {
     });
   };
 
-  uploadFiles = (options: ICollectOptions) :Promise<UploadFilesResponse> => {
+  uploadFiles = (options?: ICollectOptions): Promise<UploadFilesResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {
@@ -472,7 +506,7 @@ class CollectContainer extends Container {
       if (!mountedIframeIds.length) return;
 
       this.#removeUnmountedElements(mountedIframeIds);
-    } catch (error) {
+    } catch (error: unknown) {
       printLog(`${error}`, MessageType.LOG, this.#context.logLevel);
     }
   };

@@ -10,10 +10,12 @@ import { getAccessToken } from '../utils/bus-events';
 import {
   IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
   MessageType, LogLevel,
+  InsertResponse,
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
 import IFrameFormElement from '../core/internal/iframe-form';
+import { BatchInsertRequestBody } from '../core/internal/internal-types';
 
 export interface IUpsertOptions{
   table: string,
@@ -35,8 +37,8 @@ export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions>
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
   options: Record<string, any> = { tokens: true },
-) => {
-  const requestBody: any = [];
+): Array<BatchInsertRequestBody> => {
+  const requestBody: Array<BatchInsertRequestBody> = [];
   if (options?.tokens || options === null) {
     records.records.forEach((record, index) => {
       const upsertColumn = getUpsertColumn(record.table, options.upsert);
@@ -74,7 +76,7 @@ export const constructInsertRecordResponse = (
   responseBody: any,
   tokens: boolean,
   records: IInsertRecord[],
-) => {
+): InsertResponse => {
   if (tokens) {
     return {
       records: responseBody.responses
@@ -207,12 +209,12 @@ const updateRecordsInVault = (
   skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'table');
   skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'skyflowID');
   return client.request({
-    body: {
+    body: JSON.stringify({
       record: {
         fields: { ...skyflowIdRecord.fields },
       },
       tokenization: options?.tokens !== undefined ? options.tokens : true,
-    },
+    }),
     requestMethod: 'PUT',
     url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${table}/${skyflowID}`,
     headers: {

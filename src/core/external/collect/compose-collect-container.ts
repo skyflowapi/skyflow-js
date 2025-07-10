@@ -21,6 +21,9 @@ import {
   CollectElementOptions,
   ICollectOptions,
   CollectResponse,
+  InputStyles,
+  ErrorTextStyles,
+  ContainerOptions,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
@@ -38,6 +41,13 @@ import {
 import Container from '../common/container';
 import CollectElement from './collect-element';
 import ComposableElement from './compose-collect-element';
+import { ElementGroup, ElementGroupItem } from './collect-container';
+import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
+
+export interface ComposableElementGroup extends ElementGroup {
+  styles: InputStyles;
+  errorTextStyles: ErrorTextStyles;
+}
 
 const CLASS_NAME = 'CollectContainer';
 class ComposableContainer extends Container {
@@ -45,21 +55,21 @@ class ComposableContainer extends Container {
 
   #elements: Record<string, any> = {};
 
-  #metaData: any;
+  #metaData: Metadata;
 
-  #elementGroup: any = { rows: [] };
+  #elementGroup: ComposableElementGroup = { rows: [], styles: {}, errorTextStyles: {} };
 
-  #elementsList:any = [];
+  #elementsList: Array<ElementGroupItem> = [];
 
   #context:Context;
 
-  #skyflowElements:any;
+  #skyflowElements: Array<SkyflowElementProps>;
 
   #eventEmitter: EventEmitter;
 
   #isMounted: boolean = false;
 
-  #options: any;
+  #options: ContainerOptions;
 
   #containerElement:any;
 
@@ -73,7 +83,12 @@ class ComposableContainer extends Container {
 
   #isSkyflowFrameReady: boolean = false;
 
-  constructor(options, metaData, skyflowElements, context) {
+  constructor(
+    metaData: Metadata,
+    skyflowElements: Array<SkyflowElementProps>,
+    context: Context,
+    options: ContainerOptions,
+  ) {
     super();
     this.#containerId = uuid();
     this.#metaData = {
@@ -114,7 +129,7 @@ class ComposableContainer extends Container {
 
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
-  }) => {
+  }): ComposableElement => {
     validateCollectElementInput(input, this.#context.logLevel);
     const validations = formatValidations(input.validations);
     const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
@@ -139,9 +154,9 @@ class ComposableContainer extends Container {
   };
 
   #createMultipleElement = (
-    multipleElements: any,
+    multipleElements: ComposableElementGroup,
     isSingleElementAPI: boolean = false,
-  ) => {
+  ): ComposableContainer => {
     const elements: any[] = [];
     this.#tempElements = deepClone(multipleElements);
     this.#tempElements.rows.forEach((row) => {
@@ -307,7 +322,7 @@ class ComposableContainer extends Container {
     this.#containerElement.unmount();
   };
 
-  collect = (options: ICollectOptions = { tokens: true }) :Promise<CollectResponse> => {
+  collect = (options: ICollectOptions = { tokens: true }): Promise<CollectResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {
@@ -342,7 +357,7 @@ class ComposableContainer extends Container {
           this.#elementsList.forEach((element) => {
             elementIds.push({
               frameId: this.#tempElements.elementName,
-              elementId: element.elementName,
+              elementId: element.elementName || '',
             });
           });
           bus
@@ -412,7 +427,7 @@ class ComposableContainer extends Container {
         this.#elementsList.forEach((element) => {
           elementIds.push({
             frameId: this.#tempElements.elementName,
-            elementId: element.elementName,
+            elementId: element.elementName || '',
           });
         });
         bus

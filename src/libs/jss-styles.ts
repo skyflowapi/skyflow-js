@@ -6,7 +6,7 @@ import preset from 'jss-preset-default';
 
 jss.setup(preset());
 
-export default function getCssClassesFromJss(styles, name) {
+export default function getCssClassesFromJss(styles, name: string) {
   const createGenerateId = () => (rule) => `SkyflowElement-${name}-${rule.key}`;
   jss.setup({ createGenerateId });
   const cssStyle = jss.createStyleSheet(styles);

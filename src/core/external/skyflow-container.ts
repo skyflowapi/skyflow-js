@@ -57,7 +57,7 @@ class SkyflowContainer {
 
   #context: Context;
 
-  constructor(client, context) {
+  constructor(client: Client, context: Context) {
     this.#client = client;
     this.#containerId = this.#client.toJSON()?.metaData?.uuid || '';
     this.#context = context;
