@@ -41,6 +41,7 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
+import properties from '../../../properties';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
@@ -93,6 +94,8 @@ class CollectElement extends SkyflowElement {
   #readyToMount: boolean = false;
 
   #isUpdateCalled = false;
+
+  #shadowRoot: ShadowRoot | null = null;
 
   constructor(
     elementId: string,
@@ -199,8 +202,14 @@ class CollectElement extends SkyflowElement {
   getID = () => this.#elementId;
 
   mount = (domElement: HTMLElement | string) => {
+    this.#mounted = true;
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
+    }
+    // check if the domElement is a HTML element & shadow root
+    if (domElement instanceof HTMLElement
+      && (domElement as HTMLElement).getRootNode() instanceof ShadowRoot) {
+      this.#shadowRoot = domElement.getRootNode() as ShadowRoot;
     }
     this.resizeObserver = new ResizeObserver(() => {
       this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
@@ -252,6 +261,21 @@ class CollectElement extends SkyflowElement {
         }),
       });
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
+    }
+  };
+
+  getShadowRoot = () => this.#shadowRoot;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  emitEventFromShadowRoot = (eventName: string, options?: Record<string, any>, callback?: any) => {
+    if (this.#shadowRoot) {
+      const iframe = this.#shadowRoot.getElementById(this.#iframe.name) as HTMLIFrameElement;
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          name: eventName,
+          ...options,
+        }, properties.IFRAME_SECURE_ORIGIN);
+      }
     }
   };
 
