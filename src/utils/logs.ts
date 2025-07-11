@@ -4,6 +4,10 @@ Copyright (c) 2022 Skyflow, Inc.
 
 const logs = {
   infoLogs: {
+    TOKENIZE_REQUEST: '%s1 - Creating Tokenization  request body.',
+    TOKENIZE_REQUEST_INSERT: '%s1 - Creating Tokenization insert request body.',
+
+    TOKENIZE_REQUEST_CREATED: '%s1 - Created Tokenization request body successfully.',
     INITIALIZE_CLIENT: '%s1 - Initializing skyflow client.',
     CLIENT_INITIALIZED: '%s1 - Initialized skyflow client successfully.',
 

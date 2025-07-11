@@ -560,8 +560,8 @@ class SkyflowFrameController {
   tokenize = (options) => {
     const id = options.containerId;
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
-    const insertResponseObject: any = {};
-    const updateResponseObject: any = {};
+    const insertRequestObject: any = {};
+    const updateRequestObject: any = {};
     let errorMessage = '';
     for (let i = 0; i < options.elementIds.length; i += 1) {
       const {
@@ -601,77 +601,98 @@ class SkyflowFrameController {
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
     }
 
-    for (let i = 0; i < options.elementIds.length; i += 1) {
-      const {
-        state,
-        value,
-        fieldType,
-        validations,
-        tableName,
-        skyflowID,
-      } = this.getProperties(options.elementIds[i], id);
-
-      if (tableName) {
-        if (
-          fieldType
-      !== ELEMENTS.FILE_INPUT.name
-        ) {
+    try {
+      for (let i = 0; i < options.elementIds.length; i += 1) {
+        const {
+          state,
+          value,
+          fieldType,
+          validations,
+          tableName,
+          skyflowID,
+        } = this.getProperties(options.elementIds[i], id);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.TOKENIZE_REQUEST,
+            CLASS_NAME,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
+        if (tableName) {
           if (
             fieldType
-        === ELEMENTS.checkbox.name
+      !== ELEMENTS.FILE_INPUT.name
           ) {
-            if (insertResponseObject[state.name]) {
-              insertResponseObject[state.name] = `${insertResponseObject[state.name]},${state.value
-              }`;
-            } else {
-              insertResponseObject[state.name] = state.value;
-            }
-          } else if (insertResponseObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
-            if (get(insertResponseObject[tableName], state.name)
+            if (
+              fieldType
+        === ELEMENTS.checkbox.name
+            ) {
+              if (insertRequestObject[state.name]) {
+                insertRequestObject[state.name] = `${insertRequestObject[state.name]},${state.value
+                }`;
+              } else {
+                insertRequestObject[state.name] = state.value;
+              }
+            } else if (insertRequestObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
+              printLog(
+                parameterizedString(
+                  logs.infoLogs.TOKENIZE_REQUEST_INSERT,
+                  CLASS_NAME,
+                ),
+                MessageType.LOG,
+                this.#context.logLevel,
+              );
+              if (get(insertRequestObject[tableName], state.name)
           && !(validations && checkForElementMatchRule(validations))) {
-              return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
-                [state.name, tableName], true));
-            }
-            set(
-              insertResponseObject[tableName],
-              state.name,
-              value,
-            );
-          } else if (skyflowID || skyflowID === '') {
-            if (skyflowID === '' || skyflowID === null) {
-              return Promise.reject(new SkyflowError(
-                SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
-              ));
-            }
-            if (updateResponseObject[skyflowID]) {
+                return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
+                  [state.name, tableName], true));
+              }
               set(
-                updateResponseObject[skyflowID],
+                insertRequestObject[tableName],
                 state.name,
                 value,
               );
+            } else if (skyflowID || skyflowID === '') {
+              if (skyflowID === '' || skyflowID === null) {
+                return Promise.reject(new SkyflowError(
+                  SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
+                ));
+              }
+              if (updateRequestObject[skyflowID]) {
+                set(
+                  updateRequestObject[skyflowID],
+                  state.name,
+                  value,
+                );
+              } else {
+                updateRequestObject[skyflowID] = {};
+                set(
+                  updateRequestObject[skyflowID],
+                  state.name,
+                  value,
+                );
+                set(
+                  updateRequestObject[skyflowID],
+                  'table',
+                  tableName,
+                );
+              }
             } else {
-              updateResponseObject[skyflowID] = {};
+              insertRequestObject[tableName] = {};
               set(
-                updateResponseObject[skyflowID],
+                insertRequestObject[tableName],
                 state.name,
                 value,
               );
-              set(
-                updateResponseObject[skyflowID],
-                'table',
-                tableName,
-              );
             }
-          } else {
-            insertResponseObject[tableName] = {};
-            set(
-              insertResponseObject[tableName],
-              state.name,
-              value,
-            );
           }
         }
       }
+    } catch (error:any) {
+      return Promise.reject({
+        error: error?.message,
+      });
     }
     let finalInsertRequest;
     let finalInsertRecords;
@@ -684,7 +705,7 @@ class SkyflowFrameController {
     let updateDone = false;
     try {
       [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
-        insertResponseObject, updateResponseObject, options,
+        insertRequestObject, updateRequestObject, options,
       );
       finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
     } catch (error:any) {
@@ -692,6 +713,14 @@ class SkyflowFrameController {
         error: error?.message,
       });
     }
+    printLog(
+      parameterizedString(
+        logs.infoLogs.TOKENIZE_REQUEST_CREATED,
+        CLASS_NAME,
+      ),
+      MessageType.LOG,
+      this.#context.logLevel,
+    );
     const client = this.#client;
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
       const clientId = client.toJSON()?.metaData?.uuid || '';
