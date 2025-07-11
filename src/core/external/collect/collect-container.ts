@@ -497,7 +497,7 @@ class CollectContainer extends Container {
           });
           const shadowRootElementsCount = fileElements.reduce((count, element) => {
             if (element.getShadowRoot() !== null
-             && element.elementType !== ELEMENTS.FILE_INPUT.name) {
+             && element.elementType === ELEMENTS.FILE_INPUT.name) {
               return count + 1;
             }
             return count;
@@ -533,6 +533,9 @@ class CollectContainer extends Container {
               if (!data || data?.error) {
                 printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
                 reject(data?.error);
+              } else if (!data || data.errorResponse) {
+                printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data);
               } else {
                 printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                   MessageType.LOG,
@@ -598,7 +601,7 @@ class CollectContainer extends Container {
         });
         const shadowRootElementsCount = fileElements.reduce((count, element) => {
           if (element.getShadowRoot() !== null
-             && element.elementType !== ELEMENTS.FILE_INPUT.name) {
+             && element.elementType === ELEMENTS.FILE_INPUT.name) {
             return count + 1;
           }
           return count;
@@ -637,6 +640,9 @@ class CollectContainer extends Container {
                 if (!data || data?.error) {
                   printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
                   reject(data?.error);
+                } else if (data.errorResponse) {
+                  printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(data);
                 } else {
                   printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
