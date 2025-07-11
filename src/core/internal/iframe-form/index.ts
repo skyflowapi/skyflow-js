@@ -14,6 +14,7 @@ import {
   DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES,
   CardType,
   ELEMENT_TYPES,
+  COLLECT_TYPES,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -164,6 +165,7 @@ export default class IFrameFormElement extends EventEmitter {
     isMatchEqual: this.isMatchEqual,
     tableName: this.tableName,
     skyflowID: this.skyflowID,
+    preserveFileName: this.preserveFileName,
   });
 
   isMatchEqual(index: number, value: string, validation: IValidationRule): boolean {
@@ -580,19 +582,65 @@ export default class IFrameFormElement extends EventEmitter {
       if (
         event.data.name === ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST
           && this.containerId === event.data.containerId) {
-        bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_DATA_REQUEST + this.clientId, {
-          name: this.iFrameName,
-          properties: this.getProperties(),
-          shadowRootElementsCount: event.data.shadowRootElementsCount,
-          type: event.data.type,
-          tokens: event.data.tokens,
-          elementIds: event.data.elementIds,
-          containerId: event.data.containerId,
-          additionalFields: event.data.additionalFields,
-          upsert: event.data.upsert,
-          requestId: event.data.requestId,
-          transId: event.data.transId,
-        });
+        if (event.data && event.data.type === COLLECT_TYPES.FILE_UPLOAD) {
+          if (this.state.value && this.state.value instanceof File) {
+            const reader = new FileReader();
+            const file = this.state.value as File;
+            reader.onload = () => {
+              const buffer = reader.result;
+              bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_DATA_REQUEST + this.clientId, {
+                name: this.iFrameName,
+                properties: {
+                  ...this.getProperties(),
+                  value: {
+                    fileName: this.state.value.name,
+                    fileType: this.state.value.type,
+                    fileSize: this.state.value.size,
+                    fileBuffer: Array.from(new Uint8Array(buffer as ArrayBuffer)),
+                  },
+                },
+                shadowRootElementsCount: event.data.shadowRootElementsCount,
+                type: event.data.type,
+                tokens: event.data.tokens,
+                elementIds: event.data.elementIds,
+                containerId: event.data.containerId,
+                additionalFields: event.data.additionalFields,
+                upsert: event.data.upsert,
+                requestId: event.data.requestId,
+                transId: event.data.transId,
+              });
+            };
+            reader.readAsArrayBuffer(file);
+          } else {
+            bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_DATA_REQUEST + this.clientId, {
+              name: this.iFrameName,
+              properties: this.getProperties(),
+              shadowRootElementsCount: event.data.shadowRootElementsCount,
+              type: event.data.type,
+              tokens: event.data.tokens,
+              elementIds: event.data.elementIds,
+              containerId: event.data.containerId,
+              additionalFields: event.data.additionalFields,
+              upsert: event.data.upsert,
+              requestId: event.data.requestId,
+              transId: event.data.transId,
+            });
+          }
+        } else {
+          bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_DATA_REQUEST + this.clientId, {
+            name: this.iFrameName,
+            properties: this.getProperties(),
+            shadowRootElementsCount: event.data.shadowRootElementsCount,
+            type: event.data.type,
+            tokens: event.data.tokens,
+            elementIds: event.data.elementIds,
+            containerId: event.data.containerId,
+            additionalFields: event.data.additionalFields,
+            upsert: event.data.upsert,
+            requestId: event.data.requestId,
+            transId: event.data.transId,
+          });
+        }
       }
     });
     bus

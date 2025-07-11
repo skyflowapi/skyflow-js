@@ -298,6 +298,19 @@ class SkyflowFrameController {
                 this.#collectCallbacks[data.transId](error);
                 delete this.#collectCallbacks[data.transId];
               });
+          } else if (data.type === COLLECT_TYPES.FILE_UPLOAD) {
+            printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
+            MessageType.LOG, this.#context.logLevel);
+            this.parallelUploadFiles(data)
+              .then((response) => {
+                this.#collectCallbacks[data.transId](response);
+                delete this.#collectCallbacks[data.transId];
+              })
+              .catch((error) => {
+                this.#collectCallbacks[data.transId](error);
+                delete this.#collectCallbacks[data.transId];
+              });
           }
         }
       });
@@ -794,16 +807,25 @@ class SkyflowFrameController {
     const promises: Promise<unknown>[] = [];
     for (let i = 0; i < options.elementIds.length; i += 1) {
       let res: Promise<unknown>;
-      const Frame = window.parent.frames[`${options.elementIds[i]}:${id}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`];
-      const inputElement = Frame.document
-        .getElementById(options.elementIds[i]);
-      if (inputElement) {
-        if (
-          inputElement.iFrameFormElement.fieldType
-          === ELEMENTS.FILE_INPUT.name
-        ) {
-          res = this.uploadFiles(inputElement.iFrameFormElement);
+      if (options.elementIds[i] && options.elementIds[i].shadowRoot) {
+        if (options.elementIds[i].elementType === ELEMENTS.FILE_INPUT.name) {
+          const fileElement = this.#map[options.elementIds[i].elementId];
+          res = this.uploadFiles(fileElement);
           promises.push(res);
+        }
+      } else {
+        const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${id}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`];
+
+        const inputElement = Frame.document
+          .getElementById(options.elementIds[i].elementId);
+        if (inputElement) {
+          if (
+            inputElement.iFrameFormElement.fieldType
+          === ELEMENTS.FILE_INPUT.name
+          ) {
+            res = this.uploadFiles(inputElement.iFrameFormElement);
+            promises.push(res);
+          }
         }
       }
     }
@@ -839,7 +861,14 @@ class SkyflowFrameController {
     const {
       state, tableName, skyflowID, onFocusChange, preserveFileName,
     } = fileElement;
-
+    if (fileElement.value && fileElement.value !== undefined && fileElement.value !== null && fileElement.value !== '') {
+      const reconvertedFile = new File(
+        [new Blob([new Uint8Array(fileElement.value.fileBuffer).buffer])],
+        fileElement.value.fileName,
+        { type: fileElement.value.fileType },
+      );
+      state.value = reconvertedFile;
+    }
     if (state.isRequired) {
       onFocusChange(false);
     }
