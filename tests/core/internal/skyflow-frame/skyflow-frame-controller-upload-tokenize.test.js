@@ -8,6 +8,7 @@ import * as busEvents from '../../../../src/utils/bus-events';
 import { LogLevel, Env } from '../../../../src/utils/common';
 import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
 import SkyflowError from '../../../../src/libs/skyflow-error';
+import { get } from 'lodash';
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();
 const emit = jest.fn();
@@ -432,7 +433,45 @@ describe('SkyflowFrameController - tokenize function', () => {
     targetSpy.mockReturnValue({
       on,
     });
-
+  global.window = Object.create({}, {
+    parent: {
+      get: () => ({
+        frames: {
+        'frameId:containerId:ERROR:1234': {
+          document: {
+            getElementById: jest.fn(() => testValue),
+          },
+        },
+        'frameId2:containerId:ERROR:1234': {
+          document: {
+            getElementById: jest.fn(() => testValue2),
+          },
+        },
+      },
+      }),
+      configurable: true,
+      frames: {
+        'frameId:containerId:ERROR:1234': {
+          document: {
+            getElementById: jest.fn(() => testValue),
+          },
+        },
+        'frameId2:containerId:ERROR:1234': {
+          document: {
+            getElementById: jest.fn(() => testValue2),
+          },
+        },
+      },
+    },
+    addEventListener: {
+      value: jest.fn(),
+      configurable: true
+    },
+    name: {
+      value: 'test:containerId:1234',
+      configurable: true
+    }
+  });
     testValue = {
       iFrameFormElement: {
         fieldType: 'TEXT_INPUT',
@@ -449,6 +488,21 @@ describe('SkyflowFrameController - tokenize function', () => {
         tableName: 'test-table-name',
         onFocusChange: jest.fn(),
         getUnformattedValue: jest.fn(() => 'unformatted-value'),
+        getProperties: jest.fn(() => ({
+          fieldType: 'TEXT_INPUT',
+          state: {
+            value: 'test-value',
+            isFocused: false,
+            isValid: true,
+            isEmpty: false,
+            isComplete: true,
+            name: 'test-name',
+            isRequired: true,
+            isTouched: false,
+          },
+          onFocusChange: jest.fn(),
+          tableName: 'test-table-name',
+        })),
       },
     };
     testValue2 = {
@@ -468,6 +522,22 @@ describe('SkyflowFrameController - tokenize function', () => {
         skyflowID: 'id',
         onFocusChange: jest.fn(),
         getUnformattedValue: jest.fn(() => 'unformatted-value2'),
+        getProperties: jest.fn(() => ({
+          fieldType: 'TEXT_INPUT',
+          state: {
+            value: 'test-value2',
+            isFocused: false,
+            isValid: true,
+            isEmpty: false,
+            isComplete: true,
+            name: 'test-name2',
+            isRequired: true,
+            isTouched: false,
+          },
+          tableName: 'test-table-name2',
+          skyflowID: 'id',
+          onFocusChange: jest.fn(),
+        })),
       },
     };
 
@@ -484,6 +554,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     jest.restoreAllMocks();
     jest.resetModules();
     delete window.parent.frames;
+        delete global.window;
     if (windowSpy) {
       windowSpy.mockRestore();
     }
@@ -493,7 +564,7 @@ describe('SkyflowFrameController - tokenize function', () => {
   test('should fail tokenize when client is null', async () => {
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },
@@ -538,12 +609,12 @@ describe('SkyflowFrameController - tokenize function', () => {
   test('should tokenize data successfully', async () => {
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },
         },
-        'frameId2:containerId:ERROR:': {
+        'frameId2:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue2),
           },
@@ -617,12 +688,12 @@ describe('SkyflowFrameController - tokenize function', () => {
   test('should tokenize data successfully case 2', async () => {
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },
         },
-        'frameId2:containerId:ERROR:': {
+        'frameId2:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue2),
           },
@@ -697,7 +768,7 @@ describe('SkyflowFrameController - tokenize function', () => {
   test('should tokenize data successfully case 3', async () => {
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId2:containerId:ERROR:': {
+        'frameId2:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue2),
           },
@@ -769,7 +840,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     testValue2.iFrameFormElement.skyflowID = '';
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId2:containerId:ERROR:': {
+        'frameId2:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue2),
           },
@@ -810,7 +881,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     testValue2.iFrameFormElement.skyflowID = null;
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId2:containerId:ERROR:': {
+        'frameId2:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue2),
           },
@@ -853,7 +924,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     testValue2.iFrameFormElement.state.isRequired = false;
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId2:containerId:ERROR:': {
+        'frameId2:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue2),
           },
@@ -893,7 +964,7 @@ describe('SkyflowFrameController - tokenize function', () => {
   test('should tokenize data partial successfully', async () => {
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },
@@ -947,7 +1018,7 @@ describe('SkyflowFrameController - tokenize function', () => {
   test('should tokenize data partial successfully case 2', async () => {
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },
@@ -1021,7 +1092,7 @@ describe('SkyflowFrameController - tokenize function', () => {
   
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },
@@ -1082,10 +1153,10 @@ describe('SkyflowFrameController - tokenize function', () => {
     testValue.iFrameFormElement.skyflowID = 'test-id'
       windowSpy.mockImplementation(()=>({
         frames:{
-          'frame1:container123:ERROR:':{document:{
+          'frame1:container123:ERROR:1234':{document:{
               getElementById:()=>(testValue)
           }},
-          'frame2:container123:ERROR:':{document:{
+          'frame2:container123:ERROR:1234':{document:{
               getElementById:()=>(testValue)
           }}
         }
@@ -1140,7 +1211,7 @@ describe('SkyflowFrameController - tokenize function', () => {
       testValue.iFrameFormElement.fieldType = 'checkbox';
       windowSpy.mockImplementation(() => ({
         frames: {
-          'frameId:containerId:ERROR:': {
+          'frameId:containerId:ERROR:1234': {
             document: {
               getElementById: jest.fn(() => testValue),
             },
@@ -1212,7 +1283,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     testValue.iFrameFormElement.fieldType = 'textarea';
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },
@@ -1292,7 +1363,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     testValue.iFrameFormElement.isMatchEqual = jest.fn(() => true);
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },
@@ -1365,7 +1436,7 @@ describe('SkyflowFrameController - tokenize function', () => {
       testValue.iFrameFormElement.doesClientHasError = true;
       windowSpy.mockImplementation(() => ({
         frames: {
-          'frameId:containerId:ERROR:': {
+          'frameId:containerId:ERROR:1234': {
             document: {
               getElementById: jest.fn(() => testValue),
             },
@@ -1419,7 +1490,7 @@ describe('SkyflowFrameController - tokenize function', () => {
       testValue.iFrameFormElement.doesClientHasError = false;
       windowSpy.mockImplementation(() => ({
         frames: {
-          'frameId:containerId:ERROR:': {
+          'frameId:containerId:ERROR:1234': {
             document: {
               getElementById: jest.fn(() => testValue),
             },
@@ -1474,7 +1545,7 @@ describe('SkyflowFrameController - tokenize function', () => {
       testValue.iFrameFormElement.doesClientHasError = false;
       windowSpy.mockImplementation(() => ({
         frames: {
-          'frameId:containerId:ERROR:': {
+          'frameId:containerId:ERROR:1234': {
             document: {
               getElementById: jest.fn(() => testValue),
             },
@@ -1528,7 +1599,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     testValue.iFrameFormElement.fieldType = 'textarea';
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },
@@ -1578,7 +1649,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     testValue.iFrameFormElement.skyflowID = 'test-skyflow-id';
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },
@@ -1628,7 +1699,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     testValue.iFrameFormElement.skyflowID = undefined;
     windowSpy.mockImplementation(() => ({
       frames: {
-        'frameId:containerId:ERROR:': {
+        'frameId:containerId:ERROR:1234': {
           document: {
             getElementById: jest.fn(() => testValue),
           },

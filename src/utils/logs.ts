@@ -4,6 +4,10 @@ Copyright (c) 2022 Skyflow, Inc.
 
 const logs = {
   infoLogs: {
+    TOKENIZE_REQUEST: '%s1 - Creating Tokenization  request body.',
+    TOKENIZE_REQUEST_INSERT: '%s1 - Creating Tokenization insert request body.',
+
+    TOKENIZE_REQUEST_CREATED: '%s1 - Created Tokenization request body successfully.',
     INITIALIZE_CLIENT: '%s1 - Initializing skyflow client.',
     CLIENT_INITIALIZED: '%s1 - Initialized skyflow client successfully.',
 
@@ -91,6 +95,7 @@ const logs = {
     VALIDATE_GET_BY_ID_INPUT: '%s1 - Validating getByID input.',
   },
   errorLogs: {
+    FRAME_COLLECT_EMIT_TIMEOUT: 'Collect frame emit timeout. Make sure to Emit all elements events before invoking \'collect\' function.',
     NO_ELEMENTS_IN_COLLECT: 'Validation error. No elements found in collect container',
     NO_ELEMENTS_IN_COMPOSABLE: 'Validation error. No elements found in composable container',
     NO_ELEMENTS_IN_REVEAL: 'Validation error. No elements found in reveal container',

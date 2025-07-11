@@ -17,6 +17,7 @@ import {
   ELEMENT_TYPES,
   EVENT_TYPES,
   REVEAL_TYPES,
+  DEFAULT_FILE_RENDER_ERROR,
 } from '../../constants';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
@@ -64,6 +65,8 @@ class RevealElement extends SkyflowElement {
 
   #isSkyflowFrameReady: boolean = false;
 
+  #shadowRoot: ShadowRoot | null = null;
+
   constructor(record: IRevealElementInput,
     options: IRevealElementOptions = {},
     metaData: any, container: any, elementId: string, context: Context) {
@@ -101,9 +104,27 @@ class RevealElement extends SkyflowElement {
     return this.#elementId;
   }
 
+  getShadowRoot = () => this.#shadowRoot;
+
+  emitEventFromShadowRoot = (eventName: string, options?: Record<string, any>) => {
+    if (this.#shadowRoot) {
+      const iframe = this.#shadowRoot.getElementById(this.#iframe.name) as HTMLIFrameElement;
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          name: eventName,
+          ...options,
+        }, properties.IFRAME_SECURE_ORIGIN);
+      }
+    }
+  };
+
   mount(domElementSelector: HTMLElement | string) {
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
+    }
+    if (domElementSelector instanceof HTMLElement
+      && (domElementSelector as HTMLElement).getRootNode() instanceof ShadowRoot) {
+      this.#shadowRoot = domElementSelector.getRootNode() as ShadowRoot;
     }
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.DIV_ID, domElementSelector);
     if (
@@ -154,7 +175,10 @@ class RevealElement extends SkyflowElement {
           }
           if (Object.prototype.hasOwnProperty.call(this.#recordData, 'skyflowID')) {
             bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-              {}, (payload:any) => {
+              {
+                height: this.#iframe.container?.scrollHeight || 0,
+                name: this.#iframe.name,
+              }, (payload:any) => {
                 this.#iframe.setIframeHeight(payload.height);
               });
           }
@@ -189,6 +213,7 @@ class RevealElement extends SkyflowElement {
                 records: this.#recordData,
                 containerId: this.#containerId,
                 iframeName: this.#iframe.name,
+                shadowRoot: this.getShadowRoot() !== null,
               },
               (revealData: any) => {
                 if (revealData.errors) {
@@ -199,6 +224,15 @@ class RevealElement extends SkyflowElement {
                   if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
                     this.setAltText(altText);
                   }
+                  if (this.getShadowRoot() !== null) {
+                    this.emitEventFromShadowRoot(
+                      ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#iframe.name,
+                      {
+                        error: DEFAULT_FILE_RENDER_ERROR,
+                        iframeName: this.#iframe.name,
+                      },
+                    );
+                  }
                   reject(formatForRenderClient(revealData, this.#recordData.column as string));
                 } else {
                   printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
@@ -207,6 +241,15 @@ class RevealElement extends SkyflowElement {
                   printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
                     CLASS_NAME, this.#recordData.skyflowID),
                   MessageType.LOG, this.#context.logLevel);
+                  if (this.getShadowRoot() !== null) {
+                    this.emitEventFromShadowRoot(
+                      ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#iframe.name,
+                      {
+                        iframeName: this.#iframe.name,
+                        url: revealData.fields[this.#recordData.column as string],
+                      },
+                    );
+                  }
                   resolve(formatForRenderClient(revealData, this.#recordData.column as string));
                 }
               },
