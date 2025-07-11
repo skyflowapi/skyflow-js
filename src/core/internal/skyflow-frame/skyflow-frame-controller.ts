@@ -79,7 +79,6 @@ class SkyflowFrameController {
     const encodedClientDomain = getValueFromName(window.name, 2);
     const clientDomain = getAtobValue(encodedClientDomain);
     this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
-
     bus
       .on(
         ELEMENT_EVENTS_TO_IFRAME.PUSH_EVENT + this.#clientId,
@@ -411,7 +410,7 @@ class SkyflowFrameController {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
           MessageType.LOG, this.#context.logLevel);
-          this.renderFile(data.records, data.iframeName).then(
+          this.renderFile(data.records, data.iframeName, data.shadowRoot as boolean).then(
             (resolvedResult) => {
               callback(
                 resolvedResult,
@@ -499,7 +498,7 @@ class SkyflowFrameController {
     });
   }
 
-  renderFile(data, iframeName) {
+  renderFile(data, iframeName, shadowRoot = false) {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowID(data, this.#client)
@@ -508,31 +507,38 @@ class SkyflowFrameController {
             if (resolvedResult.fields && data.column) {
               url = resolvedResult.fields[data.column];
             }
-            bus
-              .target(properties.IFRAME_SECURE_SITE)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
-                + iframeName,
-                {
-                  url,
-                  iframeName,
-                },
-              );
+            if (shadowRoot) {
+              resolve(resolvedResult);
+            } else {
+              bus
+                .target(properties.IFRAME_SECURE_SITE)
+                .emit(
+                  ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + iframeName,
+                  {
+                    url,
+                    iframeName,
+                  },
+                );
 
-            resolve(resolvedResult);
+              resolve(resolvedResult);
+            }
           },
           (rejectedResult) => {
-            bus
-              .target(properties.IFRAME_SECURE_SITE)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
+            if (data.shadowRoot) {
+              reject(rejectedResult);
+            } else {
+              bus
+                .target(properties.IFRAME_SECURE_SITE)
+                .emit(
+                  ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
                 + iframeName,
-                {
-                  error: DEFAULT_FILE_RENDER_ERROR,
-                  iframeName,
-                },
-              );
-            reject(rejectedResult);
+                  {
+                    error: DEFAULT_FILE_RENDER_ERROR,
+                    iframeName,
+                  },
+                );
+              reject(rejectedResult);
+            }
           });
       } catch (err) {
         reject(err);

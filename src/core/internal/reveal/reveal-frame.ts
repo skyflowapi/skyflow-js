@@ -243,6 +243,14 @@ class RevealFrame {
         }
       }
     };
+    window.addEventListener('message', (event) => {
+      if (event.origin === this.#clientDomain) {
+        if (event.data && event.data.name === ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
+           + this.#name) {
+          sub2(event.data);
+        }
+      }
+    });
     bus
       .target(window.location.origin)
       .on(
