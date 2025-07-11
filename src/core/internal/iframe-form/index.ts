@@ -14,6 +14,7 @@ import {
   DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES,
   CardType,
   ELEMENT_TYPES,
+  COLLECT_TYPES,
 } from '../../constants';
 import EventEmitter from '../../../event-emitter';
 import regExFromString from '../../../libs/regex';
@@ -113,10 +114,16 @@ export default class IFrameFormElement extends EventEmitter {
 
   blockEmptyFiles: boolean = false;
 
+  containerId: string;
+
+  clientId: string;
+
   constructor(name: string, label: string, metaData, context: Context, skyflowID?: string) {
     super();
     const frameValues = name.split(':');
     const fieldType = frameValues[1];
+    this.containerId = window.name.split(':')[3] || '';
+    this.clientId = metaData.uuid;
     // const tempfield = atob(frameValues[2]);
 
     // const removeAfter = tempfield.indexOf(':');
@@ -144,6 +151,22 @@ export default class IFrameFormElement extends EventEmitter {
     this.state.isRequired = metaData.isRequired;
     this.collectBusEvents();
   }
+
+  getProperties = () => ({
+    state: this.state,
+    value: this.getUnformattedValue(),
+    fieldType: this.fieldType,
+    doesClientHasError: this.doesClientHasError,
+    clientErrorText: this.clientErrorText,
+    errorText: this.errorText,
+    onFocusChange: this.onFocusChange,
+    setValue: this.setValue,
+    validations: this.validations,
+    isMatchEqual: this.isMatchEqual,
+    tableName: this.tableName,
+    skyflowID: this.skyflowID,
+    preserveFileName: this.preserveFileName,
+  });
 
   isMatchEqual(index: number, value: string, validation: IValidationRule): boolean {
     try {
@@ -555,6 +578,71 @@ export default class IFrameFormElement extends EventEmitter {
 
   // on client force focus
   collectBusEvents = () => {
+    window.addEventListener('message', (event) => {
+      if (
+        event.data.name === ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST
+          && this.containerId === event.data.containerId) {
+        if (event.data && event.data.type === COLLECT_TYPES.FILE_UPLOAD) {
+          if (this.state.value && this.state.value instanceof File) {
+            const reader = new FileReader();
+            const file = this.state.value as File;
+            reader.onload = () => {
+              const buffer = reader.result;
+              bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_DATA_REQUEST + this.clientId, {
+                name: this.iFrameName,
+                properties: {
+                  ...this.getProperties(),
+                  value: {
+                    fileName: this.state.value.name,
+                    fileType: this.state.value.type,
+                    fileSize: this.state.value.size,
+                    fileBuffer: Array.from(new Uint8Array(buffer as ArrayBuffer)),
+                  },
+                },
+                shadowRootElementsCount: event.data.shadowRootElementsCount,
+                type: event.data.type,
+                tokens: event.data.tokens,
+                elementIds: event.data.elementIds,
+                containerId: event.data.containerId,
+                additionalFields: event.data.additionalFields,
+                upsert: event.data.upsert,
+                requestId: event.data.requestId,
+                transId: event.data.transId,
+              });
+            };
+            reader.readAsArrayBuffer(file);
+          } else {
+            bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_DATA_REQUEST + this.clientId, {
+              name: this.iFrameName,
+              properties: this.getProperties(),
+              shadowRootElementsCount: event.data.shadowRootElementsCount,
+              type: event.data.type,
+              tokens: event.data.tokens,
+              elementIds: event.data.elementIds,
+              containerId: event.data.containerId,
+              additionalFields: event.data.additionalFields,
+              upsert: event.data.upsert,
+              requestId: event.data.requestId,
+              transId: event.data.transId,
+            });
+          }
+        } else {
+          bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_DATA_REQUEST + this.clientId, {
+            name: this.iFrameName,
+            properties: this.getProperties(),
+            shadowRootElementsCount: event.data.shadowRootElementsCount,
+            type: event.data.type,
+            tokens: event.data.tokens,
+            elementIds: event.data.elementIds,
+            containerId: event.data.containerId,
+            additionalFields: event.data.additionalFields,
+            upsert: event.data.upsert,
+            requestId: event.data.requestId,
+            transId: event.data.transId,
+          });
+        }
+      }
+    });
     bus
       .target(this.metaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName, (data) => {

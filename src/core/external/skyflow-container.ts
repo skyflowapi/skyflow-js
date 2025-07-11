@@ -71,6 +71,7 @@ class SkyflowContainer {
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
+
     bus
       .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, (data, callback) => {

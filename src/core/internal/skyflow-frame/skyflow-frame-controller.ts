@@ -6,7 +6,6 @@ import get from 'lodash/get';
 import Client from '../../../client';
 import {
   checkForElementMatchRule,
-  checkForValueMatch,
   constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
@@ -52,6 +51,12 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 const set = require('set-value');
 
 const CLASS_NAME = 'SkyflowFrameController';
+
+// declare global {
+//   interface Window {
+//     _pendingCallbacks?: { [key: string]: (data: any) => void };
+//   }
+// }
 class SkyflowFrameController {
   #clientId: string;
 
@@ -60,6 +65,14 @@ class SkyflowFrameController {
   #client!: Client;
 
   #context!: Context;
+
+  #map: Record<string, any> = {};
+
+  #collectTransIds: Record<string, number> = {};
+
+  #collectCallbacks: Record<string, any> = {};
+
+  #shadowRootElementsCount: number = 0;
 
   constructor(clientId: string) {
     this.#clientId = clientId || '';
@@ -246,6 +259,60 @@ class SkyflowFrameController {
           }
         },
       );
+    // eslint-disable-next-line prefer-template
+    bus.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST, (data2: any, callback) => {
+      if (data2.clientId === this.#clientId) {
+        const transid: string = data2.transId || '';
+        if (this.#collectCallbacks[transid] === undefined) {
+          this.#collectCallbacks[transid] = callback;
+        }
+      }
+    });
+    bus
+      .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_DATA_REQUEST + this.#clientId, (data: any) => {
+        this.#shadowRootElementsCount = this.#shadowRootElementsCount + 1;
+        this.#map[data.name] = data.properties;
+
+        if (this.#collectTransIds[data.transId] === undefined) {
+          this.#collectTransIds[data.transId] = 1;
+        } else if (this.#collectTransIds[data.transId] > 0) {
+          this.#collectTransIds[data.transId] = this.#collectTransIds[data.transId] + 1;
+        }
+        if (data.shadowRootElementsCount === this.#collectTransIds[data.transId]) {
+          this.#shadowRootElementsCount = 0;
+          delete this.#collectTransIds[data.transId];
+          if (data.type === COLLECT_TYPES.COLLECT) {
+            printLog(
+              parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+                CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+              MessageType.LOG,
+              this.#context.logLevel,
+            );
+            this.tokenize(data)
+              .then((response) => {
+                this.#collectCallbacks[data.transId](response);
+                delete this.#collectCallbacks[data.transId];
+              })
+              .catch((error) => {
+                this.#collectCallbacks[data.transId](error);
+                delete this.#collectCallbacks[data.transId];
+              });
+          } else if (data.type === COLLECT_TYPES.FILE_UPLOAD) {
+            printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
+              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
+            MessageType.LOG, this.#context.logLevel);
+            this.parallelUploadFiles(data)
+              .then((response) => {
+                this.#collectCallbacks[data.transId](response);
+                delete this.#collectCallbacks[data.transId];
+              })
+              .catch((error) => {
+                this.#collectCallbacks[data.transId](error);
+                delete this.#collectCallbacks[data.transId];
+              });
+          }
+        }
+      });
     bus
       // .target(this.#clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#clientId, {}, (data: any) => {
@@ -343,7 +410,7 @@ class SkyflowFrameController {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
           MessageType.LOG, this.#context.logLevel);
-          this.renderFile(data.records, data.iframeName).then(
+          this.renderFile(data.records, data.iframeName, data.shadowRoot as boolean).then(
             (resolvedResult) => {
               callback(
                 resolvedResult,
@@ -431,7 +498,7 @@ class SkyflowFrameController {
     });
   }
 
-  renderFile(data, iframeName) {
+  renderFile(data, iframeName, shadowRoot = false) {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowID(data, this.#client)
@@ -440,31 +507,38 @@ class SkyflowFrameController {
             if (resolvedResult.fields && data.column) {
               url = resolvedResult.fields[data.column];
             }
-            bus
-              .target(properties.IFRAME_SECURE_SITE)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
-                + iframeName,
-                {
-                  url,
-                  iframeName,
-                },
-              );
+            if (shadowRoot) {
+              resolve(resolvedResult);
+            } else {
+              bus
+                .target(properties.IFRAME_SECURE_SITE)
+                .emit(
+                  ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + iframeName,
+                  {
+                    url,
+                    iframeName,
+                  },
+                );
 
-            resolve(resolvedResult);
+              resolve(resolvedResult);
+            }
           },
           (rejectedResult) => {
-            bus
-              .target(properties.IFRAME_SECURE_SITE)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
+            if (data.shadowRoot) {
+              reject(rejectedResult);
+            } else {
+              bus
+                .target(properties.IFRAME_SECURE_SITE)
+                .emit(
+                  ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
                 + iframeName,
-                {
-                  error: DEFAULT_FILE_RENDER_ERROR,
-                  iframeName,
-                },
-              );
-            reject(rejectedResult);
+                  {
+                    error: DEFAULT_FILE_RENDER_ERROR,
+                    iframeName,
+                  },
+                );
+              reject(rejectedResult);
+            }
           });
       } catch (err) {
         reject(err);
@@ -472,39 +546,53 @@ class SkyflowFrameController {
     });
   }
 
+  getProperties(element: any, containerId: string) {
+    if (element && element.shadowRoot) {
+      return this.#map[element.elementId];
+    }
+    const Frame = window.parent.frames[`${element.frameId}:${containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`];
+    const inputElement = Frame.document
+      .getElementById(element.elementId);
+    const { getProperties } = inputElement?.iFrameFormElement;
+    return getProperties();
+  }
+
   tokenize = (options) => {
     const id = options.containerId;
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
-    const insertResponseObject: any = {};
-    const updateResponseObject: any = {};
+    const insertRequestObject: any = {};
+    const updateRequestObject: any = {};
     let errorMessage = '';
     for (let i = 0; i < options.elementIds.length; i += 1) {
-      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${id}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`];
-      const inputElement = Frame.document
-        .getElementById(options.elementIds[i].elementId);
-      if (inputElement) {
-        if (
-          inputElement.iFrameFormElement.fieldType
-          !== ELEMENTS.FILE_INPUT.name
-        ) {
-          const {
-            state, doesClientHasError, clientErrorText, errorText, onFocusChange, validations,
-            setValue,
-          } = inputElement.iFrameFormElement;
-          if (state.isRequired || !state.isValid) {
-            onFocusChange(false);
-          }
-          if (validations
-            && checkForElementMatchRule(validations)
-            && checkForValueMatch(validations, inputElement.iFrameFormElement)) {
-            setValue(state.value);
-            onFocusChange(false);
-          }
-          if (!state.isValid || !state.isComplete) {
-            if (doesClientHasError) {
-              errorMessage += `${state.name}:${clientErrorText}`;
-            } else { errorMessage += `${state.name}:${errorText} `; }
-          }
+      const {
+        state,
+        fieldType,
+        doesClientHasError,
+        clientErrorText,
+        errorText,
+        onFocusChange,
+        setValue,
+        validations,
+        // isMatchEqual,
+      } = this.getProperties(options.elementIds[i], id);
+
+      if (
+        fieldType
+        !== ELEMENTS.FILE_INPUT.name
+      ) {
+        if (state.isRequired || !state.isValid) {
+          onFocusChange(false);
+        }
+        if (validations
+          && checkForElementMatchRule(validations)) {
+          // && checkForValueMatch(validations, inputElement.iFrameFormElement)) {
+          setValue(state.value);
+          onFocusChange(false);
+        }
+        if (!state.isValid || !state.isComplete) {
+          if (doesClientHasError) {
+            errorMessage += `${state.name}:${clientErrorText}`;
+          } else { errorMessage += `${state.name}:${errorText} `; }
         }
       }
     }
@@ -513,39 +601,57 @@ class SkyflowFrameController {
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
     }
 
-    for (let i = 0; i < options.elementIds.length; i += 1) {
-      const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${id}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`];
-      const inputElement = Frame.document
-        .getElementById(options.elementIds[i].elementId);
-      if (inputElement) {
+    try {
+      for (let i = 0; i < options.elementIds.length; i += 1) {
         const {
-          state, tableName, validations, skyflowID,
-        } = inputElement.iFrameFormElement;
+          state,
+          value,
+          fieldType,
+          validations,
+          tableName,
+          skyflowID,
+        } = this.getProperties(options.elementIds[i], id);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.TOKENIZE_REQUEST,
+            CLASS_NAME,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
         if (tableName) {
           if (
-            inputElement.iFrameFormElement.fieldType
-        !== ELEMENTS.FILE_INPUT.name
+            fieldType
+      !== ELEMENTS.FILE_INPUT.name
           ) {
             if (
-              inputElement.iFrameFormElement.fieldType
-          === ELEMENTS.checkbox.name
+              fieldType
+        === ELEMENTS.checkbox.name
             ) {
-              if (insertResponseObject[state.name]) {
-                insertResponseObject[state.name] = `${insertResponseObject[state.name]},${state.value
+              if (insertRequestObject[state.name]) {
+                insertRequestObject[state.name] = `${insertRequestObject[state.name]},${state.value
                 }`;
               } else {
-                insertResponseObject[state.name] = state.value;
+                insertRequestObject[state.name] = state.value;
               }
-            } else if (insertResponseObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
-              if (get(insertResponseObject[tableName], state.name)
-            && !(validations && checkForElementMatchRule(validations))) {
+            } else if (insertRequestObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
+              printLog(
+                parameterizedString(
+                  logs.infoLogs.TOKENIZE_REQUEST_INSERT,
+                  CLASS_NAME,
+                ),
+                MessageType.LOG,
+                this.#context.logLevel,
+              );
+              if (get(insertRequestObject[tableName], state.name)
+          && !(validations && checkForElementMatchRule(validations))) {
                 return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
                   [state.name, tableName], true));
               }
               set(
-                insertResponseObject[tableName],
+                insertRequestObject[tableName],
                 state.name,
-                inputElement.iFrameFormElement.getUnformattedValue(),
+                value,
               );
             } else if (skyflowID || skyflowID === '') {
               if (skyflowID === '' || skyflowID === null) {
@@ -553,36 +659,40 @@ class SkyflowFrameController {
                   SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
                 ));
               }
-              if (updateResponseObject[skyflowID]) {
+              if (updateRequestObject[skyflowID]) {
                 set(
-                  updateResponseObject[skyflowID],
+                  updateRequestObject[skyflowID],
                   state.name,
-                  inputElement.iFrameFormElement.getUnformattedValue(),
+                  value,
                 );
               } else {
-                updateResponseObject[skyflowID] = {};
+                updateRequestObject[skyflowID] = {};
                 set(
-                  updateResponseObject[skyflowID],
+                  updateRequestObject[skyflowID],
                   state.name,
-                  inputElement.iFrameFormElement.getUnformattedValue(),
+                  value,
                 );
                 set(
-                  updateResponseObject[skyflowID],
+                  updateRequestObject[skyflowID],
                   'table',
                   tableName,
                 );
               }
             } else {
-              insertResponseObject[tableName] = {};
+              insertRequestObject[tableName] = {};
               set(
-                insertResponseObject[tableName],
+                insertRequestObject[tableName],
                 state.name,
-                inputElement.iFrameFormElement.getUnformattedValue(),
+                value,
               );
             }
           }
         }
       }
+    } catch (error:any) {
+      return Promise.reject({
+        error: error?.message,
+      });
     }
     let finalInsertRequest;
     let finalInsertRecords;
@@ -595,7 +705,7 @@ class SkyflowFrameController {
     let updateDone = false;
     try {
       [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
-        insertResponseObject, updateResponseObject, options,
+        insertRequestObject, updateRequestObject, options,
       );
       finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
     } catch (error:any) {
@@ -603,6 +713,14 @@ class SkyflowFrameController {
         error: error?.message,
       });
     }
+    printLog(
+      parameterizedString(
+        logs.infoLogs.TOKENIZE_REQUEST_CREATED,
+        CLASS_NAME,
+      ),
+      MessageType.LOG,
+      this.#context.logLevel,
+    );
     const client = this.#client;
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
       const clientId = client.toJSON()?.metaData?.uuid || '';
@@ -724,16 +842,25 @@ class SkyflowFrameController {
     const promises: Promise<unknown>[] = [];
     for (let i = 0; i < options.elementIds.length; i += 1) {
       let res: Promise<unknown>;
-      const Frame = window.parent.frames[`${options.elementIds[i]}:${id}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`];
-      const inputElement = Frame.document
-        .getElementById(options.elementIds[i]);
-      if (inputElement) {
-        if (
-          inputElement.iFrameFormElement.fieldType
-          === ELEMENTS.FILE_INPUT.name
-        ) {
-          res = this.uploadFiles(inputElement.iFrameFormElement);
+      if (options.elementIds[i] && options.elementIds[i].shadowRoot) {
+        if (options.elementIds[i].elementType === ELEMENTS.FILE_INPUT.name) {
+          const fileElement = this.#map[options.elementIds[i].elementId];
+          res = this.uploadFiles(fileElement);
           promises.push(res);
+        }
+      } else {
+        const Frame = window.parent.frames[`${options.elementIds[i].frameId}:${id}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`];
+
+        const inputElement = Frame.document
+          .getElementById(options.elementIds[i].elementId);
+        if (inputElement) {
+          if (
+            inputElement.iFrameFormElement.fieldType
+          === ELEMENTS.FILE_INPUT.name
+          ) {
+            res = this.uploadFiles(inputElement.iFrameFormElement);
+            promises.push(res);
+          }
         }
       }
     }
@@ -769,7 +896,14 @@ class SkyflowFrameController {
     const {
       state, tableName, skyflowID, onFocusChange, preserveFileName,
     } = fileElement;
-
+    if (fileElement.value && fileElement.value !== undefined && fileElement.value !== null && fileElement.value !== '') {
+      const reconvertedFile = new File(
+        [new Blob([new Uint8Array(fileElement.value.fileBuffer).buffer])],
+        fileElement.value.fileName,
+        { type: fileElement.value.fileType },
+      );
+      state.value = reconvertedFile;
+    }
     if (state.isRequired) {
       onFocusChange(false);
     }

@@ -38,6 +38,11 @@ import CollectElement from './collect-element';
 import EventEmitter from '../../../event-emitter';
 import properties from '../../../properties';
 
+// declare global {
+//   interface Window {
+//     _pendingCallbacks?: Record<string, (responseData: any) => void>;
+//   }
+// }
 const CLASS_NAME = 'CollectContainer';
 class CollectContainer extends Container {
   #containerId: string;
@@ -243,6 +248,7 @@ class CollectContainer extends Container {
 
   collect = (options: ICollectOptions = { tokens: true }): Promise<CollectResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
+    const transId = uuid();
     if (this.#isSkyflowFrameReady) {
       // eslint-disable-next-line @typescript-eslint/no-shadow
       return new Promise((resolve, reject) => {
@@ -254,7 +260,12 @@ class CollectContainer extends Container {
           this.#removeStaleElements();
           const collectElements = Object.values(this.#elements);
           const elementIds = Object.keys(this.#elements)
-            .map((element) => ({ frameId: element, elementId: element }));
+            .map((element, index) => ({
+              frameId: element,
+              elementId: element,
+              shadowRoot: collectElements[index].getShadowRoot() !== null,
+              transId,
+            }));
           collectElements.forEach((element) => {
             if (!element.isMounted()) {
               throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
@@ -270,66 +281,48 @@ class CollectContainer extends Container {
           if (options?.upsert) {
             validateUpsertOptions(options?.upsert);
           }
-          bus
-          // .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
-              {
-                type: COLLECT_TYPES.COLLECT,
-                ...options,
-                tokens: options?.tokens !== undefined ? options.tokens : true,
-                elementIds,
-                containerId: this.#containerId,
-              },
-              (data: any) => {
-                if (!data || data?.error) {
-                  printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                  reject(data?.error);
-                } else {
-                  printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                    MessageType.LOG,
-                    this.#context.logLevel);
-                  resolve(data);
-                }
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
-          MessageType.LOG, this.#context.logLevel);
-        } catch (err: any) {
-          printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
-          reject(err);
-        }
-      });
-    }
-    return new Promise((resolve, reject) => {
-      try {
-        validateInitConfig(this.#metaData.clientJSON.config);
-        if (Object.keys(this.#elements).length === 0) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
-        }
-        this.#removeStaleElements();
-        const collectElements = Object.values(this.#elements);
-        const elementIds = Object.keys(this.#elements)
-          .map((element) => ({ frameId: element, elementId: element }));
-        collectElements.forEach((element) => {
-          if (!element.isMounted()) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
-          }
-          element.isValidElement();
-        });
-        if (Object.prototype.hasOwnProperty.call(options, 'tokens') && !validateBooleanOptions(options.tokens)) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
-        }
-        if (options?.additionalFields) {
-          validateAdditionalFieldsInCollect(options.additionalFields);
-        }
-        if (options?.upsert) {
-          validateUpsertOptions(options?.upsert);
-        }
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
+          const shadowRootElementsCount = collectElements.reduce((count, element) => {
+            if (element.getShadowRoot() !== null) {
+              return count + 1;
+            }
+            return count;
+          }, 0);
+          if (shadowRootElementsCount > 0) {
+            const requestId = `req_${Math.random()}`;
+            collectElements.forEach((element) => {
+              if (element.getShadowRoot() != null) {
+                element.emitEventFromShadowRoot(
+                  ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST, // + this.#containerId,
+                  {
+                    shadowRootElementsCount,
+                    type: COLLECT_TYPES.COLLECT,
+                    ...options,
+                    tokens: options?.tokens !== undefined ? options.tokens : true,
+                    elementIds,
+                    containerId: this.#containerId,
+                    requestId,
+                    transId,
+                  },
+                );
+              }
+            });
+            // eslint-disable-next-line prefer-template
+            bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST, {
+              transId,
+              clientId: this.#metaData.uuid,
+            }, (data: any) => {
+              // clearTimeout(timeout);
+              if (!data || data?.error) {
+                printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data?.error);
+              } else {
+                printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                  MessageType.LOG,
+                  this.#context.logLevel);
+                resolve(data);
+              }
+            });
+          } else {
             bus
             // .target(properties.IFRAME_SECURE_ORIGIN)
               .emit(
@@ -349,12 +342,126 @@ class CollectContainer extends Container {
                     printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                       MessageType.LOG,
                       this.#context.logLevel);
-
                     resolve(data);
                   }
                 },
               );
+          }
+          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
+            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+          MessageType.LOG, this.#context.logLevel);
+        } catch (err: any) {
+          printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+          reject(err);
+        }
+      });
+    }
+    return new Promise((resolve, reject) => {
+      try {
+        validateInitConfig(this.#metaData.clientJSON.config);
+        if (Object.keys(this.#elements).length === 0) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
+        }
+        this.#removeStaleElements();
+        const collectElements = Object.values(this.#elements);
+        const elementIds = Object.keys(this.#elements)
+          .map((element, index) => ({
+            frameId: element,
+            elementId: element,
+            shadowRoot: collectElements[index].getShadowRoot() !== null,
+            transId,
+          }));
+        collectElements.forEach((element) => {
+          if (!element.isMounted()) {
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
+          }
+          element.isValidElement();
+        });
+        if (Object.prototype.hasOwnProperty.call(options, 'tokens') && !validateBooleanOptions(options.tokens)) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
+        }
+        if (options?.additionalFields) {
+          validateAdditionalFieldsInCollect(options.additionalFields);
+        }
+        if (options?.upsert) {
+          validateUpsertOptions(options?.upsert);
+        }
+        const shadowRootElementsCount = collectElements.reduce((count, element) => {
+          if (element.getShadowRoot() !== null) {
+            return count + 1;
+          }
+          return count;
+        }, 0);
+        if (shadowRootElementsCount > 0) {
+          const requestId = `req_${Math.random()}`;
+          collectElements.forEach((element) => {
+            if (element.getShadowRoot() != null) {
+              element.emitEventFromShadowRoot(
+                ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST, // + this.#containerId,
+                {
+                  shadowRootElementsCount,
+                  type: COLLECT_TYPES.COLLECT,
+                  ...options,
+                  tokens: options?.tokens !== undefined ? options.tokens : true,
+                  elementIds,
+                  containerId: this.#containerId,
+                  requestId,
+                  transId,
+                },
+              );
+            }
           });
+          bus
+            .target(properties.IFRAME_SECURE_ORIGIN)
+            .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
+              bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST, {
+                transId,
+                clientId: this.#metaData.uuid,
+              }, (data: any) => {
+                // clearTimeout(timeout);
+                if (!data || data?.error) {
+                  printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(data?.error);
+                } else {
+                  printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                    MessageType.LOG,
+                    this.#context.logLevel);
+                  resolve(data);
+                }
+              });
+            });
+          // eslint-disable-next-line prefer-template
+        } else {
+          bus
+            .target(properties.IFRAME_SECURE_ORIGIN)
+            .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
+              bus
+              // .target(properties.IFRAME_SECURE_ORIGIN)
+                .emit(
+                  ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
+                  {
+                    type: COLLECT_TYPES.COLLECT,
+                    ...options,
+                    tokens: options?.tokens !== undefined ? options.tokens : true,
+                    elementIds,
+                    containerId: this.#containerId,
+                  },
+                  (data: any) => {
+                    if (!data || data?.error) {
+                      printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                      reject(data?.error);
+                    } else {
+                      // eslint-disable-next-line max-len
+                      printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                        MessageType.LOG,
+                        this.#context.logLevel);
+
+                      resolve(data);
+                    }
+                  },
+                );
+            });
+        }
       } catch (err:any) {
         printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
         reject(err);
@@ -364,6 +471,7 @@ class CollectContainer extends Container {
 
   uploadFiles = (options: ICollectOptions) :Promise<UploadFilesResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
+    const transId = uuid();
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {
         try {
@@ -373,65 +481,71 @@ class CollectContainer extends Container {
           }
           this.#removeStaleElements();
           const fileElements = Object.values(this.#elements);
-          const elementIds = Object.keys(this.#elements);
+          const elementIds = Object.keys(this.#elements)
+            .map((element, index) => ({
+              frameId: element,
+              elementId: element,
+              elementType: fileElements[index].elementType,
+              shadowRoot: fileElements[index].getShadowRoot() !== null,
+              transId,
+            }));
           fileElements.forEach((element) => {
             if (!element.isMounted()) {
               throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
             }
             element.isValidElement();
           });
-          bus
-            // .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
-              {
-                type: COLLECT_TYPES.FILE_UPLOAD,
-                ...options,
-                elementIds,
-                containerId: this.#containerId,
-              },
-              (data: any) => {
-                if (!data || data?.error) {
-                  printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                  reject(data?.error);
-                } else {
-                  printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                    MessageType.LOG,
-                    this.#context.logLevel);
-
-                  resolve(data);
-                }
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
-          MessageType.LOG, this.#context.logLevel);
-        } catch (err:any) {
-          printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
-          reject(err);
-        }
-      });
-    }
-    return new Promise((resolve, reject) => {
-      bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
-        .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
-          try {
-            validateInitConfig(this.#metaData.clientJSON.config);
-            if (Object.keys(this.#elements).length === 0) {
-              throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
+          const shadowRootElementsCount = fileElements.reduce((count, element) => {
+            if (element.getShadowRoot() !== null
+             && element.elementType === ELEMENTS.FILE_INPUT.name) {
+              return count + 1;
             }
-            this.#removeStaleElements();
-            const fileElements = Object.values(this.#elements);
-            const elementIds = Object.keys(this.#elements);
+            return count;
+          }, 0);
+          if (shadowRootElementsCount > 0) {
+            const requestId = `req_${Math.random()}`;
             fileElements.forEach((element) => {
-              if (!element.isMounted()) {
-                throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
+              if (element.getShadowRoot() != null
+                && element.elementType === ELEMENTS.FILE_INPUT.name) {
+                element.emitEventFromShadowRoot(
+                  ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST, // + this.#containerId,
+                  {
+                    shadowRootElementsCount,
+                    type: COLLECT_TYPES.FILE_UPLOAD,
+                    ...options,
+                    tokens: options?.tokens !== undefined ? options.tokens : true,
+                    elementIds,
+                    containerId: this.#containerId,
+                    requestId,
+                    transId,
+                  },
+                );
               }
-              element.isValidElement();
             });
+            bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST, {
+              transId,
+              clientId: this.#metaData.uuid,
+              type: COLLECT_TYPES.FILE_UPLOAD,
+              ...options,
+              elementIds,
+              containerId: this.#containerId,
+            }, (data: any) => {
+              if (!data || data?.error) {
+                printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data?.error);
+              } else if (!data || data.errorResponse) {
+                printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data);
+              } else {
+                printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                  MessageType.LOG,
+                  this.#context.logLevel);
+                resolve(data);
+              }
+            });
+          } else {
             bus
-              // .target(properties.IFRAME_SECURE_ORIGIN)
+            // .target(properties.IFRAME_SECURE_ORIGIN)
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
                 {
@@ -453,14 +567,132 @@ class CollectContainer extends Container {
                   }
                 },
               );
-            printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
-            MessageType.LOG, this.#context.logLevel);
-          } catch (err:any) {
-            printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
-            reject(err);
           }
+          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
+            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
+          MessageType.LOG, this.#context.logLevel);
+        } catch (err:any) {
+          printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+          reject(err);
+        }
+      });
+    }
+    return new Promise((resolve, reject) => {
+      try {
+        validateInitConfig(this.#metaData.clientJSON.config);
+        if (Object.keys(this.#elements).length === 0) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
+        }
+        this.#removeStaleElements();
+        const fileElements = Object.values(this.#elements);
+        const elementIds = Object.keys(this.#elements)
+          .map((element, index) => ({
+            frameId: element,
+            elementId: element,
+            elementType: fileElements[index].elementType,
+            shadowRoot: fileElements[index].getShadowRoot() !== null,
+            transId,
+          }));
+        fileElements.forEach((element) => {
+          if (!element.isMounted()) {
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
+          }
+          element.isValidElement();
         });
+        const shadowRootElementsCount = fileElements.reduce((count, element) => {
+          if (element.getShadowRoot() !== null
+             && element.elementType === ELEMENTS.FILE_INPUT.name) {
+            return count + 1;
+          }
+          return count;
+        }, 0);
+        if (shadowRootElementsCount > 0) {
+          const requestId = `req_${Math.random()}`;
+          fileElements.forEach((element) => {
+            if (element.getShadowRoot() != null
+                && element.elementType === ELEMENTS.FILE_INPUT.name) {
+              element.emitEventFromShadowRoot(
+                ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST, // + this.#containerId,
+                {
+                  shadowRootElementsCount,
+                  type: COLLECT_TYPES.FILE_UPLOAD,
+                  ...options,
+                  tokens: options?.tokens !== undefined ? options.tokens : true,
+                  elementIds,
+                  containerId: this.#containerId,
+                  requestId,
+                  transId,
+                },
+              );
+            }
+          });
+          bus
+            .target(properties.IFRAME_SECURE_ORIGIN)
+            .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
+              bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_INVOKE_REQUEST, {
+                transId,
+                clientId: this.#metaData.uuid,
+                type: COLLECT_TYPES.FILE_UPLOAD,
+                ...options,
+                elementIds,
+                containerId: this.#containerId,
+              }, (data: any) => {
+                if (!data || data?.error) {
+                  printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(data?.error);
+                } else if (data.errorResponse) {
+                  printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(data);
+                } else {
+                  printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                    MessageType.LOG,
+                    this.#context.logLevel);
+                  resolve(data);
+                }
+              });
+            });
+        } else {
+          bus
+            .target(properties.IFRAME_SECURE_ORIGIN)
+            .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
+              try {
+                bus
+                // .target(properties.IFRAME_SECURE_ORIGIN)
+                  .emit(
+                    ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
+                    {
+                      type: COLLECT_TYPES.FILE_UPLOAD,
+                      ...options,
+                      elementIds,
+                      containerId: this.#containerId,
+                    },
+                    (data: any) => {
+                      if (!data || data?.error) {
+                        printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                        reject(data?.error);
+                      } else {
+                        // eslint-disable-next-line max-len
+                        printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                          MessageType.LOG,
+                          this.#context.logLevel);
+
+                        resolve(data);
+                      }
+                    },
+                  );
+                printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
+                  CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
+                MessageType.LOG, this.#context.logLevel);
+              } catch (err:any) {
+                printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+                reject(err);
+              }
+            });
+        }
+      } catch (err:any) {
+        printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+        reject(err);
+      }
     });
   };
 
@@ -503,6 +735,18 @@ class CollectContainer extends Container {
   ): boolean => (
     element.isMounted()
     && !mountedIframeIds.includes(element.iframeName())
+    && !(element.getShadowRoot() === null)
+    && !this.checkIfFrameExistsInShadowRoot(element.getShadowRoot(), element.iframeName())
   );
+
+  // Check if the frame exists in the shadow root
+  checkIfFrameExistsInShadowRoot = (
+    shadowRoot: ShadowRoot | null,
+    frameName: string,
+  ): boolean => {
+    if (!shadowRoot) return false;
+    const frames = shadowRoot.querySelectorAll('iframe');
+    return Array.from(frames).some((frame) => frame.name === frameName);
+  };
 }
 export default CollectContainer;
