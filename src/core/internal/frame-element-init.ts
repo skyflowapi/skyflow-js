@@ -90,7 +90,7 @@ export default class FrameElementInit {
               });
           window?.parent.postMessage({
             type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
-            data: records,
+            data: response,
           }, '*');
         })
         .catch((error) => {
