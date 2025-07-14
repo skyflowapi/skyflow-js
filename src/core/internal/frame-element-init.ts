@@ -62,7 +62,8 @@ export default class FrameElementInit {
     };
     this.updateGroupData();
     this.createContainerDiv(this.group);
-    bus.target(this.clientMetaData.clientDomain)
+    bus
+      // .target(this.clientMetaData.clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
         this.#context = data.context;
         data.client.config = {

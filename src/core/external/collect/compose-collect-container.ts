@@ -113,7 +113,7 @@ class ComposableContainer extends Container {
     this.#containerMounted = true;
     this.#updateListeners();
     bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
+      // .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, (data, callback) => {
         printLog(parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
           MessageType.LOG,
