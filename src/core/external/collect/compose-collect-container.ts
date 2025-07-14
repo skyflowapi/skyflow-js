@@ -79,6 +79,8 @@ class ComposableContainer extends Container {
 
   #iframeID: string = '';
 
+  #getSkyflowBearerToken: () => Promise<string> | undefined;
+
   constructor(options, metaData, skyflowElements, context) {
     super();
     this.#containerId = uuid();
@@ -95,6 +97,7 @@ class ComposableContainer extends Container {
         },
       },
     };
+    this.#getSkyflowBearerToken = metaData.getSkyflowBearerToken;
     this.#skyflowElements = skyflowElements;
     this.#context = context;
     this.#options = options;
@@ -386,7 +389,10 @@ class ComposableContainer extends Container {
           });
           const client = Client.fromJSON(this.#metaData.clientJSON.config) as any;
           const clientId = client.toJSON()?.metaData?.uuid || '';
-          getAccessToken(this.#metaData.uuid).then((authToken) => {
+          this.#getSkyflowBearerToken()?.then((authToken) => {
+            printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+              MessageType.LOG,
+              this.#context.logLevel);
             this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + this.#containerId, {
               data: {
                 type: COLLECT_TYPES.COLLECT,
