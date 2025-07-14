@@ -69,12 +69,14 @@ export default class FrameElementInit {
           ...data.client.config,
         };
         this.#client = Client.fromJSON(data.client) as any;
+        console.log('client initailized');
       });
 
     window.addEventListener('message', this.handleCollectCall);
   }
 
   private handleCollectCall = (event: MessageEvent) => {
+    console.log('Received message:', event.data);
     // if (event.origin === this.clientMetaData.clientDomain) {
     if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
          + this.containerId) {
