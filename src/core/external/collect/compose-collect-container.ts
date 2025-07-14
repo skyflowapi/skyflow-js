@@ -591,7 +591,7 @@ class ComposableContainer extends Container {
                 if (!data || data?.error) {
                   printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
                   reject(data?.error);
-                } else if (data?.records) {
+                } else if (data?.fileUploadResponse) {
                   printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
                     this.#context.logLevel);
