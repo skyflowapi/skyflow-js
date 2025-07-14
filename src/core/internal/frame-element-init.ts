@@ -229,10 +229,11 @@ export default class FrameElementInit {
       const insertPromiseSet: Promise<any>[] = [];
 
       const clientId = client.toJSON()?.metaData?.uuid || '';
-      getAccessToken(clientId).then(() => {
+      getAccessToken(clientId).then((authToken) => {
         if (finalInsertRequest.length !== 0) {
           insertPromiseSet.push(
-            insertDataInCollect(finalInsertRequest, client, options, finalInsertRecords),
+            insertDataInCollect(finalInsertRequest,
+              client, options, finalInsertRecords, authToken as string),
           );
         }
         if (finalUpdateRecords.updateRecords.length !== 0) {
@@ -240,57 +241,54 @@ export default class FrameElementInit {
             updateRecordsBySkyflowID(finalUpdateRecords, client, options),
           );
         }
+        if (insertPromiseSet.length !== 0) {
+          Promise.allSettled(insertPromiseSet).then((resultSet: any) => {
+            const recordsResponse: any[] = [];
+            const errorsResponse: any[] = [];
+
+            resultSet.forEach((result:
+            { status: string; value: any; reason?: any; }) => {
+              if (result.status === 'fulfilled') {
+                if (result.value.records !== undefined && Array.isArray(result.value.records)) {
+                  result.value.records.forEach((record) => {
+                    recordsResponse.push(record);
+                  });
+                }
+                if (result.value.errors !== undefined && Array.isArray(result.value.errors)) {
+                  result.value.errors.forEach((error) => {
+                    errorsResponse.push(error);
+                  });
+                }
+              } else {
+                if (result.reason?.records !== undefined && Array.isArray(result.reason?.records)) {
+                  result.reason.records.forEach((record) => {
+                    recordsResponse.push(record);
+                  });
+                }
+                if (result.reason?.errors !== undefined && Array.isArray(result.reason?.errors)) {
+                  result.reason.errors.forEach((error) => {
+                    errorsResponse.push(error);
+                  });
+                }
+              }
+            });
+            if (errorsResponse.length === 0) {
+              rootResolve({ records: recordsResponse });
+            } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
+            else rootReject({ records: recordsResponse, errors: errorsResponse });
+          });
+        }
       }).catch((err) => {
         rootReject({
           error: err,
         });
       });
-      if (insertPromiseSet.length !== 0) {
-        Promise.allSettled(insertPromiseSet).then((resultSet: any) => {
-          const recordsResponse: any[] = [];
-          const errorsResponse: any[] = [];
-          resultSet.forEach((result:
-          { status: string; value: any; reason?: any; }) => {
-            if (result.status === 'fulfilled') {
-              if (result.value.records !== undefined && Array.isArray(result.value.records)) {
-                result.value.records.forEach((record) => {
-                  recordsResponse.push(record);
-                });
-              }
-              if (result.value.errors !== undefined && Array.isArray(result.value.errors)) {
-                result.value.errors.forEach((error) => {
-                  errorsResponse.push(error);
-                });
-              }
-            } else {
-              if (result.reason?.records !== undefined && Array.isArray(result.reason?.records)) {
-                result.reason.records.forEach((record) => {
-                  recordsResponse.push(record);
-                });
-              }
-              if (result.reason?.errors !== undefined && Array.isArray(result.reason?.errors)) {
-                result.reason.errors.forEach((error) => {
-                  errorsResponse.push(error);
-                });
-              }
-            }
-          });
-          if (errorsResponse.length === 0) {
-            rootResolve({ records: recordsResponse });
-          } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
-          else rootReject({ records: recordsResponse, errors: errorsResponse });
-        });
-      }
     });
 
     return new Promise((resolve, reject) => {
       sendRequest()
-        .then((res) => {
-          resolve(res);
-        })
-        .catch((err) => {
-          reject(err);
-        });
+        .then((res) => resolve(res))
+        .catch((err) => reject(err));
     });
   };
 

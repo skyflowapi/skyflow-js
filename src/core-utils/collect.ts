@@ -282,48 +282,44 @@ export const insertDataInCollect = async (
   client: Client,
   options,
   finalInsertRecords,
-) => new Promise((resolve, reject) => {
+  authToken: string,
+) => new Promise((resolve) => {
   let insertResponse: any;
   let insertErrorResponse: any;
-  const clientId = client.toJSON()?.metaData?.uuid || '';
-  getAccessToken(clientId).then((authToken) => {
-    client
-      .request({
-        body: {
-          records,
-        },
-        requestMethod: 'POST',
-        url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
-        headers: {
-          authorization: `Bearer ${authToken}`,
-          'content-type': 'application/json',
-        },
-      })
-      .then((response: any) => {
-        insertResponse = constructInsertRecordResponse(
-          response,
-          options.tokens,
-          finalInsertRecords.records,
-        );
-        resolve(insertResponse);
-      })
-      .catch((error) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        insertErrorResponse = {
-          errors: [
-            {
-              error: {
-                code: error?.error?.code,
-                description: error?.error?.description,
-              },
+  client
+    .request({
+      body: {
+        records,
+      },
+      requestMethod: 'POST',
+      url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+      },
+    })
+    .then((response: any) => {
+      insertResponse = constructInsertRecordResponse(
+        response,
+        options.tokens,
+        finalInsertRecords.records,
+      );
+      resolve(insertResponse);
+    })
+    .catch((error) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      insertErrorResponse = {
+        errors: [
+          {
+            error: {
+              code: error?.error?.code,
+              description: error?.error?.description,
             },
-          ],
-        };
-        resolve(insertErrorResponse);
-      });
-  }).catch((err) => {
-    reject(err);
-  });
+          },
+        ],
+      };
+      resolve(insertErrorResponse);
+    });
 });
 
 export const checkForElementMatchRule = (validations: IValidationRule[]) => {
