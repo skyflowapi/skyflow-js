@@ -91,10 +91,17 @@ export default class FrameElementInit {
               {
                 records,
               });
+          window?.parent.postMessage({
+            type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
+            records,
+          }, '*');
         })
         .catch((error) => {
           console.log('Tokenization error:', error);
-
+          window?.parent.postMessage({
+            type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
+            error,
+          }, '*');
           bus
           // .target(this.clientMetaData.clientDomain)
             .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
