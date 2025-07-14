@@ -225,6 +225,7 @@ class CollectElement extends SkyflowElement {
     }
     const isComposable = this.#elements.length > 1;
     if (isComposable) {
+      this.#mounted = true;
       this.#iframe.mount(domElement, this.#elementId, {
         record: JSON.stringify({
           record: this.#group,
