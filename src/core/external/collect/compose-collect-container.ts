@@ -482,6 +482,7 @@ class ComposableContainer extends Container {
     if (this.#shadowRoot) {
       const iframe = this.#shadowRoot.getElementById(this.#iframeID) as HTMLIFrameElement;
       if (iframe?.contentWindow) {
+        console.log('Posting message to iframe:', eventName, options);
         iframe.contentWindow.postMessage({
           name: eventName,
           ...options,

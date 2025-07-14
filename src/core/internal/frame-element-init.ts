@@ -74,30 +74,30 @@ export default class FrameElementInit {
   }
 
   private handleCollectCall = (event: MessageEvent) => {
-    if (event.origin === this.clientMetaData.clientDomain) {
-      if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
-         // eslint-disable-next-line no-empty
+    // if (event.origin === this.clientMetaData.clientDomain) {
+    if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
          + this.containerId) {
-        this.tokenize(event.data)
-          .then((response: any) => {
-            const records = response.records;
-            bus
-              // .target(this.clientMetaData.clientDomain)
-              .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
-                {
-                  records,
-                });
-          })
-          .catch((error) => {
-            bus
-              // .target(this.clientMetaData.clientDomain)
-              .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
-                {
-                  error,
-                });
-          });
-      }
+      console.log('Received composable call request:', event.data);
+      this.tokenize(event.data)
+        .then((response: any) => {
+          const records = response.records;
+          bus
+          // .target(this.clientMetaData.clientDomain)
+            .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
+              {
+                records,
+              });
+        })
+        .catch((error) => {
+          bus
+          // .target(this.clientMetaData.clientDomain)
+            .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
+              {
+                error,
+              });
+        });
     }
+    // }
   };
 
   private tokenize = (options) => {
