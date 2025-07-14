@@ -71,7 +71,11 @@ class ComposableContainer extends Container {
 
   #clientDomain: string = '';
 
-  #isSkyflowFrameReady: boolean = false;
+  #isComposableFrameReady: boolean = false;
+
+  #shadowRoot: ShadowRoot | null = null;
+
+  #iframeID: string = '';
 
   constructor(options, metaData, skyflowElements, context) {
     super();
@@ -89,8 +93,6 @@ class ComposableContainer extends Container {
         },
       },
     };
-    this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
-
     this.#skyflowElements = skyflowElements;
     this.#context = context;
     this.#options = options;
@@ -110,6 +112,18 @@ class ComposableContainer extends Container {
       this.#context.logLevel);
     this.#containerMounted = true;
     this.#updateListeners();
+    bus
+      .target(properties.IFRAME_SECURE_ORIGIN)
+      .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, (data, callback) => {
+        printLog(parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
+          MessageType.LOG,
+          this.#context.logLevel);
+        callback({
+          client: this.#metaData.clientJSON,
+          context,
+        });
+        this.#isComposableFrameReady = true;
+      });
   }
 
   create = (input: CollectElementInput, options: CollectElementOptions = {
@@ -135,6 +149,7 @@ class ComposableContainer extends Container {
       elementName,
     });
     const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`;
+    this.#iframeID = controllerIframeName;
     return new ComposableElement(elementName, this.#eventEmitter, controllerIframeName);
   };
 
@@ -301,6 +316,20 @@ class ComposableContainer extends Container {
       this.#containerElement.mount(domElement);
       this.#isMounted = true;
     }
+    if (domElement instanceof HTMLElement
+      && (domElement as HTMLElement).getRootNode() instanceof ShadowRoot) {
+      this.#shadowRoot = domElement.getRootNode() as ShadowRoot;
+    } else if (typeof domElement === 'string') {
+      const element = document.getElementById(domElement);
+      if (element && element.getRootNode() instanceof ShadowRoot) {
+        this.#shadowRoot = element.getRootNode() as ShadowRoot;
+      }
+    }
+    if (this.#shadowRoot !== null) {
+      this.#eventEmitter.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT, (data) => {
+        this.#emitEvent(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + data.iframeName, {});
+      });
+    }
   };
 
   unmount = () => {
@@ -308,8 +337,7 @@ class ComposableContainer extends Container {
   };
 
   collect = (options: ICollectOptions = { tokens: true }) :Promise<CollectResponse> => {
-    this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
-    if (this.#isSkyflowFrameReady) {
+    if (this.#isComposableFrameReady) {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#metaData.clientJSON.config);
@@ -345,30 +373,25 @@ class ComposableContainer extends Container {
               elementId: element.elementName,
             });
           });
-          bus
-          // .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
-              {
-                type: COLLECT_TYPES.COLLECT,
-                ...options,
-                tokens: options?.tokens !== undefined ? options.tokens : true,
-                elementIds,
-                containerId: this.#containerId,
-              },
-              (data: any) => {
-                if (!data || data?.error) {
-                  printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                  reject(data?.error);
-                } else {
-                  printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                    MessageType.LOG,
-                    this.#context.logLevel);
+          this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + this.#containerId, {
+            type: COLLECT_TYPES.COLLECT,
+            ...options,
+            tokens: options?.tokens !== undefined ? options.tokens : true,
+            elementIds,
+            containerId: this.#containerId,
+          });
+          bus.on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.#containerId, (data) => {
+            if (!data || data?.error) {
+              printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+              reject(data?.error);
+            } else {
+              printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                MessageType.LOG,
+                this.#context.logLevel);
 
-                  resolve(data);
-                }
-              },
-            );
+              resolve(data);
+            }
+          });
           printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
           MessageType.LOG, this.#context.logLevel);
@@ -417,30 +440,32 @@ class ComposableContainer extends Container {
         });
         bus
           .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
-            bus
-            // .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
-                {
-                  type: COLLECT_TYPES.COLLECT,
-                  ...options,
-                  tokens: options?.tokens !== undefined ? options.tokens : true,
-                  elementIds,
-                  containerId: this.#containerId,
-                },
-                (data: any) => {
-                  if (!data || data?.error) {
-                    printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                    reject(data?.error);
-                  } else {
-                    printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                      MessageType.LOG,
-                      this.#context.logLevel);
-                    resolve(data);
-                  }
-                },
-              );
+          .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER
+             + this.#containerId, (_, callback) => {
+            callback({
+              client: this.#metaData.clientJSON,
+              context: this.#context,
+            });
+            this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + this.#containerId, {
+              type: COLLECT_TYPES.COLLECT,
+              ...options,
+              tokens: options?.tokens !== undefined ? options.tokens : true,
+              elementIds,
+              containerId: this.#containerId,
+            });
+            bus.on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE
+               + this.#containerId, (data) => {
+              if (!data || data?.error) {
+                printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data?.error);
+              } else {
+                printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                  MessageType.LOG,
+                  this.#context.logLevel);
+
+                resolve(data);
+              }
+            });
           });
         printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
           CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
@@ -450,6 +475,26 @@ class ComposableContainer extends Container {
         reject(err);
       }
     });
+  };
+
+  #emitEvent = (eventName: string, options?: Record<string, any>, callback?: any) => {
+    if (this.#shadowRoot) {
+      const iframe = this.#shadowRoot.getElementById(this.#iframeID) as HTMLIFrameElement;
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          name: eventName,
+          ...options,
+        }, properties.IFRAME_SECURE_ORIGIN);
+      }
+    } else {
+      const iframe = document.getElementById(this.#iframeID) as HTMLIFrameElement;
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          name: eventName,
+          ...options,
+        }, properties.IFRAME_SECURE_ORIGIN);
+      }
+    }
   };
 
   #updateListeners = () => {

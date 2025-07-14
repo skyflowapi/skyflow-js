@@ -1,17 +1,30 @@
 import injectStylesheet from 'inject-stylesheet';
 import bus from 'framebus';
+import get from 'lodash/get';
 import { getValueAndItsUnit, validateAndSetupGroupOptions } from '../../libs/element-options';
 import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
-import { Context, Env, LogLevel } from '../../utils/common';
+import {
+  Context, Env, LogLevel,
+} from '../../utils/common';
 import { getContainerType } from '../../utils/helpers';
 import {
   ALLOWED_MULTIPLE_FIELDS_STYLES,
-  ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ERROR_TEXT_STYLES, STYLE_TYPE,
+  ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, ERROR_TEXT_STYLES, STYLE_TYPE,
 } from '../constants';
 import IFrameFormElement from './iframe-form';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-styles';
 import FrameElement from '.';
+import {
+  checkForElementMatchRule, checkForValueMatch, constructElementsInsertReq,
+  constructInsertRecordRequest, insertDataInCollect, updateRecordsBySkyflowID,
+} from '../../core-utils/collect';
+import SkyflowError from '../../libs/skyflow-error';
+import SKYFLOW_ERROR_CODE from '../../utils/constants';
+import { getAccessToken } from '../../utils/bus-events';
+import Client from '../../client';
+
+const set = require('set-value');
 
 export default class FrameElementInit {
   iframeFormElement: IFrameFormElement | undefined;
@@ -30,6 +43,14 @@ export default class FrameElementInit {
 
   group: any;
 
+  frameList: FrameElement[] = [];
+
+  iframeFormList: IFrameFormElement[] = [];
+
+  #client!: Client;
+
+  #context!: Context;
+
   constructor() {
     // this.createIframeElement(frameName, label, skyflowID, isRequired);
     this.context = { logLevel: LogLevel.INFO, env: Env.DEV }; // client level
@@ -41,7 +62,237 @@ export default class FrameElementInit {
     };
     this.updateGroupData();
     this.createContainerDiv(this.group);
+    bus.emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
+      this.#context = data.context;
+      data.client.config = {
+        ...data.client.config,
+      };
+      this.#client = Client.fromJSON(data.client) as any;
+    });
+
+    window.addEventListener('message', this.handleCollectCall);
   }
+
+  private handleCollectCall = (event: MessageEvent) => {
+    if (event.origin === this.clientMetaData.clientDomain) {
+      if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
+         // eslint-disable-next-line no-empty
+         + this.containerId) {
+        this.tokenize(event.data)
+          .then((response: any) => {
+            const records = response.records;
+            bus
+              // .target(this.clientMetaData.clientDomain)
+              .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
+                {
+                  records,
+                });
+          })
+          .catch((error) => {
+            bus
+              // .target(this.clientMetaData.clientDomain)
+              .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
+                {
+                  error,
+                });
+          });
+      }
+    }
+  };
+
+  private tokenize = (options) => {
+    let errorMessage = '';
+    const insertRequestObject: any = {};
+    const updateRequestObject: any = {};
+
+    this.iframeFormList.forEach((inputElement) => {
+      if (inputElement) {
+        if (inputElement) {
+          if (
+            inputElement.fieldType
+                        !== ELEMENTS.FILE_INPUT.name
+          ) {
+            const {
+              // eslint-disable-next-line max-len
+              state, doesClientHasError, clientErrorText, errorText, onFocusChange, validations,
+              setValue,
+            } = inputElement;
+            if (state.isRequired || !state.isValid) {
+              onFocusChange(false);
+            }
+            if (validations
+                          && checkForElementMatchRule(validations)
+                          && checkForValueMatch(validations, inputElement)) {
+              setValue(state.value);
+              onFocusChange(false);
+            }
+            if (!state.isValid || !state.isComplete) {
+              if (doesClientHasError) {
+                errorMessage += `${state.name}:${clientErrorText}`;
+              } else { errorMessage += `${state.name}:${errorText} `; }
+            }
+          }
+        }
+      }
+    });
+
+    // return for error
+    if (errorMessage.length > 0) {
+      // eslint-disable-next-line max-len
+      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
+    }
+    // eslint-disable-next-line consistent-return
+    this.iframeFormList.forEach((inputElement) => {
+      if (inputElement) {
+        const {
+          state, tableName, validations, skyflowID,
+        } = inputElement;
+        if (tableName) {
+          if (
+            inputElement.fieldType
+        !== ELEMENTS.FILE_INPUT.name
+          ) {
+            if (
+              inputElement.fieldType
+          === ELEMENTS.checkbox.name
+            ) {
+              if (insertRequestObject[state.name]) {
+                insertRequestObject[state.name] = `${insertRequestObject[state.name]},${state.value
+                }`;
+              } else {
+                insertRequestObject[state.name] = state.value;
+              }
+            } else if (insertRequestObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
+              if (get(insertRequestObject[tableName], state.name)
+            && !(validations && checkForElementMatchRule(validations))) {
+                return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
+                  [state.name, tableName], true));
+              }
+              set(
+                insertRequestObject[tableName],
+                state.name,
+                inputElement.getUnformattedValue(),
+              );
+            } else if (skyflowID || skyflowID === '') {
+              if (skyflowID === '' || skyflowID === null) {
+                return Promise.reject(new SkyflowError(
+                  SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS,
+                ));
+              }
+              if (updateRequestObject[skyflowID]) {
+                set(
+                  updateRequestObject[skyflowID],
+                  state.name,
+                  inputElement.getUnformattedValue(),
+                );
+              } else {
+                updateRequestObject[skyflowID] = {};
+                set(
+                  updateRequestObject[skyflowID],
+                  state.name,
+                  inputElement.getUnformattedValue(),
+                );
+                set(
+                  updateRequestObject[skyflowID],
+                  'table',
+                  tableName,
+                );
+              }
+            } else {
+              insertRequestObject[tableName] = {};
+              set(
+                insertRequestObject[tableName],
+                state.name,
+                inputElement.getUnformattedValue(),
+              );
+            }
+          }
+        }
+      }
+    });
+    let finalInsertRequest;
+    let finalInsertRecords;
+    let finalUpdateRecords;
+    try {
+      [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
+        insertRequestObject, updateRequestObject, options.options,
+      );
+      finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options.options);
+    } catch (error:any) {
+      return Promise.reject({
+        error: error?.message,
+      });
+    }
+
+    const client = this.#client;
+    const sendRequest = () => new Promise((rootResolve, rootReject) => {
+      const insertPromiseSet: Promise<any>[] = [];
+
+      const clientId = client.toJSON()?.metaData?.uuid || '';
+      getAccessToken(clientId).then(() => {
+        if (finalInsertRequest.length !== 0) {
+          insertPromiseSet.push(
+            insertDataInCollect(finalInsertRequest, client, options, finalInsertRecords),
+          );
+        }
+        if (finalUpdateRecords.updateRecords.length !== 0) {
+          insertPromiseSet.push(
+            updateRecordsBySkyflowID(finalUpdateRecords, client, options),
+          );
+        }
+      }).catch((err) => {
+        rootReject({
+          error: err,
+        });
+      });
+      if (insertPromiseSet.length !== 0) {
+        Promise.allSettled(insertPromiseSet).then((resultSet: any) => {
+          const recordsResponse: any[] = [];
+          const errorsResponse: any[] = [];
+          resultSet.forEach((result:
+          { status: string; value: any; reason?: any; }) => {
+            if (result.status === 'fulfilled') {
+              if (result.value.records !== undefined && Array.isArray(result.value.records)) {
+                result.value.records.forEach((record) => {
+                  recordsResponse.push(record);
+                });
+              }
+              if (result.value.errors !== undefined && Array.isArray(result.value.errors)) {
+                result.value.errors.forEach((error) => {
+                  errorsResponse.push(error);
+                });
+              }
+            } else {
+              if (result.reason?.records !== undefined && Array.isArray(result.reason?.records)) {
+                result.reason.records.forEach((record) => {
+                  recordsResponse.push(record);
+                });
+              }
+              if (result.reason?.errors !== undefined && Array.isArray(result.reason?.errors)) {
+                result.reason.errors.forEach((error) => {
+                  errorsResponse.push(error);
+                });
+              }
+            }
+          });
+          if (errorsResponse.length === 0) {
+            rootResolve({ records: recordsResponse });
+          } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
+          else rootReject({ records: recordsResponse, errors: errorsResponse });
+        });
+      }
+    });
+
+    return new Promise((resolve, reject) => {
+      sendRequest()
+        .then((res) => {
+          resolve(res);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  };
 
   updateGroupData = () => {
     const frameName = window.name;
@@ -52,7 +303,6 @@ export default class FrameElementInit {
     this.clientMetaData = parsedRecord.metaData;
     this.group = parsedRecord.record;
     this.containerId = parsedRecord.containerId;
-
     bus
       .target(this.clientMetaData.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE + frameName, (data) => {
@@ -69,6 +319,7 @@ export default class FrameElementInit {
       ...this.clientMetaData,
       isRequired,
     }, this.context, skyflowID);
+    this.iframeFormList.push(this.iframeFormElement);
     return this.iframeFormElement;
   };
 
@@ -181,6 +432,8 @@ export default class FrameElementInit {
           element,
           elementDiv,
         );
+        this.frameList.push(this.frameElement);
+
         if (isComposableContainer && errorTextElement) {
           iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
             errorTextMap[element.elementName] = state.error;
@@ -203,6 +456,16 @@ export default class FrameElementInit {
     }
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name, (data, callback) => {
       callback({ height: rootDiv.scrollHeight, name: window.name });
+    });
+    window.addEventListener('message', (event) => {
+      if (event.data.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name) {
+        bus
+          // .target(event.origin)
+          .emit(
+            ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
+            { height: rootDiv.scrollHeight, name: window.name },
+          );
+      }
     });
   };
 

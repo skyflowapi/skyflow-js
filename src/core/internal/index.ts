@@ -89,16 +89,21 @@ export default class FrameElement {
 
   private selectedData?: number = undefined;
 
+  frameElementName: string;
+
   constructor(
     iFrameFormElement: IFrameFormElement,
     options: any,
     htmlDivElement: HTMLDivElement,
+    frameElementName: string = '',
   ) {
     this.iFrameFormElement = iFrameFormElement;
     this.options = options;
     this.htmlDivElement = htmlDivElement;
     this.hasError = false;
     this.mount();
+    this.frameElementName = frameElementName;
+
     this.iFrameFormElement.fieldName = options.column;
     this.iFrameFormElement.tableName = options.table;
     this.iFrameFormElement.state.name = options.column;

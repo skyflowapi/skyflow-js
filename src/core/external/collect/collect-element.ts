@@ -119,7 +119,6 @@ class CollectElement extends SkyflowElement {
     // if (this.#isSingleElementAPI && this.#elements.length > 1) {
     //   throw new SkyflowError(SKYFLOW_ERROR_CODE.UNKNOWN_ERROR, [], true);
     // }
-
     this.#doesReturnValue = EnvOptions[this.#context.env].doesReturnValue;
     this.elementType = this.#isSingleElementAPI
       ? this.#elements[0].elementType
@@ -525,10 +524,13 @@ class CollectElement extends SkyflowElement {
               else this.#states[index].value = undefined;
 
               emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
-
               this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
                 + this.#iframe.name,
               {}, (payload:any) => {
+                this.#iframe.setIframeHeight(payload.height);
+              });
+              this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK
+                + this.#iframe.name, (payload:any) => {
                 this.#iframe.setIframeHeight(payload.height);
               });
 
@@ -537,6 +539,11 @@ class CollectElement extends SkyflowElement {
                 ...this.#states[index],
                 elementType: element.elementType,
               };
+              if (isComposable) {
+                this.#groupEmitter?._emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT, {
+                  iframeName: this.#iframe.name,
+                });
+              }
               if (isComposable && this.#groupEmitter) {
                 this.#groupEmitter._emit(emitEvent, emitData);
               } else {
