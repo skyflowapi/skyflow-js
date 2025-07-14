@@ -412,11 +412,11 @@ class ComposableContainer extends Container {
         }
 
         const containerElements = getElements(this.#tempElements);
-        containerElements.forEach((element:any) => {
-          if (!element?.isMounted) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
-          }
-        });
+        // containerElements.forEach((element:any) => {
+        //   if (!element?.isMounted) {
+        //     throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
+        //   }
+        // });
         const elementIds:{ frameId:string, elementId:string }[] = [];
         const collectElements = Object.values(this.#elements);
         collectElements.forEach((element) => {
