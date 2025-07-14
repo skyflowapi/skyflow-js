@@ -38,6 +38,8 @@ import {
 import Container from '../common/container';
 import CollectElement from './collect-element';
 import ComposableElement from './compose-collect-element';
+import Client from '../../../client';
+import { getAccessToken } from '../../../utils/bus-events';
 
 const CLASS_NAME = 'CollectContainer';
 class ComposableContainer extends Container {
@@ -337,8 +339,12 @@ class ComposableContainer extends Container {
   };
 
   collect = (options: ICollectOptions = { tokens: true }) :Promise<CollectResponse> => {
+    console.log('Collect called with options:');
     // this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, {
-    //   client: this.#metaData.clientJSON,
+    // client: {
+    //   vaultURL: this.#metaData.clientJSON.config.vaultURL,
+    //   vaultID: this.#metaData.clientJSON.config.vaultID,
+    // },
     //   context: this.#context,
     // });
     this.#isComposableFrameReady = true;
@@ -378,12 +384,27 @@ class ComposableContainer extends Container {
               elementId: element.elementName,
             });
           });
-          this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + this.#containerId, {
-            type: COLLECT_TYPES.COLLECT,
-            ...options,
-            tokens: options?.tokens !== undefined ? options.tokens : true,
-            elementIds,
-            containerId: this.#containerId,
+          const client = Client.fromJSON(this.#metaData.clientJSON.config) as any;
+          const clientId = client.toJSON()?.metaData?.uuid || '';
+          getAccessToken(this.#metaData.uuid).then((authToken) => {
+            this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + this.#containerId, {
+              data: {
+                type: COLLECT_TYPES.COLLECT,
+                ...options,
+                tokens: options?.tokens !== undefined ? options.tokens : true,
+                elementIds,
+                containerId: this.#containerId,
+              },
+              clientConfig: {
+                vaultURL: this.#metaData.clientJSON.config.vaultURL,
+                vaultID: this.#metaData.clientJSON.config.vaultID,
+                authToken,
+              },
+            });
+          }).catch((err:any) => {
+            console.error('Error getting access token:', err);
+            printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+            reject(err);
           });
           bus.on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.#containerId, (data) => {
             if (!data || data?.error) {
@@ -443,10 +464,10 @@ class ComposableContainer extends Container {
             elementId: element.elementName,
           });
         });
-        // this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, {
-        //   client: this.#metaData.clientJSON,
-        //   context: this.#context,
-        // });
+        this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, {
+          client: this.#metaData.clientJSON,
+          context: this.#context,
+        });
         bus
           .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER

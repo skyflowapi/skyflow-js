@@ -17,11 +17,11 @@ import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-st
 import FrameElement from '.';
 import {
   checkForElementMatchRule, checkForValueMatch, constructElementsInsertReq,
-  constructInsertRecordRequest, insertDataInCollect, updateRecordsBySkyflowID,
+  constructInsertRecordRequest, insertDataInCollect,
+  updateRecordsBySkyflowIDComposable,
 } from '../../core-utils/collect';
 import SkyflowError from '../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../utils/constants';
-import { getAccessToken } from '../../utils/bus-events';
 import Client from '../../client';
 
 const set = require('set-value');
@@ -65,26 +65,26 @@ export default class FrameElementInit {
     bus
       // .target(this.clientMetaData.clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
+        console.log('Received composable container data:', data);
         this.#context = data.context;
         data.client.config = {
           ...data.client.config,
         };
         this.#client = Client.fromJSON(data.client) as any;
-        console.log('client initailized');
       });
 
     window.addEventListener('message', this.handleCollectCall);
   }
 
   private handleCollectCall = (event: MessageEvent) => {
-    console.log('Received message:', event.data);
     // if (event.origin === this.clientMetaData.clientDomain) {
     if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
          + this.containerId) {
       console.log('Received composable call request:', event.data);
-      this.tokenize(event.data)
+      this.tokenize(event.data.data, event.data.clientConfig)
         .then((response: any) => {
           const records = response.records;
+          console.log('Tokenization response:', records);
           bus
           // .target(this.clientMetaData.clientDomain)
             .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
@@ -93,6 +93,8 @@ export default class FrameElementInit {
               });
         })
         .catch((error) => {
+          console.log('Tokenization error:', error);
+
           bus
           // .target(this.clientMetaData.clientDomain)
             .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
@@ -113,7 +115,7 @@ export default class FrameElementInit {
     // }
   };
 
-  private tokenize = (options) => {
+  private tokenize = (options, clientConfig: any) => {
     let errorMessage = '';
     const insertRequestObject: any = {};
     const updateRequestObject: any = {};
@@ -236,66 +238,68 @@ export default class FrameElementInit {
         error: error?.message,
       });
     }
-
+    this.#client = new Client(clientConfig, {});
     const client = this.#client;
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
       const insertPromiseSet: Promise<any>[] = [];
 
-      const clientId = client.toJSON()?.metaData?.uuid || '';
-      getAccessToken(clientId).then((authToken) => {
-        if (finalInsertRequest.length !== 0) {
-          insertPromiseSet.push(
-            insertDataInCollect(finalInsertRequest,
-              client, options, finalInsertRecords, authToken as string),
-          );
-        }
-        if (finalUpdateRecords.updateRecords.length !== 0) {
-          insertPromiseSet.push(
-            updateRecordsBySkyflowID(finalUpdateRecords, client, options),
-          );
-        }
-        if (insertPromiseSet.length !== 0) {
-          Promise.allSettled(insertPromiseSet).then((resultSet: any) => {
-            const recordsResponse: any[] = [];
-            const errorsResponse: any[] = [];
+      // const clientId = client.toJSON()?.metaData?.uuid || '';
+      // getAccessToken(clientId).then((authToken) => {
+      if (finalInsertRequest.length !== 0) {
+        insertPromiseSet.push(
+          insertDataInCollect(finalInsertRequest,
+            client, options, finalInsertRecords, clientConfig.authToken as string),
+        );
+      }
+      if (finalUpdateRecords.updateRecords.length !== 0) {
+        insertPromiseSet.push(
+          updateRecordsBySkyflowIDComposable(
+            finalUpdateRecords, client, options, clientConfig.authToken as string,
+          ),
+        );
+      }
+      if (insertPromiseSet.length !== 0) {
+        Promise.allSettled(insertPromiseSet).then((resultSet: any) => {
+          const recordsResponse: any[] = [];
+          const errorsResponse: any[] = [];
 
-            resultSet.forEach((result:
-            { status: string; value: any; reason?: any; }) => {
-              if (result.status === 'fulfilled') {
-                if (result.value.records !== undefined && Array.isArray(result.value.records)) {
-                  result.value.records.forEach((record) => {
-                    recordsResponse.push(record);
-                  });
-                }
-                if (result.value.errors !== undefined && Array.isArray(result.value.errors)) {
-                  result.value.errors.forEach((error) => {
-                    errorsResponse.push(error);
-                  });
-                }
-              } else {
-                if (result.reason?.records !== undefined && Array.isArray(result.reason?.records)) {
-                  result.reason.records.forEach((record) => {
-                    recordsResponse.push(record);
-                  });
-                }
-                if (result.reason?.errors !== undefined && Array.isArray(result.reason?.errors)) {
-                  result.reason.errors.forEach((error) => {
-                    errorsResponse.push(error);
-                  });
-                }
+          resultSet.forEach((result:
+          { status: string; value: any; reason?: any; }) => {
+            if (result.status === 'fulfilled') {
+              if (result.value.records !== undefined && Array.isArray(result.value.records)) {
+                result.value.records.forEach((record) => {
+                  recordsResponse.push(record);
+                });
               }
-            });
-            if (errorsResponse.length === 0) {
-              rootResolve({ records: recordsResponse });
-            } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
-            else rootReject({ records: recordsResponse, errors: errorsResponse });
+              if (result.value.errors !== undefined && Array.isArray(result.value.errors)) {
+                result.value.errors.forEach((error) => {
+                  errorsResponse.push(error);
+                });
+              }
+            } else {
+              if (result.reason?.records !== undefined && Array.isArray(result.reason?.records)) {
+                result.reason.records.forEach((record) => {
+                  recordsResponse.push(record);
+                });
+              }
+              if (result.reason?.errors !== undefined && Array.isArray(result.reason?.errors)) {
+                result.reason.errors.forEach((error) => {
+                  errorsResponse.push(error);
+                });
+              }
+            }
           });
-        }
-      }).catch((err) => {
-        rootReject({
-          error: err,
+          if (errorsResponse.length === 0) {
+            rootResolve({ records: recordsResponse });
+          } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
+          else rootReject({ records: recordsResponse, errors: errorsResponse });
         });
-      });
+      }
+      // }).catch((err) => {
+      //   rootReject({
+      //     error: err,
+      //   });
+      // });
     });
 
     return new Promise((resolve, reject) => {
@@ -471,7 +475,7 @@ export default class FrameElementInit {
     window.addEventListener('message', (event) => {
       if (event.data.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name) {
         bus
-          // .target(event.origin)
+          .target(this.clientMetaData.clientDomain)
           .emit(
             ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
             { height: rootDiv.scrollHeight, name: window.name },
