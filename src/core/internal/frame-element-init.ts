@@ -20,7 +20,7 @@ import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-st
 import FrameElement from '.';
 import {
   checkForElementMatchRule, checkForValueMatch, constructElementsInsertReq,
-  constructInsertRecordRequest, constructUploadResponse, insertDataInCollect,
+  constructInsertRecordRequest, insertDataInCollect,
   updateRecordsBySkyflowIDComposable,
 } from '../../core-utils/collect';
 import SkyflowError from '../../libs/skyflow-error';
@@ -569,6 +569,7 @@ export default class FrameElementInit {
           iFrameFormElement,
           element,
           elementDiv,
+          this.clientMetaData.clientDomain,
         );
         this.frameList.push(this.frameElement);
 
@@ -595,14 +596,22 @@ export default class FrameElementInit {
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name, (data, callback) => {
       callback({ height: rootDiv.scrollHeight, name: window.name });
     });
+    window.parent.postMessage(
+      {
+        type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
+        data: { height: rootDiv.scrollHeight, name: window.name },
+      },
+      this.clientMetaData.clientDomain,
+    );
     window.addEventListener('message', (event) => {
       if (event.data.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name) {
-        bus
-          .target(this.clientMetaData.clientDomain)
-          .emit(
-            ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
-            { height: rootDiv.scrollHeight, name: window.name },
-          );
+        window.parent.postMessage(
+          {
+            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
+            data: { height: rootDiv.scrollHeight, name: window.name },
+          },
+          this.clientMetaData.clientDomain,
+        );
       }
     });
   };

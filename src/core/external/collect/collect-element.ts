@@ -163,18 +163,18 @@ class CollectElement extends SkyflowElement {
     this.#readyToMount = container.isMounted;
 
     if (container.type === ContainerType.COMPOSABLE) {
+      window.addEventListener('message', (event) => {
+        if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK
+                    + this.#iframe.name) {
+          this.#iframe.setIframeHeight(event.data.data.height);
+        }
+      });
       this.#elements.forEach((element) => {
-        this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED
-          + formatFrameNameToId(element.elementName), (data) => {
-          if (data.name === element.elementName) {
-            updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, `${element.elementType}_${METRIC_TYPES.EVENTS.MOUNTED}`);
+        window.addEventListener('message', (event) => {
+          if (event.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+            + formatFrameNameToId(element.elementName)) {
             element.isMounted = true;
             this.#mounted = true;
-            this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
-              + this.#iframe.name,
-            {}, (payload:any) => {
-              this.#iframe.setIframeHeight(payload.height);
-            });
           }
         });
       });
@@ -528,10 +528,6 @@ class CollectElement extends SkyflowElement {
               this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
                 + this.#iframe.name,
               {}, (payload:any) => {
-                this.#iframe.setIframeHeight(payload.height);
-              });
-              this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK
-                + this.#iframe.name, (payload:any) => {
                 this.#iframe.setIframeHeight(payload.height);
               });
 
