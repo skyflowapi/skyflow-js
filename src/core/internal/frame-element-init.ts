@@ -62,13 +62,14 @@ export default class FrameElementInit {
     };
     this.updateGroupData();
     this.createContainerDiv(this.group);
-    bus.emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
-      this.#context = data.context;
-      data.client.config = {
-        ...data.client.config,
-      };
-      this.#client = Client.fromJSON(data.client) as any;
-    });
+    bus.target(this.clientMetaData.clientDomain)
+      .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
+        this.#context = data.context;
+        data.client.config = {
+          ...data.client.config,
+        };
+        this.#client = Client.fromJSON(data.client) as any;
+      });
 
     window.addEventListener('message', this.handleCollectCall);
   }
