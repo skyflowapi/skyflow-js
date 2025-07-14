@@ -90,13 +90,13 @@ export default class FrameElementInit {
               });
           window?.parent.postMessage({
             type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
-            records,
+            data: records,
           }, '*');
         })
         .catch((error) => {
           window?.parent.postMessage({
             type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
-            error,
+            data: error,
           }, '*');
           bus
           // .target(this.clientMetaData.clientDomain)
