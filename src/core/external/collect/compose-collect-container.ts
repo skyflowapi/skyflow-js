@@ -408,22 +408,25 @@ class ComposableContainer extends Container {
               },
             });
           }).catch((err:any) => {
-            console.error('Error getting access token:', err);
             printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
             reject(err);
           });
           window.addEventListener('message', (event) => {
-            console.log('Message received in collect:', event.data);
+            // console.log('Message received in collect:', event.data);
             if (event.data?.type
               === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.#containerId) {
-              if (!event.data || event.data?.error) {
-                printLog(`${JSON.stringify(event.data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                reject(event.data?.error);
-              } else {
+              const data = event.data.data;
+              if (!data || data?.error) {
+                printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data?.error);
+              } else if (data?.records) {
                 printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                   MessageType.LOG,
                   this.#context.logLevel);
-                resolve(event.data);
+                resolve(data);
+              } else {
+                printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data);
               }
             }
           });

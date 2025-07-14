@@ -65,7 +65,6 @@ export default class FrameElementInit {
     bus
       // .target(this.clientMetaData.clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
-        console.log('Received composable container data:', data);
         this.#context = data.context;
         data.client.config = {
           ...data.client.config,
@@ -80,11 +79,9 @@ export default class FrameElementInit {
     // if (event.origin === this.clientMetaData.clientDomain) {
     if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
          + this.containerId) {
-      console.log('Received composable call request:', event.data);
       this.tokenize(event.data.data, event.data.clientConfig)
         .then((response: any) => {
           const records = response.records;
-          console.log('Tokenization response:', records);
           bus
           // .target(this.clientMetaData.clientDomain)
             .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
@@ -97,7 +94,6 @@ export default class FrameElementInit {
           }, '*');
         })
         .catch((error) => {
-          console.log('Tokenization error:', error);
           window?.parent.postMessage({
             type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
             error,
@@ -111,7 +107,6 @@ export default class FrameElementInit {
         });
     }
     if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId) {
-      // console.log('Received composable container event:', event.data);
       const data = event.data;
       this.#context = data.context;
       data.client.config = {
