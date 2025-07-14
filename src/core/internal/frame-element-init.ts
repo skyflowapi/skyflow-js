@@ -97,6 +97,15 @@ export default class FrameElementInit {
               });
         });
     }
+    if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId) {
+      // console.log('Received composable container event:', event.data);
+      const data = event.data;
+      this.#context = data.context;
+      data.client.config = {
+        ...data.client.config,
+      };
+      this.#client = Client.fromJSON(data.client) as any;
+    }
     // }
   };
 

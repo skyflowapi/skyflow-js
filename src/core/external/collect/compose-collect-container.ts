@@ -337,6 +337,11 @@ class ComposableContainer extends Container {
   };
 
   collect = (options: ICollectOptions = { tokens: true }) :Promise<CollectResponse> => {
+    this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, {
+      client: this.#metaData.clientJSON,
+      context: this.#context,
+    });
+    this.#isComposableFrameReady = true;
     if (this.#isComposableFrameReady) {
       return new Promise((resolve, reject) => {
         try {
@@ -437,6 +442,10 @@ class ComposableContainer extends Container {
             frameId: this.#tempElements.elementName,
             elementId: element.elementName,
           });
+        });
+        this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, {
+          client: this.#metaData.clientJSON,
+          context: this.#context,
         });
         bus
           .target(properties.IFRAME_SECURE_ORIGIN)
