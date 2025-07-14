@@ -97,7 +97,7 @@ export default class FrameElementInit {
             }, this.clientMetaData.clientDomain);
           });
       } else if (event.data.data && event.data.data.type === COLLECT_TYPES.FILE_UPLOAD) {
-        this.parallelUploadFiles(event.data.data, event.data.clientConfig.authToken)
+        this.parallelUploadFiles(event.data.data, event.data.clientConfig)
           .then((response: any) => {
             window?.parent.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.containerId,
@@ -123,7 +123,7 @@ export default class FrameElementInit {
     // }
   };
 
-  private parallelUploadFiles = (options, bearerToken) => new Promise((rootResolve, rootReject) => {
+  private parallelUploadFiles = (options, config) => new Promise((rootResolve, rootReject) => {
     const promises: Promise<unknown>[] = [];
     this.iframeFormList.forEach((inputElement) => {
       let res: Promise<unknown>;
@@ -132,7 +132,7 @@ export default class FrameElementInit {
           inputElement.fieldType
           === ELEMENTS.FILE_INPUT.name
         ) {
-          res = this.uploadFiles(inputElement, bearerToken);
+          res = this.uploadFiles(inputElement, config);
           promises.push(res);
         }
       }
@@ -140,15 +140,18 @@ export default class FrameElementInit {
     Promise.allSettled(
       promises,
     ).then((resultSet) => {
-      const fileUploadResponse: Record<string, any>[] = [];
-      const errorResponse: Record<string, any>[] = [];
+      const fileUploadResponse: any[] = [];
+      const errorResponse: any[] = [];
       resultSet.forEach((result) => {
         if (result.status === 'fulfilled') {
           if (result.value !== undefined && result.value !== null) {
             if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
               errorResponse.push(result.value);
             } else {
-              fileUploadResponse.push(result.value);
+              const response = typeof result.value === 'string'
+                ? JSON.parse(result.value)
+                : result.value;
+              fileUploadResponse.push(response);
             }
           }
         } else if (result.status === 'rejected') {
@@ -162,7 +165,8 @@ export default class FrameElementInit {
     });
   });
 
-  uploadFiles = (fileElement, bearerToken) => {
+  uploadFiles = (fileElement, clientConfig) => {
+    this.#client = new Client(clientConfig, {});
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const fileUploadObject: any = {};
 
@@ -213,12 +217,12 @@ export default class FrameElementInit {
           requestMethod: 'POST',
           url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${tableName}/${skyflowID}/files`,
           headers: {
-            authorization: `Bearer ${bearerToken}`,
+            authorization: `Bearer ${clientConfig.authToken}`,
             'content-type': 'multipart/form-data',
           },
         })
         .then((response: any) => {
-          rootResolve(constructUploadResponse(response));
+          rootResolve(response);
         })
         .catch((error) => {
           rootReject(error);
