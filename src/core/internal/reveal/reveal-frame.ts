@@ -86,7 +86,7 @@ class RevealFrame {
   constructor(record, context, id, rootDiv?) {
     console.log('Initializing RevealFrame', document.location.href, document, record);
     this.#skyflowContainerId = id;
-    this.#name = window.name;
+    this.#name = rootDiv ? record?.name : window.name;
     this.#containerId = getValueFromName(this.#name, 2);
     const encodedClientDomain = getValueFromName(this.#name, 4);
     const clientDomain = getAtobValue(encodedClientDomain);
@@ -100,14 +100,14 @@ class RevealFrame {
     getCssClassesFromJss(REVEAL_ELEMENT_DIV_STYLE, 'div');
 
     this.#labelElement = document.createElement('span');
-    this.#labelElement.className = `SkyflowElement-label-${STYLE_TYPE.BASE}`;
+    this.#labelElement.className = `SkyflowElement-${this.#name}-label-${STYLE_TYPE.BASE}`;
 
     this.#dataElememt = document.createElement('span');
-    this.#dataElememt.className = `SkyflowElement-content-${STYLE_TYPE.BASE}`;
+    this.#dataElememt.className = `SkyflowElement-${this.#name}-content-${STYLE_TYPE.BASE}`;
     this.#dataElememt.id = this.#name;
 
     this.#errorElement = document.createElement('span');
-    this.#errorElement.className = `SkyflowElement-error-${STYLE_TYPE.BASE}`;
+    this.#errorElement.className = `SkyflowElement-${this.#name}-error-${STYLE_TYPE.BASE}`;
 
     if (this.#record.enableCopy) {
       this.domCopy = document.createElement('img');
@@ -134,13 +134,14 @@ class RevealFrame {
           ...REVEAL_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.BASE],
           ...this.#record.labelStyles[STYLE_TYPE.BASE],
         };
-        getCssClassesFromJss(this.#labelStyles, 'label');
+        // getCssClassesFromJss(this.#labelStyles, 'label');
+        getCssClassesFromJss(this.#labelStyles, `${this.#name}-label`);
 
         if (this.#record.labelStyles[STYLE_TYPE.GLOBAL]) {
           generateCssWithoutClass(this.#record.labelStyles[STYLE_TYPE.GLOBAL]);
         }
       } else {
-        getCssClassesFromJss(REVEAL_ELEMENT_LABEL_DEFAULT_STYLES, 'label');
+        getCssClassesFromJss(REVEAL_ELEMENT_LABEL_DEFAULT_STYLES, `${this.#name}-label`);
       }
     }
     this.updateDataView();
@@ -149,7 +150,7 @@ class RevealFrame {
       this.#inputStyles[STYLE_TYPE.BASE] = {
         ...this.#record.inputStyles[STYLE_TYPE.BASE],
       };
-      getCssClassesFromJss(this.#inputStyles, 'content');
+      getCssClassesFromJss(this.#inputStyles, `${this.#name}-content`);
       if (this.#record.inputStyles[STYLE_TYPE.GLOBAL]) {
         generateCssWithoutClass(this.#record.inputStyles[STYLE_TYPE.GLOBAL]);
       }
@@ -164,14 +165,14 @@ class RevealFrame {
         ...REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES[STYLE_TYPE.BASE],
         ...this.#record.errorTextStyles[STYLE_TYPE.BASE],
       };
-      getCssClassesFromJss(this.#errorTextStyles, 'error');
+      getCssClassesFromJss(this.#errorTextStyles, `${this.#name}-error`);
       if (this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]) {
         generateCssWithoutClass(this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]);
       }
     } else {
       getCssClassesFromJss(
         REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
-        'error',
+        `${this.#name}-error`,
       );
     }
 
@@ -441,7 +442,7 @@ class RevealFrame {
         ...this.#inputStyles,
         ...this.#record.inputStyles[STYLE_TYPE.BASE],
       };
-      getCssClassesFromJss(this.#inputStyles, 'content');
+      getCssClassesFromJss(this.#inputStyles, `${this.#name}-content`);
       if (this.#record.inputStyles[STYLE_TYPE.GLOBAL]) {
         const newInputGlobalStyles = {
           ...this.#inputStyles[STYLE_TYPE.GLOBAL],
@@ -456,7 +457,7 @@ class RevealFrame {
         ...REVEAL_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.BASE],
         ...this.#record.labelStyles[STYLE_TYPE.BASE],
       };
-      getCssClassesFromJss(this.#labelStyles, 'label');
+      getCssClassesFromJss(this.#labelStyles, `${this.#name}-label`);
 
       if (this.#record.labelStyles[STYLE_TYPE.GLOBAL]) {
         const newLabelGlobalStyles = {
@@ -472,7 +473,7 @@ class RevealFrame {
         ...this.#errorTextStyles[STYLE_TYPE.BASE],
         ...this.#record.errorTextStyles[STYLE_TYPE.BASE],
       };
-      getCssClassesFromJss(this.#errorTextStyles, 'error');
+      getCssClassesFromJss(this.#errorTextStyles, `${this.#name}-error`);
       if (this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]) {
         const newErrorTextGlobalStyles = {
           ...this.#errorTextStyles[STYLE_TYPE.GLOBAL],
