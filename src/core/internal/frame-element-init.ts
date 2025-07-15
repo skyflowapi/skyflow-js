@@ -86,6 +86,7 @@ export default class FrameElementInit {
     const {
       rows, styles, errorTextStyles,
     } = this.group;
+    console.log('window \t', window);
     const isComposableContainer = getContainerType(window.name) === ContainerType.COMPOSABLE;
     this.group.spacing = getValueAndItsUnit(this.group.spacing).join('');
     const rootDiv = document.createElement('div');

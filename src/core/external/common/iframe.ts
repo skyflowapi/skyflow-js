@@ -30,6 +30,7 @@ export default class IFrame {
   }
 
   mount = (domElement, elementId?: string, data?: any) => {
+    console.log('mounting iframe with name \t', data);
     this.unmount();
     try {
       if (typeof domElement === 'string') {

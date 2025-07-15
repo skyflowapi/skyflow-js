@@ -47,11 +47,13 @@ import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
 import ThreeDS from './core/external/threeds/threeds';
+import RevealComposableContainer from './core/external/reveal/compose-reveal-container';
 
 export enum ContainerType {
   COLLECT = 'COLLECT',
   REVEAL = 'REVEAL',
   COMPOSABLE = 'COMPOSABLE',
+  REVEAL_COMPOSABLE = 'REVEAL_COMPOSABLE',
 }
 export interface ISkyflow {
   vaultID?: string;
@@ -167,6 +169,9 @@ class Skyflow {
   container(type: ContainerType.COLLECT, options?: ContainerOptions): CollectContainer;
   container(type: ContainerType.COMPOSABLE, options?: ContainerOptions): ComposableContainer;
   container(type: ContainerType.REVEAL, options?: ContainerOptions): RevealContainer;
+  container(
+    type: ContainerType.REVEAL_COMPOSABLE, options: ContainerOptions
+  ): RevealComposableContainer;
   container(type: ContainerType, options?: ContainerOptions) {
     switch (type) {
       case ContainerType.COLLECT: {
@@ -211,6 +216,22 @@ class Skyflow {
           MessageType.LOG,
           this.#logLevel);
         return collectContainer;
+      }
+      case ContainerType.REVEAL_COMPOSABLE: {
+        validateComposableContainerOptions(options);
+        console.log('metadata is \t', this.#metadata);
+        const revealComposableContainer = new RevealComposableContainer(options, {
+          ...this.#metadata,
+          clientJSON: this.#client.toJSON(),
+          containerType: type,
+          skyflowContainer: this.#skyflowContainer,
+        },
+        this.#skyflowElements,
+        { logLevel: this.#logLevel, env: this.#env });
+        printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
+          MessageType.LOG,
+          this.#logLevel);
+        return revealComposableContainer;
       }
 
       default:

@@ -8,43 +8,30 @@ import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import { ContainerType } from '../../../skyflow';
 import {
-  Context, MessageType,
-  RedactionType, RevealResponse,
+  Context, IRevealElementInput, IRevealElementOptions, MessageType, RevealResponse,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateInputFormatOptions, validateRevealElementRecords } from '../../../utils/validators';
 import {
-  CONTROLLER_STYLES, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
+  CONTROLLER_STYLES,
+  ELEMENT_EVENTS_TO_CONTAINER,
+  ELEMENT_EVENTS_TO_IFRAME,
+  FRAME_REVEAL,
+  REVEAL_FRAME_CONTROLLER,
   REVEAL_TYPES,
 } from '../../constants';
 import Container from '../common/container';
-import RevealElement from './reveal-element';
 import properties from '../../../properties';
-
-export interface IRevealElementInput {
-  token?: string;
-  skyflowID?: string;
-  table?: string;
-  column?: string;
-  redaction?: RedactionType;
-  inputStyles?: object;
-  label?: string;
-  labelStyles?: object;
-  altText?: string;
-  errorTextStyles?: object;
-}
-
-export interface IRevealElementOptions {
-  enableCopy?: boolean;
-  format?: string;
-  translation?:Record<string, string>
-}
+import deepClone from '../../../libs/deep-clone';
+import RevealElement from './reveal-element copy';
 
 const CLASS_NAME = 'RevealContainer';
 class RevealContainer extends Container {
   #revealRecords: IRevealElementInput[] = [];
+
+  #elements: Record<string, RevealElement> = {};
 
   #revealElements: RevealElement[] = [];
 
@@ -54,7 +41,7 @@ class RevealContainer extends Container {
 
   #containerId: string;
 
-  #eventEmmiter: EventEmitter;
+  #eventEmitter: EventEmitter;
 
   #isRevealCalled: boolean = false;
 
@@ -88,7 +75,7 @@ class RevealContainer extends Container {
     };
     this.#skyflowElements = skyflowElements;
     this.#containerId = uuid();
-    this.#eventEmmiter = new EventEmitter();
+    this.#eventEmitter = new EventEmitter();
     this.#context = context;
     const clientDomain = this.#metaData.clientDomain || '';
     const iframe = iframer({
@@ -122,7 +109,7 @@ class RevealContainer extends Container {
           // this.#mountedRecords.length === this.#revealElements.length;
           if (this.#isRevealCalled && this.#isElementsMounted) {
             // eslint-disable-next-line no-underscore-dangle
-            this.#eventEmmiter._emit(
+            this.#eventEmitter._emit(
               ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED
                 + this.#containerId,
               {
@@ -138,16 +125,132 @@ class RevealContainer extends Container {
     // this.#revealRecords.push(record);
     const elementId = uuid();
     validateInputFormatOptions(options);
-    const revealElement = new RevealElement(record, options, this.#metaData,
-      {
-        containerId: this.#containerId,
-        isMounted: this.#isMounted,
-        eventEmitter: this.#eventEmmiter,
-      }, elementId, this.#context);
-    this.#revealElements.push(revealElement);
-    this.#skyflowElements[elementId] = revealElement;
-    return revealElement;
+    const elementGroup = {
+      rows: [
+        {
+          elements: [
+            {
+              elementId,
+              containerType: ContainerType.REVEAL,
+              record,
+              options,
+            },
+          ],
+        },
+      ],
+    };
+    return this.#createMultipleElement(elementGroup, true);
+
+    // if (this.#hasElementName(record.name)) {
+    // const revealElement = new RevealElement(record, options, this.#metaData,
+    //   {
+    //     containerId: this.#containerId,
+    //     isMounted: this.#isMounted,
+    //     eventEmitter: this.#eventEmmiter,
+    //   }, elementId, this.#context);
+    // this.#revealElements.push(revealElement);
+    // this.#skyflowElements[elementId] = revealElement;
+    // return revealElement;
   }
+
+  #createMultipleElement = (
+    multipleElements: any,
+    isSingleElementAPI: boolean = false,
+  ) => {
+    const elements: any[] = [];
+    const tempElements = deepClone(multipleElements);
+    tempElements.rows.forEach((row) => {
+      row.elements.forEach((element) => {
+        const options = element;
+        options.isMounted = false;
+        elements.push(options);
+      });
+    });
+
+    tempElements.elementName = isSingleElementAPI
+      ? elements[0].elementName
+      : `${FRAME_REVEAL}:group:${btoa(tempElements.name)}`;
+
+    if (
+      isSingleElementAPI
+      && !this.#elements[elements[0].elementName]
+      && this.#hasElementName(elements[0].name)
+    ) {
+      throw new SkyflowError(
+        SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [`${elements[0].name}`], true,
+      );
+    }
+
+    let element = this.#elements[tempElements.elementName];
+    if (element) {
+      if (isSingleElementAPI) {
+        element.updateElementGroup(elements[0]);
+      } else {
+        element.updateElementGroup(tempElements);
+      }
+    } else {
+      const elementId = uuid();
+      element = new RevealElement(
+        elementId,
+        tempElements,
+        this.#metaData,
+        {
+          containerId: this.#containerId,
+          isMounted: this.#isMounted,
+          type: ContainerType.REVEAL,
+        },
+        isSingleElementAPI,
+        this.#destroyCallback,
+        this.#updateCallback,
+        this.#context,
+        this.#eventEmitter,
+      );
+      this.#elements[tempElements.elementName] = element;
+      this.#skyflowElements[elementId] = element;
+    }
+
+    if (!isSingleElementAPI) {
+      elements.forEach((iElement) => {
+        const name = iElement.elementName;
+        if (!this.#elements[name]) {
+          this.#elements[name] = this.create(iElement.elementType, iElement);
+        } else {
+          this.#elements[name].updateElementGroup(iElement);
+        }
+      });
+    }
+    return element;
+  };
+
+  #removeElement = (elementName: string) => {
+    Object.keys(this.#elements).forEach((element) => {
+      if (element === elementName) delete this.#elements[element];
+    });
+  };
+
+  #destroyCallback = (elementNames: string[]) => {
+    elementNames.forEach((elementName) => {
+      this.#removeElement(elementName);
+    });
+  };
+
+  #updateCallback = (elements: any[]) => {
+    elements.forEach((element) => {
+      if (this.#elements[element.elementName]) {
+        this.#elements[element.elementName].updateElementGroup(element);
+      }
+    });
+  };
+
+  #hasElementName = (name: string) => {
+    const tempElements = Object.keys(this.#elements);
+    for (let i = 0; i < tempElements.length; i += 1) {
+      if (atob(tempElements[i].split(':')[2]) === name) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   reveal(): Promise<RevealResponse> {
     this.#isRevealCalled = true;
@@ -178,7 +281,7 @@ class RevealContainer extends Container {
               reject(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL));
             }, 10000);
 
-            this.#eventEmmiter.on(
+            this.#eventEmitter.on(
               ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
               () => {
                 clearTimeout(timeout);
@@ -219,7 +322,7 @@ class RevealContainer extends Container {
             reject(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL));
           }, 10000);
 
-          this.#eventEmmiter.on(
+          this.#eventEmitter.on(
             ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
             () => {
               clearTimeout(timeout);

@@ -24,6 +24,11 @@ import FrameElementInit from './core/internal/frame-element-init';
     const frameName = root.name;
     const frameType = getValueFromName(frameName, 0);
     const frameId = getValueFromName(frameName, 1);
+
+    console.log('frameName is \t', frameName);
+    console.log('frameType is \t', frameType);
+    console.log('frameId is \t', frameId);
+
     if (frameType === SKYFLOW_FRAME_CONTROLLER) {
       SkyflowFrameController.init(frameId);
     } else if (frameType === FRAME_ELEMENT) {
@@ -53,6 +58,7 @@ import FrameElementInit from './core/internal/frame-element-init';
       RevealFrame.init();
     }
   } catch (e) {
+    console.log('error is \t', e);
     throw new Error(parameterizedString(logs.errorLogs.INVALID_IFRAME));
   }
 }(window));

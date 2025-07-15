@@ -188,6 +188,46 @@ export function validateAndSetupGroupOptions(
   return newGroup;
 }
 
+export function validateAndSetupGroupOptionsForReveal(
+  oldGroup: any,
+  newGroup: any = {},
+  setup = true,
+) {
+  newGroup = { ...oldGroup, ...newGroup };
+  newGroup.rows.forEach((row, rowIndex) => {
+    const newRow = row;
+    const oldRow = oldGroup.rows[rowIndex];
+    newGroup.rows[rowIndex] = { ...oldRow, ...newRow };
+    newRow.elements.forEach((element, elementIndex) => {
+      const oldElement = oldRow.elements[elementIndex];
+      const newElement = element;
+      newRow.elements[elementIndex] = {
+        ...oldElement,
+        ...newElement,
+        elementName: oldElement.elementName,
+      };
+
+      const classes = newElement.classes || {};
+      const styles = newElement.styles || {};
+      styles.base = { ...INPUT_STYLES, ...styles.base };
+
+      newElement.classes = classes;
+      newElement.styles = styles;
+
+      const labelClasses = newElement?.labelStyles?.classes || {};
+      const labelStyles = newElement?.labelStyles?.styles || {};
+
+      if (setup) {
+        buildStylesFromClassesAndStyles(labelClasses, labelStyles);
+      }
+
+      newElement.labelStyles = { labelClasses };
+      newElement.labelStyles.styles = labelStyles;
+    });
+  });
+  return newGroup;
+}
+
 export const getElements = (group: any) => {
   const { rows } = group;
   const elements: string[] = [];

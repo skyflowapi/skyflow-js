@@ -33,6 +33,8 @@ export {
   LabelStyles,
   ErrorTextStyles,
   RedactionType,
+  IRevealElementInput as RevealElementInput,
+  IRevealElementOptions as RevealElementOptions,
   IRevealRecord as RevealRecord,
   RevealResponse,
   RenderFileResponse,
@@ -43,11 +45,6 @@ export {
   Env,
   ElementState,
 } from './utils/common';
-
-export {
-  IRevealElementInput as RevealElementInput,
-  IRevealElementOptions as RevealElementOptions,
-} from './core/external/reveal/reveal-container';
 
 export { ThreeDSBrowserDetails } from './core/external/threeds/threeds';
 

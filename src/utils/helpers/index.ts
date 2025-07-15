@@ -7,7 +7,6 @@ import {
   CardType,
   COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType,
 } from '../../core/constants';
-import { IRevealElementOptions } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
 import { ContainerType, ISkyflow } from '../../skyflow';
 import SKYFLOW_ERROR_CODE from '../constants';
@@ -15,6 +14,7 @@ import { detectCardType, isValidURL, validateBooleanOptions } from '../validator
 import properties from '../../properties';
 import uuid from '../../libs/uuid';
 import SDKDetails from '../../../package.json';
+import { IRevealElementOptions } from '../common';
 
 const { getType } = require('mime');
 

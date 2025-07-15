@@ -70,6 +70,10 @@ class RevealFrame {
     const configIndex = url.indexOf('?');
     const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
     const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
+    console.log('url is \t', url);
+    console.log('config index is \t', configIndex);
+    console.log('encoded string is \t', encodedString);
+    console.log('parsedRecord is \t', parsedRecord);
     const skyflowContainerId = parsedRecord.clientJSON.metaData.uuid;
     RevealFrame.revealFrame = new RevealFrame(parsedRecord.record,
       parsedRecord.context, skyflowContainerId);
@@ -81,7 +85,9 @@ class RevealFrame {
     this.#containerId = getValueFromName(this.#name, 2);
     const encodedClientDomain = getValueFromName(this.#name, 4);
     const clientDomain = getAtobValue(encodedClientDomain);
+    console.log('clientDomain is \t', clientDomain);
     this.#clientDomain = document.referrer.split('/').slice(0, 3).join('/') || clientDomain;
+    console.log('record is \t', record);
     this.#record = record;
     this.#context = context;
     this.isRevealCalled = false;

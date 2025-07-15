@@ -4,7 +4,10 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
-import { Context, MessageType, RenderFileResponse } from '../../../utils/common';
+import {
+  Context, IRevealElementInput,
+  MessageType, RenderFileResponse,
+} from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
   // eslint-disable-next-line max-len
@@ -20,8 +23,7 @@ import {
 } from '../../constants';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
-import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
-import { formatRevealElementOptions } from '../../../utils/helpers';
+import { formatFrameNameToId } from '../../../utils/helpers';
 import {
   initalizeMetricObject,
   pushElementEventWithTimeout,
@@ -32,6 +34,10 @@ import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { formatForRenderClient } from '../../../core-utils/reveal';
 import properties from '../../../properties';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
+import EventEmitter from '../../../event-emitter';
+import deepClone from '../../../libs/deep-clone';
+import { getElements, validateAndSetupGroupOptionsForReveal } from '../../../libs/element-options';
+import Bus from '../../../libs/bus';
 
 const CLASS_NAME = 'RevealElement';
 
@@ -64,24 +70,44 @@ class RevealElement extends SkyflowElement {
 
   #isSkyflowFrameReady: boolean = false;
 
-  constructor(record: IRevealElementInput,
-    options: IRevealElementOptions = {},
-    metaData: any, container: any, elementId: string, context: Context) {
+  #isSingleElementAPI: boolean = false;
+
+  #elements: any[];
+
+  #groupEmitter: EventEmitter | undefined = undefined;
+
+  #updateCallbacks: Function[] = [];
+
+  #group: any;
+
+  #bus = new Bus();
+
+  constructor(
+    elementId: string,
+    elementGroup: any,
+    metaData: any,
+    container: any,
+    isSingleElementAPI: boolean = false,
+    destroyCallback: Function,
+    updateCallback: Function,
+    context: Context,
+    groupEventEmitter?: EventEmitter,
+  ) {
     super();
-    this.#elementId = elementId;
-    this.#metaData = metaData;
-    this.#clientId = this.#metaData.uuid;
-    this.#recordData = {
-      ...record,
-      ...formatRevealElementOptions(options),
-    };
     this.#containerId = container.containerId;
-    this.#readyToMount = container.isMounted;
-    this.#eventEmitter = container.eventEmitter;
+    this.#elementId = elementId;
     this.#context = context;
+    this.#metaData = metaData;
+    this.#group = validateAndSetupGroupOptionsForReveal(elementGroup);
+    this.#elements = getElements(elementGroup);
+    this.#isSingleElementAPI = isSingleElementAPI;
+
+    if (groupEventEmitter) this.#groupEmitter = groupEventEmitter;
+
     initalizeMetricObject(metaData, elementId);
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, ELEMENT_TYPES.REVEAL);
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.CONTAINER_NAME, ELEMENT_TYPES.REVEAL);
+
     this.#iframe = new IFrame(
       `${FRAME_REVEAL}:${btoa(uuid())}`,
       metaData,
@@ -462,6 +488,59 @@ class RevealElement extends SkyflowElement {
         });
     }
   }
+
+  updateElementGroup = (group) => {
+    let tempGroup = deepClone(group);
+    const callback = () => {
+      if (this.#isSingleElementAPI) {
+        tempGroup = {
+          rows: [
+            {
+              elements: [
+                {
+                  ...tempGroup,
+                },
+              ],
+            },
+          ],
+        };
+      }
+      this.#group = validateAndSetupGroupOptionsForReveal(this.#group, tempGroup);
+      this.#elements = getElements(this.#group);
+
+      if (this.#isSingleElementAPI) {
+        this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE_REVEAL
+            + formatFrameNameToId(this.#iframe.name), {
+          name: this.#iframe.name,
+          options: this.#elements[0],
+          isSingleElementAPI: true,
+        });
+      } else {
+        // todo: check whether we need to update
+        this.#elements.forEach((elementOptions) => {
+          this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE
+              + formatFrameNameToId(this.#iframe.name), {
+            name: elementOptions.elementName,
+            options: elementOptions,
+            isSingleElementAPI: true,
+          });
+        });
+
+        this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE
+            + formatFrameNameToId(this.#iframe.name), {
+          name: this.#iframe.name,
+          options: this.#group,
+          isSingleElementAPI: false,
+        });
+      }
+    };
+
+    if (this.#isMounted) {
+      callback();
+    } else {
+      this.#updateCallbacks.push(callback);
+    }
+  };
 }
 
 export default RevealElement;

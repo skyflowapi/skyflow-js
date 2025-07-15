@@ -186,6 +186,25 @@ export interface SharedMeticsObjectType {
   records: MeticsObjectType[];
 }
 
+export interface IRevealElementInput {
+  token?: string;
+  skyflowID?: string;
+  table?: string;
+  column?: string;
+  redaction?: RedactionType;
+  inputStyles?: object;
+  label?: string;
+  labelStyles?: object;
+  altText?: string;
+  errorTextStyles?: object;
+}
+
+export interface IRevealElementOptions {
+  enableCopy?: boolean;
+  format?: string;
+  translation?:Record<string, string>
+}
+
 export interface InsertResponse {
   records?: InsertResponseRecords[],
   errors?: ErrorRecord[],

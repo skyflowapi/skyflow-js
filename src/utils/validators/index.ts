@@ -9,7 +9,6 @@ import {
   DEFAULT_CARD_LENGTH_RANGE,
   ElementType,
 } from '../../core/constants';
-import { IRevealElementInput } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
 import { ISkyflow } from '../../skyflow';
 import {
@@ -22,6 +21,7 @@ import {
   IDeleteRecordInput,
   IGetOptions,
   CollectElementInput,
+  IRevealElementInput,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { appendZeroToOne } from '../helpers';
