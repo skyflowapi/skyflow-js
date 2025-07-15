@@ -227,6 +227,7 @@ class Skyflow {
           clientJSON: this.#client.toJSON(),
           containerType: type,
           skyflowContainer: this.#skyflowContainer,
+          getSkyflowBearerToken: this.#getSkyflowBearerToken,
         },
         this.#skyflowElements,
         { logLevel: this.#logLevel }, options);
