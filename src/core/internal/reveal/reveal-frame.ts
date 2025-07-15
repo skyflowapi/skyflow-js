@@ -77,12 +77,14 @@ class RevealFrame {
     const configIndex = url.indexOf('?');
     const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
     const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
+    console.log('LK', JSON.stringify(parsedRecord));
     const skyflowContainerId = parsedRecord.clientJSON.metaData.uuid;
     RevealFrame.revealFrame = new RevealFrame(parsedRecord.record,
       parsedRecord.context, skyflowContainerId);
   }
 
-  constructor(record, context, id) {
+  constructor(record, context, id, rootDiv?) {
+    console.log('Initializing RevealFrame', document.location.href, document, record);
     this.#skyflowContainerId = id;
     this.#name = window.name;
     this.#containerId = getValueFromName(this.#name, 2);
@@ -174,8 +176,11 @@ class RevealFrame {
     }
 
     this.#elementContainer.appendChild(this.#dataElememt);
+    console.log('RevealFrame', this.#elementContainer);
 
-    document.body.append(this.#elementContainer);
+    if (rootDiv) rootDiv.append(this.#elementContainer);
+    else document.body.append(this.#elementContainer);
+    // document.body.append(this.#elementContainer);
 
     bus.emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#name, { name: this.#name });
 

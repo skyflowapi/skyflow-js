@@ -30,11 +30,13 @@ export const SDK_IFRAME_EVENT = 'SDK IFRAME EVENT';
 export const DOMAIN = 'US2';
 export const CORALOGIX_DOMAIN = 'https://cdn.rum-ingress-coralogix.com/coralogix/browser/latest/coralogix-browser-sdk.js';
 export const FRAME_ELEMENT = 'element';
+export const COMPOSABLE_REVEAL = 'reveal-composable';
 
 export const ELEMENT_TYPES = {
   COLLECT: 'COLLECT',
   REVEAL: 'REVEAL',
   COMPOSE: 'COMPOSABLE',
+  REVEAL_COMPOSE: 'REVEAL_COMPOSE',
 };
 
 export const EVENT_TYPES = {
