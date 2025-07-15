@@ -10,6 +10,8 @@ const logs = {
     CREATE_COLLECT_CONTAINER: '%s1 - Creating Collect container.',
     COLLECT_CONTAINER_CREATED: '%s1 - Created Collect container successfully.',
 
+    INITIALIZE_COMPOSABLE_CLIENT: '%s1 - Initializing Composable container.',
+
     CREATE_REVEAL_CONTAINER: '%s1 - Creating Reveal container.',
     REVEAL_CONTAINER_CREATED: '%s1 - Created Reveal container successfully.',
 

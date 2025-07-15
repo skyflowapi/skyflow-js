@@ -15,17 +15,22 @@ import {
   RENDER_ELEMENT_IMAGE_STYLES,
   DEFAULT_FILE_RENDER_ERROR,
   ELEMENT_EVENTS_TO_CLIENT,
+  REVEAL_TYPES,
 } from '../../constants';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import {
   printLog, parameterizedString,
 } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
-import { Context, MessageType } from '../../../utils/common';
+import {
+  Context, IRenderResponseType, IRevealRecord, MessageType,
+} from '../../../utils/common';
 import {
   constructMaskTranslation,
   getAtobValue, getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
+import { formatForRenderClient, getFileURLFromVaultBySkyflowID } from '../../../core-utils/reveal';
+import Client from '../../../client';
 
 const { getType } = require('mime');
 
@@ -64,6 +69,8 @@ class RevealFrame {
   private isRevealCalled?: boolean;
 
   #skyflowContainerId: string = '';
+
+  #client!: Client;
 
   static init() {
     const url = window.location?.href;
@@ -172,6 +179,18 @@ class RevealFrame {
 
     bus.emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#name, { name: this.#name });
 
+    window.parent.postMessage({
+      type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#name,
+      data: {
+        name: this.#name,
+      },
+    }, this.#clientDomain);
+
+    window.parent.postMessage({
+      type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+      data: { height: this.#elementContainer.scrollHeight, name: this.#name },
+    }, this.#clientDomain);
+
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (_, callback) => {
       callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
     });
@@ -222,33 +241,95 @@ class RevealFrame {
       });
     this.updateRevealElementOptions();
 
-    const sub2 = (responseUrl) => {
-      if (responseUrl.iframeName === this.#name) {
-        if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
-          this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
-          if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
-            this.#dataElememt.innerText = this.#record.altText;
-          }
-          bus
-            .emit(
-              ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
-              {
-                height: this.#elementContainer.scrollHeight,
-              }, () => {
-              },
+    window.addEventListener('message', (event) => {
+      if (event.data
+        && event.data.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#name) {
+        if (event.data.data.iframeName === this.#name
+          && event.data.data.type === REVEAL_TYPES.RENDER_FILE) {
+          this.renderFile(this.#record, event.data.clientConfig).then((resolvedResult) => {
+            const result = formatForRenderClient(
+              resolvedResult as IRenderResponseType, this.#record.column,
             );
-        } else {
-          const ext = this.getExtension(responseUrl.url);
-          this.addFileRender(responseUrl.url, ext);
+            window.parent.postMessage({
+              type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
+              data: {
+                type: REVEAL_TYPES.RENDER_FILE,
+                result,
+              },
+            }, this.#clientDomain);
+          }).catch((error) => {
+            window.parent.postMessage({
+              type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
+              data: {
+                type: REVEAL_TYPES.RENDER_FILE,
+                result: {
+                  errors: error,
+                },
+              },
+            }, this.#clientDomain);
+          });
         }
       }
-    };
-    bus
-      .target(window.location.origin)
-      .on(
-        ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#name,
-        sub2,
-      );
+      if (event.data && event.data.type === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name) {
+        if (event.data.data && event.data.data.height) {
+          window.parent.postMessage({
+            type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+            data: { height: this.#elementContainer.scrollHeight, name: this.#name },
+          }, this.#clientDomain);
+        }
+      }
+    });
+  }
+
+  private sub2 = (responseUrl) => {
+    if (responseUrl.iframeName === this.#name) {
+      if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
+        this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
+        if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
+          this.#dataElememt.innerText = this.#record.altText;
+        }
+        bus
+          .emit(
+            ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+            {
+              height: this.#elementContainer.scrollHeight,
+            }, () => {
+            },
+          );
+      } else {
+        const ext = this.getExtension(responseUrl.url);
+        this.addFileRender(responseUrl.url, ext);
+      }
+    }
+  };
+
+  private renderFile(data: IRevealRecord, clientConfig) {
+    this.#client = new Client(clientConfig, {});
+    return new Promise((resolve, reject) => {
+      try {
+        getFileURLFromVaultBySkyflowID(data, this.#client, clientConfig.authToken)
+          .then((resolvedResult) => {
+            let url = '';
+            if (resolvedResult.fields && data.column) {
+              url = resolvedResult.fields[data.column];
+            }
+            this.sub2({
+              url,
+              iframeName: this.#name,
+            });
+            resolve(resolvedResult);
+          },
+          (rejectedResult) => {
+            this.sub2({
+              error: DEFAULT_FILE_RENDER_ERROR,
+              iframeName: this.#name,
+            });
+            reject(rejectedResult);
+          });
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 
   // eslint-disable-next-line class-methods-use-this

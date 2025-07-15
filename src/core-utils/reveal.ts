@@ -156,22 +156,18 @@ export const getFileURLForRender = (
 export const getFileURLFromVaultBySkyflowID = (
   skyflowIdRecord: IRevealRecord,
   client: Client,
+  authToken: string,
 ): Promise<IRenderResponseType> => new Promise((rootResolve, rootReject) => {
   try {
-    const clientId = client.toJSON().metaData.uuid || '';
-    getAccessToken(clientId).then((authToken) => {
-      getFileURLForRender(
-        skyflowIdRecord, client, authToken as string,
-      ).then((resolvedResult: IRenderResponseType) => {
-        rootResolve(resolvedResult);
-      }).catch((err: any) => {
-        const errorData = formatForRenderFileFailure(err, skyflowIdRecord.skyflowID as string,
-          skyflowIdRecord.column as string);
-        printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
-        rootReject(errorData);
-      });
-    }).catch((err) => {
-      rootReject(err);
+    getFileURLForRender(
+      skyflowIdRecord, client, authToken as string,
+    ).then((resolvedResult: IRenderResponseType) => {
+      rootResolve(resolvedResult);
+    }).catch((err: any) => {
+      const errorData = formatForRenderFileFailure(err, skyflowIdRecord.skyflowID as string,
+        skyflowIdRecord.column as string);
+      printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
+      rootReject(errorData);
     });
   } catch (err) {
     rootReject(err);
