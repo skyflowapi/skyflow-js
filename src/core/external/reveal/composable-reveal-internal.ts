@@ -224,7 +224,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
     }
   }
 
-  #emitEvent = (eventName: string, options?: Record<string, any>, callback?: any) => {
+  #emitEvent = (eventName: string, options?: Record<string, any>) => {
     if (this.#shadowRoot) {
       const iframe = this.#shadowRoot
         .getElementById(this.#iframe.name) as HTMLIFrameElement;
