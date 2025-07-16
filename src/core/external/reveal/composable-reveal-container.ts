@@ -386,10 +386,10 @@ class ComposableRevealContainer extends Container {
               if (event.data.type
                === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
                 const revealData = event.data.data;
-                if (revealData.error) {
+                if (revealData.errors) {
                   printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
                     MessageType.ERROR, this.#context.logLevel);
-                  reject(revealData.error);
+                  reject(revealData);
                 } else {
                   printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
@@ -450,10 +450,10 @@ class ComposableRevealContainer extends Container {
                 if (event.data.type
                === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
                   const revealData = event.data.data;
-                  if (revealData.error) {
+                  if (revealData.errors) {
                     printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
                       MessageType.ERROR, this.#context.logLevel);
-                    reject(revealData.error);
+                    reject(revealData);
                   } else {
                     printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
                       MessageType.LOG,
