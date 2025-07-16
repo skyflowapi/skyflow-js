@@ -199,6 +199,33 @@ class RevealFrame {
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (_, callback) => {
       callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
     });
+    const sub2 = (responseUrl) => {
+      if (responseUrl.iframeName === this.#name) {
+        if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
+          this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
+          if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
+            this.#dataElememt.innerText = this.#record.altText;
+          }
+          bus
+            .emit(
+              ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+              {
+                height: this.#elementContainer.scrollHeight,
+              }, () => {
+              },
+            );
+        } else {
+          const ext = this.getExtension(responseUrl.url);
+          this.addFileRender(responseUrl.url, ext);
+        }
+      }
+    };
+    bus
+      .target(window.location.origin)
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#name,
+        sub2,
+      );
 
     const sub = (data) => {
       if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
