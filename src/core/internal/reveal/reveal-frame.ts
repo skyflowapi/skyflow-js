@@ -31,6 +31,7 @@ import {
 } from '../../../utils/helpers';
 import { formatForRenderClient, getFileURLFromVaultBySkyflowIDComposable } from '../../../core-utils/reveal';
 import Client from '../../../client';
+import properties from '../../../properties';
 
 const { getType } = require('mime');
 
@@ -268,6 +269,9 @@ class RevealFrame {
                 result,
               },
             }, this.#clientDomain);
+            window.postMessage({
+              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name,
+            }, properties.IFRAME_SECURE_ORIGIN);
           }).catch((error) => {
             window.parent.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
@@ -278,6 +282,9 @@ class RevealFrame {
                 },
               },
             }, this.#clientDomain);
+            window.postMessage({
+              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name,
+            }, properties.IFRAME_SECURE_ORIGIN);
           });
         }
       }

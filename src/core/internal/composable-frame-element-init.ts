@@ -322,6 +322,15 @@ export default class RevealComposableFrameElementInit {
           this.clientMetaData.clientDomain,
         );
       }
+      if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name) {
+        window.parent.postMessage(
+          {
+            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
+            data: { height: this.rootDiv.scrollHeight, name: window.name },
+          },
+          this.clientMetaData.clientDomain,
+        );
+      }
     });
   };
 }
