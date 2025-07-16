@@ -437,7 +437,7 @@ class ComposableContainer extends Container {
         iframe.contentWindow.postMessage({
           name: eventName,
           ...options,
-        }, '*');
+        }, properties.IFRAME_SECURE_ORIGIN);
       }
     } else {
       const iframe = document.getElementById(this.#iframeID) as HTMLIFrameElement;
