@@ -57,63 +57,37 @@ export default class RevealComposableFrameElementInit {
       event.preventDefault();
     };
     this.rootDiv = document.createElement('div');
-    try {
-      this.updateGroupData();
-      this.createContainerDiv(this.group);
-      window.addEventListener('message', (event) => {
-        if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL
+    this.updateGroupData();
+    this.createContainerDiv(this.group);
+    window.addEventListener('message', (event) => {
+      if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL
           + this.containerId && event.data.data.type === REVEAL_TYPES.REVEAL) {
-          this.#context = event.data.context;
-          const data = event.data.data;
-          const elementIds = data.elementIds;
-          const revealDataInput: IRevealRecordComposable [] = [];
-          this.#client = new Client(event.data.clientConfig, {});
-          elementIds.forEach((element) => {
-            this.revealFrameList.forEach((revealFrame) => {
-              const data2 = revealFrame.getData();
-              if (data2.name === element.frameId) {
-                if (data2 && !data2.skyflowID) {
-                  const revealRecord :IRevealRecordComposable = {
-                    token: data2.token,
-                    redaction: data2.redaction,
-                    iframeName: data2.name,
-                  };
+        this.#context = event.data.context;
+        const data = event.data.data;
+        const elementIds = data.elementIds;
+        const revealDataInput: IRevealRecordComposable [] = [];
+        this.#client = new Client(event.data.clientConfig, {});
+        elementIds.forEach((element) => {
+          this.revealFrameList.forEach((revealFrame) => {
+            const data2 = revealFrame.getData();
+            if (data2.name === element.frameId) {
+              if (data2 && !data2.skyflowID) {
+                const revealRecord :IRevealRecordComposable = {
+                  token: data2.token,
+                  redaction: data2.redaction,
+                  iframeName: data2.name,
+                };
 
-                  revealDataInput.push(revealRecord);
-                }
+                revealDataInput.push(revealRecord);
               }
-            });
+            }
           });
-          this.revealData(revealDataInput, this.containerId,
-            event.data.clientConfig.authToken)
-            .then((revealResponse: any) => {
-              if (revealResponse.records && revealResponse.records.length > 0) {
-                const formattedRecord = formatRecordsForClientComposable(revealResponse);
-                window.parent.postMessage(
-                  {
-                    type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
-                    data: formattedRecord,
-                  },
-                  this.clientMetaData.clientDomain,
-                );
-                revealResponse.records.forEach((record: any) => {
-                  this.revealFrameList.forEach((revealFrame) => {
-                    if (revealFrame.getData().name === record.frameId) {
-                      revealFrame.responseUpdate(record);
-                    }
-                  });
-                });
-              }
-              window.parent.postMessage(
-                {
-                  type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
-                  data: { height: this.rootDiv.scrollHeight, name: window.name },
-                },
-                this.clientMetaData.clientDomain,
-              );
-            })
-            .catch((error) => {
-              const formattedRecord = formatRecordsForClientComposable(error);
+        });
+        this.revealData(revealDataInput, this.containerId,
+          event.data.clientConfig.authToken)
+          .then((revealResponse: any) => {
+            if (revealResponse.records && revealResponse.records.length > 0) {
+              const formattedRecord = formatRecordsForClientComposable(revealResponse);
               window.parent.postMessage(
                 {
                   type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
@@ -121,36 +95,58 @@ export default class RevealComposableFrameElementInit {
                 },
                 this.clientMetaData.clientDomain,
               );
-              if (error.records) {
-                error.records.forEach((record: any) => {
-                  // Update the frame with the revealed data
-                  this.revealFrameList.forEach((revealFrame) => {
-                    if (revealFrame.getData().name === record.frameId) {
-                      revealFrame.responseUpdate(record);
-                    }
-                  });
-                });
-              }
-              error.errors.forEach((error: any) => {
+              revealResponse.records.forEach((record: any) => {
                 this.revealFrameList.forEach((revealFrame) => {
-                  if (revealFrame.getData().name === error.frameId) {
-                    revealFrame.responseUpdate(error);
+                  if (revealFrame.getData().name === record.frameId) {
+                    revealFrame.responseUpdate(record);
                   }
                 });
               });
-              window.parent.postMessage(
-                {
-                  type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
-                  data: { height: this.rootDiv.scrollHeight, name: window.name },
-                },
-                this.clientMetaData.clientDomain,
-              );
+            }
+            window.parent.postMessage(
+              {
+                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
+                data: { height: this.rootDiv.scrollHeight, name: window.name },
+              },
+              this.clientMetaData.clientDomain,
+            );
+          })
+          .catch((error) => {
+            const formattedRecord = formatRecordsForClientComposable(error);
+            window.parent.postMessage(
+              {
+                type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
+                data: formattedRecord,
+              },
+              this.clientMetaData.clientDomain,
+            );
+            if (error.records) {
+              error.records.forEach((record: any) => {
+                // Update the frame with the revealed data
+                this.revealFrameList.forEach((revealFrame) => {
+                  if (revealFrame.getData().name === record.frameId) {
+                    revealFrame.responseUpdate(record);
+                  }
+                });
+              });
+            }
+            error.errors.forEach((error: any) => {
+              this.revealFrameList.forEach((revealFrame) => {
+                if (revealFrame.getData().name === error.frameId) {
+                  revealFrame.responseUpdate(error);
+                }
+              });
             });
-        }
-      });
-    } catch (e: any) {
-      console.error('Error in RevealComposableFrameElementInit:', e);
-    }
+            window.parent.postMessage(
+              {
+                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
+                data: { height: this.rootDiv.scrollHeight, name: window.name },
+              },
+              this.clientMetaData.clientDomain,
+            );
+          });
+      }
+    });
 
     bus
       // .target(this.clientMetaData.clientDomain)

@@ -123,8 +123,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
 
   private setupRenderFileEventListener(rows: any[]): void {
     if (!rows?.length) {
-      console.warn('No rows provided for event listener setup');
-      return;
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REVEAL_COMPOSABLE_INPUT, ['COMPOSABLE_REVEAL'], true);
     }
 
     try {
@@ -144,7 +143,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
         });
       });
     } catch (error) {
-      console.error('Error setting up render file event listener:', error);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REVEAL_COMPOSABLE_INPUT, ['COMPOSABLE_REVEAL'], true);
     }
   }
 

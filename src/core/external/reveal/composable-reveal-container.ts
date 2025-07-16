@@ -154,59 +154,73 @@ class ComposableRevealContainer extends Container {
     multipleElements: any,
     isSingleElementAPI: boolean = false,
   ) => {
-    const elements: any[] = [];
-    this.#tempElements = deepClone(multipleElements);
-    this.#tempElements.rows.forEach((row) => {
-      row.elements.forEach((element) => {
-        const options = element;
-        const { elementType } = options;
-        options.isMounted = false;
+    try {
+      const elements: any[] = [];
+      this.#tempElements = deepClone(multipleElements);
+      this.#tempElements.rows.forEach((row) => {
+        row.elements.forEach((element) => {
+          const options = element;
+          const { elementType } = options;
+          options.isMounted = false;
 
-        options.label = element.label;
-        options.skyflowID = element.skyflowID;
+          options.label = element.label;
+          options.skyflowID = element.skyflowID;
 
-        elements.push(options);
+          elements.push(options);
+        });
       });
-    });
 
-    this.#tempElements.elementName = isSingleElementAPI
-      ? elements[0].elementName
-      : `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}`;
-    if (
-      isSingleElementAPI
-      && !this.#elements[elements[0].elementName]
-      && this.#hasElementName(elements[0].name)
-    ) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [`${elements[0].name}`], true);
-    }
-
-    let element = this.#elements[this.#tempElements.elementName];
-    if (element) {
-      if (isSingleElementAPI) {
-        element.update(elements[0]);
-      } else {
-        element.update(this.#tempElements);
+      this.#tempElements.elementName = isSingleElementAPI
+        ? elements[0].elementName
+        : `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}`;
+      if (
+        isSingleElementAPI
+        && !this.#elements[elements[0].elementName]
+        && this.#hasElementName(elements[0].name)
+      ) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [`${elements[0].name}`], true);
       }
-    } else {
-      const elementId = uuid();
-      element = new ComposableRevealInternalElement(
-        elementId,
-        this.#tempElements,
-        this.#metaData,
-        {
-          containerId: this.#containerId,
-          isMounted: this.#containerMounted,
-          type: this.type,
-          eventEmitter: this.#eventEmitter,
-        },
-        true,
-        this.#context,
-      );
-      this.#elements[this.#tempElements.elementName] = element;
-      this.#skyflowElements[elementId] = element;
+
+      let element = this.#elements[this.#tempElements.elementName];
+      if (element) {
+        if (isSingleElementAPI) {
+          element.update(elements[0]);
+        } else {
+          element.update(this.#tempElements);
+        }
+      } else {
+        const elementId = uuid();
+        try {
+          element = new ComposableRevealInternalElement(
+            elementId,
+            this.#tempElements,
+            this.#metaData,
+            {
+              containerId: this.#containerId,
+              isMounted: this.#containerMounted,
+              type: this.type,
+              eventEmitter: this.#eventEmitter,
+            },
+            true,
+            this.#context,
+          );
+          this.#elements[this.#tempElements.elementName] = element;
+          this.#skyflowElements[elementId] = element;
+        } catch (error: any) {
+          printLog(logs.errorLogs.INVALID_REVEAL_COMPOSABLE_INPUT,
+            MessageType.ERROR,
+            this.#context.logLevel);
+          throw error;
+        }
+      }
+      this.#iframeID = element.iframeName();
+      return element;
+    } catch (error: any) {
+      printLog(logs.errorLogs.INVALID_REVEAL_COMPOSABLE_INPUT,
+        MessageType.ERROR,
+        this.#context.logLevel);
+      throw error;
     }
-    this.#iframeID = element.iframeName();
-    return element;
   };
 
   #removeElement = (elementName: string) => {
