@@ -280,16 +280,17 @@ class RevealFrame {
       }, this.#clientDomain,
     );
     this.updateRevealElementOptions();
-    window.addEventListener('message', (event) => {
-      if (event.data
-        && event.data.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#name) {
-        if (event.data.data.iframeName === this.#name
-          && event.data.data.type === REVEAL_TYPES.RENDER_FILE) {
-          this.renderFile(this.#record, event.data.clientConfig).then((resolvedResult) => {
+    window?.addEventListener('message', (event) => {
+      if (event && event.data
+        && event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#name) {
+        if (event?.data?.data?.iframeName === this.#name
+          && event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
+          this.renderFile(this.#record, event?.data?.clientConfig)?.then((resolvedResult) => {
             const result = formatForRenderClient(
-              resolvedResult as IRenderResponseType, this.#record.column,
+              resolvedResult as IRenderResponseType,
+              this.#record?.column,
             );
-            window.parent.postMessage({
+            window?.parent?.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
               data: {
                 type: REVEAL_TYPES.RENDER_FILE,
@@ -300,7 +301,7 @@ class RevealFrame {
               type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name,
             }, properties.IFRAME_SECURE_ORIGIN);
           }).catch((error) => {
-            window.parent.postMessage({
+            window?.parent?.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
               data: {
                 type: REVEAL_TYPES.RENDER_FILE,
@@ -309,17 +310,23 @@ class RevealFrame {
                 },
               },
             }, this.#clientDomain);
-            window.postMessage({
-              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name,
-            }, properties.IFRAME_SECURE_ORIGIN);
+
+            window?.postMessage({
+              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+            }, properties?.IFRAME_SECURE_ORIGIN);
           });
         }
       }
-      if (event.data && event.data.type === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name) {
-        if (event.data.data && event.data.data.height) {
-          window.parent.postMessage({
+
+      if (event && event.data
+         && event?.data?.type === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name) {
+        if (event?.data?.data?.height) {
+          window?.parent?.postMessage({
             type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
-            data: { height: this.#elementContainer.scrollHeight, name: this.#name },
+            data: {
+              height: this.#elementContainer?.scrollHeight ?? 0,
+              name: this.#name,
+            },
           }, this.#clientDomain);
         }
       }
@@ -327,28 +334,41 @@ class RevealFrame {
   }
 
   responseUpdate = (data) => {
-    if (data.frameId === this.#record.name && data.error) {
+    if (data?.frameId === this.#record?.name && data?.error) {
       if (!Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
         this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
       }
-    } else if (data.frameId === this.#record.name && data[0].token
-       && this.#record.token === data[0].token) {
-      const responseValue = data[0].value as string;
+    } else if (data?.frameId === this.#record?.name && data?.[0]?.token
+       && this.#record?.token === data?.[0]?.token) {
+      const responseValue = data?.[0]?.value as string;
       this.#revealedValue = responseValue;
       this.isRevealCalled = true;
-      this.#dataElememt.innerText = responseValue;
-      if (this.#record.mask) {
-        const { formattedOutput } = getMaskedOutput(this.#dataElememt.innerText,
-          this.#record.mask[0],
-          constructMaskTranslation(this.#record.mask));
-        this.#dataElememt.innerText = formattedOutput;
+      this.#dataElememt.innerText = responseValue ?? '';
+      if (this.#record?.mask) {
+        const { formattedOutput } = getMaskedOutput(
+          this.#dataElememt?.innerText ?? '',
+          this.#record?.mask?.[0],
+          constructMaskTranslation(this.#record?.mask),
+        );
+        this.#dataElememt.innerText = formattedOutput ?? '';
       }
-      printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
-        CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
+      printLog(
+        parameterizedString(
+          logs.infoLogs.ELEMENT_REVEALED,
+          CLASS_NAME,
+          this.#record?.token,
+        ),
+        MessageType.LOG,
+        this.#context?.logLevel,
+      );
     }
-    window.parent.postMessage({
+
+    window?.parent?.postMessage({
       type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
-      data: { height: this.#elementContainer.scrollHeight, name: this.#name },
+      data: {
+        height: this.#elementContainer?.scrollHeight ?? 0,
+        name: this.#name,
+      },
     }, this.#clientDomain);
   };
 

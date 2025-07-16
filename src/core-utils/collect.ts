@@ -203,7 +203,7 @@ const updateRecordsInVault = (
   options,
 ) => {
   const table = skyflowIdRecord.fields.table;
-  const skyflowID = skyflowIdRecord.skyflowID;
+  const skyflowID = skyflowIdRecord?.skyflowID;
   skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'table');
   skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'skyflowID');
   return client.request({
@@ -268,7 +268,7 @@ export const updateRecordsBySkyflowID = async (
       });
 
       if (errorsResponse.length === 0) {
-        rootResolve({ records: recordsResponse });
+        rootResolve(recordsResponse);
       } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
       else rootReject({ records: recordsResponse, errors: errorsResponse });
     });
@@ -284,10 +284,8 @@ export const updateRecordsBySkyflowIDComposable = async (
   authToken: string,
 ) => new Promise((rootResolve, rootReject) => {
   let updateResponseSet: Promise<any>[];
-  // const clientId = client.toJSON()?.metaData?.uuid || '';
-  // getAccessToken(clientId).then((authToken) => {
   // eslint-disable-next-line prefer-const
-  updateResponseSet = skyflowIdRecords.updateRecords.map(
+  updateResponseSet = skyflowIdRecords?.updateRecords.map(
     (skyflowIdRecord: IInsertRecord) => new Promise((resolve, reject) => {
       updateRecordsInVault(skyflowIdRecord, client, authToken as string, options)
         .then((resolvedResult: any) => {
@@ -329,9 +327,6 @@ export const updateRecordsBySkyflowIDComposable = async (
     } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
     else rootReject({ records: recordsResponse, errors: errorsResponse });
   });
-  // }).catch((err) => {
-  //   rootReject(err);
-  // });
 });
 
 export const insertDataInCollect = async (
@@ -358,8 +353,8 @@ export const insertDataInCollect = async (
     .then((response: any) => {
       insertResponse = constructInsertRecordResponse(
         response,
-        options.tokens,
-        finalInsertRecords.records,
+        options?.tokens,
+        finalInsertRecords?.records,
       );
       resolve(insertResponse);
     })

@@ -104,15 +104,15 @@ class ComposableRevealInternalElement extends SkyflowElement {
       this.#iframe.setIframeHeight(data.height);
     });
     window.addEventListener('message', (event) => {
-      if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
+      if (event && event.data && event.data?.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
                   + this.#containerId) {
         this.#isComposableFrameReady = true;
       }
     });
     window.addEventListener('message', (event) => {
       if (event.data
-         && event.data.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + this.#iframe.name) {
-        this.#iframe.setIframeHeight(event.data.data.height);
+         && event.data?.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + this.#iframe.name) {
+        this.#iframe.setIframeHeight(event?.data?.data?.height);
       }
     });
     // eslint-disable-next-line max-len
@@ -282,8 +282,8 @@ class ComposableRevealInternalElement extends SkyflowElement {
             window.addEventListener('message', (event) => {
               if (event.data && event.data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
        + recordData.name) {
-                if (event.data.data.type === REVEAL_TYPES.RENDER_FILE) {
-                  const revealData = event.data.data.result;
+                if (event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
+                  const revealData = event?.data?.data?.result;
                   if (revealData.error) {
                     printLog(parameterizedString(
                       logs.errorLogs.FAILED_RENDER,
@@ -353,8 +353,8 @@ class ComposableRevealInternalElement extends SkyflowElement {
                 if (event1.data
                          && event1.data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
              + this.#iframe.name) {
-                  if (event.data.data.type === REVEAL_TYPES.RENDER_FILE) {
-                    const revealData = event.data.data.result;
+                  if (event1.data.data.type === REVEAL_TYPES.RENDER_FILE) {
+                    const revealData = event1.data.data.result;
                     if (revealData.error) {
                       printLog(parameterizedString(
                         logs.errorLogs.FAILED_RENDER,

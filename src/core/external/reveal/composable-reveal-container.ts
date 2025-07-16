@@ -38,6 +38,7 @@ import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import ComposableRevealInternalElement from './composable-reveal-internal';
 
 const CLASS_NAME = 'ComposableRevealContainer';
+
 class ComposableRevealContainer extends Container {
   #containerId: string;
 
@@ -79,59 +80,58 @@ class ComposableRevealContainer extends Container {
 
   #getSkyflowBearerToken: () => Promise<string> | undefined;
 
-  constructor(options, metaData, skyflowElements, context) {
+  constructor(options: any, metaData: any, skyflowElements: any, context: Context) {
     super();
     this.#containerId = uuid();
     this.#metaData = {
       ...metaData,
       clientJSON: {
-        ...metaData.clientJSON,
+        ...metaData?.clientJSON,
         config: {
-          ...metaData.clientJSON.config,
+          ...metaData?.clientJSON?.config,
           options: {
-            ...metaData.clientJSON.config?.options,
+            ...metaData?.clientJSON?.config?.options,
             ...options,
           },
         },
       },
     };
-    this.#getSkyflowBearerToken = metaData.getSkyflowBearerToken;
-    this.#skyflowElements = skyflowElements;
+    this.#getSkyflowBearerToken = metaData?.getSkyflowBearerToken;
+    this.#skyflowElements = skyflowElements ?? {};
     this.#context = context;
-    this.#options = options;
+    this.#options = options ?? {};
     this.#eventEmitter = new EventEmitter();
 
-    this.#clientDomain = this.#metaData.clientDomain || '';
+    this.#clientDomain = this.#metaData?.clientDomain || '';
     const iframe = iframer({
-      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`,
+      name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context?.logLevel}:${btoa(this.#clientDomain)}`,
       referrer: this.#clientDomain,
     });
     setAttributes(iframe, {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-    printLog(parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
-      MessageType.LOG,
-      this.#context.logLevel);
-    this.#containerMounted = true;
-    bus
-      // .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, (data, callback) => {
-        printLog(parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
-          MessageType.LOG,
-          this.#context.logLevel);
-        callback({
-          client: this.#metaData.clientJSON,
-          context,
-        });
-        this.#isComposableFrameReady = true;
-      });
-    window.addEventListener('message', (event) => {
-      if (event.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
-                  + this.#containerId) {
+
+    this.#setupEventListeners();
+    this.#initializeContainer();
+  }
+
+  #setupEventListeners(): void {
+    window.addEventListener('message', (event: MessageEvent) => {
+      if (event && event.data
+         && event.data?.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#containerId) {
         this.#isComposableFrameReady = true;
       }
     });
+  }
+
+  #initializeContainer(): void {
+    printLog(
+      parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
+      MessageType.LOG,
+      this.#context?.logLevel,
+    );
+    this.#containerMounted = true;
   }
 
   create = (input: RevealElementInput, options?: IRevealElementOptions) => {
@@ -139,15 +139,19 @@ class ComposableRevealContainer extends Container {
     validateInputFormatOptions(options);
 
     const elementName = `${COMPOSABLE_REVEAL}:${btoa(elementId)}`;
-    this.#elementsList.push({
+    this.#elementsList?.push({
       name: elementName,
       ...input,
       elementName,
       elementId,
     });
-    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`;
-    return new ComposableRevealElement(elementName,
-      this.#eventEmitter, controllerIframeName);
+
+    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements ?? {})}:${
+      this.#containerId}:${this.#context?.logLevel}:${btoa(this.#clientDomain)}`;
+
+    return new ComposableRevealElement(
+      elementName, this.#eventEmitter, controllerIframeName, this.#context,
+    );
   };
 
   #createMultipleElement = (
@@ -157,33 +161,39 @@ class ComposableRevealContainer extends Container {
     try {
       const elements: any[] = [];
       this.#tempElements = deepClone(multipleElements);
-      this.#tempElements.rows.forEach((row) => {
-        row.elements.forEach((element) => {
+      this.#tempElements?.rows?.forEach((row) => {
+        row?.elements?.forEach((element) => {
           const options = element;
           const { elementType } = options;
           options.isMounted = false;
-
-          options.label = element.label;
-          options.skyflowID = element.skyflowID;
+          options.label = element?.label;
+          options.skyflowID = element?.skyflowID;
 
           elements.push(options);
         });
       });
 
-      this.#tempElements.elementName = isSingleElementAPI
+      this.#tempElements.elementName = isSingleElementAPI && elements?.[0]?.elementName
         ? elements[0].elementName
-        : `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}`;
+        : `${FRAME_ELEMENT}:group:${btoa(JSON.stringify(this.#tempElements ?? {}))}`;
+
       if (
         isSingleElementAPI
-        && !this.#elements[elements[0].elementName]
+        && !this.#elements?.[elements?.[0]?.elementName]
+        && elements?.[0]?.name
         && this.#hasElementName(elements[0].name)
       ) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [`${elements[0].name}`], true);
+        throw new SkyflowError(
+          SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME,
+          [elements?.[0]?.name ?? 'unknown'],
+          true,
+        );
       }
 
-      let element = this.#elements[this.#tempElements.elementName];
+      let element = this.#elements?.[this.#tempElements?.elementName];
+
       if (element) {
-        if (isSingleElementAPI) {
+        if (isSingleElementAPI && elements?.[0]) {
           element.update(elements[0]);
         } else {
           element.update(this.#tempElements);
@@ -204,43 +214,31 @@ class ComposableRevealContainer extends Container {
             true,
             this.#context,
           );
-          this.#elements[this.#tempElements.elementName] = element;
+
+          if (this.#tempElements?.elementName) {
+            this.#elements[this.#tempElements.elementName] = element;
+          }
           this.#skyflowElements[elementId] = element;
         } catch (error: any) {
-          printLog(logs.errorLogs.INVALID_REVEAL_COMPOSABLE_INPUT,
+          printLog(
+            logs.errorLogs.INVALID_REVEAL_COMPOSABLE_INPUT,
             MessageType.ERROR,
-            this.#context.logLevel);
+            this.#context?.logLevel,
+          );
           throw error;
         }
       }
-      this.#iframeID = element.iframeName();
+
+      this.#iframeID = element?.iframeName?.() ?? '';
       return element;
     } catch (error: any) {
-      printLog(logs.errorLogs.INVALID_REVEAL_COMPOSABLE_INPUT,
+      printLog(
+        logs.errorLogs.INVALID_REVEAL_COMPOSABLE_INPUT,
         MessageType.ERROR,
-        this.#context.logLevel);
+        this.#context?.logLevel,
+      );
       throw error;
     }
-  };
-
-  #removeElement = (elementName: string) => {
-    Object.keys(this.#elements).forEach((element) => {
-      if (element === elementName) delete this.#elements[element];
-    });
-  };
-
-  #destroyCallback = (elementNames: string[]) => {
-    elementNames.forEach((elementName) => {
-      this.#removeElement(elementName);
-    });
-  };
-
-  #updateCallback = (elements: any[]) => {
-    elements.forEach((element) => {
-      if (this.#elements[element.elementName]) {
-        this.#elements[element.elementName].update(element);
-      }
-    });
   };
 
   #hasElementName = (name: string) => {
@@ -251,34 +249,6 @@ class ComposableRevealContainer extends Container {
       }
     }
     return false;
-  };
-
-  on = (eventName:string, handler:Function) => {
-    if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
-      throw new SkyflowError(
-        SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER,
-        [],
-        true,
-      );
-    }
-    if (!handler) {
-      throw new SkyflowError(
-        SKYFLOW_ERROR_CODE.MISSING_HANDLER_IN_EVENT_LISTENER,
-        [],
-        true,
-      );
-    }
-    if (typeof handler !== 'function') {
-      throw new SkyflowError(
-        SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER,
-        [],
-        true,
-      );
-    }
-
-    this.#eventEmitter.on(ELEMENT_EVENTS_TO_CLIENT.SUBMIT, () => {
-      handler();
-    });
   };
 
   mount = (domElement: HTMLElement | string) => {

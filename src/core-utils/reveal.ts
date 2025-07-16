@@ -261,24 +261,24 @@ export const fetchRecordsByTokenIdComposable = (
   const vaultResponseSet: Promise<any>[] = tokenIdRecords.map(
     (tokenRecord) => new Promise((resolve) => {
       const apiResponse: any = [];
-      const redaction: RedactionType = tokenRecord.redaction ? tokenRecord.redaction
+      const redaction: RedactionType = tokenRecord?.redaction ? tokenRecord?.redaction
         : RedactionType.PLAIN_TEXT;
         // eslint-disable-next-line max-len
-      getTokenRecordsFromVault(tokenRecord.token as string, redaction, client, authToken as string)
+      getTokenRecordsFromVault(tokenRecord?.token as string, redaction, client, authToken as string)
         .then(
           (response: IApiSuccessResponse) => {
             const fieldsData = formatForPureJsSuccess(response);
             apiResponse.push({
               ...fieldsData,
-              frameId: tokenRecord.iframeName, // Add iframeName to the response
+              frameId: tokenRecord?.iframeName, // Add iframeName to the response
             });
           },
           (cause: any) => {
-            const errorData = formatForPureJsFailure(cause, tokenRecord.token as string);
+            const errorData = formatForPureJsFailure(cause, tokenRecord?.token as string);
             printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
             apiResponse.push({
               ...errorData,
-              frameId: tokenRecord.iframeName, // Add iframeName to the error response
+              frameId: tokenRecord?.iframeName, // Add iframeName to the error response
             });
           },
         )
@@ -307,9 +307,6 @@ export const fetchRecordsByTokenIdComposable = (
     } else if (recordsResponse.length === 0) rootReject({ errors: errorResponse });
     else rootReject({ records: recordsResponse, errors: errorResponse });
   });
-  // }).catch((err) => {
-  //   rootReject(err);
-  // });
 });
 
 export const formatRecordsForIframe = (response: IRevealResponseType) => {
@@ -368,15 +365,15 @@ export const formatRecordsForClient = (response: IRevealResponseType) => {
 export const formatRecordsForClientComposable = (response) => {
   let successRecords = [];
   let errorRecords = [];
-  if (response.errors) {
+  if (response.errors && response.errors.length > 0) {
     errorRecords = response.errors.map((errors) => ({
-      error: errors.error,
+      error: errors?.error,
     }));
   }
-  if (response.records) {
+  if (response.records && response.records.length > 0) {
     successRecords = response.records.map((record) => ({
-      token: record[0].token,
-      valueType: record[0].valueType,
+      token: record[0]?.token,
+      valueType: record[0]?.valueType,
     }));
   }
   if (successRecords.length > 0 && errorRecords.length > 0) {

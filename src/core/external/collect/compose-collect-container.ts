@@ -98,7 +98,7 @@ class ComposableContainer extends Container {
         },
       },
     };
-    this.#getSkyflowBearerToken = metaData.getSkyflowBearerToken;
+    this.#getSkyflowBearerToken = metaData?.getSkyflowBearerToken;
     this.#skyflowElements = skyflowElements;
     this.#context = context;
     this.#options = options;
@@ -118,43 +118,26 @@ class ComposableContainer extends Container {
       this.#context.logLevel);
     this.#containerMounted = true;
     this.#updateListeners();
-    bus
-      // .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, (data, callback) => {
-        printLog(parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
-          MessageType.LOG,
-          this.#context.logLevel);
-        callback({
-          client: this.#metaData.clientJSON,
-          context,
-        });
-        this.#isComposableFrameReady = true;
-      });
   }
 
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
   }) => {
-    validateCollectElementInput(input, this.#context.logLevel);
-    const validations = formatValidations(input.validations);
-    const formattedOptions = formatOptions(input.type, options, this.#context.logLevel);
-    // let elementName;
-    // elementName = `${input.table}.${input.column}:${btoa(uuid())}`;
-    // elementName = (input.table && input.column) ? `${input.type}:${btoa(
-    //   elementName,
-    // )}` : ;
+    validateCollectElementInput(input, this.#context?.logLevel);
+    const validations = formatValidations(input?.validations);
+    const formattedOptions = formatOptions(input?.type, options, this.#context?.logLevel);
+    const elementName = `${FRAME_ELEMENT}:${input?.type}:${btoa(uuid())}`;
 
-    const elementName = `${FRAME_ELEMENT}:${input.type}:${btoa(uuid())}`;
-
-    this.#elementsList.push({
-      elementType: input.type,
-      name: input.column,
+    this.#elementsList?.push({
+      elementType: input?.type,
+      name: input?.column,
       ...input,
       ...formattedOptions,
       validations,
       elementName,
     });
-    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`;
+
+    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements ?? {})}:${this.#containerId}:${this.#context?.logLevel}:${btoa(this.#clientDomain ?? '')}`;
     this.#iframeID = controllerIframeName;
     return new ComposableElement(elementName, this.#eventEmitter, controllerIframeName);
   };
@@ -165,37 +148,37 @@ class ComposableContainer extends Container {
   ) => {
     const elements: any[] = [];
     this.#tempElements = deepClone(multipleElements);
-    this.#tempElements.rows.forEach((row) => {
-      row.elements.forEach((element) => {
-        const options = element;
+
+    this.#tempElements?.rows?.forEach((row) => {
+      row?.elements?.forEach((element) => {
+        const options = element ?? {};
         const { elementType } = options;
         validateElementOptions(elementType, options);
 
-        options.sensitive = options.sensitive || ELEMENTS[elementType].sensitive;
-        options.replacePattern = options.replacePattern || ELEMENTS[elementType].replacePattern;
-        options.mask = options.mask || ELEMENTS[elementType].mask;
-
+        options.sensitive = options?.sensitive ?? ELEMENTS[elementType]?.sensitive;
+        options.replacePattern = options?.replacePattern ?? ELEMENTS[elementType]?.replacePattern;
+        options.mask = options?.mask ?? ELEMENTS[elementType]?.mask;
         options.isMounted = false;
-
-        options.label = element.label;
-        options.skyflowID = element.skyflowID;
+        options.label = element?.label;
+        options.skyflowID = element?.skyflowID;
 
         elements.push(options);
       });
     });
 
     this.#tempElements.elementName = isSingleElementAPI
-      ? elements[0].elementName
-      : `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}`;
+      ? elements[0]?.elementName
+      : `${FRAME_ELEMENT}:group:${btoa(JSON.stringify(this.#tempElements ?? {}))}`;
+
     if (
       isSingleElementAPI
-      && !this.#elements[elements[0].elementName]
-      && this.#hasElementName(elements[0].name)
+      && !this.#elements?.[elements[0]?.elementName]
+      && this.#hasElementName(elements[0]?.name)
     ) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [`${elements[0].name}`], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.UNIQUE_ELEMENT_NAME, [`${elements[0]?.name}`], true);
     }
 
-    let element = this.#elements[this.#tempElements.elementName];
+    let element = this.#elements?.[this.#tempElements?.elementName];
     if (element) {
       if (isSingleElementAPI) {
         element.update(elements[0]);
@@ -432,17 +415,17 @@ class ComposableContainer extends Container {
 
   #emitEvent = (eventName: string, options?: Record<string, any>, callback?: any) => {
     if (this.#shadowRoot) {
-      const iframe = this.#shadowRoot.getElementById(this.#iframeID) as HTMLIFrameElement;
+      const iframe = this.#shadowRoot?.getElementById(this.#iframeID) as HTMLIFrameElement;
       if (iframe?.contentWindow) {
-        iframe.contentWindow.postMessage({
+        iframe.contentWindow?.postMessage({
           name: eventName,
           ...options,
         }, properties.IFRAME_SECURE_ORIGIN);
       }
     } else {
-      const iframe = document.getElementById(this.#iframeID) as HTMLIFrameElement;
+      const iframe = document?.getElementById(this.#iframeID) as HTMLIFrameElement;
       if (iframe?.contentWindow) {
-        iframe.contentWindow.postMessage({
+        iframe.contentWindow?.postMessage({
           name: eventName,
           ...options,
         }, properties.IFRAME_SECURE_ORIGIN);
@@ -516,22 +499,22 @@ class ComposableContainer extends Container {
   });
 
   #updateListeners = () => {
-    this.#eventEmitter.on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, (data) => {
+    this.#eventEmitter?.on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, (data) => {
       let elementIndex;
-      const elementList = this.#elementsList.map((element, index) => {
-        if (element.elementName === data.elementName) {
+      const elementList = this.#elementsList?.map((element, index) => {
+        if (element?.elementName === data?.elementName) {
           elementIndex = index;
           return {
-            elementName: element.elementName,
-            ...data.elementOptions,
+            elementName: element?.elementName,
+            ...data?.elementOptions,
           };
         }
         return element;
       });
 
       if (this.#containerElement) {
-        this.#containerElement.updateElement({
-          ...elementList[elementIndex],
+        this.#containerElement?.updateElement({
+          ...elementList?.[elementIndex],
         });
       }
     });
