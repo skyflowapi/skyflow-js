@@ -2,6 +2,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+import e from 'express';
 import Client from '../client';
 import { getAccessToken } from '../utils/bus-events';
 import SkyflowError from '../libs/skyflow-error';
@@ -11,6 +12,7 @@ import {
   IRenderResponseType,
   IGetOptions,
   RenderFileResponse,
+  IRevealRecordComposable,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
 import { FILE_DOWNLOAD_URL_PARAM } from '../core/constants';
@@ -226,6 +228,68 @@ export const fetchRecordsByTokenId = (
     rootReject(err);
   });
 });
+
+export const fetchRecordsByTokenIdComposable = (
+  tokenIdRecords: IRevealRecordComposable[],
+  client: Client,
+  authToken: string,
+): Promise<IRevealResponseType> => new Promise((rootResolve, rootReject) => {
+  const vaultResponseSet: Promise<any>[] = tokenIdRecords.map(
+    (tokenRecord) => new Promise((resolve) => {
+      const apiResponse: any = [];
+      const redaction: RedactionType = tokenRecord.redaction ? tokenRecord.redaction
+        : RedactionType.PLAIN_TEXT;
+        // eslint-disable-next-line max-len
+      getTokenRecordsFromVault(tokenRecord.token as string, redaction, client, authToken as string)
+        .then(
+          (response: IApiSuccessResponse) => {
+            const fieldsData = formatForPureJsSuccess(response);
+            apiResponse.push({
+              ...fieldsData,
+              frameId: tokenRecord.iframeName, // Add iframeName to the response
+            });
+          },
+          (cause: any) => {
+            const errorData = formatForPureJsFailure(cause, tokenRecord.token as string);
+            printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
+            apiResponse.push({
+              ...errorData,
+              frameId: tokenRecord.iframeName, // Add iframeName to the error response
+            });
+          },
+        )
+        .finally(() => {
+          resolve(apiResponse);
+        });
+    }),
+  );
+
+  Promise.allSettled(vaultResponseSet).then((resultSet) => {
+    const recordsResponse: Record<string, any>[] = [];
+    const errorResponse: Record<string, any>[] = [];
+    resultSet.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        console.log('Result status:', result.value);
+
+        result.value.forEach((res: Record<string, any>) => {
+          if (Object.prototype.hasOwnProperty.call(res, 'error')) {
+            errorResponse.push(res);
+          } else {
+            recordsResponse.push(res);
+          }
+        });
+      }
+    });
+    if (errorResponse.length === 0) {
+      rootResolve({ records: recordsResponse });
+    } else if (recordsResponse.length === 0) rootReject({ errors: errorResponse });
+    else rootReject({ records: recordsResponse, errors: errorResponse });
+  });
+  // }).catch((err) => {
+  //   rootReject(err);
+  // });
+});
+
 export const formatRecordsForIframe = (response: IRevealResponseType) => {
   const result: Record<string, string> = {};
   if (response.records) {
@@ -277,6 +341,29 @@ export const formatRecordsForClient = (response: IRevealResponseType) => {
     return { success: successRecords };
   }
   return { errors: response.errors };
+};
+
+export const formatRecordsForClientComposable = (response) => {
+  let successRecords = [];
+  let errorRecords = [];
+  if (response.errors) {
+    errorRecords = response.errors.map((errors) => ({
+      error: errors.error,
+    }));
+  }
+  if (response.records) {
+    successRecords = response.records.map((record) => ({
+      token: record[0].token,
+      valueType: record[0].valueType,
+    }));
+  }
+  if (successRecords.length > 0 && errorRecords.length > 0) {
+    return { success: successRecords, errors: errorRecords };
+  }
+  if (successRecords.length > 0) {
+    return { success: successRecords };
+  }
+  return { errors: errorRecords };
 };
 
 export const fetchRecordsGET = async (

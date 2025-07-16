@@ -19,7 +19,6 @@ import {
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
-import { formatRevealElementOptions } from '../../../utils/helpers';
 import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
@@ -72,7 +71,6 @@ class ComposableRevealInternalElement extends SkyflowElement {
     recordGroup: RevealComposableGroup[],
     metaData: any, container: any, isSingleElementAPI: boolean = false,
     context: Context) {
-    console.log('RecordGroup', recordGroup);
     super();
     this.#elementId = elementId;
     this.#metaData = metaData;
@@ -95,6 +93,12 @@ class ComposableRevealInternalElement extends SkyflowElement {
     this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name, (data) => {
       this.#iframe.setIframeHeight(data.height);
+    });
+    window.addEventListener('message', (event) => {
+      if (event.data
+         && event.data.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + this.#iframe.name) {
+        this.#iframe.setIframeHeight(event.data.data.height);
+      }
     });
   }
 

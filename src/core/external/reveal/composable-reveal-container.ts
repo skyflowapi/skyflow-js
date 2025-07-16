@@ -8,42 +8,32 @@ import sum from 'lodash/sum';
 import EventEmitter from '../../../event-emitter';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
-import {
-  formatValidations, formatOptions, validateElementOptions, getElements,
-} from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
 import { ContainerType } from '../../../skyflow';
 import {
   Context, MessageType,
-  CollectElementInput,
-  CollectElementOptions,
-  ICollectOptions,
-  CollectResponse,
-  UploadFilesResponse,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import {
-  validateCollectElementInput, validateInitConfig, validateAdditionalFieldsInCollect,
-  validateUpsertOptions,
+  validateInitConfig,
   validateInputFormatOptions,
 } from '../../../utils/validators';
 import {
   COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER,
-  COLLECT_TYPES,
+  FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
   COMPOSABLE_REVEAL,
+  REVEAL_TYPES,
 } from '../../constants';
 import Container from '../common/container';
 
-import Client from '../../../client';
 import ComposableRevealElement from './composable-reveal-element';
-import { RevealElementInput } from '../../../index-node';
-import { IRevealElementOptions } from './reveal-container';
+import { RevealElementInput, RevealResponse } from '../../../index-node';
+import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import ComposableRevealInternalElement from './composable-reveal-internal';
 
 const CLASS_NAME = 'ComposableRevealContainer';
@@ -83,6 +73,8 @@ class ComposableRevealContainer extends Container {
   #shadowRoot: ShadowRoot | null = null;
 
   #iframeID: string = '';
+
+  #revealRecords: IRevealElementInput[] = [];
 
   #getSkyflowBearerToken: () => Promise<string> | undefined;
 
@@ -133,6 +125,12 @@ class ComposableRevealContainer extends Container {
         });
         this.#isComposableFrameReady = true;
       });
+    window.addEventListener('message', (event) => {
+      if (event.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+                  + this.#containerId) {
+        this.#isComposableFrameReady = true;
+      }
+    });
   }
 
   create = (input: RevealElementInput, options?: IRevealElementOptions) => {
@@ -140,7 +138,6 @@ class ComposableRevealContainer extends Container {
     validateInputFormatOptions(options);
 
     const elementName = `${COMPOSABLE_REVEAL}:${btoa(elementId)}`;
-
     this.#elementsList.push({
       name: elementName,
       ...input,
@@ -206,6 +203,7 @@ class ComposableRevealContainer extends Container {
       this.#elements[this.#tempElements.elementName] = element;
       this.#skyflowElements[elementId] = element;
     }
+    this.#iframeID = element.iframeName();
     return element;
   };
 
@@ -270,7 +268,7 @@ class ComposableRevealContainer extends Container {
   mount = (domElement: HTMLElement | string) => {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT,
-        ['CollectElement'], true);
+        ['RevealElement'], true);
     }
 
     const { layout } = this.#options;
@@ -300,7 +298,6 @@ class ComposableRevealContainer extends Container {
         ...this.#options.errorTextStyles,
       };
     }
-    console.log('Element Group', this.#elementGroup);
     if (this.#containerMounted) {
       this.#containerElement = this.#createMultipleElement(this.#elementGroup, false);
       this.#containerElement.mount(domElement);
@@ -334,7 +331,7 @@ class ComposableRevealContainer extends Container {
         iframe.contentWindow.postMessage({
           name: eventName,
           ...options,
-        }, '*');
+        }, properties.IFRAME_SECURE_ORIGIN);
       }
     } else {
       const iframe = document.getElementById(this.#iframeID) as HTMLIFrameElement;
@@ -346,5 +343,136 @@ class ComposableRevealContainer extends Container {
       }
     }
   };
+
+  reveal(): Promise<RevealResponse> {
+    this.#revealRecords = [];
+    if (this.#isComposableFrameReady) {
+      return new Promise((resolve, reject) => {
+        try {
+          validateInitConfig(this.#metaData.clientJSON.config);
+          if (!this.#elementsList || this.#elementsList.length === 0) {
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE, [], true);
+          }
+          printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
+            MessageType.LOG,
+            this.#context.logLevel);
+          const elementIds:{ frameId:string, token:string }[] = [];
+          this.#elementsList.forEach((element) => {
+            elementIds.push({
+              frameId: element.name,
+              token: element.token,
+            });
+          });
+          this.#getSkyflowBearerToken()?.then((authToken) => {
+            printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+              MessageType.LOG,
+              this.#context.logLevel);
+            this.#emitEvent(
+              ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + this.#containerId, {
+                data: {
+                  type: REVEAL_TYPES.REVEAL,
+                  containerId: this.#containerId,
+                  elementIds,
+                },
+                clientConfig: {
+                  vaultURL: this.#metaData.clientJSON.config.vaultURL,
+                  vaultID: this.#metaData.clientJSON.config.vaultID,
+                  authToken,
+                },
+                context: this.#context,
+              },
+            );
+            window.addEventListener('message', (event) => {
+              if (event.data.type
+               === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
+                const revealData = event.data.data;
+                if (revealData.error) {
+                  printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
+                    MessageType.ERROR, this.#context.logLevel);
+                  reject(revealData.error);
+                } else {
+                  printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
+                    MessageType.LOG,
+                    this.#context.logLevel);
+                  resolve(revealData);
+                }
+              }
+            });
+          }).catch((err:any) => {
+            printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+            reject(err);
+          });
+        } catch (err: any) {
+          printLog(`Error: ${err.message}`, MessageType.ERROR, this.#context.logLevel);
+          reject(err);
+        }
+      });
+    }
+    return new Promise((resolve, reject) => {
+      try {
+        validateInitConfig(this.#metaData.clientJSON.config);
+        if (!this.#elementsList || this.#elementsList.length === 0) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE, [], true);
+        }
+        printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
+          MessageType.LOG,
+          this.#context.logLevel);
+        const elementIds:{ frameId:string, token:string }[] = [];
+        this.#elementsList.forEach((element) => {
+          elementIds.push({
+            frameId: element.name,
+            token: element.token,
+          });
+        });
+        this.#getSkyflowBearerToken()?.then((authToken) => {
+          printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+            MessageType.LOG,
+            this.#context.logLevel);
+          window.addEventListener('message', (event) => {
+            if (event.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+                  + this.#containerId) {
+              this.#emitEvent(
+                ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + this.#containerId, {
+                  data: {
+                    type: REVEAL_TYPES.REVEAL,
+                    containerId: this.#containerId,
+                    elementIds,
+                  },
+                  clientConfig: {
+                    vaultURL: this.#metaData.clientJSON.config.vaultURL,
+                    vaultID: this.#metaData.clientJSON.config.vaultID,
+                    authToken,
+                  },
+                  context: this.#context,
+                },
+              );
+              window.addEventListener('message', (event) => {
+                if (event.data.type
+               === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
+                  const revealData = event.data.data;
+                  if (revealData.error) {
+                    printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
+                      MessageType.ERROR, this.#context.logLevel);
+                    reject(revealData.error);
+                  } else {
+                    printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
+                      MessageType.LOG,
+                      this.#context.logLevel);
+                    resolve(revealData);
+                  }
+                }
+              });
+            }
+          });
+        }).catch((err:any) => {
+          printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+          reject(err);
+        });
+      } catch (err: any) {
+        printLog(`Error: ${err.message}`, MessageType.ERROR, this.#context.logLevel);
+        reject(err);
+      }
+    });
+  }
 }
 export default ComposableRevealContainer;

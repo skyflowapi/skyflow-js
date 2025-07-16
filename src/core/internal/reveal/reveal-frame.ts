@@ -77,14 +77,12 @@ class RevealFrame {
     const configIndex = url.indexOf('?');
     const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
     const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
-    console.log('LK', JSON.stringify(parsedRecord));
     const skyflowContainerId = parsedRecord.clientJSON.metaData.uuid;
     RevealFrame.revealFrame = new RevealFrame(parsedRecord.record,
       parsedRecord.context, skyflowContainerId);
   }
 
   constructor(record, context, id, rootDiv?) {
-    console.log('Initializing RevealFrame', document.location.href, document, record);
     this.#skyflowContainerId = id;
     this.#name = rootDiv ? record?.name : window.name;
     this.#containerId = getValueFromName(this.#name, 2);
@@ -184,19 +182,20 @@ class RevealFrame {
     // document.body.append(this.#elementContainer);
 
     bus.emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#name, { name: this.#name });
+    if (rootDiv) {
+      this.getConfig();
+      window.parent.postMessage({
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#name,
+        data: {
+          name: this.#name,
+        },
+      }, this.#clientDomain);
 
-    window.parent.postMessage({
-      type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#name,
-      data: {
-        name: this.#name,
-      },
-    }, this.#clientDomain);
-
-    window.parent.postMessage({
-      type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
-      data: { height: this.#elementContainer.scrollHeight, name: this.#name },
-    }, this.#clientDomain);
-
+      window.parent.postMessage({
+        type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+        data: { height: this.#elementContainer.scrollHeight, name: this.#name },
+      }, this.#clientDomain);
+    }
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (_, callback) => {
       callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
     });
@@ -286,6 +285,42 @@ class RevealFrame {
       }
     });
   }
+
+  responseUpdate = (data) => {
+    if (data.frameId === this.#record.name && data.error) {
+      if (!Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
+        this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
+      }
+    } else if (data.frameId === this.#record.name && data[0].token
+       && this.#record.token === data[0].token) {
+      const responseValue = data[0].value as string;
+      this.#revealedValue = responseValue;
+      this.isRevealCalled = true;
+      this.#dataElememt.innerText = responseValue;
+      if (this.#record.mask) {
+        const { formattedOutput } = getMaskedOutput(this.#dataElememt.innerText,
+          this.#record.mask[0],
+          constructMaskTranslation(this.#record.mask));
+        this.#dataElememt.innerText = formattedOutput;
+      }
+      printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
+        CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
+    }
+    window.parent.postMessage({
+      type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+      data: { height: this.#elementContainer.scrollHeight, name: this.#name },
+    }, this.#clientDomain);
+  };
+
+  getConfig = () => {
+    const url = window.location?.href;
+    const configIndex = url.indexOf('?');
+    const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
+    const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
+    this.#clientDomain = parsedRecord.clientDomain || '';
+  };
+
+  getData = () => this.#record;
 
   private sub2 = (responseUrl) => {
     if (responseUrl.iframeName === this.#name) {
