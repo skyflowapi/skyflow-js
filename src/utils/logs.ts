@@ -10,6 +10,8 @@ const logs = {
     CREATE_COLLECT_CONTAINER: '%s1 - Creating Collect container.',
     COLLECT_CONTAINER_CREATED: '%s1 - Created Collect container successfully.',
 
+    INITIALIZE_COMPOSABLE_CLIENT: '%s1 - Initializing Composable container.',
+
     CREATE_REVEAL_CONTAINER: '%s1 - Creating Reveal container.',
     REVEAL_CONTAINER_CREATED: '%s1 - Created Reveal container successfully.',
 
@@ -91,6 +93,7 @@ const logs = {
     VALIDATE_GET_BY_ID_INPUT: '%s1 - Validating getByID input.',
   },
   errorLogs: {
+    INVALID_REVEAL_COMPOSABLE_INPUT: 'Reveal composable input is invalid. Please provide a valid input.',
     NO_ELEMENTS_IN_COLLECT: 'Validation error. No elements found in collect container',
     NO_ELEMENTS_IN_COMPOSABLE: 'Validation error. No elements found in composable container',
     NO_ELEMENTS_IN_REVEAL: 'Validation error. No elements found in reveal container',
