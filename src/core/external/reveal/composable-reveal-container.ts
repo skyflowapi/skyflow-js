@@ -21,6 +21,7 @@ import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import {
   validateInitConfig,
   validateInputFormatOptions,
+  validateRevealElementRecords,
 } from '../../../utils/validators';
 import {
   COLLECT_FRAME_CONTROLLER,
@@ -141,7 +142,6 @@ class ComposableRevealContainer extends Container {
     this.#elementsList.push({
       name: elementName,
       ...input,
-      elementName,
       elementId,
     });
     const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`;
@@ -356,6 +356,15 @@ class ComposableRevealContainer extends Container {
           printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
             MessageType.LOG,
             this.#context.logLevel);
+          this.#elementsList.forEach((currentElement) => {
+            // if (currentElement.isClientSetError()) {
+            //   throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
+            // }
+            if (!currentElement.skyflowID) {
+              this.#revealRecords.push(currentElement);
+            }
+          });
+          validateRevealElementRecords(this.#revealRecords);
           const elementIds:{ frameId:string, token:string }[] = [];
           this.#elementsList.forEach((element) => {
             elementIds.push({
@@ -417,6 +426,15 @@ class ComposableRevealContainer extends Container {
         printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
           MessageType.LOG,
           this.#context.logLevel);
+        this.#elementsList.forEach((currentElement) => {
+          // if (currentElement.isClientSetError()) {
+          //   throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
+          // }
+          if (!currentElement.skyflowID) {
+            this.#revealRecords.push(currentElement);
+          }
+        });
+        validateRevealElementRecords(this.#revealRecords);
         const elementIds:{ frameId:string, token:string }[] = [];
         this.#elementsList.forEach((element) => {
           elementIds.push({
@@ -428,8 +446,8 @@ class ComposableRevealContainer extends Container {
           printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
             MessageType.LOG,
             this.#context.logLevel);
-          window.addEventListener('message', (event) => {
-            if (event.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+          window.addEventListener('message', (messagEevent) => {
+            if (messagEevent.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
                   + this.#containerId) {
               this.#emitEvent(
                 ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + this.#containerId, {
