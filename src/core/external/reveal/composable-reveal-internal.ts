@@ -25,9 +25,9 @@ import {
 } from '../../../metrics';
 import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
-import { formatForRenderClient } from '../../../core-utils/reveal';
 import properties from '../../../properties';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
+import EventEmitter from '../../../event-emitter';
 
 const CLASS_NAME = 'RevealElementInteranalElement';
 
@@ -55,7 +55,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
 
   #readyToMount: boolean = false;
 
-  #eventEmitter:any;
+  #eventEmitter: EventEmitter;
 
   #isFrameReady: boolean;
 
@@ -66,6 +66,14 @@ class ComposableRevealInternalElement extends SkyflowElement {
   #isSkyflowFrameReady: boolean = false;
 
   #isSingleElementAPI: boolean;
+
+  #shadowRoot: ShadowRoot | null = null;
+
+  #getSkyflowBearerToken: () => Promise<string> | undefined;
+
+  #composableIframeName!: string;
+
+  #isComposableFrameReady: boolean = false;
 
   constructor(elementId: string,
     recordGroup: RevealComposableGroup[],
@@ -90,9 +98,16 @@ class ComposableRevealInternalElement extends SkyflowElement {
     this.#domSelecter = '';
     this.#isFrameReady = false;
     this.#readyToMount = true;
+    this.#getSkyflowBearerToken = metaData.getSkyflowBearerToken;
     this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name, (data) => {
       this.#iframe.setIframeHeight(data.height);
+    });
+    window.addEventListener('message', (event) => {
+      if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
+                  + this.#containerId) {
+        this.#isComposableFrameReady = true;
+      }
     });
     window.addEventListener('message', (event) => {
       if (event.data
@@ -100,6 +115,37 @@ class ComposableRevealInternalElement extends SkyflowElement {
         this.#iframe.setIframeHeight(event.data.data.height);
       }
     });
+    // eslint-disable-next-line max-len
+    if (this.#recordData && this.#recordData.rows) {
+      this.setupRenderFileEventListener(this.getRecordData().rows);
+    }
+  }
+
+  private setupRenderFileEventListener(rows: any[]): void {
+    if (!rows?.length) {
+      console.warn('No rows provided for event listener setup');
+      return;
+    }
+
+    try {
+      rows.forEach((row) => {
+        row.elements?.forEach((element: any) => {
+          if (!element?.name) return;
+          this.#eventEmitter.on(
+            `${ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST}:${element.name}`,
+            (data, callback) => {
+              this.renderFile(element).then((response) => {
+                callback(response);
+              }).catch((error) => {
+                callback({ error });
+              });
+            },
+          );
+        });
+      });
+    } catch (error) {
+      console.error('Error setting up render file event listener:', error);
+    }
   }
 
   getID() {
@@ -167,55 +213,103 @@ class ComposableRevealInternalElement extends SkyflowElement {
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
     }
+    if (domElementSelector instanceof HTMLElement
+      && (domElementSelector as HTMLElement).getRootNode() instanceof ShadowRoot) {
+      this.#shadowRoot = domElementSelector.getRootNode() as ShadowRoot;
+    } else if (typeof domElementSelector === 'string') {
+      const element = document.getElementById(domElementSelector);
+      if (element && element.getRootNode() instanceof ShadowRoot) {
+        this.#shadowRoot = element.getRootNode() as ShadowRoot;
+      }
+    }
   }
 
-  renderFile(): Promise<RenderFileResponse> {
-    this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
+  #emitEvent = (eventName: string, options?: Record<string, any>, callback?: any) => {
+    if (this.#shadowRoot) {
+      const iframe = this.#shadowRoot
+        .getElementById(this.#iframe.name) as HTMLIFrameElement;
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          name: eventName,
+          ...options,
+        }, properties.IFRAME_SECURE_ORIGIN);
+      }
+    } else {
+      const iframe = document.getElementById(this.#iframe.name) as HTMLIFrameElement;
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          name: eventName,
+          ...options,
+        }, properties.IFRAME_SECURE_ORIGIN);
+      }
+    }
+  };
+
+  renderFile(recordData): Promise<RenderFileResponse> {
     let altText = '';
-    if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
-      altText = this.#recordData.altText;
+    if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
+      altText = recordData.altText;
     }
     this.setAltText('loading...');
     const loglevel = this.#context.logLevel;
-    if (this.#isSkyflowFrameReady) {
+    if (this.#isComposableFrameReady) {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#metaData.clientJSON.config);
           printLog(parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
             MessageType.LOG,
             loglevel);
-          validateRenderElementRecord(this.#recordData);
-          bus
-          // .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
+          validateRenderElementRecord(recordData);
+
+          this.#getSkyflowBearerToken()?.then((authToken) => {
+            printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+              MessageType.LOG,
+              this.#context.logLevel);
+            this.#emitEvent(
+              ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + recordData.name,
               {
-                type: REVEAL_TYPES.RENDER_FILE,
-                records: this.#recordData,
-                containerId: this.#containerId,
-                iframeName: this.#iframe.name,
-              },
-              (revealData: any) => {
-                if (revealData.errors) {
-                  printLog(parameterizedString(
-                    logs.errorLogs.FAILED_RENDER,
-                  ), MessageType.ERROR,
-                  this.#context.logLevel);
-                  if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
-                    this.setAltText(altText);
-                  }
-                  reject(formatForRenderClient(revealData, this.#recordData.column as string));
-                } else {
-                  printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
-                    MessageType.LOG,
-                    this.#context.logLevel);
-                  printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
-                    CLASS_NAME, this.#recordData.skyflowID),
-                  MessageType.LOG, this.#context.logLevel);
-                  resolve(formatForRenderClient(revealData, this.#recordData.column as string));
-                }
+                data: {
+                  type: REVEAL_TYPES.RENDER_FILE,
+                  containerId: this.#containerId,
+                  iframeName: recordData.name,
+                },
+                clientConfig: {
+                  vaultURL: this.#metaData.clientJSON.config.vaultURL,
+                  vaultID: this.#metaData.clientJSON.config.vaultID,
+                  authToken,
+                },
               },
             );
+            window.addEventListener('message', (event) => {
+              if (event.data && event.data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
+       + recordData.name) {
+                if (event.data.data.type === REVEAL_TYPES.RENDER_FILE) {
+                  const revealData = event.data.data.result;
+                  if (revealData.error) {
+                    printLog(parameterizedString(
+                      logs.errorLogs.FAILED_RENDER,
+                    ), MessageType.ERROR,
+                    this.#context.logLevel);
+                    if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
+                      this.setAltText(altText);
+                    }
+                    reject(revealData);
+                  } else {
+                    printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
+                      MessageType.LOG,
+                      this.#context.logLevel);
+                    printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
+                      CLASS_NAME, recordData.skyflowID),
+                    MessageType.LOG, this.#context.logLevel);
+                    resolve(revealData);
+                  }
+                }
+              }
+            });
+          }).catch((err:any) => {
+            printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+            reject(err);
+          });
           printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
           MessageType.LOG, loglevel);
@@ -232,45 +326,64 @@ class ComposableRevealInternalElement extends SkyflowElement {
         printLog(parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
           MessageType.LOG,
           loglevel);
-        validateRenderElementRecord(this.#recordData);
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#metaData.uuid, () => {
-            bus
-              // .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
+        validateRenderElementRecord(recordData);
+        window.addEventListener('message', (event) => {
+          if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
+                  + this.#containerId) {
+            this.#isMounted = true;
+            this.#getSkyflowBearerToken()?.then((authToken) => {
+              printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+                MessageType.LOG,
+                this.#context.logLevel);
+              this.#emitEvent(
+                ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + recordData.name,
                 {
-                  type: REVEAL_TYPES.RENDER_FILE,
-                  records: this.#recordData,
-                  containerId: this.#containerId,
-                  iframeName: this.#iframe.name,
-                },
-                (revealData: any) => {
-                  if (revealData.errors) {
-                    printLog(parameterizedString(
-                      logs.errorLogs.FAILED_RENDER,
-                    ), MessageType.ERROR,
-                    this.#context.logLevel);
-                    if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
-                      this.setAltText(altText);
-                    }
-                    reject(formatForRenderClient(revealData, this.#recordData.column as string));
-                  } else {
-                    printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
-                      MessageType.LOG,
-                      this.#context.logLevel);
-                    printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
-                      CLASS_NAME, this.#recordData.skyflowID),
-                    MessageType.LOG, this.#context.logLevel);
-                    resolve(formatForRenderClient(revealData, this.#recordData.column as string));
-                  }
+                  data: {
+                    type: REVEAL_TYPES.RENDER_FILE,
+                    containerId: this.#containerId,
+                    iframeName: recordData.name,
+                  },
+                  clientConfig: {
+                    vaultURL: this.#metaData.clientJSON.config.vaultURL,
+                    vaultID: this.#metaData.clientJSON.config.vaultID,
+                    authToken,
+                  },
                 },
               );
-            printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-            MessageType.LOG, loglevel);
-          });
+              window.addEventListener('message', (event1) => {
+                if (event1.data
+                         && event1.data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
+             + this.#iframe.name) {
+                  if (event.data.data.type === REVEAL_TYPES.RENDER_FILE) {
+                    const revealData = event.data.data.result;
+                    if (revealData.error) {
+                      printLog(parameterizedString(
+                        logs.errorLogs.FAILED_RENDER,
+                      ), MessageType.ERROR,
+                      this.#context.logLevel);
+                      if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
+                        this.setAltText(altText);
+                      }
+                      reject(revealData);
+                    } else {
+                      // eslint-disable-next-line max-len
+                      printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
+                        MessageType.LOG,
+                        this.#context.logLevel);
+                      printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
+                        CLASS_NAME, recordData.skyflowID),
+                      MessageType.LOG, this.#context.logLevel);
+                      resolve(revealData);
+                    }
+                  }
+                }
+              });
+            }).catch((err:any) => {
+              printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+              reject(err);
+            });
+          }
+        });
         printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
           CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
         MessageType.LOG, loglevel);

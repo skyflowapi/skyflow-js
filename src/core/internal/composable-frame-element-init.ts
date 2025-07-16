@@ -4,7 +4,7 @@ import { getValueAndItsUnit } from '../../libs/element-options';
 import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
 import {
-  Context, Env, IRevealRecordComposable, LogLevel,
+  Context, IRevealRecordComposable,
 } from '../../utils/common';
 import {
   getContainerType,
@@ -263,7 +263,6 @@ export default class RevealComposableFrameElementInit {
         );
       }
 
-      const errorTextMap = {};
       row.elements.forEach((element) => {
         const elementDiv = document.createElement('div');
         elementDiv.className = `element-${count}`;
@@ -324,14 +323,5 @@ export default class RevealComposableFrameElementInit {
         );
       }
     });
-  };
-
-  #updateCombinedErrorText = (elementId, errorMessages) => {
-    const currentErrorElememt = document.getElementById(elementId);
-    let errorText = '';
-    Object.values(errorMessages).forEach((message) => {
-      errorText += (message) && `${message}. `;
-    });
-    if (currentErrorElememt) { currentErrorElememt.innerText = errorText; }
   };
 }

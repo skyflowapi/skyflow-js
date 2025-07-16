@@ -434,7 +434,7 @@ class SkyflowFrameController {
   renderFile(data, iframeName) {
     return new Promise((resolve, reject) => {
       try {
-        getFileURLFromVaultBySkyflowID(data, this.#client, '')
+        getFileURLFromVaultBySkyflowID(data, this.#client)
           .then((resolvedResult) => {
             let url = '';
             if (resolvedResult.fields && data.column) {

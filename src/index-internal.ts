@@ -29,8 +29,6 @@ import RevealComposableFrameElementInit from './core/internal/composable-frame-e
     if (frameType === SKYFLOW_FRAME_CONTROLLER) {
       SkyflowFrameController.init(frameId);
     } else if (frameType === COMPOSABLE_REVEAL) {
-      const logLevel = getValueFromName(frameName, 4) || LogLevel.ERROR;
-      console.log('Reveal', frameName, logLevel);
       root.Skyflow = RevealComposableFrameElementInit;
       RevealComposableFrameElementInit.startFrameElement();
     } else if (frameType === FRAME_ELEMENT) {

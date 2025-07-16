@@ -29,7 +29,7 @@ import {
   constructMaskTranslation,
   getAtobValue, getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
-import { formatForRenderClient, getFileURLFromVaultBySkyflowID } from '../../../core-utils/reveal';
+import { formatForRenderClient, getFileURLFromVaultBySkyflowIDComposable } from '../../../core-utils/reveal';
 import Client from '../../../client';
 
 const { getType } = require('mime');
@@ -175,7 +175,6 @@ class RevealFrame {
     }
 
     this.#elementContainer.appendChild(this.#dataElememt);
-    console.log('RevealFrame', this.#elementContainer);
 
     if (rootDiv) rootDiv.append(this.#elementContainer);
     else document.body.append(this.#elementContainer);
@@ -244,8 +243,15 @@ class RevealFrame {
           if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
         }
       });
+    window.parent.postMessage(
+      {
+        type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + this.#containerId,
+        data: {
+          name: window.name,
+        },
+      }, this.#clientDomain,
+    );
     this.updateRevealElementOptions();
-
     window.addEventListener('message', (event) => {
       if (event.data
         && event.data.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#name) {
@@ -318,6 +324,7 @@ class RevealFrame {
     const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
     const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
     this.#clientDomain = parsedRecord.clientDomain || '';
+    this.#containerId = parsedRecord.containerId;
   };
 
   getData = () => this.#record;
@@ -348,7 +355,7 @@ class RevealFrame {
     this.#client = new Client(clientConfig, {});
     return new Promise((resolve, reject) => {
       try {
-        getFileURLFromVaultBySkyflowID(data, this.#client, clientConfig.authToken)
+        getFileURLFromVaultBySkyflowIDComposable(data, this.#client, clientConfig.authToken)
           .then((resolvedResult) => {
             let url = '';
             if (resolvedResult.fields && data.column) {

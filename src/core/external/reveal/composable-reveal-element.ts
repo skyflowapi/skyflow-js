@@ -1,6 +1,7 @@
 import EventEmitter from '../../../event-emitter';
 import { ContainerType } from '../../../skyflow';
-import { EventName } from '../../../utils/common';
+import { EventName, RenderFileResponse } from '../../../utils/common';
+import { ELEMENT_EVENTS_TO_IFRAME } from '../../constants';
 
 class ComposableRevealElement {
   #elementName: string;
@@ -11,15 +12,12 @@ class ComposableRevealElement {
 
   type: string = ContainerType.COMPOSABLE;
 
-  #isMounted = false;
-
-  #isUpdateCalled = false;
+  #isMounted: boolean = false;
 
   constructor(name, eventEmitter, iframeName) {
     this.#elementName = name;
     this.#iframeName = iframeName;
     this.#eventEmitter = eventEmitter;
-
     this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
       this.#isMounted = true;
     });
@@ -31,6 +29,23 @@ class ComposableRevealElement {
 
   getID(): string {
     return this.#elementName;
+  }
+
+  renderFile(): Promise<RenderFileResponse> {
+    return new Promise((resolve, reject) => {
+      // eslint-disable-next-line no-underscore-dangle
+      this.#eventEmitter._emit(
+        `${ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST}:${this.#elementName}`,
+        {},
+        (response: RenderFileResponse) => {
+          if (response.errors) {
+            reject(response);
+          } else {
+            resolve(response);
+          }
+        },
+      );
+    });
   }
 }
 

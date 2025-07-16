@@ -2,7 +2,6 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import e from 'express';
 import Client from '../client';
 import { getAccessToken } from '../utils/bus-events';
 import SkyflowError from '../libs/skyflow-error';
@@ -158,6 +157,31 @@ export const getFileURLForRender = (
 export const getFileURLFromVaultBySkyflowID = (
   skyflowIdRecord: IRevealRecord,
   client: Client,
+): Promise<IRenderResponseType> => new Promise((rootResolve, rootReject) => {
+  try {
+    const clientId = client.toJSON().metaData.uuid || '';
+    getAccessToken(clientId).then((authToken) => {
+      getFileURLForRender(
+        skyflowIdRecord, client, authToken as string,
+      ).then((resolvedResult: IRenderResponseType) => {
+        rootResolve(resolvedResult);
+      }).catch((err: any) => {
+        const errorData = formatForRenderFileFailure(err, skyflowIdRecord.skyflowID as string,
+          skyflowIdRecord.column as string);
+        printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
+        rootReject(errorData);
+      });
+    }).catch((err) => {
+      rootReject(err);
+    });
+  } catch (err) {
+    rootReject(err);
+  }
+});
+
+export const getFileURLFromVaultBySkyflowIDComposable = (
+  skyflowIdRecord: IRevealRecord,
+  client: Client,
   authToken: string,
 ): Promise<IRenderResponseType> => new Promise((rootResolve, rootReject) => {
   try {
@@ -269,8 +293,6 @@ export const fetchRecordsByTokenIdComposable = (
     const errorResponse: Record<string, any>[] = [];
     resultSet.forEach((result) => {
       if (result.status === 'fulfilled') {
-        console.log('Result status:', result.value);
-
         result.value.forEach((res: Record<string, any>) => {
           if (Object.prototype.hasOwnProperty.call(res, 'error')) {
             errorResponse.push(res);

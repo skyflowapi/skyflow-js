@@ -142,11 +142,12 @@ class ComposableRevealContainer extends Container {
     this.#elementsList.push({
       name: elementName,
       ...input,
+      elementName,
       elementId,
     });
     const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`;
-    this.#iframeID = controllerIframeName;
-    return new ComposableRevealElement(elementName, this.#eventEmitter, controllerIframeName);
+    return new ComposableRevealElement(elementName,
+      this.#eventEmitter, controllerIframeName);
   };
 
   #createMultipleElement = (
@@ -196,6 +197,7 @@ class ComposableRevealContainer extends Container {
           containerId: this.#containerId,
           isMounted: this.#containerMounted,
           type: this.type,
+          eventEmitter: this.#eventEmitter,
         },
         true,
         this.#context,
