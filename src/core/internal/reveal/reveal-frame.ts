@@ -175,7 +175,6 @@ class RevealFrame {
     }
 
     this.#elementContainer.appendChild(this.#dataElememt);
-    console.log('RevealFrame', this.#elementContainer);
 
     if (rootDiv) rootDiv.append(this.#elementContainer);
     else document.body.append(this.#elementContainer);
