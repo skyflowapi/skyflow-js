@@ -11,6 +11,7 @@ import {
   IRenderResponseType,
   IGetOptions,
   RenderFileResponse,
+  IRevealRecordComposable,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
 import { FILE_DOWNLOAD_URL_PARAM } from '../core/constants';
@@ -177,6 +178,27 @@ export const getFileURLFromVaultBySkyflowID = (
     rootReject(err);
   }
 });
+
+export const getFileURLFromVaultBySkyflowIDComposable = (
+  skyflowIdRecord: IRevealRecord,
+  client: Client,
+  authToken: string,
+): Promise<IRenderResponseType> => new Promise((rootResolve, rootReject) => {
+  try {
+    getFileURLForRender(
+      skyflowIdRecord, client, authToken as string,
+    ).then((resolvedResult: IRenderResponseType) => {
+      rootResolve(resolvedResult);
+    }).catch((err: any) => {
+      const errorData = formatForRenderFileFailure(err, skyflowIdRecord.skyflowID as string,
+        skyflowIdRecord.column as string);
+      printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
+      rootReject(errorData);
+    });
+  } catch (err) {
+    rootReject(err);
+  }
+});
 export const fetchRecordsByTokenId = (
   tokenIdRecords: IRevealRecord[],
   client: Client,
@@ -230,6 +252,65 @@ export const fetchRecordsByTokenId = (
     rootReject(err);
   });
 });
+
+export const fetchRecordsByTokenIdComposable = (
+  tokenIdRecords: IRevealRecordComposable[],
+  client: Client,
+  authToken: string,
+): Promise<IRevealResponseType> => new Promise((rootResolve, rootReject) => {
+  const vaultResponseSet: Promise<any>[] = tokenIdRecords?.map(
+    (tokenRecord) => new Promise((resolve) => {
+      const apiResponse: any = [];
+      const redaction: RedactionType = tokenRecord?.redaction ?? RedactionType.PLAIN_TEXT;
+
+      getTokenRecordsFromVault(tokenRecord?.token ?? '', redaction, client, authToken)
+        ?.then(
+          (response: IApiSuccessResponse) => {
+            const fieldsData = formatForPureJsSuccess(response);
+            apiResponse?.push({
+              ...fieldsData,
+              frameId: tokenRecord?.iframeName ?? '',
+            });
+          },
+          (cause: any) => {
+            const errorData = formatForPureJsFailure(cause, tokenRecord?.token ?? '');
+            printLog(errorData?.error?.description ?? '', MessageType.ERROR, LogLevel.ERROR);
+            apiResponse?.push({
+              ...errorData,
+              frameId: tokenRecord?.iframeName ?? '',
+            });
+          },
+        )
+        ?.finally(() => {
+          resolve(apiResponse);
+        });
+    }),
+  );
+
+  Promise.allSettled(vaultResponseSet)?.then((resultSet) => {
+    const recordsResponse: Record<string, any>[] = [];
+    const errorResponse: Record<string, any>[] = [];
+    resultSet?.forEach((result) => {
+      if (result?.status === 'fulfilled') {
+        result?.value?.forEach((res: Record<string, any>) => {
+          if (Object.prototype.hasOwnProperty.call(res, 'error')) {
+            errorResponse?.push(res);
+          } else {
+            recordsResponse?.push(res);
+          }
+        });
+      }
+    });
+    if (errorResponse?.length === 0) {
+      rootResolve({ records: recordsResponse });
+    } else if (recordsResponse?.length === 0) {
+      rootReject({ errors: errorResponse });
+    } else {
+      rootReject({ records: recordsResponse, errors: errorResponse });
+    }
+  });
+});
+
 export const formatRecordsForIframe = (response: IRevealResponseType) => {
   const result: Record<string, string> = {};
   if (response.records) {
@@ -281,6 +362,34 @@ export const formatRecordsForClient = (response: IRevealResponseType) => {
     return { success: successRecords };
   }
   return { errors: response.errors };
+};
+
+export const formatRecordsForClientComposable = (response) => {
+  let successRecords = [];
+  let errorRecords = [];
+
+  if (response?.errors && response?.errors?.length > 0) {
+    errorRecords = response?.errors?.map((errors) => ({
+      error: errors?.error ?? {},
+    }));
+  }
+
+  if (response?.records) {
+    successRecords = response?.records?.map((record) => ({
+      token: record?.[0]?.token ?? '',
+      valueType: record?.[0]?.valueType ?? '',
+    }));
+  }
+
+  if (successRecords?.length > 0 && errorRecords?.length > 0) {
+    return { success: successRecords, errors: errorRecords };
+  }
+
+  if (successRecords?.length > 0) {
+    return { success: successRecords };
+  }
+
+  return { errors: errorRecords };
 };
 
 export const fetchRecordsGET = async (
