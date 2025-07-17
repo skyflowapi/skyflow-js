@@ -203,7 +203,7 @@ const updateRecordsInVault = (
   options,
 ) => {
   const table = skyflowIdRecord.fields.table;
-  const skyflowID = skyflowIdRecord.skyflowID;
+  const skyflowID = skyflowIdRecord?.skyflowID;
   skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'table');
   skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'skyflowID');
   return client.request({
@@ -285,18 +285,20 @@ export const updateRecordsBySkyflowIDComposable = async (
 ) => new Promise((rootResolve, rootReject) => {
   let updateResponseSet: Promise<any>[];
   // eslint-disable-next-line prefer-const
-  updateResponseSet = skyflowIdRecords?.updateRecords.map(
+  updateResponseSet = skyflowIdRecords?.updateRecords?.map(
     (skyflowIdRecord: IInsertRecord) => new Promise((resolve, reject) => {
-      updateRecordsInVault(skyflowIdRecord, client, authToken as string, options)
-        .then((resolvedResult: any) => {
+      updateRecordsInVault(skyflowIdRecord, client, authToken, options)
+        ?.then((resolvedResult: any) => {
           const resp = constructFinalUpdateRecordResponse(
-            resolvedResult, options?.tokens, skyflowIdRecord,
+            resolvedResult,
+            options?.tokens,
+            skyflowIdRecord,
           );
           resolve(resp);
         },
         (rejectedResult) => {
           let errorResponse = rejectedResult;
-          if (rejectedResult && rejectedResult.error) {
+          if (rejectedResult?.error) {
             errorResponse = {
               error: {
                 code: rejectedResult?.error?.code,
@@ -304,28 +306,31 @@ export const updateRecordsBySkyflowIDComposable = async (
               },
             };
           }
-          printLog(rejectedResult.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
+          printLog(rejectedResult?.error?.description ?? '', MessageType.ERROR, LogLevel.ERROR);
           reject(errorResponse);
-        }).catch((error) => {
+        })?.catch((error) => {
           reject(error);
         });
     }),
   );
-  Promise.allSettled(updateResponseSet).then((resultSet: any) => {
+  Promise.allSettled(updateResponseSet)?.then((resultSet: any) => {
     const recordsResponse: any[] = [];
     const errorsResponse: any[] = [];
-    resultSet.forEach((result: { status: string; value: any; reason?: any; }) => {
-      if (result.status === 'fulfilled') {
-        recordsResponse.push(result.value);
+    resultSet?.forEach((result: { status: string; value: any; reason?: any; }) => {
+      if (result?.status === 'fulfilled') {
+        recordsResponse?.push(result?.value);
       } else {
-        errorsResponse.push(result.reason);
+        errorsResponse?.push(result?.reason);
       }
     });
 
-    if (errorsResponse.length === 0) {
+    if (errorsResponse?.length === 0) {
       rootResolve({ records: recordsResponse });
-    } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
-    else rootReject({ records: recordsResponse, errors: errorsResponse });
+    } else if (recordsResponse?.length === 0) {
+      rootReject({ errors: errorsResponse });
+    } else {
+      rootReject({ records: recordsResponse, errors: errorsResponse });
+    }
   });
 });
 
@@ -339,7 +344,7 @@ export const insertDataInCollect = async (
   let insertResponse: any;
   let insertErrorResponse: any;
   client
-    .request({
+    ?.request({
       body: {
         records,
       },
@@ -350,7 +355,7 @@ export const insertDataInCollect = async (
         'content-type': 'application/json',
       },
     })
-    .then((response: any) => {
+    ?.then((response: any) => {
       insertResponse = constructInsertRecordResponse(
         response,
         options?.tokens,
@@ -358,8 +363,7 @@ export const insertDataInCollect = async (
       );
       resolve(insertResponse);
     })
-    .catch((error) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ?.catch((error) => {
       insertErrorResponse = {
         errors: [
           {

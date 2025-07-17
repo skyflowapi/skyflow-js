@@ -51,123 +51,133 @@ export default class RevealComposableFrameElementInit {
 
   constructor() {
     this.containerId = '';
-    this.#domForm = document.createElement('form');
+    this.#domForm = document?.createElement('form');
     this.#domForm.action = '#';
     this.#domForm.onsubmit = (event) => {
-      event.preventDefault();
+      event?.preventDefault();
     };
-    this.rootDiv = document.createElement('div');
+
+    this.rootDiv = document?.createElement('div');
     this.updateGroupData();
     this.createContainerDiv(this.group);
-    window.addEventListener('message', (event) => {
-      if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL
-          + this.containerId && event.data.data.type === REVEAL_TYPES.REVEAL) {
-        this.#context = event.data.context;
-        const data = event.data.data;
-        const elementIds = data.elementIds;
-        const revealDataInput: IRevealRecordComposable [] = [];
-        this.#client = new Client(event.data.clientConfig, {});
-        elementIds.forEach((element) => {
-          this.revealFrameList.forEach((revealFrame) => {
-            const data2 = revealFrame.getData();
-            if (data2.name === element.frameId) {
-              if (data2 && !data2.skyflowID) {
-                const revealRecord :IRevealRecordComposable = {
-                  token: data2.token,
-                  redaction: data2.redaction,
-                  iframeName: data2.name,
-                };
 
-                revealDataInput.push(revealRecord);
+    window?.addEventListener('message', (event) => {
+      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL
+          + this.containerId && event?.data?.data?.type === REVEAL_TYPES.REVEAL) {
+        this.#context = event?.data?.context;
+        const data = event?.data?.data ?? {};
+        const elementIds = data?.elementIds ?? [];
+        const revealDataInput: IRevealRecordComposable[] = [];
+        this.#client = new Client(event?.data?.clientConfig ?? {}, {});
+
+        elementIds?.forEach((element) => {
+          this.revealFrameList?.forEach((revealFrame) => {
+            const data2 = revealFrame?.getData?.();
+            if (data2?.name === element?.frameId) {
+              if (data2 && !data2?.skyflowID) {
+                const revealRecord: IRevealRecordComposable = {
+                  token: data2?.token ?? '',
+                  redaction: data2?.redaction,
+                  iframeName: data2?.name ?? '',
+                };
+                revealDataInput?.push(revealRecord);
               }
             }
           });
         });
-        this.revealData(revealDataInput, this.containerId,
-          event.data.clientConfig.authToken)
-          .then((revealResponse: any) => {
-            if (revealResponse.records && revealResponse.records.length > 0) {
+
+        this.revealData(revealDataInput, this.containerId, event?.data?.clientConfig?.authToken)
+          ?.then((revealResponse: any) => {
+            if (revealResponse?.records?.length > 0) {
               const formattedRecord = formatRecordsForClientComposable(revealResponse);
-              window.parent.postMessage(
+              window?.parent?.postMessage(
                 {
                   type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
                   data: formattedRecord,
                 },
-                this.clientMetaData.clientDomain,
+                this.clientMetaData?.clientDomain,
               );
-              revealResponse.records.forEach((record: any) => {
-                this.revealFrameList.forEach((revealFrame) => {
-                  if (revealFrame.getData().name === record.frameId) {
-                    revealFrame.responseUpdate(record);
+
+              revealResponse?.records?.forEach((record: any) => {
+                this.revealFrameList?.forEach((revealFrame) => {
+                  if (revealFrame?.getData()?.name === record?.frameId) {
+                    revealFrame?.responseUpdate?.(record);
                   }
                 });
               });
             }
-            window.parent.postMessage(
+
+            window?.parent?.postMessage(
               {
-                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
-                data: { height: this.rootDiv.scrollHeight, name: window.name },
+                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+                data: {
+                  height: this.rootDiv?.scrollHeight ?? 0,
+                  name: window?.name,
+                },
               },
-              this.clientMetaData.clientDomain,
+              this.clientMetaData?.clientDomain,
             );
           })
-          .catch((error) => {
+          ?.catch((error) => {
             const formattedRecord = formatRecordsForClientComposable(error);
-            window.parent.postMessage(
+            window?.parent?.postMessage(
               {
                 type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
                 data: formattedRecord,
               },
-              this.clientMetaData.clientDomain,
+              this.clientMetaData?.clientDomain,
             );
-            if (error.records) {
-              error.records.forEach((record: any) => {
-                // Update the frame with the revealed data
-                this.revealFrameList.forEach((revealFrame) => {
-                  if (revealFrame.getData().name === record.frameId) {
-                    revealFrame.responseUpdate(record);
-                  }
-                });
-              });
-            }
-            error.errors.forEach((error: any) => {
-              this.revealFrameList.forEach((revealFrame) => {
-                if (revealFrame.getData().name === error.frameId) {
-                  revealFrame.responseUpdate(error);
+
+            error?.records?.forEach((record: any) => {
+              this.revealFrameList?.forEach((revealFrame) => {
+                if (revealFrame?.getData()?.name === record?.frameId) {
+                  revealFrame?.responseUpdate?.(record);
                 }
               });
             });
-            window.parent.postMessage(
+
+            error?.errors?.forEach((error1: any) => {
+              this.revealFrameList?.forEach((revealFrame) => {
+                if (revealFrame?.getData()?.name === error1?.frameId) {
+                  revealFrame?.responseUpdate?.(error1);
+                }
+              });
+            });
+
+            window?.parent?.postMessage(
               {
-                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
-                data: { height: this.rootDiv.scrollHeight, name: window.name },
+                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+                data: {
+                  height: this.rootDiv?.scrollHeight ?? 0,
+                  name: window?.name,
+                },
               },
-              this.clientMetaData.clientDomain,
+              this.clientMetaData?.clientDomain,
             );
           });
       }
     });
 
-    bus
-      // .target(this.clientMetaData.clientDomain)
-      .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
-        this.#context = data.context;
+    bus?.emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
+      this.#context = data?.context;
+      if (data?.client?.config) {
         data.client.config = {
-          ...data.client.config,
+          ...data?.client?.config,
         };
-        this.#client = Client.fromJSON(data.client) as any;
-      });
+      }
+      this.#client = Client?.fromJSON?.(data?.client);
+    });
   }
 
   updateGroupData = () => {
-    const url = window.location?.href;
-    const configIndex = url.indexOf('?');
-    const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
+    const url = window?.location?.href ?? '';
+    const configIndex = url?.indexOf('?') ?? -1;
+    const encodedString = configIndex !== -1 ? decodeURIComponent(url?.substring(configIndex + 1)) : '';
     const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
-    this.clientMetaData = parsedRecord.clientJSON.metaData;
-    this.group = parsedRecord.record;
-    this.containerId = parsedRecord.containerId;
-    this.#context = parsedRecord.context;
+    this.clientMetaData = parsedRecord?.clientJSON?.metaData;
+    this.group = parsedRecord?.record;
+    this.containerId = parsedRecord?.containerId ?? '';
+    this.#context = parsedRecord?.context;
   };
 
   static startFrameElement = () => {
@@ -176,7 +186,7 @@ export default class RevealComposableFrameElementInit {
 
   revealData(revealRecords: IRevealRecordComposable[], containerId, authToken) {
     return new Promise((resolve, reject) => {
-      fetchRecordsByTokenIdComposable(revealRecords, this.#client, authToken).then(
+      fetchRecordsByTokenIdComposable(revealRecords, this.#client, authToken)?.then(
         (resolvedResult) => {
           resolve(resolvedResult);
         },
@@ -190,139 +200,166 @@ export default class RevealComposableFrameElementInit {
   createContainerDiv = (newGroup) => {
     this.group = newGroup;
     const {
-      rows, styles, errorTextStyles,
-    } = this.group;
-    const isComposableContainer = getContainerType(window.name) === ContainerType.COMPOSABLE;
-    this.group.spacing = getValueAndItsUnit(this.group.spacing).join('');
-    this.rootDiv = document.createElement('div');
+      rows = [],
+      styles,
+      errorTextStyles,
+    } = this.group ?? {};
+
+    const isComposableContainer = getContainerType(window?.name) === ContainerType?.COMPOSABLE;
+    this.group.spacing = getValueAndItsUnit(this.group?.spacing)?.join('') ?? '';
+    this.rootDiv = document?.createElement('div');
     this.rootDiv.className = 'container';
+
     const containerStylesByClassName = getFlexGridStyles({
-      'align-items': this.group.alignItems || 'stretch',
-      'justify-content': this.group.justifyContent || 'flex-start',
-      spacing: this.group.spacing,
+      'align-items': this.group?.alignItems ?? 'stretch',
+      'justify-content': this.group?.justifyContent ?? 'flex-start',
+      spacing: this.group?.spacing,
     });
 
-    injectStylesheet.injectWithAllowlist(
+    injectStylesheet?.injectWithAllowlist(
       {
-        [`.${this.rootDiv.className}`]: containerStylesByClassName,
+        [`.${this.rootDiv?.className}`]: containerStylesByClassName,
       },
       ALLOWED_MULTIPLE_FIELDS_STYLES,
     );
+
     let count = 0;
-    rows.forEach((row, rowIndex) => {
-      row.spacing = getValueAndItsUnit(row.spacing).join('');
-      const rowDiv = document.createElement('div');
+    rows?.forEach((row, rowIndex) => {
+      row.spacing = getValueAndItsUnit(row?.spacing)?.join('') ?? '';
+      const rowDiv = document?.createElement('div');
       rowDiv.id = `row-${rowIndex}`;
 
       const intialRowStyles = {
-        'align-items': row.alignItems || 'stretch',
-        'justify-content': row.justifyContent || 'flex-start',
-        spacing: row.spacing,
-        padding: this.group.spacing,
+        'align-items': row?.alignItems ?? 'stretch',
+        'justify-content': row?.justifyContent ?? 'flex-start',
+        spacing: row?.spacing,
+        padding: this.group?.spacing,
       };
+
       const rowStylesByClassName = getFlexGridStyles(intialRowStyles);
       let errorTextElement;
+
       if (isComposableContainer) {
-        rowDiv.className = `${rowDiv.id} SkyflowElement-${rowDiv.id}-base`;
+        rowDiv.className = `${rowDiv?.id} SkyflowElement-${rowDiv?.id}-base`;
         const rowStyles = {
-          [STYLE_TYPE.BASE]: {
-            // ...rowStylesByClassName,
-            // alignItems: rowStylesByClassName['align-items'],
-            // justifyContent: rowStylesByClassName['justify-content'],
-            ...(styles && styles[STYLE_TYPE.BASE]),
+          [STYLE_TYPE?.BASE]: {
+            ...(styles?.[STYLE_TYPE?.BASE] ?? {}),
           },
         };
 
-        getCssClassesFromJss(rowStyles, `${rowDiv.id}`);
+        getCssClassesFromJss?.(rowStyles, `${rowDiv?.id}`);
 
-        errorTextElement = document.createElement('span');
-        errorTextElement.id = `${rowDiv.id}-error`;
+        errorTextElement = document?.createElement('span');
+        errorTextElement.id = `${rowDiv?.id}-error`;
         errorTextElement.className = 'SkyflowElement-row-error-base';
 
         const errorStyles = {
-          [STYLE_TYPE.BASE]: {
+          [STYLE_TYPE?.BASE]: {
             ...ERROR_TEXT_STYLES,
-            ...(errorTextStyles && errorTextStyles[STYLE_TYPE.BASE]),
+            ...(errorTextStyles?.[STYLE_TYPE?.BASE] ?? {}),
           },
         };
-        getCssClassesFromJss(errorStyles, 'row-error');
-        if (errorTextStyles && errorTextStyles[STYLE_TYPE.GLOBAL]) {
-          generateCssWithoutClass(errorTextStyles[STYLE_TYPE.GLOBAL]);
+
+        getCssClassesFromJss?.(errorStyles, 'row-error');
+        if (errorTextStyles?.[STYLE_TYPE?.GLOBAL]) {
+          generateCssWithoutClass?.(errorTextStyles?.[STYLE_TYPE?.GLOBAL]);
         }
       } else {
         rowDiv.className = `row-${rowIndex}`;
-        injectStylesheet.injectWithAllowlist(
+        injectStylesheet?.injectWithAllowlist(
           {
-            [`.${rowDiv.className}`]: rowStylesByClassName,
+            [`.${rowDiv?.className}`]: rowStylesByClassName,
           },
           ALLOWED_MULTIPLE_FIELDS_STYLES,
         );
       }
 
-      row.elements.forEach((element) => {
-        const elementDiv = document.createElement('div');
+      row?.elements?.forEach((element) => {
+        const elementDiv = document?.createElement('div');
         elementDiv.className = `element-${count}`;
-        elementDiv.id = `${rowDiv.id}:element-${count}`;
+        elementDiv.id = `${rowDiv?.id}:element-${count}`;
         count += 1;
+
         const elementStylesByClassName = {
-          padding: row.spacing,
+          padding: row?.spacing,
         };
-        injectStylesheet.injectWithAllowlist(
+
+        injectStylesheet?.injectWithAllowlist(
           {
-            [`.${elementDiv.className}`]: elementStylesByClassName,
+            [`.${elementDiv?.className}`]: elementStylesByClassName,
           },
           ALLOWED_MULTIPLE_FIELDS_STYLES,
         );
+
         const revealFrame = new RevealFrame(element, this.#context,
           this.containerId, elementDiv);
-        this.revealFrameList.push(revealFrame);
-        rowDiv.append(elementDiv);
+        this.revealFrameList?.push(revealFrame);
+        rowDiv?.append(elementDiv);
       });
-      this.rootDiv.append(rowDiv);
-      if (isComposableContainer) { this.rootDiv.append(errorTextElement); }
+
+      this.rootDiv?.append(rowDiv);
+      if (isComposableContainer) {
+        this.rootDiv?.append(errorTextElement);
+      }
     });
 
     if (this.#domForm) {
-      // for cleaning
       this.#domForm.innerHTML = '';
       document.body.innerHTML = '';
-      this.#domForm.append(this.rootDiv);
-      document.body.append(this.#domForm);
+      this.#domForm?.append(this.rootDiv);
+      document?.body?.append(this.#domForm);
     }
-    window.parent.postMessage(
+
+    window?.parent?.postMessage(
       {
         type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.containerId,
         data: {
-          name: window.name,
+          name: window?.name,
         },
       },
       this.clientMetaData.clientDomain,
     );
-    bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name, (data, callback) => {
-      callback({ height: this.rootDiv.scrollHeight, name: window.name });
+
+    bus?.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name, (data, callback) => {
+      callback?.({
+        height: this.rootDiv?.scrollHeight ?? 0,
+        name: window?.name,
+      });
     });
-    window.parent.postMessage(
+
+    window?.parent?.postMessage(
       {
-        type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
-        data: { height: this.rootDiv.scrollHeight, name: window.name },
+        type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+        data: {
+          height: this.rootDiv?.scrollHeight ?? 0,
+          name: window?.name,
+        },
       },
       this.clientMetaData.clientDomain,
     );
-    window.addEventListener('message', (event) => {
-      if (event.data.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name) {
-        window.parent.postMessage(
+
+    window?.addEventListener('message', (event) => {
+      if (event?.data?.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name) {
+        window?.parent?.postMessage(
           {
-            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
-            data: { height: this.rootDiv.scrollHeight, name: window.name },
+            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+            data: {
+              height: this.rootDiv?.scrollHeight ?? 0,
+              name: window?.name,
+            },
           },
-          this.clientMetaData.clientDomain,
+          this.clientMetaData?.clientDomain,
         );
       }
-      if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name) {
-        window.parent.postMessage(
+      if (event?.data?.type
+         === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name) {
+        window?.parent?.postMessage(
           {
-            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
-            data: { height: this.rootDiv.scrollHeight, name: window.name },
+            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+            data: {
+              height: this.rootDiv?.scrollHeight ?? 0,
+              name: window?.name,
+            },
           },
           this.clientMetaData.clientDomain,
         );

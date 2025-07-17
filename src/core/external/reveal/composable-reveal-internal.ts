@@ -82,42 +82,47 @@ class ComposableRevealInternalElement extends SkyflowElement {
     super();
     this.#elementId = elementId;
     this.#metaData = metaData;
-    this.#clientId = this.#metaData.uuid;
+    this.#clientId = this.#metaData?.uuid;
     this.#isSingleElementAPI = isSingleElementAPI;
     this.#recordData = recordGroup;
-    this.#containerId = container.containerId;
-    this.#readyToMount = container.isMounted;
-    this.#eventEmitter = container.eventEmitter;
+    this.#containerId = container?.containerId;
+    this.#readyToMount = container?.isMounted ?? true;
+    this.#eventEmitter = container?.eventEmitter;
     this.#context = context;
+
     this.#iframe = new IFrame(
       `${COMPOSABLE_REVEAL}:${btoa(uuid())}`,
       metaData,
       this.#containerId,
-      this.#context.logLevel,
+      this.#context?.logLevel,
     );
+
     this.#domSelecter = '';
     this.#isFrameReady = false;
     this.#readyToMount = true;
-    this.#getSkyflowBearerToken = metaData.getSkyflowBearerToken;
-    this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
-    bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name, (data) => {
-      this.#iframe.setIframeHeight(data.height);
+    this.#getSkyflowBearerToken = metaData?.getSkyflowBearerToken;
+    this.#isSkyflowFrameReady = metaData?.skyflowContainer?.isControllerFrameReady ?? false;
+
+    bus?.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe?.name, (data) => {
+      this.#iframe?.setIframeHeight(data?.height);
     });
-    window.addEventListener('message', (event) => {
-      if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
+
+    window?.addEventListener('message', (event) => {
+      if (event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
                   + this.#containerId) {
         this.#isComposableFrameReady = true;
       }
     });
-    window.addEventListener('message', (event) => {
-      if (event.data
-         && event.data.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + this.#iframe.name) {
-        this.#iframe.setIframeHeight(event.data.data.height);
+
+    window?.addEventListener('message', (event) => {
+      if (event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + this.#iframe?.name) {
+        this.#iframe?.setIframeHeight(event?.data?.data?.height);
       }
     });
+
     // eslint-disable-next-line max-len
-    if (this.#recordData && this.#recordData.rows) {
-      this.setupRenderFileEventListener(this.getRecordData().rows);
+    if (this.#recordData?.rows) {
+      this.setupRenderFileEventListener(this.getRecordData()?.rows);
     }
   }
 
@@ -127,16 +132,16 @@ class ComposableRevealInternalElement extends SkyflowElement {
     }
 
     try {
-      rows.forEach((row) => {
-        row.elements?.forEach((element: any) => {
+      rows?.forEach((row) => {
+        row?.elements?.forEach((element: any) => {
           if (!element?.name) return;
-          this.#eventEmitter.on(
-            `${ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST}:${element.name}`,
+          this.#eventEmitter?.on(
+            `${ELEMENT_EVENTS_TO_IFRAME?.RENDER_FILE_REQUEST}:${element?.name}`,
             (data, callback) => {
-              this.renderFile(element).then((response) => {
-                callback(response);
-              }).catch((error) => {
-                callback({ error });
+              this.renderFile(element)?.then((response) => {
+                callback?.(response);
+              })?.catch((error) => {
+                callback?.({ error });
               });
             },
           );
@@ -225,22 +230,17 @@ class ComposableRevealInternalElement extends SkyflowElement {
 
   #emitEvent = (eventName: string, options?: Record<string, any>) => {
     if (this.#shadowRoot) {
-      const iframe = this.#shadowRoot
-        .getElementById(this.#iframe.name) as HTMLIFrameElement;
-      if (iframe?.contentWindow) {
-        iframe.contentWindow.postMessage({
-          name: eventName,
-          ...options,
-        }, properties.IFRAME_SECURE_ORIGIN);
-      }
+      const iframe = this.#shadowRoot?.getElementById(this.#iframe?.name) as HTMLIFrameElement;
+      iframe?.contentWindow?.postMessage({
+        name: eventName,
+        ...options,
+      }, properties?.IFRAME_SECURE_ORIGIN);
     } else {
-      const iframe = document.getElementById(this.#iframe.name) as HTMLIFrameElement;
-      if (iframe?.contentWindow) {
-        iframe.contentWindow.postMessage({
-          name: eventName,
-          ...options,
-        }, properties.IFRAME_SECURE_ORIGIN);
-      }
+      const iframe = document?.getElementById(this.#iframe?.name) as HTMLIFrameElement;
+      iframe?.contentWindow?.postMessage({
+        name: eventName,
+        ...options,
+      }, properties?.IFRAME_SECURE_ORIGIN);
     }
   };
 
@@ -279,12 +279,12 @@ class ComposableRevealInternalElement extends SkyflowElement {
                 },
               },
             );
-            window.addEventListener('message', (event) => {
-              if (event.data && event.data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
+            window?.addEventListener('message', (event) => {
+              if (event?.data && event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
        + recordData.name) {
-                if (event.data.data.type === REVEAL_TYPES.RENDER_FILE) {
-                  const revealData = event.data.data.result;
-                  if (revealData.error) {
+                if (event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
+                  const revealData = event?.data?.data?.result;
+                  if (revealData?.error) {
                     printLog(parameterizedString(
                       logs.errorLogs.FAILED_RENDER,
                     ), MessageType.ERROR,
@@ -350,12 +350,12 @@ class ComposableRevealInternalElement extends SkyflowElement {
                 },
               );
               window.addEventListener('message', (event1) => {
-                if (event1.data
-                         && event1.data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
+                if (event1?.data
+                         && event1?.data?.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
              + this.#iframe.name) {
-                  if (event.data.data.type === REVEAL_TYPES.RENDER_FILE) {
-                    const revealData = event.data.data.result;
-                    if (revealData.error) {
+                  if (event1?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
+                    const revealData = event1?.data?.data?.result;
+                    if (revealData?.error) {
                       printLog(parameterizedString(
                         logs.errorLogs.FAILED_RENDER,
                       ), MessageType.ERROR,
@@ -378,7 +378,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
                 }
               });
             }).catch((err:any) => {
-              printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+              printLog(`${err?.message}`, MessageType.ERROR, this.#context.logLevel);
               reject(err);
             });
           }
@@ -387,7 +387,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
           CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
         MessageType.LOG, loglevel);
       } catch (err: any) {
-        printLog(`Error: ${err.message}`, MessageType.ERROR,
+        printLog(`Error: ${err?.message}`, MessageType.ERROR,
           loglevel);
         reject(err);
       }

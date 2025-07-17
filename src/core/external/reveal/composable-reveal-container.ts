@@ -139,15 +139,16 @@ class ComposableRevealContainer extends Container {
     validateInputFormatOptions(options);
 
     const elementName = `${COMPOSABLE_REVEAL}:${btoa(elementId)}`;
-    this.#elementsList.push({
+    this.#elementsList?.push({
       name: elementName,
       ...input,
       elementName,
       elementId,
     });
-    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`;
+    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements ?? {})}:${this.#containerId}:${this.#context?.logLevel}:${btoa(this.#clientDomain ?? '')}`;
     return new ComposableRevealElement(elementName,
-      this.#eventEmitter, controllerIframeName);
+      this.#eventEmitter,
+      controllerIframeName);
   };
 
   #createMultipleElement = (
@@ -157,14 +158,14 @@ class ComposableRevealContainer extends Container {
     try {
       const elements: any[] = [];
       this.#tempElements = deepClone(multipleElements);
-      this.#tempElements.rows.forEach((row) => {
-        row.elements.forEach((element) => {
-          const options = element;
+      this.#tempElements?.rows?.forEach((row) => {
+        row?.elements?.forEach((element) => {
+          const options = element ?? {};
           const { elementType } = options;
           options.isMounted = false;
 
-          options.label = element.label;
-          options.skyflowID = element.skyflowID;
+          options.label = element?.label;
+          options.skyflowID = element?.skyflowID;
 
           elements.push(options);
         });
@@ -223,26 +224,6 @@ class ComposableRevealContainer extends Container {
     }
   };
 
-  #removeElement = (elementName: string) => {
-    Object.keys(this.#elements).forEach((element) => {
-      if (element === elementName) delete this.#elements[element];
-    });
-  };
-
-  #destroyCallback = (elementNames: string[]) => {
-    elementNames.forEach((elementName) => {
-      this.#removeElement(elementName);
-    });
-  };
-
-  #updateCallback = (elements: any[]) => {
-    elements.forEach((element) => {
-      if (this.#elements[element.elementName]) {
-        this.#elements[element.elementName].update(element);
-      }
-    });
-  };
-
   #hasElementName = (name: string) => {
     const tempElements = Object.keys(this.#elements);
     for (let i = 0; i < tempElements.length; i += 1) {
@@ -251,34 +232,6 @@ class ComposableRevealContainer extends Container {
       }
     }
     return false;
-  };
-
-  on = (eventName:string, handler:Function) => {
-    if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
-      throw new SkyflowError(
-        SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER,
-        [],
-        true,
-      );
-    }
-    if (!handler) {
-      throw new SkyflowError(
-        SKYFLOW_ERROR_CODE.MISSING_HANDLER_IN_EVENT_LISTENER,
-        [],
-        true,
-      );
-    }
-    if (typeof handler !== 'function') {
-      throw new SkyflowError(
-        SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER,
-        [],
-        true,
-      );
-    }
-
-    this.#eventEmitter.on(ELEMENT_EVENTS_TO_CLIENT.SUBMIT, () => {
-      handler();
-    });
   };
 
   mount = (domElement: HTMLElement | string) => {
@@ -393,32 +346,39 @@ class ComposableRevealContainer extends Container {
               MessageType.LOG,
               this.#context.logLevel);
             this.#emitEvent(
-              ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + this.#containerId, {
+              ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + this.#containerId,
+              {
                 data: {
                   type: REVEAL_TYPES.REVEAL,
                   containerId: this.#containerId,
                   elementIds,
                 },
                 clientConfig: {
-                  vaultURL: this.#metaData.clientJSON.config.vaultURL,
-                  vaultID: this.#metaData.clientJSON.config.vaultID,
+                  vaultURL: this.#metaData?.clientJSON?.config?.vaultURL,
+                  vaultID: this.#metaData?.clientJSON?.config?.vaultID,
                   authToken,
                 },
                 context: this.#context,
               },
             );
-            window.addEventListener('message', (event) => {
-              if (event.data.type
-               === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
-                const revealData = event.data.data;
-                if (revealData.errors) {
-                  printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
-                    MessageType.ERROR, this.#context.logLevel);
+
+            window?.addEventListener('message', (event) => {
+              if (event?.data?.type
+                 === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
+                const revealData = event?.data?.data;
+                if (revealData?.errors) {
+                  printLog(
+                    parameterizedString(logs?.errorLogs?.FAILED_REVEAL),
+                    MessageType.ERROR,
+                    this.#context?.logLevel,
+                  );
                   reject(revealData);
                 } else {
-                  printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
+                  printLog(
+                    parameterizedString(logs?.infoLogs?.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
-                    this.#context.logLevel);
+                    this.#context?.logLevel,
+                  );
                   resolve(revealData);
                 }
               }
