@@ -2,7 +2,9 @@ import Client from '../client';
 import SkyflowError from '../libs/skyflow-error';
 import { getAccessToken } from '../utils/bus-events';
 import {
+  IDeleteOptions,
   IDeleteRecord,
+  IDeleteRecordInput,
   IDeleteResponseType,
   LogLevel,
   MessageType,
@@ -40,9 +42,9 @@ export const deleteRecordsFromVault = async (
 };
 
 export const deleteData = async (
-  records,
-  options,
-  client,
+  records: IDeleteRecordInput,
+  options: IDeleteOptions,
+  client: Client,
 ): Promise<IDeleteResponseType> => {
   const clientId = client.toJSON()?.metaData?.uuid || '';
 

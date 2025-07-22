@@ -32,17 +32,19 @@ import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { formatForRenderClient } from '../../../core-utils/reveal';
 import properties from '../../../properties';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
+import { Metadata, RevealContainerProps } from '../../internal/internal-types';
+import EventEmitter from '../../../event-emitter';
 
 const CLASS_NAME = 'RevealElement';
 
 class RevealElement extends SkyflowElement {
   #iframe: IFrame;
 
-  #metaData: any;
+  #metaData: Metadata;
 
   #recordData: any;
 
-  #containerId: any;
+  #containerId: string;
 
   #isMounted:boolean = false;
 
@@ -54,7 +56,7 @@ class RevealElement extends SkyflowElement {
 
   #readyToMount: boolean = false;
 
-  #eventEmitter:any;
+  #eventEmitter: EventEmitter;
 
   #isFrameReady: boolean;
 
@@ -64,9 +66,14 @@ class RevealElement extends SkyflowElement {
 
   #isSkyflowFrameReady: boolean = false;
 
-  constructor(record: IRevealElementInput,
+  constructor(
+    record: IRevealElementInput,
     options: IRevealElementOptions = {},
-    metaData: any, container: any, elementId: string, context: Context) {
+    metaData: Metadata,
+    container: RevealContainerProps,
+    elementId: string,
+    context: Context,
+  ) {
     super();
     this.#elementId = elementId;
     this.#metaData = metaData;

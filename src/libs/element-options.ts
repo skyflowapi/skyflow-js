@@ -11,13 +11,16 @@ import {
   DEFAULT_EXPIRATION_YEAR_FORMAT,
   DEFAULT_INPUT_FORMAT_TRANSLATION,
   ELEMENTS,
+  ElementType,
   INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES,
   INPUT_STYLES,
 } from '../core/constants';
 import CollectElement from '../core/external/collect/collect-element';
 import ComposableElement from '../core/external/collect/compose-collect-element';
+import { FormattedCollectElementOptions } from '../core/internal/internal-types';
 import {
-  IValidationRule, MessageType, ValidationRuleType,
+  CollectElementOptions,
+  IValidationRule, LogLevel, MessageType, ValidationRuleType,
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import logs from '../utils/logs';
@@ -277,8 +280,12 @@ IValidationRule[] | undefined => {
   });
 };
 
-export const formatOptions = (elementType, options, logLevel) => {
-  let formattedOptions = {
+export const formatOptions = (
+  elementType: ElementType,
+  options: CollectElementOptions,
+  logLevel: LogLevel,
+) => {
+  let formattedOptions: FormattedCollectElementOptions = {
     required: false,
     ...options,
   };
@@ -349,7 +356,7 @@ export const formatOptions = (elementType, options, logLevel) => {
       }
       formattedOptions = {
         ...formattedOptions,
-        format: isvalidFormat ? formattedOptions.format.toUpperCase()
+        format: (isvalidFormat && formattedOptions.format) ? formattedOptions.format.toUpperCase()
           : DEFAULT_EXPIRATION_DATE_FORMAT,
       };
       delete formattedOptions?.translation;
@@ -366,7 +373,7 @@ export const formatOptions = (elementType, options, logLevel) => {
       }
       formattedOptions = {
         ...formattedOptions,
-        format: isvalidFormat ? formattedOptions.format.toUpperCase()
+        format: (isvalidFormat && formattedOptions.format) ? formattedOptions.format.toUpperCase()
           : DEFAULT_EXPIRATION_YEAR_FORMAT,
       };
       delete formattedOptions?.translation;
