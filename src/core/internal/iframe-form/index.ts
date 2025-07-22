@@ -469,6 +469,21 @@ export default class IFrameFormElement extends EventEmitter {
         resp = false;
       }
       if (this.preserveFileName) vaildateFileNames = vaildateFileName(value.name);
+    } else if (this.fieldType === ElementType.MULTI_FILE_INPUT) {
+      const files = this.state.value instanceof FileList
+        ? Array.from(this.state.value)
+        : [this.state.value];
+      for (let i = 0; i < files.length; i += 1) {
+        try {
+          resp = fileValidation(files[i], this.state.isRequired, {
+            allowedFileType: this.allowedFileType,
+            blockEmptyFiles: this.blockEmptyFiles,
+          });
+        } catch (err) {
+          resp = false;
+        }
+        if (this.preserveFileName) vaildateFileNames = vaildateFileName(files[i].name);
+      }
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex && value) {
@@ -677,7 +692,8 @@ export default class IFrameFormElement extends EventEmitter {
       this.state.value
       && (this.fieldType === ELEMENTS.EXPIRATION_DATE.name
         || this.fieldType === ELEMENTS.EXPIRATION_MONTH.name
-        || this.fieldType === ELEMENTS.FILE_INPUT.name)
+        || this.fieldType === ELEMENTS.FILE_INPUT.name
+        || this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name)
     ) {
       bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName, {
         name: this.iFrameName,

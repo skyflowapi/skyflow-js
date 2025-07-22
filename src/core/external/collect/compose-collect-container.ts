@@ -156,7 +156,10 @@ class ComposableContainer extends Container {
     });
     const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`;
     this.#iframeID = controllerIframeName;
-    return new ComposableElement(elementName, this.#eventEmitter, controllerIframeName);
+    return new ComposableElement(
+      elementName, this.#eventEmitter, controllerIframeName,
+      { ...this.#metaData, type: input.type },
+    );
   };
 
   #createMultipleElement = (
@@ -322,6 +325,36 @@ class ComposableContainer extends Container {
       this.#containerElement.mount(domElement);
       this.#isMounted = true;
     }
+    this.#elementsList.forEach((element) => {
+      this.#eventEmitter.on(`${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${element.elementName}`, (data, callback) => {
+        this.#getSkyflowBearerToken()?.then((authToken) => {
+          printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+            MessageType.LOG,
+            this.#context.logLevel);
+          this.#emitEvent(
+            `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${element.elementName}`,
+            {
+              elementName: element.name,
+              data: {
+                type: COLLECT_TYPES.FILE_UPLOAD,
+                containerId: this.#containerId,
+              },
+              clientConfig: {
+                vaultURL: this.#metaData.clientJSON.config.vaultURL,
+                vaultID: this.#metaData.clientJSON.config.vaultID,
+                authToken,
+              },
+              options: {
+                ...data.options,
+              },
+            },
+          );
+        }).catch((err:any) => {
+          printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+          callback(err);
+        });
+      });
+    });
     if (domElement instanceof HTMLElement
       && (domElement as HTMLElement).getRootNode() instanceof ShadowRoot) {
       this.#shadowRoot = domElement.getRootNode() as ShadowRoot;

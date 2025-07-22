@@ -1,7 +1,8 @@
 import EventEmitter from '../../../event-emitter';
 import { ContainerType } from '../../../skyflow';
 import { EventName, RenderFileResponse } from '../../../utils/common';
-import { ELEMENT_EVENTS_TO_IFRAME } from '../../constants';
+import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from '../../constants';
+import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 
 class ComposableRevealElement {
   #elementName: string;
@@ -37,9 +38,11 @@ class ComposableRevealElement {
       this.#eventEmitter?._emit?.(
         `${ELEMENT_EVENTS_TO_IFRAME?.RENDER_FILE_REQUEST ?? ''}:${this.#elementName}`,
         {},
-        (response: RenderFileResponse) => {
+        (response) => {
           if (response?.errors) {
             reject(response);
+          } else if (response?.error) {
+            reject({ errors: response?.error });
           } else {
             resolve(response);
           }
@@ -47,6 +50,17 @@ class ComposableRevealElement {
       );
     });
   }
+
+  update = (options: IRevealElementInput | IRevealElementOptions) => {
+    // eslint-disable-next-line no-underscore-dangle
+    this.#eventEmitter?._emit?.(
+      `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS}:${this.#elementName}`,
+      {
+        options: options as IRevealElementInput | IRevealElementOptions,
+        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
+      },
+    );
+  };
 }
 
 export default ComposableRevealElement;

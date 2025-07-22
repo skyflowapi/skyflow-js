@@ -222,6 +222,9 @@ export default class FrameElement {
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
         this.focusChange(false);
       }
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
+        this.focusChange(false);
+      }
 
       this.focusChange(false);
       if (state.error && this.domError) {
@@ -577,6 +580,10 @@ export default class FrameElement {
     if (this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
       const target = event.target as HTMLFormElement;
       this.iFrameFormElement.setValue(target.files[0], target.checkValidity());
+      this.focusChange(true);
+    } else if (this.iFrameFormElement.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
+      const target = event.target as HTMLFormElement;
+      this.iFrameFormElement.setValue(target.files, target.checkValidity());
       this.focusChange(true);
     } else {
       const target = event.target as HTMLInputElement;

@@ -6,6 +6,7 @@ import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
 import {
   Context, Env, LogLevel,
+  MessageType,
 } from '../../utils/common';
 import {
   fileValidation, generateUploadFileName, getContainerType, vaildateFileName,
@@ -26,6 +27,7 @@ import {
 import SkyflowError from '../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../utils/constants';
 import Client from '../../client';
+import { printLog } from '../../utils/logs-helper';
 
 const set = require('set-value');
 
@@ -79,6 +81,29 @@ export default class FrameElementInit {
   }
 
   private handleCollectCall = (event: MessageEvent) => {
+    this.iframeFormList.forEach((inputElement) => {
+      if (inputElement) {
+        if (inputElement.fieldType
+          === ELEMENTS.MULTI_FILE_INPUT.name) {
+          if (event?.data && event?.data?.name === `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${inputElement.iFrameName}`) {
+            this.#client = Client.fromJSON(event?.data?.clientConfig);
+            this.multipleUploadFiles(inputElement, event?.data?.clientConfig, event?.data?.options)
+              ?.then((response: any) => {
+                window?.parent.postMessage({
+                  type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${inputElement.iFrameName}`,
+                  data: response,
+                }, this.clientMetaData.clientDomain);
+              }).catch((error) => {
+                window?.parent.postMessage({
+                  type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${inputElement.iFrameName}`,
+                  data: error,
+                }, this.clientMetaData.clientDomain);
+              });
+          }
+        }
+      }
+    });
+
     // if (event.origin === this.clientMetaData.clientDomain) {
     if (event.data && event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
          + this.containerId) {
@@ -248,7 +273,8 @@ export default class FrameElementInit {
         if (inputElement) {
           if (
             inputElement.fieldType
-                        !== ELEMENTS.FILE_INPUT.name
+                        !== ELEMENTS.FILE_INPUT.name && inputElement.fieldType
+                        !== ELEMENTS.MULTI_FILE_INPUT.name
           ) {
             const {
               // eslint-disable-next-line max-len
@@ -288,7 +314,8 @@ export default class FrameElementInit {
         if (tableName) {
           if (
             inputElement.fieldType
-        !== ELEMENTS.FILE_INPUT.name
+        !== ELEMENTS.FILE_INPUT.name && inputElement.fieldType
+        !== ELEMENTS.MULTI_FILE_INPUT.name
           ) {
             if (
               inputElement.fieldType
@@ -431,6 +458,181 @@ export default class FrameElementInit {
         .catch((err) => reject(err));
     });
   };
+
+  // eslint-disable-next-line consistent-return
+  private multipleUploadFiles =
+  (fileElement: IFrameFormElement,
+    clientConfig, metaData) => new Promise((rootResolve, rootReject) => {
+    this.#client = new Client(clientConfig, {});
+    if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
+    const {
+      state, tableName, onFocusChange, preserveFileName,
+    } = fileElement;
+    if (state.isRequired) {
+      onFocusChange(false);
+    }
+
+    if (fileElement.state.value === undefined || fileElement.state.value === null || fileElement.state.value === '') {
+      rootReject({ error: 'No files selected' });
+      return;
+    }
+    const files = state.value instanceof FileList
+      ? Array.from(state.value)
+      : [state.value];
+
+    this.validateFiles(files, state, fileElement);
+    const insertRequest = this.createInsertRequest(files.length, metaData);
+    this.insertDataCallInMultiFiles(
+      insertRequest, this.#client, tableName as string, clientConfig.authToken as string,
+    ).then((response: any) => {
+      const skyflowIDs = this.extractSkyflowIDs(response);
+      if (skyflowIDs.length === 0) {
+        rootReject({ error: 'No skyflow IDs returned from insert data' });
+        return;
+      }
+      const promises: Promise<unknown>[] = [];
+
+      files.forEach((file, index) => {
+        const fileUploadObject: any = {};
+        fileUploadObject[state.name] = file;
+        const formData = new FormData();
+        const column = Object.keys(fileUploadObject)[0];
+        const value: Blob = Object.values(fileUploadObject)[0] as Blob;
+        if (preserveFileName) {
+          formData.append(column, value);
+        } else {
+          const generatedFileName = generateUploadFileName(file.name);
+          formData.append(column, new File([value], generatedFileName, { type: file.type }));
+        }
+        const client = this.#client;
+        const promise1 = new Promise((resolve, reject) => {
+          client
+            .request({
+              body: formData,
+              requestMethod: 'POST',
+              url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${tableName}/${skyflowIDs[index]}/files`,
+              headers: {
+                authorization: `Bearer ${clientConfig.authToken}`,
+                'content-type': 'multipart/form-data',
+              },
+            })
+            .then((response1) => {
+              resolve(response1);
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        });
+        promises.push(promise1);
+      });
+      Promise.allSettled(
+        promises,
+      ).then((resultSet) => {
+        const fileUploadResponse: any[] = [];
+        const errorResponse: any[] = [];
+        resultSet.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            if (result.value !== undefined && result.value !== null) {
+              if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
+                errorResponse.push(result.value);
+              } else {
+                const response1 = typeof result.value === 'string'
+                  ? JSON.parse(result.value)
+                  : result.value;
+                fileUploadResponse.push(response1);
+              }
+            }
+          } else if (result.status === 'rejected') {
+            errorResponse.push({ error: result.reason });
+          }
+        });
+        if (errorResponse.length === 0) {
+          rootResolve({ fileUploadResponse });
+        } else if (fileUploadResponse.length === 0) rootReject({ errorResponse });
+        else rootReject({ fileUploadResponse, errorResponse });
+      });
+    }).catch((error) => {
+      printLog(`${error}`, MessageType.LOG, this.#context.logLevel);
+      rootReject({
+        error: error?.error || error,
+      });
+    });
+  });
+
+  private validateFiles = (files: File[], state: any, fileElement: IFrameFormElement) => {
+    files.forEach((file) => {
+      // Check file validation
+      const validatedFileState = fileValidation(file, state.isRequired, fileElement);
+      if (!validatedFileState) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
+      }
+
+      // Check filename validation
+      const isValidFileName = vaildateFileName(file.name);
+      if (!isValidFileName) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true);
+      }
+    });
+    return true;
+  };
+
+  private createInsertRequest = (numberOfRequests: number, options = {}) => {
+  // Create basic request structure
+    const request = {
+      records: [] as Array<{ fields: Record<string, any> }>,
+      tokenization: false,
+    };
+
+    // Add empty field objects based on number of requests
+    for (let i = 0; i < numberOfRequests; i += 1) {
+      request.records.push({
+        fields: options === undefined ? {} : options,
+      });
+    }
+
+    return request;
+  };
+
+  private extractSkyflowIDs = (response: { records: Array<{ skyflow_id: string }> }): string[] => {
+    if (!response?.records || !Array.isArray(response.records)) {
+      return [];
+    }
+
+    return response.records
+      .map((record) => record.skyflow_id)
+      .filter((id) => id !== undefined && id !== null);
+  };
+
+  private insertDataCallInMultiFiles = (
+    insertRequest,
+    client: Client,
+    tableName: string,
+    authToken: string,
+  ) => new Promise((rootResolve, rootReject) => {
+    client
+      .request({
+        body: {
+          ...insertRequest,
+        },
+        requestMethod: 'POST',
+        url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${tableName}`,
+        headers: {
+          authorization: `Bearer ${authToken}`,
+          'content-type': 'application/json',
+        },
+      })
+      .then((response: any) => {
+        // Extract skyflow IDs from response
+        const skyflowIDs = this.extractSkyflowIDs(response);
+        rootResolve({
+          ...response,
+          skyflowIDs, // Add extracted IDs to response
+        });
+      })
+      .catch((error) => {
+        rootReject(error);
+      });
+  });
 
   updateGroupData = () => {
     const frameName = window.name;

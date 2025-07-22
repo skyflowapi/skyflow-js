@@ -28,6 +28,8 @@ const logs = {
     ELEMENT_REVEALED: '%s1 - %s2 Element revealed.',
     FILE_RENDERED: '%s1 - %s2 File rendered.',
     COLLECT_SUBMIT_SUCCESS: '%s1 - Data has been collected successfully.',
+    UPLOAD_FILES_SUCCESS: '%s1 - Files uploaded successfully.',
+    MULTI_UPLOAD_FILES_SUCCESS: '%s1 - Multiple files uploaded successfully.',
     REVEAL_SUBMIT_SUCCESS: '%s1 - Data has been revealed successfully.',
     RENDER_SUBMIT_SUCCESS: '%s1 - File download URL has been fetched successfully.',
     INSERT_DATA_SUCCESS: '%s1 - Data has been inserted successfully.',
@@ -93,6 +95,7 @@ const logs = {
     VALIDATE_GET_BY_ID_INPUT: '%s1 - Validating getByID input.',
   },
   errorLogs: {
+    MULTI_FILE_NOT_SUPPORTED: 'Multi file upload is only supported in MULT_FILE_INPUT element in composable container. Please use MULT_FILE_INPUT element for multi file upload.',
     INVALID_REVEAL_COMPOSABLE_INPUT: 'Reveal composable input is invalid. Please provide a valid input.',
     NO_ELEMENTS_IN_COLLECT: 'Validation error. No elements found in collect container',
     NO_ELEMENTS_IN_COMPOSABLE: 'Validation error. No elements found in composable container',

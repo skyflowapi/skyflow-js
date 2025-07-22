@@ -36,6 +36,7 @@ import ComposableRevealElement from './composable-reveal-element';
 import { RevealElementInput, RevealResponse } from '../../../index-node';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import ComposableRevealInternalElement from './composable-reveal-internal';
+import { formatRevealElementOptions } from '../../../utils/helpers';
 
 const CLASS_NAME = 'ComposableRevealContainer';
 class ComposableRevealContainer extends Container {
@@ -144,6 +145,7 @@ class ComposableRevealContainer extends Container {
       ...input,
       elementName,
       elementId,
+      ...formatRevealElementOptions(options ?? {}),
     });
     const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements ?? {})}:${this.#containerId}:${this.#context?.logLevel}:${btoa(this.#clientDomain ?? '')}`;
     return new ComposableRevealElement(elementName,

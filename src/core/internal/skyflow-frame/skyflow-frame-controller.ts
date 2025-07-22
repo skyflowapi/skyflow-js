@@ -485,7 +485,8 @@ class SkyflowFrameController {
       if (inputElement) {
         if (
           inputElement.iFrameFormElement.fieldType
-          !== ELEMENTS.FILE_INPUT.name
+          !== ELEMENTS.FILE_INPUT.name && inputElement.iFrameFormElement.fieldType
+          !== ELEMENTS.MULTI_FILE_INPUT.name
         ) {
           const {
             state, doesClientHasError, clientErrorText, errorText, onFocusChange, validations,
@@ -525,6 +526,7 @@ class SkyflowFrameController {
           if (
             inputElement.iFrameFormElement.fieldType
         !== ELEMENTS.FILE_INPUT.name
+         && inputElement.iFrameFormElement.fieldType !== ELEMENTS.MULTI_FILE_INPUT.name
           ) {
             if (
               inputElement.iFrameFormElement.fieldType

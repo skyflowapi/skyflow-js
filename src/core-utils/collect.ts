@@ -378,6 +378,50 @@ export const insertDataInCollect = async (
     });
 });
 
+export const insertDataInMultipleFiles = async (
+  records,
+  client: Client,
+  options,
+  finalInsertRecords,
+  authToken: string,
+) => new Promise((resolve) => {
+  let insertResponse: any;
+  let insertErrorResponse: any;
+  client
+    ?.request({
+      body: {
+        records,
+      },
+      requestMethod: 'POST',
+      url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+      },
+    })
+    ?.then((response: any) => {
+      insertResponse = constructInsertRecordResponse(
+        response,
+        options?.tokens,
+        finalInsertRecords?.records,
+      );
+      resolve(insertResponse);
+    })
+    ?.catch((error) => {
+      insertErrorResponse = {
+        errors: [
+          {
+            error: {
+              code: error?.error?.code,
+              description: error?.error?.description,
+            },
+          },
+        ],
+      };
+      resolve(insertErrorResponse);
+    });
+});
+
 export const checkForElementMatchRule = (validations: IValidationRule[]) => {
   if (!validations) return false;
   for (let i = 0; i < validations.length; i += 1) {

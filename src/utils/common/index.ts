@@ -317,6 +317,9 @@ export interface ICollectOptions {
   additionalFields?: IInsertRecordInput,
   upsert?: Array<IUpsertOptions>,
 }
+export interface MetaData {
+  [key: string]: any,
+}
 
 export interface UploadFilesResponse {
   fileUploadResponse: [{ skyflow_id: string }],

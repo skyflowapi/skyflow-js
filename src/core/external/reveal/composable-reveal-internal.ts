@@ -28,6 +28,7 @@ import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import properties from '../../../properties';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
 import EventEmitter from '../../../event-emitter';
+import { formatRevealElementOptions } from '../../../utils/helpers';
 
 const CLASS_NAME = 'RevealElementInteranalElement';
 
@@ -132,8 +133,8 @@ class ComposableRevealInternalElement extends SkyflowElement {
     }
 
     try {
-      rows?.forEach((row) => {
-        row?.elements?.forEach((element: any) => {
+      rows?.forEach((row, rowIndex) => {
+        row?.elements?.forEach((element: any, elementIndex: number) => {
           if (!element?.name) return;
           this.#eventEmitter?.on(
             `${ELEMENT_EVENTS_TO_IFRAME?.RENDER_FILE_REQUEST}:${element?.name}`,
@@ -143,6 +144,30 @@ class ComposableRevealInternalElement extends SkyflowElement {
               })?.catch((error) => {
                 callback?.({ error });
               });
+            },
+          );
+          this.#eventEmitter?.on(
+            `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS}:${element?.name}`,
+            (data) => {
+              if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS) {
+              // make this change in original elememt that is inside rows
+                const updatedElement = {
+                  ...element,
+                  ...data.options,
+                  ...formatRevealElementOptions(data.options as IRevealElementOptions),
+                };
+
+                // Update element in this.#recordData.rows structure
+                if (this.#recordData?.rows?.[rowIndex]?.elements?.[elementIndex]) {
+                  this.#recordData.rows[rowIndex].elements[elementIndex] = updatedElement;
+                }
+
+                // Update local element reference
+                element = updatedElement;
+
+                // Call update method
+                this.update(data.options, element);
+              }
             },
           );
         });
@@ -284,7 +309,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
        + recordData.name) {
                 if (event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
                   const revealData = event?.data?.data?.result;
-                  if (revealData?.error) {
+                  if (revealData?.error || revealData?.errors) {
                     printLog(parameterizedString(
                       logs.errorLogs.FAILED_RENDER,
                     ), MessageType.ERROR,
@@ -292,7 +317,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
                     if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
                       this.setAltText(altText);
                     }
-                    reject(revealData);
+                    reject(revealData?.error || revealData?.errors);
                   } else {
                     printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
                       MessageType.LOG,
@@ -554,29 +579,30 @@ class ComposableRevealInternalElement extends SkyflowElement {
     this.#iframe.unmount();
   }
 
-  update(options: IRevealElementInput) {
-    this.#recordData = {
-      ...this.#recordData,
-      ...options,
-    };
-
-    if (this.#isMounted) {
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-        name: this.#iframe.name,
-        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
-        updatedValue: options,
-      });
+  update(options: IRevealElementInput | IRevealElementOptions, record) {
+    if (this.#isComposableFrameReady) {
+      this.#emitEvent(
+        ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + record.name,
+        {
+          name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + record.name,
+          updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
+          updatedValue: options,
+        },
+      );
     } else {
-      bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
-        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-          this.#isMounted = true;
-          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-            name: this.#iframe.name,
-            updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
-            updatedValue: options,
-          });
-        });
+      window.addEventListener('message', (event) => {
+        if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
+                  + this.#containerId) {
+          this.#emitEvent(
+            ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + record.name,
+            {
+              name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + record.name,
+              updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
+              updatedValue: options,
+            },
+          );
+        }
+      });
     }
   }
 }
