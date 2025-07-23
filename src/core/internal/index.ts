@@ -1071,9 +1071,15 @@ export default class FrameElement {
       this.applyMask();
 
       if (this.domInput) {
+        id.addEventListener('dragover', (event) => {
+          console.log('dragover', event);
+          event.preventDefault();
+        });
         const { replacePattern } = this.iFrameFormElement;
         if (replacePattern) {
           id.addEventListener('input', (event) => {
+            console.log('input', event);
+            event.preventDefault();
             event.target.value = event.target.value.replace(
               replacePattern[0],
               replacePattern[1],
@@ -1090,9 +1096,6 @@ export default class FrameElement {
         // id.addEventListener('drop', (event) => {
         //   event.preventDefault();
         // });
-        id.addEventListener('dragover', (event) => {
-          event.preventDefault();
-        });
       }
 
       this.setupInputField(
