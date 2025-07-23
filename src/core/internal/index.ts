@@ -143,7 +143,6 @@ export default class FrameElement {
 
     this.inputParent = document.createElement('div');
     this.inputParent.style.position = 'relative';
-
     const inputElement = document.createElement(type);
     this.domInput = inputElement;
     this.domInput.iFrameFormElement = this.iFrameFormElement;
@@ -1088,6 +1087,12 @@ export default class FrameElement {
         });
         id.addEventListener('input', this.onInputChange);
         id.addEventListener('keydown', this.onArrowKeys);
+        id.addEventListener('drop', (event) => {
+          event.preventDefault();
+        });
+        id.addEventListener('dragover', (event) => {
+          event.preventDefault();
+        });
       }
 
       this.setupInputField(
