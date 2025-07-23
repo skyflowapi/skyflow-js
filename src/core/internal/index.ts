@@ -1087,9 +1087,9 @@ export default class FrameElement {
         });
         id.addEventListener('input', this.onInputChange);
         id.addEventListener('keydown', this.onArrowKeys);
-        id.addEventListener('drop', (event) => {
-          event.preventDefault();
-        });
+        // id.addEventListener('drop', (event) => {
+        //   event.preventDefault();
+        // });
         id.addEventListener('dragover', (event) => {
           event.preventDefault();
         });
