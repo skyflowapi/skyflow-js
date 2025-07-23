@@ -1072,14 +1072,13 @@ export default class FrameElement {
 
       if (this.domInput) {
         id.addEventListener('dragover', (event) => {
-          console.log('dragover', event);
           event.preventDefault();
+          console.log('dragover', event);
         });
         const { replacePattern } = this.iFrameFormElement;
         if (replacePattern) {
           id.addEventListener('input', (event) => {
             console.log('input', event);
-            event.preventDefault();
             event.target.value = event.target.value.replace(
               replacePattern[0],
               replacePattern[1],
