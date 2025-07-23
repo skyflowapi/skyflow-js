@@ -1075,6 +1075,10 @@ export default class FrameElement {
           event.preventDefault();
           console.log('dragover', event);
         });
+        id.addEventListener('drop', (event) => {
+          event.preventDefault();
+          console.log('dropped file2', event.dataTransfer.files);
+        });
         const { replacePattern } = this.iFrameFormElement;
         if (replacePattern) {
           id.addEventListener('input', (event) => {
