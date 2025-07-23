@@ -59,6 +59,8 @@ export default class FrameElement {
   private domInput?: (HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLFormElement)
   & { iFrameFormElement? : IFrameFormElement };
 
+  private dropArea?: HTMLDivElement;
+
   public domError?: HTMLSpanElement;
 
   private domImg?: HTMLImageElement;
@@ -140,6 +142,11 @@ export default class FrameElement {
     } else {
       type = 'input';
     }
+    if (this.iFrameFormElement?.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
+      console.log('create drag element');
+      this.dropArea = document.createElement('div');
+      this.dropArea.className = 'skyflow-drop-area';
+    }
 
     this.inputParent = document.createElement('div');
     this.inputParent.style.position = 'relative';
@@ -147,7 +154,29 @@ export default class FrameElement {
     this.domInput = inputElement;
     this.domInput.iFrameFormElement = this.iFrameFormElement;
     inputElement.setAttribute(CUSTOM_ROW_ID_ATTRIBUTE, this.htmlDivElement?.id?.split(':')[0] || '');
-    this.inputParent.append(inputElement);
+    this.dropArea?.setAttribute(CUSTOM_ROW_ID_ATTRIBUTE, this.htmlDivElement?.id?.split(':')[0] || '');
+    if (this.dropArea) {
+      // apply some style to drop area
+      this.dropArea.setAttribute('style', 'width: 300px; height: 200px; border: 1px dashed #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center;');
+      this.inputParent.append(this.dropArea);
+      this.dropArea.innerHTML = 'Drop files here';
+      // this.dropArea.addEventListener('dragover', (e) => {
+      //   e.preventDefault();
+      //   console.log('drag over', e);
+      // });
+      // this.dropArea.addEventListener('drop', (ev) => {
+      //   ev.preventDefault();
+      //   console.log('drop', ev);
+      //   const files = ev.dataTransfer?.files;
+      //   if (files && files.length > 0) {
+      //     this.iFrameFormElement.setValue(files, true);
+      //     this.focusChange(true);
+      //   }
+      // });
+      // this.dropArea.innerHTML = 'Drop files here';
+    } else {
+      this.inputParent.append(inputElement);
+    }
 
     if (this.iFrameFormElement.fieldType === ELEMENTS.CARD_NUMBER.name
       && this.options.enableCardIcon) {
@@ -1071,16 +1100,17 @@ export default class FrameElement {
       this.applyMask();
 
       if (this.domInput) {
-        id.addEventListener('dragover', (event) => {
-          event.preventDefault();
-          console.log('dragover', event);
-        });
-        id.addEventListener('drop', (event) => {
-          event.preventDefault();
-          console.log('dropped file2', event.dataTransfer.files);
-        });
+        // id.addEventListener('dragover', (event) => {
+        //   event.preventDefault();
+        //   console.log('dragover', event);
+        // });
+        // id.addEventListener('drop', (event) => {
+        //   event.preventDefault();
+        //   console.log('dropped file2', event.dataTransfer.files);
+        // });
         const { replacePattern } = this.iFrameFormElement;
         if (replacePattern) {
+          // eslint-disable-next-line @typescript-eslint/no-shadow
           id.addEventListener('input', (event) => {
             console.log('input', event);
             event.target.value = event.target.value.replace(
@@ -1089,6 +1119,7 @@ export default class FrameElement {
             );
           });
         }
+        // eslint-disable-next-line @typescript-eslint/no-shadow
         id.addEventListener('paste', (event) => {
           this.selectionEnd = event.target.selectionEnd;
           this.selectionStart = event.target.selectionStart;
@@ -1099,6 +1130,25 @@ export default class FrameElement {
         // id.addEventListener('drop', (event) => {
         //   event.preventDefault();
         // });
+      }
+      if (this.dropArea) {
+        this.dropArea.addEventListener('dragover', (event1) => {
+          event1.preventDefault();
+          console.log('dragover1', event1);
+          console.log('dragover1', event1?.dataTransfer?.files);
+        });
+        this.dropArea.addEventListener('dragleave', (event2) => {
+          console.log('dragleave1', event2);
+        });
+        this.dropArea.addEventListener('drop', (event3) => {
+          event3.preventDefault();
+          console.log('dropped file1', event3?.dataTransfer?.files);
+          if (event3?.dataTransfer?.files && event3.dataTransfer.files.length > 0) {
+            const file = event3.dataTransfer.files;
+            this.iFrameFormElement.setValue(file, true);
+            this.focusChange(true);
+          }
+        });
       }
 
       this.setupInputField(
