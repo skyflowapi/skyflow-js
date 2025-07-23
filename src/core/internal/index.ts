@@ -1134,14 +1134,21 @@ export default class FrameElement {
       if (this.dropArea) {
         this.dropArea.addEventListener('dragover', (event1) => {
           event1.preventDefault();
+          event1.stopPropagation();
           console.log('dragover1', event1);
           console.log('dragover1', event1?.dataTransfer?.files);
         });
         this.dropArea.addEventListener('dragleave', (event2) => {
+          event2.preventDefault();
           console.log('dragleave1', event2);
+        });
+        this.dropArea.addEventListener('change', (event2) => {
+          console.log('change', event2);
+          event2.preventDefault();
         });
         this.dropArea.addEventListener('drop', (event3) => {
           event3.preventDefault();
+          event3.stopPropagation();
           console.log('dropped file1', event3?.dataTransfer?.files);
           if (event3?.dataTransfer?.files && event3.dataTransfer.files.length > 0) {
             const file = event3.dataTransfer.files;
