@@ -779,6 +779,13 @@ export default class FrameElementInit {
           iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
             errorTextMap[element.elementName] = state.error;
             this.#updateCombinedErrorText(errorTextElement.id, errorTextMap);
+            window.parent.postMessage(
+              {
+                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
+                data: { height: rootDiv.scrollHeight, name: window.name },
+              },
+              this.clientMetaData.clientDomain,
+            );
           });
         }
 
