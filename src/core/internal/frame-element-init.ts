@@ -32,7 +32,7 @@ export default class FrameElementInit {
 
   constructor() {
     // this.createIframeElement(frameName, label, skyflowID, isRequired);
-    this.context = { logLevel: LogLevel.INFO, env: Env.DEV }; // client level
+    this.context = { logLevel: LogLevel.ERROR, env: Env.PROD }; // client level
     this.containerId = '';
     this.#domForm = document.createElement('form');
     this.#domForm.action = '#';
@@ -50,6 +50,10 @@ export default class FrameElementInit {
     const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
     const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
     this.clientMetaData = parsedRecord.metaData;
+    this.context = {
+      logLevel: this.clientMetaData?.clientJSON?.config?.options?.logLevel || LogLevel.ERROR,
+      env: this.clientMetaData?.clientJSON?.config?.options?.env || Env.PROD,
+    };
     this.group = parsedRecord.record;
     this.containerId = parsedRecord.containerId;
 

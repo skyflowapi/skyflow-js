@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, FRAME_ELEMENT } from '../../../../src/core/constants';
+import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, ElementType, FRAME_ELEMENT } from '../../../../src/core/constants';
 import { Env, LogLevel, ValidationRuleType } from '../../../../src/utils/common';
 import IFrameFormElement from '../../../../src/core/internal/iframe-form'
 import * as busEvents from '../../../../src/utils/bus-events';
@@ -124,6 +124,142 @@ describe('test iframeFormelement', () => {
         });
         element.setValue('2020-12-30')
         expect(element.getValue()).toBe('2020-12-30')
+    });
+
+    test('iframeFormElement element state value for collect elements in PROD env', () => {
+        const elementsList = [
+            {
+                element: test_collect_element,
+                type: ElementType.CARD_NUMBER,
+                input: '4111111111111111',
+                expected:'41111111XXXXXXXX'
+            },
+            {
+                element: collect_element,
+                type: ElementType.CVV,
+                input: '1234',
+                expected: undefined
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.CARDHOLDER_NAME,
+                input: 'john doe',
+                expected: undefined
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.EXPIRATION_DATE,
+                input: '12/30',
+                format: 'MM/YY',
+                expected: undefined,
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.EXPIRATION_MONTH,
+                input: '11',
+                expected: undefined
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.EXPIRATION_YEAR,
+                input: '29',
+                expected: undefined
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.PIN,
+                input: '2912',
+                expected: undefined
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.INPUT_FIELD,
+                input: '212-61-2465',
+                expected: undefined
+            },
+        ];
+
+        for (const element of elementsList) {
+            const iframeElement = new IFrameFormElement(element.element, element.type, {}, context);
+            Object.defineProperty(iframeElement, 'fieldType', {
+                get: () => element.type,
+                set: () => {}
+            });
+            if (element.format !== undefined) {
+                iframeElement.setFormat(element.format);
+            }
+            iframeElement.setValue(element.input);
+            console.log(element.type);
+            expect(iframeElement.getStatus().value).toBe(element.expected);
+        }
+    });
+
+    test('iframeFormElement element state value for card number in DEV env', () => {
+        const elementsList = [
+            {
+                element: test_collect_element,
+                type: ElementType.CARD_NUMBER,
+                input: '4111111111111111',
+                expected:'4111111111111111'
+            },
+            {
+                element: collect_element,
+                type: ElementType.CVV,
+                input: '1234',
+                expected: '1234'
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.CARDHOLDER_NAME,
+                input: 'john doe',
+                expected: 'john doe'
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.EXPIRATION_DATE,
+                input: '12/30',
+                format: 'MM/YY',
+                expected: '12/30',
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.EXPIRATION_MONTH,
+                input: '11',
+                expected: '11'
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.EXPIRATION_YEAR,
+                input: '29',
+                expected: '29'
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.PIN,
+                input: '2912',
+                expected: '2912'
+            },
+            {
+                element: test_collect_element,
+                type: ElementType.INPUT_FIELD,
+                input: '212-61-2465',
+                expected: '212-61-2465'
+            },
+        ];
+
+        for (const element of elementsList) {
+            const iframeElement = new IFrameFormElement(element.element, element.type, {}, {...context, env: Env.DEV});
+            Object.defineProperty(iframeElement, 'fieldType', {
+                get: () => element.type,
+                set: () => {}
+            });
+            if (element.format !== undefined) {
+                iframeElement.setFormat(element.format);
+            }
+            iframeElement.setValue(element.input);
+            console.log(element.type);
+            expect(iframeElement.getStatus().value).toBe(element.expected);
+        }
     });
 
     test('iframeFormelement should throw error for sensitive', () => {
