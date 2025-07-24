@@ -78,6 +78,14 @@ export default class FrameElementInit {
       });
 
     window.addEventListener('message', this.handleCollectCall);
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      console.log('dragover event triggered in window', e);
+    });
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      console.log('dragover event triggered in window', e);
+    });
   }
 
   private handleCollectCall = (event: MessageEvent) => {
