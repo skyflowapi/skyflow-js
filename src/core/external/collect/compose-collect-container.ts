@@ -370,6 +370,25 @@ class ComposableContainer extends Container {
       });
       this.#emitEvent(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframeID, {});
     }
+    if (this.#shadowRoot) {
+      const iframe = this.#shadowRoot.getElementById(this.#iframeID) as HTMLIFrameElement;
+      if (iframe?.contentWindow) {
+        iframe.addEventListener('dragover', (e) => {
+          e.preventDefault(); // ← absolutely required
+          console.log('iframe dragover event triggered', e);
+        });
+        iframe.addEventListener('drop', (e) => {
+          e.preventDefault();
+          console.log('iframe drop event triggered', e);
+
+          // retrieve files here and forward into the iframe
+          const files = e?.dataTransfer?.files;
+          iframe?.contentWindow?.postMessage(
+            { type: 'FILE_DROP', files }, '*',
+          );
+        });
+      }
+    }
   };
 
   unmount = () => {
