@@ -373,19 +373,36 @@ class ComposableContainer extends Container {
     if (this.#shadowRoot) {
       const iframe = this.#shadowRoot.getElementById(this.#iframeID) as HTMLIFrameElement;
       if (iframe?.contentWindow) {
-        iframe.addEventListener('dragover', (e) => {
-          e.preventDefault(); // ← absolutely required
-          console.log('iframe dragover event triggered', e);
-        });
-        iframe.addEventListener('drop', (e) => {
-          e.preventDefault();
-          console.log('iframe drop event triggered', e);
+        // iframe.addEventListener('')
+        // window.addEventListener('dragover', (e) => {
+        //   console.log('dragover event triggered in window', e);
+        // });
+        console.log('iframe dragover and drop events added', iframe);
+        iframe.addEventListener('load', (ev) => {
+          console.log('iframe load event triggered', ev);
+          iframe.addEventListener('dragover', (e) => {
+            e.preventDefault(); // ← absolutely required
+            console.log('iframe dragover event triggered', e);
+          });
+          iframe.addEventListener('drop', (e) => {
+            e.preventDefault();
+            console.log('iframe drop event triggered', e);
+            const path = e.composedPath();
+            const fileInput = path.find((el: any) => el.tagName === 'INPUT' && el.type === 'file');
+            if (!fileInput) {
+              console.warn('Dropped outside of any file input');
+              return;
+            }
 
-          // retrieve files here and forward into the iframe
-          const files = e?.dataTransfer?.files;
-          iframe?.contentWindow?.postMessage(
-            { type: 'FILE_DROP', files }, '*',
-          );
+            console.log('🖐 drop on', fileInput, 'files=', e?.dataTransfer?.files);
+            // fileInput.files = e?.dataTransfer?.files;
+            // fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+            // retrieve files here and forward into the iframe
+            // const files = e?.dataTransfer?.files;
+            // iframe?.contentWindow?.postMessage(
+            //   { type: 'FILE_DROP', files }, '*',
+            // );
+          });
         });
       }
     }
