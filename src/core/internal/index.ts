@@ -160,6 +160,7 @@ export default class FrameElement {
       this.dropArea.setAttribute('style', 'width: 300px; height: 200px; border: 1px dashed #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center;');
       this.inputParent.append(this.dropArea);
       this.dropArea.innerHTML = 'Drop files here';
+      this.inputParent.append(inputElement);
       // this.dropArea.addEventListener('dragover', (e) => {
       //   e.preventDefault();
       //   console.log('drag over', e);
@@ -1100,14 +1101,14 @@ export default class FrameElement {
       this.applyMask();
 
       if (this.domInput) {
-        // id.addEventListener('dragover', (event) => {
-        //   event.preventDefault();
-        //   console.log('dragover', event);
-        // });
-        // id.addEventListener('drop', (event) => {
-        //   event.preventDefault();
-        //   console.log('dropped file2', event.dataTransfer.files);
-        // });
+        this.domInput.addEventListener('dragover', (event) => {
+          event.preventDefault();
+          console.log('file input dragover', event);
+        });
+        this.domInput.addEventListener('drop', (event) => {
+          event.preventDefault();
+          console.log('file inpur  file2', event);
+        });
         const { replacePattern } = this.iFrameFormElement;
         if (replacePattern) {
           // eslint-disable-next-line @typescript-eslint/no-shadow
