@@ -189,12 +189,11 @@ describe('test iframeFormelement', () => {
                 iframeElement.setFormat(element.format);
             }
             iframeElement.setValue(element.input);
-            console.log(element.type);
             expect(iframeElement.getStatus().value).toBe(element.expected);
         }
     });
 
-    test('iframeFormElement element state value for card number in DEV env', () => {
+    test('iframeFormElement element state value for collect elements in DEV env', () => {
         const elementsList = [
             {
                 element: test_collect_element,
@@ -257,7 +256,6 @@ describe('test iframeFormelement', () => {
                 iframeElement.setFormat(element.format);
             }
             iframeElement.setValue(element.input);
-            console.log(element.type);
             expect(iframeElement.getStatus().value).toBe(element.expected);
         }
     });
