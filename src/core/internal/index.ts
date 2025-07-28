@@ -834,11 +834,21 @@ export default class FrameElement {
   };
 
   onSubmit = () => {
-    bus
-      .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameFormElement.iFrameName, {
-        name: this.iFrameFormElement.iFrameName,
-        event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
-      });
+    if (this.iFrameFormElement.containerType === ContainerType.COMPOSABLE) {
+      window.parent.postMessage({
+        type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameFormElement.iFrameName,
+        data: {
+          name: this.iFrameFormElement.iFrameName,
+          event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
+        },
+      }, this.clientDomain);
+    } else {
+      bus
+        .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameFormElement.iFrameName, {
+          name: this.iFrameFormElement.iFrameName,
+          event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
+        });
+    }
   };
 
   onArrowKeys = (keyBoardEvent: KeyboardEvent) => {
