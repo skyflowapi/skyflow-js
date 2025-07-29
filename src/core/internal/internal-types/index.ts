@@ -77,6 +77,7 @@ export interface ClientMetadata {
 }
 
 export interface Metadata extends ClientMetadata {
+  getSkyflowBearerToken: () => Promise<string> | undefined | unknown;
   clientJSON: ClientToJSON;
   containerType: ContainerType;
   skyflowContainer: SkyflowContainer;

@@ -1,10 +1,15 @@
+import { Context } from 'vm';
 import EventEmitter from '../../../event-emitter';
 import { formatValidations } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
-import { CollectElementUpdateOptions, EventName } from '../../../utils/common';
+import {
+  CollectElementUpdateOptions, EventName, MessageType, MetaData,
+} from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '../../constants';
+import { printLog } from '../../../utils/logs-helper';
+import logs from '../../../utils/logs';
 
 class ComposableElement {
   #elementName: string;
@@ -19,7 +24,13 @@ class ComposableElement {
 
   #isUpdateCalled = false;
 
-  constructor(name: string, eventEmitter: EventEmitter, iframeName: string) {
+  #metaData: any;
+
+  #context: Context;
+
+  #elementType: ElementType;
+
+  constructor(name, eventEmitter, iframeName, metaData) {
     this.#elementName = name;
     this.#iframeName = iframeName;
     this.#eventEmitter = eventEmitter;
@@ -27,6 +38,12 @@ class ComposableElement {
     this.#eventEmitter.on(`${EventName.READY}:${this.#elementName}`, () => {
       this.#isMounted = true;
     });
+    this.#metaData = metaData;
+    this.#context = {
+      logLevel: this.#metaData.clientJSON?.config?.options?.logLevel,
+      env: this.#metaData.clientJSON?.config?.options?.env,
+    };
+    this.#elementType = this.#metaData?.type as ElementType;
   }
 
   on(eventName: string, handler: Function) {
@@ -98,6 +115,40 @@ class ComposableElement {
       });
     }
   };
-}
 
+  uploadMultipleFiles = (metaData?: MetaData) => new Promise((resolve, reject) => {
+    try {
+      if (this.#elementType !== ElementType.MULTI_FILE_INPUT) {
+        throw new SkyflowError(
+          SKYFLOW_ERROR_CODE.MULTI_FILE_NOT_SUPPORTED,
+          [],
+          true,
+        );
+      }
+      // eslint-disable-next-line no-underscore-dangle
+      this.#eventEmitter._emit(`${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${this.#elementName}`, {
+        options: metaData,
+      }, (response: any) => {
+        if (response.error) {
+          reject(response);
+        }
+      });
+      window.addEventListener('message', (event) => {
+        if (event?.data?.type === `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${this.#elementName}`) {
+          if (event?.data?.data?.errorResponse || event?.data?.data?.error) {
+            printLog(`${event?.data?.data.errorResponse || event?.data?.data.error}`, MessageType.ERROR, this.#context.logLevel);
+            reject(event?.data?.data);
+          } else {
+            printLog(logs.infoLogs.MULTI_UPLOAD_FILES_SUCCESS,
+              MessageType.LOG, this.#context.logLevel);
+            resolve(event?.data?.data);
+          }
+        }
+      });
+    } catch (error) {
+      printLog(`${error}`, MessageType.ERROR, this.#context.logLevel);
+      reject(error);
+    }
+  });
+}
 export default ComposableElement;
