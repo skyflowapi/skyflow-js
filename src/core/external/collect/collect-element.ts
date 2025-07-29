@@ -513,7 +513,8 @@ class CollectElement extends SkyflowElement {
                     this.#states[index].isFocused = data.value.isFocused;
                     this.#states[index].isRequired = data.value.isRequired;
                     this.#states[index].selectedCardScheme = data?.value?.selectedCardScheme || '';
-                    if (element.elementType === ElementType.MULTI_FILE_INPUT) {
+                    if (element.elementType === ElementType.MULTI_FILE_INPUT
+                      || element.elementType === ElementType.FILE_INPUT) {
                       this.#states[index].metaData = data?.value?.metaData || [];
                     }
                     if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
