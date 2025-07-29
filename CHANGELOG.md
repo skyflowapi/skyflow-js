@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.2] - 2025-07-24
+### Fixed
+- Element state in event listeners for collect elements in `PROD` env.
+
 ## [2.4.1] - 2025-06-19
 ### Fixed
 - Make `scheme` optional in `CardMetadata`.
