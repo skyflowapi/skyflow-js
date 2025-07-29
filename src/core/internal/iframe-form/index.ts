@@ -220,7 +220,8 @@ export default class IFrameFormElement extends EventEmitter {
       value: { ...this.getStatus() },
     });
     if (this.containerType === ContainerType.COMPOSABLE) {
-      if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
+      if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name) {
         window.parent.postMessage({
           type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
           data: {
@@ -670,7 +671,8 @@ export default class IFrameFormElement extends EventEmitter {
                 value: this.getStatus(),
               });
               if (this.containerType === ContainerType.COMPOSABLE) {
-                if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
+                if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name) {
                   window.parent.postMessage({
                     type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
                     data: {
@@ -777,7 +779,8 @@ export default class IFrameFormElement extends EventEmitter {
         value: this.getStatus(),
       });
       if (this.containerType === ContainerType.COMPOSABLE) {
-        if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
+        if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name) {
           window.parent.postMessage({
             type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
             data: {
@@ -806,7 +809,8 @@ export default class IFrameFormElement extends EventEmitter {
       && (this.fieldType === ELEMENTS.EXPIRATION_DATE.name
         || this.fieldType === ELEMENTS.EXPIRATION_MONTH.name
         || this.fieldType === ELEMENTS.FILE_INPUT.name
-        || this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name)
+        || this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name)
     ) {
       bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName, {
         name: this.iFrameName,
@@ -814,7 +818,8 @@ export default class IFrameFormElement extends EventEmitter {
         value: this.getStatus(),
       });
       if (this.containerType === ContainerType.COMPOSABLE) {
-        if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
+        if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name) {
           window.parent.postMessage({
             type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
             data: {
@@ -845,7 +850,8 @@ export default class IFrameFormElement extends EventEmitter {
         value: this.getStatus(),
       });
       if (this.containerType === ContainerType.COMPOSABLE) {
-        if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
+        if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name) {
           window.parent.postMessage({
             type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
             data: {
