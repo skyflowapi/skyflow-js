@@ -810,7 +810,7 @@ export default class IFrameFormElement extends EventEmitter {
         || this.fieldType === ELEMENTS.EXPIRATION_MONTH.name
         || this.fieldType === ELEMENTS.FILE_INPUT.name
         || this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
-           || this.fieldType === ELEMENTS.FILE_INPUT.name)
+      )
     ) {
       bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName, {
         name: this.iFrameName,
