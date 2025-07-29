@@ -242,7 +242,7 @@ class RevealFrame {
           this.#dataElememt.innerText = formattedOutput;
         }
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
-          CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
+          CLASS_NAME, this.#record.token), MessageType.LOG, this.#context?.logLevel);
 
         // bus
         //   .target(window.location.origin)

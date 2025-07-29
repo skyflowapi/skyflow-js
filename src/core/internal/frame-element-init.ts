@@ -54,8 +54,6 @@ export default class FrameElementInit {
 
   #client!: Client;
 
-  #context!: Context;
-
   constructor() {
     // this.createIframeElement(frameName, label, skyflowID, isRequired);
     this.context = { logLevel: LogLevel.INFO, env: Env.PROD }; // client level
@@ -70,7 +68,6 @@ export default class FrameElementInit {
     bus
       // .target(this.clientMetaData.clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
-        this.#context = data.context;
         data.client.config = {
           ...data.client.config,
         };
@@ -92,12 +89,12 @@ export default class FrameElementInit {
                 window?.parent.postMessage({
                   type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${inputElement.iFrameName}`,
                   data: response,
-                }, this.clientMetaData.clientDomain);
+                }, this.clientMetaData?.clientDomain);
               }).catch((error) => {
                 window?.parent.postMessage({
                   type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${inputElement.iFrameName}`,
                   data: error,
-                }, this.clientMetaData.clientDomain);
+                }, this.clientMetaData?.clientDomain);
               });
           }
         }
@@ -139,7 +136,6 @@ export default class FrameElementInit {
     }
     if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId) {
       const data = event.data;
-      this.#context = data.context;
       data.client.config = {
         ...data.client.config,
       };
@@ -552,7 +548,7 @@ export default class FrameElementInit {
         else rootReject({ fileUploadResponse, errorResponse });
       });
     }).catch((error) => {
-      printLog(`${error}`, MessageType.LOG, this.#context.logLevel);
+      printLog(`${error}`, MessageType.LOG, this.context?.logLevel);
       rootReject({
         error: error?.error || error,
       });

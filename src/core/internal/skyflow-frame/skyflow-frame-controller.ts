@@ -92,11 +92,11 @@ class SkyflowFrameController {
             try {
               window.CoralogixRum.info(SDK_IFRAME_EVENT, data.event);
               printLog(parameterizedString(logs.infoLogs.METRIC_CAPTURE_EVENT),
-                MessageType.LOG, this.#context.logLevel);
+                MessageType.LOG, this.#context?.logLevel);
             } catch (err: any) {
               printLog(parameterizedString(logs.infoLogs.UNKNOWN_METRIC_CAPTURE_EVENT,
                 err.toString()),
-              MessageType.LOG, this.#context.logLevel);
+              MessageType.LOG, this.#context?.logLevel);
             }
           }
         },
