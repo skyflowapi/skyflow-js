@@ -75,6 +75,15 @@ export interface IRevealRecord {
   table?: string;
 }
 
+export interface IRevealRecordComposable {
+  token?: string;
+  redaction?: RedactionType;
+  column?: string;
+  skyflowID?: string;
+  table?: string;
+  iframeName?: string;
+}
+
 export interface IInsertResponse {
   records: IInsertResponseReocrds[];
 }
@@ -307,6 +316,9 @@ export interface ICollectOptions {
   tokens?: boolean,
   additionalFields?: IInsertRecordInput,
   upsert?: Array<IUpsertOptions>,
+}
+export interface MetaData {
+  [key: string]: any,
 }
 
 export interface UploadFilesResponse {

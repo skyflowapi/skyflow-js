@@ -203,7 +203,7 @@ const updateRecordsInVault = (
   options,
 ) => {
   const table = skyflowIdRecord.fields.table;
-  const skyflowID = skyflowIdRecord.skyflowID;
+  const skyflowID = skyflowIdRecord?.skyflowID;
   skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'table');
   skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'skyflowID');
   return client.request({
@@ -275,6 +275,151 @@ export const updateRecordsBySkyflowID = async (
   }).catch((err) => {
     rootReject(err);
   });
+});
+
+export const updateRecordsBySkyflowIDComposable = async (
+  skyflowIdRecords,
+  client: Client,
+  options,
+  authToken: string,
+) => new Promise((rootResolve, rootReject) => {
+  let updateResponseSet: Promise<any>[];
+  // eslint-disable-next-line prefer-const
+  updateResponseSet = skyflowIdRecords?.updateRecords?.map(
+    (skyflowIdRecord: IInsertRecord) => new Promise((resolve, reject) => {
+      updateRecordsInVault(skyflowIdRecord, client, authToken, options)
+        ?.then((resolvedResult: any) => {
+          const resp = constructFinalUpdateRecordResponse(
+            resolvedResult,
+            options?.tokens,
+            skyflowIdRecord,
+          );
+          resolve(resp);
+        },
+        (rejectedResult) => {
+          let errorResponse = rejectedResult;
+          if (rejectedResult?.error) {
+            errorResponse = {
+              error: {
+                code: rejectedResult?.error?.code,
+                description: rejectedResult?.error?.description,
+              },
+            };
+          }
+          printLog(rejectedResult?.error?.description ?? '', MessageType.ERROR, LogLevel.ERROR);
+          reject(errorResponse);
+        })?.catch((error) => {
+          reject(error);
+        });
+    }),
+  );
+  Promise.allSettled(updateResponseSet)?.then((resultSet: any) => {
+    const recordsResponse: any[] = [];
+    const errorsResponse: any[] = [];
+    resultSet?.forEach((result: { status: string; value: any; reason?: any; }) => {
+      if (result?.status === 'fulfilled') {
+        recordsResponse?.push(result?.value);
+      } else {
+        errorsResponse?.push(result?.reason);
+      }
+    });
+
+    if (errorsResponse?.length === 0) {
+      rootResolve({ records: recordsResponse });
+    } else if (recordsResponse?.length === 0) {
+      rootReject({ errors: errorsResponse });
+    } else {
+      rootReject({ records: recordsResponse, errors: errorsResponse });
+    }
+  });
+});
+
+export const insertDataInCollect = async (
+  records,
+  client: Client,
+  options,
+  finalInsertRecords,
+  authToken: string,
+) => new Promise((resolve) => {
+  let insertResponse: any;
+  let insertErrorResponse: any;
+  client
+    ?.request({
+      body: {
+        records,
+      },
+      requestMethod: 'POST',
+      url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+      },
+    })
+    ?.then((response: any) => {
+      insertResponse = constructInsertRecordResponse(
+        response,
+        options?.tokens,
+        finalInsertRecords?.records,
+      );
+      resolve(insertResponse);
+    })
+    ?.catch((error) => {
+      insertErrorResponse = {
+        errors: [
+          {
+            error: {
+              code: error?.error?.code,
+              description: error?.error?.description,
+            },
+          },
+        ],
+      };
+      resolve(insertErrorResponse);
+    });
+});
+
+export const insertDataInMultipleFiles = async (
+  records,
+  client: Client,
+  options,
+  finalInsertRecords,
+  authToken: string,
+) => new Promise((resolve) => {
+  let insertResponse: any;
+  let insertErrorResponse: any;
+  client
+    ?.request({
+      body: {
+        records,
+      },
+      requestMethod: 'POST',
+      url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+      },
+    })
+    ?.then((response: any) => {
+      insertResponse = constructInsertRecordResponse(
+        response,
+        options?.tokens,
+        finalInsertRecords?.records,
+      );
+      resolve(insertResponse);
+    })
+    ?.catch((error) => {
+      insertErrorResponse = {
+        errors: [
+          {
+            error: {
+              code: error?.error?.code,
+              description: error?.error?.description,
+            },
+          },
+        ],
+      };
+      resolve(insertErrorResponse);
+    });
 });
 
 export const checkForElementMatchRule = (validations: IValidationRule[]) => {

@@ -92,11 +92,11 @@ class SkyflowFrameController {
             try {
               window.CoralogixRum.info(SDK_IFRAME_EVENT, data.event);
               printLog(parameterizedString(logs.infoLogs.METRIC_CAPTURE_EVENT),
-                MessageType.LOG, this.#context.logLevel);
+                MessageType.LOG, this.#context?.logLevel);
             } catch (err: any) {
               printLog(parameterizedString(logs.infoLogs.UNKNOWN_METRIC_CAPTURE_EVENT,
                 err.toString()),
-              MessageType.LOG, this.#context.logLevel);
+              MessageType.LOG, this.#context?.logLevel);
             }
           }
         },
@@ -485,7 +485,8 @@ class SkyflowFrameController {
       if (inputElement) {
         if (
           inputElement.iFrameFormElement.fieldType
-          !== ELEMENTS.FILE_INPUT.name
+          !== ELEMENTS.FILE_INPUT.name && inputElement.iFrameFormElement.fieldType
+          !== ELEMENTS.MULTI_FILE_INPUT.name
         ) {
           const {
             state, doesClientHasError, clientErrorText, errorText, onFocusChange, validations,
@@ -525,6 +526,7 @@ class SkyflowFrameController {
           if (
             inputElement.iFrameFormElement.fieldType
         !== ELEMENTS.FILE_INPUT.name
+         && inputElement.iFrameFormElement.fieldType !== ELEMENTS.MULTI_FILE_INPUT.name
           ) {
             if (
               inputElement.iFrameFormElement.fieldType

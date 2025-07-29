@@ -89,15 +89,20 @@ export default class FrameElement {
 
   private selectedData?: number = undefined;
 
+  private clientDomain: string;
+
   constructor(
     iFrameFormElement: IFrameFormElement,
     options: any,
     htmlDivElement: HTMLDivElement,
+    clientDomain: string = '',
   ) {
+    this.clientDomain = clientDomain;
     this.iFrameFormElement = iFrameFormElement;
     this.options = options;
     this.htmlDivElement = htmlDivElement;
     this.hasError = false;
+
     this.mount();
     this.iFrameFormElement.fieldName = options.column;
     this.iFrameFormElement.tableName = options.table;
@@ -138,7 +143,6 @@ export default class FrameElement {
 
     this.inputParent = document.createElement('div');
     this.inputParent.style.position = 'relative';
-
     const inputElement = document.createElement(type);
     this.domInput = inputElement;
     this.domInput.iFrameFormElement = this.iFrameFormElement;
@@ -215,6 +219,9 @@ export default class FrameElement {
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
+        this.focusChange(false);
+      }
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
         this.focusChange(false);
       }
 
@@ -454,6 +461,12 @@ export default class FrameElement {
       .emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.iFrameFormElement.iFrameName, {
         name: this.iFrameFormElement.iFrameName,
       });
+    window.parent.postMessage({
+      type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.iFrameFormElement.iFrameName,
+      data: {
+        name: this.iFrameFormElement.iFrameName,
+      },
+    }, this.clientDomain);
 
     this.updateStyleClasses(this.iFrameFormElement.getStatus());
   };
@@ -566,6 +579,10 @@ export default class FrameElement {
     if (this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
       const target = event.target as HTMLFormElement;
       this.iFrameFormElement.setValue(target.files[0], target.checkValidity());
+      this.focusChange(true);
+    } else if (this.iFrameFormElement.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
+      const target = event.target as HTMLFormElement;
+      this.iFrameFormElement.setValue(target.files, target.checkValidity());
       this.focusChange(true);
     } else {
       const target = event.target as HTMLInputElement;
@@ -817,11 +834,21 @@ export default class FrameElement {
   };
 
   onSubmit = () => {
-    bus
-      .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameFormElement.iFrameName, {
-        name: this.iFrameFormElement.iFrameName,
-        event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
-      });
+    if (this.iFrameFormElement.containerType === ContainerType.COMPOSABLE) {
+      window.parent.postMessage({
+        type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameFormElement.iFrameName,
+        data: {
+          name: this.iFrameFormElement.iFrameName,
+          event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
+        },
+      }, this.clientDomain);
+    } else {
+      bus
+        .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameFormElement.iFrameName, {
+          name: this.iFrameFormElement.iFrameName,
+          event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
+        });
+    }
   };
 
   onArrowKeys = (keyBoardEvent: KeyboardEvent) => {

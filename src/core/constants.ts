@@ -30,11 +30,13 @@ export const SDK_IFRAME_EVENT = 'SDK IFRAME EVENT';
 export const DOMAIN = 'US2';
 export const CORALOGIX_DOMAIN = 'https://cdn.rum-ingress-coralogix.com/coralogix/browser/latest/coralogix-browser-sdk.js';
 export const FRAME_ELEMENT = 'element';
+export const COMPOSABLE_REVEAL = 'reveal-composable';
 
 export const ELEMENT_TYPES = {
   COLLECT: 'COLLECT',
   REVEAL: 'REVEAL',
   COMPOSE: 'COMPOSABLE',
+  REVEAL_COMPOSE: 'REVEAL_COMPOSE',
 };
 
 export const EVENT_TYPES = {
@@ -104,8 +106,19 @@ export const ELEMENT_EVENTS_TO_CLIENT = {
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {
+  MULTIPLE_UPLOAD_FILES_RESPONSE: 'MULTIPLE_UPLOAD_FILES_RESPONSE',
+  RENDER_MOUNTED: 'RENDER_MOUNTED',
+  HEIGHT_CALLBACK: 'HEIGHT_CALLBACK',
+  HEIGHT_CALLBACK_COMPOSABLE: 'HEIGHT_CALLBACK_COMPOSABLE',
+  COMPOSABLE_REVEAL: 'COMPOSABLE_REVEAL',
+  MULTIPLE_UPLOAD_FILES: 'MULTIPLE_UPLOAD_FILES',
   COLLECT_CALL_REQUESTS: 'COLLECT_CALL_REQUESTS',
+  COMPOSABLE_CALL_REQUESTS: 'COMPOSABLE_CALL_REQUESTS',
+  COMPOSABLE_CALL_RESPONSE: 'COMPOSABLE_CALL_RESPONSE',
+  COMPOSABLE_FILE_CALL_RESPONSE: 'COMPOSABLE_FILE_CALL_RESPONSE',
+  COMPOSABLE_CONTAINER: 'COMPOSABLE_CONTAINER',
   REVEAL_CALL_REQUESTS: 'REVEAL_CALL_REQUESTS',
+  REVEAL_CALL_RESPONSE: 'REVEAL_CALL_RESPONSE',
   FRAME_READY: 'FRAME_READY',
   READY_FOR_CLIENT: 'READY_FOR_CLIENT',
   TOKENIZATION_REQUEST: 'TOKENIZATION_REQUEST',
@@ -162,6 +175,7 @@ export enum ElementType {
   EXPIRATION_MONTH = 'EXPIRATION_MONTH',
   EXPIRATION_YEAR = 'EXPIRATION_YEAR',
   FILE_INPUT = 'FILE_INPUT',
+  MULTI_FILE_INPUT = 'MULTI_FILE_INPUT',
 }
 
 export enum CardType {
@@ -322,6 +336,14 @@ export const ELEMENTS = {
     sensitive: true,
     attributes: {
       type: 'file',
+    },
+  },
+  [ElementType.MULTI_FILE_INPUT]: {
+    name: 'MULTI_FILE_INPUT',
+    sensitive: true,
+    attributes: {
+      type: 'file',
+      multiple: '',
     },
   },
 };
@@ -637,6 +659,7 @@ export const DEFAULT_ERROR_TEXT_ELEMENT_TYPES = {
   [ElementType.EXPIRATION_MONTH]: 'Invalid expiration month',
   [ElementType.EXPIRATION_YEAR]: 'Invalid expiration year',
   [ElementType.FILE_INPUT]: logs.errorLogs.INVALID_COLLECT_VALUE,
+  [ElementType.MULTI_FILE_INPUT]: logs.errorLogs.INVALID_COLLECT_VALUE,
 };
 
 export const DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES = {
@@ -649,6 +672,7 @@ export const DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES = {
   [ElementType.EXPIRATION_MONTH]: 'expiration month is required',
   [ElementType.EXPIRATION_YEAR]: 'expiration year is required',
   [ElementType.FILE_INPUT]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
+  [ElementType.MULTI_FILE_INPUT]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
 };
 
 export const INPUT_KEYBOARD_EVENTS = {
