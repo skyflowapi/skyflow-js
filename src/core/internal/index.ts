@@ -888,7 +888,7 @@ export default class FrameElement {
 
       case INPUT_KEYBOARD_EVENTS.ENTER:
         this.onSubmit();
-        keyBoardEvent.preventDefault();
+        // keyBoardEvent.preventDefault();
         break;
 
       default: break;
