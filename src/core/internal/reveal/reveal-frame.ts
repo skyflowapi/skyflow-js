@@ -325,7 +325,7 @@ class RevealFrame {
           window?.parent?.postMessage({
             type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
             data: {
-              height: this.#elementContainer?.scrollHeight ?? 0,
+              height: this.#elementContainer?.scrollHeight,
               name: this.#name,
             },
           }, this.#clientDomain);
@@ -371,7 +371,7 @@ class RevealFrame {
       {
         type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
         data: {
-          height: this.#elementContainer?.scrollHeight ?? 0,
+          height: this.#elementContainer?.scrollHeight,
           name: this.#name,
         },
       },

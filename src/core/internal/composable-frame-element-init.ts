@@ -111,7 +111,7 @@ export default class RevealComposableFrameElementInit {
               {
                 type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
                 data: {
-                  height: this.rootDiv?.scrollHeight ?? 0,
+                  height: this.rootDiv?.scrollHeight,
                   name: window?.name,
                 },
               },
@@ -148,7 +148,7 @@ export default class RevealComposableFrameElementInit {
               {
                 type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
                 data: {
-                  height: this.rootDiv?.scrollHeight ?? 0,
+                  height: this.rootDiv?.scrollHeight,
                   name: window?.name,
                 },
               },
@@ -320,18 +320,18 @@ export default class RevealComposableFrameElementInit {
       this.clientMetaData.clientDomain,
     );
 
-    bus?.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name, (data, callback) => {
-      callback?.({
-        height: this.rootDiv?.scrollHeight ?? 0,
-        name: window?.name,
-      });
-    });
+    // bus?.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name, (data, callback) => {
+    //   callback?.({
+    //     height: this.rootDiv?.scrollHeight,
+    //     name: window?.name,
+    //   });
+    // });
 
     window?.parent?.postMessage(
       {
         type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
         data: {
-          height: this.rootDiv?.scrollHeight ?? 0,
+          height: this.rootDiv?.scrollHeight,
           name: window?.name,
         },
       },
@@ -344,7 +344,7 @@ export default class RevealComposableFrameElementInit {
           {
             type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
             data: {
-              height: this.rootDiv?.scrollHeight ?? 0,
+              height: this.rootDiv?.scrollHeight,
               name: window?.name,
             },
           },
@@ -357,7 +357,7 @@ export default class RevealComposableFrameElementInit {
           {
             type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
             data: {
-              height: this.rootDiv?.scrollHeight ?? 0,
+              height: this.rootDiv?.scrollHeight,
               name: window?.name,
             },
           },
