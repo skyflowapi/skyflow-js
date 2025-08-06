@@ -26,6 +26,7 @@ export default class IFrame {
     this.iframe = iframer({
       name: this.name,
       referrer: clientDomain,
+      title: name.match(/^element:([^:]+):/)?.[1] ?? name
     });
   }
 
