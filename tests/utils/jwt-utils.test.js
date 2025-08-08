@@ -20,3 +20,4 @@ describe('Validation token', () => {
         expect(res).toBe(false)
     })
 });
+
