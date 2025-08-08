@@ -145,6 +145,14 @@ export default class FrameElement {
     this.inputParent.style.position = 'relative';
     const inputElement = document.createElement(type);
     this.domInput = inputElement;
+    inputElement.addEventListener('keydown', (event) => {
+      const keyboardEvent = event as KeyboardEvent;
+      if ((keyboardEvent.ctrlKey || keyboardEvent.metaKey) && keyboardEvent.key.toLowerCase() === 'z') {
+        keyboardEvent.preventDefault();
+        this.setValue('');
+        this.iFrameFormElement.setValue('', true);
+      }
+    });
     this.domInput.iFrameFormElement = this.iFrameFormElement;
     inputElement.setAttribute(CUSTOM_ROW_ID_ATTRIBUTE, this.htmlDivElement?.id?.split(':')[0] || '');
     this.inputParent.append(inputElement);
@@ -164,7 +172,16 @@ export default class FrameElement {
 
       this.dropdownSelect = document.createElement('select');
       this.dropdownSelect.setAttribute('style', this.options?.inputStyles?.dropdown ? (DROPDOWN_STYLES + styleToString(this.options.inputStyles.dropdown)) : DROPDOWN_STYLES);
+      this.dropdownSelect.addEventListener('focus', () => {
+        if (this.options?.inputStyles?.dropdownIcon?.focus) {
+          this.setDropdownIconStyle(this.options?.inputStyles?.dropdownIcon?.focus);
+        }
+      });
 
+      this.dropdownSelect.addEventListener('blur', () => {
+        this.setDropdownIconStyle(this.options?.inputStyles?.dropdownIcon);
+      });
+    
       this.dropdownSelect.addEventListener('change', (event:any) => {
         event.preventDefault();
         if (this.domImg && CARD_ENCODED_ICONS[event.target.value]) {
@@ -888,7 +905,6 @@ export default class FrameElement {
 
       case INPUT_KEYBOARD_EVENTS.ENTER:
         this.onSubmit();
-        keyBoardEvent.preventDefault();
         break;
 
       default: break;
@@ -1165,4 +1181,16 @@ export default class FrameElement {
       }
     }
   }
+
+  private setDropdownIconStyle(styleObj?: any) {
+    if (this.dropdownIcon?.style.display === 'block') {
+      this.dropdownIcon.setAttribute(
+        'style',
+        styleObj
+          ? DROPDOWN_ICON_STYLES + styleToString(styleObj)
+          : DROPDOWN_ICON_STYLES
+      );
+      this.dropdownIcon.style.display = 'block';
+    }
+  };
 }
