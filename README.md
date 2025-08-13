@@ -143,7 +143,7 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 
 ## Insert data into the vault
 
-To insert data into the vault, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to insert into the below format. The `options` parameter takes an object of optional parameters for the insertion. The `insert` method also supports upsert operations.
+To insert data into the vault, use the `insert(records, options?)` method of the Skyflow client. The `records` parameter takes a JSON object of the records to insert into the below format. The `options` parameter takes an object of optional parameters for the insertion. This includes an option to return tokenized data, upsert records and continue on error.
 
 ```javascript
 const records = {
@@ -160,13 +160,14 @@ const records = {
 };
 
 const options = {
-  tokens: true,               // Indicates whether or not tokens should be returned for the inserted data. Defaults to 'true'  
-  upsert: [                   // Upsert operations support in the vault
+  tokens: true,               // Optional, Indicates whether or not tokens should be returned for the inserted data. Defaults to 'true'  
+  upsert: [                   // Optional, Upsert operations support in the vault
       {
         table: 'string',      // Table name
         column: 'value',      // Unique column in the table
       }
-    ]
+    ],
+  continueOnError: true       // Optional, decides whether to continue if error encountered or not
 }
 
 skyflowClient.insert(records, options);
@@ -192,11 +193,65 @@ The sample response:
 {
   "records": [
     {
+     "request_index": 0,
      "table": "cards",
      "fields":{
         "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
         "cardNumber": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
         "cvv": "1989cb56-63da-4482-a2df-1f74cd0dd1a5"
+      }
+    }
+  ]
+}
+```
+
+### Insert call example with continueOnError option
+
+```javascript
+skyflowClient.insert({
+  records: [
+    {
+      table: 'cards',
+      fields: {
+        card_number: '41111111111',
+        cvv: '123',
+      },
+    },
+    {
+      table: 'cards',
+      fields: {
+        expiry_date: '12/2027',
+        card_number: '411111111111111',
+        namee: 'jane doe',
+      },
+    }
+  ],
+},{
+  tokens: true,
+  continueOnError: true,
+});
+```
+
+**Sample Response :**
+```javascript
+{
+  "records": [
+    {
+      "table": "cards",
+      "fields": {
+        "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+        "cvv": "12f670af-6c7d-4837-83fb-30365fbc0b1e"
+      },
+      "request_index": 0,
+    }
+  ], 
+  "errors": [
+    {
+      "error": {
+        "code":400,
+        "description":"Invalid field present in JSON namee - requestId: 87fb2e32-6287-4e61-8304-9268df12bfe8",
+        "request_index": 1,
       }
     }
   ]
@@ -545,6 +600,7 @@ When the form is ready to be submitted, call the `collect(options?)` method on t
 - `tokens`: indicates whether tokens for the collected data should be returned or not. Defaults to 'true'
 - `additionalFields`: Non-PCI elements data to be inserted into the vault which should be in the `records` object format as described in the above [Insert data into vault](#insert-data-into-the-vault) section.
 -  `upsert`: To support upsert operations while collecting data from Skyflow elements, pass the table and column marked as unique in the table.
+-  `continueOnError`: To decides whether to continue if error encountered or not. Defaults to `false`.
 
 ```javascript
 const options = {
@@ -567,6 +623,7 @@ const options = {
       column: 'value',                    // Unique column in the table
     },
   ],                                      // Optional
+  continueOnError: true                   // Optional, decides whether to continue if error encountered or not
 };
 
 container.collect(options);
@@ -745,6 +802,117 @@ cvvElement.mount('#cvv'); //Assumes there is a div with id='#cvv' in the webpage
   ]
 }
 ```
+
+### Insert call example with continueOnError support
+**Sample Code**
+
+ ```javascript
+//Step 1
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT) 
+ 
+//Step 2
+const cardNumberElement = container.create({           
+  table: 'cards',
+  column: 'card_number',
+  inputStyles: {
+      base: {
+        color: '#1d1d1d',
+      },
+      cardIcon:{
+        position: 'absolute',
+        left:'8px', 
+        bottom:'calc(50% - 12px)'
+    },
+  },
+  labelStyles: {
+      base: {
+        fontSize: '12px',
+        fontWeight: 'bold'
+      }
+  },
+  errorTextStyles: {
+      base: {
+        color: '#f44336'
+      }
+  },
+  placeholder: 'Card Number',
+  label: 'card_number',
+  type: Skyflow.ElementType.CARD_NUMBER
+})
+
+
+const cvvElement = container.create({           
+  table: 'pii_fields',
+  column: 'cvv',
+  inputStyles: {
+      base: {
+        color: '#1d1d1d',
+      },
+      cardIcon:{
+        position: 'absolute',
+        left:'8px', 
+        bottom:'calc(50% - 12px)'
+    },
+  },
+  labelStyles: {
+      base: {
+        fontSize: '12px',
+        fontWeight: 'bold'
+      }
+  },
+  errorTextStyles: {
+      base: {
+        color: '#f44336'
+      }
+  },
+  placeholder: 'CVV',
+  label: 'cvv',
+  type: Skyflow.ElementType.CVV
+})
+
+// Step 3
+cardNumberElement.mount('#cardNumber')  //Assumes there is a div with id='#cardNumber' in the webpage.
+cvvElement.mount('#cvv'); //Assumes there is a div with id='#cvv' in the webpage.
+ 
+// Step 4
+ container.collect({
+  tokens: true,
+  additionalFields: {
+      records: [
+        {
+          table: 'table',                  
+          fields: {
+            "cardholder_nam": 'value',   
+          },
+        },
+  },
+  continueOnError: true,
+})
+ ```
+ **Skyflow returns tokens for the record you just inserted.**
+```javascript
+{
+  "records": [
+    {
+      "table": "cards",
+      "fields": {
+        "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+        "cardNumber": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+        "cvv": "12f670af-6c7d-4837-83fb-30365fbc0b1e"
+      }
+    }
+  ], 
+  "errors": [
+    {
+      "error": {
+        "code": 404,
+        "description": "Object Name table was not found for Vault - requestId : id1234",
+      }
+    }
+  ]
+}
+```
+
 ## Using Skyflow Elements to update data
 
 You can update the data in a vault with Skyflow Elements. Use the following steps to securely update data. 
