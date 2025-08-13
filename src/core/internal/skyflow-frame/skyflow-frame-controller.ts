@@ -769,7 +769,7 @@ class SkyflowFrameController {
     const fileUploadObject: any = {};
 
     const {
-      state, tableName, skyflowID, onFocusChange, preserveFileName,
+      state, tableName, skyflowID, onFocusChange, preserveFileName, returnFileMetadata
     } = fileElement;
 
     if (state.isRequired) {
@@ -794,6 +794,10 @@ class SkyflowFrameController {
 
     const value: Blob = Object.values(fileUploadObject)[0] as Blob;
 
+    formData.append('columnName', column);
+    formData.append('returnFileMetadata', returnFileMetadata as string);
+    formData.append('tableName', tableName);
+
     if (preserveFileName) {
       const isValidFileName = vaildateFileName(state.value.name);
       if (!isValidFileName) {
@@ -801,10 +805,14 @@ class SkyflowFrameController {
           new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true),
         );
       }
-      formData.append(column, value);
+      formData.append('file', value);
     } else {
       const generatedFileName = generateUploadFileName(state.value.name);
-      formData.append(column, new File([value], generatedFileName, { type: state.value.type }));
+      formData.append('file', new File([value], generatedFileName, { type: state.value.type }));
+    }
+
+    if (skyflowID) {
+      formData.append('skyflowID', skyflowID);
     }
 
     const client = this.#client;
@@ -815,7 +823,7 @@ class SkyflowFrameController {
           .request({
             body: formData,
             requestMethod: 'POST',
-            url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${tableName}/${skyflowID}/files`,
+            url: `${client.config.vaultURL}/v2/vaults/${client.config.vaultID}/files/upload`,
             headers: {
               authorization: `Bearer ${authToken}`,
               'content-type': 'multipart/form-data',

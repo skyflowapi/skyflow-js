@@ -263,6 +263,9 @@ export const formatRevealElementOptions = (options:IRevealElementOptions) => {
     if (Object.prototype.hasOwnProperty.call(revealOptions, 'enableCopy') && !validateBooleanOptions(revealOptions.enableCopy)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['enableCopy'], true);
     }
+    if (Object.prototype.hasOwnProperty.call(revealOptions, 'returnFileMetadata') && !validateBooleanOptions(revealOptions.returnFileMetadata)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['returnFileMetadata'], true);
+    }
     if (Object.prototype.hasOwnProperty.call(revealOptions, 'format')
     || Object.prototype.hasOwnProperty.call(revealOptions, 'translation')) {
       const revealElementMask:any[] = [];

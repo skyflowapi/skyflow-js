@@ -24,6 +24,7 @@ import {
 import logs from '../../../utils/logs';
 import {
   Context, IRenderResponseType, IRevealRecord, MessageType,
+  RenderFileRecord,
 } from '../../../utils/common';
 import {
   constructMaskTranslation,
@@ -412,7 +413,7 @@ class RevealFrame {
     }
   };
 
-  private renderFile(data: IRevealRecord, clientConfig) {
+  private renderFile(data: RenderFileRecord, clientConfig) {
     this.#client = new Client(clientConfig, {});
     return new Promise((resolve, reject) => {
       try {

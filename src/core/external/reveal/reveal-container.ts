@@ -39,7 +39,8 @@ export interface IRevealElementInput {
 export interface IRevealElementOptions {
   enableCopy?: boolean;
   format?: string;
-  translation?:Record<string, string>
+  translation?:Record<string, string>;
+  returnFileMetadata?: boolean;
 }
 
 const CLASS_NAME = 'RevealContainer';

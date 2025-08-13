@@ -396,6 +396,11 @@ export const formatOptions = (elementType, options, logLevel) => {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['preserveFileName'], true);
   }
   if (elementType === ELEMENTS.FILE_INPUT.name || elementType === ELEMENTS.MULTI_FILE_INPUT.name) {
+    if (Object.prototype.hasOwnProperty.call(options, 'returnFileMetadata')) {
+      if (!validateBooleanOptions(options.returnFileMetadata)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['returnFileMetadata'], true);
+      }
+    }
     if (options.allowedFileType) {
       if (!Array.isArray(options.allowedFileType)) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_OPTIONS, [], true);

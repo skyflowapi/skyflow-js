@@ -75,6 +75,10 @@ export interface IRevealRecord {
   table?: string;
 }
 
+export interface RenderFileRecord extends IRevealRecord {
+  returnFileMetadata: boolean;
+}
+
 export interface IRevealRecordComposable {
   token?: string;
   redaction?: RedactionType;
@@ -99,6 +103,7 @@ export interface IRevealResponseType {
 export interface IRenderResponseType {
   fields?: Record<string, any>
   errors?: Record<string, any>
+  fileMetadata?: Record<string, any>
 }
 
 export interface IDetokenizeInput {
@@ -285,6 +290,7 @@ export interface CollectElementOptions {
   blockEmptyFiles?: boolean,
   masking?: boolean,
   maskingChar?: string,
+  returnFileMetadata?: string;
 }
 
 export interface CardMetadata {

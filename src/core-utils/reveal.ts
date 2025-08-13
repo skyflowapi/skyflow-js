@@ -12,6 +12,7 @@ import {
   IGetOptions,
   RenderFileResponse,
   IRevealRecordComposable,
+  RenderFileRecord,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
 import { FILE_DOWNLOAD_URL_PARAM } from '../core/constants';
@@ -133,7 +134,7 @@ const getTokenRecordsFromVault = (
 };
 
 export const getFileURLForRender = (
-  skyflowIdRecord: IRevealRecord,
+  skyflowIdRecord: RenderFileRecord,
   client: Client,
   authToken: string,
 ): Promise<any> => {
@@ -142,6 +143,9 @@ export const getFileURLForRender = (
   paramList += `${skyflowIdRecord.skyflowID}?`;
 
   paramList += `fields=${skyflowIdRecord.column}&${FILE_DOWNLOAD_URL_PARAM}`;
+  if (skyflowIdRecord?.returnFileMetadata === true) {
+    paramList += `&returnFileMetadata=true`;
+  }
 
   const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}/${paramList}`;
   return client.request({
@@ -155,7 +159,7 @@ export const getFileURLForRender = (
 };
 
 export const getFileURLFromVaultBySkyflowID = (
-  skyflowIdRecord: IRevealRecord,
+  skyflowIdRecord: RenderFileRecord,
   client: Client,
 ): Promise<IRenderResponseType> => new Promise((rootResolve, rootReject) => {
   try {
@@ -180,7 +184,7 @@ export const getFileURLFromVaultBySkyflowID = (
 });
 
 export const getFileURLFromVaultBySkyflowIDComposable = (
-  skyflowIdRecord: IRevealRecord,
+  skyflowIdRecord: RenderFileRecord,
   client: Client,
   authToken: string,
 ): Promise<IRenderResponseType> => new Promise((rootResolve, rootReject) => {
@@ -340,6 +344,7 @@ export const formatForRenderClient = (response: IRenderResponseType, column: str
     const successRecord = {
       skyflow_id: response.fields.skyflow_id,
       column,
+      fileMetadata: response.fileMetadata
     };
     formattedResponse.success = successRecord;
   } else if (response.errors) {
