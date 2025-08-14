@@ -313,9 +313,9 @@ export default class IFrameFormElement extends EventEmitter {
   }
 
   getFileDetails = (value: FileList | File | null): Array<{
-    name: string;
-    size: number;
-    type: string;
+    fileName: string;
+    fileSizeKB: number;
+    fileType: string;
   }> => {
   // Return empty array if no value
     if (!value) return [];
@@ -324,18 +324,18 @@ export default class IFrameFormElement extends EventEmitter {
     // Handle FileList
       if (value instanceof FileList) {
         return Array.from(value).map((file) => ({
-          name: file.name,
-          size: file.size,
-          type: file.type,
+          fileName: file.name,
+          fileSizeKB: Math.ceil(file.size / 1024),
+          fileType: file.type,
         }));
       }
 
       // Handle single File
       if (value instanceof File) {
         return [{
-          name: value.name,
-          size: value.size,
-          type: value.type,
+          fileName: value.name,
+          fileSizeKB: Math.ceil(value.size / 1024),
+          fileType: value.type,
         }];
       }
 
