@@ -275,7 +275,7 @@ class RevealFrame {
       });
     window.parent.postMessage(
       {
-        type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + this.#containerId,
+        type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + this.#name,
         data: {
           name: window.name,
         },
@@ -291,6 +291,8 @@ class RevealFrame {
               resolvedResult as IRenderResponseType,
               this.#record?.column,
             );
+            console.log("event name : ",ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name)
+            console.log("resultt : ", result);
             window?.parent?.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
               data: {
