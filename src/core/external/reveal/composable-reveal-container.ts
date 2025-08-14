@@ -187,9 +187,9 @@ class ComposableRevealContainer extends Container {
       let element = this.#elements[this.#tempElements.elementName];
       if (element) {
         if (isSingleElementAPI) {
-          element.update(elements[0]);
+          // element.update(elements[0]);
         } else {
-          element.update(this.#tempElements);
+          // element.update(this.#tempElements);
         }
       } else {
         const elementId = uuid();

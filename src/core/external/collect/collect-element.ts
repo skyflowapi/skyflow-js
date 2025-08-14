@@ -468,7 +468,7 @@ class CollectElement extends SkyflowElement {
       }
     });
     this.#elements.forEach((element1) => {
-      const isComposableContainer = this.#elements.length > 1;
+      const isComposableContainer = this.#metaData?.containerType === 'COMPOSABLE';
       if (isComposableContainer) {
         window.addEventListener('message', (event) => {
           if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT
@@ -482,7 +482,6 @@ class CollectElement extends SkyflowElement {
               ) {
                 this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
               } else {
-                const isComposable = this.#elements.length > 1;
                 this.#elements.forEach((element, index) => {
                   if (data.name === element.elementName) {
                     let emitEvent = '';
@@ -519,7 +518,7 @@ class CollectElement extends SkyflowElement {
                     if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
                     else this.#states[index].value = undefined;
 
-                    emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
+                    emitEvent = isComposableContainer ? `${emitEvent}:${data.name}` : emitEvent;
                     this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
                 + this.#iframe.name,
                     {}, (payload:any) => {
@@ -531,12 +530,12 @@ class CollectElement extends SkyflowElement {
                       ...this.#states[index],
                       elementType: element.elementType,
                     };
-                    if (isComposable) {
+                    if (isComposableContainer) {
                       this.#groupEmitter?._emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT, {
                         iframeName: this.#iframe.name,
                       });
                     }
-                    if (isComposable && this.#groupEmitter) {
+                    if (isComposableContainer && this.#groupEmitter) {
                       this.#groupEmitter._emit(emitEvent, emitData);
                     } else {
                       this.#eventEmitter._emit(emitEvent, emitData);

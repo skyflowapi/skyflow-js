@@ -108,12 +108,6 @@ class ComposableRevealInternalElement extends SkyflowElement {
       this.#iframe?.setIframeHeight(data?.height);
     });
 
-    window?.addEventListener('message', (event) => {
-      if (event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
-                  + this.#containerId) {
-        this.#isComposableFrameReady = true;
-      }
-    });
 
     window?.addEventListener('message', (event) => {
       if (event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + this.#iframe?.name) {
@@ -136,6 +130,12 @@ class ComposableRevealInternalElement extends SkyflowElement {
       rows?.forEach((row, rowIndex) => {
         row?.elements?.forEach((element: any, elementIndex: number) => {
           if (!element?.name) return;
+          window?.addEventListener('message', (event) => {
+            if (event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
+                        + element?.name) {
+              this.#isComposableFrameReady = true;
+            }
+          });
           this.#eventEmitter?.on(
             `${ELEMENT_EVENTS_TO_IFRAME?.RENDER_FILE_REQUEST}:${element?.name}`,
             (data, callback) => {
@@ -351,9 +351,9 @@ class ComposableRevealInternalElement extends SkyflowElement {
           MessageType.LOG,
           loglevel);
         validateRenderElementRecord(recordData);
-        window.addEventListener('message', (event) => {
+        window.addEventListener('message', (event) => {   
           if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
-                  + this.#containerId) {
+                  + recordData?.name) {
             this.#isMounted = true;
             this.#getSkyflowBearerToken()?.then((authToken) => {
               printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
@@ -377,7 +377,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
               window.addEventListener('message', (event1) => {
                 if (event1?.data
                          && event1?.data?.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
-             + this.#iframe.name) {
+             + recordData.name) {
                   if (event1?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
                     const revealData = event1?.data?.data?.result;
                     if (revealData?.error) {
@@ -592,7 +592,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
     } else {
       window.addEventListener('message', (event) => {
         if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
-                  + this.#containerId) {
+                  + record?.name) {
           this.#emitEvent(
             ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + record.name,
             {
