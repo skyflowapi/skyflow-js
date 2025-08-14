@@ -275,7 +275,7 @@ class RevealFrame {
       });
     window.parent.postMessage(
       {
-        type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + this.#containerId,
+        type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + this.#name,
         data: {
           name: window.name,
         },
