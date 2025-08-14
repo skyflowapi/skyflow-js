@@ -181,7 +181,7 @@ export default class FrameElement {
       this.dropdownSelect.addEventListener('blur', () => {
         this.setDropdownIconStyle(this.options?.inputStyles?.dropdownIcon);
       });
-    
+
       this.dropdownSelect.addEventListener('change', (event:any) => {
         event.preventDefault();
         if (this.domImg && CARD_ENCODED_ICONS[event.target.value]) {
@@ -1188,9 +1188,9 @@ export default class FrameElement {
         'style',
         styleObj
           ? DROPDOWN_ICON_STYLES + styleToString(styleObj)
-          : DROPDOWN_ICON_STYLES
+          : DROPDOWN_ICON_STYLES,
       );
       this.dropdownIcon.style.display = 'block';
     }
-  };
+  }
 }

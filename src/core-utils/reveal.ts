@@ -340,7 +340,7 @@ export const formatForRenderClient = (response: IRenderResponseType, column: str
     const successRecord = {
       skyflow_id: response.fields.skyflow_id,
       column,
-      fileMetadata: response.fileMetadata
+      fileMetadata: response.fileMetadata,
     };
     formattedResponse.success = successRecord;
   } else if (response.errors) {
