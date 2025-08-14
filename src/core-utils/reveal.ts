@@ -146,7 +146,7 @@ export const getFileURLForRender = (
 
   paramList += `${skyflowIdRecord.skyflowID}?`;
 
-  paramList += `fields=${skyflowIdRecord.column}&${FILE_DOWNLOAD_URL_PARAM}`;
+  paramList += `fields=${skyflowIdRecord.column}&${FILE_DOWNLOAD_URL_PARAM}&returnFileMetadata=true`;
 
   const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}/${paramList}`;
   return client.request({
@@ -345,6 +345,7 @@ export const formatForRenderClient = (response: IRenderResponseType, column: str
     const successRecord = {
       skyflow_id: response.fields.skyflow_id,
       column,
+      fileMetadata: response.fileMetadata,
     };
     formattedResponse.success = successRecord;
   } else if (response.errors) {
