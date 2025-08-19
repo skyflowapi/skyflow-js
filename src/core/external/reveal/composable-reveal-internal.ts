@@ -54,6 +54,8 @@ class ComposableRevealInternalElement extends SkyflowElement {
 
   #elementId: string;
 
+  resizeObserver: ResizeObserver | null;
+
   #readyToMount: boolean = false;
 
   #eventEmitter: EventEmitter;
@@ -83,6 +85,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
     super();
     this.#elementId = elementId;
     this.#metaData = metaData;
+    this.resizeObserver = null;
     this.#clientId = this.#metaData?.uuid;
     this.#isSingleElementAPI = isSingleElementAPI;
     this.#recordData = recordGroup;
@@ -185,12 +188,35 @@ class ComposableRevealInternalElement extends SkyflowElement {
     if (!domElementSelector) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
+
+    if(domElementSelector instanceof HTMLElement){
+      this.resizeObserver = new ResizeObserver(() => {
+        if (domElementSelector.getElementsByTagName('iframe')[0]?.contentWindow) {
+          const iframeElement = domElementSelector.getElementsByTagName('iframe')[0]
+          if(iframeElement.name === this.#iframe.name){
+            iframeElement?.contentWindow?.postMessage({
+            name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+          }, properties.IFRAME_SECURE_ORIGIN);
+          }
+        }
+      });
+    }
+
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.DIV_ID, domElementSelector);
     if (
       this.#metaData?.clientJSON?.config?.options?.trackMetrics
       && this.#metaData.clientJSON.config?.options?.trackingKey
     ) {
       pushElementEventWithTimeout(this.#elementId);
+    }
+
+    if (typeof domElementSelector === 'string') {
+      const targetElement = document.querySelector(domElementSelector);
+      if (targetElement) {
+        this.resizeObserver?.observe(targetElement);
+      }
+    } else if (domElementSelector instanceof HTMLElement) {
+      this.resizeObserver?.observe(domElementSelector);
     }
 
     this.#readyToMount = true;
