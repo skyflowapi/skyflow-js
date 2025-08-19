@@ -217,6 +217,9 @@ export default class FrameElementInit {
 
     const value: Blob = Object.values(fileUploadObject)[0] as Blob;
 
+    formData.append('columnName', column);
+    formData.append('tableName', tableName);
+
     if (preserveFileName) {
       const isValidFileName = vaildateFileName(state.value.name);
       if (!isValidFileName) {
@@ -224,10 +227,14 @@ export default class FrameElementInit {
           new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true),
         );
       }
-      formData.append(column, value);
+      formData.append('file', value);
     } else {
       const generatedFileName = generateUploadFileName(state.value.name);
-      formData.append(column, new File([value], generatedFileName, { type: state.value.type }));
+      formData.append('file', new File([value], generatedFileName, { type: state.value.type }));
+    }
+
+    if (skyflowID) {
+      formData.append('skyflowID', skyflowID);
     }
 
     const client = this.#client;
@@ -236,7 +243,7 @@ export default class FrameElementInit {
         .request({
           body: formData,
           requestMethod: 'POST',
-          url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${tableName}/${skyflowID}/files`,
+          url: `${client.config.vaultURL}/v2/vaults/${client.config.vaultID}/files/upload`,
           headers: {
             authorization: `Bearer ${clientConfig.authToken}`,
             'content-type': 'multipart/form-data',
@@ -457,73 +464,90 @@ export default class FrameElementInit {
 
   // eslint-disable-next-line consistent-return
   private multipleUploadFiles =
-  (fileElement: IFrameFormElement,
-    clientConfig, metaData) => new Promise((rootResolve, rootReject) => {
+  (fileElement: IFrameFormElement, clientConfig, metaData) => new Promise((rootResolve, rootReject) => {
     this.#client = new Client(clientConfig, {});
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
-    const {
-      state, tableName, onFocusChange, preserveFileName,
-    } = fileElement;
+
+    const { state, tableName, onFocusChange, preserveFileName } = fileElement;
     if (state.isRequired) {
       onFocusChange(false);
     }
 
-    if (fileElement.state.value === undefined || fileElement.state.value === null || fileElement.state.value === '') {
+    if (state.value === undefined || state.value === null || state.value === '') {
       rootReject({ error: 'No files selected' });
       return;
     }
-    const files = state.value instanceof FileList
-      ? Array.from(state.value)
-      : [state.value];
 
+    const files = state.value instanceof FileList ? Array.from(state.value) : [state.value];
     this.validateFiles(files, state, fileElement);
-    const insertRequest = this.createInsertRequest(files.length, metaData);
-    this.insertDataCallInMultiFiles(
-      insertRequest, this.#client, tableName as string, clientConfig.authToken as string,
-    ).then((response: any) => {
-      const skyflowIDs = this.extractSkyflowIDs(response);
-      if (skyflowIDs.length === 0) {
-        rootReject({ error: 'No skyflow IDs returned from insert data' });
-        return;
-      }
-      const promises: Promise<unknown>[] = [];
 
-      files.forEach((file, index) => {
-        const fileUploadObject: any = {};
-        fileUploadObject[state.name] = file;
-        const formData = new FormData();
-        const column = Object.keys(fileUploadObject)[0];
-        const value: Blob = Object.values(fileUploadObject)[0] as Blob;
-        if (preserveFileName) {
-          formData.append(column, value);
-        } else {
-          const generatedFileName = generateUploadFileName(file.name);
-          formData.append(column, new File([value], generatedFileName, { type: file.type }));
-        }
-        const client = this.#client;
-        const promise1 = new Promise((resolve, reject) => {
-          client
-            .request({
-              body: formData,
-              requestMethod: 'POST',
-              url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${tableName}/${skyflowIDs[index]}/files`,
-              headers: {
-                authorization: `Bearer ${clientConfig.authToken}`,
-                'content-type': 'multipart/form-data',
-              },
-            })
-            .then((response1) => {
-              resolve(response1);
-            })
-            .catch((error) => {
-              reject(error);
-            });
-        });
-        promises.push(promise1);
+    const uploadFile = (file: File, skyflowID?: string) => {
+      const formData = new FormData();
+      formData.append('columnName', state.name);
+      if (tableName) formData.append('tableName', tableName);
+      if (preserveFileName) {
+        formData.append('file', file);
+      } else {
+        const generatedFileName = generateUploadFileName(file.name);
+        formData.append('file', new File([file], generatedFileName, { type: file.type }));
+      }
+      if (skyflowID) formData.append('skyflowID', skyflowID);
+      const client = this.#client;
+      return this.#client.request({
+        body: formData,
+        requestMethod: 'POST',
+        url: `${client.config.vaultURL}/v2/vaults/${this.#client.config.vaultID}/files/upload`,
+        headers: {
+          authorization: `Bearer ${clientConfig.authToken}`,
+          'content-type': 'multipart/form-data',
+        },
       });
-      Promise.allSettled(
-        promises,
-      ).then((resultSet) => {
+    };
+
+    if (metaData && Object.keys(metaData).length > 0) {
+      const insertRequest = this.createInsertRequest(files.length, metaData);
+      this.insertDataCallInMultiFiles(
+        insertRequest, this.#client, tableName as string, clientConfig.authToken as string,
+      ).then((response: any) => {
+        const skyflowIDs = this.extractSkyflowIDs(response);
+        if (skyflowIDs.length === 0) {
+          rootReject({ error: 'No skyflow IDs returned from insert data' });
+          return;
+        }
+        const promises = files.map((file, idx) => uploadFile(file, skyflowIDs[idx]));
+        Promise.allSettled(promises).then((resultSet) => {
+          const fileUploadResponse: any[] = [];
+          const errorResponse: any[] = [];
+          resultSet.forEach((result) => {
+            if (result.status === 'fulfilled') {
+              if (result.value !== undefined && result.value !== null) {
+                if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
+                  errorResponse.push(result.value);
+                } else {
+                  const response1 = typeof result.value === 'string'
+                    ? JSON.parse(result.value)
+                    : result.value;
+                  fileUploadResponse.push(response1);
+                }
+              }
+            } else if (result.status === 'rejected') {
+              errorResponse.push({ error: result.reason });
+            }
+          });
+          if (errorResponse.length === 0) {
+            rootResolve({ fileUploadResponse });
+          } else if (fileUploadResponse.length === 0) rootReject({ errorResponse });
+          else rootReject({ fileUploadResponse, errorResponse });
+        });
+      }).catch((error) => {
+        printLog(`${error}`, MessageType.LOG, this.context?.logLevel);
+        rootReject({
+          error: error?.error || error,
+        });
+      });
+    } else {
+      const promises = files.map((file) => uploadFile(file));
+      Promise.allSettled(promises).then((resultSet) => {
         const fileUploadResponse: any[] = [];
         const errorResponse: any[] = [];
         resultSet.forEach((result) => {
@@ -547,12 +571,7 @@ export default class FrameElementInit {
         } else if (fileUploadResponse.length === 0) rootReject({ errorResponse });
         else rootReject({ fileUploadResponse, errorResponse });
       });
-    }).catch((error) => {
-      printLog(`${error}`, MessageType.LOG, this.context?.logLevel);
-      rootReject({
-        error: error?.error || error,
-      });
-    });
+    }
   });
 
   private validateFiles = (files: File[], state: any, fileElement: IFrameFormElement) => {

@@ -41,6 +41,7 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
+import properties from '../../../properties';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
@@ -202,12 +203,36 @@ class CollectElement extends SkyflowElement {
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
     }
-    this.resizeObserver = new ResizeObserver(() => {
+
+    if(domElement instanceof HTMLElement){
+      this.resizeObserver = new ResizeObserver(() => {
+        const iframeElements = domElement.getElementsByTagName('iframe');
+        if (iframeElements && iframeElements.length > 0) {
+          for (let i = 0; i < iframeElements.length; i++) {
+            const iframeElement = iframeElements[i];
+            if (
+              iframeElement.name === this.#iframe.name &&
+              iframeElement.contentWindow
+            ) {
+              iframeElement?.contentWindow?.postMessage(
+                {
+                  name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+                },
+                properties.IFRAME_SECURE_ORIGIN
+              );
+            }
+          }
+        }
+      });
+    } else if (typeof domElement === 'string'){
+      this.resizeObserver = new ResizeObserver(() => {
       this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
         {}, (payload:any) => {
           this.#iframe.setIframeHeight(payload.height);
         });
-    });
+      });
+    }
+
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.DIV_ID, domElement);
     if (
       this.#metaData?.clientJSON?.config?.options?.trackMetrics
