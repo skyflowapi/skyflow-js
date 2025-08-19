@@ -207,18 +207,20 @@ class CollectElement extends SkyflowElement {
     if(domElement instanceof HTMLElement){
       this.resizeObserver = new ResizeObserver(() => {
         const iframeElements = domElement.getElementsByTagName('iframe');
-        for (let i = 0; i < iframeElements.length; i++) {
-          const iframeElement = iframeElements[i];
-          if (
-            iframeElement.name === this.#iframe.name &&
-            iframeElement.contentWindow
-          ) {
-            iframeElement?.contentWindow?.postMessage(
-              {
-                name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-              },
-              properties.IFRAME_SECURE_ORIGIN
-            );
+        if (iframeElements && iframeElements.length > 0) {
+          for (let i = 0; i < iframeElements.length; i++) {
+            const iframeElement = iframeElements[i];
+            if (
+              iframeElement.name === this.#iframe.name &&
+              iframeElement.contentWindow
+            ) {
+              iframeElement?.contentWindow?.postMessage(
+                {
+                  name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+                },
+                properties.IFRAME_SECURE_ORIGIN
+              );
+            }
           }
         }
       });
