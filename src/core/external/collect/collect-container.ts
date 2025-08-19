@@ -78,7 +78,6 @@ class CollectContainer extends Container {
     this.#skyflowElements = skyflowElements;
     this.#context = context;
     this.#eventEmitter = new EventEmitter();
-
     const clientDomain = this.#metaData.clientDomain || '';
     const iframe = iframer({
       name: `${COLLECT_FRAME_CONTROLLER}:${this.#containerId}:${this.#context.logLevel}:${btoa(clientDomain)}`,
