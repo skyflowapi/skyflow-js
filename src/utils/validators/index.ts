@@ -562,10 +562,6 @@ export const validateCollectElementInput = (input: CollectElementInput, logLevel
   if (Object.prototype.hasOwnProperty.call(input, 'skyflowID') && !(typeof input.skyflowID === 'string')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT, [], true);
   }
-  if (input.type === ElementType.FILE_INPUT
-    && !Object.keys(input).includes('skyflowID')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_IN_COLLECT, [], true);
-  }
 };
 
 export const validateUpsertOptions = (upsertOptions) => {

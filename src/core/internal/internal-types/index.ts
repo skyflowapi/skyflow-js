@@ -47,6 +47,7 @@ export interface RevealContainerProps {
 }
 
 export interface InternalState {
+  metaData: any;
   isEmpty: boolean,
   isValid: boolean,
   isFocused: boolean,
