@@ -208,12 +208,20 @@ class CollectElement extends SkyflowElement {
 
     if (domElement instanceof HTMLElement) {
       this.resizeObserver = new ResizeObserver(() => {
-        if (domElement.getElementsByTagName('iframe')[0]?.contentWindow) {
-          const iframeElement = domElement.getElementsByTagName('iframe')[0];
-          if (iframeElement.name === this.#iframe.name) {
-            iframeElement?.contentWindow?.postMessage({
-              name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-            }, properties.IFRAME_SECURE_ORIGIN);
+        const iframeElements = domElement.getElementsByTagName('iframe');
+        // eslint-disable-next-line no-plusplus
+        for (let i = 0; i < iframeElements.length; i++) {
+          const iframeElement = iframeElements[i];
+          if (
+            iframeElement.name === this.#iframe.name
+            && iframeElement.contentWindow
+          ) {
+            iframeElement?.contentWindow?.postMessage(
+              {
+                name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+              },
+              properties.IFRAME_SECURE_ORIGIN,
+            );
           }
         }
       });
