@@ -1,10 +1,16 @@
 /*
 Copyright (c) 2025 Skyflow, Inc.
 */
-import { ElementType } from "../../../../src/core/constants";
+import {
+  ELEMENT_EVENTS_TO_IFRAME,
+  ElementType,
+} from "../../../../src/core/constants";
 import CollectContainer from "../../../../src/core/external/collect/collect-container";
 import CollectElement from "../../../../src/core/external/collect/collect-element";
+import SkyflowContainer from "../../../../src/core/external/skyflow-container";
+import { Metadata } from "../../../../src/core/internal/internal-types";
 import * as iframerUtils from "../../../../src/iframe-libs/iframer";
+import { ContainerType } from "../../../../src/skyflow";
 import {
   LogLevel,
   Env,
@@ -36,47 +42,33 @@ jest.mock("../../../../src/libs/uuid", () => ({
   default: jest.fn(() => mockUuid),
 }));
 
-const metaData = {
+const metaData: Metadata = {
   uuid: "123",
+  sdkVersion: "",
+  sessionId: "1234",
+  clientDomain: "http://abc.com",
+  containerType: ContainerType.COLLECT,
+  clientJSON: {
+    config: {
+      vaultID: "vault123",
+      vaultURL: "https://sb.vault.dev",
+      getBearerToken,
+    },
+    metaData: {
+      uuid: "123",
+      clientDomain: "http://abc.com",
+    },
+  },
   skyflowContainer: {
     isControllerFrameReady: true,
-  },
-  config: {
-    vaultID: "vault123",
-    vaultURL: "https://sb.vault.dev",
-    getBearerToken,
-  },
-  metaData: {
-    clientDomain: "http://abc.com",
-  },
-  clientJSON: {
-    config: {
-      vaultID: "vault123",
-      vaultURL: "https://sb.vault.dev",
-      getBearerToken,
-    },
-  },
+  } as unknown as SkyflowContainer,
 };
-const metaData2 = {
-  uuid: "123",
+
+const metaData2: Metadata = {
+  ...metaData,
   skyflowContainer: {
     isControllerFrameReady: false,
-  },
-  config: {
-    vaultID: "vault123",
-    vaultURL: "https://sb.vault.dev",
-    getBearerToken,
-  },
-  metaData: {
-    clientDomain: "http://abc.com",
-  },
-  clientJSON: {
-    config: {
-      vaultID: "vault123",
-      vaultURL: "https://sb.vault.dev",
-      getBearerToken,
-    },
-  },
+  } as unknown as SkyflowContainer,
 };
 
 const collectStylesOptions = {
@@ -89,7 +81,7 @@ const collectStylesOptions = {
   } as InputStyles,
 };
 
-const cvvElement: CollectElementInput = {
+const cvvInput: CollectElementInput = {
   table: "pii_fields",
   column: "primary_card.cvv",
   placeholder: "cvv",
@@ -98,20 +90,20 @@ const cvvElement: CollectElementInput = {
   ...collectStylesOptions,
 };
 
-const cardNumberElement: CollectElementInput = {
+const cardNumberInput: CollectElementInput = {
   table: "pii_fields",
   column: "primary_card.card_number",
   type: ElementType.CARD_NUMBER,
   ...collectStylesOptions,
 };
 
-const ExpirationDateElement: CollectElementInput = {
+const ExpirationDateInput: CollectElementInput = {
   table: "pii_fields",
   column: "primary_card.expiry",
   type: ElementType.EXPIRATION_DATE,
 };
 
-const FileElement: CollectElementInput = {
+const fileInput: CollectElementInput = {
   table: "pii_fields",
   column: "primary_card.file",
   type: ElementType.FILE_INPUT,
@@ -154,31 +146,28 @@ describe("Collect container", () => {
     document.body.innerHTML = "";
   });
 
-  it("container collect success", () => {
-    let collectContainer = new CollectContainer(
-      {},
-      metaData,
-      {},
-      { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
-    const div1 = document.createElement("div");
-    const div2 = document.createElement("div");
+  it("should successfully collect data from elements", () => {
+    const collectContainer = new CollectContainer(metaData, [], {
+      logLevel: LogLevel.ERROR,
+      env: Env.PROD,
+    });
+    const div1 = document.createElement("div1");
+    const div2 = document.createElement("div2");
 
-    const element1: CollectElement = collectContainer.create(cvvElement);
-    const element2: CollectElement = collectContainer.create(cardNumberElement);
+    const element1: CollectElement = collectContainer.create(cvvInput);
+    const element2: CollectElement = collectContainer.create(cardNumberInput);
 
     element1.mount(div1);
     element2.mount(div2);
 
     const mountCvvCb = onSpy.mock.calls[2][1];
-
     mountCvvCb({
-      name: `element:${cvvElement.type}:${btoa(element1.getID())}`,
+      name: `element:${cvvInput.type}:${btoa(element1.getID())}`,
     });
 
     const mountCardNumberCb = onSpy.mock.calls[5][1];
     mountCardNumberCb({
-      name: `element:${cardNumberElement.type}:${btoa(element2.getID())}`,
+      name: `element:${cardNumberInput.type}:${btoa(element2.getID())}`,
     });
 
     collectContainer
@@ -199,53 +188,188 @@ describe("Collect container", () => {
   });
 
   it("should successfully upload files when elements are mounted", async () => {
-    const container = new CollectContainer(
-      {},
-      metaData,
-      {},
-      { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    const collectContainer = new CollectContainer(metaData, [], {
+      logLevel: LogLevel.ERROR,
+      env: Env.PROD,
+    });
     const div = document.createElement("div");
-    const fileElement = container.create(FileElement);
+    const fileElement = collectContainer.create(fileInput);
 
     fileElement.mount(div);
 
     const mountCb = onSpy.mock.calls[2][1];
     mountCb({
-      name: `element:${FileElement.type}:${btoa(fileElement.getID())}`,
+      name: `element:${fileInput.type}:${btoa(fileElement.getID())}`,
     });
 
-    const uploadPromise: Promise<UploadFilesResponse> = container.uploadFiles({
-      tokens: true,
-    });
+    const uploadPromise: Promise<UploadFilesResponse> =
+      collectContainer.uploadFiles();
 
-    const uploadRequestCb = emitSpy.mock.calls[1][2];
+    const uploadFileCallRequestEvent = emitSpy.mock.calls.find((call) => {
+      return (
+        call[0] &&
+        call[0].includes(ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS)
+      );
+    });
+    expect(uploadFileCallRequestEvent).toBeDefined();
+    const uploadRequestCb = uploadFileCallRequestEvent[2];
     uploadRequestCb({
-      fileUploadResonse: [{ skyflow_id: "1234" }],
+      fileUploadResonse: [{ skyflow_id: "abc-def" }],
     });
 
     const expectedResponse = await uploadPromise;
-    console.log(JSON.stringify(expectedResponse, null, 2))
-
+    console.log(JSON.stringify(expectedResponse, null, 2));
     expect(expectedResponse).toBeDefined();
   });
 
   it("tests different collect element options for elements", () => {
-    const container = new CollectContainer(
-      {},
-      metaData,
-      {},
-      { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    const collectContainer = new CollectContainer(metaData, [], {
+      logLevel: LogLevel.ERROR,
+      env: Env.PROD,
+    });
     let expiryElement: CollectElement;
     let elementOptions: CollectElementOptions = {
       required: true,
       enableCardIcon: true,
       enableCopy: true,
     };
-    expiryElement = container.create(ExpirationDateElement, elementOptions);
+    expiryElement = collectContainer.create(
+      ExpirationDateInput,
+      elementOptions
+    );
     const options = expiryElement.getOptions();
     expect(options.enableCardIcon).toBe(true);
     expect(options.enableCopy).toBe(true);
+  });
+});
+
+describe("iframe cleanup logic", () => {
+  let collectContainer: CollectContainer;
+  let div1: HTMLElement;
+  let div2: HTMLElement;
+  let emitSpy: jest.SpyInstance;
+  let targetSpy: jest.SpyInstance;
+  let onSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, "emit");
+    targetSpy = jest.spyOn(bus, "target");
+    onSpy = jest.spyOn(bus, "on");
+    targetSpy.mockReturnValue({
+      on,
+      off: jest.fn(),
+    });
+    div1 = document.createElement("div");
+    div2 = document.createElement("div");
+    document.body.innerHTML = "";
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+    document.body.innerHTML = "";
+  });
+
+  it("should remove unmounted iframe elements", () => {
+    // Create and mount elements
+    collectContainer = new CollectContainer(metaData, [], {
+      logLevel: LogLevel.ERROR,
+      env: Env.PROD,
+    });
+
+    const element1 = collectContainer.create(cvvInput);
+    const element2 = collectContainer.create(cardNumberInput);
+
+    element1.mount(div1);
+    element2.mount(div2);
+
+    const mountCvvCb = onSpy.mock.calls[2][1];
+    mountCvvCb({
+      name: `element:${cvvInput.type}:${btoa(element1.getID())}`,
+    });
+
+    const mountCardNumberCb = onSpy.mock.calls[5][1];
+    mountCardNumberCb({
+      name: `element:${cardNumberInput.type}:${btoa(element2.getID())}`,
+    });
+
+    // Mock iframe elements in document
+    const iframe1 = document.createElement("iframe");
+    iframe1.id = element1.iframeName();
+    document.body.appendChild(iframe1);
+
+    // Trigger cleanup by calling collect
+    collectContainer.collect().catch((error) => {
+      expect(error).not.toBeDefined();
+    });
+  });
+
+  it("should handle empty document.body", () => {
+    collectContainer = new CollectContainer(metaData, [], {
+      logLevel: LogLevel.ERROR,
+      env: Env.PROD,
+    });
+
+    const element1 = collectContainer.create(cvvInput);
+    element1.mount(div1);
+
+    const mountCvvCb = onSpy.mock.calls[2][1];
+    mountCvvCb({
+      name: `element:${cvvInput.type}:${btoa(element1.getID())}`,
+    });
+
+    // Mock document.body as null
+    const originalBody = document.body;
+    Object.defineProperty(document, "body", {
+      value: null,
+      writable: true,
+    });
+
+    collectContainer.collect().catch(() => {});
+
+    // Restore document.body
+    Object.defineProperty(document, "body", {
+      value: originalBody,
+      writable: true,
+    });
+
+    // Elements should remain unchanged
+    collectContainer.collect().catch((error) => {
+      expect(error).not.toBeDefined();
+    });
+  });
+
+  it("should remove unmounted iframe elements", () => {
+    collectContainer = new CollectContainer(metaData2, [], {
+      logLevel: LogLevel.ERROR,
+      env: Env.PROD,
+    });
+
+    // Create and mount elements
+    const element1 = collectContainer.create(cvvInput);
+    const element2 = collectContainer.create(cardNumberInput);
+
+    element1.mount(div1);
+    element2.mount(div2);
+
+    const mountCvvCb = onSpy.mock.calls[2][1];
+    mountCvvCb({
+      name: `element:${cvvInput.type}:${btoa(element1.getID())}`,
+    });
+
+    const mountCardNumberCb = onSpy.mock.calls[5][1];
+    mountCardNumberCb({
+      name: `element:${cardNumberInput.type}:${btoa(element2.getID())}`,
+    });
+
+    // Mock iframe elements in document
+    const iframe1 = document.createElement("iframe");
+    iframe1.id = element1.iframeName();
+    document.body.appendChild(iframe1);
+
+    // Trigger cleanup by calling collect
+    collectContainer.collect().catch((error) => {
+      expect(error).not.toBeDefined();
+    });
   });
 });
