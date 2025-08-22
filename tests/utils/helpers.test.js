@@ -79,6 +79,8 @@ describe('bin data for for AMEX card number element type on CHANGE event', () =>
     expect(getReturnValue("02", ElementType.EXPIRATION_MONTH, false)).toBe(undefined)
     expect(getReturnValue("2025", ElementType.EXPIRATION_YEAR, false)).toBe(undefined)
     expect(getReturnValue("1234", ElementType.PIN, false)).toBe(undefined)
+    expect(getReturnValue('4111 1111 1111 1111', ElementType.CARD_NUMBER, true)).toBe('4111111111111111');
+    expect(getReturnValue('4111-1111-1111-1111', ElementType.CARD_NUMBER, true)).toBe('4111111111111111');
   })
   test("in DEV return data for all elements", () => {
     expect(getReturnValue("3782 822463 10005", ElementType.CARD_NUMBER, true)).toBe("378282246310005")

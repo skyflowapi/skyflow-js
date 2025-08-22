@@ -70,7 +70,7 @@ export const appendMonthTwoDigitYears = (value: string) => {
 export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {
   if (typeof value === 'string') {
     if (element === ElementType.CARD_NUMBER) {
-      value = value && value.replace(/\s/g, '');
+      value = value && value.replace(/[\s-]/g, '');
       if (!doesReturnValue) {
         const cardType = detectCardType(value);
         const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
