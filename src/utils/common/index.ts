@@ -311,8 +311,8 @@ export interface ICollectOptions {
 }
 
 export interface UploadFilesResponse {
-  fileUploadResponse?: { skyflow_id: string }[],
-  errorResponse?: { error: ErrorRecord }[],
+  fileUploadResponse?: Record<string, any>,
+  errorResponse?: Record<string, any>,
 }
 
 export interface RevealResponse {

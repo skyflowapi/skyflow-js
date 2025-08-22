@@ -771,13 +771,16 @@ class SkyflowFrameController {
     Promise.allSettled(
       promises,
     ).then((resultSet) => {
-      const fileUploadResponse: { skyflow_id: string }[] = [];
-      const errorResponse: { error: ErrorRecord }[] = [];
+      const fileUploadResponse: Record<string, any>[] = [];
+      const errorResponse: Record<string, any>[] = [];
       resultSet.forEach((result) => {
         if (result.status === 'fulfilled') {
           if (result.value !== undefined && result.value !== null) {
-            const parsedResultValue = JSON.parse(result.value as string);
-            fileUploadResponse.push({ skyflow_id: parsedResultValue.skyflow_id });
+            if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
+              errorResponse.push(result.value);
+            } else {
+              fileUploadResponse.push(result.value);
+            }
           }
         } else if (result.status === 'rejected') {
           errorResponse.push(result.reason);
