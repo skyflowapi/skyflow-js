@@ -15,19 +15,23 @@ export const iframeDefaultAttributes = {
   allow: 'clipboard-read; clipboard-write',
 };
 
-export const setAttributes = (element, attributes) => {
-  Object.keys(attributes).forEach((key) => {
-    if (Object.prototype.hasOwnProperty.call(attributes, key)) {
-      const value = attributes[key];
+function domReady(callback) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', callback);
+  } else {
+    callback();
+  }
+}
 
-      if (value === null || value === undefined) {
-        element.removeAttribute(key);
-      } else {
-        element.setAttribute(key, value);
-      }
-    }
+export function setAttributes(element, attributes = {}) {
+  if (!document || !element) return;
+  
+  domReady(() => {
+    Object.keys(attributes).forEach((key) => {
+      element.setAttribute(key, attributes[key]);
+    });
   });
-};
+}
 
 export default (options = {}) => {
   const iframe = document.createElement('iframe');

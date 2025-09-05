@@ -24,6 +24,7 @@ import logs from '../../../utils/logs';
 import { Context, MessageType } from '../../../utils/common';
 import {
   constructMaskTranslation,
+  domReady,
   getAtobValue, getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
 
@@ -66,13 +67,15 @@ class RevealFrame {
   #skyflowContainerId: string = '';
 
   static init() {
-    const url = window.location?.href;
+    domReady(() => {
+      const url = window.location?.href;
     const configIndex = url.indexOf('?');
     const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
     const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
     const skyflowContainerId = parsedRecord.clientJSON.metaData.uuid;
     RevealFrame.revealFrame = new RevealFrame(parsedRecord.record,
       parsedRecord.context, skyflowContainerId);
+    })
   }
 
   constructor(record, context, id) {
@@ -267,7 +270,8 @@ class RevealFrame {
   }
 
   private addFileRender(responseUrl, ext) {
-    let tag = '';
+    domReady(() => {
+      let tag = '';
     if (typeof ext === 'string' && ext.includes('image')) {
       tag = 'img';
     } else {
@@ -304,6 +308,7 @@ class RevealFrame {
     } else {
       this.#elementContainer.appendChild(fileElement);
     }
+    })
   }
 
   private setRevealError(errorText: string) {

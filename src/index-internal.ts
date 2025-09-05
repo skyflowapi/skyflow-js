@@ -16,7 +16,7 @@ import {
   parameterizedString,
   getElementName,
 } from './utils/logs-helper';
-import { getAtobValue, getValueFromName } from './utils/helpers';
+import { domReady, getAtobValue, getValueFromName } from './utils/helpers';
 import FrameElementInit from './core/internal/frame-element-init';
 
 (function init(root: any) {
@@ -24,7 +24,8 @@ import FrameElementInit from './core/internal/frame-element-init';
     const frameName = root.name;
     const frameType = getValueFromName(frameName, 0);
     const frameId = getValueFromName(frameName, 1);
-    if (frameType === SKYFLOW_FRAME_CONTROLLER) {
+    domReady(()=> {
+      if (frameType === SKYFLOW_FRAME_CONTROLLER) {
       SkyflowFrameController.init(frameId);
     } else if (frameType === FRAME_ELEMENT) {
       const logLevel = getValueFromName(frameName, 4) || LogLevel.ERROR;
@@ -52,6 +53,7 @@ import FrameElementInit from './core/internal/frame-element-init';
       );
       RevealFrame.init();
     }
+    })
   } catch (e) {
     throw new Error(parameterizedString(logs.errorLogs.INVALID_IFRAME));
   }
