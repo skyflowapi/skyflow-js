@@ -49,6 +49,7 @@ import {
   GetByIdResponse,
   IDeleteResponseType,
   IDeleteRecordInput,
+  IRenderResponseType,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
@@ -458,7 +459,7 @@ class SkyflowFrameController {
     });
   }
 
-  renderFile(data: IRevealRecord, iframeName: string): Promise<any> {
+  renderFile(data: IRevealRecord, iframeName: string): Promise<IRenderResponseType> {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowID(data, this.#client)
