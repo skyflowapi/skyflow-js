@@ -49,7 +49,6 @@ import {
   GetByIdResponse,
   IDeleteResponseType,
   IDeleteRecordInput,
-  IRenderResponseType,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
@@ -459,7 +458,7 @@ class SkyflowFrameController {
     });
   }
 
-  renderFile(data: IRevealRecord, iframeName: string): Promise<IRenderResponseType> {
+  renderFile(data: IRevealRecord, iframeName: string): Promise<any> {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowID(data, this.#client)
@@ -771,15 +770,21 @@ class SkyflowFrameController {
     Promise.allSettled(
       promises,
     ).then((resultSet) => {
-      const fileUploadResponse: Record<string, any>[] = [];
-      const errorResponse: Record<string, any>[] = [];
+      const fileUploadResponse: { skyflow_id: string }[] = [];
+      const errorResponse: { error: ErrorRecord }[] = [];
       resultSet.forEach((result) => {
         if (result.status === 'fulfilled') {
           if (result.value !== undefined && result.value !== null) {
-            if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
-              errorResponse.push(result.value);
-            } else {
-              fileUploadResponse.push(result.value);
+            try {
+              const parsedResultValue = JSON.parse(result.value as string);
+
+              if ('error' in parsedResultValue) {
+                errorResponse.push({ error: parsedResultValue.error as ErrorRecord });
+              } else if ('skyflow_id' in parsedResultValue) {
+                fileUploadResponse.push({ skyflow_id: parsedResultValue.skyflow_id });
+              }
+            } catch (e) {
+              errorResponse.push({ error: e as ErrorRecord });
             }
           }
         } else if (result.status === 'rejected') {
