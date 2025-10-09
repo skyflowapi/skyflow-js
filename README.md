@@ -834,7 +834,7 @@ const cardMetadata = {
 
 ### Samples
 
-- [Card brand choice](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/card-branch-choice.html):
+- [Card brand choice](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/card-brand-choice.html):
 This sample illustrates how to use Bin Lookup API and display the available card schemes.
 
 ## Using Skyflow Elements to update data
