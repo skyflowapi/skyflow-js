@@ -134,6 +134,7 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 - [**Insert data into the vault**](#insert-data-into-the-vault)
 - [**Using Skyflow Elements to collect data**](#using-skyflow-elements-to-collect-data)
 - [**Using Skyflow Elements to update data**](#using-skyflow-elements-to-update-data)
+- [**Bin lookup**](#bin-lookup)
 - [**Using validations on Collect Elements**](#validations)
 - [**Event Listener on Collect Elements**](#event-listener-on-collect-elements)
 - [**UI Error for Collect Elements**](#ui-error-for-collect-elements)
@@ -745,6 +746,97 @@ cvvElement.mount('#cvv'); //Assumes there is a div with id='#cvv' in the webpage
   ]
 }
 ```
+
+## Bin lookup
+
+Skyflow supports BIN (Bank Identification Number) lookup to help identify co-badged cards and enable card network selection.
+
+**What is BIN Lookup?**
+A Bank Identification Number (BIN) represents the first 8 digits of a card number and identifies the issuing bank, card scheme, and country.
+For co-badged cards, merchants are required to offer consumers a choice of which network to process the payment through.
+You can use Skyflow’s BIN Lookup API to detect such cards and provide the appropriate options to users.
+
+### Example: Calling the BIN Lookup API
+```javascript
+// Function to call Skyflow's BIN Lookup API
+const binLookup = (bin) => {
+  const myHeaders = new Headers();
+  myHeaders.append("X-skyflow-authorization", "<BEARER_TOKEN>"); // TODO: replace bearer token
+  myHeaders.append("Content-Type", "application/json");
+
+  const raw = JSON.stringify({
+    "BIN": bin
+  });
+
+  const requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: raw,
+    redirect: "follow"
+  };
+
+  // TODO: replace <VAULT_URL> with your Skyflow vault URL
+  return fetch(`${VAULT_URL}/v1/card_lookup`, requestOptions);
+};
+```
+
+**Sample Response :**
+```javascript
+{
+  "cards_data": [
+    {
+      "BIN": "54284800",
+      "issuer_name": "CREDIT MUTUEL ARKEA",
+      "country_code": "FR",
+      "currency": "",
+      "card_type": "Credit",
+      "card_category": "",
+      "card_scheme": "CARTES BANCAIRES"
+    },
+    {
+      "BIN": "54284800",
+      "issuer_name": "Credit Mutuel Arkea",
+      "country_code": "FR",
+      "currency": "",
+      "card_type": "Credit",
+      "card_category": "Mastercard Standard",
+      "card_scheme": "MASTERCARD"
+    }
+  ]
+}
+```
+
+### Updating the Card Element with Network Schemes
+```javascript
+const options = {
+  required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
+  enableCardIcon: true, // Optional, indicates whether a card icon should be enabled (only applicable for CARD_NUMBER ElementType).
+  enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false').
+  format: String,       // Optional, format for the element 
+  translation: {},      // Optional, indicates the allowed data type value for format. 
+  cardMetadata: {},     // Optional, metadata to control card number element behavior. (only applicable for CARD_NUMBER ElementType).
+  masking: true,        // Optional, indicates whether the input should be masked. Defaults to 'false'.
+  maskingChar: '*',     // Optional, character used for masking input when masking is enabled. Defaults to '*'.
+};
+```
+
+`cardMetadata`: An object of metadata keys to control card number element behavior. It supports an optional key called `scheme`, which accepts an array of Skyflow accept card types based on which SDK will display card brand choice dropdown in the card number element. `Skyflow.CardType`   is an enum with all skyflow supported card schemes.
+
+```javascript
+import Skyflow from 'skyflow-js'
+
+const cardMetadata = { 
+  scheme: Skyflow.CardType [] // Optional, array of skyflow supported card types. 
+}
+```
+
+- By default, SDK will populate its own auto-detected card scheme.
+
+### Samples
+
+- [Card brand choice](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/card-branch-choice.html):
+This sample illustrates how to use Bin Lookup API and display the available card schemes.
+
 ## Using Skyflow Elements to update data
 
 You can update the data in a vault with Skyflow Elements. Use the following steps to securely update data. 
