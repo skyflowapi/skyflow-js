@@ -477,4 +477,5 @@ class CollectContainer extends Container {
     });
   };
 }
+
 export default CollectContainer;
