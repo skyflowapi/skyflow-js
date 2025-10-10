@@ -213,6 +213,7 @@ export default class FrameElement {
         this.updateStyleClasses(state);
       }
     });
+    
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
         this.focusChange(false);
