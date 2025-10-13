@@ -55,7 +55,6 @@ export default class FrameElementInit {
   #client!: Client;
 
   constructor() {
-    // this.createIframeElement(frameName, label, skyflowID, isRequired);
     this.context = { logLevel: LogLevel.INFO, env: Env.PROD }; // client level
     this.containerId = '';
     this.#domForm = document.createElement('form');
@@ -101,7 +100,6 @@ export default class FrameElementInit {
       }
     });
 
-    // if (event.origin === this.clientMetaData.clientDomain) {
     if (event.data && event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
          + this.containerId) {
       if (event.data.data && event.data.data.type === COLLECT_TYPES.COLLECT) {
