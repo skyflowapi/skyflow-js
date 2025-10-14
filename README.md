@@ -747,7 +747,7 @@ cvvElement.mount('#cvv'); //Assumes there is a div with id='#cvv' in the webpage
 }
 ```
 
-## Bin lookup
+## BIN Lookup
 
 Skyflow supports BIN (Bank Identification Number) lookup to help identify co-badged cards and enable card network selection.
 
