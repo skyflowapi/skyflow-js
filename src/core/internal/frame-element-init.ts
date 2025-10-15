@@ -31,7 +31,6 @@ export default class FrameElementInit {
   group: any;
 
   constructor() {
-    // this.createIframeElement(frameName, label, skyflowID, isRequired);
     this.context = { logLevel: LogLevel.ERROR, env: Env.PROD }; // client level
     this.containerId = '';
     this.#domForm = document.createElement('form');
