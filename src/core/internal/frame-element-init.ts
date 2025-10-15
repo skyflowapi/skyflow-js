@@ -299,7 +299,6 @@ export default class FrameElementInit {
       }
     });
 
-    // return for error
     if (errorMessage.length > 0) {
       // eslint-disable-next-line max-len
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
