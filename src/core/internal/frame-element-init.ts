@@ -391,8 +391,6 @@ export default class FrameElementInit {
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
       const insertPromiseSet: Promise<any>[] = [];
 
-      // const clientId = client.toJSON()?.metaData?.uuid || '';
-      // getAccessToken(clientId).then((authToken) => {
       if (finalInsertRequest.length !== 0) {
         insertPromiseSet.push(
           insertDataInCollect(finalInsertRequest,
