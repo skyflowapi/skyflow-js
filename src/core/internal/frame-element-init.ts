@@ -55,7 +55,7 @@ export default class FrameElementInit {
   #client!: Client;
 
   constructor() {
-    this.context = { logLevel: LogLevel.INFO, env: Env.PROD }; // client level
+    this.context = { logLevel: LogLevel.INFO, env: Env.PROD };
     this.containerId = '';
     this.#domForm = document.createElement('form');
     this.#domForm.action = '#';
@@ -139,7 +139,6 @@ export default class FrameElementInit {
       };
       this.#client = Client.fromJSON(data.client) as any;
     }
-    // }
   };
 
   private parallelUploadFiles = (options, config) => new Promise((rootResolve, rootReject) => {
