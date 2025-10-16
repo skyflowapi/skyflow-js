@@ -464,11 +464,14 @@ export default class FrameElementInit {
 
   // eslint-disable-next-line consistent-return
   private multipleUploadFiles =
-  (fileElement: IFrameFormElement, clientConfig, metaData) => new Promise((rootResolve, rootReject) => {
+  (fileElement: IFrameFormElement,
+    clientConfig, metaData) => new Promise((rootResolve, rootReject) => {
     this.#client = new Client(clientConfig, {});
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
 
-    const { state, tableName, onFocusChange, preserveFileName } = fileElement;
+    const {
+      state, tableName, onFocusChange, preserveFileName,
+    } = fileElement;
     if (state.isRequired) {
       onFocusChange(false);
     }
