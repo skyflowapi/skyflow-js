@@ -8,6 +8,7 @@ import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import { ContainerType } from '../../../skyflow';
 import {
+  ContainerOptions,
   Context, MessageType,
   RedactionType, RevealResponse,
 } from '../../../utils/common';
@@ -22,6 +23,7 @@ import {
 import Container from '../common/container';
 import RevealElement from './reveal-element';
 import properties from '../../../properties';
+import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
 
 export interface IRevealElementInput {
   token?: string;
@@ -50,7 +52,7 @@ class RevealContainer extends Container {
 
   #mountedRecords: { id: string }[] = [];
 
-  #metaData: any;
+  #metaData: Metadata;
 
   #containerId: string;
 
@@ -62,15 +64,20 @@ class RevealContainer extends Container {
 
   #context: Context;
 
-  #skyflowElements: any;
+  #skyflowElements: Array<SkyflowElementProps>;
 
-  #isMounted:any;
+  #isMounted: boolean = false;
 
   type:string = ContainerType.REVEAL;
 
   #isSkyflowFrameReady: boolean = false;
 
-  constructor(metaData, skyflowElements, context, options = {}) {
+  constructor(
+    metaData: Metadata,
+    skyflowElements: Array<SkyflowElementProps>,
+    context: Context,
+    options?: ContainerOptions,
+  ) {
     super();
     this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
     this.#metaData = {

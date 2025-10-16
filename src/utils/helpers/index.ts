@@ -33,7 +33,7 @@ export function removeSpaces(inputString:string) {
   return inputString.trim().replace(/[\s-]/g, '');
 }
 
-export function formatVaultURL(vaultURL) {
+export function formatVaultURL(vaultURL?: string) {
   if (typeof vaultURL !== 'string') return vaultURL;
   return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
 }
@@ -42,7 +42,7 @@ export function checkIfDuplicateExists(arr) {
   return new Set(arr).size !== arr.length;
 }
 
-export const appendZeroToOne = (value) => {
+export const appendZeroToOne = (value: string) => {
   if (value.length === 1 && Number(value) === 1) {
     return {
       isAppended: true,
@@ -52,14 +52,14 @@ export const appendZeroToOne = (value) => {
   return { isAppended: false, value };
 };
 
-export const appendMonthFourDigitYears = (value) => {
+export const appendMonthFourDigitYears = (value: string) => {
   if (value.length === 6 && Number(value.charAt(5)) === 1) {
     return { isAppended: true, value: `${value.substring(0, 5)}0${value.charAt(5)}` };
   }
   return { isAppended: false, value };
 };
 
-export const appendMonthTwoDigitYears = (value) => {
+export const appendMonthTwoDigitYears = (value: string) => {
   const lastChar = (value.length > 0 && value.charAt(value.length - 1)) || '';
   if (value.length === 4 && Number(lastChar) === 1) {
     return { isAppended: true, value: `${value.substring(0, 3)}0${lastChar}` };
@@ -223,7 +223,7 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
   return true;
 };
 
-export const vaildateFileName = (name) => ALLOWED_NAME_FOR_FILE.test(name);
+export const vaildateFileName = (name: string) => ALLOWED_NAME_FOR_FILE.test(name);
 
 export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
   `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`

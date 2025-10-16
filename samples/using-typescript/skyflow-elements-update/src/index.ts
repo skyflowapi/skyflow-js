@@ -2,7 +2,7 @@
   Copyright (c) 2025 Skyflow, Inc.
 */
 import Skyflow, {
-  CollectContainer, 
+  CollectContainer,
   CollectElement,
   CollectElementInput,
   CollectElementOptions,
@@ -48,11 +48,13 @@ try {
       logLevel: Skyflow.LogLevel.ERROR,
       env: Skyflow.Env.PROD,
     },
-  }
+  };
   const skyflowClient: Skyflow = Skyflow.init(config);
 
   // Create collect Container.
-  const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT) as CollectContainer;
+  const collectContainer = skyflowClient.container(
+    Skyflow.ContainerType.COLLECT
+  ) as CollectContainer;
 
   // Custom styles for collect elements.
   const collectStylesOptions = {
@@ -128,7 +130,7 @@ try {
     label: "Cvv",
     placeholder: "cvv",
     type: Skyflow.ElementType.CVV,
-  }
+  };
   const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
   const expiryDateInput: CollectElementInput = {
@@ -138,8 +140,9 @@ try {
     label: "Expiry Date",
     placeholder: "MM/YYYY",
     type: Skyflow.ElementType.EXPIRATION_DATE,
-  }
-  const expiryDateElement: CollectElement = collectContainer.create(expiryDateInput);
+  };
+  const expiryDateElement: CollectElement =
+    collectContainer.create(expiryDateInput);
 
   const cardholderNameInput: CollectElementInput = {
     table: "pii_fields",
@@ -148,8 +151,9 @@ try {
     label: "Card Holder Name",
     placeholder: "cardholder name",
     type: Skyflow.ElementType.CARDHOLDER_NAME,
-  }
-  const cardHolderNameElement: CollectElement = collectContainer.create(cardholderNameInput);
+  };
+  const cardHolderNameElement: CollectElement =
+    collectContainer.create(cardholderNameInput);
 
   // Mount the elements.
   cardNumberElement.mount("#collectCardNumber");
@@ -184,11 +188,15 @@ try {
   cardNumberElement.on(Skyflow.EventName.CHANGE, (state: ElementState) => {
     if (state.isValid) {
       // update cvv element validation rule.
-      if (findCvvLength((state.value) as string) === 3) {
-        const updateOptions: CollectElementUpdateOptions = { validations: [length3Rule] };
+      if (findCvvLength(state.value as string) === 3) {
+        const updateOptions: CollectElementUpdateOptions = {
+          validations: [length3Rule],
+        };
         cvvElement.update(updateOptions);
       } else {
-        const updateOptions: CollectElementUpdateOptions = { validations: [length4Rule] };
+        const updateOptions: CollectElementUpdateOptions = {
+          validations: [length4Rule],
+        };
         cvvElement.update(updateOptions);
       }
     }
@@ -225,175 +233,194 @@ try {
   }
 
   // Collect all elements data.
-  const collectButton = document.getElementById("collectPCIData") as HTMLButtonElement;
+  const collectButton = document.getElementById(
+    "collectPCIData"
+  ) as HTMLButtonElement;
   if (collectButton) {
     collectButton.addEventListener("click", () => {
-      const collectResponse: Promise<CollectResponse> = collectContainer.collect();
+      const collectResponse: Promise<CollectResponse> =
+        collectContainer.collect();
       collectResponse
         .then((response: CollectResponse) => {
           console.log(response);
           collectResponseData = response;
-          const responseElement = document.getElementById('collectResponse') as HTMLElement;
+          const responseElement = document.getElementById(
+            "collectResponse"
+          ) as HTMLElement;
           if (responseElement) {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
+
+          revealView.style.visibility = "visible";
+
+          const revealStyleOptions = {
+            inputStyles: {
+              base: {
+                border: "1px solid #eae8ee",
+                padding: "10px 16px",
+                borderRadius: "4px",
+                color: "#1d1d1d",
+                marginTop: "4px",
+                fontFamily: '"Roboto", sans-serif',
+              },
+              global: {
+                "@import":
+                  'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+              },
+            } as InputStyles,
+            labelStyles: {
+              base: {
+                fontSize: "16px",
+                fontWeight: "bold",
+                fontFamily: '"Roboto", sans-serif',
+              },
+              global: {
+                "@import":
+                  'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+              },
+            } as LabelStyles,
+            errorTextStyles: {
+              base: {
+                color: "#f44336",
+                paddingLeft: "20px",
+                fontFamily: '"Roboto", sans-serif',
+              },
+              global: {
+                "@import":
+                  'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+              },
+            } as ErrorTextStyles,
+          };
+
+          // Create Reveal Elements With Tokens.
+          const fieldsTokenData = collectResponseData.records![0].fields;
+          const revealContainer = skyflowClient.container(
+            Skyflow.ContainerType.REVEAL
+          ) as RevealContainer;
+
+          const revealCardNumberInput: RevealElementInput = {
+            token: fieldsTokenData.card_number,
+            label: "Card Number",
+            ...revealStyleOptions,
+          };
+          const revealCardNumberElement: RevealElement = revealContainer.create(
+            revealCardNumberInput
+          );
+          revealCardNumberElement.mount("#revealCardNumber");
+
+          const revealCardCvvInput: RevealElementInput = {
+            token: fieldsTokenData.cvv,
+            label: "CVV",
+            ...revealStyleOptions,
+            altText: "###",
+          };
+          const revealCardCvvElement: RevealElement =
+            revealContainer.create(revealCardCvvInput);
+          revealCardCvvElement.mount("#revealCvv");
+
+          const revealCardExpiryInput: RevealElementInput = {
+            token: fieldsTokenData.expiration_date,
+            label: "Card Expiry Date",
+            ...revealStyleOptions,
+          };
+          const revealCardExpiryElement: RevealElement = revealContainer.create(
+            revealCardExpiryInput
+          );
+          revealCardExpiryElement.mount("#revealExpiryDate");
+
+          const revealCardholderNameInput: RevealElementInput = {
+            token: fieldsTokenData.name,
+            label: "Card Holder Name",
+            ...revealStyleOptions,
+          };
+          const revealCardholderNameElement: RevealElement =
+            revealContainer.create(revealCardholderNameInput);
+          revealCardholderNameElement.mount("#revealCardholderName");
+
+          const revealButton = document.getElementById(
+            "revealPCIData"
+          ) as HTMLButtonElement;
+
+          // update Reveal elements' properties
+          const updateRevealElementsButton = document.getElementById(
+            "updateRevealElements"
+          ) as HTMLButtonElement;
+          if (updateRevealElementsButton) {
+            updateRevealElementsButton.addEventListener("click", () => {
+              // update label,inputStyles on cardholderName,
+              revealCardholderNameElement.update({
+                label: "CARDHOLDER NAME",
+                inputStyles: {
+                  base: {
+                    color: "#aa11aa",
+                  },
+                },
+              } as RevealElementInput);
+
+              // update label,labelSyles on card number
+              revealCardNumberElement.update({
+                label: "CARD NUMBER",
+                labelStyles: {
+                  base: {
+                    borderWidth: "5px",
+                  },
+                },
+              } as RevealElementInput);
+
+              // update redaction,inputStyles on expiry date
+              revealCardExpiryElement.update({
+                redaction: Skyflow.RedactionType.REDACTED,
+                inputStyles: {
+                  base: {
+                    backgroundColor: "#000",
+                    color: "#fff",
+                  },
+                },
+              } as RevealElementInput);
+
+              // update altText,token,inputStyles,errorTextStyles on cvv
+              revealCardCvvElement.update({
+                altText: "XXXX-XX",
+                token: "new-random-roken",
+                inputStyles: {
+                  base: {
+                    color: "#fff",
+                    backgroundColor: "#000",
+                    borderColor: "#f00",
+                    borderWidth: "5px",
+                  },
+                },
+                errorTextStyles: {
+                  base: {
+                    backgroundColor: "#000",
+                    border: "1px #f00 solid",
+                  },
+                },
+              } as RevealElementInput);
+            });
+          }
+
+          if (revealButton) {
+            revealButton.addEventListener("click", () => {
+              const revealResponse: Promise<RevealResponse> =
+                revealContainer.reveal();
+              revealResponse
+                .then((res: RevealResponse) => {
+                  console.log(res);
+                })
+                .catch((err: RevealResponse) => {
+                  console.log(err);
+                });
+            });
+          }
         })
         .catch((err: CollectResponse) => {
-          const errorElement = document.getElementById('collectResponse') as HTMLElement;
-          if (errorElement){
+          const errorElement = document.getElementById(
+            "collectResponse"
+          ) as HTMLElement;
+          if (errorElement) {
             errorElement.innerHTML = JSON.stringify(err, null, 2);
           }
-          console.log(err);
-        });
-    });
-  }
-
-  revealView!.style.visibility = "visible";
-
-  const revealStyleOptions = {
-    inputStyles: {
-      base: {
-        border: "1px solid #eae8ee",
-        padding: "10px 16px",
-        borderRadius: "4px",
-        color: "#1d1d1d",
-        marginTop: "4px",
-        fontFamily: '"Roboto", sans-serif',
-      },
-      global: {
-        "@import":
-          'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
-      },
-    } as InputStyles,
-    labelStyles: {
-      base: {
-        fontSize: "16px",
-        fontWeight: "bold",
-        fontFamily: '"Roboto", sans-serif',
-      },
-      global: {
-        "@import":
-          'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
-      },
-    } as LabelStyles,
-    errorTextStyles: {
-      base: {
-        color: "#f44336",
-        paddingLeft: "20px",
-        fontFamily: '"Roboto", sans-serif',
-      },
-      global: {
-        "@import":
-          'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
-      },
-    } as ErrorTextStyles,
-  };
-
-  // Create Reveal Elements With Tokens.
-  const fieldsTokenData = collectResponseData.records![0].fields;
-  const revealContainer = skyflowClient.container(Skyflow.ContainerType.REVEAL) as RevealContainer;
-  
-  const revealCardNumberInput: RevealElementInput = {
-    token: fieldsTokenData.card_number,
-    label: "Card Number",
-    ...revealStyleOptions,
-  };
-  const revealCardNumberElement: RevealElement = revealContainer.create(revealCardNumberInput);
-  revealCardNumberElement.mount("#revealCardNumber");
-
-  const revealCardCvvInput: RevealElementInput = {
-    token: fieldsTokenData.cvv,
-    label: "CVV",
-    ...revealStyleOptions,
-    altText: "###",
-  };
-  const revealCardCvvElement: RevealElement = revealContainer.create(revealCardCvvInput);
-  revealCardCvvElement.mount("#revealCvv");
-
-  const revealCardExpiryInput: RevealElementInput = {
-    token: fieldsTokenData.expiration_date,
-    label: "Card Expiry Date",
-    ...revealStyleOptions,
-  };
-  const revealCardExpiryElement: RevealElement = revealContainer.create(revealCardExpiryInput);
-  revealCardExpiryElement.mount("#revealExpiryDate");
-
-  const revealCardholderNameInput: RevealElementInput = {
-    token: fieldsTokenData.name,
-    label: "Card Holder Name",
-    ...revealStyleOptions,
-  };
-  const revealCardholderNameElement: RevealElement = revealContainer.create(revealCardholderNameInput);
-  revealCardholderNameElement.mount("#revealCardholderName");
-
-  const revealButton = document.getElementById("revealPCIData") as HTMLButtonElement;
-
-  // update Reveal elements' properties
-  const updateRevealElementsButton = document.getElementById(
-    "updateRevealElements"
-  ) as HTMLButtonElement;
-  if (updateRevealElementsButton) {
-    updateRevealElementsButton.addEventListener("click", () => {
-      // update label,inputStyles on cardholderName,
-      revealCardholderNameElement.update({
-        label: "CARDHOLDER NAME",
-        inputStyles: {
-          base: {
-            color: "#aa11aa",
-          },
-        },
-      } as RevealElementInput);
-
-      // update label,labelSyles on card number
-      revealCardNumberElement.update({
-        label: "CARD NUMBER",
-        labelStyles: {
-          base: {
-            borderWidth: "5px",
-          },
-        },
-      } as RevealElementInput);
-
-      // update redaction,inputStyles on expiry date
-      revealCardExpiryElement.update({
-        redaction: Skyflow.RedactionType.REDACTED,
-        inputStyles: {
-          base: {
-            backgroundColor: "#000",
-            color: "#fff",
-          },
-        },
-      } as RevealElementInput);
-
-      // update altText,token,inputStyles,errorTextStyles on cvv
-      revealCardCvvElement.update({
-        altText: "XXXX-XX",
-        token: "new-random-roken",
-        inputStyles: {
-          base: {
-            color: "#fff",
-            backgroundColor: "#000",
-            borderColor: "#f00",
-            borderWidth: "5px",
-          },
-        },
-        errorTextStyles: {
-          base: {
-            backgroundColor: "#000",
-            border: "1px #f00 solid",
-          },
-        },
-      } as RevealElementInput);
-    });
-  }
-
-  if (revealButton) {
-    revealButton.addEventListener("click", () => {
-      const revealResponse: Promise<RevealResponse> = revealContainer.reveal();
-        revealResponse.then((res: RevealResponse) => {
-          console.log(res);
-        })
-        .catch((err: RevealResponse) => {
           console.log(err);
         });
     });

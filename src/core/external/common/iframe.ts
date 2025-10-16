@@ -9,17 +9,19 @@ import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { updateMetricObjectValue } from '../../../metrics/index';
 import { METRIC_TYPES } from '../../constants';
+import { LogLevel } from '../../../index-node';
+import { Metadata } from '../../internal/internal-types';
 
 export default class IFrame {
   name: string;
 
-  metadata: any;
+  metadata: Metadata;
 
   iframe: HTMLIFrameElement;
 
   container?: Element;
 
-  constructor(name, metadata, containerId, logLevel) {
+  constructor(name: string, metadata: Metadata, containerId: string, logLevel: LogLevel) {
     const clientDomain = metadata.clientDomain || '';
     this.name = `${name}:${containerId}:${logLevel}:${btoa(clientDomain)}`;
     this.metadata = metadata;
@@ -29,7 +31,7 @@ export default class IFrame {
     });
   }
 
-  mount = (domElement, elementId?: string, data?: any) => {
+  mount = (domElement: HTMLElement | string, elementId?: string, data?: any) => {
     this.unmount();
     try {
       if (typeof domElement === 'string') {
