@@ -26,11 +26,12 @@ export default class IFrame {
     this.iframe = iframer({
       name: this.name,
       referrer: clientDomain,
+      title: name.match(/^element:([^:]+):/)?.[1] ?? name,
     });
   }
 
   mount = (domElement, elementId?: string, data?: any) => {
-    this.unmount();
+    // this.unmount();
     try {
       if (typeof domElement === 'string') {
         this.container = document.querySelector(domElement) || undefined;

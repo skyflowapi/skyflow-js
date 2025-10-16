@@ -373,7 +373,7 @@ export const formatOptions = (elementType, options, logLevel) => {
       break;
     }
 
-    case ELEMENTS.FILE_INPUT.name: {
+    case ELEMENTS.FILE_INPUT.name || ELEMENTS.MULTI_FILE_INPUT.name: {
       if (!Object.prototype.hasOwnProperty.call(formattedOptions, 'preserveFileName')) {
         formattedOptions = { ...formattedOptions, preserveFileName: true };
       }
@@ -395,7 +395,7 @@ export const formatOptions = (elementType, options, logLevel) => {
   if (Object.prototype.hasOwnProperty.call(formattedOptions, 'preserveFileName') && !validateBooleanOptions(formattedOptions.preserveFileName)) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['preserveFileName'], true);
   }
-  if (elementType === ELEMENTS.FILE_INPUT.name) {
+  if (elementType === ELEMENTS.FILE_INPUT.name || elementType === ELEMENTS.MULTI_FILE_INPUT.name) {
     if (options.allowedFileType) {
       if (!Array.isArray(options.allowedFileType)) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALLOWED_OPTIONS, [], true);
