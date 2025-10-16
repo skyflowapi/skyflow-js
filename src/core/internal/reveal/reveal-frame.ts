@@ -15,17 +15,25 @@ import {
   RENDER_ELEMENT_IMAGE_STYLES,
   DEFAULT_FILE_RENDER_ERROR,
   ELEMENT_EVENTS_TO_CLIENT,
+  REVEAL_TYPES,
 } from '../../constants';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import {
   printLog, parameterizedString,
 } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
-import { Context, MessageType } from '../../../utils/common';
+import {
+  Context, IRenderResponseType, IRevealRecord, MessageType,
+} from '../../../utils/common';
 import {
   constructMaskTranslation,
-  getAtobValue, getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
+  formatRevealElementOptions,
+  getAtobValue,
+  getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
+import { formatForRenderClient, getFileURLFromVaultBySkyflowIDComposable } from '../../../core-utils/reveal';
+import Client from '../../../client';
+import properties from '../../../properties';
 
 const { getType } = require('mime');
 
@@ -65,6 +73,8 @@ class RevealFrame {
 
   #skyflowContainerId: string = '';
 
+  #client!: Client;
+
   static init() {
     const url = window.location?.href;
     const configIndex = url.indexOf('?');
@@ -75,9 +85,9 @@ class RevealFrame {
       parsedRecord.context, skyflowContainerId);
   }
 
-  constructor(record, context, id) {
+  constructor(record, context, id, rootDiv?) {
     this.#skyflowContainerId = id;
-    this.#name = window.name;
+    this.#name = rootDiv ? record?.name : window.name;
     this.#containerId = getValueFromName(this.#name, 2);
     const encodedClientDomain = getValueFromName(this.#name, 4);
     const clientDomain = getAtobValue(encodedClientDomain);
@@ -91,14 +101,14 @@ class RevealFrame {
     getCssClassesFromJss(REVEAL_ELEMENT_DIV_STYLE, 'div');
 
     this.#labelElement = document.createElement('span');
-    this.#labelElement.className = `SkyflowElement-label-${STYLE_TYPE.BASE}`;
+    this.#labelElement.className = `SkyflowElement-${this.#name}-label-${STYLE_TYPE.BASE}`;
 
     this.#dataElememt = document.createElement('span');
-    this.#dataElememt.className = `SkyflowElement-content-${STYLE_TYPE.BASE}`;
+    this.#dataElememt.className = `SkyflowElement-${this.#name}-content-${STYLE_TYPE.BASE}`;
     this.#dataElememt.id = this.#name;
 
     this.#errorElement = document.createElement('span');
-    this.#errorElement.className = `SkyflowElement-error-${STYLE_TYPE.BASE}`;
+    this.#errorElement.className = `SkyflowElement-${this.#name}-error-${STYLE_TYPE.BASE}`;
 
     if (this.#record.enableCopy) {
       this.domCopy = document.createElement('img');
@@ -125,13 +135,14 @@ class RevealFrame {
           ...REVEAL_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.BASE],
           ...this.#record.labelStyles[STYLE_TYPE.BASE],
         };
-        getCssClassesFromJss(this.#labelStyles, 'label');
+        // getCssClassesFromJss(this.#labelStyles, 'label');
+        getCssClassesFromJss(this.#labelStyles, `${this.#name}-label`);
 
         if (this.#record.labelStyles[STYLE_TYPE.GLOBAL]) {
           generateCssWithoutClass(this.#record.labelStyles[STYLE_TYPE.GLOBAL]);
         }
       } else {
-        getCssClassesFromJss(REVEAL_ELEMENT_LABEL_DEFAULT_STYLES, 'label');
+        getCssClassesFromJss(REVEAL_ELEMENT_LABEL_DEFAULT_STYLES, `${this.#name}-label`);
       }
     }
     this.updateDataView();
@@ -140,7 +151,7 @@ class RevealFrame {
       this.#inputStyles[STYLE_TYPE.BASE] = {
         ...this.#record.inputStyles[STYLE_TYPE.BASE],
       };
-      getCssClassesFromJss(this.#inputStyles, 'content');
+      getCssClassesFromJss(this.#inputStyles, `${this.#name}-content`);
       if (this.#record.inputStyles[STYLE_TYPE.GLOBAL]) {
         generateCssWithoutClass(this.#record.inputStyles[STYLE_TYPE.GLOBAL]);
       }
@@ -155,26 +166,68 @@ class RevealFrame {
         ...REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES[STYLE_TYPE.BASE],
         ...this.#record.errorTextStyles[STYLE_TYPE.BASE],
       };
-      getCssClassesFromJss(this.#errorTextStyles, 'error');
+      getCssClassesFromJss(this.#errorTextStyles, `${this.#name}-error`);
       if (this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]) {
         generateCssWithoutClass(this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]);
       }
     } else {
       getCssClassesFromJss(
         REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES,
-        'error',
+        `${this.#name}-error`,
       );
     }
 
     this.#elementContainer.appendChild(this.#dataElememt);
 
-    document.body.append(this.#elementContainer);
+    if (rootDiv) rootDiv.append(this.#elementContainer);
+    else document.body.append(this.#elementContainer);
+    // document.body.append(this.#elementContainer);
 
     bus.emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#name, { name: this.#name });
+    if (rootDiv) {
+      this.getConfig();
+      window.parent.postMessage({
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#name,
+        data: {
+          name: this.#name,
+        },
+      }, this.#clientDomain);
 
+      window.parent.postMessage({
+        type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+        data: { height: this.#elementContainer.scrollHeight, name: this.#name },
+      }, this.#clientDomain);
+    }
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name, (_, callback) => {
       callback({ height: this.#elementContainer.scrollHeight, name: this.#name });
     });
+    const sub2 = (responseUrl) => {
+      if (responseUrl.iframeName === this.#name) {
+        if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
+          this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
+          if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
+            this.#dataElememt.innerText = this.#record.altText;
+          }
+          bus
+            .emit(
+              ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+              {
+                height: this.#elementContainer.scrollHeight,
+              }, () => {
+              },
+            );
+        } else {
+          const ext = this.getExtension(responseUrl.url);
+          this.addFileRender(responseUrl.url, ext);
+        }
+      }
+    };
+    bus
+      .target(window.location.origin)
+      .on(
+        ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#name,
+        sub2,
+      );
 
     const sub = (data) => {
       if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
@@ -189,7 +242,7 @@ class RevealFrame {
           this.#dataElememt.innerText = formattedOutput;
         }
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
-          CLASS_NAME, this.#record.token), MessageType.LOG, this.#context.logLevel);
+          CLASS_NAME, this.#record.token), MessageType.LOG, this.#context?.logLevel);
 
         // bus
         //   .target(window.location.origin)
@@ -220,35 +273,172 @@ class RevealFrame {
           if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
         }
       });
+    window.parent.postMessage(
+      {
+        type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + this.#name,
+        data: {
+          name: window.name,
+        },
+      }, this.#clientDomain,
+    );
     this.updateRevealElementOptions();
-
-    const sub2 = (responseUrl) => {
-      if (responseUrl.iframeName === this.#name) {
-        if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
-          this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
-          if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
-            this.#dataElememt.innerText = this.#record.altText;
-          }
-          bus
-            .emit(
-              ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
-              {
-                height: this.#elementContainer.scrollHeight,
-              }, () => {
-              },
+    window.addEventListener('message', (event) => {
+      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#name) {
+        if (event?.data?.data?.iframeName === this.#name
+          && event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
+          this.renderFile(this.#record, event?.data?.clientConfig)?.then((resolvedResult) => {
+            const result = formatForRenderClient(
+              resolvedResult as IRenderResponseType,
+              this.#record?.column,
             );
-        } else {
-          const ext = this.getExtension(responseUrl.url);
-          this.addFileRender(responseUrl.url, ext);
+            window?.parent?.postMessage({
+              type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
+              data: {
+                type: REVEAL_TYPES.RENDER_FILE,
+                result,
+              },
+            }, this.#clientDomain);
+
+            window?.postMessage({
+              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+            }, properties?.IFRAME_SECURE_ORIGIN);
+          })?.catch((error) => {
+            window?.parent?.postMessage({
+              type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
+              data: {
+                type: REVEAL_TYPES.RENDER_FILE,
+                result: {
+                  errors: error,
+                },
+              },
+            }, this.#clientDomain);
+
+            window?.postMessage({
+              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+            }, properties?.IFRAME_SECURE_ORIGIN);
+          });
         }
       }
-    };
-    bus
-      .target(window.location.origin)
-      .on(
-        ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#name,
-        sub2,
+
+      if (event?.data?.type === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name) {
+        if (event?.data?.data?.height) {
+          window?.parent?.postMessage({
+            type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+            data: {
+              height: this.#elementContainer?.scrollHeight ?? 0,
+              name: this.#name,
+            },
+          }, this.#clientDomain);
+        }
+      }
+    });
+  }
+
+  responseUpdate = (data) => {
+    if (data?.frameId === this.#record?.name && data?.error) {
+      if (!Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
+        this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
+      }
+    } else if (data?.frameId === this.#record?.name
+               && data?.[0]?.token
+               && this.#record?.token === data?.[0]?.token) {
+      const responseValue = data?.[0]?.value as string ?? '';
+      this.#revealedValue = responseValue;
+      this.isRevealCalled = true;
+      this.#dataElememt.innerText = responseValue;
+
+      if (this.#record?.mask) {
+        const { formattedOutput } = getMaskedOutput(
+          this.#dataElememt?.innerText ?? '',
+          this.#record?.mask?.[0],
+          constructMaskTranslation(this.#record?.mask),
+        );
+        this.#dataElememt.innerText = formattedOutput ?? '';
+      }
+
+      printLog(
+        parameterizedString(
+          logs?.infoLogs?.ELEMENT_REVEALED,
+          CLASS_NAME,
+          this.#record?.token,
+        ),
+        MessageType.LOG,
+        this.#context?.logLevel,
       );
+    }
+
+    window?.parent?.postMessage(
+      {
+        type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+        data: {
+          height: this.#elementContainer?.scrollHeight ?? 0,
+          name: this.#name,
+        },
+      },
+      this.#clientDomain,
+    );
+  };
+
+  getConfig = () => {
+    const url = window.location?.href;
+    const configIndex = url.indexOf('?');
+    const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
+    const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
+    this.#clientDomain = parsedRecord.clientDomain || '';
+    this.#containerId = parsedRecord.containerId;
+  };
+
+  getData = () => this.#record;
+
+  private sub2 = (responseUrl) => {
+    if (responseUrl.iframeName === this.#name) {
+      if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
+        this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
+        if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
+          this.#dataElememt.innerText = this.#record.altText;
+        }
+        bus
+          .emit(
+            ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+            {
+              height: this.#elementContainer.scrollHeight,
+            }, () => {
+            },
+          );
+      } else {
+        const ext = this.getExtension(responseUrl.url);
+        this.addFileRender(responseUrl.url, ext);
+      }
+    }
+  };
+
+  private renderFile(data: IRevealRecord, clientConfig) {
+    this.#client = new Client(clientConfig, {});
+    return new Promise((resolve, reject) => {
+      try {
+        getFileURLFromVaultBySkyflowIDComposable(data, this.#client, clientConfig.authToken)
+          .then((resolvedResult) => {
+            let url = '';
+            if (resolvedResult.fields && data.column) {
+              url = resolvedResult.fields[data.column];
+            }
+            this.sub2({
+              url,
+              iframeName: this.#name,
+            });
+            resolve(resolvedResult);
+          },
+          (rejectedResult) => {
+            this.sub2({
+              error: DEFAULT_FILE_RENDER_ERROR,
+              iframeName: this.#name,
+            });
+            reject(rejectedResult);
+          });
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -312,6 +502,31 @@ class RevealFrame {
   }
 
   private updateRevealElementOptions() {
+    window.addEventListener('message', (event) => {
+      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS
+         + this.#name) {
+        const data = event?.data;
+        if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS) {
+          const updatedValue = data.updatedValue as object;
+          this.#record = {
+            ...this.#record,
+            ...updatedValue,
+            ...formatRevealElementOptions(updatedValue),
+          };
+          this.updateElementProps();
+          if (this.isRevealCalled) {
+            if (this.#record?.mask) {
+              const { formattedOutput } = getMaskedOutput(
+                this.#revealedValue ?? '',
+                this.#record?.mask?.[0],
+                constructMaskTranslation(this.#record?.mask),
+              );
+              this.#dataElememt.innerText = formattedOutput ?? '';
+            }
+          }
+        }
+      }
+    });
     bus
       .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#name, (data) => {
@@ -355,7 +570,7 @@ class RevealFrame {
         ...this.#inputStyles,
         ...this.#record.inputStyles[STYLE_TYPE.BASE],
       };
-      getCssClassesFromJss(this.#inputStyles, 'content');
+      getCssClassesFromJss(this.#inputStyles, `${this.#name}-content`);
       if (this.#record.inputStyles[STYLE_TYPE.GLOBAL]) {
         const newInputGlobalStyles = {
           ...this.#inputStyles[STYLE_TYPE.GLOBAL],
@@ -370,7 +585,7 @@ class RevealFrame {
         ...REVEAL_ELEMENT_LABEL_DEFAULT_STYLES[STYLE_TYPE.BASE],
         ...this.#record.labelStyles[STYLE_TYPE.BASE],
       };
-      getCssClassesFromJss(this.#labelStyles, 'label');
+      getCssClassesFromJss(this.#labelStyles, `${this.#name}-label`);
 
       if (this.#record.labelStyles[STYLE_TYPE.GLOBAL]) {
         const newLabelGlobalStyles = {
@@ -386,7 +601,7 @@ class RevealFrame {
         ...this.#errorTextStyles[STYLE_TYPE.BASE],
         ...this.#record.errorTextStyles[STYLE_TYPE.BASE],
       };
-      getCssClassesFromJss(this.#errorTextStyles, 'error');
+      getCssClassesFromJss(this.#errorTextStyles, `${this.#name}-error`);
       if (this.#record.errorTextStyles[STYLE_TYPE.GLOBAL]) {
         const newErrorTextGlobalStyles = {
           ...this.#errorTextStyles[STYLE_TYPE.GLOBAL],
