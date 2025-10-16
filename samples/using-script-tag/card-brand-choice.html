@@ -189,7 +189,6 @@
             const collectButton = document.getElementById('collectPCIData');
             if (collectButton) {
                 collectButton.addEventListener('click', () => {
-                    cardNumberElement.mount("#collectCardNumber")
                     const collectResponse = collectContainer.collect();
 
                     collectResponse
