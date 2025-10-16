@@ -362,9 +362,8 @@ describe("Uploading files to the vault", () => {
 
       // Check successful upload
       expect(result.error.fileUploadResponse).toHaveLength(1);
-      expect(result.error.fileUploadResponse[0].skyflow_id).toBe(
-        "success-file-id"
-      );
+      const parsedResponse = JSON.parse(result.error.fileUploadResponse[0]);
+      expect(parsedResponse.skyflow_id).toBe('success-file-id');
 
       // Check failed upload
       expect(result.error.errorResponse).toHaveLength(1);
