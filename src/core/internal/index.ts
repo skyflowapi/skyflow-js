@@ -89,15 +89,20 @@ export default class FrameElement {
 
   private selectedData?: number = undefined;
 
+  private clientDomain: string;
+
   constructor(
     iFrameFormElement: IFrameFormElement,
     options: any,
     htmlDivElement: HTMLDivElement,
+    clientDomain: string = '',
   ) {
+    this.clientDomain = clientDomain;
     this.iFrameFormElement = iFrameFormElement;
     this.options = options;
     this.htmlDivElement = htmlDivElement;
     this.hasError = false;
+
     this.mount();
     this.iFrameFormElement.fieldName = options.column;
     this.iFrameFormElement.tableName = options.table;
@@ -454,6 +459,12 @@ export default class FrameElement {
       .emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.iFrameFormElement.iFrameName, {
         name: this.iFrameFormElement.iFrameName,
       });
+    window.parent.postMessage({
+      type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.iFrameFormElement.iFrameName,
+      data: {
+        name: this.iFrameFormElement.iFrameName,
+      },
+    }, this.clientDomain);
 
     this.updateStyleClasses(this.iFrameFormElement.getStatus());
   };
