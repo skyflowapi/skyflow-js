@@ -10,9 +10,10 @@ import sdkDetails from '../../package.json';
 import {
   getMetaObject,
 } from '../utils/helpers';
+import { ClientMetadata } from '../core/internal/internal-types';
 
 export interface IClientRequest {
-  body?: any;
+  body?: Document | XMLHttpRequestBodyInit | null;
   headers?: Record<string, string>;
   requestMethod:
   | 'GET'
@@ -30,24 +31,30 @@ export interface SdkInfo {
   sdkName: string;
   sdkVersion: string;
 }
+
+export interface ClientToJSON {
+  config: ISkyflow;
+  metaData: ClientMetadata;
+}
+
 class Client {
   config: ISkyflow;
 
-  #metaData: any;
+  #metaData: ClientMetadata;
 
-  constructor(config: ISkyflow, metadata) {
+  constructor(config: ISkyflow, metadata: ClientMetadata) {
     this.config = config;
     this.#metaData = metadata;
   }
 
-  toJSON() {
+  toJSON(): ClientToJSON {
     return {
       config: this.config,
       metaData: this.#metaData,
     };
   }
 
-  static fromJSON(json) {
+  static fromJSON(json: ClientToJSON) {
     return new Client(json.config, json.metaData);
   }
 
@@ -63,7 +70,7 @@ class Client {
     if (request.headers) {
       const metaDataObject = getMetaObject(sdkDetails, this.#metaData, navigator);
       request.headers[SKY_METADATA_HEADER] = JSON.stringify(metaDataObject);
-      const { headers } = request;
+      const headers = request.headers;
       Object.keys(request.headers).forEach((key) => {
         if (!(key === 'content-type' && headers[key] && headers[key].includes(ContentType.FORMDATA))) {
           httpRequest.setRequestHeader(key, headers[key]);
@@ -75,7 +82,11 @@ class Client {
       || request.headers?.['content-type']?.includes(ContentType.FORMDATA)) {
       httpRequest.send(request.body);
     } else {
-      httpRequest.send(JSON.stringify({ ...request.body }));
+      /* Earlier we were stringifying here, but due to TS, we're stringifying
+        at the point where we are creating the request. Since the body parameter
+        doesn't accept JSON object.
+      */
+      httpRequest.send(request.body);
     }
 
     httpRequest.onload = () => {
