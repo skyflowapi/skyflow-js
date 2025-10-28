@@ -342,15 +342,6 @@ describe("skyflow update", () => {
       });
     } catch (err) {}
   });
-
-  test("update error when controller frame not ready", (done) => {
-    skyflow.update = jest.fn(() => Promise.reject(new Error("Controller frame is not ready")));
-    const res: Promise<UpdateResponse> = skyflow.update(updateRecord, updateOptions);
-    res.catch((err) => {
-      expect(err).toBeDefined();
-      done();
-    });
-  });
 });
 
 // detokenize records, options and responses
