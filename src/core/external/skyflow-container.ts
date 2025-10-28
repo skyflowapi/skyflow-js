@@ -161,7 +161,6 @@ class SkyflowContainer {
 
   insert(records: IInsertRecordInput, options?:IInsertOptions): Promise<InsertResponse> {
     if (this.isControllerFrameReady) {
-      console.log('is controller frame ready true');
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
