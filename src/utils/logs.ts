@@ -137,7 +137,6 @@ const logs = {
     EMPTY_SKYFLOWID_IN_UPDATE: 'Validation error. \'skyflowID\' key cannot be empty in update record. Specify a non-empty value as a string.',
     INVALID_SKYFLOWID_IN_UPDATE: 'Validation error. Invalid \'skyflowID\' key in update record. Specify a value of type string instead.',
     INVALID_TOKENS_IN_UPDATE: 'Validation error.Invalid \'tokens\' key in update options. Specify a boolean value for tokens.',
-    CONTROLLER_FRAME_NOT_READY: 'Validation error. Controller frame is not ready.',
     INVALID_RECORDS_IN_DELETE: 'Validation error. Invalid \'records\' key found. Specify a value of type array instead.',
     EMPTY_RECORDS_IN_DELETE: 'Validation error. \'records\' key cannot be empty. Provide a non-empty value instead.',
     MISSING_TABLE_IN_DELETE: 'Validation error. Missing \'table\' key in records at index %s1. Provide a valid \'table\' key.',
