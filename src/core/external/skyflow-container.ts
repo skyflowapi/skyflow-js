@@ -17,6 +17,7 @@ import {
   validateGetByIdInput,
   validateUpsertOptions,
   validateDeleteRecords,
+  validateUpdateRecord,
 } from '../../utils/validators';
 import {
   CONTROLLER_STYLES,
@@ -45,7 +46,12 @@ import {
   DeleteResponse,
   IInsertRecordInput,
   DetokenizeResponse,
+  IUpdateRequest,
+  UpdateResponse,
+  IUpdateOptions,
 } from '../../utils/common';
+import SkyflowError from '../../libs/skyflow-error';
+import SKYFLOW_ERROR_CODE from '../../utils/constants';
 
 const CLASS_NAME = 'SkyflowContainer';
 class SkyflowContainer {
@@ -240,6 +246,45 @@ class SkyflowContainer {
         reject(e);
       }
     });
+  }
+
+  update(record: IUpdateRequest, options?: IUpdateOptions): Promise<UpdateResponse> {
+    if (this.isControllerFrameReady) {
+      return new Promise((resolve, reject) => {
+        validateInitConfig(this.#client.config);
+        try {
+          printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
+            this.#context.logLevel);
+
+          validateUpdateRecord(record, options);
+
+          bus
+            .emit(
+              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
+              {
+                type: PUREJS_TYPES.UPDATE,
+                record,
+                options,
+              },
+              (updatedData: any) => {
+                if (updatedData.error) {
+                  printLog(`${JSON.stringify(updatedData.error)}`, MessageType.ERROR, this.#context.logLevel);
+                  reject(updatedData.error);
+                } else resolve(updatedData);
+              },
+            );
+          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
+            PUREJS_TYPES.UPDATE),
+          MessageType.LOG, this.#context.logLevel);
+        } catch (e: any) {
+          printLog(e.message, MessageType.ERROR, this.#context.logLevel);
+          reject(e);
+        }
+      });
+    }
+    return Promise.reject(
+      new SkyflowError(SKYFLOW_ERROR_CODE.CONTROLLER_FRAME_NOT_READY, [], true),
+    );
   }
 
   getById(getByIdInput: IGetByIdInput): Promise<GetByIdResponse> {
