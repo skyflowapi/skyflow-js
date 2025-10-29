@@ -522,20 +522,6 @@ describe('skyflow update', () => {
       });
     } catch (err) {}
   });
-
-  test('update error when controller frame not ready', (done) => {
-    skyflow = Skyflow.init({
-      vaultID: 'vault123',
-      vaultURL: 'https://vaulturl.com',
-      getBearerToken: jest.fn(),
-    });
-    skyflow.update = jest.fn(() => Promise.reject(new Error('Controller frame is not ready')));
-    const res = skyflow.update(updateRecord, updateOptions);
-    res.catch((err) => {
-      expect(err).toBeDefined();
-      done();
-    });
-  });
 });
 
 const detokenizeInput = {

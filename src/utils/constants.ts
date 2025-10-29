@@ -243,10 +243,6 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_TOKENS_IN_UPDATE,
   },
-  CONTROLLER_FRAME_NOT_READY: {
-    code: 400,
-    description: logs.errorLogs.CONTROLLER_FRAME_NOT_READY,
-  },
   EMPTY_RECORDS_IN_DELETE: { code: 400, description: logs.errorLogs.EMPTY_RECORDS_IN_DELETE },
   INVALID_RECORDS_IN_DELETE: { code: 404, description: logs.errorLogs.INVALID_RECORDS_IN_DELETE },
   INVALID_TABLE_IN_DELETE: { code: 400, description: logs.errorLogs.INVALID_TABLE_IN_DELETE },
