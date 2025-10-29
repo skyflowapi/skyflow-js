@@ -204,6 +204,59 @@ The sample response:
 }
 ```
 
+## Update data in the vault
+
+To update data in the vault, use the `update(request, options?)` method of the Skyflow client. The request object is a JSON object describing the data to update, including the `table`, `fields`, and the `skyflowID` of the record to update. The `options` parameter takes an 
+
+
+```javascript
+const updateRecord = {
+  table: 'string',       // Table in which record should be updated.
+  fields: {
+    column1: 'value',   // Fields to update. Column names should match vault column names.
+    //...additional fields here
+  },
+  skyflowID: 'string', // The skyflow_id of the record to update.
+};
+
+const options = {
+  tokens: true,        // Indicates whether or not tokens should be returned for the updated data. Defaults to 'true'
+};
+
+skyflowClient.update(updateRecord, options);
+```
+
+An [example](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/pure-update.html) of update call: 
+```javascript
+skyflowClient.update({
+  table: 'cards',
+  fields: {
+    table: 'cards',
+    fields: {
+      cardNumber: '41111111111',
+      cvv: '123',
+    },
+  },
+  skyflowID: '43127a6c-5c15-4513-aa15-29f50bb37182'
+});
+```
+
+The sample response:
+
+```javascript
+{
+  "updatedField": {
+    "skyflowID": "43127a6c-5c15-4513-aa15-29f50bb37182",
+    "cardNumber": "f390186-e7e2-466f-91e5-48e12c2bcbc1",
+    "cvv": "1989cb56-63da-4482-a2df-1f74cd0d1a5"
+  }
+}
+```
+
+**Note**:
+- The `skyflowID` field is required and should be the Skyflow ID of the record you want to update.
+- If tokens is set to true, the response will include tokens for the updated fields.
+
 ## Using Skyflow Elements to collect data
 
 **Skyflow Elements** provide developers with pre-built form elements to securely collect sensitive data client-side. These elements are hosted by Skyflow and injected into your web page as iFrames. This reduces your PCI compliance scope by not exposing your front-end application to sensitive data. Follow the steps below to securely collect data with Skyflow Elements on your web page. 

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pure Js Update</title>
+    <script src="https://js.skyflow.com/v2/index.js"></script>
+    <style>
+      .field {
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h3>Update</h3>
+      <form>
+        <div id="cardNumberContainer" class="field">
+          <label for="cardNumber">Card Number</label>
+          <br />
+          <input
+            id="cardNumber"
+            type="text"
+            placeholder="card number"
+            name="cardNumber"
+          />
+        </div>
+        <div id="cardCvvContainer" class="field">
+          <label for="cardCvv">CVV</label>
+          <br />
+          <input id="cardCvv" type="text" placeholder="cvv" minlength="4" />
+        </div>
+        <div id="cardExpiryDateContainer" class="field">
+          <label>Expiry Date</label>
+          <br />
+          <input id="cardExpiry" type="text" placeholder="MM/YYYY" />
+        </div>
+        <div id="cardHolderNameContainer" class="field">
+          <label>Card Holder Name</label>
+          <br />
+          <input
+            id="cardHolderName"
+            type="text"
+            placeholder="card holder name"
+          />
+        </div>
+        <br />
+        <br />
+        <button id="updateButton" type="button">update</button>
+      </form>
+      <div>
+        <h3>Update Response</h3>
+        <pre id="updateResponse"></pre>
+      </div>
+    </div>
+    <br />
+    <script>
+      try {
+        const skyflow = Skyflow.init({
+          vaultID: "<VAULT_ID>",
+          vaultURL: "<VAULT_URL>",
+          getBearerToken: () => {
+            return new Promise((resolve, reject) => {
+              const Http = new XMLHttpRequest();
+
+              Http.onreadystatechange = () => {
+                if (Http.readyState === 4 && Http.status === 200) {
+                  const response = JSON.parse(Http.responseText);
+                  resolve(response.accessToken);
+                }
+              };
+              const url = "<TOKEN_END_POINT_URL>";
+              Http.open("GET", url);
+              Http.send();
+            });
+          },
+        });
+
+        // form update request
+
+        const updateButton = document.getElementById("updateButton");
+        if (updateButton) {
+          updateButton.addEventListener("click", () => {
+            const cardNumberData = document.getElementById("cardNumber").value;
+            const cardCvvData = document.getElementById("cardCvv").value;
+            const cardExpiryData = document.getElementById("cardExpiry").value;
+            const cardholderNameData =
+              document.getElementById("cardHolderName").value;
+
+            const response = skyflow.update(
+              {
+                table: "financial_service_providers",
+                fields: {
+                  cvv: cardCvvData,
+                  card_number: cardNumberData,
+                  expiry_date: cardExpiryData,
+                  cardholder_name: cardholderNameData,
+                },
+                skyflowID: "<SKYFLOW_ID>", // replace with actual Skyflow ID
+              },
+              {
+                tokens: true,
+              }
+            );
+
+            response
+              .then((res) => {
+                document.getElementById("updateResponse").innerHTML =
+                  JSON.stringify(res, null, 2);
+              })
+              .catch((err) => {
+                document.getElementById("updateResponse").innerHTML =
+                  JSON.stringify(err, null, 2);
+              });
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    </script>
+  </body>
+</html>
