@@ -175,7 +175,7 @@ class Skyflow {
     return skyflow;
   }
 
-  #getSkyflowBearerToken = () => new Promise((resolve, reject) => {
+  #getSkyflowBearerToken: () => Promise<string> = () => new Promise((resolve, reject) => {
     if (
       this.#client.config.getBearerToken
         && (!this.#bearerToken || !isTokenValid(this.#bearerToken))

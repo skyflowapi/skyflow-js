@@ -111,7 +111,6 @@ class ComposableRevealInternalElement extends SkyflowElement {
       this.#iframe?.setIframeHeight(data?.height);
     });
 
-
     window?.addEventListener('message', (event) => {
       if (event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + this.#iframe?.name) {
         this.#iframe?.setIframeHeight(event?.data?.data?.height);
@@ -189,21 +188,22 @@ class ComposableRevealInternalElement extends SkyflowElement {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['RevealElement'], true);
     }
 
-    if(domElementSelector instanceof HTMLElement){
+    if (domElementSelector instanceof HTMLElement) {
       this.resizeObserver = new ResizeObserver(() => {
         const iframeElements = domElementSelector.getElementsByTagName('iframe');
         if (iframeElements && iframeElements.length > 0) {
-            for (let i = 0; i < iframeElements.length; i++) {
+          // eslint-disable-next-line no-plusplus
+          for (let i = 0; i < iframeElements.length; i++) {
             const iframeElement = iframeElements[i];
             if (
-              iframeElement.name === this.#iframe.name &&
-              iframeElement.contentWindow
+              iframeElement.name === this.#iframe.name
+              && iframeElement.contentWindow
             ) {
               iframeElement?.contentWindow?.postMessage(
                 {
                   name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
                 },
-                properties.IFRAME_SECURE_ORIGIN
+                properties.IFRAME_SECURE_ORIGIN,
               );
             }
           }
@@ -386,7 +386,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
           MessageType.LOG,
           loglevel);
         validateRenderElementRecord(recordData);
-        window.addEventListener('message', (event) => {   
+        window.addEventListener('message', (event) => {
           if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
                   + recordData?.name) {
             this.#isMounted = true;
