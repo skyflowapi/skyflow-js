@@ -32,8 +32,8 @@ export default class IFrame {
     });
   }
 
-  mount = (domElement: HTMLElement | string, elementId?: string, data?: any) => {
-    this.unmount();
+  mount = (domElement, elementId?: string, data?: any) => {
+    // this.unmount();
     try {
       if (typeof domElement === 'string') {
         this.container = document.querySelector(domElement) || undefined;

@@ -7,7 +7,6 @@ import {
   ALLOWED_EXPIRY_YEAR_FORMATS,
   CardType, CARD_TYPE_REGEX,
   DEFAULT_CARD_LENGTH_RANGE,
-  ElementType,
 } from '../../core/constants';
 import { IRevealElementInput } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
