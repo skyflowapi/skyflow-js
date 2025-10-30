@@ -206,7 +206,7 @@ The sample response:
 
 ## Update data in the vault
 
-To update data in the vault by skyd, use the `update(request, options?)` method of the Skyflow client. The request object is a JSON object describing the data to update, including the `table`, `fields`, and the `skyflowID` of the record to update. The options parameter takes an object of optional parameters for the update and includes an option to return tokenized data for the updated fields. 
+To update data in the vault by skyflowID, use the `update(request, options?)` method of the Skyflow client. The request object is a JSON object describing the data to update, including the `table`, `fields`, and the `skyflowID` of the record to update. The options parameter takes an object of optional parameters for the update and includes an option to return tokenized data for the updated fields. 
 
 ```javascript
 const updateRecord = {
