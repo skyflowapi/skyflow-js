@@ -48,11 +48,13 @@ import ComposableContainer from './core/external/collect/compose-collect-contain
 import { validateComposableContainerOptions } from './utils/validators';
 import ThreeDS from './core/external/threeds/threeds';
 import { ClientMetadata, SkyflowElementProps } from './core/internal/internal-types';
+import ComposableRevealContainer from './core/external/reveal/composable-reveal-container';
 
 export enum ContainerType {
   COLLECT = 'COLLECT',
   REVEAL = 'REVEAL',
   COMPOSABLE = 'COMPOSABLE',
+  COMPOSE_REVEAL = 'COMPOSABLE_REVEAL',
 }
 export interface SkyflowConfigOptions {
   logLevel?: LogLevel;
@@ -173,9 +175,50 @@ class Skyflow {
     return skyflow;
   }
 
+  #getSkyflowBearerToken: () => Promise<string> = () => new Promise((resolve, reject) => {
+    if (
+      this.#client.config.getBearerToken
+        && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
+    ) {
+      this.#client.config
+        .getBearerToken()
+        .then((bearerToken) => {
+          if (isTokenValid(bearerToken)) {
+            printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+              MessageType.LOG,
+              this.#logLevel);
+            this.#bearerToken = bearerToken;
+            resolve(this.#bearerToken);
+          } else {
+            printLog(parameterizedString(
+              logs.errorLogs.INVALID_BEARER_TOKEN,
+            ), MessageType.ERROR, this.#logLevel);
+            reject({
+              error: parameterizedString(
+                logs.errorLogs.INVALID_BEARER_TOKEN,
+              ),
+            });
+          }
+        })
+        .catch((err) => {
+          printLog(parameterizedString(logs.errorLogs.BEARER_TOKEN_REJECTED), MessageType.ERROR,
+            this.#logLevel);
+          reject({ error: err });
+        });
+    } else {
+      printLog(parameterizedString(logs.infoLogs.REUSE_BEARER_TOKEN, CLASS_NAME),
+        MessageType.LOG,
+        this.#logLevel);
+      resolve(this.#bearerToken);
+    }
+  });
+
   container(type: ContainerType.COLLECT, options?: ContainerOptions): CollectContainer;
   container(type: ContainerType.COMPOSABLE, options?: ContainerOptions): ComposableContainer;
   container(type: ContainerType.REVEAL, options?: ContainerOptions): RevealContainer;
+  container(type: ContainerType.COMPOSE_REVEAL,
+    options?: ContainerOptions)
+  : ComposableRevealContainer;
   container(type: ContainerType, options?: ContainerOptions) {
     switch (type) {
       case ContainerType.COLLECT: {
@@ -184,6 +227,7 @@ class Skyflow {
           clientJSON: this.#client.toJSON(),
           containerType: type,
           skyflowContainer: this.#skyflowContainer,
+          getSkyflowBearerToken: this.#getSkyflowBearerToken,
         },
         this.#skyflowElements,
         { logLevel: this.#logLevel, env: this.#env }, options);
@@ -198,6 +242,7 @@ class Skyflow {
           clientJSON: this.#client.toJSON(),
           containerType: type,
           skyflowContainer: this.#skyflowContainer,
+          getSkyflowBearerToken: this.#getSkyflowBearerToken,
         },
         this.#skyflowElements,
         { logLevel: this.#logLevel, env: this.#env }, options);
@@ -208,21 +253,36 @@ class Skyflow {
       }
       case ContainerType.COMPOSABLE: {
         validateComposableContainerOptions(options!);
-        const composableContainer = new ComposableContainer(
-          {
-            ...this.#metadata,
-            clientJSON: this.#client.toJSON(),
-            containerType: type,
-            skyflowContainer: this.#skyflowContainer,
-          },
-          this.#skyflowElements,
-          { logLevel: this.#logLevel, env: this.#env },
-          options!,
-        );
+        const composableContainer = new ComposableContainer({
+          ...this.#metadata,
+          clientJSON: this.#client.toJSON(),
+          containerType: type,
+          skyflowContainer: this.#skyflowContainer,
+          getSkyflowBearerToken: this.#getSkyflowBearerToken,
+        },
+        this.#skyflowElements,
+        { logLevel: this.#logLevel, env: this.#env }, options!);
         printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);
         return composableContainer;
+      }
+
+      case ContainerType.COMPOSE_REVEAL: {
+        validateComposableContainerOptions(options!);
+        const revealComposableContainer = new ComposableRevealContainer(options, {
+          ...this.#metadata,
+          clientJSON: this.#client.toJSON(),
+          containerType: type,
+          skyflowContainer: this.#skyflowContainer,
+          getSkyflowBearerToken: this.#getSkyflowBearerToken,
+        },
+        this.#skyflowElements,
+        { logLevel: this.#logLevel, env: this.#env });
+        printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
+          MessageType.LOG,
+          this.#logLevel);
+        return revealComposableContainer;
       }
 
       default:

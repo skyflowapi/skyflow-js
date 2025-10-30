@@ -89,15 +89,20 @@ export default class FrameElement {
 
   private selectedData?: number = undefined;
 
+  private clientDomain: string;
+
   constructor(
     iFrameFormElement: IFrameFormElement,
     options: any,
     htmlDivElement: HTMLDivElement,
+    clientDomain: string = '',
   ) {
+    this.clientDomain = clientDomain;
     this.iFrameFormElement = iFrameFormElement;
     this.options = options;
     this.htmlDivElement = htmlDivElement;
     this.hasError = false;
+
     this.mount();
     this.iFrameFormElement.fieldName = options.column;
     this.iFrameFormElement.tableName = options.table;
@@ -138,9 +143,16 @@ export default class FrameElement {
 
     this.inputParent = document.createElement('div');
     this.inputParent.style.position = 'relative';
-
     const inputElement = document.createElement(type);
     this.domInput = inputElement;
+    inputElement.addEventListener('keydown', (event) => {
+      const keyboardEvent = event as KeyboardEvent;
+      if ((keyboardEvent.ctrlKey || keyboardEvent.metaKey) && keyboardEvent.key.toLowerCase() === 'z') {
+        keyboardEvent.preventDefault();
+        this.setValue('');
+        this.iFrameFormElement.setValue('', true);
+      }
+    });
     this.domInput.iFrameFormElement = this.iFrameFormElement;
     inputElement.setAttribute(CUSTOM_ROW_ID_ATTRIBUTE, this.htmlDivElement?.id?.split(':')[0] || '');
     this.inputParent.append(inputElement);
@@ -160,6 +172,15 @@ export default class FrameElement {
 
       this.dropdownSelect = document.createElement('select');
       this.dropdownSelect.setAttribute('style', this.options?.inputStyles?.dropdown ? (DROPDOWN_STYLES + styleToString(this.options.inputStyles.dropdown)) : DROPDOWN_STYLES);
+      this.dropdownSelect.addEventListener('focus', () => {
+        if (this.options?.inputStyles?.dropdownIcon?.focus) {
+          this.setDropdownIconStyle(this.options?.inputStyles?.dropdownIcon?.focus);
+        }
+      });
+
+      this.dropdownSelect.addEventListener('blur', () => {
+        this.setDropdownIconStyle(this.options?.inputStyles?.dropdownIcon);
+      });
 
       this.dropdownSelect.addEventListener('change', (event:any) => {
         event.preventDefault();
@@ -215,6 +236,9 @@ export default class FrameElement {
     });
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, (state) => {
       if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
+        this.focusChange(false);
+      }
+      if (state.value && this.iFrameFormElement.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
         this.focusChange(false);
       }
 
@@ -454,6 +478,12 @@ export default class FrameElement {
       .emit(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.iFrameFormElement.iFrameName, {
         name: this.iFrameFormElement.iFrameName,
       });
+    window.parent.postMessage({
+      type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.iFrameFormElement.iFrameName,
+      data: {
+        name: this.iFrameFormElement.iFrameName,
+      },
+    }, this.clientDomain);
 
     this.updateStyleClasses(this.iFrameFormElement.getStatus());
   };
@@ -566,6 +596,10 @@ export default class FrameElement {
     if (this.iFrameFormElement.fieldType === ELEMENTS.FILE_INPUT.name) {
       const target = event.target as HTMLFormElement;
       this.iFrameFormElement.setValue(target.files[0], target.checkValidity());
+      this.focusChange(true);
+    } else if (this.iFrameFormElement.fieldType === ELEMENTS.MULTI_FILE_INPUT.name) {
+      const target = event.target as HTMLFormElement;
+      this.iFrameFormElement.setValue(target.files, target.checkValidity());
       this.focusChange(true);
     } else {
       const target = event.target as HTMLInputElement;
@@ -817,11 +851,21 @@ export default class FrameElement {
   };
 
   onSubmit = () => {
-    bus
-      .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameFormElement.iFrameName, {
-        name: this.iFrameFormElement.iFrameName,
-        event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
-      });
+    if (this.iFrameFormElement.containerType === ContainerType.COMPOSABLE) {
+      window.parent.postMessage({
+        type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameFormElement.iFrameName,
+        data: {
+          name: this.iFrameFormElement.iFrameName,
+          event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
+        },
+      }, this.clientDomain);
+    } else {
+      bus
+        .emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameFormElement.iFrameName, {
+          name: this.iFrameFormElement.iFrameName,
+          event: ELEMENT_EVENTS_TO_CLIENT.SUBMIT,
+        });
+    }
   };
 
   onArrowKeys = (keyBoardEvent: KeyboardEvent) => {
@@ -861,7 +905,6 @@ export default class FrameElement {
 
       case INPUT_KEYBOARD_EVENTS.ENTER:
         this.onSubmit();
-        keyBoardEvent.preventDefault();
         break;
 
       default: break;
@@ -1136,6 +1179,18 @@ export default class FrameElement {
         this.inputParent.append(this.dropdownIcon);
         this.inputParent.append(this.dropdownSelect);
       }
+    }
+  }
+
+  private setDropdownIconStyle(styleObj?: any) {
+    if (this.dropdownIcon?.style.display === 'block') {
+      this.dropdownIcon.setAttribute(
+        'style',
+        styleObj
+          ? DROPDOWN_ICON_STYLES + styleToString(styleObj)
+          : DROPDOWN_ICON_STYLES,
+      );
+      this.dropdownIcon.style.display = 'block';
     }
   }
 }

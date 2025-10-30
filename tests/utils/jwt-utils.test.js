@@ -5,7 +5,7 @@ import isTokenValid from "../../src/utils/jwt-utils";
 jest.mock('jwt-decode', () => () => ({exp: 123}))
 
 describe('Validation token', () => {
-
+    
     test('empty token', () => {
         const res = isTokenValid("")
         expect(res).toBe(false)

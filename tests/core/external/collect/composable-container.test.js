@@ -18,7 +18,7 @@ const bus = require('framebus');
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 
-const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve());
+const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve('token'));
 
 const mockUuid = '1234';
 jest.mock('../../../../src/libs/uuid', () => ({
@@ -57,6 +57,7 @@ EventEmitter.mockImplementation(()=>({
 
 
 const metaData = {
+  getSkyflowBearerToken: getBearerToken,
   skyflowContainer:{
     isControllerFrameReady: true
   },
@@ -78,6 +79,7 @@ const metaData = {
   },
 };
 const metaData2 = {
+  getSkyflowBearerToken: getBearerToken,
   skyflowContainer:{
     isControllerFrameReady: false
   },

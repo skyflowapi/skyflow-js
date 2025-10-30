@@ -42,6 +42,7 @@ import {
   updateMetricObjectValue,
 } from '../../../metrics';
 import { Metadata, ContainerProps, InternalState } from '../../internal/internal-types';
+import properties from '../../../properties';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
@@ -120,7 +121,6 @@ class CollectElement extends SkyflowElement {
     // if (this.#isSingleElementAPI && this.#elements.length > 1) {
     //   throw new SkyflowError(SKYFLOW_ERROR_CODE.UNKNOWN_ERROR, [], true);
     // }
-
     this.#doesReturnValue = EnvOptions[this.#context.env].doesReturnValue;
     this.elementType = this.#isSingleElementAPI
       ? this.#elements[0].elementType
@@ -140,6 +140,7 @@ class CollectElement extends SkyflowElement {
         name: element.elementName,
         isRequired: element.required,
         selectedCardScheme: '',
+        metaData: undefined,
       });
     });
     if (this.#elements && this.#elements.length && this.#elements.length > 1) {
@@ -165,18 +166,18 @@ class CollectElement extends SkyflowElement {
     this.#readyToMount = container.isMounted;
 
     if (container.type === ContainerType.COMPOSABLE) {
+      window.addEventListener('message', (event) => {
+        if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK
+                    + this.#iframe.name) {
+          this.#iframe.setIframeHeight(event.data.data.height);
+        }
+      });
       this.#elements.forEach((element) => {
-        this.#bus.on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED
-          + formatFrameNameToId(element.elementName), (data) => {
-          if (data.name === element.elementName) {
-            updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, `${element.elementType}_${METRIC_TYPES.EVENTS.MOUNTED}`);
+        window.addEventListener('message', (event) => {
+          if (event.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+            + formatFrameNameToId(element.elementName)) {
             element.isMounted = true;
             this.#mounted = true;
-            this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
-              + this.#iframe.name,
-            {}, (payload:any) => {
-              this.#iframe.setIframeHeight(payload.height);
-            });
           }
         });
       });
@@ -200,15 +201,41 @@ class CollectElement extends SkyflowElement {
   getID = () => this.#elementId;
 
   mount = (domElement: HTMLElement | string) => {
+    this.#mounted = true;
     if (!domElement) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT, ['CollectElement'], true);
     }
-    this.resizeObserver = new ResizeObserver(() => {
-      this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-        {}, (payload:any) => {
-          this.#iframe.setIframeHeight(payload.height);
-        });
-    });
+
+    if (domElement instanceof HTMLElement) {
+      this.resizeObserver = new ResizeObserver(() => {
+        const iframeElements = domElement.getElementsByTagName('iframe');
+        if (iframeElements && iframeElements.length > 0) {
+          // eslint-disable-next-line no-plusplus
+          for (let i = 0; i < iframeElements.length; i++) {
+            const iframeElement = iframeElements[i];
+            if (
+              iframeElement.name === this.#iframe.name
+              && iframeElement.contentWindow
+            ) {
+              iframeElement?.contentWindow?.postMessage(
+                {
+                  name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+                },
+                properties.IFRAME_SECURE_ORIGIN,
+              );
+            }
+          }
+        }
+      });
+    } else if (typeof domElement === 'string') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+          {}, (payload:any) => {
+            this.#iframe.setIframeHeight(payload.height);
+          });
+      });
+    }
+
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.DIV_ID, domElement);
     if (
       this.#metaData?.clientJSON?.config?.options?.trackMetrics
@@ -469,84 +496,168 @@ class CollectElement extends SkyflowElement {
       }
     });
     this.#elements.forEach((element1) => {
-      this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT
-        + element1.elementName, (data: any) => {
-        if (
-          this.#isSingleElementAPI
+      const isComposableContainer = this.#metaData?.containerType === 'COMPOSABLE';
+      if (isComposableContainer) {
+        window.addEventListener('message', (event) => {
+          if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT
+                    + element1.elementName) {
+            const data = event.data.data;
+            if (data.name === element1.elementName) {
+              if (
+                this.#isSingleElementAPI
           && data.event === ELEMENT_EVENTS_TO_CLIENT.READY
           && data.name === formatFrameNameToId(this.#iframe.name)
-        ) {
-          this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
-        } else {
-          const isComposable = this.#elements.length > 1;
-          this.#elements.forEach((element, index) => {
-            if (data.name === element.elementName) {
-              let emitEvent = '';
-              switch (data.event) {
-                case ELEMENT_EVENTS_TO_CLIENT.FOCUS:
-                  emitEvent = ELEMENT_EVENTS_TO_CLIENT.FOCUS;
-                  break;
-                case ELEMENT_EVENTS_TO_CLIENT.BLUR:
-                  emitEvent = ELEMENT_EVENTS_TO_CLIENT.BLUR;
-                  break;
-                case ELEMENT_EVENTS_TO_CLIENT.CHANGE:
-                  emitEvent = ELEMENT_EVENTS_TO_CLIENT.CHANGE;
-                  break;
-                case ELEMENT_EVENTS_TO_CLIENT.READY:
-                  emitEvent = ELEMENT_EVENTS_TO_CLIENT.READY;
-                  break;
-                case ELEMENT_EVENTS_TO_CLIENT.SUBMIT:
-                  this.#groupEmitter?._emit(ELEMENT_EVENTS_TO_CLIENT.SUBMIT);
-                  return;
-                  // case ELEMENT_EVENTS_TO_CLIENT.CREATED:
-                  //   this.#mounted = true;
-                  //   return;
-                  // todo: need to implement the below events
-                  // case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
-                  //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
-                  //   break;
-                  // case ELEMENT_EVENTS_TO_CLIENT.CLICK:
-                  //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CLICK);
-                  //   break;
-                  // case ELEMENT_EVENTS_TO_CLIENT.ERROR:
-                  //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ERROR);
-                  //   break;
-
-                default:
-                  throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_TYPE, [], true);
-              }
-              this.#states[index].isEmpty = data.value.isEmpty;
-              this.#states[index].isValid = data.value.isValid;
-              this.#states[index].isComplete = data.value.isComplete;
-              this.#states[index].isFocused = data.value.isFocused;
-              this.#states[index].isRequired = data.value.isRequired;
-              this.#states[index].selectedCardScheme = data?.value?.selectedCardScheme || '';
-
-              if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
-              else this.#states[index].value = undefined;
-
-              emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
-
-              this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
-                + this.#iframe.name,
-              {}, (payload:any) => {
-                this.#iframe.setIframeHeight(payload.height);
-              });
-
-              this.#updateState();
-              const emitData = {
-                ...this.#states[index],
-                elementType: element.elementType,
-              };
-              if (isComposable && this.#groupEmitter) {
-                this.#groupEmitter._emit(emitEvent, emitData);
+              ) {
+                this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
               } else {
-                this.#eventEmitter._emit(emitEvent, emitData);
+                this.#elements.forEach((element, index) => {
+                  if (data.name === element.elementName) {
+                    let emitEvent = '';
+                    switch (data.event) {
+                      case ELEMENT_EVENTS_TO_CLIENT.FOCUS:
+                        emitEvent = ELEMENT_EVENTS_TO_CLIENT.FOCUS;
+                        break;
+                      case ELEMENT_EVENTS_TO_CLIENT.BLUR:
+                        emitEvent = ELEMENT_EVENTS_TO_CLIENT.BLUR;
+                        break;
+                      case ELEMENT_EVENTS_TO_CLIENT.CHANGE:
+                        emitEvent = ELEMENT_EVENTS_TO_CLIENT.CHANGE;
+                        break;
+                      case ELEMENT_EVENTS_TO_CLIENT.READY:
+                        emitEvent = ELEMENT_EVENTS_TO_CLIENT.READY;
+                        break;
+                      case ELEMENT_EVENTS_TO_CLIENT.SUBMIT:
+                        this.#groupEmitter?._emit(ELEMENT_EVENTS_TO_CLIENT.SUBMIT);
+                        return;
+
+                      default:
+                        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_TYPE, [], true);
+                    }
+                    this.#states[index].isEmpty = data.value.isEmpty;
+                    this.#states[index].isValid = data.value.isValid;
+                    this.#states[index].isComplete = data.value.isComplete;
+                    this.#states[index].isFocused = data.value.isFocused;
+                    this.#states[index].isRequired = data.value.isRequired;
+                    this.#states[index].selectedCardScheme = data?.value?.selectedCardScheme || '';
+                    if (element.elementType === ElementType.MULTI_FILE_INPUT
+                      || element.elementType === ElementType.FILE_INPUT) {
+                      this.#states[index].metaData = data?.value?.metaData || [];
+                    }
+                    if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
+                    else this.#states[index].value = undefined;
+
+                    emitEvent = isComposableContainer ? `${emitEvent}:${data.name}` : emitEvent;
+                    this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
+                + this.#iframe.name,
+                    {}, (payload:any) => {
+                      this.#iframe.setIframeHeight(payload.height);
+                    });
+
+                    this.#updateState();
+                    const emitData = {
+                      ...this.#states[index],
+                      elementType: element.elementType,
+                    };
+                    if (isComposableContainer) {
+                      this.#groupEmitter?._emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT, {
+                        iframeName: this.#iframe.name,
+                      });
+                    }
+                    if (isComposableContainer && this.#groupEmitter) {
+                      this.#groupEmitter._emit(emitEvent, emitData);
+                    } else {
+                      this.#eventEmitter._emit(emitEvent, emitData);
+                    }
+                  }
+                });
               }
             }
-          });
-        }
-      });
+          }
+        });
+      } else {
+        this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT
+        + element1.elementName, (data: any) => {
+          if (
+            this.#isSingleElementAPI
+          && data.event === ELEMENT_EVENTS_TO_CLIENT.READY
+          && data.name === formatFrameNameToId(this.#iframe.name)
+          ) {
+            this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY);
+          } else {
+            const isComposable = this.#elements.length > 1;
+            this.#elements.forEach((element, index) => {
+              if (data.name === element.elementName) {
+                let emitEvent = '';
+                switch (data.event) {
+                  case ELEMENT_EVENTS_TO_CLIENT.FOCUS:
+                    emitEvent = ELEMENT_EVENTS_TO_CLIENT.FOCUS;
+                    break;
+                  case ELEMENT_EVENTS_TO_CLIENT.BLUR:
+                    emitEvent = ELEMENT_EVENTS_TO_CLIENT.BLUR;
+                    break;
+                  case ELEMENT_EVENTS_TO_CLIENT.CHANGE:
+                    emitEvent = ELEMENT_EVENTS_TO_CLIENT.CHANGE;
+                    break;
+                  case ELEMENT_EVENTS_TO_CLIENT.READY:
+                    emitEvent = ELEMENT_EVENTS_TO_CLIENT.READY;
+                    break;
+                  case ELEMENT_EVENTS_TO_CLIENT.SUBMIT:
+                    this.#groupEmitter?._emit(ELEMENT_EVENTS_TO_CLIENT.SUBMIT);
+                    return;
+                    // case ELEMENT_EVENTS_TO_CLIENT.CREATED:
+                    //   this.#mounted = true;
+                    //   return;
+                    // todo: need to implement the below events
+                    // case ELEMENT_EVENTS_TO_CLIENT.ESCAPE:
+                    //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ESCAPE);
+                    //   break;
+                    // case ELEMENT_EVENTS_TO_CLIENT.CLICK:
+                    //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.CLICK);
+                    //   break;
+                    // case ELEMENT_EVENTS_TO_CLIENT.ERROR:
+                    //   this.eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.ERROR);
+                    //   break;
+
+                  default:
+                    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_TYPE, [], true);
+                }
+                this.#states[index].isEmpty = data.value.isEmpty;
+                this.#states[index].isValid = data.value.isValid;
+                this.#states[index].isComplete = data.value.isComplete;
+                this.#states[index].isFocused = data.value.isFocused;
+                this.#states[index].isRequired = data.value.isRequired;
+                this.#states[index].selectedCardScheme = data?.value?.selectedCardScheme || '';
+
+                if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;
+                else this.#states[index].value = undefined;
+
+                emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
+                this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
+                + this.#iframe.name,
+                {}, (payload:any) => {
+                  this.#iframe.setIframeHeight(payload.height);
+                });
+
+                this.#updateState();
+                const emitData = {
+                  ...this.#states[index],
+                  elementType: element.elementType,
+                };
+                if (isComposable) {
+                  this.#groupEmitter?._emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT, {
+                    iframeName: this.#iframe.name,
+                  });
+                }
+                if (isComposable && this.#groupEmitter) {
+                  this.#groupEmitter._emit(emitEvent, emitData);
+                } else {
+                  this.#eventEmitter._emit(emitEvent, emitData);
+                }
+              }
+            });
+          }
+        });
+      }
     });
   };
 

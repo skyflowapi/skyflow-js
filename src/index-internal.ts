@@ -4,6 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import 'core-js/stable';
 import RevealFrame from './core/internal/reveal/reveal-frame';
 import {
+  COMPOSABLE_REVEAL,
   FRAME_ELEMENT,
   FRAME_REVEAL,
   SKYFLOW_FRAME_CONTROLLER,
@@ -18,6 +19,7 @@ import {
 } from './utils/logs-helper';
 import { getAtobValue, getValueFromName } from './utils/helpers';
 import FrameElementInit from './core/internal/frame-element-init';
+import RevealComposableFrameElementInit from './core/internal/composable-frame-element-init';
 
 (function init(root: any) {
   try {
@@ -26,6 +28,9 @@ import FrameElementInit from './core/internal/frame-element-init';
     const frameId = getValueFromName(frameName, 1);
     if (frameType === SKYFLOW_FRAME_CONTROLLER) {
       SkyflowFrameController.init(frameId);
+    } else if (frameType === COMPOSABLE_REVEAL) {
+      root.Skyflow = RevealComposableFrameElementInit;
+      RevealComposableFrameElementInit.startFrameElement();
     } else if (frameType === FRAME_ELEMENT) {
       const logLevel = getValueFromName(frameName, 4) || LogLevel.ERROR;
       printLog(
