@@ -11,6 +11,10 @@ import {
   IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
   MessageType, LogLevel,
   InsertResponse,
+  IUpdateRequest,
+  IUpdateOptions,
+  UpdateResponse,
+  UpdateResponseType,
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
@@ -101,6 +105,39 @@ export const constructInsertRecordResponse = (
       table: records[index].table,
       skyflow_id: res.records[0].skyflow_id,
     })),
+  };
+};
+
+export const constructUpdateRecordRequest = (
+  updateData: IUpdateRequest,
+  options: IUpdateOptions = { tokens: true },
+) => {
+  const tokenization = options?.tokens ?? false;
+
+  return {
+    record: {
+      fields: updateData.fields,
+    },
+    tokenization,
+  };
+};
+
+export const constructUpdateRecordResponse = (
+  responseBody: any,
+  tokenization: boolean,
+): UpdateResponse => {
+  const result: UpdateResponseType = {
+    skyflowID: responseBody.skyflow_id,
+  };
+
+  if (tokenization && responseBody.tokens) {
+    Object.entries(responseBody.tokens).forEach(([key, value]) => {
+      result[key] = value;
+    });
+  }
+
+  return {
+    updatedField: result,
   };
 };
 

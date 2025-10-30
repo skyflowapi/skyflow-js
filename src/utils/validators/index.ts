@@ -24,6 +24,8 @@ import {
   CollectElementInput,
   LogLevel,
   ContainerOptions,
+  IUpdateRequest,
+  IUpdateOptions,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { appendZeroToOne } from '../helpers';
@@ -157,6 +159,46 @@ export const validateInsertRecords = (recordObj: IInsertRecordInput, options: an
 
   if (options && options.tokens && typeof options.tokens !== 'boolean') {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_INSERT, [], true);
+  }
+};
+
+export const validateUpdateRecord = (recordObj: IUpdateRequest, options?: IUpdateOptions) => {
+  if (!(recordObj && typeof recordObj === 'object')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_RECORD_KEY_UPDATE, [], true);
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(recordObj, 'table')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_UPDATE, [], true);
+  }
+  if (!recordObj.table) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_UPDATE, [], true);
+  }
+  if (!(typeof recordObj.table === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_UPDATE, [], true);
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(recordObj, 'fields')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_FIELDS_IN_UPDATE, [], true);
+  }
+  if (!recordObj.fields) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_FIELDS_IN_UPDATE, [], true);
+  }
+  if (!(typeof recordObj.fields === 'object' && !Array.isArray(recordObj.fields))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELDS_IN_UPDATE, [], true);
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(recordObj, 'skyflowID')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_IN_UPDATE, [], true);
+  }
+  if (!recordObj.skyflowID) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOWID_IN_UPDATE, [], true);
+  }
+  if (!(typeof recordObj.skyflowID === 'string')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_UPDATE, [], true);
+  }
+
+  if (options && options.tokens !== undefined && typeof options.tokens !== 'boolean') {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_UPDATE, [], true);
   }
 };
 

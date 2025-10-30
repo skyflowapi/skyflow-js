@@ -23,7 +23,8 @@ import {
   validateComposableContainerOptions,
   validateDeleteRecords,
   validateInputFormatOptions,
-  validateRenderElementRecord
+  validateRenderElementRecord,
+  validateUpdateRecord
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logs-helper';
 import { RedactionType } from '../../src/utils/common';
@@ -184,6 +185,108 @@ describe('insert records validation', () => {
     }
   })
 })
+
+describe('validateUpdateRecord', () => {
+  const validRecord = {
+    table: 'test_table',
+    fields: { name: 'John' },
+    skyflowID: 'id123',
+  };
+
+  test('throws INVALID_RECORD_KEY_UPDATE if recordObj is not an object', () => {
+    try {
+      validateUpdateRecord(null);
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_RECORD_KEY_UPDATE.description));
+    }
+  });
+
+  test('throws MISSING_TABLE_IN_UPDATE if table is missing', () => {
+    try {
+      validateUpdateRecord({ fields: {}, skyflowID: 'id123' });
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_UPDATE.description));
+    }
+  });
+
+  test('throws EMPTY_TABLE_IN_UPDATE if table is empty', () => {
+    try {
+      validateUpdateRecord({ table: '', fields: {}, skyflowID: 'id123' });
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_UPDATE.description));
+    }
+  });
+
+  test('throws INVALID_TABLE_IN_UPDATE if table is not a string', () => {
+    try {
+      validateUpdateRecord({ table: {}, fields: {}, skyflowID: 'id123' });
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_UPDATE.description));
+    }
+  });
+
+  test('throws MISSING_FIELDS_IN_UPDATE if fields is missing', () => {
+    try {
+      validateUpdateRecord({ table: 'test', skyflowID: 'id123' });
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_FIELDS_IN_UPDATE.description));
+    }
+  });
+
+  test('throws EMPTY_FIELDS_IN_UPDATE if fields is empty', () => {
+    try {
+      validateUpdateRecord({ table: 'test', fields: null, skyflowID: 'id123' });
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_FIELDS_IN_UPDATE.description));
+    }
+  });
+
+  test('throws INVALID_FIELDS_IN_UPDATE if fields is not an object', () => {
+    try {
+      validateUpdateRecord({ table: 'test', fields: 'invalid', skyflowID: 'id123' });
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FIELDS_IN_UPDATE.description));
+    }
+  });
+
+  test('throws MISSING_SKYFLOWID_IN_UPDATE if skyflowID is missing', () => {
+    try {
+      validateUpdateRecord({ table: 'test', fields: {} });
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_SKYFLOWID_IN_UPDATE.description));
+    }
+  });
+
+  test('throws EMPTY_SKYFLOWID_IN_UPDATE if skyflowID is empty', () => {
+    try {
+      validateUpdateRecord({ table: 'test', fields: {}, skyflowID: '' });
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOWID_IN_UPDATE.description));
+    }
+  });
+
+  test('throws INVALID_SKYFLOWID_IN_UPDATE if skyflowID is not a string', () => {
+    try {
+      validateUpdateRecord({ table: 'test', fields: {}, skyflowID: {} });
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_UPDATE.description));
+    }
+  });
+
+  test('throws INVALID_TOKENS_IN_UPDATE if options.tokens is not boolean', () => {
+    try {
+      validateUpdateRecord(validRecord, { tokens: 'notBoolean' });
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_UPDATE.description));
+    }
+  });
+
+  test('does not throw for valid input', () => {
+    expect(() => validateUpdateRecord(validRecord, { tokens: true })).not.toThrow();
+    expect(() => validateUpdateRecord(validRecord, { tokens: false })).not.toThrow();
+    expect(() => validateUpdateRecord(validRecord)).not.toThrow();
+  });
+});
 
 describe('insert additional records validation', () => {
   test('records not found', () => {

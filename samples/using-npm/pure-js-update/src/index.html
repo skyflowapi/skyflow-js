@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pure Js Update and Reveal</title>
+    <style>
+      .field {
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h3>Update</h3>
+      <form>
+        <div id="cardNumberContainer" class="field">
+          <label for="cardNumber">Card Number</label>
+          <br />
+          <input
+            id="cardNumber"
+            type="text"
+            placeholder="card number"
+            name="cardNumber"
+          />
+        </div>
+        <div id="cardCvvContainer" class="field">
+          <label for="cardCvv">CVV</label>
+          <br />
+          <input id="cardCvv" type="text" placeholder="cvv" minlength="4" />
+        </div>
+        <div id="cardPinContainer" class="field">
+          <label>Card Pin</label>
+          <br />
+          <input id="cardPin" type="number" placeholder="card pin" minlength="4" />
+        </div>
+        <br />
+        <button id="updateButton" type="button">update</button>
+      </form>
+      <div>
+        <h3>Update Response</h3>
+        <pre id="updateResponse"></pre>
+      </div>
+    </div>
+    <script type="module" src="index.js"></script>
+  </body>
+</html>

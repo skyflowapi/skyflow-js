@@ -199,6 +199,50 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.RECORDS_KEY_NOT_FOUND_DELETE,
   },
+  INVALID_RECORD_KEY_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_RECORD_KEY_UPDATE,
+  },
+  MISSING_TABLE_IN_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.MISSING_TABLE_IN_UPDATE,
+  },
+  EMPTY_TABLE_IN_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_TABLE_IN_UPDATE,
+  },
+  INVALID_TABLE_IN_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_TABLE_IN_UPDATE,
+  },
+  MISSING_FIELDS_IN_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.MISSING_FIELDS_IN_UPDATE,
+  },
+  EMPTY_FIELDS_IN_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_FIELDS_IN_UPDATE,
+  },
+  INVALID_FIELDS_IN_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_FIELDS_IN_UPDATE,
+  },
+  MISSING_SKYFLOWID_IN_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.MISSING_SKYFLOWID_IN_UPDATE,
+  },
+  EMPTY_SKYFLOWID_IN_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.EMPTY_SKYFLOWID_IN_UPDATE,
+  },
+  INVALID_SKYFLOWID_IN_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_SKYFLOWID_IN_UPDATE,
+  },
+  INVALID_TOKENS_IN_UPDATE: {
+    code: 400,
+    description: logs.errorLogs.INVALID_TOKENS_IN_UPDATE,
+  },
   EMPTY_RECORDS_IN_DELETE: { code: 400, description: logs.errorLogs.EMPTY_RECORDS_IN_DELETE },
   INVALID_RECORDS_IN_DELETE: { code: 404, description: logs.errorLogs.INVALID_RECORDS_IN_DELETE },
   INVALID_TABLE_IN_DELETE: { code: 400, description: logs.errorLogs.INVALID_TABLE_IN_DELETE },

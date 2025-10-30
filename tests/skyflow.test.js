@@ -370,6 +370,211 @@ describe('skyflow insert', () => {
   });
 });
 
+const updateRecord = {
+  table: 'pii_fields',
+  fields: {
+    first_name: 'joey',
+    primary_card: {
+      card_number: '411',
+      cvv: '123',
+    },
+  },
+  skyflowID: 'test-skyflow-id',
+};
+
+const updateOptions = {
+  returnTokens: true,
+};
+
+const updateResponse = {
+  updatedField: {
+    skyflowID: 'test-skyflow-id',
+    card_number: 'token2',
+    cvv: 'token3',
+  },
+};
+
+describe('skyflow update', () => {
+  let emitSpy;
+  let targetSpy;
+  let skyflow;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+
+    skyflow = Skyflow.init({
+      vaultID: 'vault123',
+      vaultURL: 'https://vaulturl.com',
+      getBearerToken: jest.fn(),
+    });
+  }); 
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('update success', (done) => {
+    const frameReadyEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReadyEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+
+    try {
+      const res = skyflow.update(updateRecord, updateOptions);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(updateResponse);
+
+      let data;
+      res.then((result) => data = result);
+
+      setTimeout(() => {
+        expect(data.updatedField.skyflowID).toBe('test-skyflow-id');
+        expect(data.updatedField.card_number).toBe('token2');
+        expect(data.updatedField.cvv).toBe('token3');
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {}
+  });
+
+  test('update error', (done) => {
+    const frameReadyEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReadyEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+
+    try {
+      const res = skyflow.update(updateRecord, updateOptions);
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb({ error: { message: "update failed", code: 400 } });
+
+      let error;
+      res.catch((err) => error = err);
+
+      setTimeout(() => {
+        expect(error).toBeDefined();
+        done();
+      }, 1000);
+    } catch (err) {}
+  });
+
+  test('update invalid input - missing table', (done) => {
+    const invalidRecord = { ...updateRecord };
+    delete invalidRecord.table;
+    const frameReadyEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReadyEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+
+    try {
+      const res = skyflow.update(invalidRecord, updateOptions);
+      res.catch((err) => {
+        expect(err).toBeDefined();
+        done();
+      });
+    } catch (err) {}
+  });
+
+  test('update invalid input - missing fields', (done) => {
+    const invalidRecord = { ...updateRecord };
+    delete invalidRecord.fields;
+    const frameReadyEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReadyEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+
+    try {
+      const res = skyflow.update(invalidRecord, updateOptions);
+      res.catch((err) => {
+        expect(err).toBeDefined();
+        done();
+      });
+    } catch (err) {}
+  });
+
+  test('update invalid input - missing skyflowID', (done) => {
+    const invalidRecord = { ...updateRecord };
+    delete invalidRecord.skyflowID;
+    const frameReadyEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReadyEvent[0][1];
+    const cb2 = jest.fn();
+    frameReadyCb({}, cb2);
+
+    try {
+      const res = skyflow.update(invalidRecord, updateOptions);
+      res.catch((err) => {
+        expect(err).toBeDefined();
+        done();
+      });
+    } catch (err) {}
+  });
+
+  test('update success else', (done) => {
+    try {
+      const res = skyflow.update(updateRecord, updateOptions);
+
+      const frameReadyEvent = on.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+      const frameReadyCb = frameReadyEvent[1][1];
+      frameReadyCb();
+
+      const emitEvent = emitSpy.mock.calls
+        .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+      const emitCb = emitEvent[0][2];
+      emitCb(updateResponse);
+
+      let data;
+      res.then((result) => data = result);
+
+      setTimeout(() => {
+        expect(data.updatedField.skyflowID).toBe('test-skyflow-id');
+        expect(data.updatedField.card_number).toBe('token2');
+        expect(data.updatedField.cvv).toBe('token3');
+        expect(data.error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {}
+  });
+
+test('update error else', (done) => {
+  try {
+    const res = skyflow.update(updateRecord, updateOptions);
+
+    const frameReadyEvent = on.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY));
+    const frameReadyCb = frameReadyEvent[1][1];
+    frameReadyCb();
+
+    const emitEvent = emitSpy.mock.calls
+      .filter((data) => data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST));
+    const emitCb = emitEvent[0][2];
+    emitCb({ error: { message: "update failed", code: 400 } });
+
+    let error;
+    res.catch((err) => error = err);
+
+    setTimeout(() => {
+      expect(error).toBeDefined();
+      done();
+    }, 1000);
+  } catch (err) {}
+});
+});
+
 const detokenizeInput = {
   records: [{
     token: 'token1',
