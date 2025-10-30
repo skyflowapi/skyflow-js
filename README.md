@@ -230,11 +230,8 @@ An [example](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-sc
 skyflowClient.update({
   table: 'cards',
   fields: {
-    table: 'cards',
-    fields: {
-      cardNumber: '41111111111',
-      cvv: '123',
-    },
+    cardNumber: '41111111111',
+    cvv: '123',
   },
   skyflowID: '43127a6c-5c15-4513-aa15-29f50bb37182'
 });
