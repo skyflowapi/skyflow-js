@@ -413,7 +413,10 @@ class RevealFrame {
   };
 
   private renderFile(data: IRevealRecord, clientConfig) {
-    this.#client = new Client(clientConfig, {});
+    this.#client = new Client(clientConfig, {
+      uuid: '',
+      clientDomain: '',
+    });
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowIDComposable(data, this.#client, clientConfig.authToken)

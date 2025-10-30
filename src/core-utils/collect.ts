@@ -347,9 +347,9 @@ export const insertDataInCollect = async (
   let insertErrorResponse: any;
   client
     ?.request({
-      body: {
+      body: JSON.stringify({
         records,
-      },
+      }),
       requestMethod: 'POST',
       url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
       headers: {
@@ -391,9 +391,9 @@ export const insertDataInMultipleFiles = async (
   let insertErrorResponse: any;
   client
     ?.request({
-      body: {
+      body: JSON.stringify({
         records,
-      },
+      }),
       requestMethod: 'POST',
       url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
       headers: {

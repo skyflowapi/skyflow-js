@@ -68,7 +68,10 @@ export default class RevealComposableFrameElementInit {
         const data = event?.data?.data ?? {};
         const elementIds = data?.elementIds ?? [];
         const revealDataInput: IRevealRecordComposable[] = [];
-        this.#client = new Client(event?.data?.clientConfig ?? {}, {});
+        this.#client = new Client(event?.data?.clientConfig ?? {}, {
+          uuid: '',
+          clientDomain: '',
+        });
 
         elementIds?.forEach((element) => {
           this.revealFrameList?.forEach((revealFrame) => {

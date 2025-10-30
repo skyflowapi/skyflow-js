@@ -187,7 +187,10 @@ export default class FrameElementInit {
   });
 
   uploadFiles = (fileElement, clientConfig) => {
-    this.#client = new Client(clientConfig, {});
+    this.#client = new Client(clientConfig, {
+      uuid: '',
+      clientDomain: '',
+    });
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const fileUploadObject: any = {};
 
@@ -391,7 +394,10 @@ export default class FrameElementInit {
         error: error?.message,
       });
     }
-    this.#client = new Client(clientConfig, {});
+    this.#client = new Client(clientConfig, {
+      uuid: '',
+      clientDomain: '',
+    });
     const client = this.#client;
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
       const insertPromiseSet: Promise<any>[] = [];
@@ -466,7 +472,10 @@ export default class FrameElementInit {
   private multipleUploadFiles =
   (fileElement: IFrameFormElement,
     clientConfig, metaData) => new Promise((rootResolve, rootReject) => {
-    this.#client = new Client(clientConfig, {});
+    this.#client = new Client(clientConfig, {
+      uuid: '',
+      clientDomain: '',
+    });
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
 
     const {
