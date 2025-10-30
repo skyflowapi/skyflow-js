@@ -342,6 +342,61 @@ describe("skyflow update", () => {
       });
     } catch (err) {}
   });
+
+  test("update success else", (done) => {
+    try {
+      const res: Promise<UpdateResponse> = skyflow.update(updateRecord, updateOptions);
+
+      const frameReadyEvent = on.mock.calls.filter((data) =>
+        data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY)
+      );
+      const frameReadyCb = frameReadyEvent[1][1];
+      frameReadyCb();
+
+      const emitEvent = emitSpy.mock.calls.filter((data) =>
+        data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST)
+      );
+      const emitCb = emitEvent[0][2];
+      emitCb(updateResponse);
+
+      let data: UpdateResponse;
+      res.then((result) => (data = result));
+
+      setTimeout(() => {
+        expect(data.updatedField.skyflowID).toBe("test-skyflow-id");
+        expect(data.updatedField.card_number).toBe("token2");
+        expect(data.updatedField.cvv).toBe("token3");
+        expect((data as any).error).toBeUndefined();
+        done();
+      }, 1000);
+    } catch (err) {}
+  });
+
+  test("update error else", (done) => {
+    try {
+      const res: Promise<UpdateResponse> = skyflow.update(updateRecord, updateOptions);
+
+      const frameReadyEvent = on.mock.calls.filter((data) =>
+        data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY)
+      );
+      const frameReadyCb = frameReadyEvent[1][1];
+      frameReadyCb();
+
+      const emitEvent = emitSpy.mock.calls.filter((data) =>
+        data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST)
+      );
+      const emitCb = emitEvent[0][2];
+      emitCb({ error: { message: "update failed", code: 400 } });
+
+      let error: UpdateResponse;
+      res.catch((err) => (error = err));
+
+      setTimeout(() => {
+        expect(error).toBeDefined();
+        done();
+      }, 1000);
+    } catch (err) {}
+  });
 });
 
 // detokenize records, options and responses
