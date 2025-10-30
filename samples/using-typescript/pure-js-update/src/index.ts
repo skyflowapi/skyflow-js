@@ -51,7 +51,7 @@ try {
       const cardholderNameData: string = cardholderNameElement.value;
 
       const updateRecord: UpdateRequest = {
-        table: "financial_service_providers",
+        table: "<TABLE_NAME>",
         fields: {
           cvv: cardCvvData,
           card_number: cardNumberData,
