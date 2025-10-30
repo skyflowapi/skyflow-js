@@ -31,26 +31,23 @@ try {
     updateButton.addEventListener('click', () => {
       const cardNumberElement = document.getElementById('cardNumber');
       const cardCvvElement = document.getElementById('cardCvv');
-      const cardExpiryElement = document.getElementById('cardExpiry');
-      const cardholderNameElement = document.getElementById('cardHolderName');
+      const cardPinElement = document.getElementById('cardPin');
 
-      if (!cardNumberElement || !cardCvvElement || !cardExpiryElement || !cardholderNameElement) {
+      if (!cardNumberElement || !cardCvvElement || !cardPinElement) {
         console.error('Required form elements not found');
         return;
       }
 
       const cardNumberData = cardNumberElement.value;
       const cardCvvData = cardCvvElement.value;
-      const cardExpiryData = cardExpiryElement.value;
-      const cardholderNameData = cardholderNameElement.value;
+      const cardPinData = Number(cardPinElement.value);
 
       const updateRecord = {
         table: "<TABLE_NAME>",
         fields: {
           cvv: cardCvvData,
           card_number: cardNumberData,
-          expiry_date: cardExpiryData,
-          cardholder_name: cardholderNameData,
+          card_pin: cardPinData,
         },
         skyflowID: "<SKYFLOW_ID>", // replace with actual Skyflow ID
       };

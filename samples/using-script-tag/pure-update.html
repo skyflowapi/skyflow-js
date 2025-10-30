@@ -31,21 +31,11 @@
           <br />
           <input id="cardCvv" type="text" placeholder="cvv" minlength="4" />
         </div>
-        <div id="cardExpiryDateContainer" class="field">
-          <label>Expiry Date</label>
+        <div id="cardPinContainer" class="field">
+          <label>Card PIN</label>
           <br />
-          <input id="cardExpiry" type="text" placeholder="MM/YYYY" />
+          <input id="cardPin" type="number" placeholder="card pin" minlength="4" />
         </div>
-        <div id="cardHolderNameContainer" class="field">
-          <label>Card Holder Name</label>
-          <br />
-          <input
-            id="cardHolderName"
-            type="text"
-            placeholder="card holder name"
-          />
-        </div>
-        <br />
         <br />
         <button id="updateButton" type="button">update</button>
       </form>
@@ -84,9 +74,7 @@
           updateButton.addEventListener("click", () => {
             const cardNumberData = document.getElementById("cardNumber").value;
             const cardCvvData = document.getElementById("cardCvv").value;
-            const cardExpiryData = document.getElementById("cardExpiry").value;
-            const cardholderNameData =
-              document.getElementById("cardHolderName").value;
+            const cardPinData = Number(document.getElementById("cardPin").value);
 
             const response = skyflow.update(
               {
@@ -94,8 +82,7 @@
                 fields: {
                   cvv: cardCvvData,
                   card_number: cardNumberData,
-                  expiry_date: cardExpiryData,
-                  cardholder_name: cardholderNameData,
+                  card_pin: cardPinData,
                 },
                 skyflowID: "<SKYFLOW_ID>", // replace with actual Skyflow ID
               },
