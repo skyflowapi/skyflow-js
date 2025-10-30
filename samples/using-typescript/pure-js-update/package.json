@@ -8,9 +8,9 @@
   },
   "license": "ISC",
   "dependencies": {
-    "skyflow-js": "^2.5.0"
+    "skyflow-js": "2.4.4-dev.10905d5"
   },
   "devDependencies": {
-    "parcel": "^2.0.1"
+    "parcel": "^2.5.0"
   }
 }
