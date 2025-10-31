@@ -150,6 +150,7 @@ class RevealContainer extends Container {
         containerId: this.#containerId,
         isMounted: this.#isMounted,
         eventEmitter: this.#eventEmmiter,
+        type: ContainerType.REVEAL,
       }, elementId, this.#context);
     this.#revealElements.push(revealElement);
     this.#skyflowElements[elementId] = revealElement;

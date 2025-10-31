@@ -33,10 +33,12 @@ import {
 import Container from '../common/container';
 
 import ComposableRevealElement from './composable-reveal-element';
-import { RevealElementInput, RevealResponse } from '../../../index-node';
+import { ContainerOptions, RevealElementInput, RevealResponse } from '../../../index-node';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import ComposableRevealInternalElement from './composable-reveal-internal';
 import { formatRevealElementOptions } from '../../../utils/helpers';
+import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
+import ComposableContainer, { ComposableElementGroup } from '../collect/compose-collect-container';
 
 const CLASS_NAME = 'ComposableRevealContainer';
 class ComposableRevealContainer extends Container {
@@ -44,15 +46,15 @@ class ComposableRevealContainer extends Container {
 
   #elements: Record<string, any> = {};
 
-  #metaData: any;
+  #metaData: Metadata;
 
   #elementGroup: any = { rows: [] };
 
   #elementsList:any = [];
 
-  #context:Context;
+  #context: Context;
 
-  #skyflowElements:any;
+  #skyflowElements: Array<SkyflowElementProps>;
 
   #eventEmitter: EventEmitter;
 
@@ -80,7 +82,12 @@ class ComposableRevealContainer extends Container {
 
   #getSkyflowBearerToken: () => Promise<string> | undefined;
 
-  constructor(options, metaData, skyflowElements, context) {
+  constructor(
+    metaData: Metadata,
+    skyflowElements:Array<SkyflowElementProps>,
+    context: Context,
+    options?: ContainerOptions,
+  ) {
     super();
     this.#containerId = uuid();
     this.#metaData = {
@@ -88,7 +95,7 @@ class ComposableRevealContainer extends Container {
       clientJSON: {
         ...metaData.clientJSON,
         config: {
-          ...metaData.clientJSON.config,
+          ...metaData.clientJSON?.config,
           options: {
             ...metaData.clientJSON.config?.options,
             ...options,
@@ -154,9 +161,9 @@ class ComposableRevealContainer extends Container {
   };
 
   #createMultipleElement = (
-    multipleElements: any,
+    multipleElements: ComposableElementGroup,
     isSingleElementAPI: boolean = false,
-  ) => {
+  ): ComposableContainer => {
     try {
       const elements: any[] = [];
       this.#tempElements = deepClone(multipleElements);
@@ -204,7 +211,6 @@ class ComposableRevealContainer extends Container {
               type: this.type,
               eventEmitter: this.#eventEmitter,
             },
-            true,
             this.#context,
           );
           this.#elements[this.#tempElements.elementName] = element;

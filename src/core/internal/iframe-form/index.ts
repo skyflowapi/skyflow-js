@@ -113,7 +113,7 @@ export default class IFrameFormElement extends EventEmitter {
 
   blockEmptyFiles: boolean = false;
 
-  constructor(name: string, label: string, metaData, context: Context, skyflowID?: string) {
+  constructor(name: string, label: string, metaData: any, context: Context, skyflowID?: string) {
     super();
     const frameValues = name.split(':');
     const fieldType = frameValues[1];

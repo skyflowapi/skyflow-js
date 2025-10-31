@@ -29,6 +29,7 @@ import properties from '../../../properties';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
 import EventEmitter from '../../../event-emitter';
 import { formatRevealElementOptions } from '../../../utils/helpers';
+import { Metadata, RevealContainerProps } from '../../internal/internal-types';
 
 const CLASS_NAME = 'RevealElementInteranalElement';
 
@@ -40,11 +41,11 @@ export interface RevealComposableGroup{
 class ComposableRevealInternalElement extends SkyflowElement {
   #iframe: IFrame;
 
-  #metaData: any;
+  #metaData: Metadata;
 
   #recordData: any;
 
-  #containerId: any;
+  #containerId: string;
 
   #isMounted:boolean = false;
 
@@ -60,34 +61,21 @@ class ComposableRevealInternalElement extends SkyflowElement {
 
   #eventEmitter: EventEmitter;
 
-  #isFrameReady: boolean;
-
-  #domSelecter: string;
-
-  #clientId: string;
-
-  #isSkyflowFrameReady: boolean = false;
-
-  #isSingleElementAPI: boolean;
-
   #shadowRoot: ShadowRoot | null = null;
 
   #getSkyflowBearerToken: () => Promise<string> | undefined;
-
-  #composableIframeName!: string;
 
   #isComposableFrameReady: boolean = false;
 
   constructor(elementId: string,
     recordGroup: RevealComposableGroup[],
-    metaData: any, container: any, isSingleElementAPI: boolean = false,
+    metaData: Metadata,
+    container: RevealContainerProps,
     context: Context) {
     super();
     this.#elementId = elementId;
     this.#metaData = metaData;
     this.resizeObserver = null;
-    this.#clientId = this.#metaData?.uuid;
-    this.#isSingleElementAPI = isSingleElementAPI;
     this.#recordData = recordGroup;
     this.#containerId = container?.containerId;
     this.#readyToMount = container?.isMounted ?? true;
@@ -101,11 +89,8 @@ class ComposableRevealInternalElement extends SkyflowElement {
       this.#context?.logLevel,
     );
 
-    this.#domSelecter = '';
-    this.#isFrameReady = false;
     this.#readyToMount = true;
     this.#getSkyflowBearerToken = metaData?.getSkyflowBearerToken;
-    this.#isSkyflowFrameReady = metaData?.skyflowContainer?.isControllerFrameReady ?? false;
 
     bus?.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe?.name, (data) => {
       this.#iframe?.setIframeHeight(data?.height);
@@ -304,7 +289,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
     }
   };
 
-  renderFile(recordData): Promise<RenderFileResponse> {
+  renderFile(recordData: any): Promise<RenderFileResponse> {
     let altText = '';
     if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
       altText = recordData.altText;

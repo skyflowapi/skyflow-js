@@ -85,7 +85,7 @@ class RevealFrame {
       parsedRecord.context, skyflowContainerId);
   }
 
-  constructor(record, context, id, rootDiv?) {
+  constructor(record, context: Context, id: string, rootDiv?: HTMLDivElement) {
     this.#skyflowContainerId = id;
     this.#name = rootDiv ? record?.name : window.name;
     this.#containerId = getValueFromName(this.#name, 2);
@@ -390,7 +390,7 @@ class RevealFrame {
 
   getData = () => this.#record;
 
-  private sub2 = (responseUrl) => {
+  private sub2 = (responseUrl: { iframeName?: string; error?: string; url?: string }) => {
     if (responseUrl.iframeName === this.#name) {
       if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
         this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
@@ -406,13 +406,14 @@ class RevealFrame {
             },
           );
       } else {
-        const ext = this.getExtension(responseUrl.url);
-        this.addFileRender(responseUrl.url, ext);
+        const ext = this.getExtension(responseUrl.url as string);
+        this.addFileRender(responseUrl.url as string, ext);
       }
     }
   };
 
-  private renderFile(data: IRevealRecord, clientConfig) {
+  private renderFile(data: IRevealRecord, clientConfig):
+  Promise<IRenderResponseType> | undefined {
     this.#client = new Client(clientConfig, {
       uuid: '',
       clientDomain: '',
@@ -445,7 +446,7 @@ class RevealFrame {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private getExtension(url) {
+  private getExtension(url: string) {
     try {
       const params = new URL(url).searchParams;
       const name = params.get('response-content-disposition');
@@ -459,7 +460,7 @@ class RevealFrame {
     }
   }
 
-  private addFileRender(responseUrl, ext) {
+  private addFileRender(responseUrl: string, ext: string) {
     let tag = '';
     if (typeof ext === 'string' && ext.includes('image')) {
       tag = 'img';

@@ -15,9 +15,9 @@ class ComposableRevealElement {
 
   #isMounted: boolean = false;
 
-  constructor(name, eventEmitter, iframeName) {
-    this.#elementName = name ?? '';
-    this.#iframeName = iframeName ?? '';
+  constructor(name: string, eventEmitter: EventEmitter, iframeName: string) {
+    this.#elementName = name;
+    this.#iframeName = iframeName;
     this.#eventEmitter = eventEmitter;
     this.#eventEmitter?.on?.(`${EventName?.READY ?? 'READY'}:${this.#elementName}`, () => {
       this.#isMounted = true;

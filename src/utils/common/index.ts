@@ -322,6 +322,11 @@ export interface ICollectOptions {
 export interface MetaData {
   [key: string]: any,
 }
+export interface EventConfig{
+  authToken: string,
+  vaultURL: string,
+  vaultID: string,
+}
 
 export interface UploadFilesResponse {
   fileUploadResponse?: Record<string, any>,

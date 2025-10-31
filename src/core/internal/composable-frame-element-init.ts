@@ -187,7 +187,7 @@ export default class RevealComposableFrameElementInit {
     RevealComposableFrameElementInit.frameEle = new RevealComposableFrameElementInit();
   };
 
-  revealData(revealRecords: IRevealRecordComposable[], containerId, authToken) {
+  revealData(revealRecords: IRevealRecordComposable[], containerId: string, authToken: string) {
     return new Promise((resolve, reject) => {
       fetchRecordsByTokenIdComposable(revealRecords, this.#client, authToken)?.then(
         (resolvedResult) => {
@@ -207,8 +207,7 @@ export default class RevealComposableFrameElementInit {
       styles,
       errorTextStyles,
     } = this.group ?? {};
-
-    const isComposableContainer = getContainerType(window?.name) === ContainerType?.COMPOSABLE;
+    const isComposableContainer = getContainerType(window?.name) === ContainerType?.COMPOSE_REVEAL;
     this.group.spacing = getValueAndItsUnit(this.group?.spacing)?.join('') ?? '';
     this.rootDiv = document?.createElement('div');
     this.rootDiv.className = 'container';
@@ -231,7 +230,6 @@ export default class RevealComposableFrameElementInit {
       row.spacing = getValueAndItsUnit(row?.spacing)?.join('') ?? '';
       const rowDiv = document?.createElement('div');
       rowDiv.id = `row-${rowIndex}`;
-
       const intialRowStyles = {
         'align-items': row?.alignItems ?? 'stretch',
         'justify-content': row?.justifyContent ?? 'flex-start',
@@ -262,7 +260,6 @@ export default class RevealComposableFrameElementInit {
             ...(errorTextStyles?.[STYLE_TYPE?.BASE] ?? {}),
           },
         };
-
         getCssClassesFromJss?.(errorStyles, 'row-error');
         if (errorTextStyles?.[STYLE_TYPE?.GLOBAL]) {
           generateCssWithoutClass?.(errorTextStyles?.[STYLE_TYPE?.GLOBAL]);

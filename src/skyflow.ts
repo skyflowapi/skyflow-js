@@ -270,7 +270,7 @@ class Skyflow {
 
       case ContainerType.COMPOSE_REVEAL: {
         validateComposableContainerOptions(options!);
-        const revealComposableContainer = new ComposableRevealContainer(options, {
+        const revealComposableContainer = new ComposableRevealContainer({
           ...this.#metadata,
           clientJSON: this.#client.toJSON(),
           containerType: type,
@@ -278,7 +278,7 @@ class Skyflow {
           getSkyflowBearerToken: this.#getSkyflowBearerToken,
         },
         this.#skyflowElements,
-        { logLevel: this.#logLevel, env: this.#env });
+        { logLevel: this.#logLevel, env: this.#env }, options);
         printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
           this.#logLevel);

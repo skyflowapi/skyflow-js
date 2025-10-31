@@ -44,6 +44,7 @@ export interface RevealContainerProps {
   containerId: string;
   isMounted: boolean;
   eventEmitter: EventEmitter;
+  type: string;
 }
 
 export interface InternalState {
