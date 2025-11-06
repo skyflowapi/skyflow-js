@@ -68,5 +68,6 @@ export { default as ComposableElement } from './core/external/collect/compose-co
 export { default as RevealContainer } from './core/external/reveal/reveal-container';
 export { default as RevealElement } from './core/external/reveal/reveal-element';
 export { default as ThreeDS } from './core/external/threeds/threeds';
-
+export { default as ComposableRevealContainer } from './core/external/reveal/composable-reveal-container';
+export { default as ComposableRevealElement } from './core/external/reveal/composable-reveal-element';
 export default Skyflow;
