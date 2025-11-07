@@ -3143,6 +3143,10 @@ fetch("<BACKEND_URL>")
 }
 ```
 
+Note: 
+- Only images and pdf can render in elements. 
+- To render pdf, need to give height and width in inputStyles.
+
 ### Update Reveal Elements
 
 You can update reveal element properties with the `update` interface.
