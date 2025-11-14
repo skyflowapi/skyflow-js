@@ -8,9 +8,6 @@ import SkyflowContainer from '../../../../src/core/external/skyflow-container';
 import Client from '../../../../src/client';
 import ComposableRevealInternalElement from "../../../../src/core/external/reveal/composable-reveal-internal";
 import * as busEvents from '../../../../src/utils/bus-events';
-
-
-
 import bus from "framebus";
 import { JSDOM } from 'jsdom';
 import EventEmitter from "../../../../src/event-emitter";
@@ -127,6 +124,7 @@ let skyflowContainer;
 describe("Reveal Element Class", () => {
   let emitSpy;
   let targetSpy;
+  let windowSpy;
   beforeEach(() => {
     jest.clearAllMocks();
     emitSpy = jest.spyOn(bus, 'emit');
@@ -135,8 +133,12 @@ describe("Reveal Element Class", () => {
       on,
       off
     });
+    windowSpy = jest.spyOn(window, "window", "get");
     const client = new Client(clientData.client.config, clientData);
     skyflowContainer = new SkyflowContainer(client, { logLevel: LogLevel.DEBUG, env: Env.PROD });
+  });
+  afterEach(() => {
+    windowSpy.mockRestore();
   });
 
   const containerId = mockUuid;
