@@ -224,6 +224,12 @@ describe("Reveal Element Class", () => {
     const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
 
+    // Mock iframe postMessage to prevent CI errors
+    const iframe = document.querySelector("iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage = jest.fn();
+    }
+
     groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", {}, (response) => {
         expect(response).toBeDefined();
         expect(response).toEqual({ success: { skyflow_id: '1244', column: 'file' } });
@@ -277,6 +283,12 @@ describe("Reveal Element Class", () => {
     const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
 
+    // Mock iframe postMessage to prevent CI errors
+    const iframe = document.querySelector("iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage = jest.fn();
+    }
+
     groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", {}, (response) => {
         expect(response).toBeDefined();
         expect(response).toEqual({ error: { skyflow_id: '1244', column: 'file', error:{code : 400, description: "No Records Found"} } });
@@ -333,6 +345,12 @@ describe("Reveal Element Class", () => {
     const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
 
+    // Mock iframe postMessage to prevent CI errors
+    const iframe = document.querySelector("iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage = jest.fn();
+    }
+
     groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", {}, (response) => {
         expect(response).toBeDefined();
         expect(response).toEqual({ error: { skyflow_id: '1244', column: 'file', error:{code : 400, description: "No Records Found"} } });
@@ -382,6 +400,12 @@ describe("Reveal Element Class", () => {
     expect(document.querySelector("iframe")).toBeTruthy();
     const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
+
+    // Mock iframe postMessage to prevent CI errors
+    const iframe = document.querySelector("iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage = jest.fn();
+    }
 
     groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
         expect(response).toBeDefined();
@@ -435,6 +459,12 @@ describe("Reveal Element Class", () => {
     expect(document.querySelector("iframe")).toBeTruthy();
     const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
+
+    // Mock iframe postMessage to prevent CI errors
+    const iframe = document.querySelector("iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage = jest.fn();
+    }
 
     groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
         expect(response).toBeDefined();
@@ -499,11 +529,16 @@ describe("Reveal Element Class", () => {
     const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
 
+    // Mock iframe postMessage to prevent CI errors
+    const iframe = document.querySelector("iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage = jest.fn();
+    }
+
     // Capture the callback response
     let callbackResponse;
     groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
         callbackResponse = response;
-        console.log('Callback response received:', response);
     });
     
     window.dispatchEvent(new MessageEvent('message', {
@@ -567,11 +602,16 @@ describe("Reveal Element Class", () => {
     const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
 
+    // Mock iframe postMessage to prevent CI errors
+    const iframe = document.querySelector("iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage = jest.fn();
+    }
+
     // Capture the callback response
     let callbackResponse;
     groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
         callbackResponse = response;
-        console.log('Callback response received:', response);
     });
     
     
@@ -612,6 +652,12 @@ describe("Reveal Element Class", () => {
     expect(document.querySelector("iframe")).toBeTruthy();
     const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
+
+    // Mock iframe postMessage to prevent CI errors
+    const iframe = document.querySelector("iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage = jest.fn();
+    }
 
     groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + ":element2", {
         updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
@@ -660,6 +706,12 @@ describe("Reveal Element Class", () => {
     expect(document.querySelector("iframe")).toBeTruthy();
     const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(document.querySelector("iframe")?.name).toBe(testIframeName);
+
+    // Mock iframe postMessage to prevent CI errors
+    const iframe = document.querySelector("iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage = jest.fn();
+    }
 
     groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + ":element2", {
         updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
