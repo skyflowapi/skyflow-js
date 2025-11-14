@@ -62,6 +62,7 @@ const metaData: Metadata = {
   skyflowContainer: {
     isControllerFrameReady: true,
   } as unknown as SkyflowContainer,
+  getSkyflowBearerToken: getBearerToken,
 };
 
 const metaData2: Metadata = {

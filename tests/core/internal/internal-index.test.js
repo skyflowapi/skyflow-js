@@ -42,7 +42,13 @@ describe('domReady function - FrameElement', () => {
         on,
     });
     windowSpy = jest.spyOn(window,'parent','get');
-
+          const originalPostMessage = window.postMessage;
+          window.postMessage = (message, targetOrigin, ...args) => {
+            if (!targetOrigin) {
+              targetOrigin = "*";
+            }
+          return originalPostMessage.call(window, message, targetOrigin, ...args);
+          };
     mockIFrameFormElement = {
       resetEvents: jest.fn(),
       on: jest.fn(),

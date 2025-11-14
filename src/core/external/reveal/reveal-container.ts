@@ -79,7 +79,7 @@ class RevealContainer extends Container {
     options?: ContainerOptions,
   ) {
     super();
-    this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
+    this.#isSkyflowFrameReady = metaData?.skyflowContainer?.isControllerFrameReady;
     this.#metaData = {
       ...metaData,
       clientJSON: {
@@ -150,6 +150,7 @@ class RevealContainer extends Container {
         containerId: this.#containerId,
         isMounted: this.#isMounted,
         eventEmitter: this.#eventEmmiter,
+        type: ContainerType.REVEAL,
       }, elementId, this.#context);
     this.#revealElements.push(revealElement);
     this.#skyflowElements[elementId] = revealElement;

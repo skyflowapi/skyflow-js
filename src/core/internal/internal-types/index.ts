@@ -44,9 +44,11 @@ export interface RevealContainerProps {
   containerId: string;
   isMounted: boolean;
   eventEmitter: EventEmitter;
+  type: string;
 }
 
 export interface InternalState {
+  metaData: any;
   isEmpty: boolean,
   isValid: boolean,
   isFocused: boolean,
@@ -80,4 +82,5 @@ export interface Metadata extends ClientMetadata {
   clientJSON: ClientToJSON;
   containerType: ContainerType;
   skyflowContainer: SkyflowContainer;
+  getSkyflowBearerToken: () => Promise<string>;
 }

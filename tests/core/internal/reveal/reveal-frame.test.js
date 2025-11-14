@@ -55,6 +55,20 @@ const defineUrl = (url) => {
     value: "reveal:1234",
     writable: true,
   });
+  Object.defineProperty(window, "parent", {
+    value: {
+      frames: {
+        "element:CARD_NUMBER:${tableCol}": {
+          document: {
+            getElementById: () => ({ value: testValue }),
+          },
+        },
+      },
+      postMessage: jest.fn(),
+      addEventListener: jest.fn(),
+    },
+    writable: true,
+  });
 };
 const elementName = "reveal:1234"
 
@@ -171,10 +185,10 @@ name: elementName,
     // 
 
     // reveal response ready
-    const onRevealResponseName = on.mock.calls[0][0];
+    const onRevealResponseName = on.mock.calls[1][0];
     // undefined since with jest window.name will be emptyString("") 
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
-    const onRevealResponseCb = on.mock.calls[0][1];
+    const onRevealResponseCb = on.mock.calls[1][1];
     onRevealResponseCb({"1815-6223-1073-1425":"card_value"})
 
   });
@@ -213,10 +227,10 @@ name: elementName,
     
 
     // reveal response ready
-    const onRevealResponseName = on.mock.calls[0][0];
+    const onRevealResponseName = on.mock.calls[1][0];
     // undefined since with jest window.name will be emptyString("") 
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
-    const onRevealResponseCb = on.mock.calls[0][1];
+    const onRevealResponseCb = on.mock.calls[1][1];
     onRevealResponseCb({"1815":"1234"})
   });
   test("init callback after reveal without value",()=>{
@@ -257,10 +271,10 @@ name: elementName,
     
 
     // reveal response ready
-    const onRevealResponseName = on.mock.calls[0][0];
+    const onRevealResponseName = on.mock.calls[1][0];
     // undefined since with jest window.name will be emptyString("") 
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
-    const onRevealResponseCb = on.mock.calls[0][1];
+    const onRevealResponseCb = on.mock.calls[1][1];
     onRevealResponseCb({});
 
   });
@@ -305,10 +319,10 @@ name: elementName,
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);
     
 
-    const onSetErrorName = on.mock.calls[1][0];
+    const onSetErrorName = on.mock.calls[2][0];
     // undefined since with jest window.name will be emptyString("") 
     expect(onSetErrorName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR+ elementName);
-    const onSetErrorCb = on.mock.calls[1][1];
+    const onSetErrorCb = on.mock.calls[2][1];
     onSetErrorCb({
       name:elementName,
       isTriggerError: true,
@@ -355,10 +369,10 @@ name: elementName,
     
 
     // reveal response ready
-    const onRevealResponseName = on.mock.calls[1][0];
+    const onRevealResponseName = on.mock.calls[2][0];
     // undefined since with jest window.name will be emptyString("") 
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR+ elementName);;
-    const onRevealResponseCb = on.mock.calls[1][1];
+    const onRevealResponseCb = on.mock.calls[2][1];
     onRevealResponseCb({
       name: elementName,
       isTriggerError: false,
@@ -401,10 +415,10 @@ name: elementName,
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
-    const onRevealResponseName = on.mock.calls[2][0];
+    const onRevealResponseName = on.mock.calls[3][0];
     // undefined since with jest window.name will be emptyString("") 
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS+ elementName);
-    const onRevealResponseCb = on.mock.calls[2][1];
+    const onRevealResponseCb = on.mock.calls[3][1];
     onRevealResponseCb({
       name: elementName,
       updateType:REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN,
@@ -449,10 +463,10 @@ name: elementName,
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
-    const onRevealResponseName = on.mock.calls[2][0];
+    const onRevealResponseName = on.mock.calls[3][0];
     // undefined since with jest window.name will be emptyString("") 
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS+ elementName);
-    const onRevealResponseCb = on.mock.calls[2][1];
+    const onRevealResponseCb = on.mock.calls[3][1];
     onRevealResponseCb({
       name: elementName,
       updateType:REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
@@ -497,10 +511,10 @@ name: elementName,
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
-    const onRevealResponseName = on.mock.calls[2][0];
+    const onRevealResponseName = on.mock.calls[3][0];
     // undefined since with jest window.name will be emptyString("") 
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS+ elementName);
-    const onRevealResponseCb = on.mock.calls[2][1];
+    const onRevealResponseCb = on.mock.calls[3][1];
     onRevealResponseCb({
       name: elementName,
       updateType:REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
@@ -671,9 +685,9 @@ name: elementName,
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
-    const onRevealResponseName = on.mock.calls[2][0];
+    const onRevealResponseName = on.mock.calls[3][0];
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS+ elementName);
-    const onRevealResponseCb = on.mock.calls[2][1];
+    const onRevealResponseCb = on.mock.calls[3][1];
     onRevealResponseCb({
       name: elementName,
       updateType:REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
@@ -712,9 +726,9 @@ name: elementName,
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
-    const eventRenderResponse = on.mock.calls[3][0];
+    const eventRenderResponse = on.mock.calls[0][0];
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+ elementName);
-    const callback = on.mock.calls[3][1];
+    const callback = on.mock.calls[0][1];
     callback(
       { url: "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
       iframeName: elementName,
@@ -764,9 +778,9 @@ name: elementName,
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
-    const eventRenderResponse = on.mock.calls[3][0];
+    const eventRenderResponse = on.mock.calls[0][0];
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+ elementName);
-    const callback = on.mock.calls[3][1];
+    const callback = on.mock.calls[0][1];
     callback({
       url:  "https://url?response-content-disposition=inline%3B%20filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
       iframeName: elementName,
@@ -789,9 +803,9 @@ name: elementName,
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
-    const eventRenderResponse = on.mock.calls[3][0];
+    const eventRenderResponse = on.mock.calls[0][0];
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+ elementName);
-    const callback = on.mock.calls[3][1];
+    const callback = on.mock.calls[0][1];
     callback({
       url:  "https://fileurl?response-content-disposition=inline%3B%20filename%3Ddummylicence.png&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
       iframeName: elementName,
@@ -829,9 +843,9 @@ name: elementName,
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
-    const eventRenderResponse = on.mock.calls[3][0];
+    const eventRenderResponse = on.mock.calls[0][0];
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+ elementName);
-    const callback = on.mock.calls[3][1];
+    const callback = on.mock.calls[0][1];
     callback({
       url: "https://fileurl?filename%3Ddummylicence.pdf&X-Amz-Signature=4a19c53917cc21df2bd05bc28e4e316ffc36c208d005d8f3f50631",
       iframeName: elementName,
@@ -870,9 +884,9 @@ name: elementName,
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     
 
-    const eventRenderResponse = on.mock.calls[3][0];
+    const eventRenderResponse = on.mock.calls[0][0];
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY+ elementName);
-    const callback = on.mock.calls[3][1];
+    const callback = on.mock.calls[0][1];
     callback({
       error: DEFAULT_FILE_RENDER_ERROR,
       iframeName: elementName,
@@ -993,9 +1007,9 @@ describe("Reveal Frame Class", () => {
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     console.log('======>>>>>>>>>', emitSpy.mock.calls, onMock.mock.calls);
     // Verify reveal response ready
-    const onRevealResponseName = onMock.mock.calls[0][0];
+    const onRevealResponseName = onMock.mock.calls[1][0];
     expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
-    const onRevealResponseCb = onMock.mock.calls[0][1];
+    const onRevealResponseCb = onMock.mock.calls[1][1];
     onRevealResponseCb({ "1815-6223-1073-1425": "card_value" });
   });
 
@@ -1028,9 +1042,9 @@ describe("Reveal Frame Class", () => {
     const emittedEventName = emitSpy.mock.calls[0][0];
     const emitCb = emitSpy.mock.calls[0][2];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
-    const eventRenderResponse = onMock.mock.calls[3][0];
+    const eventRenderResponse = onMock.mock.calls[0][0];
     expect(eventRenderResponse).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + elementName);
-    const callback = onMock.mock.calls[3][1];
+    const callback = onMock.mock.calls[0][1];
     callback({
       error: DEFAULT_FILE_RENDER_ERROR,
       iframeName: elementName,
@@ -1073,7 +1087,6 @@ describe("Reveal Frame Class", () => {
     defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
     const testFrame = RevealFrame.init();
     const emittedEventName = emitSpy.mock.calls[0][0];
-    console.log("testFrame===>", emitSpy.mock.calls);
     const emittedData = emitSpy.mock.calls[0][1];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     expect(emittedData).toEqual({name : elementName})
