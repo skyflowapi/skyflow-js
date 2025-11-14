@@ -360,7 +360,7 @@ class ComposableContainer extends Container {
                 authToken,
               },
               options: {
-                ...data.options,
+                ...data?.options,
               },
             },
           );

@@ -76,15 +76,23 @@ const element = {
 describe('test frame elements', () => {
     let emitSpy;
     let windowSpy;
+    let windowSpy1;
     beforeEach(() => {
         windowSpy = jest.spyOn(global, 'window', 'get');
         windowSpy.mockImplementation(() => ({
             name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
             location: {
               href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-            }
+            },
+            parent: {
+              postMessage: (message, targetOrigin, ...args) => {
+                if (!targetOrigin) targetOrigin = "*";
+                // Optionally, call a jest mock here
+                console.log("postMessage called with:", message, targetOrigin, args);
+              }
+            },
+            addEventListener: jest.fn(),
         }));
-
         emitSpy = jest.spyOn(bus, 'emit');
     })
     test('FrameElementInit constructor : empty path', () => {
@@ -93,7 +101,14 @@ describe('test frame elements', () => {
         name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
         location: {
           href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-        }
+        },
+        parent: {
+              postMessage: (message, targetOrigin, ...args) => {
+                if (!targetOrigin) targetOrigin = "*";
+                // Optionally, call a jest mock here
+              }
+            },
+            addEventListener: jest.fn(),
       }))
         const onSpy = jest.spyOn(bus, 'on');
         FrameElementInit.startFrameElement('123')
@@ -155,7 +170,14 @@ describe('test composable frame elements', () => {
           name: `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR:`,
           location: {
             href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-          }
+          },
+          parent: {
+              postMessage: (message, targetOrigin, ...args) => {
+                if (!targetOrigin) targetOrigin = "*";
+                // Optionally, call a jest mock here
+              }
+            },
+            addEventListener: jest.fn(),
       }));
 
       emitSpy = jest.spyOn(bus, 'emit');
@@ -166,7 +188,14 @@ describe('test composable frame elements', () => {
       name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR:`,
       location: {
         href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-      }
+      },
+      parent: {
+              postMessage: (message, targetOrigin, ...args) => {
+                if (!targetOrigin) targetOrigin = "*";
+                // Optionally, call a jest mock here
+              }
+            },
+            addEventListener: jest.fn(),
     }))
       const onSpy = jest.spyOn(bus, 'on');
       FrameElementInit.group = [];

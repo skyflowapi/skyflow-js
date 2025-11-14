@@ -79,7 +79,7 @@ class RevealContainer extends Container {
     options?: ContainerOptions,
   ) {
     super();
-    this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
+    this.#isSkyflowFrameReady = metaData?.skyflowContainer?.isControllerFrameReady;
     this.#metaData = {
       ...metaData,
       clientJSON: {

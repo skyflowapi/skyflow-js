@@ -67,14 +67,17 @@ describe('test iframeFormelement', () => {
         targetSpy.mockReturnValue({
             on,
         });
-        windowSpy = jest.spyOn(window,'parent','get');
+        windowSpy = jest.spyOn(global, 'window', 'get');
         windowSpy.mockImplementation(()=>({
-         
-                frames:{
+                parent:{
+                    frames:{
                 'element:CARD_NUMBER:${tableCol}':{document:{
                     getElementById:()=>({value:testValue})
                 }}
-                }
+                },
+                    postMessage: jest.fn(),
+                },
+                addEventListener: jest.fn(),
         }));
     });
     afterEach(() => {

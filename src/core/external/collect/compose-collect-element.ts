@@ -40,8 +40,8 @@ class ComposableElement {
     });
     this.#metaData = metaData;
     this.#context = {
-      logLevel: this.#metaData.clientJSON?.config?.options?.logLevel,
-      env: this.#metaData.clientJSON?.config?.options?.env,
+      logLevel: this.#metaData?.clientJSON?.config?.options?.logLevel,
+      env: this.#metaData?.clientJSON?.config?.options?.env,
     };
     this.#elementType = this.#metaData?.type as ElementType;
   }

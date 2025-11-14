@@ -438,22 +438,13 @@ describe("Reveal Element Class", () => {
       data => console.log('data', data)
       ).catch (
       (error) => {
-        expect(error).toEqual({
-          "errors": {
-              "grpc_code": 5,
-              "http_code": 404,
-              "message": "No Records Found",
-              "http_status": "Not Found",
-              "details": []
-          }
-      }
-    );
+        expect(error).toEqual({ errors: { skyflowId:'1244', error: "No Records Found", column: "Not column" } });
     });
 
     expect(emitSpy.mock.calls[3][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + '123');
     expect(emitSpy.mock.calls[3][1]).toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' }, containerId: mockUuid, iframeName: testIframeName});
     const emitCb = emitSpy.mock.calls[3][2];
-    emitCb({ errors: { grpc_code: 5, http_code: 404, message: "No Records Found", http_status: "Not Found", details: [] } });
+    emitCb({ errors: { skyflowId:'1244', error: "No Records Found", column: "Not column" } });
   });
 
   test("Mount Method with ready to mount false", () => {

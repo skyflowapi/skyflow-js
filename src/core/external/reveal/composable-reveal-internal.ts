@@ -68,7 +68,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
   #isComposableFrameReady: boolean = false;
 
   constructor(elementId: string,
-    recordGroup: RevealComposableGroup[],
+    recordGroup,
     metaData: Metadata,
     container: RevealContainerProps,
     context: Context) {
@@ -294,7 +294,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
     if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
       altText = recordData.altText;
     }
-    this.setAltText('loading...');
+    this.setAltText('loading...', recordData);
     const loglevel = this.#context.logLevel;
     if (this.#isComposableFrameReady) {
       return new Promise((resolve, reject) => {
@@ -304,7 +304,6 @@ class ComposableRevealInternalElement extends SkyflowElement {
             MessageType.LOG,
             loglevel);
           validateRenderElementRecord(recordData);
-
           this.#getSkyflowBearerToken()?.then((authToken) => {
             printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
               MessageType.LOG,
@@ -335,7 +334,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
                     ), MessageType.ERROR,
                     this.#context.logLevel);
                     if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
-                      this.setAltText(altText);
+                      this.setAltText(altText, recordData);
                     }
                     reject(revealData?.error || revealData?.errors);
                   } else {
@@ -400,15 +399,15 @@ class ComposableRevealInternalElement extends SkyflowElement {
              + recordData.name) {
                   if (event1?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
                     const revealData = event1?.data?.data?.result;
-                    if (revealData?.error) {
+                    if (revealData?.error || revealData?.errors) {
                       printLog(parameterizedString(
                         logs.errorLogs.FAILED_RENDER,
                       ), MessageType.ERROR,
                       this.#context.logLevel);
                       if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
-                        this.setAltText(altText);
+                        this.setAltText(altText, recordData);
                       }
-                      reject(revealData);
+                      reject(revealData?.error || revealData?.errors);
                     } else {
                       // eslint-disable-next-line max-len
                       printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
@@ -447,11 +446,6 @@ class ComposableRevealInternalElement extends SkyflowElement {
     return this.#isMounted;
   }
 
-  hasToken():boolean {
-    if (this.#recordData.token) return true;
-    return false;
-  }
-
   isClientSetError():boolean {
     return this.#isClientSetError;
   }
@@ -460,134 +454,51 @@ class ComposableRevealInternalElement extends SkyflowElement {
     return this.#recordData;
   }
 
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
   setErrorOverride(clientErrorText: string) {
-    if (this.#isMounted) {
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
-        name: this.#iframe.name,
-        isTriggerError: true,
-        clientErrorText,
-      });
-    } else {
-      bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
-        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
-            name: this.#iframe.name,
-            isTriggerError: true,
-            clientErrorText,
-          });
-        });
-    }
-    this.#isClientSetError = true;
+    // to be implemented
   }
 
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
   setError(clientErrorText:string) {
-    if (this.#isMounted) {
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
-        name: this.#iframe.name,
-        isTriggerError: true,
-        clientErrorText,
-      });
-    } else {
-      bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
-        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-          this.#isMounted = true;
-          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
-            name: this.#iframe.name,
-            isTriggerError: true,
-            clientErrorText,
-          });
-        });
-    }
-    this.#isClientSetError = true;
+    // to be implemented
   }
 
+  // eslint-disable-next-line class-methods-use-this
   resetError() {
-    if (this.#isMounted) {
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
-        name: this.#iframe.name,
-        isTriggerError: false,
-      });
-    } else {
-      bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
-        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-          this.#isMounted = true;
-          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#iframe.name, {
-            name: this.#iframe.name,
-            isTriggerError: false,
-          });
-        });
-    }
-    this.#isClientSetError = false;
+    // to be implemented
   }
 
-  setAltText(altText:string) {
-    if (this.#isMounted) {
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-        name: this.#iframe.name,
-        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
-        updatedValue: altText,
-      });
+  setAltText(altText:string, record) {
+    if (this.#isComposableFrameReady) {
+      this.#emitEvent(
+        ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + record?.name,
+        {
+          name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + record?.name,
+          updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
+          updatedValue: altText,
+        },
+      );
     } else {
-      bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
-        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-          this.#isMounted = true;
-          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-            name: this.#iframe.name,
-            updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
-            updatedValue: altText,
-          });
-        });
+      window.addEventListener('message', (event) => {
+        if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
+                  + record?.name) {
+          this.#emitEvent(
+            ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + record?.name,
+            {
+              name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + record?.name,
+              updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
+              updatedValue: altText,
+            },
+          );
+        }
+      });
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   clearAltText() {
-    if (this.#isMounted) {
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-        name: this.#iframe.name,
-        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
-        updatedValue: null,
-      });
-    } else {
-      bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
-        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-          this.#isMounted = true;
-          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-            name: this.#iframe.name,
-            updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
-            updatedValue: null,
-          });
-        });
-    }
-  }
-
-  setToken(token:string) {
-    this.#recordData = {
-      ...this.#recordData,
-      token,
-    };
-    if (this.#isMounted) {
-      bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-        name: this.#iframe.name,
-        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN,
-        updatedValue: token,
-      });
-    } else {
-      bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
-        .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
-          this.#isMounted = true;
-          bus.emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#iframe.name, {
-            name: this.#iframe.name,
-            updateType: REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN,
-            updatedValue: token,
-          });
-        });
-    }
+    // to be implemented
   }
 
   unmount() {

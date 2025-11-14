@@ -24,6 +24,13 @@ import SkyflowError from "../../../../src/libs/skyflow-error";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
 import { ContainerType } from "../../../../src/skyflow";
 import { Metadata } from "../../../../src/core/internal/internal-types";
+import IFrame from "../../../../src/core/external/common/iframe";
+
+global.ResizeObserver = jest.fn(() => ({
+  observe: jest.fn(),
+  disconnect: jest.fn(),
+  unobserve: jest.fn(),
+}));
 
 const bus = require("framebus");
 
@@ -37,7 +44,7 @@ jest.mock("../../../../src/iframe-libs/iframer", () => {
   return mockedModule;
 });
 
-const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve());
+const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve("token"));
 
 const mockUuid = "1234";
 jest.mock("../../../../src/libs/uuid", () => ({
@@ -96,6 +103,7 @@ const metaData: Metadata = {
       clientDomain: "http://abc.com",
     },
   },
+  getSkyflowBearerToken: getBearerToken,
   skyflowContainer: {
     isControllerFrameReady: true,
   } as unknown as SkyflowContainer,
@@ -257,7 +265,6 @@ describe("test composable container class", () => {
     const div = document.createElement("div");
     div.id = "composable";
     document.body.append(div);
-
     const container = new ComposableContainer(metaData, [], context, {
       layout: [2],
       styles: { base: { width: "100px" } },
@@ -267,7 +274,6 @@ describe("test composable container class", () => {
     const element2 = container.create(cardNumberElement);
 
     container.mount("#composable");
-
     const options: ICollectOptions = {
       tokens: true,
       additionalFields: {
@@ -290,19 +296,26 @@ describe("test composable container class", () => {
 
     const collectPromiseSuccess: Promise<CollectResponse> =
       container.collect(options);
-
-    const collectCb1 = emitSpy.mock.calls[0][2];
-    collectCb1(collectResponse);
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + '1234', // containerId
+        data: {...collectResponse}
+      }
+    }));
 
     const successResult = await collectPromiseSuccess;
     expect(successResult).toEqual(collectResponse);
 
     const collectPromiseError: Promise<CollectResponse> =
       container.collect(options);
-    const collectCb2 = emitSpy.mock.calls[1][2];
-    collectCb2({ error: "Error occurred" });
-
-    await expect(collectPromiseError).rejects.toEqual("Error occurred");
+    
+      window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + '1234', // containerId
+        data: { error: "Error occured"}
+      }
+    }));
+    await expect(collectPromiseError).rejects.toEqual("Error occured");
   });
 
   it("tests collect when isMount is false", async () => {

@@ -8,6 +8,7 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   REVEAL_TYPES,
   REVEAL_ELEMENT_OPTIONS_TYPES,
+  ElementType,
 } from "../../../../src/core/constants";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
@@ -95,6 +96,7 @@ const metaData: Metadata = {
       clientDomain: clientDomain,
     },
   },
+  getSkyflowBearerToken: getBearerToken,
   skyflowContainer: {
     isControllerFrameReady: true,
   } as unknown as SkyflowContainer,
@@ -193,6 +195,7 @@ describe("Reveal Element Class", () => {
         containerId: containerId,
         isMounted: false,
         eventEmitter: groupEmiitter,
+        type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -209,6 +212,7 @@ describe("Reveal Element Class", () => {
         containerId: containerId,
         isMounted: true,
         eventEmitter: groupEmiitter,
+        type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -256,6 +260,7 @@ describe("Reveal Element Class", () => {
         containerId: containerId,
         isMounted: true,
         eventEmitter: groupEmiitter,
+        type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -303,6 +308,7 @@ describe("Reveal Element Class", () => {
         containerId: containerId,
         isMounted: true,
         eventEmitter: groupEmiitter,
+        type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -380,6 +386,7 @@ describe("Reveal Element Class", () => {
         containerId: containerId,
         isMounted: true,
         eventEmitter: groupEmiitter,
+        type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -435,6 +442,7 @@ describe("Reveal Element Class", () => {
         containerId: containerId,
         isMounted: true,
         eventEmitter: groupEmiitter,
+        type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -489,6 +497,7 @@ describe("Reveal Element Class", () => {
         containerId: containerId,
         isMounted: true,
         eventEmitter: groupEmiitter,
+        type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -517,45 +526,17 @@ describe("Reveal Element Class", () => {
     });
     expect(testRevealElement.isMounted()).toBe(true);
     expect(testRevealElement.iframeName()).toBe(testIframeName);
-    testRevealElement
-      .renderFile()
-      .then((data) => console.log("data", data))
-      .catch((error) => {
-        expect(error).toEqual({
-          errors: {
-            grpc_code: 5,
-            http_code: 404,
-            message: "No Records Found",
-            http_status: "Not Found",
-            details: [],
-          },
-        });
-      });
+    testRevealElement.renderFile().then(
+      data => console.log('data', data)
+      ).catch (
+      (error) => {
+        expect(error).toEqual({ errors: { skyflowId:'1244', error: "No Records Found", column: "Not column" } });
+    });
 
-    expect(emitSpy.mock.calls[3][0]).toBe(
-      ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + "123"
-    );
-    expect(emitSpy.mock.calls[3][1]).toEqual({
-      type: REVEAL_TYPES.RENDER_FILE,
-      records: {
-        altText: "alt text",
-        skyflowID: "1244",
-        column: "column",
-        table: "table",
-      },
-      containerId: mockUuid,
-      iframeName: testIframeName,
-    });
+    expect(emitSpy.mock.calls[3][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + '123');
+    expect(emitSpy.mock.calls[3][1]).toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' }, containerId: mockUuid, iframeName: testIframeName});
     const emitCb = emitSpy.mock.calls[3][2];
-    emitCb({
-      errors: {
-        grpc_code: 5,
-        http_code: 404,
-        message: "No Records Found",
-        http_status: "Not Found",
-        details: [],
-      },
-    });
+    emitCb({ errors: { skyflowId:'1244', error: "No Records Found", column: "Not column" } });
   });
 
   test("Mount method with ready to mount false", () => {
@@ -567,6 +548,7 @@ describe("Reveal Element Class", () => {
         containerId: containerId,
         isMounted: false,
         eventEmitter: groupEmiitter,
+        type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -599,6 +581,7 @@ describe("Reveal Element Class", () => {
         containerId: containerId,
         isMounted: false,
         eventEmitter: groupEmiitter,
+        type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -631,6 +614,7 @@ describe("Reveal Element Class", () => {
         containerId: containerId,
         isMounted: false,
         eventEmitter: groupEmiitter,
+        type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -647,7 +631,8 @@ describe("Reveal Element Methods", () => {
     },
     undefined,
     metaData,
-    { containerId: containerId, isMounted: false, eventEmitter: groupEmiitter },
+    { containerId: containerId, isMounted: false, eventEmitter: groupEmiitter, type: ContainerType.REVEAL
+ },
     elementId,
     { logLevel: LogLevel.ERROR, env: Env.PROD }
   );
@@ -690,7 +675,8 @@ describe("Reveal Element Methods", () => {
     },
     undefined,
     metaData,
-    { containerId: containerId, isMounted: false, eventEmitter: groupEmiitter },
+    { containerId: containerId, isMounted: false, eventEmitter: groupEmiitter, type: ContainerType.REVEAL
+ },
     elementId,
     { logLevel: LogLevel.ERROR, env: Env.PROD }
   );

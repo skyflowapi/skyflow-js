@@ -93,17 +93,17 @@ class ComposableRevealContainer extends Container {
     this.#metaData = {
       ...metaData,
       clientJSON: {
-        ...metaData.clientJSON,
+        ...metaData?.clientJSON,
         config: {
-          ...metaData.clientJSON?.config,
+          ...metaData?.clientJSON?.config,
           options: {
-            ...metaData.clientJSON.config?.options,
+            ...metaData?.clientJSON?.config?.options,
             ...options,
           },
         },
       },
     };
-    this.#getSkyflowBearerToken = metaData.getSkyflowBearerToken;
+    this.#getSkyflowBearerToken = metaData?.getSkyflowBearerToken;
     this.#skyflowElements = skyflowElements;
     this.#context = context;
     this.#options = options;
@@ -431,7 +431,7 @@ class ComposableRevealContainer extends Container {
             MessageType.LOG,
             this.#context.logLevel);
           window.addEventListener('message', (messagEevent) => {
-            if (messagEevent.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+            if (messagEevent?.data?.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
                   + this.#containerId) {
               this.#emitEvent(
                 ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + this.#containerId, {
@@ -449,10 +449,10 @@ class ComposableRevealContainer extends Container {
                 },
               );
               window.addEventListener('message', (event) => {
-                if (event.data.type
+                if (event?.data?.type
                === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
-                  const revealData = event.data.data;
-                  if (revealData.errors) {
+                  const revealData = event?.data?.data;
+                  if (revealData?.errors) {
                     printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
                       MessageType.ERROR, this.#context.logLevel);
                     reject(revealData);
