@@ -2,10 +2,14 @@ import {
   getUpsertColumn,
   constructElementsInsertReq,
   checkForValueMatch,
+  constructUpdateRecordResponse,
+  constructUpdateRecordRequest,
 } from "../../src/core-utils/collect";
 import IFrameFormElement from "../../src/core/internal/iframe-form";
 import {
   ICollectOptions,
+  IUpdateOptions,
+  IUpdateRequest,
   IUpsertOption,
   IValidationRule,
   ValidationRuleType,
@@ -164,5 +168,96 @@ describe("Testing checkForValueMatch method", () => {
     expect(checkForValueMatch(validations, element as IFrameFormElement)).toBe(
       false
     );
+  });
+});
+
+describe("constructUpdateRecordRequest", () => {
+  test("should construct request with tokens true", () => {
+    const updateData: IUpdateRequest = {
+      table: "table1",
+      fields: { name: "John" },
+      skyflowID: "id1",
+    };
+    const options: IUpdateOptions = { tokens: true };
+    const req = constructUpdateRecordRequest(updateData, options);
+    expect(req).toEqual({
+      record: { fields: { name: "John" } },
+      tokenization: true,
+    });
+  });
+
+  test("should construct request with tokens false", () => {
+    const updateData: IUpdateRequest = {
+      table: "table1",
+      fields: { name: "John" },
+      skyflowID: "id1",
+    };
+    const options: IUpdateOptions = { tokens: false };
+    const req = constructUpdateRecordRequest(updateData, options);
+    expect(req).toEqual({
+      record: { fields: { name: "John" } },
+      tokenization: false,
+    });
+  });
+
+  test("should default tokens to false if not provided", () => {
+    const updateData: IUpdateRequest = {
+      table: "table1",
+      fields: { name: "John" },
+      skyflowID: "id1",
+    };
+    const req = constructUpdateRecordRequest(updateData, {});
+    expect(req).toEqual({
+      record: { fields: { name: "John" } },
+      tokenization: false,
+    });
+  });
+});
+
+describe("constructUpdateRecordResponse", () => {
+  test("should construct response with tokens", () => {
+    const responseBody = {
+      skyflow_id: "id1",
+      tokens: {
+        name: "tok123",
+        age: "tok456",
+      },
+    };
+    const result = constructUpdateRecordResponse(responseBody, true);
+    expect(result).toEqual({
+      updatedField: {
+        skyflowID: "id1",
+        name: "tok123",
+        age: "tok456",
+      },
+    });
+  });
+
+  test("should construct response without tokens", () => {
+    const responseBody = {
+      skyflow_id: "id1",
+      tokens: null,
+    };
+    const result = constructUpdateRecordResponse(responseBody, false);
+    expect(result).toEqual({
+      updatedField: {
+        skyflowID: "id1",
+      },
+    });
+  });
+
+  test("should construct response with tokens false and tokens present", () => {
+    const responseBody = {
+      skyflow_id: "id1",
+      tokens: {
+        name: "tok123",
+      },
+    };
+    const result = constructUpdateRecordResponse(responseBody, false);
+    expect(result).toEqual({
+      updatedField: {
+        skyflowID: "id1",
+      },
+    });
   });
 });

@@ -42,6 +42,9 @@ import {
   DeleteResponse,
   ContainerOptions,
   DetokenizeResponse,
+  IUpdateRequest,
+  UpdateResponse,
+  IUpdateOptions,
 } from './utils/common';
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
@@ -325,6 +328,12 @@ class Skyflow {
     printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
     return this.#skyflowContainer.delete(records, options);
+  }
+
+  update(record: IUpdateRequest, options?: IUpdateOptions): Promise<UpdateResponse> {
+    printLog(parameterizedString(logs.infoLogs.UPDATE_TRIGGERED, CLASS_NAME), MessageType.LOG,
+      this.#logLevel);
+    return this.#skyflowContainer.update(record, options);
   }
 
   static get ContainerType() {

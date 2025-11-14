@@ -10,6 +10,8 @@ import {
   constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
+  constructUpdateRecordRequest,
+  constructUpdateRecordResponse,
   constructUploadResponse,
   updateRecordsBySkyflowID,
 } from '../../../core-utils/collect';
@@ -49,6 +51,9 @@ import {
   IDeleteResponseType,
   IDeleteRecordInput,
   IRenderResponseType,
+  IUpdateRequest,
+  UpdateResponse,
+  IUpdateOptions,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
@@ -172,6 +177,27 @@ class SkyflowFrameController {
               .catch((error: InsertResponse) => {
                 printLog(
                   parameterizedString(logs.errorLogs.INSERT_RECORDS_REJECTED),
+                  MessageType.ERROR,
+                  this.#context.logLevel,
+                );
+                callback({ error });
+              });
+          } else if (data.type === PUREJS_TYPES.UPDATE) {
+            this.updateData(data.record as IUpdateRequest, data.options as IUpdateOptions)
+              .then((result: any) => {
+                printLog(
+                  parameterizedString(
+                    logs.infoLogs.UPDATE_RECORD_RESOLVED,
+                    CLASS_NAME,
+                  ),
+                  MessageType.LOG,
+                  this.#context.logLevel,
+                );
+                callback(result);
+              })
+              .catch((error: any) => {
+                printLog(
+                  parameterizedString(logs.errorLogs.UPDATE_RECORD_REJECTED),
                   MessageType.ERROR,
                   this.#context.logLevel,
                 );
@@ -450,6 +476,37 @@ class SkyflowFrameController {
             );
           })
           .catch((error) => {
+            rootReject(error);
+          });
+      }).catch((err) => {
+        rootReject(err);
+      });
+    });
+  }
+
+  updateData(updateData: IUpdateRequest, options?: IUpdateOptions): Promise<UpdateResponse> {
+    const requestBody = constructUpdateRecordRequest(
+      updateData, options,
+    );
+    return new Promise((rootResolve, rootReject) => {
+      getAccessToken(this.#clientId).then((authToken) => {
+        const { table, skyflowID } = updateData;
+        this.#client
+          .request({
+            body: JSON.stringify(requestBody),
+            requestMethod: 'PUT',
+            url: `${this.#client.config.vaultURL}/v1/vaults/${this.#client.config.vaultID}/${table}/${skyflowID}`,
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              'content-type': 'application/json',
+            },
+          })
+          .then((response: any) => {
+            rootResolve(
+              constructUpdateRecordResponse(response, options?.tokens ?? false),
+            );
+          })
+          .catch((error: any) => {
             rootReject(error);
           });
       }).catch((err) => {

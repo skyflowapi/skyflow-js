@@ -421,6 +421,144 @@ describe('Inserting records into the vault', () => {
   });
 });
 
+const updateRecord = {
+  table: 'pii_fields',
+  fields: {
+    first_name: 'Joseph',
+    primary_card: {
+      card_number: '4111111111111111',
+      cvv: '123',
+    },
+  },
+  skyflowID: 'test-skyflow-id',
+};
+
+const updateOptions = {
+  tokens: true,
+};
+
+const updateResponseWithTokens = {
+  skyflow_id: 'test-skyflow-id',
+  tokens: {
+    card_number: 'token2',
+    cvv: 'token3',
+  },
+};
+
+const updateResponseWithoutTokens = {
+  skyflow_id: 'test-skyflow-id',
+  tokens: null,
+};
+
+const updateErrorResponse = {
+  error: {
+    http_code: 400,
+    message: 'Update failed',
+  },
+};
+
+describe('Updating records in the vault', () => {
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+    });
+    busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
+  });
+
+  test('updateData with tokens as true', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(updateResponseWithTokens));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+      ...clientData.client,
+      request: clientReq,
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.UPDATE,
+      record: updateRecord,
+      options: updateOptions,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].updatedField.skyflowID).toBe('test-skyflow-id');
+      expect(cb2.mock.calls[0][0].updatedField.card_number).toBe('token2');
+      expect(cb2.mock.calls[0][0].updatedField.cvv).toBe('token3');
+      expect(cb2.mock.calls[0][0].error).toBeUndefined();
+      done();
+    }, 1000);
+  });
+
+  test('updateData with tokens as false', (done) => {
+    const clientReq = jest.fn(() => Promise.resolve(updateResponseWithoutTokens));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+      ...clientData.client,
+      request: clientReq,
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.UPDATE,
+      record: updateRecord,
+      options: { tokens: false },
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].updatedField.skyflowID).toBe('test-skyflow-id');
+      expect(cb2.mock.calls[0][0].updatedField.card_number).toBeUndefined();
+      expect(cb2.mock.calls[0][0].error).toBeUndefined();
+      done();
+    }, 1000);
+  });
+
+  test('updateData with error', (done) => {
+    const clientReq = jest.fn(() => Promise.reject(updateErrorResponse));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+      ...clientData.client,
+      request: clientReq,
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitEventName = emitSpy.mock.calls[0][0];
+    const emitCb = emitSpy.mock.calls[0][2];
+    emitCb(clientData);
+
+    const onCb = on.mock.calls[0][1];
+    const data = {
+      type: PUREJS_TYPES.UPDATE,
+      record: updateRecord,
+      options: updateOptions,
+    };
+    const cb2 = jest.fn();
+    onCb(data, cb2);
+
+    setTimeout(() => {
+      expect(cb2.mock.calls[0][0].error).toBeDefined();
+      done();
+    }, 1000);
+  });
+});
+
 const detokenizeRecords = [{
   token: 'token1',
   // redaction: 'PLAIN_TEXT',

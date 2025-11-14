@@ -67,6 +67,16 @@ export interface IInsertRecord {
   skyflowID?: string;
 }
 
+export interface IUpdateRequest {
+  table: string;
+  fields: Record<string, unknown>;
+  skyflowID: string;
+}
+
+export interface IUpdateOptions {
+  tokens?: boolean;
+}
+
 export interface IRevealRecord {
   token?: string;
   redaction?: RedactionType;
@@ -199,6 +209,15 @@ export interface SharedMeticsObjectType {
 export interface InsertResponse {
   records?: InsertResponseRecords[],
   errors?: ErrorRecord[],
+}
+
+export interface UpdateResponseType {
+  skyflowID: string;
+  [key: string]: unknown;
+}
+
+export interface UpdateResponse {
+  updatedField: UpdateResponseType
 }
 
 export interface CollectResponse extends InsertResponse {}

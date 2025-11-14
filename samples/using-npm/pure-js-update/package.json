@@ -1,16 +1,19 @@
 {
-  "name": "purejs",
+  "name": "purejs-get",
   "version": "1.0.0",
   "description": "",
+  "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "parcel src/index.html --open",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "license": "ISC",
-  "dependencies": {
-    "skyflow-js": "^2.5.0"
-  },
   "devDependencies": {
     "parcel": "^2.0.1"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.1",
+    "skyflow-js": "^2.5.0"
   }
 }
