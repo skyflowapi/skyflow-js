@@ -330,6 +330,10 @@ const SKYFLOW_ERROR_CODE = {
   UNKNOWN_ERROR: { code: 400, description: logs.errorLogs.UNKNOWN_ERROR },
   CONNECTION_ERROR: { code: 400, description: logs.errorLogs.CONNECTION_ERROR },
   NETWORK_ERROR: { code: 500, description: logs.errorLogs.NETWORK_ERROR },
+  OFFLINE_ERROR: { code: 500, description: logs.errorLogs.OFFLINE_ERROR },
+  TIMEOUT_ERROR: { code: 500, description: logs.errorLogs.TIMEOUT_ERROR },
+  ABORT_ERROR: { code: 500, description: logs.errorLogs.ABORT_ERROR },
+  GENERIC_ERROR: { code: 0, description: logs.errorLogs.GENERIC_ERROR },
   COMPLETE_AND_VALID_INPUTS: { code: 400, description: logs.errorLogs.COMPLETE_AND_VALID_INPUTS },
   INVALID_VALIDATIONS_TYPE: { code: 400, description: logs.errorLogs.INVALID_VALIDATIONS_TYPE },
   MISSING_VALIDATION_RULE_TYPE: {
