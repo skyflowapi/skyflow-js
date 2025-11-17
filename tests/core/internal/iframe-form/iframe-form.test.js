@@ -2205,58 +2205,6 @@ describe('test file Upload method', () => {
         });
     });
 
-    // test.only('initialize iFrame and upload with file input', () => {
-    //     // const form = new IFrameForm("controllerId", "", "ERROR");
-    //     // form.setClient(fileClientObj)
-    //     // form.setClientMetadata(metaData)
-    //     // form.setContext(context)
-
-    //     // const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
-    //     // const frameReadyCb = frameReadyEvent[0][1];
-
-    //     // expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
-
-    //     // frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
-
-    //     // expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
-    //     const skyflowInit = jest.fn();
-    //     windowSpy = jest.spyOn(global, 'window', 'get');
-    //     windowSpy.mockImplementation(() => ({
-    //         name: `${FRAME_ELEMENT}:FILE_INPUT:123:ERROR:`,
-    //         location: {
-    //         href: `http://localhost/?${btoa(JSON.stringify({record: element, metaData: {clientDomain: 'http://localhost.com'}}))}`,
-    //       }
-    //     }))
-
-    //     // frameReadyCb({ name: file_element })
-
-    //     const createFormElement = skyflowInit.mock.calls[0][0]
-    //     const fileElement = createFormElement(file_element)
-
-    //     const fileUploadEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + 'controllerId');
-    //     const fileUploadCb = fileUploadEvent[0][1];
-    //     const cb2 = jest.fn();
-    //     fileUploadCb(fileData, cb2)
-
-    //     setTimeout(() => {
-    //         expect(cb2.mock.calls[0][0].error).toBeDefined()
-    //     }, 3000)
-
-    //     setTimeout(() => {
-    //         expect(cb2.mock.calls[0][0].error).toBeDefined()
-    //     }, 3000)
-
-    //     fileElement.setValue({
-    //         lastModified: '',
-    //         lastModifiedDate: '',
-    //         name: "sample.jpg",
-    //         size: 48848,
-    //         type: "image/jpeg",
-    //         webkitRelativePath: ""
-    //     })
-    //     const cb3 = jest.fn()
-    //     fileUploadCb(fileData, cb3)
-    // });
     test('validate for file input - valid blockZeroSizeFile boolean', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
         var options = { blockEmptyFiles: true};

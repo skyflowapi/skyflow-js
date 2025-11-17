@@ -102,21 +102,21 @@ export default class FrameElementInit {
     });
 
     // if (event.origin === this.clientMetaData.clientDomain) {
-    if (event.data && event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
+    if (event?.data && event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
          + this.containerId) {
-      if (event.data.data && event.data.data.type === COLLECT_TYPES.COLLECT) {
-        this.tokenize(event.data.data, event.data.clientConfig)
+      if (event?.data?.data && event?.data?.data?.type === COLLECT_TYPES.COLLECT) {
+        this.tokenize(event?.data?.data, event?.data?.clientConfig)
           .then((response: any) => {
             window?.parent.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
               data: response,
-            }, this.clientMetaData.clientDomain);
+            }, this.clientMetaData?.clientDomain);
           })
           .catch((error) => {
             window?.parent.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
               data: error,
-            }, this.clientMetaData.clientDomain);
+            }, this.clientMetaData?.clientDomain);
           });
       } else if (event.data.data && event.data.data.type === COLLECT_TYPES.FILE_UPLOAD) {
         this.parallelUploadFiles(event.data.data, event.data.clientConfig)
@@ -124,17 +124,17 @@ export default class FrameElementInit {
             window?.parent.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.containerId,
               data: response,
-            }, this.clientMetaData.clientDomain);
+            }, this.clientMetaData?.clientDomain);
           })
           .catch((error) => {
             window?.parent.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.containerId,
               data: error,
-            }, this.clientMetaData.clientDomain);
+            }, this.clientMetaData?.clientDomain);
           });
       }
     }
-    if (event.data.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId) {
+    if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId) {
       const data = event.data;
       data.client.config = {
         ...data.client.config,
@@ -844,7 +844,7 @@ export default class FrameElementInit {
       this.clientMetaData.clientDomain,
     );
     window.addEventListener('message', (event) => {
-      if (event.data.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name) {
+      if (event?.data?.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name) {
         window.parent.postMessage(
           {
             type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,

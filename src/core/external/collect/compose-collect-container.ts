@@ -355,8 +355,8 @@ class ComposableContainer extends Container {
                 containerId: this.#containerId,
               },
               clientConfig: {
-                vaultURL: this.#metaData.clientJSON.config.vaultURL,
-                vaultID: this.#metaData.clientJSON.config.vaultID,
+                vaultURL: this.#metaData?.clientJSON?.config?.vaultURL,
+                vaultID: this.#metaData?.clientJSON?.config?.vaultID,
                 authToken,
               },
               options: {

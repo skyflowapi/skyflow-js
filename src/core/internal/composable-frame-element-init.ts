@@ -317,7 +317,7 @@ export default class RevealComposableFrameElementInit {
           name: window?.name,
         },
       },
-      this.clientMetaData.clientDomain,
+      this.clientMetaData?.clientDomain,
     );
 
     bus?.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name, (data, callback) => {
@@ -335,7 +335,7 @@ export default class RevealComposableFrameElementInit {
           name: window?.name,
         },
       },
-      this.clientMetaData.clientDomain,
+      this.clientMetaData?.clientDomain,
     );
 
     window?.addEventListener('message', (event) => {
@@ -361,7 +361,7 @@ export default class RevealComposableFrameElementInit {
               name: window?.name,
             },
           },
-          this.clientMetaData.clientDomain,
+          this.clientMetaData?.clientDomain,
         );
       }
     });

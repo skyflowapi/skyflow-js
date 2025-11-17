@@ -21,6 +21,11 @@ jest.mock('../../../../src/libs/uuid',()=>({
   __esModule: true,
   default:jest.fn(()=>(mockUuid)),
 }));
+global.ResizeObserver = jest.fn(() => ({
+  observe: jest.fn(),
+  disconnect: jest.fn(),
+  unobserve: jest.fn(),
+}));
 // const _on = jest.fn();
 // const _off = jest.fn();
 // const _emit = jest.fn();
@@ -720,4 +725,63 @@ describe("Reveal Element Class", () => {
     
     
  });
+ test("update call error case when container is not mounted case 2", async () => {
+    const elementArray = {
+        rows:[{
+            elements : [{
+            "column": "file",
+            "table": "table6",
+            "altText": "Alt text 1",
+            "name": "element2",
+            "skyflowID": "id1"
+            }]
+        }]
+    };
+    const groupEmiitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealInternalElement(
+        elementId,
+        elementArray,
+        clientData,
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        { logLevel: LogLevel.ERROR,env:Env.PROD }
+    );
+    window.dispatchEvent(new MessageEvent('message', {
+        data: {
+            type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + "element2",
+            containerId: mockUuid,
+        }
+    }));
+
+
+    // create shadow dom and add testDiv inside shadow dom
+    const hostElement = document.createElement('div');
+    document.body.appendChild(hostElement);
+    hostElement.attachShadow({ mode: 'open' });
+
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    hostElement.shadowRoot.appendChild(testEmptyDiv);
+    expect(hostElement.shadowRoot.getElementById("testDiv")).not.toBeNull();  
+    expect(testRevealElement.isMounted()).toBe(false);
+
+    testRevealElement.mount(hostElement.shadowRoot.getElementById('testDiv'));
+
+    // Mock iframe postMessage to prevent CI errors
+    const iframe = hostElement.shadowRoot.getElementById('testDiv').querySelector('iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage = jest.fn();
+    }
+
+    const divInShadow = hostElement.shadowRoot.getElementById('testDiv').querySelector('iframe');
+    expect(divInShadow).not.toBeNull();
+
+    expect(hostElement.shadowRoot.getElementById('testDiv').querySelector('iframe')).toBeTruthy();
+    const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
+    expect(hostElement.shadowRoot.getElementById('testDiv').querySelector('iframe')?.name).toBe(testIframeName);
+
+    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + ":element2", {
+        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
+        options: { altText: "Updated Alt Text" }
+    });
+  });
 }); 
