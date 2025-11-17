@@ -1,6 +1,7 @@
 import {
   COLLECT_FRAME_CONTROLLER,
-  ELEMENT_EVENTS_TO_IFRAME
+  ELEMENT_EVENTS_TO_IFRAME,
+  ElementType
 } from '../../../../src/core/constants';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
@@ -18,7 +19,7 @@ const bus = require('framebus');
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 
-const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve());
+const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve('token'));
 
 const mockUuid = '1234';
 jest.mock('../../../../src/libs/uuid', () => ({
@@ -57,6 +58,7 @@ EventEmitter.mockImplementation(()=>({
 
 
 const metaData = {
+  getSkyflowBearerToken: getBearerToken,
   skyflowContainer:{
     isControllerFrameReady: true
   },
@@ -78,6 +80,7 @@ const metaData = {
   },
 };
 const metaData2 = {
+  getSkyflowBearerToken: getBearerToken,
   skyflowContainer:{
     isControllerFrameReady: false
   },
@@ -137,8 +140,15 @@ const cardNumberElement = {
   column: 'primary_card.card_number',
   type: 'CARD_NUMBER',
   ...collectStylesOptions,
-
 };
+
+const FileInuptElement = {
+  table: 'pii_fields',
+  column: 'profile_picture',
+  type: ElementType.FILE_INPUT,
+  skyflowID:'id1',
+  ...collectStylesOptions,
+}
 
 const ExpirationDateElement = {
   table: 'pii_fields',
@@ -174,6 +184,7 @@ describe('test composable container class',()=>{
   let targetSpy;
   let onSpy;
   let eventEmitterSpy;
+  let windowSpy;
   beforeEach(() => {
     emitSpy = jest.spyOn(bus, 'emit');
     targetSpy = jest.spyOn(bus, 'target');
@@ -183,6 +194,7 @@ describe('test composable container class',()=>{
       on,
       off: jest.fn()
     });
+    windowSpy = jest.spyOn(window, "window", "get");
   });
   
 
@@ -240,10 +252,6 @@ describe('test composable container class',()=>{
   });
 
   it('test collect with success and error scenarios', async () => {
-    // let readyCb;
-    // on.mockImplementation((name, cb) => {
-    //   readyCb = cb;
-    // });
   
     const div = document.createElement('div');
     div.id = 'composable';
@@ -284,19 +292,29 @@ describe('test composable container class',()=>{
       ],
     };
   
-    const collectPromiseSuccess = container.collect(options);
-  
-    const collectCb1 = emitSpy.mock.calls[0][2];
-    collectCb1(collectResponse);
-  
+    const collectPromiseSuccess =
+      container.collect(options);
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + '1234', // containerId
+        data: {...collectResponse}
+      }
+    }));
+
     const successResult = await collectPromiseSuccess;
     expect(successResult).toEqual(collectResponse);
-  
-    const collectPromiseError = container.collect(options);
-    const collectCb2 = emitSpy.mock.calls[1][2];
-    collectCb2({ error: 'Error occurred' });
-  
-    await expect(collectPromiseError).rejects.toEqual('Error occurred');
+
+    const collectPromiseError =
+      container.collect(options);
+    
+      window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + '1234', // containerId
+        data: { error: "Error occured"}
+      }
+    }));
+    await expect(collectPromiseError).rejects.toEqual("Error occured");
+
   });
   it('test collect when isMount is false', async () => {
     let readyCb;
@@ -544,5 +562,80 @@ describe('test composable container class',()=>{
     container.on("CHANGE",()=>{});
     expect(element).toBeInstanceOf(ComposableElement);
   });
+  it('test upload FILES with success and error scenarios', async () => {
+    const div = document.createElement('div');
+    div.id = 'composable';
+    document.body.append(div);
+  
+    const container = new ComposableContainer(
+      metaData,
+      {},
+      context,
+      { layout: [1], styles: { base: { width: '100px' } } }
+    );
+  
+    const element1 = container.create(FileInuptElement);  
+    container.mount('#composable');
+    const options = {};
+  
+    const collectPromiseSuccess = container.uploadFiles(options);
 
+    // Wait for the bearer token promise to resolve and event listener to be set up
+    await Promise.resolve('token');
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + '1234', // containerId
+        data: { fileUploadResponse: [{ skyflow_id: 'id1' }] }
+      }
+    }));
+
+    const successResult = await collectPromiseSuccess;
+    expect(successResult).toEqual({ fileUploadResponse: [{ skyflow_id: 'id1' }] });
+
+    // Test error scenario
+    const collectPromiseError = container.uploadFiles(options);
+    
+    await Promise.resolve('token');
+    
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + '1234', // containerId
+        data: { error: "Error occured"}
+      }
+    }));
+    
+    await expect(collectPromiseError).rejects.toEqual("Error occured");
+
+    // Test error scenario case 2 - no fileUploadResponse and no error
+    const collectPromiseError2 = container.uploadFiles(options);
+    
+    await Promise.resolve('token');
+    
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + '1234', // containerId
+        data: { errors: "Error occured"}
+      }
+    }));
+    
+    await expect(collectPromiseError2).rejects.toEqual({ errors: "Error occured"});
+  });
+  it('test upload FILES when bearer token fails', async () => {
+  const getBearerTokenFail = jest.fn().mockRejectedValue({ error: 'token generation failed' });
+  const metaDataFail = {
+    ...metaData,
+    getSkyflowBearerToken: getBearerTokenFail,
+  };
+
+  const div = document.createElement('div');
+  div.id = 'composable2';
+  document.body.append(div);
+
+  const container = new ComposableContainer(metaDataFail, {}, context, { layout: [1] });
+  const element1 = container.create(FileInuptElement);
+  container.mount('#composable2');
+
+  await expect(container.uploadFiles({})).rejects.toEqual({ error: 'token generation failed' });
+  });
 });

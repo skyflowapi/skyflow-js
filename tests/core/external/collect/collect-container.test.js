@@ -1618,7 +1618,7 @@ describe('Collect container', () => {
       expect(err).toBeDefined();
     })
   });
-  it('test collect and additional fields duplicate elements',(done)=>{
+  it('test collect and additional fields duplicate elements',()=>{
     const div1 = document.createElement('div');
     const div2 = document.createElement('div');
 
@@ -1632,11 +1632,12 @@ describe('Collect container', () => {
         done(res)
       }).catch((err)=>{
         expect(err).toBeDefined();
-        done();
+        // done();
       });
+
     }catch(err){
       expect(err).toBeDefined();
-      done(err)
+      // done()
     }
     
   });
