@@ -12,6 +12,7 @@ import ComposableContainer from '../src/core/external/collect/compose-collect-co
 import SkyflowContainer from '../src/core/external/skyflow-container';
 import Client from '../src/client'
 import logs from '../src/utils/logs';
+import { ComposableRevealContainer } from '../src/index-node';
 
 jest.mock('../src/utils/jwt-utils', () => ({
   __esModule: true,
@@ -89,6 +90,9 @@ describe('Create container', () => {
 
     const composableContainer = skyflow.container(ContainerType.COMPOSABLE,{layout:[1]});
     expect(composableContainer).toBeInstanceOf(ComposableContainer);
+
+    const revealComposableContainer = skyflow.container(ContainerType.COMPOSE_REVEAL,{layout:[1]});
+    expect(revealComposableContainer).toBeInstanceOf(ComposableRevealContainer);
 
     try {
       const revealContainer = skyflow.container('test');

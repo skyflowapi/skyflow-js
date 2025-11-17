@@ -63,6 +63,7 @@ const testMetaData: Metadata = {
   skyflowContainer: {
     isControllerFrameReady: true,
   } as unknown as SkyflowContainer,
+  getSkyflowBearerToken: getBearerToken,
 };
 
 const testMetaData2: Metadata = {
@@ -134,6 +135,23 @@ describe("Reveal Container Class", () => {
     expect(testRevealContainer1).toHaveProperty("create");
     expect(testRevealContainer1).toHaveProperty("reveal");
     expect(testRevealContainer1).toHaveProperty("type");
+  });
+  test("reveal when elment is empty when skyflow ready", async() => {
+    const errPromise = testRevealContainer2.reveal()
+    await expect(errPromise).rejects.toEqual(new Error(logs.errorLogs.NO_ELEMENTS_IN_REVEAL))
+  });
+
+    test("reveal when element is empty when skyflow frame not ready", (done) => {
+    testRevealContainer1.reveal().catch((error: RevealResponse) => {
+      done();
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error?.error).toBeDefined();
+      expect(error?.error?.code).toEqual(400);
+      expect(error?.error?.description).toEqual(
+        logs.errorLogs.NO_ELEMENTS_IN_REVEAL
+      );
+    });
   });
 
   test("create() will return a Reveal Element", () => {
@@ -388,11 +406,12 @@ describe("Reveal Container Class", () => {
       done();
       expect(error).toBeDefined();
       expect(error.errors).toBeDefined();
-      expect(error.errors![0].error.code).toEqual(400);
-      expect(error.errors![0].error.description).toEqual(
+      expect(error.errors![0].code).toEqual(400);
+      expect(error.errors![0].description).toEqual(
         logs.errorLogs.REVEAL_ELEMENT_ERROR_STATE
       );
     });
+    element.resetError();
   });
 
   test("reveal before skyflow frame ready", (done) => {
@@ -403,34 +422,9 @@ describe("Reveal Container Class", () => {
       done();
       expect(error).toBeDefined();
       expect(error.errors).toBeDefined();
-      expect(error.errors![0].error.code).toEqual(400);
-      expect(error.errors![0].error.description).toEqual(
+      expect(error.errors![0].code).toEqual(400);
+      expect(error.errors![0].description).toEqual(
         logs.errorLogs.REVEAL_ELEMENT_ERROR_STATE
-      );
-    });
-  });
-
-  test("reveal when elment is empty when skyflow ready", (done) => {
-    testRevealContainer2.reveal().catch((error: RevealResponse) => {
-      done();
-      expect(error).toBeDefined();
-      expect(error.errors).toBeDefined();
-      expect(error.errors![0].error.code).toEqual(400);
-      expect(error.errors![0].error.description).toEqual(
-        logs.errorLogs.NO_ELEMENTS_IN_REVEAL
-      );
-    });
-  });
-
-  test("reveal when element is empty when skyflow frame not ready", (done) => {
-    testRevealContainer1.reveal().catch((error: RevealResponse) => {
-      done();
-      expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(SkyflowError);
-      expect(error.errors).toBeDefined();
-      expect(error.errors![0].error.code).toEqual(400);
-      expect(error.errors![0].error.description).toEqual(
-        logs.errorLogs.NO_ELEMENTS_IN_REVEAL
       );
     });
   });

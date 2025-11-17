@@ -4,6 +4,12 @@ Copyright (c) 2022 Skyflow, Inc.
 import logs from './logs';
 
 const SKYFLOW_ERROR_CODE = {
+  MULTI_FILE_NOT_SUPPORTED: {
+    code: 400,
+    description: logs.errorLogs.MULTI_FILE_NOT_SUPPORTED,
+  },
+  INVALID_REVEAL_COMPOSABLE_INPUT:
+  { code: 400, description: logs.errorLogs.INVALID_REVEAL_COMPOSABLE_INPUT },
   INVALID_FILE_NAME: { code: 400, description: logs.errorLogs.INVALID_FILE_NAME },
   INVALID_FIELD: { code: 400, description: logs.errorLogs.INVALID_FIELD },
   VAULTID_IS_REQUIRED: { code: 400, description: logs.errorLogs.VAULTID_IS_REQUIRED },
