@@ -130,7 +130,26 @@ class Client {
     };
 
     httpRequest.onerror = () => {
-      reject(new SkyflowError(SKYFLOW_ERROR_CODE.NETWORK_ERROR, [], true));
+      const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+      if (isOffline) {
+        reject(new SkyflowError(SKYFLOW_ERROR_CODE.OFFLINE_ERROR, [], true));
+        return;
+      }
+
+      if (httpRequest.status === 0) {
+        reject(new SkyflowError(SKYFLOW_ERROR_CODE.GENERIC_ERROR, [], true));
+        return;
+      }
+
+      reject(new SkyflowError(SKYFLOW_ERROR_CODE.GENERIC_ERROR, [], true));
+    };
+
+    httpRequest.ontimeout = () => {
+      reject(new SkyflowError(SKYFLOW_ERROR_CODE.TIMEOUT_ERROR, [], true));
+    };
+
+    httpRequest.onabort = () => {
+      reject(new SkyflowError(SKYFLOW_ERROR_CODE.ABORT_ERROR, [], true));
     };
   });
 }
