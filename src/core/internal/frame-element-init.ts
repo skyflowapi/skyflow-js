@@ -497,6 +497,7 @@ export default class FrameElementInit {
       const formData = new FormData();
       formData.append('columnName', state.name);
       if (tableName) formData.append('tableName', tableName);
+
       if (preserveFileName) {
         formData.append('file', file);
       } else {
