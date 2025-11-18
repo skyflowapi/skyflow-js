@@ -110,7 +110,7 @@ const destroyCallback = jest.fn();
 const updateCallback = jest.fn();
 
 const groupEmittFn = jest.fn();
-// let groupOnCb;
+let groupOnCb;
 const groupEmiitter = {
   _emit: groupEmittFn,
   on:jest.fn().mockImplementation((args,cb)=>{
