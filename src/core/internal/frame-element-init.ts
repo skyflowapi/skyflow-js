@@ -312,7 +312,8 @@ export default class FrameElementInit {
       return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.COMPLETE_AND_VALID_INPUTS, [`${errorMessage}`], true));
     }
     // eslint-disable-next-line consistent-return
-    this.iframeFormList.forEach((inputElement) => {
+    for (let i = 0; i < this.iframeFormList.length; i += 1) {
+      const inputElement = this.iframeFormList[i];
       if (inputElement) {
         const {
           state, tableName, validations, skyflowID,
@@ -380,7 +381,7 @@ export default class FrameElementInit {
           }
         }
       }
-    });
+    }
     let finalInsertRequest;
     let finalInsertRecords;
     let finalUpdateRecords;
