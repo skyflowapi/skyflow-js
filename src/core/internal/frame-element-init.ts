@@ -675,7 +675,7 @@ export default class FrameElementInit {
     this.group = parsedRecord.record;
     this.containerId = parsedRecord.containerId;
     bus
-      .target(this.clientMetaData.clientDomain)
+      .target(this.clientMetaData?.clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE + frameName, (data) => {
         if (data.name === frameName) {
           if (data.options !== undefined) {
