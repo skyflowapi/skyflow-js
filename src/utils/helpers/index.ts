@@ -192,7 +192,7 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
   }
 
   if (DANGEROUS_FILE_TYPE.includes(value.type)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [value.type], true);
   }
 
   if (Object.prototype.hasOwnProperty.call(fileElement, 'allowedFileType') && (value !== undefined && value !== '')) {
@@ -207,7 +207,7 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
         }
       });
       if (!isValidType) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [value.type], true);
       }
     }
   }
@@ -216,7 +216,7 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
   }
   if (Object.prototype.hasOwnProperty.call(fileElement, 'blockEmptyFiles') && fileElement.blockEmptyFiles) {
     if (value.size === 0) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [value], true);
     }
   }
 

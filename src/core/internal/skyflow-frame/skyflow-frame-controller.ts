@@ -869,7 +869,9 @@ class SkyflowFrameController {
     const validatedFileState = fileValidation(state.value, state.isRequired, fileElement);
 
     if (!validatedFileState) {
-      return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true));
+      return Promise.reject(
+        new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [state.value.type], true),
+      );
     }
     fileUploadObject[state.name] = state.value;
 
