@@ -5,7 +5,7 @@ import bus from 'framebus';
 import CollectElement from '../../../../src/core/external/collect/collect-element';
 import SkyflowError from '../../../../src/libs/skyflow-error';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
-import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME } from '../../../../src/core/constants';
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '../../../../src/core/constants';
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import { checkForElementMatchRule } from '../../../../src/core-utils/collect';
 import { ContainerType } from '../../../../src/skyflow';
@@ -1173,5 +1173,98 @@ describe('collect element methods', () => {
     testCollectElementProd.unmount();
     expect(ResizeObserver).toHaveBeenCalled();
     expect(testCollectElementProd.resizeObserver.disconnect).toHaveBeenCalled();
+  });
+
+  it('covers composable window message event listener branches', () => {
+    const multiFileElementName = 'element:MULTI_FILE_INPUT:xyz';
+    const composableRowsForTest = [
+      { elements: [
+        { composableElementName, elementType: input.type, elementName, name: input.column, labelStyles, errorTextStyles, ...input },
+        { composableElementName, elementType: ElementType.MULTI_FILE_INPUT, elementName: multiFileElementName, name: 'files', labelStyles, errorTextStyles, table: 'pii_fields', column: 'primary_card.files' }
+      ] }
+    ];
+    const groupEmitterLocal = { _emit: jest.fn(), on: jest.fn() };
+    // isSingleElementAPI must be false for composable container to keep state.value an object
+    const collectEl = new CollectElement(id, { elementName, rows: composableRowsForTest }, { containerType: ContainerType.COMPOSABLE }, { type: ContainerType.COMPOSABLE, containerId: 'containerId', isMounted: true }, false, destroyCallback, updateCallback, { logLevel: LogLevel.INFO, env: Env.DEV }, groupEmitterLocal);
+
+    const dispatchEventFor = (targetElementName, eventType, valueObj = {}) => {
+      window.dispatchEvent(new MessageEvent('message', {
+        data: {
+          type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + targetElementName,
+          data: {
+            name: targetElementName,
+            event: eventType,
+            value: {
+              isEmpty: false,
+              isValid: true,
+              isComplete: false,
+              isFocused: eventType === ELEMENT_EVENTS_TO_CLIENT.FOCUS,
+              isRequired: true,
+              selectedCardScheme: '',
+              value: valueObj.value,
+              metaData: valueObj.metaData,
+            },
+          },
+        },
+      }));
+    };
+
+    dispatchEventFor(elementName, ELEMENT_EVENTS_TO_CLIENT.FOCUS, { value: '4111' });
+    dispatchEventFor(elementName, ELEMENT_EVENTS_TO_CLIENT.BLUR, { value: '4111' });
+    dispatchEventFor(elementName, ELEMENT_EVENTS_TO_CLIENT.CHANGE, { value: '4111' });
+    dispatchEventFor(elementName, ELEMENT_EVENTS_TO_CLIENT.CHANGE, {});
+    dispatchEventFor(elementName, ELEMENT_EVENTS_TO_CLIENT.READY, { value: '4111' });
+    dispatchEventFor(multiFileElementName, ELEMENT_EVENTS_TO_CLIENT.CHANGE, { value: undefined, metaData: [{ filename: 'doc.pdf' }] });
+    dispatchEventFor(elementName, ELEMENT_EVENTS_TO_CLIENT.SUBMIT, {});
+
+    const emittedEvents = groupEmitterLocal._emit.mock.calls.map(c => c[0]);
+    expect(emittedEvents).toContain(ELEMENT_EVENTS_TO_CLIENT.FOCUS + ':' + elementName);
+    expect(emittedEvents).toContain(ELEMENT_EVENTS_TO_CLIENT.BLUR + ':' + elementName);
+    expect(emittedEvents).toContain(ELEMENT_EVENTS_TO_CLIENT.CHANGE + ':' + elementName);
+    expect(emittedEvents).toContain(ELEMENT_EVENTS_TO_CLIENT.READY + ':' + elementName);
+    expect(emittedEvents).toContain(ELEMENT_EVENTS_TO_CLIENT.SUBMIT);
+
+    const stateAfterMeta = collectEl.getState();
+    expect(typeof stateAfterMeta.value).toBe('object');
+  });
+  it('covers composable window message event listener branches, ready event', () => {
+    const multiFileElementName = 'element:MULTI_FILE_INPUT:xyz';
+    const composableRowsForTest = [
+      { elements: [
+        { composableElementName, elementType: input.type, elementName, name: input.column, labelStyles, errorTextStyles, ...input },
+        { composableElementName, elementType: ElementType.MULTI_FILE_INPUT, elementName: multiFileElementName, name: 'files', labelStyles, errorTextStyles, table: 'pii_fields', column: 'primary_card.files' }
+      ] }
+    ];
+    const groupEmitterLocal = { _emit: jest.fn(), on: jest.fn() };
+    // isSingleElementAPI must be false for composable container to keep state.value an object
+    const collectEl = new CollectElement(id, { elementName, rows: composableRowsForTest }, { containerType: ContainerType.COMPOSABLE }, { type: ContainerType.COMPOSABLE, containerId: 'containerId', isMounted: true }, true, destroyCallback, updateCallback, { logLevel: LogLevel.INFO, env: Env.DEV }, groupEmitterLocal);
+    groupEmiitter.on(ELEMENT_EVENTS_TO_CLIENT.READY + ':' + elementName, (data) => {
+      expect(data.name).toBe(elementName);
+    });
+    const dispatchEventFor = (targetElementName, eventType, valueObj = {}) => {
+      window.dispatchEvent(new MessageEvent('message', {
+        data: {
+          type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + targetElementName,
+          data: {
+            name: targetElementName,
+            event: eventType,
+            value: {
+              isEmpty: false,
+              isValid: true,
+              isComplete: false,
+              isFocused: eventType === ELEMENT_EVENTS_TO_CLIENT.FOCUS,
+              isRequired: true,
+              selectedCardScheme: '',
+              metaData: valueObj.metaData,
+            },
+          },
+        },
+      }));
+    };
+
+    dispatchEventFor(elementName, ELEMENT_EVENTS_TO_CLIENT.READY, { value: '4111' });
+        dispatchEventFor(elementName, ELEMENT_EVENTS_TO_CLIENT.CHANGE, {});
+
+
   });
 });

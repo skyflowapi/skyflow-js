@@ -3,9 +3,50 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
-import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from "../../../../src/core/constants";
+import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES, REVEAL_TYPES } from "../../../../src/core/constants";
 import { Env, LogLevel } from "../../../../src/utils/common";
 import getCssClassesFromJss from "../../../../src/libs/jss-styles";
+import { getFileURLFromVaultBySkyflowIDComposable } from "../../../../src/core-utils/reveal";
+import properties from "../../../../src/properties";
+
+// / mock the getFileURLFromVaultBySkyflowIDComposable function and keep original other things
+// Dynamic mock for getFileURLFromVaultBySkyflowIDComposable allowing per-test resolve/reject setup
+const mockGetFileURLFromVaultBySkyflowIDComposable = jest.fn();
+jest.mock('../../../../src/core-utils/reveal', () => {
+  const original = jest.requireActual('../../../../src/core-utils/reveal');
+  return {
+    ...original,
+    getFileURLFromVaultBySkyflowIDComposable: (...args) => mockGetFileURLFromVaultBySkyflowIDComposable(...args),
+  };
+});
+properties.IFRAME_SECURE_ORIGIN = "http://localhost";
+
+// Helper to configure success response; override can include fields/fileMetadata partials
+const setFileURLResolve = (override = {}) => {
+  mockGetFileURLFromVaultBySkyflowIDComposable.mockReset().mockImplementation(() => Promise.resolve({
+    fields: {
+      primary_card_file: 'https://cdn.example.com/assets/whatever?response-content-disposition=logo.png',
+      skyflow_id: 'abc123',
+      ...(override.fields || {}),
+    },
+    fileMetadata: {
+      contentType: 'image/png',
+      ...(override.fileMetadata || {}),
+    },
+  }));
+};
+
+// Helper to configure rejection response; pass an error object/string
+const setFileURLReject = (error = { code: 'GENERIC_ERROR', description: 'failed to fetch file URL' }) => {
+  mockGetFileURLFromVaultBySkyflowIDComposable.mockReset().mockImplementation(() => Promise.reject(error));
+};
+
+// Default to success for tests that don't explicitly set behavior
+beforeAll(() => {
+  setFileURLResolve();
+});
+
+
 
 const testRecord = {
   token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
@@ -18,32 +59,9 @@ const testRecord = {
     },
   },
 };
-// const _on = jest.fn();
-// const _emit = jest.fn();
-// bus.target = jest.fn().mockReturnValue({
-//   on: _on,
-// });
-// bus.emit = _emit;
 
-// describe("Reveal Frame Class ", () => {
-//   test("init method should emit an event", () => {
-//     RevealFrame.init();
-//     expect(_emit).toBeCalledTimes(1);
-//   });
-//   test("constructor should create Span Element with recordId", () => {
-//     const frame = new RevealFrame(testRecord, { logLevel: 'PROD' });
-//     const testSpanEle = document.querySelector("span");
-//     expect(testSpanEle).toBeTruthy();
-//     // expect(testSpanEle?.innerText).toBe(testRecord.id);
-//     const expectedClassName = getCssClassesFromJss(
-//       testRecord.styles,
-//       btoa(testRecord.label || testRecord.id)
-//     )["base"];
-//     // expect(testSpanEle?.classList.contains(expectedClassName)).toBe(true);
-//     expect(_on).toHaveBeenCalledTimes(4);
-//   });
-// });
 global.window = Object.create(window);
+const listen = jest.fn()
 const defineUrl = (url) => {
   Object.defineProperty(window, "location", {
     value: {
@@ -51,8 +69,10 @@ const defineUrl = (url) => {
     },
     writable: true,
   });
+
+  const base64Domain = btoa('http://localhost');
   Object.defineProperty(window, "name", {
-    value: "reveal:1234",
+    value: `reveal:container123:frame123:meta:${base64Domain}`,
     writable: true,
   });
   Object.defineProperty(window, "parent", {
@@ -65,12 +85,26 @@ const defineUrl = (url) => {
         },
       },
       postMessage: jest.fn(),
-      addEventListener: jest.fn(),
+      addEventListener: listen,
     },
     writable: true,
   });
 };
-const elementName = "reveal:1234"
+// Match the constructed window.name so event names align
+const elementName = `reveal:container123:frame123:meta:${btoa('http://localhost')}`
+
+// Provide a localStorage mock for Node/JSDOM environment where it's undefined
+if (typeof global.localStorage === 'undefined') {
+  const storage = {};
+  global.localStorage = {
+    getItem: jest.fn((key) => (key in storage ? storage[key] : null)),
+    setItem: jest.fn((key, value) => { storage[key] = String(value); }),
+    removeItem: jest.fn((key) => { delete storage[key]; }),
+    clear: jest.fn(() => { Object.keys(storage).forEach((k) => delete storage[k]); }),
+  };
+  // attach to window as well for code expecting window.localStorage
+  Object.defineProperty(window, 'localStorage', { value: global.localStorage, writable: false });
+}
 
 const on = jest.fn();
 const off = jest.fn();
@@ -187,7 +221,7 @@ name: elementName,
     // reveal response ready
     const onRevealResponseName = on.mock.calls[1][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+ 'frame123');
     const onRevealResponseCb = on.mock.calls[1][1];
     onRevealResponseCb({"1815-6223-1073-1425":"card_value"})
 
@@ -229,7 +263,7 @@ name: elementName,
     // reveal response ready
     const onRevealResponseName = on.mock.calls[1][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+'frame123');
     const onRevealResponseCb = on.mock.calls[1][1];
     onRevealResponseCb({"1815":"1234"})
   });
@@ -273,7 +307,7 @@ name: elementName,
     // reveal response ready
     const onRevealResponseName = on.mock.calls[1][0];
     // undefined since with jest window.name will be emptyString("") 
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+ 'frame123');
     const onRevealResponseCb = on.mock.calls[1][1];
     onRevealResponseCb({});
 
@@ -1008,7 +1042,7 @@ describe("Reveal Frame Class", () => {
     console.log('======>>>>>>>>>', emitSpy.mock.calls, onMock.mock.calls);
     // Verify reveal response ready
     const onRevealResponseName = onMock.mock.calls[1][0];
-    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY);
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY+'frame123');
     const onRevealResponseCb = onMock.mock.calls[1][1];
     onRevealResponseCb({ "1815-6223-1073-1425": "card_value" });
   });
@@ -1090,5 +1124,90 @@ describe("Reveal Frame Class", () => {
     const emittedData = emitSpy.mock.calls[0][1];
     expect(emittedEventName).toBe(ELEMENT_EVENTS_TO_CLIENT.MOUNTED+ elementName);;
     expect(emittedData).toEqual({name : elementName})
+  });
+  test("render success response event (file render request message)", async () => {
+    // Cover THEN block: successful resolve posts REVEAL_CALL_RESPONSE and HEIGHT_CALLBACK_COMPOSABLE
+    setFileURLResolve({
+      fields: { primary_card_file: 'https://cdn.example.com/file?response-content-disposition=inline%3B%20filename%3Dsuccess.png' },
+      fileMetadata: { contentType: 'image/png' }
+    });
+    window.postMessage = jest.fn();
+
+    const data = {
+      record: {
+        skyflowID: '1815-6223-1073-1425',
+        table: 'pii_fields',
+        column: 'primary_card_file',
+        label: 'Card Number',
+        altText: 'xxxx-xxxx-xxxx-xxxx',
+        inputStyles: { base: { color: 'red' } },
+        labelStyles: { base: { color: 'black' } },
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 0));
+
+    const parentCalls = window.parent.postMessage.mock.calls;
+    const successCall = parentCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + elementName));
+    expect(successCall).toBeTruthy();
+    expect(successCall[0].data.type).toBe(REVEAL_TYPES.RENDER_FILE);
+    expect(successCall[0].data.result).toBeDefined();
+    // Height callback
+    const windowCalls = window.postMessage.mock.calls;
+    const heightCall = windowCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name));
+    expect(heightCall).toBeTruthy();
+  });
+
+  test("render error response event (file render request message)", async () => {
+    // Cover CATCH block: rejection posts REVEAL_CALL_RESPONSE with errors and HEIGHT_CALLBACK_COMPOSABLE
+    const mockError = { code: 'GENERIC_ERROR', description: 'mock failure for test' };
+    setFileURLReject(mockError);
+    window.postMessage = jest.fn();
+
+    const data = {
+      record: {
+        skyflowID: '1815-6223-1073-1425',
+        table: 'pii_fields',
+        column: 'primary_card_file',
+        label: 'Card Number',
+        altText: 'xxxx-xxxx-xxxx-xxxx',
+        inputStyles: { base: { color: 'red' } },
+        labelStyles: { base: { color: 'black' } },
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 0));
+
+    const parentCalls = window.parent.postMessage.mock.calls;
+    const errorCall = parentCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + elementName));
+    expect(errorCall).toBeTruthy();
+    expect(errorCall[0].data.type).toBe(REVEAL_TYPES.RENDER_FILE);
+    expect(errorCall[0].data.result.errors).toEqual(mockError);
+    // Height callback
+    const windowCalls = window.postMessage.mock.calls;
+    const heightCall = windowCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name));
+    expect(heightCall).toBeTruthy();
   });
 });

@@ -1,10 +1,12 @@
 /*
   Copyright (c) 2025 Skyflow, Inc.
 */
+import { ELEMENT_EVENTS_TO_IFRAME, ElementType } from "../../../../src/core/constants";
 import ComposableElement from "../../../../src/core/external/collect/compose-collect-element";
 import EventEmitter from "../../../../src/event-emitter";
 import { ContainerType } from "../../../../src/skyflow";
 import { ElementState } from "../../../../src/utils/common";
+import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
 
 describe("test composable element", () => {
   const emitter = jest.fn();
@@ -41,17 +43,20 @@ describe("test composable element", () => {
   const testElement = new ComposableElement(
     "testce1",
     testEventEmitter,
-    iframeName
+    iframeName,
+    {}
   );
   const testElement2 = new ComposableElement(
     "testce2",
     testEventEmitter,
-    iframeName
+    iframeName,
+    {}
   );
   const testElement3 = new ComposableElement(
     "testce3",
     testEventEmitter,
-    iframeName
+    iframeName,
+    {}
   );
 
   it("tests for iframe name to be correct", () => {
@@ -85,6 +90,22 @@ describe("test composable element", () => {
       expect(err).toBeDefined();
     }
   });
+  
+  it("throws missing handler error when handler is undefined", () => {
+    try {
+      testElement.on("CHANGE", undefined as any);
+    } catch (err: any) {
+      expect(err?.error?.code).toBe(SKYFLOW_ERROR_CODE.MISSING_HANDLER_IN_EVENT_LISTENER.code);
+    }
+  });
+
+  it("throws invalid handler error when handler is not a function", () => {
+    try {
+      testElement.on("CHANGE", "notAFunction" as any);
+    } catch (err: any) {
+      expect(err?.error?.code).toBe(SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER.code);
+    }
+  });
 
   it("should update element propeties when element is mounted", () => {
     const testUpdateOptions = { table: "table" };
@@ -107,5 +128,80 @@ describe("test composable element", () => {
       elementName: "testce2",
       elementOptions: testUpdateOptions,
     });
+  });
+  it('rejects when multi file upload invoked on non MULT_FILE_INPUT composable element when type is not MULTI_FILE_INPUT', async () => {
+    await expect(testElement3.uploadMultipleFiles()).
+      rejects.toMatchObject({ error: { code: SKYFLOW_ERROR_CODE.MULTI_FILE_NOT_SUPPORTED.code } });
+  });
+  it('reject when multi file upload invoked on MULT_FILE_INPUT composable element case 1', async () => {
+    const testEventEmitt = new EventEmitter();
+    const testElement4 = new ComposableElement(
+      "testce4",
+      testEventEmitt,
+      iframeName,
+      { type: "MULTI_FILE_INPUT" }
+    );
+    // Trigger upload then dispatch error event AFTER listener is attached.
+    testEventEmitt.on(`${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:testce4`, (_: any, cb: Function) => {
+      cb({ error: 'Error occurred' });
+    });
+    await expect(testElement4.uploadMultipleFiles()).rejects.toMatchObject({ error: 'Error occurred' });
+  });
+  it('reject when multi file upload invoked on MULT_FILE_INPUT composable element case 2', async () => {
+    const testEventEmitt = new EventEmitter();
+    const testElement4 = new ComposableElement(
+      "testce4",
+      testEventEmitt,
+      iframeName,
+      { type: "MULTI_FILE_INPUT" }
+    );
+    // Trigger upload then dispatch error event AFTER listener is attached.
+    const p = testElement4.uploadMultipleFiles();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:testce4`,
+        data: { error: 'Error occurred' }
+      }
+    }));
+    await expect(p).rejects.toMatchObject({ error: 'Error occurred' });
+  });
+  it('uploadMultipleFiles resolves on success message event', async () => {
+    const elementName = 'multiSuccess';
+    const emitterStub: any = { _emit: jest.fn(), on: jest.fn() };
+    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: ElementType.MULTI_FILE_INPUT });
+    let messageHandler: any;
+    const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => {
+      if (evt === 'message') messageHandler = handler;
+    });
+    const promise = multiEl.uploadMultipleFiles();
+    expect(messageHandler).toBeDefined();
+    // Simulate success
+    messageHandler({ data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { fileUploadResponse: [{ filename: 'doc.pdf' }] } } });
+    await expect(promise).resolves.toMatchObject({ fileUploadResponse: [{ filename: 'doc.pdf' }] });
+    addSpy.mockRestore();
+  });
+
+  it('uploadMultipleFiles rejects when message has errorResponse', async () => {
+    const elementName = 'multiErrResp';
+    const emitterStub: any = { _emit: jest.fn(), on: jest.fn() };
+    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: ElementType.MULTI_FILE_INPUT });
+    let messageHandler: any;
+    const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => { if (evt === 'message') messageHandler = handler; });
+    const promise = multiEl.uploadMultipleFiles();
+    messageHandler({ data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { errorResponse: 'Upload failed' } } });
+    await expect(promise).rejects.toMatchObject({ errorResponse: 'Upload failed' });
+    addSpy.mockRestore();
+  });
+
+  it('uploadMultipleFiles rejects when message has error field', async () => {
+    const elementName = 'multiErrField';
+    const emitterStub: any = { _emit: jest.fn(), on: jest.fn() };
+    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: ElementType.MULTI_FILE_INPUT });
+    let messageHandler: any;
+    const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => { if (evt === 'message') messageHandler = handler; });
+    const promise = multiEl.uploadMultipleFiles();
+    messageHandler({ data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { error: 'Validation error' } } });
+    await expect(promise).rejects.toMatchObject({ error: 'Validation error' });
+    addSpy.mockRestore();
   });
 });
