@@ -274,37 +274,36 @@ export default class FrameElementInit {
     const insertRequestObject: any = {};
     const updateRequestObject: any = {};
 
-    this.iframeFormList.forEach((inputElement) => {
+    for (let i = 0; i < this.iframeFormList.length; i += 1) {
+      const inputElement = this.iframeFormList[i];
       if (inputElement) {
-        if (inputElement) {
-          if (
-            inputElement.fieldType
+        if (
+          inputElement.fieldType
                         !== ELEMENTS.FILE_INPUT.name && inputElement.fieldType
                         !== ELEMENTS.MULTI_FILE_INPUT.name
-          ) {
-            const {
-              // eslint-disable-next-line max-len
-              state, doesClientHasError, clientErrorText, errorText, onFocusChange, validations,
-              setValue,
-            } = inputElement;
-            if (state.isRequired || !state.isValid) {
-              onFocusChange(false);
-            }
-            if (validations
+        ) {
+          const {
+            // eslint-disable-next-line max-len
+            state, doesClientHasError, clientErrorText, errorText, onFocusChange, validations,
+            setValue,
+          } = inputElement;
+          if (state.isRequired || !state.isValid) {
+            onFocusChange(false);
+          }
+          if (validations
                           && checkForElementMatchRule(validations)
                           && checkForValueMatch(validations, inputElement)) {
-              setValue(state.value);
-              onFocusChange(false);
-            }
-            if (!state.isValid || !state.isComplete) {
-              if (doesClientHasError) {
-                errorMessage += `${state.name}:${clientErrorText}`;
-              } else { errorMessage += `${state.name}:${errorText} `; }
-            }
+            setValue(state.value);
+            onFocusChange(false);
+          }
+          if (!state.isValid || !state.isComplete) {
+            if (doesClientHasError) {
+              errorMessage += `${state.name}:${clientErrorText}`;
+            } else { errorMessage += `${state.name}:${errorText} `; }
           }
         }
       }
-    });
+    }
 
     // return for error
     if (errorMessage.length > 0) {

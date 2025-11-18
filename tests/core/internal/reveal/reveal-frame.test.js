@@ -4,7 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
 import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES, REVEAL_TYPES } from "../../../../src/core/constants";
-import { Env, LogLevel } from "../../../../src/utils/common";
+import { Env, LogLevel, RedactionType } from "../../../../src/utils/common";
 import getCssClassesFromJss from "../../../../src/libs/jss-styles";
 import { getFileURLFromVaultBySkyflowIDComposable } from "../../../../src/core-utils/reveal";
 import properties from "../../../../src/properties";
@@ -225,6 +225,29 @@ name: elementName,
     const onRevealResponseCb = on.mock.calls[1][1];
     onRevealResponseCb({"1815-6223-1073-1425":"card_value"})
 
+  });
+    test("update element props", () => {
+    window.postMessage = jest.fn();
+
+    const data = {
+      record: {
+        skyflowID: '1815-6223-1073-1425',
+        table: 'pii_fields',
+        column: 'primary_card_file',
+        altText: 'xxxx-xxxx-xxxx-xxxx',
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + elementName,
+        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS, 
+          iframeName: elementName, 
+          updatedValue: {redaction: RedactionType.DEFAULT} },
+    }));
   });
 
   test("init callback after reveal with response value with mask value",()=>{

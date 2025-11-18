@@ -158,17 +158,101 @@ describe('FrameElementInit extended unit tests', () => {
       records: [ { skyflow_id: 'id1' }, { skyflow_id: 'id2' } ],
     });
 
-  mockClientRequest.mockResolvedValue({ upload: 'ok' });
+    mockClientRequest.mockResolvedValue({ upload: 'ok' });
 
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
     const metaData = { foo: 'bar' };
     const result = await instance['multipleUploadFiles'](fileElement, config, metaData);
     expect(instance['insertDataCallInMultiFiles']).toHaveBeenCalled();
-  // Since state.value was set to an array (not a FileList), implementation wraps it once => single upload
-  expect(result.fileUploadResponse).toHaveLength(1);
-  expect(mockClientRequest).toHaveBeenCalledTimes(1);
+    // Since state.value was set to an array (not a FileList), implementation wraps it once => single upload
+    expect(result.fileUploadResponse).toHaveLength(1);
+    expect(mockClientRequest).toHaveBeenCalledTimes(1);
+    });
+  
+  test('multipleUploadFiles no metaData mixed success and error', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('f1.txt'), makeFile('f2.txt')];
+    const fileElement = makeFileElement({ multiple: true, files });
+    fileElement.state.value = files;
+    instance.iframeFormList = [fileElement];
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    // insertDataInCollect.mockResolvedValue({records: [{ skyflow_id: 'ins1' }] });
+    mockClientRequest.mockImplementationOnce(() => Promise.resolve({records: [{ skyflow_id: 'ins1' }] }))
+    mockClientRequest.mockImplementationOnce(() => Promise.resolve({ skyflow_id: 'ins1' }))
+
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    await expect(instance['multipleUploadFiles'](fileElement, config, {id: "demo"}))
+      .resolves.toEqual({"fileUploadResponse": [{"skyflow_id": "ins1"}]});
+    expect(mockClientRequest).toHaveBeenCalledTimes(2);
   });
 
+  test('insertDataCallInMultiFiles no metaData mixed success and error', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('f1.txt'), makeFile('f2.txt')];
+    const fileElement = makeFileElement({ multiple: true, files });
+    fileElement.state.value = files;
+    instance.iframeFormList = [fileElement];
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    mockClientRequest.mockImplementationOnce(() => Promise.reject({code: '500', message: 'error'}))
+
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    await expect(instance['multipleUploadFiles'](fileElement, config, {id: "demo"}))
+      .rejects.toEqual({"error": {"code": "500", "message": "error"}});
+    expect(mockClientRequest).toHaveBeenCalledTimes(1);
+  });
+  
+  test('multipleUploadFiles with metaData mixed error', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('f1.txt'), makeFile('f2.txt')];
+    const fileElement = makeFileElement({ multiple: true, files });
+    fileElement.state.value = files;
+    instance.iframeFormList = [fileElement];
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    // insertDataInCollect.mockResolvedValue({records: [{ skyflow_id: 'ins1' }] });
+    mockClientRequest.mockImplementationOnce(() => Promise.resolve({records: [{ skyflow_id: 'ins1' }] }))
+    mockClientRequest.mockImplementationOnce(() => Promise.resolve({ error: 'ins1' }))
+
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    await expect(instance['multipleUploadFiles'](fileElement, config, {id: "demo"}))
+      .rejects.toEqual({"errorResponse": [{"error": "ins1"}]});
+    expect(mockClientRequest).toHaveBeenCalledTimes(2);
+  });
+    test('multipleUploadFiles with metaData reject error', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('f1.txt'), makeFile('f2.txt')];
+    const fileElement = makeFileElement({ multiple: true, files });
+    fileElement.state.value = files;
+    instance.iframeFormList = [fileElement];
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    // insertDataInCollect.mockResolvedValue({records: [{ skyflow_id: 'ins1' }] });
+    mockClientRequest.mockImplementationOnce(() => Promise.resolve({records: [  { skyflow_id: 'ins1' },{ skyflow_id: 'ins2' } ] }))
+    mockClientRequest.mockImplementationOnce(() => Promise.reject('ins1'))
+
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    await expect(instance['multipleUploadFiles'](fileElement, config, {id: "demo"}))
+      .rejects.toEqual({"errorResponse": [{"error": "ins1"}]});
+    expect(mockClientRequest).toHaveBeenCalledTimes(2);
+  });
+
+  test('multipleUploadFiles with metaData success and error case', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('f1.txt'), makeFile('f2.txt')];
+    const fileElement = makeFileElement({ multiple: true, files });
+    fileElement.state.value = files;
+    instance.iframeFormList = [fileElement];
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    mockClientRequest.mockImplementationOnce(() => Promise.resolve({ skyflow_id: 'ins1' }))
+
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    await expect(instance['multipleUploadFiles'](fileElement, config, {id: "demo"}))
+      .rejects.toEqual({"error": "No skyflow IDs returned from insert data"});
+    expect(mockClientRequest).toHaveBeenCalledTimes(1);
+  });
   test('multipleUploadFiles rejects when no skyflow IDs returned', async () => {
     const instance = new FrameElementInit();
     const files = [makeFile('f1.txt'), makeFile('f2.txt')];
@@ -177,7 +261,7 @@ describe('FrameElementInit extended unit tests', () => {
     helpers.fileValidation = jest.fn(() => true);
     helpers.vaildateFileName = jest.fn(() => true);
     instance['insertDataCallInMultiFiles'] = jest.fn().mockResolvedValue({ records: [] });
-  mockClientRequest.mockResolvedValue({ upload: 'ok' });
+    mockClientRequest.mockResolvedValue({ upload: 'ok' });
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
     await expect(instance['multipleUploadFiles'](fileElement, config, { meta: 'x' })).rejects.toEqual({ error: 'No skyflow IDs returned from insert data' });
   });
@@ -191,6 +275,43 @@ describe('FrameElementInit extended unit tests', () => {
     helpers.vaildateFileName = jest.fn(() => false); // force invalid name
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
     await expect(instance['multipleUploadFiles'](fileElement, config, {})).rejects.toBeTruthy();
+  });
+
+  // ===== multipleUploadFiles else branch (no metaData) coverage lines ~548-587 =====
+  test('multipleUploadFiles no metaData all success', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('f1.txt'), makeFile('f2.txt')];
+    const fileElement = makeFileElement({ multiple: true, files });
+    // Override state.value with FileList directly
+    fileElement.state.value = files;
+    instance.iframeFormList = [fileElement];
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    // Two successful uploads returning JSON strings to hit JSON.parse branch
+    mockClientRequest
+      .mockImplementationOnce(() => Promise.resolve({"up":"okA"}))
+      // .mockImplementationOnce(() => Promise.resolve('{"up":"okB"}'));
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    const result = await instance['multipleUploadFiles'](fileElement, config, undefined);
+    expect(result.fileUploadResponse).toEqual([{ up: 'okA' }]);
+    expect(mockClientRequest).toHaveBeenCalledTimes(1);
+  });
+
+  test('multipleUploadFiles no metaData all errors', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('f1.txt'), makeFile('f2.txt')];
+    const fileElement = makeFileElement({ multiple: true, files });
+    fileElement.state.value = files;
+    instance.iframeFormList = [fileElement];
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    mockClientRequest
+      .mockImplementationOnce(() => Promise.reject({error: 'badA'}))
+      // .mockImplementationOnce(() => Promise.reject('badB'));
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    await expect(instance['multipleUploadFiles'](fileElement, config, undefined))
+      .rejects.toEqual({ errorResponse: [{ error: { error: 'badA' } }] });
+    expect(mockClientRequest).toHaveBeenCalledTimes(1);
   });
 
   test('validateFiles throws on invalid file type', () => {
@@ -207,7 +328,7 @@ describe('FrameElementInit extended unit tests', () => {
     const fileElementA = makeFileElement({ multiple: false, files: [makeFile('a.txt')] });
     const fileElementB = makeFileElement({ multiple: false, files: [makeFile('b.txt')] });
     instance.iframeFormList = [fileElementA, fileElementB];
-    instance.uploadFiles = jest.fn(() => Promise.resolve('{"ok":true}'));
+    instance.uploadFiles = jest.fn(() => Promise.resolve({"ok":true}));
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
     await expect(instance['parallelUploadFiles']({}, config)).resolves.toEqual({ fileUploadResponse: [{ ok: true }, { ok: true }] });
   });
@@ -218,7 +339,7 @@ describe('FrameElementInit extended unit tests', () => {
     const fileElementB = makeFileElement({ multiple: false, files: [makeFile('b.txt')] });
     instance.iframeFormList = [fileElementA, fileElementB];
     instance.uploadFiles = jest.fn()
-      .mockImplementationOnce(() => Promise.resolve('{"ok":true}'))
+      .mockImplementationOnce(() => Promise.resolve({"ok":true}))
       .mockImplementationOnce(() => Promise.reject({ error: 'failed' }));
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
     await expect(instance['parallelUploadFiles']({}, config)).rejects.toEqual({ fileUploadResponse: [{ ok: true }], errorResponse: [{ error: 'failed' }] });
