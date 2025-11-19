@@ -1540,6 +1540,315 @@ cardNumberElement.update({
 
 ---
 
+
+## Using Skyflow File Element to upload a file
+
+You can upload binary files to a vault using the Skyflow File Element. Use the following steps to securely upload a file.
+### Step 1: Create a container
+
+Create a container for the form elements using the container(Skyflow.ContainerType) method of the Skyflow client:
+
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
+```
+
+### Step 2: Create a File Element
+
+Skyflow Collect Elements are defined as follows: 
+
+```javascript
+const collectElement =  {
+  type: Skyflow.ElementType.FILE_INPUT,   // Skyflow.ElementType enum.
+  table: 'string',             // The table this data belongs to.
+  column: 'string',            // The column into which this data should be inserted.
+  skyflowID: 'string',         // The skyflow_id of the record.
+  inputStyles: {},             // Optional, styles that should be applied to the form element.
+  labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
+  errorTextStyles:{},          // Optional, styles that will be applied to the errorText of the collect element.
+}
+```
+The `table` and `column` fields indicate which table and column the Element corresponds to. 
+
+`skyflowID` indicates the record that stores the file.
+
+**Notes**: 
+- `skyflowID` is required while creating File element
+- Use period-delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`).
+
+ ## Step 3: Mount elements to the DOM
+
+To specify where to render Elements on your page, create placeholder `<div>` elements with unique `id` tags. For instance, the form below has an empty div with a unique id as a placeholder for a Skyflow Element. 
+
+```html
+<form>
+  <div id="file"/>
+  <br/>
+  <button type="submit">Submit</button>
+</form>
+```
+
+Now, when the `mount(domElement)` method of the Element is called, the Element is inserted in the specified div. For instance, the call below inserts the Element into the div with the id "#file".  
+
+```javascript
+element.mount('#file');
+```
+Use the `unmount` method to reset a Collect Element to its initial state.
+
+```javascript
+element.unmount();
+```
+## Step 4: Collect data from elements
+
+When the file is ready to be uploaded, call the `uploadFiles()` method on the container object.
+
+```javascript
+container.uploadFiles();
+```
+### File upload limitations:
+
+- Only non-executable file are allowed to be uploaded.
+- Files must have a maximum size of 32 MB
+- File columns can't enable tokenization, redaction, or arrays.
+- Re-uploading a file overwrites previously uploaded data.
+- Partial uploads or resuming a previous upload isn't supported.
+
+### End-to-end file upload
+
+```javascript
+// Step 1.
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
+
+// Step 2.
+const element = container.create({
+  table: 'pii_fields',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.FILE_INPUT,
+});
+
+// Step 3.
+element.mount('#file'); // Assumes there is a div with id='#file' in the webpage.
+
+// Step 4.
+container.uploadFiles();
+```
+
+**Sample Response :**
+```javascript
+{
+    fileUploadResponse: [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
+### File upload with options:
+
+Along with fileElementInput, you can define other options in the Options object as described below: 
+```js
+const options = {
+ allowedFileType: String[],  // Optional, indicates the allowed file types for upload
+}
+```
+`allowedFileType`: An array of string value that indicates the allowedFileTypes to be uploaded.
+
+#### File upload with options example
+
+```javascript
+// Create collect Container.
+const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+
+// Create collect elements.
+const cardNumberElement = collectContainer.create({
+  table: 'newTable',
+  column: 'card_number',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  placeholder: 'card number',
+  label: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+const options = { 
+    allowedFileType: [".pdf",".png"];
+};
+const fileElement = collectContainer.create({
+  table: 'newTable',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.FILE_INPUT,
+},
+  options
+);
+
+// Mount the elements.
+cardNumberElement.mount('#collectCardNumber');
+fileElement.mount('#collectFile');
+
+// Collect and upload methods.
+collectContainer.collect({});
+collectContainer.uploadFiles();
+
+```
+**Sample Response for collect():**
+```javascript
+{
+  "records": [
+    {
+      "table": "newTable",
+      "fields": {
+        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+      }
+    }
+  ]
+}
+```
+**Sample Response for file uploadFiles() :**
+```javascript
+{
+    "fileUploadResponse": [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
+#### File upload with additional elements
+
+```javascript
+// Create collect Container.
+const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+
+// Create collect elements.
+const cardNumberElement = collectContainer.create({
+  table: 'newTable',
+  column: 'card_number',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  placeholder: 'card number',
+  label: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+const fileElement = collectContainer.create({
+  table: 'newTable',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.FILE_INPUT,
+});
+
+// Mount the elements.
+cardNumberElement.mount('#collectCardNumber');
+fileElement.mount('#collectFile');
+
+// Collect and upload methods.
+collectContainer.collect({});
+collectContainer.uploadFiles();
+
+```
+**Sample Response for collect():**
+```javascript
+{
+  "records": [
+    {
+      "table": "newTable",
+      "fields": {
+        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+      }
+    }
+  ]
+}
+```
+**Sample Response for file uploadFiles() :**
+```javascript
+{
+    "fileUploadResponse": [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
+
+Note: File name should contain only alphanumeric characters and !-_.*()
+
+
 # Securely collecting data client-side using Composable Elements
 
 Composable Elements combine multiple Skyflow Elements in a single iframe, letting you create multiple Skyflow Elements in a single row. The following steps create a composable element and securely collect data through it.
@@ -2128,6 +2437,8 @@ composableContainer.on(Skyflow.EventName.SUBMIT, ()=> {
 ```
 
 ---
+
+
 # Securely revealing data client-side
 -  [**Retrieving data from the vault**](#retrieving-data-from-the-vault)
 -  [**Using Skyflow Elements to reveal data**](#using-skyflow-elements-to-reveal-data)
@@ -2136,6 +2447,8 @@ composableContainer.on(Skyflow.EventName.SUBMIT, ()=> {
 -  [**Set and clear altText for Reveal Elements**](#set-and-clear-alttext-for-reveal-elements)
 -  [**Render a file with a File Element**](#render-a-file-with-a-file-element)
 -  [**Update Reveal Elements**](#update-reveal-elements)
+-  [**Using Composable Reveal Elements to reveal data**](#using-composable-reveal-elements-to-reveal-data)
+
 
 ## Retrieving data from the vault
 
@@ -2700,313 +3013,6 @@ cardNumber.clearAltText();
 
 ```
 
-## Using Skyflow File Element to upload a file
-
-You can upload binary files to a vault using the Skyflow File Element. Use the following steps to securely upload a file.
-### Step 1: Create a container
-
-Create a container for the form elements using the container(Skyflow.ContainerType) method of the Skyflow client:
-
-```javascript
-const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
-```
-
-### Step 2: Create a File Element
-
-Skyflow Collect Elements are defined as follows: 
-
-```javascript
-const collectElement =  {
-  type: Skyflow.ElementType.FILE_INPUT,   // Skyflow.ElementType enum.
-  table: 'string',             // The table this data belongs to.
-  column: 'string',            // The column into which this data should be inserted.
-  skyflowID: 'string',         // The skyflow_id of the record.
-  inputStyles: {},             // Optional, styles that should be applied to the form element.
-  labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
-  errorTextStyles:{},          // Optional, styles that will be applied to the errorText of the collect element.
-}
-```
-The `table` and `column` fields indicate which table and column the Element corresponds to. 
-
-`skyflowID` indicates the record that stores the file.
-
-**Notes**: 
-- `skyflowID` is required while creating File element
-- Use period-delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`).
-
- ## Step 3: Mount elements to the DOM
-
-To specify where to render Elements on your page, create placeholder `<div>` elements with unique `id` tags. For instance, the form below has an empty div with a unique id as a placeholder for a Skyflow Element. 
-
-```html
-<form>
-  <div id="file"/>
-  <br/>
-  <button type="submit">Submit</button>
-</form>
-```
-
-Now, when the `mount(domElement)` method of the Element is called, the Element is inserted in the specified div. For instance, the call below inserts the Element into the div with the id "#file".  
-
-```javascript
-element.mount('#file');
-```
-Use the `unmount` method to reset a Collect Element to its initial state.
-
-```javascript
-element.unmount();
-```
-## Step 4: Collect data from elements
-
-When the file is ready to be uploaded, call the `uploadFiles()` method on the container object.
-
-```javascript
-container.uploadFiles();
-```
-### File upload limitations:
-
-- Only non-executable file are allowed to be uploaded.
-- Files must have a maximum size of 32 MB
-- File columns can't enable tokenization, redaction, or arrays.
-- Re-uploading a file overwrites previously uploaded data.
-- Partial uploads or resuming a previous upload isn't supported.
-
-### End-to-end file upload
-
-```javascript
-// Step 1.
-const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
-
-// Step 2.
-const element = container.create({
-  table: 'pii_fields',
-  column: 'file',
-  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
-    base: {
-      color: '#1d1d1d',
-    },
-  },
-  labelStyles: {
-    base: {
-      fontSize: '12px',
-      fontWeight: 'bold',
-    },
-  },
-  errorTextStyles: {
-    base: {
-      color: '#f44336',
-    },
-  },
-  type: Skyflow.ElementType.FILE_INPUT,
-});
-
-// Step 3.
-element.mount('#file'); // Assumes there is a div with id='#file' in the webpage.
-
-// Step 4.
-container.uploadFiles();
-```
-
-**Sample Response :**
-```javascript
-{
-    fileUploadResponse: [
-        {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
-        }
-    ]
-}
-```
-### File upload with options:
-
-Along with fileElementInput, you can define other options in the Options object as described below: 
-```js
-const options = {
- allowedFileType: String[],  // Optional, indicates the allowed file types for upload
-}
-```
-`allowedFileType`: An array of string value that indicates the allowedFileTypes to be uploaded.
-
-#### File upload with options example
-
-```javascript
-// Create collect Container.
-const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
-
-// Create collect elements.
-const cardNumberElement = collectContainer.create({
-  table: 'newTable',
-  column: 'card_number',
-  inputstyles: {
-    base: {
-      color: '#1d1d1d',
-    },
-  },
-  labelStyles: {
-    base: {
-      fontSize: '12px',
-      fontWeight: 'bold',
-    },
-  },
-  errorTextStyles: {
-    base: {
-      color: '#f44336',
-    },
-  },
-  placeholder: 'card number',
-  label: 'Card Number',
-  type: Skyflow.ElementType.CARD_NUMBER,
-});
-const options = { 
-    allowedFileType: [".pdf",".png"];
-};
-const fileElement = collectContainer.create({
-  table: 'newTable',
-  column: 'file',
-  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
-    base: {
-      color: '#1d1d1d',
-    },
-  },
-  labelStyles: {
-    base: {
-      fontSize: '12px',
-      fontWeight: 'bold',
-    },
-  },
-  errorTextStyles: {
-    base: {
-      color: '#f44336',
-    },
-  },
-  type: Skyflow.ElementType.FILE_INPUT,
-},
-  options
-);
-
-// Mount the elements.
-cardNumberElement.mount('#collectCardNumber');
-fileElement.mount('#collectFile');
-
-// Collect and upload methods.
-collectContainer.collect({});
-collectContainer.uploadFiles();
-
-```
-**Sample Response for collect():**
-```javascript
-{
-  "records": [
-    {
-      "table": "newTable",
-      "fields": {
-        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
-      }
-    }
-  ]
-}
-```
-**Sample Response for file uploadFiles() :**
-```javascript
-{
-    "fileUploadResponse": [
-        {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
-        }
-    ]
-}
-```
-#### File upload with additional elements
-
-```javascript
-// Create collect Container.
-const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
-
-// Create collect elements.
-const cardNumberElement = collectContainer.create({
-  table: 'newTable',
-  column: 'card_number',
-  inputstyles: {
-    base: {
-      color: '#1d1d1d',
-    },
-  },
-  labelStyles: {
-    base: {
-      fontSize: '12px',
-      fontWeight: 'bold',
-    },
-  },
-  errorTextStyles: {
-    base: {
-      color: '#f44336',
-    },
-  },
-  placeholder: 'card number',
-  label: 'Card Number',
-  type: Skyflow.ElementType.CARD_NUMBER,
-});
-
-const fileElement = collectContainer.create({
-  table: 'newTable',
-  column: 'file',
-  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
-    base: {
-      color: '#1d1d1d',
-    },
-  },
-  labelStyles: {
-    base: {
-      fontSize: '12px',
-      fontWeight: 'bold',
-    },
-  },
-  errorTextStyles: {
-    base: {
-      color: '#f44336',
-    },
-  },
-  type: Skyflow.ElementType.FILE_INPUT,
-});
-
-// Mount the elements.
-cardNumberElement.mount('#collectCardNumber');
-fileElement.mount('#collectFile');
-
-// Collect and upload methods.
-collectContainer.collect({});
-collectContainer.uploadFiles();
-
-```
-**Sample Response for collect():**
-```javascript
-{
-  "records": [
-    {
-      "table": "newTable",
-      "fields": {
-        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
-      }
-    }
-  ]
-}
-```
-**Sample Response for file uploadFiles() :**
-```javascript
-{
-    "fileUploadResponse": [
-        {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
-        }
-    ]
-}
-```
-
-Note: File name should contain only alphanumeric characters and !-_.*()
-
 ## Render a file with a File Element
 
 You can render files using the Skyflow File Element. Use the following steps to securely render a file.
@@ -3242,6 +3248,515 @@ cardNumberRevealElement.update({
 ```
 
 ---
+
+
+# Using Composable Reveal Elements to reveal data
+
+Composable Reveal Elements combine multiple Skyflow Elements in a single iframe, letting you create multiple Skyflow Elements in a single row. The following steps create a composable reveal element and securely collect data through it.
+
+### Step 1: Create a composable reveal container
+
+Create a container for the composable reveal element using the `container(Skyflow.ContainerType)` method of the Skyflow client:
+
+``` javascript
+ const revealComposableContainer = skyflow.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
+```
+The container requires an options object that contains the following keys:
+
+1. `layout`: An array that indicates the number of rows in the container and the number of elements in each row. The index value of the array defines the number of rows, and each value in the array represents the number of elements in that row, in order.
+  
+    For example: `[2,1]` means the container has two rows, with two elements in the first row and one element in the second row.
+
+    `Note`: The sum of values in the layout array should be equal to the number of elements created
+
+2. `styles`: CSS styles to apply to the reveal composable container.
+3. `errorTextStyles`: CSS styles to apply if an error is encountered.
+
+```javascript
+const containerOptions = {
+    layout: [2, 1],                           // Required
+    styles: {                                 // Optional
+        base: {
+            border: '1px solid #DFE3EB',
+            padding: '8px',
+            borderRadius: '4px',
+            margin: '12px 2px',
+        },
+    },
+    errorTextStyles: {                       // Optional
+        base: {
+            color: 'red',
+            fontFamily: '"Roboto", sans-serif'
+        },
+        global: {
+            '@import': 'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+        }        
+    },
+};
+```
+
+### Step 2: Create Composable Reveal Elements
+Composable Reveal Elements use the following schema:
+
+```javascript
+const revealComposableElement = {
+  token: 'string',     // Required, token of the data being revealed.
+  inputStyles: {},     // Optional, styles to be applied to the element.
+  labelStyles: {},     // Optional, styles to be applied to the label of the reveal element.
+  errorTextStyles: {}, // Optional, styles that will be applied to the errorText of the reveal element.
+  label: 'string',     // Optional, label for the form element.
+  altText: 'string',   // Optional, string that is shown before reveal, will show token if altText is not provided.
+  redaction: RedactionType, //Optional, Redaction Type to be applied to data, RedactionType.PLAIN_TEXT will be applied if not provided.
+};
+```
+Note: If you don't provide a redaction type, RedactionType.PLAIN_TEXT will apply by default.
+
+The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant, `copyIcon` and `global` style objects. 
+
+An example of a inputStyles object:
+
+```javascript
+inputStyles: {
+  base: {
+    color: '#1d1d1d',
+  },
+  copyIcon: {
+    position: 'absolute',
+    right: '8px',
+    top: 'calc(50% - 10px)',
+  },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
+},
+```
+
+An example of a labelStyles object:
+
+```javascript
+labelStyles: {
+  base: {
+    fontSize: '12px',
+    fontWeight: 'bold',
+  },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
+},
+```
+
+An example of a errorTextStyles object:
+
+```javascript
+errorTextStyles: {
+  base: {
+    color: '#f44336',
+  },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
+},
+```
+
+Along with RevealElementInput, you can define other options in the RevealElementOptions object as described below: 
+```js
+const options = {
+  enableCopy: false,    // Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false').
+ format: String,        // Optional, format for the element 
+ translation: {}        // Optional, indicates the allowed data type value for format. 
+}
+```
+
+`format`: A string value that indicates how the reveal element should display the value, including placeholder characters that map to keys `translation` If `translation` isn't specified to any character in the `format` value is considered as a string literal.
+
+`translation`: An object of key value pairs, where the key is a character that appears in `format` and the value is a simple regex pattern of acceptable inputs for that character. Each key can only appear once. Defaults to `{ ‘X’: ‘[0-9]’ }`.
+
+**Reveal Element Options examples:**
+Example 1
+```js
+const revealElementInput = {
+ token: '<token>' 
+};
+
+const options = {
+  format: '(XXX) XXX-XXXX',
+  translation: { 'X': '[0-9]'} 
+};
+
+const revealElement = revealComposableContainer.create(revealElementInput,options);
+```
+
+Value from vault: "1234121234"
+Revealed Value displayed in element: "(123) 412-1234"
+
+Example 2:
+```js
+const revealElementInput = {
+ token: '<token>' 
+};
+
+const options = {
+  format: 'XXXX-XXXXXX-XXXXX',
+  translation: { 'X': '[0-9]' } 
+};
+
+const revealElement = revealComposableContainer.create(revealElementInput,options);
+```
+
+Value from vault: "374200000000004"
+Revealed Value displayed in element: "3742-000000-00004"
+
+Once you've defined a Skyflow Element, you can use the `create(element)` method of the container to create the Element as shown below: 
+
+```javascript
+const element = revealComposableContainer.create(revealElement)
+```
+
+### Step 3: Mount Container to the DOM
+To specify where the Elements are rendered on your page, create a placeholder `<div>` element with unique `id` attribute. Use this empty `<div>` placeholder to mount the composable reveal container.
+
+```javascript
+<form>
+  <div id="composableRevealContainer"/>
+  <br/>
+  <div id="button-id"/>
+  <button type="submit">Submit</button>
+</form>
+```
+Use the composable container's `mount(domElement)` method to insert the container's Elements into the specified `<div>`. For instance, the following call inserts Elements into the `<div>` with the `id "#composableContainer"`.
+
+```javacript
+revealComposableContainer.mount('#composableRevealContainer');
+```
+
+### Step 4: Reveal data
+When the sensitive data is ready to be retrieved and revealed, call the `reveal()` method on the container as shown below: 
+
+```javascript
+container
+  .reveal()
+  .then(data => {
+    // Handle success.
+  })
+  .catch(err => {
+    // Handle error.
+  });
+```
+
+### End to end example of reveal data with Composable Reveal Elements
+```javascript
+// Step 1.
+const container = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
+// Step 2.
+const cardNumberElement = container.create({
+  token: 'b63ec4e0-bbad-4e43-96e6-6bd50f483f75',
+  inputStyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  label: 'card_number',
+  altText: 'XXXX XXXX XXXX XXXX',
+  redaction: Skyflow.RedactionType.MASKED
+});
+
+const cvvElement = container.create({
+  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  inputStyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  label: 'cvv',
+  altText: 'XXX',
+});
+
+const expiryDate= container.create({
+ token: 'a4b24714-6a26-4256-b9d4-55ad69aa4047',
+ inputStyles: {
+   base: {
+     color: '#1d1d1d',
+   },
+ },
+ label: 'expiryDate',
+ altText: 'MM/YYYY',
+});
+// Step 3.
+container.mount('#container')
+// Step 4.
+container
+  .reveal()
+  .then(data => {
+    // Handle success.
+  })
+  .catch(err => {
+    // Handle error.
+  });
+```
+The response below shows that some tokens assigned to the reveal elements get revealed successfully, while others fail and remain unrevealed.
+
+### Sample Response
+
+```
+{
+  "success": [
+     {
+     "token": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+     "value": "xxxxxxxxx4163"
+     "valueType": "STRING"
+   },
+   {
+     "token": "a4b24714-6a26-4256-b9d4-55ad69aa4047",
+     "value": "12/2098"
+     "valueType": "STRING"
+   }
+  ],
+ "errors": [
+    {
+       "token": "89024714-6a26-4256-b9d4-55ad69aa4047",
+       "error": {
+         "code": 404,
+         "description": "Tokens not found for 89024714-6a26-4256-b9d4-55ad69aa4047"
+       } 
+   }   
+  ]
+}
+```
+
+## Update Reveal Composable Elements
+
+You can update reveal composable element properties with the `update` interface.
+
+The `update` interface takes the below object:
+```javascript
+const updateElement = {
+  token: 'string',          // Optional, token of the data being revealed.
+  inputStyles: {},          // Optional, styles to be applied to the element.
+  labelStyles: {},          // Optional, styles to be applied to the label of the reveal element.
+  errorTextStyles: {},      // Optional, styles that will be applied to the errorText of the reveal element.
+  label: 'string',          // Optional, label for the form element.
+  altText: 'string',        // Optional, string that is shown before reveal, will show token if altText is not provided.
+  redaction: RedactionType, // Optional, Redaction Type to be applied to data.
+  skyflowID: 'string',      // Optional, Skyflow ID of the file to render.
+  table: 'string',          // Optional, table name of the file to render.
+  column: 'string'          // Optional, column name of the file to render. 
+};
+```
+
+Only include the properties that you want to update for the specified reveal element. 
+
+Properties your provided when you created the element remain the same until you explicitly update them.
+
+
+### End to end example
+```javascript
+// Create a reveal composable container. 
+const revealComposableContainer = skyflow.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
+
+const stylesOptions = {
+  inputStyles: {
+    base: {
+      fontFamily: 'Inter',
+      fontStyle: 'normal',
+      fontWeight: 400,
+      fontSize: '14px',
+      lineHeight: '21px',
+      width: '294px',
+    },
+  },
+  labelStyles: {},
+  errorTextStyles: {
+    base: {
+      color: '#f44336'
+    },
+  },
+};
+
+// Create reveal elements
+const cardHolderNameRevealElement = revealComposableContainer.create({
+  token: 'ed5fdd1f-5009-435c-a06b-3417ce76d2c8',
+  altText: 'first name',
+  ...stylesOptions,
+  label: 'Card Holder Name',
+});
+
+const cardNumberRevealElement = revealComposableContainer.create({
+  token: '8ee84061-7107-4faf-bb25-e044f3d191fe',
+  altText: 'xxxx',
+  ...stylesOptions,
+  label: 'Card Number',
+  redaction: 'RedactionType.CARD_NUMBER'
+});
+
+// Mount the reveal elements.
+revealContainer.mount('#container'); // Assumes there is a div with container
+// ...
+
+// Update label, labelStyles properties on cardHolderNameRevealElement.
+cardHolderNameRevealElement.update({
+  label: 'CARDHOLDER NAME',
+  labelStyles: {
+    base: {
+      color: '#aa11aa'
+    }
+  }
+});
+
+// Update inputStyles, errorTextStyles properties on cardNumberRevealElement.
+cardNumberRevealElement.update({
+  inputStyles: {
+    base: {
+      color: '#fff',
+      backgroundColor: '#000',
+      borderColor: '#f00',
+      borderWidth: '5px'
+    }
+  },
+  errorTextStyles: {
+    base: {
+      backgroundColor: '#000',
+    }
+  }
+});
+```
+
+---
+
+
+## Render a file with a File Element
+
+You can render files using the Skyflow File Element. Use the following steps to securely render a file.
+
+## Step 1: Create a container
+Create a container for the form elements using the container(Skyflow.ContainerType) method of the Skyflow client:
+
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions)
+```
+
+## Step 2: Create a File Element
+Define a Skyflow Element to render the file as shown below.
+
+```javascript
+const fileElement = {  
+  inputStyles: {},     // Optional, styles to be applied to the element.
+  errorTextStyles: {}, // Optional, styles that will be applied to the errorText of the render element.
+  altText: 'string',   // Optional, string that is shown before file render call
+  skyflowID: 'string', // Required, skyflow id of the file to render
+  column: 'string',    // Required, column name of the file to render
+  table: 'string',     // Required, table name of the file to render
+};
+```
+The inputStyles and errorTextStyles parameters accept a styles object as described in the [previous section](https://github.com/skyflowapi/skyflow-js#step-2-create-a-collect-element) for collecting data. But for render file elements, inputStyles accepts only base variant, global style objects.
+
+An example of a inputStyles object:
+
+```javascript
+inputStyles: {
+  base: {
+      height: '400px',
+      width: '300px',
+  },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
+}
+```
+An example of a errorTextStyles object:
+```javascript
+errorTextStyles: {
+  base: {
+    color: '#f44336',
+  },
+  global: {
+    '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
+}
+```
+## Step 3: Mount Elements to the DOM
+Elements used for rendering files are mounted to the DOM the same way as Elements used for revealing data. Refer to Step 3 of the [section above](#step-3-mount-container-to-the-dom-1).
+
+## Step 4: Render File
+When the element is created and mounted, call the renderFile() method on the element as shown below:
+```javascript
+fileElement
+  .renderFile()
+  .then(data => {
+    // Handle success.
+  })
+  .catch(err => {
+    // Handle error.
+  });
+```
+
+## End to end example of file render
+```javascript
+// Step 1.
+const container = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
+
+// REPLACE with your custom implementation to fetch skyflow_id from backend service.
+// Sample implementation
+fetch("<BACKEND_URL>")
+  .then((response) => {
+
+    // on successful fetch skyflow_id
+    const skyflowID = response.skyflow_id;
+
+    // Step 2.
+    const fileElement = container.create({
+      skyflowID: "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+      column: "file",
+      table: "table",
+      inputStyles: {
+        base: {
+          height: "400px",
+          width: "300px",
+        },
+      },
+      errorTextStyles: {
+        base: {
+          color: "#f44336",
+        },
+      },
+      altText: "This is an altText",
+    });
+    // Step 3.
+    fileElement.mount("#renderFile"); // Assumes there is a placeholder div with id=renderFile on the page
+
+    const renderButton = document.getElementById("renderFiles"); // button to call render file
+
+    if (renderButton) {
+      renderButton.addEventListener("click", () => {
+    
+    // Step 4.
+        fileElement
+          .renderFile()
+          .then((data) => {
+            // Handle success.
+          })
+          .catch((err) => {
+            // Handle error.
+          });
+      });
+    }
+  })
+  .catch((err) => {
+    // failed to fetch skyflow_id
+    console.log(err);
+  });
+
+```
+
 # Securely deleting data client-side
 -  [**Deleting data from the vault**](#deleting-data-from-the-vault)
 
