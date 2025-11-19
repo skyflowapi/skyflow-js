@@ -4,6 +4,7 @@ import { ELEMENT_EVENTS_TO_IFRAME, COMPOSABLE_REVEAL, ELEMENT_EVENTS_TO_CLIENT, 
 import bus from 'framebus';
 import SkyflowError from '../../../src/libs/skyflow-error';
 import { fetchRecordsByTokenIdComposable, formatRecordsForClientComposable } from '../../../src/core-utils/reveal';
+import properties from '../../../src/properties';
 
 // Create a mock function that can be controlled per test
 const mockFetchRecordsByTokenIdComposable = jest.fn();
@@ -154,6 +155,32 @@ describe('composableFrameElementInit Additional Test Cases', () => {
     afterEach(() => {
         jest.restoreAllMocks();
     });
+    
+    test('height event window listener triggers callbacks via real dispatch', () => {
+      const containerId = 'height-listener-cover';
+      const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
+      // Configure real window (JSDOM) rather than full mock so dispatchEvent works
+      Object.defineProperty(window, 'name', { value: id, configurable: true });
+      const encoded = btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' } }, containerId }));
+      window.history.pushState({}, '', `http://localhost/?${encoded}`);
+      const postMessageSpy = jest.spyOn(window.parent, 'postMessage').mockImplementation(() => {});
+
+      RevealComposableFrameElementInit.startFrameElement();
+
+      postMessageSpy.mockClear();
+      window.dispatchEvent(new MessageEvent('message', { data: { name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + id } }));
+      const call1 = postMessageSpy.mock.calls.find(c => c[0]?.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + id);
+      expect(call1).toBeTruthy();
+      expect(call1[0].data).toMatchObject({ name: id, height: expect.any(Number) });
+
+      postMessageSpy.mockClear();
+      window.dispatchEvent(new MessageEvent('message', { data: { type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + id } }));
+      const call2 = postMessageSpy.mock.calls.find(c => c[0]?.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + id);
+      expect(call2).toBeTruthy();
+      expect(call2[0].data).toMatchObject({ name: id, height: expect.any(Number) });
+
+      postMessageSpy.mockRestore();
+    });
 
     test('should handle missing window name gracefully', () => {
         windowSpy = jest.spyOn(global, 'window', 'get');
@@ -165,12 +192,10 @@ describe('composableFrameElementInit Additional Test Cases', () => {
           parent: {
               postMessage: (message, targetOrigin, ...args) => {
                 if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
               }
             },
             addEventListener: jest.fn(),
         }))
-        //   const onSpy = jest.spyOn(bus, 'on');
           const frameElement = new RevealComposableFrameElementInit()
           expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
@@ -182,7 +207,6 @@ describe('composableFrameElementInit Additional Test Cases', () => {
           parent: {
               postMessage: (message, targetOrigin, ...args) => {
                 if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
               }
             },
             addEventListener: jest.fn(),
@@ -196,14 +220,13 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       windowSpy = jest.spyOn(global, 'window', 'get');
       const id = `${COMPOSABLE_REVEAL}:123:ERROR:`
       windowSpy.mockImplementation(() => ({
-          name: id, // Fix constant reference
+          name: id,
           location: {
               href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`,
           },
           parent: {
               postMessage: (message, targetOrigin, ...args) => {
                 if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
               }
             },
             addEventListener: jest.fn(),
@@ -226,19 +249,18 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       expect(onSpy).toHaveBeenCalledWith(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + id, expect.any(Function));
    });  
 
-    test('should correctly extract record and metadata from URL', () => {
+  test('should correctly extract record and metadata from URL', () => {
       const onSpy = jest.spyOn(bus, 'on');
       windowSpy = jest.spyOn(global, 'window', 'get');
       const id = `${COMPOSABLE_REVEAL}:123:ERROR:`
       windowSpy.mockImplementation(() => ({
-          name: id, // Fix constant reference
+          name: id,
           location: {
               href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`,
           },
           parent: {
               postMessage: (message, targetOrigin, ...args) => {
                 if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
               }
             },
             addEventListener: jest.fn(),
@@ -260,7 +282,6 @@ describe('composableFrameElementInit Additional Test Cases', () => {
             parent: {
               postMessage: (message, targetOrigin, ...args) => {
                 if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
               }
             },
             addEventListener: jest.fn(),
@@ -298,24 +319,20 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       const id = `${COMPOSABLE_REVEAL}:123:ERROR:`
       const containerId = '123';
       windowSpy.mockImplementation(() => ({
-          name: id, // Fix constant reference
+          name: id,
           location: {
               href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' }, containerId:containerId }))}`,
           },
           parent: {
               postMessage: (message, targetOrigin, ...args) => {
                 if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
               },
-            //   addEventListener: jest.fn(),
-            //   dispatchEvent: jest.fn(),
           },
           addEventListener: jest.fn(),
           dispatchEvent: jest.fn(),
           postMessage: jest.fn(),
       }));
 
-    //   expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
      RevealComposableFrameElementInit.startFrameElement();
      window.dispatchEvent(new MessageEvent('message', {
         data:{
@@ -334,7 +351,6 @@ describe('composableFrameElementInit Additional Test Cases', () => {
             }
         }
       }));
-
     });
 
     test('should handle HEIGHT_CALLBACK_COMPOSABLE event', () => {
@@ -358,13 +374,6 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       }));
 
       RevealComposableFrameElementInit.startFrameElement();
-      
-      // Trigger HEIGHT event
-      window.dispatchEvent(new MessageEvent('message', {
-        data:{
-            name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + id,
-        }
-      }));
 
       expect(postMessageSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -773,7 +782,6 @@ describe('composableFrameElementInit Additional Test Cases', () => {
 
       RevealComposableFrameElementInit.startFrameElement();
       
-      // Verify HEIGHT listener is registered
       expect(onSpy).toHaveBeenCalledWith(
         ELEMENT_EVENTS_TO_CLIENT.HEIGHT + `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`,
         expect.any(Function)
@@ -931,10 +939,8 @@ describe('composableFrameElementInit Additional Test Cases', () => {
 
       RevealComposableFrameElementInit.startFrameElement();
       
-      // Clear initial calls
       postMessageSpy.mockClear();
       
-      // Send unrelated message
       if (messageHandler) {
           messageHandler({
         data:{
@@ -953,7 +959,6 @@ describe('composableFrameElementInit Additional Test Cases', () => {
             }
         }
       });
-          // Should not call postMessage for unrelated events
           expect(postMessageSpy).not.toHaveBeenCalled();
       }
     });
@@ -964,7 +969,6 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       const postMessageSpy = jest.fn();
       let messageHandler;
 
-      // Mock successful response
       mockFetchRecordsByTokenIdComposable.mockResolvedValue({
         records: [{
             token: 'skyflow-id-1',
@@ -995,10 +999,8 @@ describe('composableFrameElementInit Additional Test Cases', () => {
 
       RevealComposableFrameElementInit.startFrameElement();
       
-      // Clear initial calls
       postMessageSpy.mockClear();
       
-      // Send reveal message
       if (messageHandler) {
           messageHandler({
             data:{
@@ -1019,10 +1021,8 @@ describe('composableFrameElementInit Additional Test Cases', () => {
             }
           });
 
-          // Wait for async operations to complete
           await new Promise(resolve => setTimeout(resolve, 100));
 
-          // Should call postMessage with REVEAL_RESPONSE_READY
           expect(postMessageSpy).toHaveBeenCalledWith(
               expect.objectContaining({
                   type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + containerId,
@@ -1078,9 +1078,7 @@ describe('composableFrameElementInit Additional Test Cases', () => {
 
       RevealComposableFrameElementInit.startFrameElement();
       
-      // Clear initial calls
       postMessageSpy.mockClear();
-            // Mock error response
       mockFetchRecordsByTokenIdComposable.mockRejectedValue({
         errors: [{
             token: 'skyflow-id-1',
@@ -1097,7 +1095,6 @@ describe('composableFrameElementInit Additional Test Cases', () => {
             frameId: 'reveal-composable:123',
         }]
       });
-      // Send reveal message
       if (messageHandler) {
           messageHandler({
             data:{
@@ -1118,10 +1115,8 @@ describe('composableFrameElementInit Additional Test Cases', () => {
             }
           });
 
-          // Wait for async operations to complete
           await new Promise(resolve => setTimeout(resolve, 100));
           await new Promise(reject => setTimeout(reject, 100));
-          // Should call postMessage with REVEAL_RESPONSE_READY even for errors
           expect(postMessageSpy).toHaveBeenCalledWith(
               expect.objectContaining({
                   type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + containerId,
@@ -1159,10 +1154,8 @@ describe('composableFrameElementInit Additional Test Cases', () => {
 
       RevealComposableFrameElementInit.startFrameElement();
       
-      // Clear initial calls
       postMessageSpy.mockClear();
       
-      // Send unrelated message
       if (messageHandler) {
           messageHandler({
         data:{
@@ -1181,7 +1174,6 @@ describe('composableFrameElementInit Additional Test Cases', () => {
             }
         }
       });
-          // Should not call postMessage for unrelated events
           expect(postMessageSpy).not.toHaveBeenCalled();
       }
     });
@@ -1215,7 +1207,6 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       
       postMessageSpy.mockClear();
       
-      // Send message with missing data
       if (messageHandler) {
           expect(() => {
               messageHandler({

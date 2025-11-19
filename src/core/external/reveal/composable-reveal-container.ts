@@ -122,18 +122,19 @@ class ComposableRevealContainer extends Container {
       MessageType.LOG,
       this.#context.logLevel);
     this.#containerMounted = true;
-    bus
-      // .target(properties.IFRAME_SECURE_ORIGIN)
-      .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, (data, callback) => {
-        printLog(parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
-          MessageType.LOG,
-          this.#context.logLevel);
-        callback({
-          client: this.#metaData.clientJSON,
-          context,
-        });
-        this.#isComposableFrameReady = true;
-      });
+    // bus
+    //   // .target(properties.IFRAME_SECURE_ORIGIN)
+    // eslint-disable-next-line max-len
+    //   .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, (data, callback) => {
+    //     printLog(parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
+    //       MessageType.LOG,
+    //       this.#context.logLevel);
+    //     callback({
+    //       client: this.#metaData.clientJSON,
+    //       context,
+    //     });
+    //     this.#isComposableFrameReady = true;
+    //   });
     window.addEventListener('message', (event) => {
       if (event.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
                   + this.#containerId) {

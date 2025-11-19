@@ -161,15 +161,16 @@ export default class RevealComposableFrameElementInit {
       }
     });
 
-    bus?.emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
-      this.#context = data?.context;
-      if (data?.client?.config) {
-        data.client.config = {
-          ...data?.client?.config,
-        };
-      }
-      this.#client = Client?.fromJSON?.(data?.client);
-    });
+    // eslint-disable-next-line max-len
+    // bus?.emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
+    //   this.#context = data?.context;
+    //   if (data?.client?.config) {
+    //     data.client.config = {
+    //       ...data?.client?.config,
+    //     };
+    //   }
+    //   this.#client = Client?.fromJSON?.(data?.client);
+    // });
   }
 
   updateGroupData = () => {
