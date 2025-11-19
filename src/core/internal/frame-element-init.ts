@@ -159,7 +159,7 @@ export default class FrameElementInit {
       }
     });
     if (promises.length === 0) {
-      return rootReject(new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_ELEMENT_FOUND, [], true));
+      rootReject(new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_ELEMENT_FOUND, [], true));
     }
     Promise.allSettled(
       promises,
