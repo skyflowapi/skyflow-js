@@ -638,9 +638,7 @@ export default class FrameElementInit {
   ) => new Promise((rootResolve, rootReject) => {
     client
       .request({
-        body: {
-          ...insertRequest,
-        },
+        body: JSON.stringify(insertRequest),
         requestMethod: 'POST',
         url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${tableName}`,
         headers: {
