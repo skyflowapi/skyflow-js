@@ -1575,7 +1575,7 @@ The `table` and `column` fields indicate which table and column the Element corr
 - `skyflowID` is required while creating File element
 - Use period-delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`).
 
- ## Step 3: Mount elements to the DOM
+### Step 3: Mount elements to the DOM
 
 To specify where to render Elements on your page, create placeholder `<div>` elements with unique `id` tags. For instance, the form below has an empty div with a unique id as a placeholder for a Skyflow Element. 
 
@@ -1597,7 +1597,7 @@ Use the `unmount` method to reset a Collect Element to its initial state.
 ```javascript
 element.unmount();
 ```
-## Step 4: Collect data from elements
+### Step 4: Collect data from elements
 
 When the file is ready to be uploaded, call the `uploadFiles()` method on the container object.
 
@@ -2058,8 +2058,6 @@ const element = container.create(composableElement, options);
 ```
 
 ### Step 3: Mount Container to the DOM
-
-
 To specify where the Elements are rendered on your page, create a placeholder `<div>` element with unique `id` attribute. Use this empty `<div>` placeholder to mount the composable container.
 
 ```javascript
@@ -2435,6 +2433,606 @@ composableContainer.on(Skyflow.EventName.SUBMIT, ()=> {
   console.log('Submit Event Listener is being Triggered.');
 });
 ```
+
+## Using Skyflow Composable File Element to upload a file
+You can upload binary files to a vault using the Skyflow File Element. Use the following steps to securely upload a file.
+### Step 1: Create a container
+
+Create a container for the form elements using the container(Skyflow.ContainerType) method of the Skyflow client:
+
+```javascript
+const containerOptions = { layout: [1] }
+
+// Creating a composable container.
+const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+```
+
+### Step 2: Create a File Element
+
+Skyflow Collect Elements are defined as follows: 
+
+```javascript
+const collectElement =  {
+  type: Skyflow.ElementType.FILE_INPUT,   // Skyflow.ElementType enum.
+  table: 'string',             // The table this data belongs to.
+  column: 'string',            // The column into which this data should be inserted.
+  skyflowID: 'string',         // The skyflow_id of the record.
+  inputStyles: {},             // Optional, styles that should be applied to the form element.
+  labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
+  errorTextStyles:{},          // Optional, styles that will be applied to the errorText of the collect element.
+}
+```
+The `table` and `column` fields indicate which table and column the Element corresponds to. 
+
+`skyflowID` indicates the record that stores the file.
+
+**Notes**: 
+- `skyflowID` is required while creating File element
+- Use period-delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`).
+
+### Step 3: Mount Container to the DOM
+Elements used for upload files are mounted to the DOM the same way as Elements used for collecting data. Refer to Step 3 of the [section above](#step-3-mount-container-to-the-dom).
+
+### Step 4: Collect data from elements
+
+When the file is ready to be uploaded, call the `uploadFiles()` method on the container object.
+
+```javascript
+composableContainer.uploadFiles();
+```
+### File upload limitations:
+
+- Only non-executable file are allowed to be uploaded.
+- Files must have a maximum size of 32 MB
+- File columns can't enable tokenization, redaction, or arrays.
+- Re-uploading a file overwrites previously uploaded data.
+- Partial uploads or resuming a previous upload isn't supported.
+
+### End-to-end file upload
+
+```javascript
+// Step 1.
+const containerOptions = { layout: [1] }
+
+// Creating a composable container.
+const container = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+
+// Step 2.
+const element = container.create({
+  table: 'pii_fields',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.FILE_INPUT,
+});
+
+// Step 3.
+container.mount('#file'); // Assumes there is a div with id='#file' in the webpage.
+
+// Step 4.
+container.uploadFiles();
+```
+
+**Sample Response :**
+```javascript
+{
+    fileUploadResponse: [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
+### File upload with options:
+
+Along with fileElementInput, you can define other options in the Options object as described below: 
+```js
+const options = {
+ allowedFileType: String[],  // Optional, indicates the allowed file types for upload
+}
+```
+`allowedFileType`: An array of string value that indicates the allowedFileTypes to be uploaded.
+
+#### File upload with options example
+
+```javascript
+// Create collect Container.
+const containerOptions = { layout: [1] }
+
+// Creating a composable container.
+const collectContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+
+// Create collect elements.
+const cardNumberElement = collectContainer.create({
+  table: 'newTable',
+  column: 'card_number',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  placeholder: 'card number',
+  label: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+const options = { 
+    allowedFileType: [".pdf",".png"];
+};
+const fileElement = collectContainer.create({
+  table: 'newTable',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.FILE_INPUT,
+},
+  options
+);
+
+// Mount the elements.
+collectContainer.mount('#collectContainer');
+
+// Collect and upload methods.
+collectContainer.collect({});
+collectContainer.uploadFiles();
+
+```
+**Sample Response for collect():**
+```javascript
+{
+  "records": [
+    {
+      "table": "newTable",
+      "fields": {
+        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+      }
+    }
+  ]
+}
+```
+**Sample Response for file uploadFiles() :**
+```javascript
+{
+    "fileUploadResponse": [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
+#### File upload with additional elements
+
+```javascript
+// Create collect Container.
+const containerOptions = { layout: [1,1] }
+
+// Creating a composable container.
+const collectContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+
+// Create collect elements.
+const cardNumberElement = collectContainer.create({
+  table: 'newTable',
+  column: 'card_number',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  placeholder: 'card number',
+  label: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+const fileElement = collectContainer.create({
+  table: 'newTable',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.FILE_INPUT,
+});
+
+// Mount the elements.
+cardNumberElement.mount('#collectCardNumber');
+fileElement.mount('#collectFile');
+
+// Collect and upload methods.
+collectContainer.collect({});
+collectContainer.uploadFiles();
+
+```
+**Sample Response for collect():**
+```javascript
+{
+  "records": [
+    {
+      "table": "newTable",
+      "fields": {
+        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+      }
+    }
+  ]
+}
+```
+**Sample Response for file uploadFiles() :**
+```javascript
+{
+    "fileUploadResponse": [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
+
+Note: File name should contain only alphanumeric characters and !-_.*()
+
+
+## Using Skyflow Composable File Element to upload multiple files
+You can upload binary files to a vault using the Skyflow File Element. Use the following steps to securely upload a file.
+### Step 1: Create a container
+
+Create a container for the form elements using the container(Skyflow.ContainerType) method of the Skyflow client:
+
+```javascript
+const containerOptions = { layout: [1] }
+
+// Creating a composable container.
+const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+```
+
+### Step 2: Create a File Element
+
+Skyflow Collect Elements are defined as follows: 
+
+```javascript
+const collectElement =  {
+  type: Skyflow.ElementType.MULTI_FILE_INPUT,   // Skyflow.ElementType enum.
+  table: 'string',             // The table this data belongs to.
+  column: 'string',            // The column into which this data should be inserted.
+  inputStyles: {},             // Optional, styles that should be applied to the form element.
+  labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
+  errorTextStyles:{},          // Optional, styles that will be applied to the errorText of the collect element.
+}
+```
+The `table` and `column` fields indicate which table and column the Element corresponds to. 
+
+**Notes**:  
+- Use period-delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`).
+
+### Step 3: Mount container to the DOM
+Elements used for rendering files are mounted to the DOM the same way as Elements used for collecting data. Refer to Step 3 of the [section above](#step-3-mount-elements-to-the-dom-1).
+
+### Step 4: Collect data from elements
+
+When the file is ready to be uploaded, call the `uploadMultipleFiles()` method on the element.
+
+```javascript
+const metaData: MetaData = {card_number: '123'} // Optional: used to generate Skyflow IDs, and upload files to those IDs
+
+element.uploadMultipleFiles();
+```
+Note: 
+- If `MetaData` is provided, that will be used to generate Skyflow IDs, and upload files to those IDs
+- If `MetaData` is not provided, the files will be uploaded as a new record.
+
+### File upload limitations:
+
+- Only non-executable file are allowed to be uploaded.
+- Files must have a maximum size of 32 MB
+- File columns can't enable tokenization, redaction, or arrays.
+- Re-uploading a file overwrites previously uploaded data.
+- Partial uploads or resuming a previous upload isn't supported.
+
+### End-to-end file upload
+
+```javascript
+// Step 1.
+const containerOptions = { layout: [1] }
+
+// Creating a composable container.
+const container = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+
+// Step 2.
+const element = container.create({
+  table: 'pii_fields',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.MULTI_FILE_INPUT,
+});
+
+// Step 3.
+container.mount('#file'); // Assumes there is a div with id='#file' in the webpage.
+
+// Step 4.
+element.uploadMultipleFiles();
+```
+
+**Sample Response :**
+```javascript
+{
+    fileUploadResponse: [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
+### File upload with options:
+
+Along with fileElementInput, you can define other options in the Options object as described below: 
+```js
+const options = {
+ allowedFileType: String[],  // Optional, indicates the allowed file types for upload
+}
+```
+`allowedFileType`: An array of string value that indicates the allowedFileTypes to be uploaded.
+
+#### File upload with options example
+
+```javascript
+// Create collect Container.
+const containerOptions = { layout: [1] }
+
+// Creating a composable container.
+const collectContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+
+// Create collect elements.
+const cardNumberElement = collectContainer.create({
+  table: 'newTable',
+  column: 'card_number',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  placeholder: 'card number',
+  label: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+const options = { 
+    allowedFileType: [".pdf",".png"];
+};
+const fileElement = collectContainer.create({
+  table: 'newTable',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.MULTI_FILE_INPUT,
+},
+  options
+);
+
+// Mount the elements.
+collectContainer.mount('#collectContainer');
+
+// Collect and upload methods.
+collectContainer.collect({});
+fileElement.uploadMultipleFiles();
+
+```
+**Sample Response for collect():**
+```javascript
+{
+  "records": [
+    {
+      "table": "newTable",
+      "fields": {
+        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+      }
+    }
+  ]
+}
+```
+**Sample Response for file uploadFiles() :**
+```javascript
+{
+    "fileUploadResponse": [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        }
+    ]
+}
+```
+#### File upload with additional elements
+
+```javascript
+// Create collect Container.
+const containerOptions = { layout: [1,1] }
+
+// Creating a composable container.
+const collectContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+
+// Create collect elements.
+const cardNumberElement = collectContainer.create({
+  table: 'newTable',
+  column: 'card_number',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  placeholder: 'card number',
+  label: 'Card Number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+const fileElement = collectContainer.create({
+  table: 'newTable',
+  column: 'file',
+  skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
+  inputstyles: {
+    base: {
+      color: '#1d1d1d',
+    },
+  },
+  labelStyles: {
+    base: {
+      fontSize: '12px',
+      fontWeight: 'bold',
+    },
+  },
+  errorTextStyles: {
+    base: {
+      color: '#f44336',
+    },
+  },
+  type: Skyflow.ElementType.MULTI_FILE_INPUT,
+});
+
+// Mount the elements.
+collectContainer.mount('#collectContainer');
+
+// Collect and upload methods.
+collectContainer.collect({});
+fileElement.uploadMultipleFiles();
+
+```
+**Sample Response for collect():**
+```javascript
+{
+  "records": [
+    {
+      "table": "newTable",
+      "fields": {
+        "card_number": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
+      }
+    }
+  ]
+}
+```
+**Sample Response for file uploadFiles() :**
+```javascript
+{
+    "fileUploadResponse": [
+        {
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+        },
+        {
+            "skyflow_id": "546eaa6c-5c15-4513-aa15-29f50babe809"
+        }
+    ]
+}
+```
+Note: File name should contain only alphanumeric characters and !-_.*()
 
 ---
 
@@ -3063,6 +3661,7 @@ errorTextStyles: {
   }
 }
 ```
+
 ## Step 3: Mount Elements to the DOM
 Elements used for rendering files are mounted to the DOM the same way as Elements used for collecting data. Refer to Step 3 of the [section above](https://github.com/skyflowapi/skyflow-js#step-3-mount-elements-to-the-dom).
 
@@ -3683,8 +4282,8 @@ errorTextStyles: {
   }
 }
 ```
-## Step 3: Mount Elements to the DOM
-Elements used for rendering files are mounted to the DOM the same way as Elements used for revealing data. Refer to Step 3 of the [section above](#step-3-mount-container-to-the-dom-1).
+## Step 3: Mount Container to the DOM
+Elements used for rendering files are mounted to the DOM the same way as Elements used for revealing data. Refer to Step 3 of the [section above](#step-3-mount-container-to-the-dom).
 
 ## Step 4: Render File
 When the element is created and mounted, call the renderFile() method on the element as shown below:
