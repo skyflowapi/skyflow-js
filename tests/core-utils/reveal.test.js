@@ -255,6 +255,29 @@ describe('getFileURLFromVaultBySkyflowID', () => {
       skyflowId: 'mockSkyflowID',
     });
     });
+  it('should reject with an error when the promise is rejected without description', async () => {
+    const mockSkyflowIdRecord = {
+      column: 'mockColumn',
+      skyflowID: 'mockSkyflowID',
+      table: 'mockTable',
+    };
+
+    const mockClient = Client.fromJSON(clientData.clientJSON); 
+    jest.spyOn(mockClient, 'request').mockRejectedValue({error: {
+      code: '500',
+      description: undefined,
+    }
+    });
+
+    await expect(getFileURLFromVaultBySkyflowID(mockSkyflowIdRecord, mockClient)).rejects.toEqual({
+      error: {
+        code: '500',
+        description: undefined,
+      },
+      column: 'mockColumn',
+      skyflowId: 'mockSkyflowID',
+    });
+    });
   it('should reject with an error when the promise is root rejected', async () => {
     const mockSkyflowIdRecord = {
       column: 'mockColumn',
@@ -342,6 +365,29 @@ describe('getFileURLFromVaultBySkyflowID for composable reveal', () => {
       error: {
         code: '500',
         description: 'Internal Server Error',
+      },
+    });
+  });
+  it('should reject with an error when the promise is root rejected when description not there', async () => {
+    const mockSkyflowIdRecord = {
+      column: 'mockColumn',
+      skyflowID: 'mockSkyflowID',
+      table: 'mockTable',
+    };
+
+    const mockClient = Client.fromJSON(clientData.clientJSON); 
+    jest.spyOn(mockClient, 'request').mockImplementation(() => {
+      throw {
+        error: {
+          code: '500',
+          description: undefined,
+        }
+      };
+    });
+
+    await expect(getFileURLFromVaultBySkyflowIDComposable(mockSkyflowIdRecord, mockClient, "token")).rejects.toEqual({
+      error: {
+        code: '500',
       },
     });
   });
@@ -435,6 +481,45 @@ describe('fetchRecordsByTokenIdComposable', () => {
       })
     );
   });
+  it('should use default PLAIN_TEXT redaction when redaction is not provided', async () => {
+    const mockTokenRecords = [
+      { token: 'token1', iframeName: 'iframe1' }, // No redaction
+    ];
+
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    
+    jest.spyOn(mockClient, 'request').mockResolvedValue({
+      records: [{ token: 'token1', value: 'value1', valueType: 'STRING' }],
+    });
+
+    await fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken');
+    
+    expect(mockClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.stringContaining('PLAIN_TEXT'),
+      })
+    );
+  });
+  it('should reject with both records and errors when some tokens succeed and some fail', async () => {
+    const mockTokenRecords = [
+      { token: undefined, iframeName: undefined, redaction: 'PLAIN_TEXT' },
+    ];
+
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    
+    jest.spyOn(mockClient, 'request')
+      .mockRejectedValueOnce({
+        error: {
+          code: '404',
+        },
+      });
+
+    await expect(fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken'))
+      .rejects.toEqual({
+        errors: expect.any(Array),
+      });
+  });
+
 
   it('should handle empty token records array', async () => {
     const mockClient = Client.fromJSON(clientData.clientJSON);

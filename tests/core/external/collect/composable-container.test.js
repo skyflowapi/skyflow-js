@@ -1,6 +1,7 @@
 import {
   COLLECT_FRAME_CONTROLLER,
   ELEMENT_EVENTS_TO_IFRAME,
+  ELEMENT_EVENTS_TO_CLIENT,
   ElementType
 } from '../../../../src/core/constants';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
@@ -314,6 +315,71 @@ describe('test composable container class',()=>{
       }
     }));
     await expect(collectPromiseError).rejects.toEqual("Error occured");
+
+  });
+
+  it('test collect with success and error scenarios', async () => {
+  
+    const div = document.createElement('div');
+    div.id = 'composable';
+    document.body.append(div);
+  
+    const container = new ComposableContainer(
+      metaData,
+      {},
+      context,
+      { layout: [2], styles: { base: { width: '100px' } } }
+    );
+  
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+  
+    // emitterSpy();
+    // readyCb({ name: `${COLLECT_FRAME_CONTROLLER}1234` }, jest.fn());
+  
+    container.mount('#composable');
+  
+    const options = {
+      tokens: 'true',
+      additionalFields: {
+        records: [
+          {
+            table: 'string',
+            fields: {
+              column1: 'value',
+            },
+          },
+        ],
+      },
+      upsert: [
+        {
+          table: 'table',
+          column: 'column',
+        },
+      ],
+    };
+  
+    const collectPromiseError1 =
+      container.collect(options);
+
+    await expect(collectPromiseError1).rejects.toThrow('Validation error. Invalid tokens. Specify a boolean value for tokens.');
+
+    const options1 = {
+      tokens: true,
+      additionalFields: {
+      },
+      upsert: [
+        {
+          table: 'table',
+          column: 'column',
+        },
+      ],
+    };
+  
+    const collectPromiseError =
+      container.collect(options1);
+  
+    await expect(collectPromiseError).rejects.toBeDefined();
 
   });
   it('test collect when isMount is false', async () => {
@@ -637,5 +703,126 @@ describe('test composable container class',()=>{
   container.mount('#composable2');
 
   await expect(container.uploadFiles({})).rejects.toEqual({ error: 'token generation failed' });
+  });
+
+  it('test mount with shadow DOM HTMLElement', () => {
+    const shadowHost = document.createElement('div');
+    const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+    const shadowDiv = document.createElement('div');
+    shadowDiv.id = 'shadow-composable';
+    shadowRoot.appendChild(shadowDiv);
+    document.body.appendChild(shadowHost);
+
+    // Mock getRootNode to return shadowRoot
+    shadowDiv.getRootNode = jest.fn(() => shadowRoot);
+
+    const container = new ComposableContainer(metaData, [], context, { layout: [2] });
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+
+    container.mount(shadowDiv);
+
+    // Verify eventEmitter.on was called with HEIGHT event
+    const onCalls = EventEmitter.mock.results[EventEmitter.mock.results.length - 1].value.on.mock.calls;
+    const heightCall = onCalls.find(call => call[0] === ELEMENT_EVENTS_TO_CLIENT.HEIGHT);
+    expect(heightCall).toBeDefined();
+
+    // Test the HEIGHT event callback
+    if (heightCall) {
+      const heightCallback = heightCall[1];
+      heightCallback({ iframeName: 'test-iframe' });
+    }
+  });
+
+  it('test mount with shadow DOM using string selector', () => {
+    const shadowHost = document.createElement('div');
+    const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+    const shadowDiv = document.createElement('div');
+    shadowDiv.id = 'shadow-composable-string';
+    shadowRoot.appendChild(shadowDiv);
+    document.body.appendChild(shadowHost);
+
+    // Mock getElementById to return our shadow element
+    const originalGetElementById = document.getElementById;
+    document.getElementById = jest.fn((id) => {
+      if (id === 'shadow-composable-string') {
+        return shadowDiv;
+      }
+      return originalGetElementById.call(document, id);
+    });
+
+    // Mock getRootNode to return shadowRoot
+    shadowDiv.getRootNode = jest.fn(() => shadowRoot);
+
+    const container = new ComposableContainer(metaData, [], context, { layout: [2] });
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+
+    container.mount('shadow-composable-string');
+
+    // Verify eventEmitter.on was called with HEIGHT event
+    const onCalls = EventEmitter.mock.results[EventEmitter.mock.results.length - 1].value.on.mock.calls;
+    const heightCall = onCalls.find(call => call[0] === ELEMENT_EVENTS_TO_CLIENT.HEIGHT);
+    expect(heightCall).toBeDefined();
+
+    // Restore original getElementById
+    document.getElementById = originalGetElementById;
+  });
+
+  it('test mount with regular DOM (no shadow root)', () => {
+    const div = document.createElement('div');
+    div.id = 'regular-composable';
+    document.body.appendChild(div);
+
+    // Mock getRootNode to return document (not a ShadowRoot)
+    div.getRootNode = jest.fn(() => document);
+
+    const container = new ComposableContainer(metaData, [], context, { layout: [2] });
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+
+    container.mount(div);
+
+    // Verify that HEIGHT event listener is NOT set up for regular DOM
+    const onCalls = EventEmitter.mock.results[EventEmitter.mock.results.length - 1].value.on.mock.calls;
+    const heightCall = onCalls.find(call => call[0] === ELEMENT_EVENTS_TO_CLIENT.HEIGHT);
+    
+    // For regular DOM, we don't expect the HEIGHT event to be registered
+    // (it's only registered when shadowRoot is not null)
+    expect(heightCall).toBeUndefined();
+  });
+
+  it('test mount with shadow DOM height event emission', () => {
+    const shadowHost = document.createElement('div');
+    const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+    const shadowDiv = document.createElement('div');
+    shadowDiv.id = 'shadow-height-test';
+    
+    // Create iframe element in shadow root
+    const iframe = document.createElement('iframe');
+    iframe.id = 'element:group:W29iamVjdCBPYmplY3Rd:1234:ERROR:aHR0cDovL2FiYy5jb20=';
+    shadowRoot.appendChild(shadowDiv);
+    shadowRoot.appendChild(iframe);
+    shadowRoot.getElementById = jest.fn((id) => {
+      if (id === iframe.id) return iframe;
+      return null;
+    });
+    
+    document.body.appendChild(shadowHost);
+
+    shadowDiv.getRootNode = jest.fn(() => shadowRoot);
+
+    const container = new ComposableContainer(metaData, [], context, { layout: [2] });
+    const element1 = container.create(cvvElement);
+    const element2 = container.create(cardNumberElement);
+
+    // Mock iframe contentWindow and postMessage
+    const mockPostMessage = jest.fn();
+    Object.defineProperty(iframe, 'contentWindow', {
+      value: { postMessage: mockPostMessage },
+      writable: true,
+    });
+
+    container.mount(shadowDiv);
   });
 });

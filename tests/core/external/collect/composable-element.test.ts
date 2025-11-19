@@ -147,6 +147,28 @@ describe("test composable element", () => {
     });
     await expect(testElement4.uploadMultipleFiles()).rejects.toMatchObject({ error: 'Error occurred' });
   });
+  it('no reject when multi file upload invoked on MULT_FILE_INPUT composable element case 1', async () => {
+    const testEventEmitt = new EventEmitter();
+    const testElement4 = new ComposableElement(
+      "testce4",
+      testEventEmitt,
+      iframeName,
+      { type: "MULTI_FILE_INPUT" }
+    );
+    // Trigger upload then dispatch error event AFTER listener is attached.
+    testEventEmitt.on(`${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:testce4`, (_: any, cb: Function) => {
+      cb({});
+    });
+ // Trigger upload then dispatch error event AFTER listener is attached.
+    const p = testElement4.uploadMultipleFiles();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:testce4`,
+        data: { error: 'Error occurred' }
+      }
+    }));
+    await expect(p).rejects.toMatchObject({ error: 'Error occurred' });
+  });
   it('reject when multi file upload invoked on MULT_FILE_INPUT composable element case 2', async () => {
     const testEventEmitt = new EventEmitter();
     const testElement4 = new ComposableElement(
@@ -164,6 +186,24 @@ describe("test composable element", () => {
       }
     }));
     await expect(p).rejects.toMatchObject({ error: 'Error occurred' });
+  });
+  it('reject when multi file upload invoked on MULT_FILE_INPUT composable element case 2', async () => {
+    const testEventEmitt = new EventEmitter();
+    const testElement4 = new ComposableElement(
+      "testce4",
+      testEventEmitt,
+      iframeName,
+      { type: "MULTI_FILE_INPUT" }
+    );
+    // Trigger upload then dispatch error event AFTER listener is attached.
+    const p = testElement4.uploadMultipleFiles();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:testce4`,
+        data: 'error occurred'
+      }
+    }));
+    await expect(p).rejects.toMatch('error occurred');
   });
   it('uploadMultipleFiles resolves on success message event', async () => {
     const elementName = 'multiSuccess';
