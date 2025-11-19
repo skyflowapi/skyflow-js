@@ -256,7 +256,7 @@ const logs = {
     EMPTY_ELEMENT_IN_MOUNT: 'mount element with type %s1 - Mount cannot be empty.',
     VALIDATION_FAILED: 'Validation failed',
     REVEAL_ELEMENT_ERROR_STATE: 'Reveal failed. \'setError\' is invoked on one or more elements. Make sure to reset any custom errors on all elements before invoking \'reveal\' function.',
-    INVALID_FILE_TYPE: '%s1 %s2 Invalid File Type',
+    INVALID_FILE_TYPE: '%s1 %s2 %s3 Invalid File Type',
     INVALID_FILE_SIZE: 'Invalid File Size',
     NO_FILE_SELECTED: 'No File Selected',
     INVALID_UPSERT_OPTION_TYPE:
