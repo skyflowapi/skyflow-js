@@ -202,7 +202,7 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
       fileElement.allowedFileType.forEach((type) => {
         const allowedType = getType(type);
         // eslint-disable-next-line max-len
-        if (value.type.includes(allowedType) || value.type.includes(type) || value.type.includes(type.substring(1)) || value.type.includes(type) || value.type === '') {
+        if (value.type.includes(allowedType) || value.type.includes(type) || value.type.includes(type.substring(1)) || value.type.includes(type)) {
           isValidType = true;
         }
       });
