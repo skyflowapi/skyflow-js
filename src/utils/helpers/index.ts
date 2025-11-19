@@ -231,6 +231,9 @@ export const styleToString = (style) => Object.keys(style).reduce((acc, key) => 
 
 export const getContainerType = (frameName:string):ContainerType => {
   const frameNameParts = frameName.split(':');
+  if (frameNameParts[0] === 'reveal-composable') {
+    return ContainerType.COMPOSE_REVEAL;
+  }
   return (frameNameParts[1] === 'group')
     ? ContainerType.COMPOSABLE
     : ContainerType.COLLECT;

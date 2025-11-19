@@ -2,9 +2,11 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import Skyflow from '../../src/skyflow';
-import {formatRecordsForClient,formatRecordsForIframe, formatRecordsForRender, formatForRenderClient, getFileURLFromVaultBySkyflowID, getFileURLForRender} from "../../src/core-utils/reveal";
+import {formatRecordsForClient, formatRecordsForClientComposable, formatRecordsForIframe, formatRecordsForRender, formatForRenderClient, getFileURLFromVaultBySkyflowID, getFileURLForRender, getFileURLFromVaultBySkyflowIDComposable, fetchRecordsByTokenIdComposable} from "../../src/core-utils/reveal";
 import { Env, LogLevel } from '../../src/utils/common';
+import { getAccessToken } from '../../src/utils/bus-events';
 import Client from '../../src/client';
+import { url } from 'inspector';
 
 const testTokenId = '1677f7bd-c087-4645-b7da-80a6fd1a81a4';
 const testInvalidTokenId = '80a6fd1a81a4-b7da-c087-4645';
@@ -57,7 +59,11 @@ const skyflow = Skyflow.init({
 });
 
 jest.setTimeout(15000);
-
+jest.mock('../../src/utils/bus-events', () => ({
+  getAccessToken: jest.fn(
+    () => Promise.resolve('mockAccessToken')
+  ),
+}));
 describe('Reveal PureJs- get() Method Input', () => {
   test('should throw error for Empty Input Array', (done) => {
     skyflow.detokenize([]).catch((err) => {
@@ -82,19 +88,7 @@ describe('Reveal PureJs- get() Method Input', () => {
       expect(err).toBeDefined();
       done();
     });
-  });
-  // test('should throw error for Missing redaction Property', (done) => {
-  //   skyflow.detokenize({
-  //     records: [
-  //       {
-  //         token: testTokenId,
-  //       },
-  //     ],
-  //   }).catch((err) => {
-  //     expect(err).toBeDefined();
-  //     done();
-  //   });
-  // });
+  }); 
   test('should throw error for Empty string in id value', (done) => {
     skyflow.detokenize({
       records: [
@@ -125,6 +119,29 @@ describe("formatRecordsForClient fn test",()=>{
   test("only error records",()=>{
     const testInput = {"errors":[{"token":"3232-6434-3253-4221"}]};
     const fnResponse = formatRecordsForClient(testInput);
+    expect(fnResponse.errors.length).toBe(1);
+    expect(fnResponse.success).toBeUndefined();
+  });
+});
+describe("formatRecordsForClientComposable fn test",()=>{
+  test("only success records",()=>{
+    const testInput = {"records":[{"token":"7402-2242-2342-232","value":"231", "valueType" : "STRING"}] }
+    const fnResponse = formatRecordsForClientComposable(testInput, {"7402-2242-2342-232": "231"});
+    expect(fnResponse.success.length).toBe(1);
+    expect(fnResponse.errors).toBeUndefined();
+  });
+  test("both success and error records",()=>{
+    const testInput = {"records":[{"token":"7402-2242-2342-232","value":"231", "valueType" : "STRING"}],"errors":[{"token":"3232-6434-3253-4221"}]};
+    const fnResponse = formatRecordsForClientComposable(testInput,{"7402-2242-2342-232": "231"});
+    expect(fnResponse.errors.length).toBe(1);
+    expect(fnResponse.success.length).toBe(1);
+  });
+  test("only error records",()=>{
+    const testInput = {"errors":[{
+      "token":"3232-6434-3253-4221",
+      "error":"token not found"
+    }]};
+    const fnResponse = formatRecordsForClientComposable(testInput);
     expect(fnResponse.errors.length).toBe(1);
     expect(fnResponse.success).toBeUndefined();
   });
@@ -164,7 +181,7 @@ describe("formatRecordsForRender fn test",()=>{
       "url": "http://dummy.com",});
   });
 });
-describe("formatRecordsForIframe fn test",()=>{
+describe("formatForRenderClient fn test",()=>{
   test("no records should return empty object",()=>{
     const testInput = {};
     const fnResponse = formatForRenderClient(testInput, 'col');
@@ -178,9 +195,27 @@ describe("formatRecordsForIframe fn test",()=>{
     const fnResponse = formatForRenderClient(testInput, 'col');
     expect(fnResponse).toStrictEqual({ success :{"column": "col",
       "skyflow_id": "id",
+      "fileMetadata": undefined,
     }});
   });
+  test("errors case", ()=>{
+    const errorResponse = {
+      "errors": {
+        "skyflowId" : "id",
+         "column": "col",
+         "error": "token not found"
+      }
+      
+    }
+    const fnResponse = formatForRenderClient(errorResponse, 'col');
+    expect(fnResponse).toStrictEqual({ errors :{
+     "skyflowId" : "id",
+         "column": "col",
+         "error": "token not found"
+    }});
 
+  })
+});
 describe('getFileURLFromVaultBySkyflowID', () => {
   it('should resolve with the file URL when the promise is resolved', async () => {
     const mockSkyflowIdRecord = {
@@ -193,7 +228,7 @@ describe('getFileURLFromVaultBySkyflowID', () => {
     // console.log(mockClient.toJSON().metaData);
 
     const result  = getFileURLFromVaultBySkyflowID(mockSkyflowIdRecord, mockClient);
-    console.log(result);
+    jest.spyOn(mockClient, 'request').mockResolvedValue('mockFileURL');
     expect(result).toBeDefined();
   });
 
@@ -205,11 +240,332 @@ describe('getFileURLFromVaultBySkyflowID', () => {
     };
 
     const mockClient = Client.fromJSON(clientData.clientJSON); 
-    // console.log(mockClient.toJSON().metaData);
+    jest.spyOn(mockClient, 'request').mockRejectedValue({error: {
+      code: '500',
+      description: 'Internal Server Error',
+    }
+    });
 
-    expect(getFileURLFromVaultBySkyflowID(mockSkyflowIdRecord, mockClient)).rejects.toThrow();
+    await expect(getFileURLFromVaultBySkyflowID(mockSkyflowIdRecord, mockClient)).rejects.toEqual({
+      error: {
+        code: '500',
+        description: 'Internal Server Error',
+      },
+      column: 'mockColumn',
+      skyflowId: 'mockSkyflowID',
+    });
+    });
+  it('should reject with an error when the promise is rejected without description', async () => {
+    const mockSkyflowIdRecord = {
+      column: 'mockColumn',
+      skyflowID: 'mockSkyflowID',
+      table: 'mockTable',
+    };
+
+    const mockClient = Client.fromJSON(clientData.clientJSON); 
+    jest.spyOn(mockClient, 'request').mockRejectedValue({error: {
+      code: '500',
+      description: undefined,
+    }
+    });
+
+    await expect(getFileURLFromVaultBySkyflowID(mockSkyflowIdRecord, mockClient)).rejects.toEqual({
+      error: {
+        code: '500',
+        description: undefined,
+      },
+      column: 'mockColumn',
+      skyflowId: 'mockSkyflowID',
+    });
+    });
+  it('should reject with an error when the promise is root rejected', async () => {
+    const mockSkyflowIdRecord = {
+      column: 'mockColumn',
+      skyflowID: 'mockSkyflowID',
+      table: 'mockTable',
+    };
+
+    const mockClient = Client.fromJSON(clientData.clientJSON); 
+    jest.spyOn(mockClient, 'request').mockImplementation(() => {
+      throw {
+        error: {
+          code: '500',
+          description: 'Internal Server Error',
+        }
+      };
+    });
+
+    await expect(getFileURLFromVaultBySkyflowID(mockSkyflowIdRecord, mockClient)).rejects.toEqual({
+      error: {
+        code: '500',
+        description: 'Internal Server Error',
+      },
+    });
   });
 });
+
+describe('getFileURLFromVaultBySkyflowID for composable reveal', () => {
+  it('should resolve with the file URL when the promise is resolved', async () => {
+    const mockSkyflowIdRecord = {
+      column: 'mockColumn',
+      skyflowID: 'mockSkyflowID',
+      table: 'mockTable',
+    };
+   
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    // mock getFileURLForRender
+    jest.spyOn(mockClient, 'request').mockResolvedValue('mockFileURL');
+ 
+    const result  = getFileURLFromVaultBySkyflowIDComposable(mockSkyflowIdRecord, mockClient, "token");
+    console.log('result',result);
+    expect(result).toBeDefined();
+  });
+
+  it('should reject with an error when the promise is rejected', async () => {
+    const mockSkyflowIdRecord = {
+      column: 'mockColumn',
+      skyflowID: 'mockSkyflowID',
+      table: 'mockTable',
+    };
+
+    const mockClient = Client.fromJSON(clientData.clientJSON); 
+    jest.spyOn(mockClient, 'request').mockRejectedValue({error: {
+      code: '500',
+      description: 'Internal Server Error',
+    }
+    });
+
+    await expect(getFileURLFromVaultBySkyflowIDComposable(mockSkyflowIdRecord, mockClient, "token")).rejects.toEqual({
+      error: {
+        code: '500',
+        description: 'Internal Server Error',
+      },
+      column: 'mockColumn',
+      skyflowId: 'mockSkyflowID',
+    });
+  });
+  it('should reject with an error when the promise is root rejected', async () => {
+    const mockSkyflowIdRecord = {
+      column: 'mockColumn',
+      skyflowID: 'mockSkyflowID',
+      table: 'mockTable',
+    };
+
+    const mockClient = Client.fromJSON(clientData.clientJSON); 
+    jest.spyOn(mockClient, 'request').mockImplementation(() => {
+      throw {
+        error: {
+          code: '500',
+          description: 'Internal Server Error',
+        }
+      };
+    });
+
+    await expect(getFileURLFromVaultBySkyflowIDComposable(mockSkyflowIdRecord, mockClient, "token")).rejects.toEqual({
+      error: {
+        code: '500',
+        description: 'Internal Server Error',
+      },
+    });
+  });
+  it('should reject with an error when the promise is root rejected when description not there', async () => {
+    const mockSkyflowIdRecord = {
+      column: 'mockColumn',
+      skyflowID: 'mockSkyflowID',
+      table: 'mockTable',
+    };
+
+    const mockClient = Client.fromJSON(clientData.clientJSON); 
+    jest.spyOn(mockClient, 'request').mockImplementation(() => {
+      throw {
+        error: {
+          code: '500',
+          description: undefined,
+        }
+      };
+    });
+
+    await expect(getFileURLFromVaultBySkyflowIDComposable(mockSkyflowIdRecord, mockClient, "token")).rejects.toEqual({
+      error: {
+        code: '500',
+      },
+    });
+  });
+});
+
+describe('fetchRecordsByTokenIdComposable', () => {
+  it('should resolve with records when all tokens are successfully detokenized', async () => {
+    const mockTokenRecords = [
+      { token: 'token1', iframeName: 'iframe1', redaction: 'PLAIN_TEXT' },
+      { token: 'token2', iframeName: 'iframe2', redaction: 'PLAIN_TEXT' },
+    ];
+
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    
+    jest.spyOn(mockClient, 'request')
+      .mockResolvedValueOnce({ records: [{ token: 'token1', value: 'value1', valueType: 'STRING' }] })
+      .mockResolvedValueOnce({ records: [{ token: 'token2', value: 'value2', valueType: 'STRING' }] });
+
+    const result = await fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken');
+    
+    expect(result).toBeDefined();
+    expect(result.records).toHaveLength(2);
+    expect(mockClient.request).toHaveBeenCalledTimes(2);
+  });
+
+  it('should reject with errors when all tokens fail to detokenize', async () => {
+    const mockTokenRecords = [
+      { token: 'token1', iframeName: 'iframe1', redaction: 'PLAIN_TEXT' },
+    ];
+
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    
+    jest.spyOn(mockClient, 'request').mockRejectedValue({
+      error: {
+        code: '404',
+        description: 'Token not found',
+      },
+    });
+
+    await expect(fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken'))
+      .rejects.toEqual({
+        errors: expect.arrayContaining([
+          expect.objectContaining({
+            token: 'token1',
+            error: expect.any(Object),
+          }),
+        ]),
+      });
+  });
+
+  it('should reject with both records and errors when some tokens succeed and some fail', async () => {
+    const mockTokenRecords = [
+      { token: 'token1', iframeName: 'iframe1', redaction: 'PLAIN_TEXT' },
+      { token: 'token2', iframeName: 'iframe2', redaction: 'PLAIN_TEXT' },
+    ];
+
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    
+    jest.spyOn(mockClient, 'request')
+      .mockResolvedValueOnce({ records: [{ token: 'token1', value: 'value1', valueType: 'STRING' }] })
+      .mockRejectedValueOnce({
+        error: {
+          code: '404',
+          description: 'Token not found',
+        },
+      });
+
+    await expect(fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken'))
+      .rejects.toEqual({
+        records: expect.any(Array),
+        errors: expect.any(Array),
+      });
+  });
+
+  it('should use default PLAIN_TEXT redaction when redaction is not provided', async () => {
+    const mockTokenRecords = [
+      { token: 'token1', iframeName: 'iframe1' }, // No redaction
+    ];
+
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    
+    jest.spyOn(mockClient, 'request').mockResolvedValue({
+      records: [{ token: 'token1', value: 'value1', valueType: 'STRING' }],
+    });
+
+    await fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken');
+    
+    expect(mockClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.stringContaining('PLAIN_TEXT'),
+      })
+    );
+  });
+  it('should use default PLAIN_TEXT redaction when redaction is not provided', async () => {
+    const mockTokenRecords = [
+      { token: 'token1', iframeName: 'iframe1' }, // No redaction
+    ];
+
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    
+    jest.spyOn(mockClient, 'request').mockResolvedValue({
+      records: [{ token: 'token1', value: 'value1', valueType: 'STRING' }],
+    });
+
+    await fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken');
+    
+    expect(mockClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.stringContaining('PLAIN_TEXT'),
+      })
+    );
+  });
+  it('should reject with both records and errors when some tokens succeed and some fail', async () => {
+    const mockTokenRecords = [
+      { token: undefined, iframeName: undefined, redaction: 'PLAIN_TEXT' },
+    ];
+
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    
+    jest.spyOn(mockClient, 'request')
+      .mockRejectedValueOnce({
+        error: {
+          code: '404',
+        },
+      });
+
+    await expect(fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken'))
+      .rejects.toEqual({
+        errors: expect.any(Array),
+      });
+  });
+
+
+  it('should handle empty token records array', async () => {
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    
+    const result = await fetchRecordsByTokenIdComposable([], mockClient, 'mockToken');
+    
+    expect(result).toEqual({ records: [] });
+  });
+
+  it('should include frameId in the response', async () => {
+    const mockTokenRecords = [
+      { token: 'token1', iframeName: 'iframe1', redaction: 'PLAIN_TEXT' },
+    ];
+
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    
+    jest.spyOn(mockClient, 'request').mockResolvedValue({
+      records: [{ token: 'token1', value: 'value1', valueType: 'STRING' }],
+    });
+
+    const result = await fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken');
+    
+    expect(result.records[0]).toHaveProperty('frameId', 'iframe1');
+  });
+});
+describe("formatRecordsForClient fn test",()=>{
+  test("only success records",()=>{
+    const testInput = {"records":[{"token":"7402-2242-2342-232","value":"231", "valueType" : "STRING"}] }
+    const fnResponse = formatRecordsForClient(testInput, {"7402-2242-2342-232": "231"});
+    expect(fnResponse.success.length).toBe(1);
+    expect(fnResponse.errors).toBeUndefined();
+  });
+  test("both success and error records",()=>{
+    const testInput = {"records":[{"token":"7402-2242-2342-232","value":"231", "valueType" : "STRING"}],"errors":[{"token":"3232-6434-3253-4221"}]};
+    const fnResponse = formatRecordsForClient(testInput,{"7402-2242-2342-232": "231"});
+    expect(fnResponse.errors.length).toBe(1);
+    expect(fnResponse.success.length).toBe(1);
+  });
+  test("only error records",()=>{
+    const testInput = {"errors":[{"token":"3232-6434-3253-4221"}]};
+    const fnResponse = formatRecordsForClient(testInput);
+    expect(fnResponse.errors.length).toBe(1);
+    expect(fnResponse.success).toBeUndefined();
+  });
+});
+
 describe('getFileURLForRender', () => {
   it('should return the file URL when the request is successful', async () => {
     const mockSkyflowIdRecord = {
@@ -239,5 +595,4 @@ describe('getFileURLForRender', () => {
 
     expect(getFileURLForRender(mockSkyflowIdRecord, mockClient, 'mockAuthToken')).rejects.toThrow();
   });
-});
 });

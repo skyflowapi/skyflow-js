@@ -10,6 +10,8 @@ const logs = {
     CREATE_COLLECT_CONTAINER: '%s1 - Creating Collect container.',
     COLLECT_CONTAINER_CREATED: '%s1 - Created Collect container successfully.',
 
+    INITIALIZE_COMPOSABLE_CLIENT: '%s1 - Initializing Composable container.',
+
     CREATE_REVEAL_CONTAINER: '%s1 - Creating Reveal container.',
     REVEAL_CONTAINER_CREATED: '%s1 - Created Reveal container successfully.',
 
@@ -26,6 +28,8 @@ const logs = {
     ELEMENT_REVEALED: '%s1 - %s2 Element revealed.',
     FILE_RENDERED: '%s1 - %s2 File rendered.',
     COLLECT_SUBMIT_SUCCESS: '%s1 - Data has been collected successfully.',
+    UPLOAD_FILES_SUCCESS: '%s1 - Files uploaded successfully.',
+    MULTI_UPLOAD_FILES_SUCCESS: '%s1 - Multiple files uploaded successfully.',
     REVEAL_SUBMIT_SUCCESS: '%s1 - Data has been revealed successfully.',
     RENDER_SUBMIT_SUCCESS: '%s1 - File download URL has been fetched successfully.',
     INSERT_DATA_SUCCESS: '%s1 - Data has been inserted successfully.',
@@ -93,6 +97,8 @@ const logs = {
     VALIDATE_GET_BY_ID_INPUT: '%s1 - Validating getByID input.',
   },
   errorLogs: {
+    MULTI_FILE_NOT_SUPPORTED: 'Multi file upload is only supported in MULT_FILE_INPUT element in composable container. Please use MULT_FILE_INPUT element for multi file upload.',
+    INVALID_REVEAL_COMPOSABLE_INPUT: 'Reveal composable input is invalid. Please provide a valid input.',
     NO_ELEMENTS_IN_COLLECT: 'Validation error. No elements found in collect container',
     NO_ELEMENTS_IN_COMPOSABLE: 'Validation error. No elements found in composable container',
     NO_ELEMENTS_IN_REVEAL: 'Validation error. No elements found in reveal container',
@@ -240,6 +246,10 @@ const logs = {
     INVALID_HANDLER_IN_EVENT_LISTENER: 'Validation error. Invalid type for \'validations\' key. Specify a value of type array instead.',
     UNKNOWN_ERROR: 'Unknown Error.',
     NETWORK_ERROR: 'A network error occurred. This could be a CORS issue or a dropped internet connection. It is not possible for us to know. Please reach out to skyflow if you see this error',
+    TIMEOUT_ERROR: 'The request timed out, which could indicate a slow or unresponsive server. Check your network connection and try again.',
+    ABORT_ERROR: 'The request was cancelled. This can happen if the request was manually stopped or if a new request was triggered before the previous one finished.',
+    GENERIC_ERROR: 'A network error occurred. This could be caused by temporary internet issues, DNS resolution failures, or connection resets. Check your network connection and try again.',
+    OFFLINE_ERROR: 'Can\'t connect to the internet. Check your network connection and try again.',
     CONNECTION_ERROR: 'Error while initializing the connection.',
     ERROR_OCCURED: 'Error occurred.',
     INVALID_VALIDATIONS_TYPE: 'Validation error. Invalid validations type.',
@@ -317,6 +327,7 @@ const logs = {
     INVALID_OPTION_CARD_METADATA: 'Validation error. container create - Invalid type, cardMetadata must be of non-empty object type.',
     INVALID_OPTION_CARD_SCHEME: 'Validation error. container create - Invalid options, scheme must be of string array type.',
     INVALID_FIELD_SHOW_3DS_CHALLEGNGE: 'Invalid field \'%s1\'. Cannot initiate 3DS Challenge. Verify \'%s1\'',
+    NO_FILE_ELEMENT_FOUND: 'No FILE_INPUT element found in the container.',
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',

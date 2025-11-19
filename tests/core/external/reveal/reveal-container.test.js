@@ -166,47 +166,6 @@ describe("Reveal Container Class", () => {
       done();
     }
   });
-
-  // test.only("on skyflow frame ready call back",()=>{
-  //   const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
-  //   const data = {
-  //     name:REVEAL_FRAME_CONTROLLER,
-  //   };
-  //   const emitterCb = jest.fn();
-  //   console.log('data is on.mock.calls', on.mock.calls);
-  //   const eventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY+mockUuid
-  //   const onCbName = on.mock.calls[1][0];
-  //   expect(onCbName).toBe(eventName);
-  //   const onCb = on.mock.calls[1][1];
-  //   onCb(data, emitterCb);
-  //   bus.emit(eventName,data,emitterCb);
-  //   const data1 =   {
-  //     "client": {
-  //       "config": {
-  //         "vaultID": "e20afc3ae1b54f0199f24130e51e0c11",
-  //         "vaultURL": "https://testurl.com",
-  //         "getBearerToken": getBearerToken,
-  //         "options": {}
-  //       },
-      
-  //     "metaData": {
-  //       "uuid": "1234",
-  //     },
-  //     "context": {
-  //       "env": "PROD",
-  //       "logLevel": "ERROR"
-  //     },
-  //   }, 
-  //   "context": {
-  //     "env": "PROD",
-  //     "logLevel": "ERROR"
-  //   },
-  // }
-    
-  //   expect(emitterCb).toBeCalledTimes(1);
-  //   expect(emitterCb).toBeCalledWith(data1);
-  // });
-
   test("on container mounted call back",()=>{
     const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
     testRevealContainer.create({

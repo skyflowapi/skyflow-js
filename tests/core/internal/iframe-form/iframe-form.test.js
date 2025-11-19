@@ -19,6 +19,7 @@ const collect_element = `element:CVV:${tableCol}`;
 const checkbox_element = `element:${ELEMENTS.checkbox.name}:${tableCol}`
 const test_collect_element = `element:CARD_NUMBER:${tableCol}`;
 const file_element = `element:FILE_INPUT:${tableCol}`;
+const multi_file_element = `element:MULTI_FILE_INPUT:${tableCol}`;
 
 const context = {
     logLevel: LogLevel.ERROR,
@@ -67,14 +68,17 @@ describe('test iframeFormelement', () => {
         targetSpy.mockReturnValue({
             on,
         });
-        windowSpy = jest.spyOn(window,'parent','get');
+        windowSpy = jest.spyOn(global, 'window', 'get');
         windowSpy.mockImplementation(()=>({
-         
-                frames:{
+                parent:{
+                    frames:{
                 'element:CARD_NUMBER:${tableCol}':{document:{
                     getElementById:()=>({value:testValue})
                 }}
-                }
+                },
+                    postMessage: jest.fn(),
+                },
+                addEventListener: jest.fn(),
         }));
     });
     afterEach(() => {
@@ -472,26 +476,6 @@ describe('test iframeFormelement', () => {
         expect(element.state.value).toBe(false)
     });
 
-    // test('test tokenize error case', () => {
-    //     const element = new IFrameFormElement(`element:EXPIRATION_MONTH:${tableCol}`, {}, context)
-    //     const form = new IFrameForm("controllerId","",'ERROR')
-    //     jest.spyOn(window,'parent','get').mockImplementation(()=>({
-    //         frames:{
-    //             [`element:EXPIRATION_MONTH:${tableCol}:controllerId:ERROR:`]:{
-    //                 document:{
-    //                     getElementById:()=>({
-    //                         iFrameFormElement:element
-    //                     })
-    //                 }
-    //             }
-    //         }
-    //     }))
-    //     form.setClient(clientObj1)
-    //     form.setClientMetadata(metaData)
-    //     form.setContext(context)
-    //     expect(form.tokenize({elementIds:[{elemenId:`element:EXPIRATION_MONTH:${tableCol}`,frameId:`element:EXPIRATION_MONTH:${tableCol}`}]})).rejects.toThrow(SkyflowError)
-    // })
-
     test('test setValue for expiration_date', () => {
         const element = new IFrameFormElement(`element:EXPIRATION_DATE:${tableCol}`, {}, context)
         element.setFormat('MM/YY')
@@ -796,7 +780,50 @@ describe('test iframeFormelement', () => {
             expect(err).toBeDefined();
         }
     });
+        test('iframeFormelement constructor FILE INPUT element', () => {
+        const element = new IFrameFormElement(file_element, '', {containerType: ContainerType.COMPOSABLE}, context)
+        element.onFocusChange(false)
+        expect(element.state.isFocused).toBe(false)
+        element.onFocusChange(true)
+        element.sendChangeStatus(true)
+    });
+    test('iframeFormelement constructor MULTI FILE INPUT element', () => {
+        const element = new IFrameFormElement(multi_file_element, '', {containerType: ContainerType.COMPOSABLE}, context)
+        element.onFocusChange(false)
+        expect(element.state.isFocused).toBe(false)
+        element.onFocusChange(true)
+        element.sendChangeStatus(true)
+      });
+    test('iframeFormelement constructor MULTI FILE INPUT element for change status', () => {
+        const element = new IFrameFormElement(file_element, '', {containerType: ContainerType.COMPOSABLE}, context)
+        element.onFocusChange(false)
+        expect(element.state.isFocused).toBe(false)
+        element.onFocusChange(true)
+        expect(element.state.isFocused).toBe(true)
+        element.onFocusChange(false)
+        expect(element.state.isFocused).toBe(false)
+        element.sendChangeStatus(true)
+    });
+    test('iframeFormelement constructor MULTI FILE INPUT element for change status', () => {
+        const element = new IFrameFormElement(multi_file_element, '', {containerType: ContainerType.COMPOSABLE}, context)
+        element.onFocusChange(false)
+        element.state.value = '123'
+        expect(element.state.isFocused).toBe(false)
+        element.sendChangeStatus(true)
 
+
+        const element2 = new IFrameFormElement(file_element, '', {containerType: ContainerType.COMPOSABLE}, context)
+        element2.onFocusChange(false)
+        element2.state.value = '123'
+        expect(element2.state.isFocused).toBe(false)
+        element2.sendChangeStatus(true)
+
+        const element3 = new IFrameFormElement(collect_element, '', {containerType: ContainerType.COMPOSABLE}, context)
+        element3.onFocusChange(false)
+        element3.state.value = '123'
+        expect(element3.state.isFocused).toBe(false)
+        element3.sendChangeStatus(true)
+    });
 })
 
 
@@ -986,1207 +1013,6 @@ const stylesOptions = {
     },
     clientDomain: 'http://localhost.com'
   }
-
-// describe('test iframeForm collect method', () => {
-
-//     let emitSpy;
-//     let targetSpy;
-
-//     beforeEach(() => {
-//         jest.clearAllMocks()
-//         emitSpy = jest.spyOn(bus, 'emit');
-//         targetSpy = jest.spyOn(bus, 'target');
-//         targetSpy.mockReturnValue({
-//             on,
-//         });
-//     });
-
-//     test('initialize iframeform and submit collect with invalid input : client has error', (done) => {
-//         const form = new FrameElementInit("controllerId", "", "ERROR");
-//         form.setClient(clientObj)
-//         form.setClientMetadata(metaData)
-//         form.setContext(context)
-
-//         const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
-//         const frameReadyCb = frameReadyEvent[0][1];
-//         expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
-
-//         frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
-
-//         expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
-//         const skyflowInit = jest.fn();
-//         let windowSpy = jest.spyOn(global, 'window', 'get');
-//         windowSpy.mockImplementation(() => ({
-//             parent: {
-//                 frames: [{
-//                     name: collect_element,
-//                     location: {
-//                         href: 'http://iframe.html'
-//                     },
-//                     Skyflow: {
-//                         init: skyflowInit
-//                     }
-//                 }]
-//             },
-//             location: {
-//                 href: 'http://iframe.html'
-//             }
-//         }));
-
-//         frameReadyCb({ name:collect_element})
-
-//         const createFormElement = skyflowInit.mock.calls[0][0]
-//         const element = createFormElement(collect_element,undefined,undefined,true)
-
-//         const setErrorEvent = on.mock.calls.filter((data)=>data[0]===ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR)
-//         const setErrorCb = setErrorEvent[0][1]
-
-//         setErrorCb({isTriggerError:true,clientErrorText:"Error",name:collect_element})
-
-//         const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//         const tokenizationCb = tokenizationEvent[0][1];
-//         const cb2 = jest.fn();
-
-//         windowSpy.mockImplementation(() => ({
-//             parent: {
-//                 frames: {
-//                     [`${collect_element}:controllerId:ERROR:`]:{
-//                         document:{
-//                             getElementById:()=>({
-//                                 iFrameFormElement:element
-//                             })
-//                         }
-//                     }
-//                 }
-//             },
-//             location: {
-//                 href: 'http://iframe.html'
-//             }
-//         }));
-//         tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2)
-
-//         setTimeout(() => {
-//             expect(cb2.mock.calls[0][0].error.error.description).toBeDefined()
-//             done()
-//         }, 1000)
-
-
-//         windowSpy.mockImplementation(() => ({
-//             parent: {
-//                 frames: [{
-//                     name: collect_element,
-//                     location: {
-//                         href: 'http://iframe.html'
-//                     },
-//                     Skyflow: {
-//                         init: skyflowInit
-//                     }
-//                 }]
-//             },
-//             location: {
-//                 href: 'http://iframe.html'
-//             }
-//         }));
-//     })
-
-//     // test('initialize iframeform and submit collect with invalid input', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     form.setClient(clientObj)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
-//     //     const frameReadyCb = frameReadyEvent[0][1];
-
-//     //     expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
-
-//     //     frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
-
-//     //     expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     frameReadyCb({ name:collect_element})
-
-//     //     const createFormElement = skyflowInit.mock.calls[0][0]
-//     //     const element = createFormElement(collect_element,undefined,undefined,true)
-
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2)
-
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error.message).toBeDefined()
-//     //     }, 1000)
-
-//     //     element.setValue('123')
-//     //     const cb3 = jest.fn()
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb3)
-
-//     //     setTimeout(() => {
-//     //         expect(cb3.mock.calls[0][0].records.length).toBe(2);
-//     //     }, 1000)
-
-//     //     element.fieldName = 'col';
-//     //     element.tableName = 'table';
-//     //     element.state.name = 'col';
-        
-//     //     const cb4 = jest.fn()
-//     //     tokenizationCb({
-//     //         ...data,
-//     //         additionalFields: {
-//     //             ...data.additionalFields,
-//     //             records: [{
-//     //                 table: 'table',
-//     //                 fields: {
-//     //                     col: '123'
-//     //                 }
-//     //             }]
-//     //         },
-//     //         elementIds:[{elementId:collect_element,frameId:collect_element}]
-//     //     }, cb4)
-
-//     //     setTimeout(() => {
-//     //         expect(cb4.mock.calls[0][0].error).toBeDefined()
-//     //         done()
-//     //     }, 1000)
-
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-
-//     // test('initialize iframeform and submit collect with invalid input and not required field', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     form.setClient(clientObj)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
-//     //     const frameReadyCb = frameReadyEvent[0][1];
-
-//     //     expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
-
-//     //     frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
-
-//     //     expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     frameReadyCb({ name:collect_element})
-
-//     //     const createFormElement = skyflowInit.mock.calls[0][0]
-//     //     const element = createFormElement(collect_element)
-
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2)
-
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error.message).toBeDefined()
-//     //     }, 1000)
-
-//     //     element.setValue('123')
-//     //     const cb3 = jest.fn()
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb3)
-
-//     //     setTimeout(() => {
-//     //         expect(cb3.mock.calls[0][0].records.length).toBe(2);
-//     //     }, 1000)
-
-//     //     element.fieldName = 'col';
-//     //     element.tableName = 'table';
-//     //     element.state.name = 'col';
-
-//     //     const cb4 = jest.fn()
-//     //     tokenizationCb({
-//     //         ...data,
-//     //         additionalFields: {
-//     //             ...data.additionalFields,
-//     //             records: [{
-//     //                 table: 'table',
-//     //                 fields: {
-//     //                     col: '123'
-//     //                 }
-//     //             }]
-//     //         },
-//     //         elementIds:[{elementId:collect_element,frameId:collect_element}]
-//     //     }, cb4)
-
-//     //     setTimeout(() => {
-//     //         expect(cb4.mock.calls[0][0].error).toBeDefined()
-//     //         done()
-//     //     }, 1000)
-
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     // })
-
-//     // test('initialize iframeform with element value match rule', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     form.setClient(clientObj)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
-//     //     const frameReadyCb = frameReadyEvent[0][1];
-
-//     //     expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
-
-//     //     frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
-
-//     //     expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     frameReadyCb({ name:collect_element})
-
-//     //     const createFormElement = skyflowInit.mock.calls[0][0]
-//     //     const element = createFormElement(collect_element,undefined,undefined,true)
-//     //     element.doesClientHasError = false;
-//     //     element.validations = [
-//     //         {
-//     //             type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
-//     //             params:{
-//     //                 element: "",
-//     //                 elementID: "",
-//     //                 error: "test rule"
-//     //             }
-//     //         }
-//     //     ]
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb(data, cb2)
-
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error.error.description).toBeDefined()
-//     //     }, 1000)
-//     //     element.setValue('123')
-//     //     const cb3 = jest.fn()
-//     //     tokenizationCb(data, cb3)
-        
-//     //     const cb4 = jest.fn()
-//     //     tokenizationCb({
-//     //         ...data,
-//     //         additionalFields: {
-//     //             ...data.additionalFields,
-//     //             records: [{
-//     //                 table: 'table',
-//     //                 fields: {
-//     //                     col: '123'
-//     //                 }
-//     //             }]
-//     //         }
-//     //     }, cb4)
-//     //     setTimeout(() => {
-//     //         expect(form).toBeDefined()
-//     //         done()
-//     //     }, 1000)
-
-//     // })
-
-//     // test('initialize iframeform with element value match rule & client error', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     form.setClient(clientObj)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
-//     //     const frameReadyCb = frameReadyEvent[0][1];
-
-//     //     expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
-
-//     //     frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
-
-//     //     expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     frameReadyCb({ name:collect_element})
-
-//     //     const createFormElement = skyflowInit.mock.calls[0][0]
-//     //     const element = createFormElement(collect_element,undefined,undefined,true)
-//     //     element.doesClientHasError = true;
-//     //     element.validations = [
-//     //         {
-//     //             type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
-//     //             params:{
-//     //                 element: "",
-//     //                 elementID: "",
-//     //                 error: "test rule"
-//     //             }
-//     //         }
-//     //     ]
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb(data, cb2)
-
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error.error.description).toBeDefined()
-//     //     }, 1000)
-//     //     element.setValue('123')
-//     //     const cb3 = jest.fn()
-//     //     tokenizationCb(data, cb3)
-        
-//     //     const cb4 = jest.fn()
-//     //     tokenizationCb({
-//     //         ...data,
-//     //         additionalFields: {
-//     //             ...data.additionalFields,
-//     //             records: [{
-//     //                 table: 'table',
-//     //                 fields: {
-//     //                     col: '123'
-//     //                 }
-//     //             }]
-//     //         }
-//     //     }, cb4)
-//     //     setTimeout(() => {
-//     //         expect(form).toBeDefined()
-//     //         done()
-//     //     }, 1000)
-
-//     // })
-
-//     // test('initialize iframeform and submit collect with invalid input and not required field', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     form.setClient(clientObj)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
-//     //     const frameReadyCb = frameReadyEvent[0][1];
-
-//     //     expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
-
-//     //     frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
-
-//     //     expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     frameReadyCb({ name:collect_element})
-
-//     //     const createFormElement = skyflowInit.mock.calls[0][0]
-//     //     const element = createFormElement(collect_element)
-
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2)
-
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error.message).toBeDefined()
-//     //     }, 1000)
-
-//     //     element.setValue('123')
-//     //     const cb3 = jest.fn()
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb3)
-
-//     //     setTimeout(() => {
-//     //         expect(cb3.mock.calls[0][0].records.length).toBe(2);
-//     //     }, 1000)
-
-//     //     element.fieldName = 'col';
-//     //     element.tableName = 'table';
-//     //     element.state.name = 'col';
-        
-//     //     const cb4 = jest.fn()
-//     //     tokenizationCb({
-//     //         ...data,
-//     //         additionalFields: {
-//     //             ...data.additionalFields,
-//     //             records: [{
-//     //                 table: 'table',
-//     //                 fields: {
-//     //                     col: '123'
-//     //                 }
-//     //             }]
-//     //         },
-//     //         elementIds:[{elementId:collect_element,frameId:collect_element}]
-//     //     }, cb4)
-
-//     //     setTimeout(() => {
-//     //         expect(cb4.mock.calls[0][0].error).toBeDefined()
-//     //         done()
-//     //     }, 1000)
-
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-
-//     // test('collect submit without client initializatiob', () => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     form.setContext(context)
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-
-//     //     expect(() => { tokenizationCb(data, cb2); }).toThrow(SkyflowError)
-
-//     // })
-//     // test('collect error', () => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     form.setContext(context)
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-
-//     //     expect(() => { tokenizationCb(data, cb2); }).toThrow(SkyflowError)
-
-//     // })
-//     // test('collect error second case', () => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     const element =  new IFrameFormElement(collect_element,"",{},context)
-//     //     element.setValue("123")
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     const skyflowInit = jest.fn();
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     //     form.setContext(context)
-//     //     form.setClient(clientObj1)
-//     //     expect(form.tokenize({...records,elementIds:[{elementId:collect_element,frameId:collect_element}]})).rejects.toMatchObject({"error": {"code": 404, "description": "Not Found"}});
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-//     // test('insert records with tokens as true', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     const element =  new IFrameFormElement(collect_element,"",{},context)
-//     //     form.setClient(clientObj)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-//     //     element.setValue("123")
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2);
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].records.length).toBe(2);
-//     //         expect(cb2.mock.calls[0][0].records[0].table).toBe('table');
-//     //         expect(Object.keys(cb2.mock.calls[0][0].records[0].fields).length).toBe(2);
-//     //         done()
-//     //     }, 1000)
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-//     // let clientObj1 = {
-//     //     config: {},
-//     //     request: jest.fn(() => Promise.reject({error:{code:404,description:"Not Found"}})),
-//     //     toJSON: jest.fn(() => ({
-//     //         config: {},
-//     //         metaData: {
-//     //             uuid: ''
-//     //         }
-//     //     }))
-//     // }
-//     // test('ererr', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     const element =  new IFrameFormElement(collect_element,"",{},context)
-//     //     form.setClient(clientObj1)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     element.setValue("123")
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2);
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error).toBeDefined();
-//     //         done()
-//     //     }, 1000)
-//     //     form.tokenize({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}).then().catch( err => {
-//     //         expect(err).toBeDefined();
-//     //     })
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-
-//     // test('inputElementNotFound', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     const element =  new IFrameFormElement(collect_element,"",{},context)
-//     //     form.setClient(clientObj1)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     element.setValue("123")
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>(undefined)
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2);
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error).toBeDefined();
-//     //         done()
-//     //     }, 1000)
-//     //     form.tokenize({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}).then().catch( err => {
-//     //         expect(err).toBeDefined();
-//     //     })
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-
-//     // test('success with skyflowID', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     const element =  new IFrameFormElement(collect_element,"",{},context)
-
-//     //     element.setValue("123")
-//     //     element.skyflowID = "testID"
-//     //     element.tableName = "table"
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     form.setClient(clientObj1)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2);
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error).toBeDefined();
-//     //         done()
-//     //     }, 1000)
-//     //     form.tokenize({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}).then().catch( err => {
-//     //         expect(err).toBeDefined();
-//     //     })
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-
-//     // test('success', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     const element =  new IFrameFormElement(collect_element,"",{},context)
-
-//     //     element.setValue("123")
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     form.setClient(clientObj1)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}, cb2);
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error).toBeDefined();
-//     //         done()
-//     //     }, 1000)
-//     //     form.tokenize({...data,elementIds:[{elementId:collect_element,frameId:collect_element}]}).then().catch( err => {
-//     //         expect(err).toBeDefined();
-//     //     })
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-
-//     // test('success : checkbox', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     const element =  new IFrameFormElement(checkbox_element,"",{},context)
-//     //     element.tableName = "tableName"
-//     //     element.setValue(true)
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${checkbox_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     form.setClient(clientObj1)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb({...data,elementIds:[{elementId:checkbox_element,frameId:checkbox_element}]}, cb2);
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error).toBeDefined();
-//     //         done()
-//     //     }, 1000)
-//     //     form.tokenize({...data,elementIds:[{elementId:checkbox_element,frameId:checkbox_element},{elementId:checkbox_element,frameId:checkbox_element}]}).then().catch( err => {
-//     //         expect(err).toBeDefined();
-//     //     })
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-
-//     // test('skyflowID error', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     form.setClient(clientObj)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const element =  new IFrameFormElement(collect_element,"",{},context)
-
-//     //     element.setValue("123")
-//     //     element.tableName = "table"
-//     //     element.state.name = collect_element
-//     //     element.skyflowID = ''
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb({
-//     //         additionalFields: {
-//     //             records: [{
-//     //                 table: 'table',
-//     //                 fields: {
-//     //                     col: '123',
-//     //                     col: '123',
-//     //                 }
-//     //             }]
-//     //         },
-//     //         elementIds:[{elementId:collect_element,frameId:collect_element}]
-//     //     }, cb2)   
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error.message).toBeDefined()
-//     //         done()
-//     //     }, 1000)
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-
-//     // test('insert records duplicate error', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     form.setClient(clientObj)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const element =  new IFrameFormElement(collect_element,"",{},context)
-
-//     //     element.setValue("123")
-//     //     element.tableName = "table"
-//     //     element.state.name = collect_element
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb({
-//     //         additionalFields: {
-//     //             records: [{
-//     //                 table: 'table',
-//     //                 fields: {
-//     //                     col: '123',
-//     //                     col: '123',
-//     //                 }
-//     //             }]
-//     //         },
-//     //         elementIds:[{elementId:collect_element,frameId:collect_element},{elementId:collect_element,frameId:collect_element}]
-//     //     }, cb2)   
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].error.message).toBeDefined()
-//     //         done()
-//     //     }, 1000)
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-//     // test('insert records with tokens as false', (done) => {
-//     //     const form = new IFrameForm("controllerId", "", "ERROR");
-//     //     form.setClient(clientObj)
-//     //     form.setClientMetadata(metaData)
-//     //     form.setContext(context)
-
-//     //     const element =  new IFrameFormElement(collect_element,"",{},context)
-
-//     //     element.setValue("123")
-//     //     const skyflowInit = jest.fn();
-//     //     let windowSpy = jest.spyOn(global, 'window', 'get');
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: {
-//     //                 [`${collect_element}:controllerId:ERROR:`]:{
-//     //                     document:{
-//     //                         getElementById:()=>({
-//     //                             iFrameFormElement:element
-//     //                         })
-//     //                     }
-//     //                 }
-//     //             }
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-
-//     //     const tokenizationEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST + 'controllerId');
-//     //     const tokenizationCb = tokenizationEvent[0][1];
-//     //     const cb2 = jest.fn();
-//     //     tokenizationCb({...data2,
-//     //         elementIds:[{elementId:collect_element,frameId:collect_element}]
-//     //     }, cb2);
-//     //     setTimeout(() => {
-//     //         expect(cb2.mock.calls[0][0].records[0].table).toBe('pii_fields');
-//     //         expect(Object.keys(cb2.mock.calls[0][0].records[0]).length).toBe(2);
-//     //         done()
-//     //     }, 1000)
-//     //     windowSpy.mockImplementation(() => ({
-//     //         parent: {
-//     //             frames: [{
-//     //                 name: collect_element,
-//     //                 location: {
-//     //                     href: 'http://iframe.html'
-//     //                 },
-//     //                 Skyflow: {
-//     //                     init: skyflowInit
-//     //                 }
-//     //             }]
-//     //         },
-//     //         location: {
-//     //             href: 'http://iframe.html'
-//     //         }
-//     //     }));
-//     // })
-
-// })
-
 const emit = jest.fn()
 describe('test file Upload method', () => {
     let emitSpy;
@@ -2202,58 +1028,6 @@ describe('test file Upload method', () => {
         });
     });
 
-    // test.only('initialize iFrame and upload with file input', () => {
-    //     // const form = new IFrameForm("controllerId", "", "ERROR");
-    //     // form.setClient(fileClientObj)
-    //     // form.setClientMetadata(metaData)
-    //     // form.setContext(context)
-
-    //     // const frameReadyEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FRAME_READY + 'controllerId');
-    //     // const frameReadyCb = frameReadyEvent[0][1];
-
-    //     // expect(() => { frameReadyCb({}) }).toThrow(SkyflowError)
-
-    //     // frameReadyCb({ name: COLLECT_FRAME_CONTROLLER })
-
-    //     // expect(() => { frameReadyCb({ name: "element:type:aW52YWxpZA==" }) }).toThrow(SkyflowError)
-    //     const skyflowInit = jest.fn();
-    //     windowSpy = jest.spyOn(global, 'window', 'get');
-    //     windowSpy.mockImplementation(() => ({
-    //         name: `${FRAME_ELEMENT}:FILE_INPUT:123:ERROR:`,
-    //         location: {
-    //         href: `http://localhost/?${btoa(JSON.stringify({record: element, metaData: {clientDomain: 'http://localhost.com'}}))}`,
-    //       }
-    //     }))
-
-    //     // frameReadyCb({ name: file_element })
-
-    //     const createFormElement = skyflowInit.mock.calls[0][0]
-    //     const fileElement = createFormElement(file_element)
-
-    //     const fileUploadEvent = on.mock.calls.filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD + 'controllerId');
-    //     const fileUploadCb = fileUploadEvent[0][1];
-    //     const cb2 = jest.fn();
-    //     fileUploadCb(fileData, cb2)
-
-    //     setTimeout(() => {
-    //         expect(cb2.mock.calls[0][0].error).toBeDefined()
-    //     }, 3000)
-
-    //     setTimeout(() => {
-    //         expect(cb2.mock.calls[0][0].error).toBeDefined()
-    //     }, 3000)
-
-    //     fileElement.setValue({
-    //         lastModified: '',
-    //         lastModifiedDate: '',
-    //         name: "sample.jpg",
-    //         size: 48848,
-    //         type: "image/jpeg",
-    //         webkitRelativePath: ""
-    //     })
-    //     const cb3 = jest.fn()
-    //     fileUploadCb(fileData, cb3)
-    // });
     test('validate for file input - valid blockZeroSizeFile boolean', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
         var options = { blockEmptyFiles: true};
@@ -2319,3 +1093,68 @@ describe('test file Upload method', () => {
         }).toThrowError(parameterizedString(logs.errorLogs.EMPTY_ALLOWED_OPTIONS_ARRAY));
       });
 })
+
+// const tableCol = btoa('1234');
+// const file_element = `element:FILE_INPUT:${tableCol}`;
+// const multi_file_element = `element:MULTI_FILE_INPUT:${tableCol}`;
+// const context = { logLevel: 'ERROR', env: 'PROD' };
+
+// Helper to build a File of specific byte length using repeated characters
+const buildFile = (bytes, name, type = 'application/octet-stream') => {
+  const chunk = 'a'.repeat(bytes);
+  return new File([chunk], name, { type });
+};
+
+describe('getFileDetails isolated tests', () => {
+  test('returns empty array for null value', () => {
+    const element = new IFrameFormElement(file_element, '', { containerType: ContainerType.COMPOSABLE }, context);
+    expect(element.getFileDetails(null)).toEqual([]);
+  });
+
+  test('single File returns correct metadata and size rounding (0 bytes)', () => {
+    const element = new IFrameFormElement(file_element, '', { containerType: ContainerType.COMPOSABLE }, context);
+    const zeroFile = buildFile(0, 'zero.bin');
+    const details = element.getFileDetails(zeroFile);
+    expect(details).toHaveLength(1);
+    expect(details[0]).toMatchObject({ fileName: 'zero.bin', fileType: 'application/octet-stream', fileSizeKB: 0 });
+  });
+
+  test('single File size rounding: 1 byte -> 1KB, 1023 -> 1KB, 1024 -> 1KB, 1025 -> 2KB', () => {
+    const element = new IFrameFormElement(file_element, '', { containerType: ContainerType.COMPOSABLE }, context);
+    const f1 = buildFile(1, 'one.bin');
+    const f2 = buildFile(1023, 'almost1k.bin');
+    const f3 = buildFile(1024, 'onek.bin');
+    const f4 = buildFile(1025, 'overonek.bin');
+    expect(element.getFileDetails(f1)[0].fileSizeKB).toBe(1);
+    expect(element.getFileDetails(f2)[0].fileSizeKB).toBe(1);
+    expect(element.getFileDetails(f3)[0].fileSizeKB).toBe(1);
+    expect(element.getFileDetails(f4)[0].fileSizeKB).toBe(2);
+  });
+
+  test('mocked FileList with two files returns both entries', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COMPOSABLE }, context);
+    const file1 = buildFile(11, 'f1.txt', 'text/plain');
+    const file2 = buildFile(2048, 'f2.txt', 'text/plain');
+  const mockFileList = { 0: file1, 1: file2, length: 2, item: (i) => (i === 0 ? file1 : file2) };
+    if (typeof FileList !== 'undefined') Object.setPrototypeOf(mockFileList, FileList.prototype);
+    const details = element.getFileDetails(mockFileList);
+    expect(details).toHaveLength(2);
+    expect(details[0]).toMatchObject({ fileName: 'f1.txt', fileType: 'text/plain', fileSizeKB: 1 });
+    expect(details[1]).toMatchObject({ fileName: 'f2.txt', fileType: 'text/plain', fileSizeKB: 2 });
+  });
+
+  test('invalid input object returns empty array', () => {
+    const element = new IFrameFormElement(file_element, '', { containerType: ContainerType.COMPOSABLE }, context);
+  expect(element.getFileDetails({ not: 'file' })).toEqual([]);
+  });
+
+  test('error path: malformed FileList that throws during iteration returns []', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COMPOSABLE }, context);
+  const throwingFileList = { length: 1 };
+    // Force instanceof FileList if possible then make Array.from throw
+    if (typeof FileList !== 'undefined') Object.setPrototypeOf(throwingFileList, FileList.prototype);
+    throwingFileList[Symbol.iterator] = () => ({ next: () => { throw new Error('boom'); } });
+    const details = element.getFileDetails(throwingFileList);
+    expect(details).toEqual([]);
+  });
+});

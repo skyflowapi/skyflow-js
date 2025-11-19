@@ -4,6 +4,12 @@ Copyright (c) 2022 Skyflow, Inc.
 import logs from './logs';
 
 const SKYFLOW_ERROR_CODE = {
+  MULTI_FILE_NOT_SUPPORTED: {
+    code: 400,
+    description: logs.errorLogs.MULTI_FILE_NOT_SUPPORTED,
+  },
+  INVALID_REVEAL_COMPOSABLE_INPUT:
+  { code: 400, description: logs.errorLogs.INVALID_REVEAL_COMPOSABLE_INPUT },
   INVALID_FILE_NAME: { code: 400, description: logs.errorLogs.INVALID_FILE_NAME },
   INVALID_FIELD: { code: 400, description: logs.errorLogs.INVALID_FIELD },
   VAULTID_IS_REQUIRED: { code: 400, description: logs.errorLogs.VAULTID_IS_REQUIRED },
@@ -324,6 +330,10 @@ const SKYFLOW_ERROR_CODE = {
   UNKNOWN_ERROR: { code: 400, description: logs.errorLogs.UNKNOWN_ERROR },
   CONNECTION_ERROR: { code: 400, description: logs.errorLogs.CONNECTION_ERROR },
   NETWORK_ERROR: { code: 500, description: logs.errorLogs.NETWORK_ERROR },
+  OFFLINE_ERROR: { code: 500, description: logs.errorLogs.OFFLINE_ERROR },
+  TIMEOUT_ERROR: { code: 500, description: logs.errorLogs.TIMEOUT_ERROR },
+  ABORT_ERROR: { code: 500, description: logs.errorLogs.ABORT_ERROR },
+  GENERIC_ERROR: { code: 0, description: logs.errorLogs.GENERIC_ERROR },
   COMPLETE_AND_VALID_INPUTS: { code: 400, description: logs.errorLogs.COMPLETE_AND_VALID_INPUTS },
   INVALID_VALIDATIONS_TYPE: { code: 400, description: logs.errorLogs.INVALID_VALIDATIONS_TYPE },
   MISSING_VALIDATION_RULE_TYPE: {
@@ -584,6 +594,10 @@ const SKYFLOW_ERROR_CODE = {
   NO_ELEMENTS_IN_REVEAL: {
     code: 400,
     description: logs.errorLogs.NO_ELEMENTS_IN_REVEAL,
+  },
+  NO_FILE_ELEMENT_FOUND: {
+    code: 400,
+    description: logs.errorLogs.NO_FILE_ELEMENT_FOUND,
   },
 };
 

@@ -113,7 +113,7 @@ export default class IFrameFormElement extends EventEmitter {
 
   blockEmptyFiles: boolean = false;
 
-  constructor(name: string, label: string, metaData, context: Context, skyflowID?: string) {
+  constructor(name: string, label: string, metaData: any, context: Context, skyflowID?: string) {
     super();
     const frameValues = name.split(':');
     const fieldType = frameValues[1];
@@ -219,6 +219,36 @@ export default class IFrameFormElement extends EventEmitter {
         : ELEMENT_EVENTS_TO_CLIENT.BLUR,
       value: { ...this.getStatus() },
     });
+    if (this.containerType === ContainerType.COMPOSABLE) {
+      if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name) {
+        window.parent.postMessage({
+          type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
+          data: {
+            event: focus
+              ? ELEMENT_EVENTS_TO_CLIENT.FOCUS
+              : ELEMENT_EVENTS_TO_CLIENT.BLUR,
+            name: this.iFrameName,
+            value: {
+              ...this.getStatus(),
+              value: '',
+              metaData: this.getFileDetails(this.getStatus().value),
+            },
+          },
+        }, this.metaData.clientDomain);
+      } else {
+        window.parent.postMessage({
+          type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
+          data: {
+            event: focus
+              ? ELEMENT_EVENTS_TO_CLIENT.FOCUS
+              : ELEMENT_EVENTS_TO_CLIENT.BLUR,
+            name: this.iFrameName,
+            value: { ...this.getStatus() },
+          },
+        }, this.metaData.clientDomain);
+      }
+    }
     if (!focus) {
       bus.emit(ELEMENT_EVENTS_TO_CLIENT.BLUR + this.iFrameName);
       this._emit(ELEMENT_EVENTS_TO_CLIENT.BLUR, {
@@ -281,6 +311,40 @@ export default class IFrameFormElement extends EventEmitter {
     }
     this.mask = newMask;
   }
+
+  getFileDetails = (value: FileList | File | null): Array<{
+    fileName: string;
+    fileSizeKB: number;
+    fileType: string;
+  }> => {
+  // Return empty array if no value
+    if (!value) return [];
+
+    try {
+    // Handle FileList
+      if (value instanceof FileList) {
+        return Array.from(value).map((file) => ({
+          fileName: file.name,
+          fileSizeKB: Math.ceil(file.size / 1024),
+          fileType: file.type,
+        }));
+      }
+
+      // Handle single File
+      if (value instanceof File) {
+        return [{
+          fileName: value.name,
+          fileSizeKB: Math.ceil(value.size / 1024),
+          fileType: value.type,
+        }];
+      }
+
+      // Return empty array for invalid input
+      return [];
+    } catch (error) {
+      return [];
+    }
+  };
 
   setValidation(validations: IValidationRule[] | undefined) {
     if (ELEMENTS[this.fieldType].regex) {
@@ -469,6 +533,21 @@ export default class IFrameFormElement extends EventEmitter {
         resp = false;
       }
       if (this.preserveFileName) vaildateFileNames = vaildateFileName(value.name);
+    } else if (this.fieldType === ElementType.MULTI_FILE_INPUT) {
+      const files = this.state.value instanceof FileList
+        ? Array.from(this.state.value)
+        : [this.state.value];
+      for (let i = 0; i < files.length; i += 1) {
+        try {
+          resp = fileValidation(files[i], this.state.isRequired, {
+            allowedFileType: this.allowedFileType,
+            blockEmptyFiles: this.blockEmptyFiles,
+          });
+        } catch (err) {
+          resp = false;
+        }
+        if (this.preserveFileName) vaildateFileNames = vaildateFileName(files[i].name);
+      }
     } else {
       // eslint-disable-next-line no-lonely-if
       if (this.regex && value) {
@@ -591,6 +670,32 @@ export default class IFrameFormElement extends EventEmitter {
                 event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
                 value: this.getStatus(),
               });
+              if (this.containerType === ContainerType.COMPOSABLE) {
+                if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name) {
+                  window.parent.postMessage({
+                    type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
+                    data: {
+                      event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+                      name: this.iFrameName,
+                      value: {
+                        ...this.getStatus(),
+                        value: '',
+                        metaData: this.getFileDetails(this.getStatus().value),
+                      },
+                    },
+                  }, this.metaData.clientDomain);
+                } else {
+                  window.parent.postMessage({
+                    type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
+                    data: {
+                      event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+                      name: this.iFrameName,
+                      value: this.getStatus(),
+                    },
+                  }, this.metaData.clientDomain);
+                }
+              }
             }
           } else if (
             data.options !== undefined
@@ -673,23 +778,103 @@ export default class IFrameFormElement extends EventEmitter {
         event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
         value: this.getStatus(),
       });
+      if (this.containerType === ContainerType.COMPOSABLE) {
+        if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name) {
+          window.parent.postMessage({
+            type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
+            data: {
+              event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+              name: this.iFrameName,
+              value: {
+                ...this.getStatus(),
+                value: '',
+                metaData: this.getFileDetails(this.getStatus().value),
+              },
+            },
+          }, this.metaData.clientDomain);
+        } else {
+          window.parent.postMessage({
+            type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
+            data: {
+              event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+              name: this.iFrameName,
+              value: this.getStatus(),
+            },
+          }, this.metaData.clientDomain);
+        }
+      }
     } else if (
       this.state.value
       && (this.fieldType === ELEMENTS.EXPIRATION_DATE.name
         || this.fieldType === ELEMENTS.EXPIRATION_MONTH.name
-        || this.fieldType === ELEMENTS.FILE_INPUT.name)
+        || this.fieldType === ELEMENTS.FILE_INPUT.name
+        || this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+      )
     ) {
       bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName, {
         name: this.iFrameName,
         event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
         value: this.getStatus(),
       });
+      if (this.containerType === ContainerType.COMPOSABLE) {
+        if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name) {
+          window.parent.postMessage({
+            type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
+            data: {
+              event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+              name: this.iFrameName,
+              value: {
+                ...this.getStatus(),
+                value: '',
+                metaData: this.getFileDetails(this.getStatus().value),
+              },
+            },
+          }, this.metaData.clientDomain);
+        } else {
+          window.parent.postMessage({
+            type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
+            data: {
+              event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+              name: this.iFrameName,
+              value: this.getStatus(),
+            },
+          }, this.metaData.clientDomain);
+        }
+      }
     } else if (!this.state.isEmpty) {
       bus.emit(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName, {
         name: this.iFrameName,
         event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
         value: this.getStatus(),
       });
+      if (this.containerType === ContainerType.COMPOSABLE) {
+        if (this.fieldType === ELEMENTS.MULTI_FILE_INPUT.name
+           || this.fieldType === ELEMENTS.FILE_INPUT.name) {
+          window.parent.postMessage({
+            type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
+            data: {
+              event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+              name: this.iFrameName,
+              value: {
+                ...this.getStatus(),
+                value: '',
+                metaData: this.getFileDetails(this.getStatus().value),
+              },
+            },
+          }, this.metaData.clientDomain);
+        } else {
+          window.parent.postMessage({
+            type: ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName,
+            data: {
+              event: ELEMENT_EVENTS_TO_CLIENT.CHANGE,
+              name: this.iFrameName,
+              value: this.getStatus(),
+            },
+          }, this.metaData.clientDomain);
+        }
+      }
     }
 
     this._emit(ELEMENT_EVENTS_TO_CLIENT.CHANGE, {
