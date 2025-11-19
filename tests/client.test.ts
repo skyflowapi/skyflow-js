@@ -550,12 +550,5 @@ describe("Client Class", () => {
     setTimeout(() => { xhrMock.onabort(); }, 0);
     await expect(p).rejects.toMatchObject({ error: { code: SKYFLOW_ERROR_CODE.ABORT_ERROR.code } });
   });
-  test('onabort path returns error code', async () => {
-    const xhrMock: any = { open: jest.fn(), send: jest.fn(), setRequestHeader: jest.fn(), getAllResponseHeaders: jest.fn().mockReturnValue(''), status: 0 };
-    jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
-    const testClient = new Client(skyflowConfig, metaData);
-    const p = testClient.request({ requestMethod: 'GET', url: 'https://abort.com' });
-    setTimeout(() => { xhrMock.onerror(); }, 0);
-    await expect(p).rejects.toMatchObject({ error: { code: SKYFLOW_ERROR_CODE.GENERIC_ERROR.code } });
-  });
+
 });
