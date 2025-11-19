@@ -207,8 +207,15 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
         }
       });
       if (!isValidType) {
+        const file = value;
         // eslint-disable-next-line max-len
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [value.type, value.name], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [value.type, value.name, JSON.stringify({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          lastModified: file.lastModified,
+          webkitRelativePath: file.webkitRelativePath,
+        }, null, 2)], true);
       }
     }
   }
