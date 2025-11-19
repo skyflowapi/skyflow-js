@@ -117,6 +117,18 @@ describe("Reveal Composable Element Class", () => {
     expect(testRevealElement).toBeInstanceOf(ComposableRevealElement);
 
   });
+  test("constructor when details are not passsed", () => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        undefined,
+        eventEmitter,
+        undefined,
+    );
+    eventEmitter._emit(`${EventName.READY}:name`, {});
+    expect(testRevealElement).toBeInstanceOf(ComposableRevealElement);
+    testRevealElement.iframeName();
+    testRevealElement.getID();
+  });
   test("iframe name", () => {
     const testRevealElement = new ComposableRevealElement(
         "name",

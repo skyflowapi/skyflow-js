@@ -13,6 +13,25 @@ import { parameterizedString } from "../../../../src/utils/logs-helper";
 import SkyflowError from "../../../../src/libs/skyflow-error";
 import logs from "../../../../src/utils/logs";
 
+// Mock internal element to intercept constructor arguments for mount coverage
+jest.mock('../../../../src/core/external/reveal/composable-reveal-internal', () => {
+  return {
+    __esModule: true,
+    default: jest.fn().mockImplementation((elementId, recordGroup, metaData, containerProps, context) => {
+      return {
+        iframeName: () => 'mockIframeName',
+        mount: jest.fn(),
+        unmount: jest.fn(),
+        __recordGroup: recordGroup, // expose for assertions
+        __containerProps: containerProps,
+        __metaData: metaData,
+        __context: context,
+      };
+    }),
+  };
+});
+import ComposableRevealInternalElement from '../../../../src/core/external/reveal/composable-reveal-internal';
+
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 const mockUuid = '1234'; 
 jest.mock('../../../../src/libs/uuid',()=>({
@@ -123,6 +142,68 @@ describe("Reveal Composable Container Class", () => {
       expect(error.error.code).toEqual(400);
       expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_COMPOSABLE);
     })
+  });
+
+  /**************** Mount method lines 246-299 coverage tests ****************/
+  test('mount() should throw MISMATCH_ELEMENT_COUNT_LAYOUT_SUM when layout sum differs from elements length', () => {
+    const meta = { ...testMetaData };
+    const container = new ComposableRevealContainer(meta, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [2] });
+    // Add only one element
+    container.create({ token: 'token-1' });
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    expect(() => container.mount(host)).toThrow(SkyflowError);
+    try { container.mount(host); } catch (e) {
+      expect(e.error.code).toBe(SKYFLOW_ERROR_CODE.MISMATCH_ELEMENT_COUNT_LAYOUT_SUM.code);
+    }
+    document.body.removeChild(host);
+  });
+
+  test('mount() should group elements, apply styles & errorTextStyles, and call internal element mount', () => {
+    const styles = { base: { color: 'blue' } };
+    const errorTextStyles = { base: { color: 'red' } };
+    const meta = { ...testMetaData };
+    const container = new ComposableRevealContainer(meta, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [2], styles, errorTextStyles });
+    container.create({ token: 'token-1' });
+    container.create({ token: 'token-2' });
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    container.mount(host);
+    // Assert internal element constructed once
+    expect(ComposableRevealInternalElement).toHaveBeenCalledTimes(1);
+    const callArgs = ComposableRevealInternalElement.mock.calls[0];
+    const recordGroup = callArgs[1];
+    expect(recordGroup.styles).toMatchObject(styles);
+    expect(recordGroup.errorTextStyles).toMatchObject(errorTextStyles);
+    // Internal mock instance mount should have been called
+    const instance = ComposableRevealInternalElement.mock.results[0].value;
+    expect(instance.mount).toHaveBeenCalledWith(host);
+    document.body.removeChild(host);
+  });
+
+  test('mount() inside shadow DOM should emit HEIGHT event via postMessage', () => {
+    const meta = { ...testMetaData };
+    const container = new ComposableRevealContainer(meta, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: 'token-1' });
+    // Shadow host setup
+    const shadowHost = document.createElement('div');
+    document.body.appendChild(shadowHost);
+    const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+    const mountPoint = document.createElement('div');
+    mountPoint.id = 'shadowMount';
+    shadowRoot.appendChild(mountPoint);
+    // Spy contentWindow.postMessage after mount creates iframe via internal element
+    // Mock iframe element appended by internal element mount (we simulate it)
+    const iframe = document.createElement('iframe');
+    iframe.id = 'mockIframeName';
+    Object.defineProperty(iframe, 'contentWindow', { value: { postMessage: jest.fn() }, writable: true });
+    shadowRoot.appendChild(iframe);
+    container.mount(mountPoint);
+    // After mount, height event initial emit should call postMessage
+    expect(iframe.contentWindow.postMessage).toHaveBeenCalled();
+    const postedArgs = iframe.contentWindow.postMessage.mock.calls[0][0];
+    expect(postedArgs.name).toContain(ELEMENT_EVENTS_TO_CLIENT.HEIGHT);
+    document.body.removeChild(shadowHost);
   });
 
   test("constructor", () => {

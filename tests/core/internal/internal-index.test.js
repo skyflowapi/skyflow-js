@@ -1587,6 +1587,44 @@ describe('FrameElement - onInputChange Tests for Card number', () => {
 
       expect(mockIFrameFormElement.setValue).toHaveBeenCalledWith(mockFile, true);
     });
+
+    it('should handle multi file input change correctly', () => {
+      mockIFrameFormElement.fieldType = ELEMENTS.MULTI_FILE_INPUT.name;
+      const mockFile1 = new File(['test1'], 'test1.pdf', { type: 'application/pdf' });
+      const mockFile2 = new File(['test2'], 'test2.pdf', { type: 'application/pdf' });
+      const mockFiles = [mockFile1, mockFile2];
+      
+      const mockEvent = {
+        target: {
+          files: mockFiles,
+          checkValidity: jest.fn().mockReturnValue(true)
+        }
+      };
+
+      const focusChangeSpy = jest.spyOn(frameElement, 'focusChange');
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(mockIFrameFormElement.setValue).toHaveBeenCalledWith(mockFiles, true);
+      expect(focusChangeSpy).toHaveBeenCalledWith(true);
+    });
+
+    it('should handle multi file input with validation failure', () => {
+      mockIFrameFormElement.fieldType = ELEMENTS.MULTI_FILE_INPUT.name;
+      const mockFile = new File(['test'], 'test.pdf', { type: 'application/pdf' });
+      const mockFiles = [mockFile];
+      
+      const mockEvent = {
+        target: {
+          files: mockFiles,
+          checkValidity: jest.fn().mockReturnValue(false)
+        }
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(mockIFrameFormElement.setValue).toHaveBeenCalledWith(mockFiles, false);
+    });
   });
 
   describe('Card Number Input Tests', () => {
@@ -2050,6 +2088,428 @@ describe('Paste Event Tests', () => {
 
     // Trigger paste event
     input.dispatchEvent(pasteEvent);
+  });
+
+});
+
+describe('Keydown Event Tests', () => {
+  let frameElement;
+  let mockIFrameFormElement;
+  let mockHtmlDivElement;
+
+  beforeEach(() => {
+    mockIFrameFormElement = {
+      fieldType: ELEMENTS.INPUT_FIELD.name,
+      setValue: jest.fn(),
+      getValue: jest.fn(),
+      setMask: jest.fn(),
+      resetEvents: jest.fn(),
+      on: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({
+        isFocused: false,
+        isValid: true,      
+        isEmpty: true,
+        isComplete: false,
+        isRequired: false,
+        isTouched: false,
+        value: '',
+      }),
+      getUnformattedValue: jest.fn().mockReturnValue(''),
+      onFocusChange: jest.fn(),
+      onDropdownSelect: jest.fn(),
+      iFrameName: 'mockFrameName',
+      cardType: 'DEFAULT',
+      state: {
+        value: '',
+        isFocused: false,
+        isValid: true,
+        isEmpty: true,
+        isComplete: false,
+        name: '',
+        isRequired: false,
+        isTouched: false,
+        selectedCardScheme: '',
+      },
+      mask: null
+    };
+
+    mockHtmlDivElement = document.createElement('div');
+    frameElement = new FrameElement(mockIFrameFormElement, {}, mockHtmlDivElement);
+    frameElement.mount();
+  });
+
+  it('should handle Ctrl+Z keydown event and clear value', () => {
+    const input = frameElement.domInput;
+    input.value = 'test value';
+    
+    const setValueSpy = jest.spyOn(frameElement, 'setValue');
+    const iFrameSetValueSpy = jest.spyOn(mockIFrameFormElement, 'setValue');
+
+    const keydownEvent = new KeyboardEvent('keydown', {
+      key: 'z',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true
+    });
+
+    const preventDefaultSpy = jest.spyOn(keydownEvent, 'preventDefault');
+    
+    input.dispatchEvent(keydownEvent);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(setValueSpy).toHaveBeenCalledWith('');
+    expect(iFrameSetValueSpy).toHaveBeenCalledWith('', true);
+  });
+
+  it('should handle Cmd+Z (metaKey) keydown event and clear value', () => {
+    const input = frameElement.domInput;
+    input.value = 'test value';
+    
+    const setValueSpy = jest.spyOn(frameElement, 'setValue');
+    const iFrameSetValueSpy = jest.spyOn(mockIFrameFormElement, 'setValue');
+
+    const keydownEvent = new KeyboardEvent('keydown', {
+      key: 'z',
+      metaKey: true,
+      bubbles: true,
+      cancelable: true
+    });
+
+    const preventDefaultSpy = jest.spyOn(keydownEvent, 'preventDefault');
+    
+    input.dispatchEvent(keydownEvent);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(setValueSpy).toHaveBeenCalledWith('');
+    expect(iFrameSetValueSpy).toHaveBeenCalledWith('', true);
+  });
+
+  it('should handle uppercase Z with Ctrl key', () => {
+    const input = frameElement.domInput;
+    input.value = 'test value';
+    
+    const setValueSpy = jest.spyOn(frameElement, 'setValue');
+
+    const keydownEvent = new KeyboardEvent('keydown', {
+      key: 'Z',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true
+    });
+    
+    input.dispatchEvent(keydownEvent);
+
+    expect(setValueSpy).toHaveBeenCalledWith('');
+  });
+
+  it('should not clear value when only Z key is pressed without Ctrl/Cmd', () => {
+    const input = frameElement.domInput;
+    input.value = 'test value';
+    
+    const setValueSpy = jest.spyOn(frameElement, 'setValue');
+
+    const keydownEvent = new KeyboardEvent('keydown', {
+      key: 'z',
+      bubbles: true,
+      cancelable: true
+    });
+    
+    input.dispatchEvent(keydownEvent);
+
+    expect(setValueSpy).not.toHaveBeenCalled();
+  });
+
+  it('should not clear value when other keys are pressed with Ctrl', () => {
+    const input = frameElement.domInput;
+    input.value = 'test value';
+    
+    const setValueSpy = jest.spyOn(frameElement, 'setValue');
+
+    const keydownEvent = new KeyboardEvent('keydown', {
+      key: 'a',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true
+    });
+    
+    input.dispatchEvent(keydownEvent);
+
+    expect(setValueSpy).not.toHaveBeenCalled();
+  });
+
+});
+
+describe('Dropdown Select Event Tests', () => {
+  let frameElement;
+  let mockIFrameFormElement;
+  let mockHtmlDivElement;
+  let mockOptions;
+
+  beforeEach(() => {
+    mockIFrameFormElement = {
+      fieldType: ELEMENTS.CARD_NUMBER.name,
+      setValue: jest.fn(),
+      getValue: jest.fn(),
+      setMask: jest.fn(),
+      resetEvents: jest.fn(),
+      on: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({
+        isFocused: false,
+        isValid: true,      
+        isEmpty: true,
+        isComplete: false,
+        isRequired: false,
+        isTouched: false,
+        value: '',
+      }),
+      getUnformattedValue: jest.fn().mockReturnValue(''),
+      onFocusChange: jest.fn(),
+      onDropdownSelect: jest.fn(),
+      iFrameName: 'mockFrameName',
+      cardType: 'DEFAULT',
+      state: {
+        value: '',
+        isFocused: false,
+        isValid: true,
+        isEmpty: true,
+        isComplete: false,
+        name: '',
+        isRequired: false,
+        isTouched: false,
+        selectedCardScheme: '',
+      },
+      mask: null
+    };
+
+    mockOptions = {
+      enableCardIcon: true,
+      inputStyles: {
+        dropdownIcon: {
+          focus: { color: 'blue' },
+          color: 'red'
+        },
+        dropdown: { backgroundColor: 'white' }
+      }
+    };
+
+    mockHtmlDivElement = document.createElement('div');
+    frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+    frameElement.mount();
+  });
+
+  it('should handle dropdown focus event and apply focus styles', () => {
+    const setDropdownIconStyleSpy = jest.spyOn(frameElement, 'setDropdownIconStyle');
+    
+    const focusEvent = new Event('focus', { bubbles: true });
+    frameElement.dropdownSelect.dispatchEvent(focusEvent);
+
+    expect(setDropdownIconStyleSpy).toHaveBeenCalledWith(mockOptions.inputStyles.dropdownIcon.focus);
+  });
+
+  it('should handle dropdown blur event and reset styles', () => {
+    const setDropdownIconStyleSpy = jest.spyOn(frameElement, 'setDropdownIconStyle');
+    
+    const blurEvent = new Event('blur', { bubbles: true });
+    frameElement.dropdownSelect.dispatchEvent(blurEvent);
+
+    expect(setDropdownIconStyleSpy).toHaveBeenCalledWith(mockOptions.inputStyles.dropdownIcon);
+  });
+
+  it('should handle dropdown change event and update card icon', () => {
+    const changeEvent = new Event('change', { bubbles: true });
+    Object.defineProperty(changeEvent, 'target', {
+      value: {
+        value: 'VISA'
+      }
+    });
+
+    frameElement.dropdownSelect.value = 'VISA';
+    frameElement.dropdownSelect.dispatchEvent(changeEvent);
+
+    expect(mockIFrameFormElement.onDropdownSelect).toHaveBeenCalledWith('VISA');
+  });
+
+  it('should not apply focus styles if inputStyles.dropdownIcon.focus is not defined', () => {
+    const mockOptionsNoFocus = {
+      enableCardIcon: true,
+      inputStyles: {
+        dropdownIcon: {
+          color: 'red'
+        }
+      }
+    };
+
+    const frameElementNoFocus = new FrameElement(mockIFrameFormElement, mockOptionsNoFocus, document.createElement('div'));
+    frameElementNoFocus.mount();
+
+    const setDropdownIconStyleSpy = jest.spyOn(frameElementNoFocus, 'setDropdownIconStyle');
+    
+    const focusEvent = new Event('focus', { bubbles: true });
+    frameElementNoFocus.dropdownSelect.dispatchEvent(focusEvent);
+
+    expect(setDropdownIconStyleSpy).not.toHaveBeenCalled();
+  });
+
+  it('should update card icon source when valid card type is selected', () => {
+    frameElement.domImg = document.createElement('img');
+    frameElement.domImg.src = 'default-icon.svg';
+
+    const changeEvent = new Event('change', { bubbles: true });
+    Object.defineProperty(changeEvent, 'target', {
+      value: {
+        value: 'MASTERCARD'
+      }
+    });
+
+    frameElement.dropdownSelect.value = 'MASTERCARD';
+    frameElement.dropdownSelect.dispatchEvent(changeEvent);
+
+    expect(mockIFrameFormElement.onDropdownSelect).toHaveBeenCalledWith('MASTERCARD');
+  });
+
+  it('should handle change event when domImg is not present', () => {
+    frameElement.domImg = null;
+
+    const changeEvent = new Event('change', { bubbles: true });
+    Object.defineProperty(changeEvent, 'target', {
+      value: {
+        value: 'AMEX'
+      }
+    });
+
+    frameElement.dropdownSelect.value = 'AMEX';
+    
+    expect(() => frameElement.dropdownSelect.dispatchEvent(changeEvent)).not.toThrow();
+  });
+
+});
+
+describe('setDropdownIconStyle Tests', () => {
+  let frameElement;
+  let mockIFrameFormElement;
+  let mockHtmlDivElement;
+  let mockOptions;
+
+  beforeEach(() => {
+    mockIFrameFormElement = {
+      fieldType: ELEMENTS.CARD_NUMBER.name,
+      setValue: jest.fn(),
+      getValue: jest.fn(),
+      setMask: jest.fn(),
+      resetEvents: jest.fn(),
+      on: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({
+        isFocused: false,
+        isValid: true,      
+        isEmpty: true,
+        isComplete: false,
+        isRequired: false,
+        isTouched: false,
+        value: '',
+      }),
+      getUnformattedValue: jest.fn().mockReturnValue(''),
+      onFocusChange: jest.fn(),
+      onDropdownSelect: jest.fn(),
+      iFrameName: 'mockFrameName',
+      cardType: 'DEFAULT',
+      state: {
+        value: '',
+        isFocused: false,
+        isValid: true,
+        isEmpty: true,
+        isComplete: false,
+        name: '',
+        isRequired: false,
+        isTouched: false,
+        selectedCardScheme: '',
+      },
+      mask: null
+    };
+
+    mockOptions = {
+      enableCardIcon: true,
+      inputStyles: {
+        dropdownIcon: {
+          focus: { color: 'blue', width: '20px' },
+          color: 'red',
+          width: '16px'
+        }
+      }
+    };
+
+    mockHtmlDivElement = document.createElement('div');
+    frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+    frameElement.mount();
+  });
+
+  it('should apply custom styles when styleObj is provided and dropdown icon is visible', () => {
+    frameElement.dropdownIcon.style.display = 'block';
+    
+    const customStyles = { color: 'green', width: '24px' };
+    frameElement.setDropdownIconStyle(customStyles);
+
+    const styleAttr = frameElement.dropdownIcon.getAttribute('style');
+    expect(styleAttr).toContain('position: absolute; left: 46px; bottom: calc(50% - 12px); cursor: pointer; display: block; color: green; width: 24px;');
+    expect(frameElement.dropdownIcon.style.display).toBe('block');
+  });
+
+  it('should apply default DROPDOWN_ICON_STYLES when no styleObj is provided', () => {
+    frameElement.dropdownIcon.style.display = 'block';
+    
+    frameElement.setDropdownIconStyle();
+
+    const styleAttr = frameElement.dropdownIcon.getAttribute('style');
+    expect(styleAttr).toBeDefined();
+    expect(frameElement.dropdownIcon.style.display).toBe('block');
+  });
+
+  it('should not apply styles when dropdown icon display is not block', () => {
+    frameElement.dropdownIcon.style.display = 'none';
+    const initialStyle = frameElement.dropdownIcon.getAttribute('style');
+    
+    const customStyles = { color: 'green' };
+    frameElement.setDropdownIconStyle(customStyles);
+
+    const finalStyle = frameElement.dropdownIcon.getAttribute('style');
+    expect(finalStyle).toBe(initialStyle);
+  });
+
+  it('should not apply styles when dropdown icon display is empty', () => {
+    frameElement.dropdownIcon.style.display = '';
+    const initialStyle = frameElement.dropdownIcon.getAttribute('style');
+    
+    const customStyles = { color: 'purple' };
+    frameElement.setDropdownIconStyle(customStyles);
+
+    // Should not change because display is not 'block'
+    expect(frameElement.dropdownIcon.style.display).toBe('');
+  });
+
+  it('should handle null styleObj and apply default styles', () => {
+    frameElement.dropdownIcon.style.display = 'block';
+    
+    frameElement.setDropdownIconStyle(null);
+
+    expect(frameElement.dropdownIcon.style.display).toBe('block');
+  });
+
+  it('should handle undefined styleObj and apply default styles', () => {
+    frameElement.dropdownIcon.style.display = 'block';
+    
+    frameElement.setDropdownIconStyle(undefined);
+
+    const styleAttr = frameElement.dropdownIcon.getAttribute('style');
+    expect(styleAttr).toBeDefined();
+    expect(frameElement.dropdownIcon.style.display).toBe('block');
+  });
+
+  it('should preserve display block after applying custom styles', () => {
+    frameElement.dropdownIcon.style.display = 'block';
+    
+    const customStyles = { backgroundColor: 'yellow' };
+    frameElement.setDropdownIconStyle(customStyles);
+
+    expect(frameElement.dropdownIcon.style.display).toBe('block');
   });
 
 });

@@ -12,6 +12,7 @@ import bus from "framebus";
 import { JSDOM } from 'jsdom';
 import EventEmitter from "../../../../src/event-emitter";
 import { error } from "console";
+import properties from "../../../../src/properties";
 
 busEvents.getAccessToken = jest.fn(() => Promise.reject('access token'));
 
@@ -783,5 +784,271 @@ describe("Reveal Element Class", () => {
         updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
         options: { altText: "Updated Alt Text" }
     });
+  });
+
+  test("mount method should throw error when domElementSelector is empty", () => {
+    const containerId = 'containerId';
+    const elementArray = {
+        rows: [{
+            elements: [{
+                name: "element1",
+                table: "table1",
+                column: "column1",
+                skyflowID: "skyflowID1"
+            }]
+        }]
+    };
+    const groupEmiitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealInternalElement(
+        elementId,
+        elementArray,
+        clientData,
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        { logLevel: LogLevel.ERROR,env:Env.PROD }
+    );
+
+    expect(() => testRevealElement.mount(null)).toThrow();
+    expect(() => testRevealElement.mount(undefined)).toThrow();
+    expect(() => testRevealElement.mount('')).toThrow();
+  });
+
+  test("mount method should create ResizeObserver for HTMLElement", () => {
+    const containerId = 'containerId';
+    const elementArray = {
+        rows: [{
+            elements: [{
+                name: "element1",
+                table: "table1",
+                column: "column1",
+                skyflowID: "skyflowID1"
+            }]
+        }]
+    };
+    const groupEmiitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealInternalElement(
+        elementId,
+        elementArray,
+        clientData,
+        {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+        { logLevel: LogLevel.ERROR,env:Env.PROD }
+    );
+
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    document.body.appendChild(testEmptyDiv);
+
+    try {
+      testRevealElement.mount(testEmptyDiv);
+
+      expect(testRevealElement.resizeObserver).not.toBeNull();
+      expect(global.ResizeObserver).toHaveBeenCalled();
+    } finally {
+      testRevealElement.unmount();
+      document.body.removeChild(testEmptyDiv);
+    }
+  });
+
+  test("mount method ResizeObserver callback should postMessage to iframe", () => {
+    const containerId = 'containerId';
+    const elementArray = {
+        rows: [{
+            elements: [{
+                name: "element1",
+                table: "table1",
+                column: "column1",
+                skyflowID: "skyflowID1"
+            }]
+        }]
+    };
+    properties.IFRAME_SECURE_ORIGIN = 'https://secure.origin';
+    const groupEmiitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealInternalElement(
+        elementId,
+        elementArray,
+        clientData,
+        {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+        { logLevel: LogLevel.ERROR,env:Env.PROD }
+    );
+
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    document.body.appendChild(testEmptyDiv);
+
+    let resizeObserverCallback;
+    const mockResizeObserver = jest.fn((callback) => {
+      resizeObserverCallback = callback;
+      return {
+        observe: jest.fn(),
+        disconnect: jest.fn(),
+        unobserve: jest.fn(),
+      };
+    });
+    global.ResizeObserver = mockResizeObserver;
+
+    try {
+      testRevealElement.mount(testEmptyDiv);
+
+      // Create mock iframe element
+      const mockIframe = document.createElement('iframe');
+      mockIframe.name = testRevealElement.iframeName();
+      const mockPostMessage = jest.fn();
+      
+      Object.defineProperty(mockIframe, 'contentWindow', {
+        value: {
+          postMessage: mockPostMessage
+        },
+        writable: true,
+        configurable: true
+      });
+
+      testEmptyDiv.appendChild(mockIframe);
+
+      // Trigger the ResizeObserver callback
+      if (resizeObserverCallback) {
+        resizeObserverCallback();
+      }
+
+      expect(mockPostMessage).toHaveBeenCalled();
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: expect.stringContaining(ELEMENT_EVENTS_TO_CLIENT.HEIGHT)
+        }),
+        expect.any(String)
+      );
+    } finally {
+      testRevealElement.unmount();
+      document.body.removeChild(testEmptyDiv);
+    }
+  });
+
+  test("mount method ResizeObserver should skip iframe without contentWindow", () => {
+    const containerId = 'containerId';
+    const elementArray = {
+        rows: [{
+            elements: [{
+                name: "element1",
+                table: "table1",
+                column: "column1",
+                skyflowID: "skyflowID1"
+            }]
+        }]
+    };
+    const groupEmiitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealInternalElement(
+        elementId,
+        elementArray,
+        clientData,
+        {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+        { logLevel: LogLevel.ERROR,env:Env.PROD }
+    );
+
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    document.body.appendChild(testEmptyDiv);
+
+    let resizeObserverCallback;
+    const mockResizeObserver = jest.fn((callback) => {
+      resizeObserverCallback = callback;
+      return {
+        observe: jest.fn(),
+        disconnect: jest.fn(),
+        unobserve: jest.fn(),
+      };
+    });
+    global.ResizeObserver = mockResizeObserver;
+    properties.IFRAME_SECURE_ORIGIN = 'https://secure.origin';
+    try {
+      testRevealElement.mount(testEmptyDiv);
+
+      // Create mock iframe without contentWindow
+      const mockIframe = document.createElement('iframe');
+      mockIframe.name = testRevealElement.iframeName();
+      testEmptyDiv.appendChild(mockIframe);
+
+      // Trigger the ResizeObserver callback - should not throw
+      expect(() => {
+        if (resizeObserverCallback) {
+          resizeObserverCallback();
+        }
+      }).not.toThrow();
+    } finally {
+      testRevealElement.unmount();
+      document.body.removeChild(testEmptyDiv);
+    }
+  });
+
+  test("mount method ResizeObserver should handle multiple iframes correctly", () => {
+    const containerId = 'containerId';
+    const elementArray = {
+        rows: [{
+            elements: [{
+                name: "element1",
+                table: "table1",
+                column: "column1",
+                skyflowID: "skyflowID1"
+            }]
+        }]
+    };
+    const groupEmiitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealInternalElement(
+        elementId,
+        elementArray,
+        clientData,
+        {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+        { logLevel: LogLevel.ERROR,env:Env.PROD }
+    );
+
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    document.body.appendChild(testEmptyDiv);
+
+    let resizeObserverCallback;
+    const mockResizeObserver = jest.fn((callback) => {
+      resizeObserverCallback = callback;
+      return {
+        observe: jest.fn(),
+        disconnect: jest.fn(),
+        unobserve: jest.fn(),
+      };
+    });
+    global.ResizeObserver = mockResizeObserver;
+
+    try {
+      testRevealElement.mount(testEmptyDiv);
+
+      // Create multiple iframes
+      const mockIframe1 = document.createElement('iframe');
+      mockIframe1.name = 'differentName';
+      const mockPostMessage1 = jest.fn();
+      Object.defineProperty(mockIframe1, 'contentWindow', {
+        value: { postMessage: mockPostMessage1 },
+        writable: true,
+        configurable: true
+      });
+
+      const mockIframe2 = document.createElement('iframe');
+      mockIframe2.name = testRevealElement.iframeName();
+      const mockPostMessage2 = jest.fn();
+      Object.defineProperty(mockIframe2, 'contentWindow', {
+        value: { postMessage: mockPostMessage2 },
+        writable: true,
+        configurable: true
+      });
+
+      testEmptyDiv.appendChild(mockIframe1);
+      testEmptyDiv.appendChild(mockIframe2);
+
+      // Trigger the ResizeObserver callback
+      if (resizeObserverCallback) {
+        resizeObserverCallback();
+      }
+
+      // Only the iframe with matching name should receive postMessage
+      expect(mockPostMessage1).not.toHaveBeenCalled();
+      expect(mockPostMessage2).toHaveBeenCalled();
+    } finally {
+      testRevealElement.unmount();
+      document.body.removeChild(testEmptyDiv);
+    }
   });
 }); 
