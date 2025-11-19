@@ -595,6 +595,10 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.NO_ELEMENTS_IN_REVEAL,
   },
+  NO_FILE_ELEMENT_FOUND: {
+    code: 400,
+    description: logs.errorLogs.NO_FILE_ELEMENT_FOUND,
+  },
 };
 
 export default SKYFLOW_ERROR_CODE;
