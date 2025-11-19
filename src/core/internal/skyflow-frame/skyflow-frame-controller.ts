@@ -870,7 +870,8 @@ class SkyflowFrameController {
 
     if (!validatedFileState) {
       return Promise.reject(
-        new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [state.value.type], true),
+        // eslint-disable-next-line max-len
+        new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [state.value.type, state.value.name], true),
       );
     }
     fileUploadObject[state.name] = state.value;

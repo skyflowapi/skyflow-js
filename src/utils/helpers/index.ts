@@ -192,7 +192,7 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
   }
 
   if (DANGEROUS_FILE_TYPE.includes(value.type)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [value.type], true);
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [value.type, value.name], true);
   }
 
   if (Object.prototype.hasOwnProperty.call(fileElement, 'allowedFileType') && (value !== undefined && value !== '')) {
@@ -207,7 +207,8 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
         }
       });
       if (!isValidType) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [value.type], true);
+        // eslint-disable-next-line max-len
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [value.type, value.name], true);
       }
     }
   }
