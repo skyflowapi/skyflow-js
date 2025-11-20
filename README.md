@@ -1458,7 +1458,7 @@ Properties your provided when you created the element remain the same until you 
 ### End to end example
 ```javascript
 // Create a collect container. 
-const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 const stylesOptions = {
   inputStyles: {
@@ -1599,7 +1599,7 @@ element.unmount();
 ```
 ### Step 4: Collect data from elements
 
-When the file is ready to be uploaded, call the `uploadFiles()` method on the container object.
+When you're ready to upload the file, call the  `uploadFiles()` method on the container object.
 
 ```javascript
 container.uploadFiles();
@@ -1673,7 +1673,7 @@ const options = {
 
 ```javascript
 // Create collect Container.
-const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 // Create collect elements.
 const cardNumberElement = collectContainer.create({
@@ -1763,7 +1763,7 @@ collectContainer.uploadFiles();
 
 ```javascript
 // Create collect Container.
-const collectContainer = skyflow.container(Skyflow.ContainerType.COLLECT);
+const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 // Create collect elements.
 const cardNumberElement = collectContainer.create({
@@ -1850,7 +1850,15 @@ Note: File name should contain only alphanumeric characters and !-_.*()
 
 
 # Securely collecting data client-side using Composable Elements
+- [**Using Skyflow Composable Elements to collect data**](#using-skyflow-composable-elements-to-collect-data)
+- [**Event listener on Composable Element**](#set-an-event-listener-on-composable-elements)
+- [**Event listener on Composable Container**](#set-an-event-listener-on-a-composable-container)
+- [**Update Composable Elements**](#update-composable-elements)
+- [**Using Skyflow File Element to upload a file**](#using-skyflow-composable-file-element-to-upload-a-file)
+- [**Using Skyflow File Element to upload multiple files**](#using-skyflow-composable-file-element-to-upload-multiple-files)
 
+
+## Using Skyflow Composable Elements to collect data
 Composable Elements combine multiple Skyflow Elements in a single iframe, letting you create multiple Skyflow Elements in a single row. The following steps create a composable element and securely collect data through it.
 
 ### Step 1: Create a composable container
@@ -1858,9 +1866,9 @@ Composable Elements combine multiple Skyflow Elements in a single iframe, lettin
 Create a container for the composable element using the `container(Skyflow.ContainerType)` method of the Skyflow client:
 
 ``` javascript
- const collectContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE,containerOptions);
+ const collectContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE,containerOptions);
 ```
-The container requires an options object that contains the following keys:
+Pass an options object that contains the following keys:
 
 1. `layout`: An array that indicates the number of rows in the container and the number of elements in each row. The index value of the array defines the number of rows, and each value in the array represents the number of elements in that row, in order.
   
@@ -2127,7 +2135,7 @@ const containerOptions = {
   },
 };
 
-const composableContainer = skyflow.container(
+const composableContainer = skyflowClient.container(
   Skyflow.ContainerType.COMPOSABLE,
   containerOptions
 );
@@ -2251,7 +2259,7 @@ const containerOptions = {
   }
 }
 
-const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+const composableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 const cvv = composableContainer.create({
   table: 'pii_fields',
@@ -2321,7 +2329,7 @@ Properties your provided when you created the element remain the same until you 
 const containerOptions = { layout: [2, 1] };
 
 // Create a composable container. 
-const composableContainer = skyflow.container(
+const composableContainer = skyflowClient.container(
   Skyflow.ContainerType.COMPOSABLE,
   containerOptions
 );
@@ -2415,7 +2423,7 @@ The handler `function(void) => void` is a callback function you provide that's c
 const containerOptions = { layout: [1] }
 
 // Creating a composable container.
-const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+const composableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 // Creating the element.
 const cvv = composableContainer.create({
@@ -2444,7 +2452,7 @@ Create a container for the form elements using the container(Skyflow.ContainerTy
 const containerOptions = { layout: [1] }
 
 // Creating a composable container.
-const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+const composableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 ```
 
 ### Step 2: Create a File Element
@@ -2471,11 +2479,11 @@ The `table` and `column` fields indicate which table and column the Element corr
 - Use period-delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`).
 
 ### Step 3: Mount Container to the DOM
-Elements used for upload files are mounted to the DOM the same way as Elements used for collecting data. Refer to Step 3 of the [section above](#step-3-mount-container-to-the-dom).
+Mount Elements for file upload to the DOM the same way as Elements used for collecting data. Refer to Step 3 of the [section above](#step-3-mount-container-to-the-dom).
 
 ### Step 4: Collect data from elements
 
-When the file is ready to be uploaded, call the `uploadFiles()` method on the container object.
+When you're ready to upload the file, call the  `uploadFiles()` method on the container object.
 
 ```javascript
 composableContainer.uploadFiles();
@@ -2495,7 +2503,7 @@ composableContainer.uploadFiles();
 const containerOptions = { layout: [1] }
 
 // Creating a composable container.
-const container = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+const container = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 // Step 2.
 const element = container.create({
@@ -2555,7 +2563,7 @@ const options = {
 const containerOptions = { layout: [1] }
 
 // Creating a composable container.
-const collectContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+const collectContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 // Create collect elements.
 const cardNumberElement = collectContainer.create({
@@ -2647,7 +2655,7 @@ collectContainer.uploadFiles();
 const containerOptions = { layout: [1,1] }
 
 // Creating a composable container.
-const collectContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+const collectContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 // Create collect elements.
 const cardNumberElement = collectContainer.create({
@@ -2743,7 +2751,7 @@ Create a container for the form elements using the container(Skyflow.ContainerTy
 const containerOptions = { layout: [1] }
 
 // Creating a composable container.
-const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+const composableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 ```
 
 ### Step 2: Create a File Element
@@ -2770,10 +2778,10 @@ Elements used for rendering files are mounted to the DOM the same way as Element
 
 ### Step 4: Collect data from elements
 
-When the file is ready to be uploaded, call the `uploadMultipleFiles()` method on the element.
+When you're ready to upload the file, call the  `uploadMultipleFiles()` method on the element.
 
 ```javascript
-const metaData: MetaData = {card_number: '123'} // Optional: used to generate Skyflow IDs, and upload files to those IDs
+const metaData = {card_number: '123'} // Optional: used to generate Skyflow IDs, and upload files to those IDs
 
 element.uploadMultipleFiles();
 ```
@@ -2796,7 +2804,7 @@ Note:
 const containerOptions = { layout: [1] }
 
 // Creating a composable container.
-const container = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+const container = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 // Step 2.
 const element = container.create({
@@ -2856,7 +2864,7 @@ const options = {
 const containerOptions = { layout: [1] }
 
 // Creating a composable container.
-const collectContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+const collectContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 // Create collect elements.
 const cardNumberElement = collectContainer.create({
@@ -2948,7 +2956,7 @@ fileElement.uploadMultipleFiles();
 const containerOptions = { layout: [1,1] }
 
 // Creating a composable container.
-const collectContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
+const collectContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 // Create collect elements.
 const cardNumberElement = collectContainer.create({
@@ -3046,6 +3054,8 @@ Note: File name should contain only alphanumeric characters and !-_.*()
 -  [**Render a file with a File Element**](#render-a-file-with-a-file-element)
 -  [**Update Reveal Elements**](#update-reveal-elements)
 -  [**Using Composable Reveal Elements to reveal data**](#using-composable-reveal-elements-to-reveal-data)
+-  [**Update Composable Reveal Elements**](#update-reveal-composable-elements)
+-  [**Render a file with a composable file element**](#render-a-file-with-a-composable-file-element)
 
 
 ## Retrieving data from the vault
@@ -3615,14 +3625,14 @@ cardNumber.clearAltText();
 
 You can render files using the Skyflow File Element. Use the following steps to securely render a file.
 
-## Step 1: Create a container
+### Step 1: Create a container
 Create a container for the form elements using the container(Skyflow.ContainerType) method of the Skyflow client:
 
 ```javascript
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL)
 ```
 
-## Step 2: Create a File Element
+### Step 2: Create a File Element
 Define a Skyflow Element to render the file as shown below.
 
 ```javascript
@@ -3662,11 +3672,11 @@ errorTextStyles: {
 }
 ```
 
-## Step 3: Mount Elements to the DOM
+### Step 3: Mount Elements to the DOM
 Elements used for rendering files are mounted to the DOM the same way as Elements used for collecting data. Refer to Step 3 of the [section above](https://github.com/skyflowapi/skyflow-js#step-3-mount-elements-to-the-dom).
 
-## Step 4: Render File
-When the element is created and mounted, call the renderFile() method on the element as shown below:
+### Step 4: Render File
+After you create and mount the element, call the `renderFile()` method on the element as shown below:
 ```javascript
 fileElement
   .renderFile()
@@ -3678,7 +3688,7 @@ fileElement
   });
 ```
 
-## End to end example of file render
+### End to end example of file render
 ```javascript
 // Step 1.
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
@@ -3736,7 +3746,7 @@ fetch("<BACKEND_URL>")
 
 ```
 
-## Sample Success Response
+### Sample Success Response
 ```json
 {
   "success": [
@@ -3748,7 +3758,7 @@ fetch("<BACKEND_URL>")
 }
 ```
 
-### Update Reveal Elements
+## Update Reveal Elements
 
 You can update reveal element properties with the `update` interface.
 
@@ -3775,7 +3785,7 @@ Properties your provided when you created the element remain the same until you 
 ### End to end example
 ```javascript
 // Create a reveal container. 
-const revealContainer = skyflow.container(Skyflow.ContainerType.REVEAL);
+const revealContainer = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 const stylesOptions = {
   inputStyles: {
@@ -3858,9 +3868,9 @@ Composable Reveal Elements combine multiple Skyflow Elements in a single iframe,
 Create a container for the composable reveal element using the `container(Skyflow.ContainerType)` method of the Skyflow client:
 
 ``` javascript
- const revealComposableContainer = skyflow.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
+ const revealComposableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
 ```
-The container requires an options object that contains the following keys:
+Pass an options object that contains the following keys:
 
 1. `layout`: An array that indicates the number of rows in the container and the number of elements in each row. The index value of the array defines the number of rows, and each value in the array represents the number of elements in that row, in order.
   
@@ -4160,7 +4170,7 @@ Properties your provided when you created the element remain the same until you 
 ### End to end example
 ```javascript
 // Create a reveal composable container. 
-const revealComposableContainer = skyflow.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
+const revealComposableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
 
 const stylesOptions = {
   inputStyles: {
@@ -4232,18 +4242,18 @@ cardNumberRevealElement.update({
 ---
 
 
-## Render a file with a File Element
+## Render a file with a Composable File Element
 
 You can render files using the Skyflow File Element. Use the following steps to securely render a file.
 
-## Step 1: Create a container
+### Step 1: Create a container
 Create a container for the form elements using the container(Skyflow.ContainerType) method of the Skyflow client:
 
 ```javascript
 const container = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions)
 ```
 
-## Step 2: Create a File Element
+### Step 2: Create a File Element
 Define a Skyflow Element to render the file as shown below.
 
 ```javascript
@@ -4282,11 +4292,11 @@ errorTextStyles: {
   }
 }
 ```
-## Step 3: Mount Container to the DOM
-Elements used for rendering files are mounted to the DOM the same way as Elements used for revealing data. Refer to Step 3 of the [section above](#step-3-mount-container-to-the-dom).
+### Step 3: Mount Container to the DOM
+Mount Elements for file rendering to the DOM the same way as Elements used for revealing data. Refer to Step 3 of the [section above](#step-3-mount-container-to-the-dom).
 
-## Step 4: Render File
-When the element is created and mounted, call the renderFile() method on the element as shown below:
+### Step 4: Render File
+After you create and mount the element, call the renderFile() method on the element as shown below:
 ```javascript
 fileElement
   .renderFile()
@@ -4298,7 +4308,7 @@ fileElement
   });
 ```
 
-## End to end example of file render
+### End to end example of file render
 ```javascript
 // Step 1.
 const container = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
