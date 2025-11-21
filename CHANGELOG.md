@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.6.0] - 2025-11-19
+### Added
+- Composable Reveal elements
+- Render and reveal using composable reveal
+- Upload Single and multi files support in composable collect
+- Render Composable reveal and collect elements inside shadow dom
+
+## [2.5.0] - 2025-10-30
+### Added
+- Update pure js method
+
+## [2.4.4] - 2025-10-20
+### Fixed
+- Fix Typescript gaps
+
+## [2.4.3] - 2025-08-01
+### Fixed
+- Fix BIN Lookup for Card Numbers with Formats Other Than Spaces
+
 ## [2.4.2] - 2025-07-24
 ### Fixed
 - Element state in event listeners for collect elements in `PROD` env.
