@@ -2,7 +2,7 @@
   "name": "skyflow-js",
   "preferGlobal": true,
   "analyze": false,
-  "version": "2.6.0-dev.827d3ec",
+  "version": "2.6.0",
   "author": "Skyflow",
   "description": "Skyflow JavaScript SDK",
   "homepage": "https://github.com/skyflowapi/skyflow-js",
@@ -33,6 +33,7 @@
     "url": "https://github.com/skyflowapi/skyflow-js.git"
   },
   "dependencies": {
+    "@zip.js/zip.js": "^2.8.11",
     "core-js": "^3.6.5",
     "framebus": "^4.0.0",
     "inject-stylesheet": "^2.0.0",
@@ -40,7 +41,6 @@
     "jquery-mask-plugin": "^1.14.16",
     "jss": "^10.7.1",
     "jss-preset-default": "^10.7.1",
-    "jszip": "^3.10.1",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "mime": "3.0.0",

@@ -2,8 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import * as JSZip from 'jszip';
+import * as zip from '@zip.js/zip.js';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
@@ -430,10 +429,11 @@ class RevealFrame {
             }
             // fetch file from url
             const response = await fetch(url);
-            const arrayBuffer = await response.arrayBuffer();
-            console.log('array', arrayBuffer);
-            const zip = await JSZip.loadAsync(arrayBuffer);
-            console.log('zip files', zip);
+            const blob = await response.blob();
+
+            const reader = new zip.ZipReader(new zip.BlobReader(blob));
+            const entries = await reader.getEntries();
+            console.log('entries', entries);
             this.sub2({
               url,
               iframeName: this.#name,
