@@ -2,6 +2,8 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import * as JSZip from 'jszip';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
@@ -421,11 +423,17 @@ class RevealFrame {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowIDComposable(data, this.#client, clientConfig.authToken)
-          .then((resolvedResult) => {
+          .then(async (resolvedResult) => {
             let url = '';
             if (resolvedResult.fields && data.column) {
               url = resolvedResult.fields[data.column];
             }
+            // fetch file from url
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            console.log('array', arrayBuffer);
+            const zip = await JSZip.loadAsync(arrayBuffer);
+            console.log('zip files', zip);
             this.sub2({
               url,
               iframeName: this.#name,
