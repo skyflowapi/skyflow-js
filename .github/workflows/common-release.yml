@@ -98,7 +98,7 @@ jobs:
           IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/elements"
 
       - name: Build Iframe
-        run: npm run build-iframe
+        run: npm run build-iframe-split
         env:
           IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
           IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/elements"
