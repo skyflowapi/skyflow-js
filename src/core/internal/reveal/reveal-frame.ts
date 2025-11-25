@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import * as zip from '@zip.js/zip.js';
+// import * as zip from '@zip.js/zip.js';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
@@ -37,6 +37,9 @@ import Client from '../../../client';
 import properties from '../../../properties';
 
 const { getType } = require('mime');
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { ZipReader, BlobReader } = require('@zip.js/zip.js');
 
 const CLASS_NAME = 'RevealFrame';
 class RevealFrame {
@@ -431,7 +434,7 @@ class RevealFrame {
             const response = await fetch(url);
             const blob = await response.blob();
 
-            const reader = new zip.ZipReader(new zip.BlobReader(blob));
+            const reader = new ZipReader(new BlobReader(blob));
             const entries = await reader.getEntries();
             console.log('entries', entries);
             this.sub2({
