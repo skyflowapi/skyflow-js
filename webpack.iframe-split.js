@@ -47,26 +47,7 @@ module.exports = () => merge(common, {
   optimization: {
     runtimeChunk: false,
     minimizer: [new terserWebpackPlugin()],
-    splitChunks: {
-      cacheGroups: {
-        // Common vendor code shared across all bundles
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendor',
-          chunks: 'all',
-          priority: 10,
-        },
-        // Common internal code
-        common: {
-          minChunks: 2,
-          name: 'common',
-          chunks: 'all',
-          priority: 5,
-          reuseExistingChunk: true,
-          enforce: true,
-        },
-      },
-    },
+    // splitChunks disabled - all dependencies bundled into each file
   },
   
   module: {
@@ -78,7 +59,7 @@ module.exports = () => merge(common, {
     new HtmlWebPackPlugin({
       filename: 'collect.html',
       template: 'assets/iframe.html',
-      chunks: ['vendor', 'common', 'collect'],
+      chunks: ['collect'],
       inject: 'head',
       minify,
     }),
@@ -86,7 +67,7 @@ module.exports = () => merge(common, {
     new HtmlWebPackPlugin({
       filename: 'reveal.html',
       template: 'assets/iframe.html',
-      chunks: ['vendor', 'common', 'reveal'],
+      chunks: ['reveal'],
       inject: 'head',
       minify,
     }),
@@ -94,7 +75,7 @@ module.exports = () => merge(common, {
     new HtmlWebPackPlugin({
       filename: 'composable-reveal.html',
       template: 'assets/iframe.html',
-      chunks: ['vendor', 'common', 'composable-reveal'],
+      chunks: ['composable-reveal'],
       inject: 'head',
       minify,
     }),
@@ -102,7 +83,7 @@ module.exports = () => merge(common, {
     new HtmlWebPackPlugin({
       filename: 'controller.html',
       template: 'assets/iframe.html',
-      chunks: ['vendor', 'common', 'controller'],
+      chunks: ['controller'],
       inject: 'head',
       minify,
     }),

@@ -7,7 +7,7 @@ import bus from 'framebus';
 import sum from 'lodash/sum';
 import EventEmitter from '../../../event-emitter';
 import iframer, {
-  setAttributes, getIframeSrc, setStyles, getIframeSrcByType, 
+  setAttributes, getIframeSrc, setStyles, getIframeSrcByType,
 } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
 import {
