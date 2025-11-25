@@ -131,7 +131,7 @@ jobs:
           npm run build-node-sdk
         env:
           IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/elements"
 
       - name: Publish SDK
         run: |
