@@ -2,7 +2,6 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-// import * as zip from '@zip.js/zip.js';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
@@ -39,7 +38,7 @@ import properties from '../../../properties';
 const { getType } = require('mime');
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { ZipReader, BlobReader } = require('@zip.js/zip.js');
+const { loadAsync } = require('jszip');
 
 const CLASS_NAME = 'RevealFrame';
 class RevealFrame {
@@ -432,11 +431,10 @@ class RevealFrame {
             }
             // fetch file from url
             const response = await fetch(url);
-            const blob = await response.blob();
-
-            const reader = new ZipReader(new BlobReader(blob));
-            const entries = await reader.getEntries();
-            console.log('entries', entries);
+            const arrayBuffer = await response.arrayBuffer();
+            console.log('array', arrayBuffer);
+            const zip = await loadAsync(arrayBuffer);
+            console.log('zip files', zip);
             this.sub2({
               url,
               iframeName: this.#name,
