@@ -95,13 +95,13 @@ jobs:
         run: npm run build-browser-sdk
         env:
           IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/elements"
 
       - name: Build Iframe
         run: npm run build-iframe
         env:
           IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/elements"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

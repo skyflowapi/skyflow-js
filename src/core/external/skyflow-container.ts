@@ -4,7 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import Client from '../../client';
 import iframer, {
-  getIframeSrc,
+  getIframeSrcByType,
   setAttributes,
   setStyles,
 } from '../../iframe-libs/iframer';
@@ -71,7 +71,7 @@ class SkyflowContainer {
       referrer: clientDomain,
     });
     setAttributes(iframe, {
-      src: getIframeSrc(),
+      src: getIframeSrcByType(SKYFLOW_FRAME_CONTROLLER),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);

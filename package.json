@@ -23,9 +23,11 @@
     "type-check:watch": "npm run type-check -- --watch",
     "build:types": "tsc --emitDeclarationOnly",
     "dev": "webpack serve --config=webpack.dev.js --open --hot ",
+    "dev:split": "SPLIT_BUNDLES=true webpack serve --config=webpack.dev.js --open --hot",
     "build-browser-sdk": "webpack --config=webpack.skyflow-browser.js",
     "build-node-sdk": "webpack --config=webpack.skyflow-node.js",
     "build-iframe": "webpack --config=webpack.iframe.js",
+    "build-iframe-split": "webpack --config=webpack.iframe-split.js",
     "test": "jest --config=jest.config.json"
   },
   "repository": {

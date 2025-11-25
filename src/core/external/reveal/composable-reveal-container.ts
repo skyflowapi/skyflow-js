@@ -6,7 +6,7 @@ Copyright (c) 2023 Skyflow, Inc.
 import bus from 'framebus';
 import sum from 'lodash/sum';
 import EventEmitter from '../../../event-emitter';
-import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
+import iframer, { setAttributes, getIframeSrcByType, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
@@ -115,7 +115,7 @@ class ComposableRevealContainer extends Container {
       referrer: this.#clientDomain,
     });
     setAttributes(iframe, {
-      src: getIframeSrc(),
+      src: getIframeSrcByType(COLLECT_FRAME_CONTROLLER),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
     printLog(parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),

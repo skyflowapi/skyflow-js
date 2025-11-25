@@ -3,7 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
 import EventEmitter from '../../../event-emitter';
-import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe-libs/iframer';
+import iframer, { getIframeSrcByType, setAttributes, setStyles } from '../../../iframe-libs/iframer';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import { ContainerType } from '../../../skyflow';
@@ -103,7 +103,7 @@ class RevealContainer extends Container {
       referrer: clientDomain,
     });
     setAttributes(iframe, {
-      src: getIframeSrc(),
+      src: getIframeSrcByType(REVEAL_FRAME_CONTROLLER),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
     printLog(parameterizedString(logs.infoLogs.CREATE_REVEAL_CONTAINER, CLASS_NAME),

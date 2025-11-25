@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
+import iframer, { setAttributes, getIframeSrcByType, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
 import {
   formatValidations, formatOptions, validateElementOptions,
@@ -120,7 +120,7 @@ class CollectContainer extends Container {
       referrer: clientDomain,
     });
     setAttributes(iframe, {
-      src: getIframeSrc(),
+      src: getIframeSrcByType(COLLECT_FRAME_CONTROLLER),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
     printLog(parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
