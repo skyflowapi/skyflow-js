@@ -3,10 +3,6 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import {
   IFRAME_DEFAULT_STYLES,
-  FRAME_ELEMENT,
-  FRAME_REVEAL,
-  COMPOSABLE_REVEAL,
-  SKYFLOW_FRAME_CONTROLLER,
 } from '../core/constants';
 import properties from '../properties';
 
@@ -49,36 +45,29 @@ export default (options = {}) => {
 };
 
 /**
- * Get iframe source URL based on frame type
- * @param frameType - Type of frame (FRAME_ELEMENT, FRAME_REVEAL, etc.)
- * @returns URL to the appropriate iframe HTML file
+ * Get iframe source URL - now returns single iframe.html for all types
+ * The iframe.html will dynamically load the appropriate bundle based on frame name
+ * @param frameType - Type of frame (not used anymore, kept for backwards compatibility)
+ * @returns URL to iframe.html (single entry point for all frame types)
  */
-export const getIframeSrcByType = (frameType: string): string => {
+export const getIframeSrcByType = (_frameType: string): string => {
   const secureSite = properties.IFRAME_SECURE_SITE;
+  // keep param for backwards compatibility
+  if (_frameType) { /* intentionally unused */ }
 
-  console.log('secureSite frameType', secureSite);
+  // debug: secureSite and frameType
 
-  // If IFRAME_SECURE_SITE ends with .html, use monolithic bundle (backwards compatible)
-  // This happens in dev mode with npm run dev (not npm run dev:split)
+  // If IFRAME_SECURE_SITE ends with .html, return as-is (monolithic or dynamic loader)
   if (secureSite.endsWith('.html')) {
-    return secureSite; // Use monolithic iframe.html
+    return secureSite;
   }
 
-  // Otherwise, use split bundles (production or npm run dev:split)
-  const baseUrl = secureSite.replace(/\/$/, ''); // Remove trailing slash if present
+  // Append iframe.html to base URL
+  const baseUrl = secureSite.replace(/\/$/, ''); // Remove trailing slash
+  return `${baseUrl}/iframe.html`;
 
-  switch (frameType) {
-    case FRAME_ELEMENT:
-      return `${baseUrl}/collect.html`;
-    case FRAME_REVEAL:
-      return `${baseUrl}/reveal.html`;
-    case COMPOSABLE_REVEAL:
-      return `${baseUrl}/composable-reveal.html`;
-    case SKYFLOW_FRAME_CONTROLLER:
-      return `${baseUrl}/controller.html`;
-    default:
-      return secureSite; // Fallback to default
-  }
+  // Note: iframe.html will read window.name to determine which bundle to load
+  // This enables 1-to-many mapping: single HTML → multiple bundles
 };
 
 export const getIframeSrc = () => properties.IFRAME_SECURE_SITE;

@@ -8,6 +8,7 @@ const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const terserWebpackPlugin = require('terser-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
+const DynamicBundleLoaderPlugin = require('./webpack-plugins/dynamic-bundle-loader');
 const common = require('./webpack.common.js');
 
 const minify = {
@@ -55,37 +56,23 @@ module.exports = () => merge(common, {
   },
 
   plugins: [
-    // HTML file for collect elements
+    // Single HTML file that dynamically loads the correct JS bundle
+    // based on container type from window.name
     new HtmlWebPackPlugin({
-      filename: 'collect.html',
+      filename: 'iframe.html',
       template: 'assets/iframe.html',
-      chunks: ['collect'],
-      inject: 'head',
+      chunks: [], // No chunks - we'll load JS dynamically via plugin
+      inject: false, // Don't auto-inject scripts
       minify,
     }),
-    // HTML file for reveal elements
-    new HtmlWebPackPlugin({
-      filename: 'reveal.html',
-      template: 'assets/iframe.html',
-      chunks: ['reveal'],
-      inject: 'head',
-      minify,
-    }),
-    // HTML file for composable reveal elements
-    new HtmlWebPackPlugin({
-      filename: 'composable-reveal.html',
-      template: 'assets/iframe.html',
-      chunks: ['composable-reveal'],
-      inject: 'head',
-      minify,
-    }),
-    // HTML file for controller frame
-    new HtmlWebPackPlugin({
-      filename: 'controller.html',
-      template: 'assets/iframe.html',
-      chunks: ['controller'],
-      inject: 'head',
-      minify,
+    // Inject dynamic bundle loader script at build time
+    new DynamicBundleLoaderPlugin({
+      bundleMap: {
+        'element': 'collect.js',
+        'reveal': 'reveal.js',
+        'reveal-composable': 'composable-reveal.js',
+        'skyflow_controller': 'controller.js'
+      }
     }),
     new CleanWebpackPlugin({
       verbose: true,
