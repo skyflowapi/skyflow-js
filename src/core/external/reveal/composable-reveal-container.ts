@@ -33,7 +33,9 @@ import {
 import Container from '../common/container';
 
 import ComposableRevealElement from './composable-reveal-element';
-import { ContainerOptions, RevealElementInput, RevealResponse } from '../../../index-node';
+import {
+  ContainerOptions, ErrorType, RevealElementInput, RevealResponse,
+} from '../../../index-node';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import ComposableRevealInternalElement from './composable-reveal-internal';
 import { formatRevealElementOptions } from '../../../utils/helpers';
@@ -82,6 +84,8 @@ class ComposableRevealContainer extends Container {
 
   #getSkyflowBearerToken: () => Promise<string> | undefined;
 
+  #customErrorMessages: Partial<Record<ErrorType, string>> = {};
+
   constructor(
     metaData: Metadata,
     skyflowElements:Array<SkyflowElementProps>,
@@ -122,19 +126,6 @@ class ComposableRevealContainer extends Container {
       MessageType.LOG,
       this.#context.logLevel);
     this.#containerMounted = true;
-    // bus
-    //   // .target(properties.IFRAME_SECURE_ORIGIN)
-    // eslint-disable-next-line max-len
-    //   .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, (data, callback) => {
-    //     printLog(parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
-    //       MessageType.LOG,
-    //       this.#context.logLevel);
-    //     callback({
-    //       client: this.#metaData.clientJSON,
-    //       context,
-    //     });
-    //     this.#isComposableFrameReady = true;
-    //   });
     window.addEventListener('message', (event) => {
       if (event.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
                   + this.#containerId) {
