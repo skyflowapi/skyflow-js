@@ -1,8 +1,10 @@
+
 /*
 Copyright (c) 2025 Skyflow, Inc.
 */
 import bus from "framebus";
 import {
+  COLLECT_TYPES,
   ELEMENT_EVENTS_TO_IFRAME,
   PUREJS_TYPES,
   REVEAL_TYPES,
@@ -19,9 +21,10 @@ import {
   IDeleteRecordInput,
 } from "../../../../src/utils/common";
 import SkyflowFrameController from "../../../../src/core/internal/skyflow-frame/skyflow-frame-controller";
-import { InsertOptions } from "../../../../src/index-node";
+import { ErrorType, InsertOptions } from "../../../../src/index-node";
 import { ISkyflow } from "../../../../src/skyflow";
 import Client from "../../../../src/client";
+import { set } from "core-js/core/dict";
 
 jest.mock("../../../../src/utils/bus-events", () => ({
   ...jest.requireActual("../../../../src/utils/bus-events"),
@@ -1818,6 +1821,7 @@ describe("test reveal request", () => {
           ...clientData.client,
           request: clientReq,
           toJSON: toJson,
+          setErrorMessages: jest.fn(),
         } as unknown as Client)
     );
 
@@ -1849,4 +1853,165 @@ describe("test reveal request", () => {
     const onCb = on.mock.calls[2][1];
     onCb(data1, emitterCb);
   });
+});
+describe("SkyflowFrameController error message handling", () => {
+  let emitSpy: jest.SpyInstance;
+  let targetSpy: jest.SpyInstance;
+  let onSpy: jest.SpyInstance;
+  let windowSpy: jest.SpyInstance;
+  let testValue: any;
+  beforeEach(() => {
+    emitSpy = jest.spyOn(bus, "emit");
+    targetSpy = jest.spyOn(bus, "target");
+    onSpy = jest.spyOn(bus, "on");
+    targetSpy.mockReturnValue({ on });
+    window.name = "controller:frameId:clientDomain:true";
+    windowSpy = jest.spyOn(window, "parent", "get");
+    windowSpy.mockImplementation(() => ({
+      frames: {},
+    }));
+    testValue = {
+      iFrameFormElement: {
+        fieldType: "FILE_INPUT",
+        state: {
+          value: {
+            type: "file",
+            name: "test-file.txt",
+            size: 1024,
+          },
+          isFocused: false,
+          isValid: false,
+          isEmpty: true,
+          isComplete: false,
+          name: "test-name",
+          isRequired: true,
+          isTouched: false,
+          selectedCardScheme: "",
+        },
+        tableName: "test-table-name",
+        preserveFileName: true,
+        onFocusChange: jest.fn(),
+      },
+    };
+  });
+
+  test("should handle custom error message from mocked request for collect", (done) => {
+    const controller = SkyflowFrameController.init(mockUuid);
+    // Mock tokenize on the instance
+    controller.tokenize = jest.fn(() => Promise.reject({
+      error: {
+        code: 400,
+        message: "Custom error from mock tokenize"
+      }
+    }));
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(
+      ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    );
+    emitCb(clientData);
+    const options = {
+      elementIds: ['ID', 'element2'],
+    }
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        "element:CARD_NUMBER:ID:CONTAINER-ID:ERROR:clientDomain": {
+          document: {
+            getElementById: () => testValue,
+          },
+        },
+      },
+      parent: {
+      frames: {
+        "element:CARD_NUMBER:ID:CONTAINER-ID:ERROR:clientDomain": {
+          document: {
+            getElementById: () => testValue,
+          },
+        },
+      },
+    },
+    }));
+    const onCb = on.mock.calls[1][1];
+    const data = {
+      type: COLLECT_TYPES.COLLECT,
+      records,
+      options,
+      elementIds: [{
+        frameId: 'element:CARD_NUMBER:ID'}],
+      containerId: 'CONTAINER-ID',
+      errorMessages: {
+        [ErrorType.ABORT]: "Custom error from mock request",
+      }
+    };
+    const cb2 = jest.fn((result) => {
+      try {
+        expect(result.error).toBeDefined();
+        done();
+      } catch (err) {
+        done(err);
+      }
+    });
+    onCb(data, cb2);
+  });
+  test("should handle custom error message from mocked request for file upload", (done) => {
+    const controller = SkyflowFrameController.init(mockUuid);
+    // Mock tokenize on the instance
+    // controller.parallelUploadFiles = jest.fn(() => Promise.reject({
+    //   error: {
+    //     code: 400,
+    //     message: "Custom error from mock tokenize"
+    //   }
+    // }));
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(
+      ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    );
+    emitCb(clientData);
+    const options = {
+      elementIds: ['ID', 'element2'],
+    }
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        "element:FILE_INPUT:ID:CONTAINER-ID:ERROR:clientDomain": {
+          document: {
+            getElementById: () => testValue,
+          },
+        },
+      },
+      parent: {
+      frames: {
+        "element:FILE_INPUT:ID:CONTAINER-ID:ERROR:clientDomain": {
+          document: {
+            getElementById: () => testValue,
+          },
+        },
+      },
+    },
+    }));
+    const onCb = on.mock.calls[1][1];
+    const data = {
+      type: COLLECT_TYPES.FILE_UPLOAD,
+      records,
+      options,
+      elementIds: [{
+        frameId: 'element:FILE_INPUT:ID'}],
+      containerId: 'CONTAINER-ID',
+      errorMessages: {
+        [ErrorType.ABORT]: "Custom error from mock request",
+      }
+    };
+    const cb2 = jest.fn((result) => {
+      try {
+        expect(result.error).toBeDefined();
+        done();
+      } catch (err) {
+        done(err);
+      }
+    });
+    onCb(data, cb2);
+  });
+
 });

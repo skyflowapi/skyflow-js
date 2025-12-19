@@ -365,7 +365,7 @@ describe("Reveal Composable Container Class", () => {
       token: "1815-6223-1073-1425",
       containerId:mockUuid
     }
-  
+    testRevealContainer.setError({[SKYFLOW_ERROR_CODE.NOT_FOUND]: "Test error message",})
     const res = testRevealContainer.reveal();
     await Promise.resolve('token');
     expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
@@ -580,5 +580,34 @@ describe("Reveal Composable Container Class", () => {
       expect(error.error.code).toEqual(400);
       expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_COMPOSABLE);
     })
+  });
+  test("reveal before skyflow frame ready event, Error case when bearer token step failed when set error is called",async ()=>{
+    // Create a mock that rejects for bearer token
+    const getBearerTokenFail = jest.fn().mockRejectedValue({
+      errors: {
+        code: 400,
+        description: "Failed to fetch bearer token"
+      }
+    });
+    
+    const clientDataFail = {
+      ...clientData,
+      getSkyflowBearerToken: getBearerTokenFail,
+    };
+    
+    const testRevealContainer = new ComposableRevealContainer(clientDataFail, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+     testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+    testRevealContainer.setError({[SKYFLOW_ERROR_CODE.NOT_FOUND]: "Test error message",})
+    const res = testRevealContainer.reveal();
+    
+    await expect(res).rejects.toEqual({errors:{code:400,description:"Failed to fetch bearer token"}});
   });
 });

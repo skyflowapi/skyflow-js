@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import { LogLevel,Env } from "../../../../src/utils/common";
-import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES} from "../../../../src/core/constants";
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES, CUSTOM_ERROR_MESSAGES} from "../../../../src/core/constants";
 import SkyflowContainer from '../../../../src/core/external/skyflow-container';
 import Client from '../../../../src/client';
 import EventEmitter from "../../../../src/event-emitter";
@@ -11,7 +11,7 @@ import ComposableRevealInternalElement from "../../../../src/core/external/revea
 
 import bus from "framebus";
 import { JSDOM } from 'jsdom';
-import { ComposableRevealElement, EventName, RedactionType } from "../../../../src/index-node";
+import { ComposableRevealElement, ErrorType, EventName, RedactionType } from "../../../../src/index-node";
 
 busEvents.getAccessToken = jest.fn(() => Promise.reject('access token'));
 
@@ -202,6 +202,34 @@ describe("Reveal Composable Element Class", () => {
             description: "No Records Found"
          } 
         });
+    });
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    document.body.appendChild(testEmptyDiv);
+    expect(document.getElementById("testDiv")).not.toBeNull();
+
+    const res =  testRevealElement.renderFile()
+    await expect(res).rejects.toEqual({"errors": {"code": 400, "description": "No Records Found"}});
+  });
+  
+  test("file render call error case 2", async () => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "name",
+        eventEmitter,
+        '123',
+    );
+    eventEmitter.on(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ':name', (data, cb) => {
+        console.log('data', data);
+        cb({error:
+            {
+            code: 400, 
+            description: "No Records Found"
+         } 
+        });
+    });
+    eventEmitter._emit(`${CUSTOM_ERROR_MESSAGES}:123`, {
+        [ErrorType.NOT_FOUND]: "No Records Found",
     });
     const testEmptyDiv = document.createElement("div");
     testEmptyDiv.setAttribute("id", "testDiv");

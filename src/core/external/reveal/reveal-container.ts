@@ -9,7 +9,7 @@ import uuid from '../../../libs/uuid';
 import { ContainerType } from '../../../skyflow';
 import {
   ContainerOptions,
-  Context, MessageType,
+  Context, ErrorType, MessageType,
   RedactionType, RevealResponse,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
@@ -17,7 +17,8 @@ import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateInputFormatOptions, validateRevealElementRecords } from '../../../utils/validators';
 import {
-  CONTROLLER_STYLES, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
+  CONTROLLER_STYLES, CUSTOM_ERROR_MESSAGES,
+  ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
   REVEAL_TYPES,
 } from '../../constants';
 import Container from '../common/container';
@@ -71,6 +72,8 @@ class RevealContainer extends Container {
   type:string = ContainerType.REVEAL;
 
   #isSkyflowFrameReady: boolean = false;
+
+  #customErrorMessages: Partial<Record<ErrorType, string>> = {};
 
   constructor(
     metaData: Metadata,
@@ -155,6 +158,14 @@ class RevealContainer extends Container {
     this.#revealElements.push(revealElement);
     this.#skyflowElements[elementId] = revealElement;
     return revealElement;
+  }
+
+  setError(errors: Partial<Record<ErrorType, string>>) {
+    this.#customErrorMessages = errors;
+    // eslint-disable-next-line no-underscore-dangle
+    this.#eventEmmiter._emit(`${CUSTOM_ERROR_MESSAGES}:${this.#containerId}`, {
+      errorMessages: this.#customErrorMessages,
+    });
   }
 
   reveal(): Promise<RevealResponse> {
@@ -265,6 +276,7 @@ class RevealContainer extends Container {
         type: REVEAL_TYPES.REVEAL,
         records: this.#revealRecords,
         containerId: this.#containerId,
+        errorMessages: this.#customErrorMessages,
       },
       (revealData: any) => {
         this.#mountedRecords = [];

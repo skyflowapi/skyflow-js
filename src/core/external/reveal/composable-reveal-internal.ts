@@ -4,7 +4,9 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
-import { Context, MessageType, RenderFileResponse } from '../../../utils/common';
+import {
+  Context, ErrorType, MessageType, RenderFileResponse,
+} from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
@@ -15,6 +17,7 @@ import {
   EVENT_TYPES,
   REVEAL_TYPES,
   COMPOSABLE_REVEAL,
+  CUSTOM_ERROR_MESSAGES,
 } from '../../constants';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
@@ -67,6 +70,8 @@ class ComposableRevealInternalElement extends SkyflowElement {
 
   #isComposableFrameReady: boolean = false;
 
+  #customerErrorMessages: Partial<Record<ErrorType, string>> = {};
+
   constructor(elementId: string,
     recordGroup,
     metaData: Metadata,
@@ -99,6 +104,11 @@ class ComposableRevealInternalElement extends SkyflowElement {
     window?.addEventListener('message', (event) => {
       if (event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + this.#iframe?.name) {
         this.#iframe?.setIframeHeight(event?.data?.data?.height);
+      }
+    });
+    this.#eventEmitter.on(`${CUSTOM_ERROR_MESSAGES}:${this.#containerId}`, (data) => {
+      if (data?.errorMessages) {
+        this.#customerErrorMessages = data.errorMessages as Record<ErrorType, string>;
       }
     });
 
@@ -274,17 +284,21 @@ class ComposableRevealInternalElement extends SkyflowElement {
   }
 
   #emitEvent = (eventName: string, options?: Record<string, any>) => {
+    const option = {
+      ...options,
+      errorMessages: this.#customerErrorMessages,
+    };
     if (this.#shadowRoot) {
       const iframe = this.#shadowRoot?.getElementById(this.#iframe?.name) as HTMLIFrameElement;
       iframe?.contentWindow?.postMessage({
         name: eventName,
-        ...options,
+        ...option,
       }, properties?.IFRAME_SECURE_ORIGIN);
     } else {
       const iframe = document?.getElementById(this.#iframe?.name) as HTMLIFrameElement;
       iframe?.contentWindow?.postMessage({
         name: eventName,
-        ...options,
+        ...option,
       }, properties?.IFRAME_SECURE_ORIGIN);
     }
   };

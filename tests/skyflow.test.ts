@@ -9,6 +9,7 @@ import {
   DeleteResponse,
   DeleteResponseRecord,
   DetokenizeResponse,
+  ErrorType,
   GetByIdResponse,
   GetByIdResponseRecord,
   GetResponse,
@@ -1078,5 +1079,10 @@ describe("Skyflow delete tests", () => {
     } catch (err) {
       done(err);
     }
+  });
+
+  test('skyflow error type check', () => {
+    const errorType = Skyflow.ErrorType;
+    expect(errorType).toBe(ErrorType);
   });
 });

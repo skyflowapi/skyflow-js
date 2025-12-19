@@ -296,7 +296,9 @@ describe("Reveal Container Class", () => {
     const emitData = emitSpy.mock.calls[1][1];
     const emitCb = emitSpy.mock.calls[1][2];
     expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
-    expect(emitData).toEqual({type: REVEAL_TYPES.REVEAL, containerId: '1234', records :[{token:"123"}]});
+    expect(emitData)
+    .toEqual({type: REVEAL_TYPES.REVEAL,
+      containerId: '1234', records :[{token:"123"}], errorMessages: {}});
     emitCb({"success":[{token:"1815-6223-1073-1425"}]}); 
 });
   test("on container mounted call back 5",()=>{
