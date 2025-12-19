@@ -369,7 +369,7 @@ class ComposableContainer extends Container {
               options: {
                 ...data?.options,
               },
-              errorMessages: this.#customErrorMessages ?? {},
+              errorMessages: this.#customErrorMessages,
             },
           );
         }).catch((err:any) => {
@@ -454,7 +454,7 @@ class ComposableContainer extends Container {
             vaultID: this.#metaData.clientJSON.config.vaultID,
             authToken,
           },
-          errorMessages: this.#customErrorMessages ?? {},
+          errorMessages: this.#customErrorMessages,
         });
       }).catch((err:any) => {
         printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
@@ -543,7 +543,7 @@ class ComposableContainer extends Container {
             vaultID: this.#metaData.clientJSON.config.vaultID,
             authToken,
           },
-          errorMessages: this.#customErrorMessages ?? {},
+          errorMessages: this.#customErrorMessages,
         });
         window.addEventListener('message', (event) => {
           if (event.data?.type

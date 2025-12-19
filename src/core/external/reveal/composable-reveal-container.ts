@@ -305,7 +305,7 @@ class ComposableRevealContainer extends Container {
   #emitEvent = (eventName: string, options?: Record<string, any>, callback?: any) => {
     const option = {
       ...options,
-      errorMessages: this.#customErrorMessages ?? {},
+      errorMessages: this.#customErrorMessages,
     };
     if (this.#shadowRoot) {
       const iframe = this.#shadowRoot.getElementById(this.#iframeID) as HTMLIFrameElement;

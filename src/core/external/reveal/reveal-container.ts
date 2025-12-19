@@ -276,7 +276,7 @@ class RevealContainer extends Container {
         type: REVEAL_TYPES.REVEAL,
         records: this.#revealRecords,
         containerId: this.#containerId,
-        errorMessages: this.#customErrorMessages ?? {},
+        errorMessages: this.#customErrorMessages,
       },
       (revealData: any) => {
         this.#mountedRecords = [];

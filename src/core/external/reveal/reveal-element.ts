@@ -206,7 +206,7 @@ class RevealElement extends SkyflowElement {
                 records: this.#recordData,
                 containerId: this.#containerId,
                 iframeName: this.#iframe.name,
-                errorMessages: this.#customerErrorMessages ?? {},
+                errorMessages: this.#customerErrorMessages,
               },
               (revealData: any) => {
                 if (revealData.errors) {
@@ -258,7 +258,7 @@ class RevealElement extends SkyflowElement {
                   records: this.#recordData,
                   containerId: this.#containerId,
                   iframeName: this.#iframe.name,
-                  errorMessages: this.#customerErrorMessages ?? {},
+                  errorMessages: this.#customerErrorMessages,
                 },
                 (revealData: any) => {
                   if (revealData.errors) {

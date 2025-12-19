@@ -321,7 +321,7 @@ class CollectContainer extends Container {
                 tokens: options?.tokens !== undefined ? options.tokens : true,
                 elementIds,
                 containerId: this.#containerId,
-                errorMessages: this.#customErrorMessages ?? {},
+                errorMessages: this.#customErrorMessages,
               },
               (data: any) => {
                 if (!data || data?.error) {
@@ -382,7 +382,7 @@ class CollectContainer extends Container {
                   tokens: options?.tokens !== undefined ? options.tokens : true,
                   elementIds,
                   containerId: this.#containerId,
-                  errorMessages: this.#customErrorMessages ?? {},
+                  errorMessages: this.#customErrorMessages,
                 },
                 (data: any) => {
                   if (!data || data?.error) {
@@ -432,7 +432,7 @@ class CollectContainer extends Container {
                 ...options,
                 elementIds,
                 containerId: this.#containerId,
-                errorMessages: this.#customErrorMessages ?? {},
+                errorMessages: this.#customErrorMessages,
               },
               (data: any) => {
                 if (!data || data?.error) {
@@ -483,7 +483,7 @@ class CollectContainer extends Container {
                   ...options,
                   elementIds,
                   containerId: this.#containerId,
-                  errorMessages: this.#customErrorMessages ?? {},
+                  errorMessages: this.#customErrorMessages,
                 },
                 (data: any) => {
                   if (!data || data?.error) {
