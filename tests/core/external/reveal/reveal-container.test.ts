@@ -385,6 +385,7 @@ describe("Reveal Container Class", () => {
       type: REVEAL_TYPES.REVEAL,
       containerId: mockUuid,
       records: [{ token: testToken }],
+      errorMessages: {},
     });
 
     // Simulate successful reveal response

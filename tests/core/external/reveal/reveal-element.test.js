@@ -286,7 +286,9 @@ describe("Reveal Element Class", () => {
     const cb = jest.fn();
     onCallback({}, cb);
     expect(emitSpy.mock.calls[3][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + '123');
-    expect(emitSpy.mock.calls[3][1]).toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' }, containerId: mockUuid, iframeName: testIframeName});
+    expect(emitSpy.mock.calls[3][1])
+    .toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' },
+      containerId: mockUuid, iframeName: testIframeName, "errorMessages": {}});
     const emitCb = emitSpy.mock.calls[3][2];
     emitCb({ success: { skyflow_id: '1244', column: 'column' } });
   });
@@ -442,7 +444,9 @@ describe("Reveal Element Class", () => {
     });
 
     expect(emitSpy.mock.calls[3][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + '123');
-    expect(emitSpy.mock.calls[3][1]).toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' }, containerId: mockUuid, iframeName: testIframeName});
+    expect(emitSpy.mock.calls[3][1])
+     .toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' }, containerId: mockUuid,
+      iframeName: testIframeName, "errorMessages": {}});
     const emitCb = emitSpy.mock.calls[3][2];
     emitCb({ errors: { skyflowId:'1244', error: "No Records Found", column: "Not column" } });
   });

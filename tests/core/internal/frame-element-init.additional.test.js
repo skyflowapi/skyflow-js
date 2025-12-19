@@ -462,10 +462,12 @@ describe('FrameElementInit extended unit tests', () => {
         name: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${multiElement.iFrameName}`,
         clientConfig,
         options: { meta: 'x' },
+        errorMessages:{},
       },
     });
     await flushPromises();
-    expect(instance['multipleUploadFiles']).toHaveBeenCalledWith(multiElement, clientConfig, { meta: 'x' });
+    expect(instance['multipleUploadFiles'])
+    .toHaveBeenCalledWith(multiElement, clientConfig, { meta: 'x' }, {});
     expect(parentPostSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${multiElement.iFrameName}`,

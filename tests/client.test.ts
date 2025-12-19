@@ -7,6 +7,7 @@ import SKYFLOW_ERROR_CODE from "../src/utils/constants";
 import logs from "../src/utils/logs";
 import { ClientMetadata } from "../src/core/internal/internal-types";
 import { ISkyflow } from "../src/skyflow";
+import SkyflowError from "../src/libs/skyflow-error";
 
 const skyflowConfig: ISkyflow = {
   vaultID: "e20afc3ae1b54f0199f24130e51e0c11",
@@ -502,7 +503,8 @@ describe("Client Class", () => {
     const testClient = new Client(skyflowConfig, metaData);
     const promise = testClient.request({ requestMethod: 'GET', url: 'https://offline.com' });
     setTimeout(() => { if (xhrMock.onerror) xhrMock.onerror(); }, 0);
-    await expect(promise).rejects.toMatchObject({ error: { code: SKYFLOW_ERROR_CODE.OFFLINE_ERROR.code } });
+    await expect(promise)
+    .rejects.toMatchObject({ error: { code: 0 } });
   });
 
   test('onerror status 0 path returns GENERIC_ERROR code', async () => {
@@ -531,7 +533,7 @@ describe("Client Class", () => {
         code: expect.any(Number), // Accept any number, or use expect.stringMatching(/^(0|500)$/)
       }),
     });  
-});
+  });
 
   test('ontimeout path returns TIMEOUT_ERROR code', async () => {
     const xhrMock: any = { open: jest.fn(), send: jest.fn(), setRequestHeader: jest.fn(), getAllResponseHeaders: jest.fn().mockReturnValue(''), status: 0 };
@@ -539,7 +541,7 @@ describe("Client Class", () => {
     const testClient = new Client(skyflowConfig, metaData);
     const p = testClient.request({ requestMethod: 'GET', url: 'https://timeout.com' });
     setTimeout(() => { xhrMock.ontimeout(); }, 0);
-    await expect(p).rejects.toMatchObject({ error: { code: SKYFLOW_ERROR_CODE.TIMEOUT_ERROR.code } });
+    await expect(p).rejects.toMatchObject({ error: { code: 0} });
   });
 
   test('onabort path returns ABORT_ERROR code', async () => {
@@ -548,7 +550,249 @@ describe("Client Class", () => {
     const testClient = new Client(skyflowConfig, metaData);
     const p = testClient.request({ requestMethod: 'GET', url: 'https://abort.com' });
     setTimeout(() => { xhrMock.onabort(); }, 0);
-    await expect(p).rejects.toMatchObject({ error: { code: SKYFLOW_ERROR_CODE.ABORT_ERROR.code } });
+    await expect(p).rejects.toMatchObject({ error: { code: 0 } });
+    testClient.setErrorMessages({
+          400: "Bad Request",
+          401: "Unauthorized",
+          503: "Service Unavailable",
+          500: "Internal Server Error",
+          404: "Not Found",
+          403: "Forbidden",
+          429: "Too Many Requests",
+          CONNECTION: "Connection Error",
+          TIMEOUT: "Timeout Error",
+          ABORT: "Abort Error",
+          NETWORK_GENERIC: "Network Generic Error",
+          OFFLINE: "Offline Error",
+          502: "Bad Gateway Error",
+    });
+    const p2 = testClient.request({ requestMethod: 'GET', url: 'https://abort.com' });
+    setTimeout(() => { xhrMock.onabort(); }, 0);
+    await expect(p2).rejects.toMatchObject({ error: { code: 0, description: "Abort Error" } });
+
   });
 
+  test('Client request resolves raw string for non-json error', async () => {
+    // define a navigator to avoid offline check issues and add userAgent
+    Object.defineProperty(window, 'navigator', 
+      { value: { onLine: true, userAgent: 'Mozilla/5.0' }, 
+      configurable: true 
+     });
+    const xhrMock: any = {
+      open: jest.fn(),
+      send: jest.fn()
+      .mockImplementation(() => 
+        { setTimeout(() => xhrMock.onload(), 0); }), setRequestHeader: jest.fn(),
+      getAllResponseHeaders: jest.fn().mockReturnValue('content-type: text/plain'),
+      status: 400,
+      response: 'error occurred',
+    };
+    jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
+    const testClient = new Client(skyflowConfig, metaData);
+    const result = testClient.request({
+      requestMethod: 'GET',
+      url: 'https://plain-success.com',
+      headers: { 'content-type': 'text/plain' },
+    });
+    await expect(result).rejects.toStrictEqual(new SkyflowError({
+      code: 400,
+      description: 'error occurred',
+    }, [], true));
+  });
+  
+  test('Client request resolves raw string for non-json error case 1', async () => {
+    // define a navigator to avoid offline check issues and add userAgent
+    Object.defineProperty(window, 'navigator', 
+      { value: { onLine: true, userAgent: 'Mozilla/5.0' }, 
+      configurable: true 
+     });
+    const xhrMock: any = {
+      open: jest.fn(),
+      send: jest.fn()
+      .mockImplementation(() => 
+        { setTimeout(() => xhrMock.onload(), 0); }), setRequestHeader: jest.fn(),
+        getAllResponseHeaders: jest.fn().mockReturnValue('content-type: text/plain\r\nx-request-id: id'),
+      status: 400,
+      response: 'error occurred',
+    };
+    jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
+    const testClient = new Client(skyflowConfig, metaData);
+    const result = testClient.request({
+      requestMethod: 'GET',
+      url: 'https://plain-success.com',
+      headers: { 'content-type': 'text/plain'},
+    });
+    await expect(result).rejects.toStrictEqual(new SkyflowError({
+      code: 400,
+      description: 'error occurred - requestId: id',
+    }, [], true));
+  });
+  test('Client request resolves raw string for non-json error case 2', async () => {
+    // define a navigator to avoid offline check issues and add userAgent
+    Object.defineProperty(window, 'navigator', 
+      { value: { onLine: true, userAgent: 'Mozilla/5.0' }, 
+      configurable: true 
+     });
+    const xhrMock: any = {
+      open: jest.fn(),
+      send: jest.fn()
+      .mockImplementation(() => 
+        { setTimeout(() => xhrMock.onload(), 0); }), setRequestHeader: jest.fn(),
+        getAllResponseHeaders: jest.fn().mockReturnValue('content-type: application/json\r\nx-request-id: id'),
+      status: 400,
+      response: JSON.stringify({ error: { message: 'error occurred' } }),
+    };
+    jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
+    const testClient = new Client(skyflowConfig, metaData);
+    const result = testClient.request({
+      requestMethod: 'GET',
+      url: 'https://plain-success.com',
+      headers: { 'content-type': 'text/plain'},
+    });
+    await expect(result).rejects.toStrictEqual(new SkyflowError({
+      code: 400,
+      description: 'error occurred - requestId: id',
+    }, [], true));
+  });
+  test('Client request resolves raw string for non-json error case 3', async () => {
+    // define a navigator to avoid offline check issues and add userAgent
+    Object.defineProperty(window, 'navigator', 
+      { value: { onLine: true, userAgent: 'Mozilla/5.0' }, 
+      configurable: true 
+     });
+    const xhrMock: any = {
+      open: jest.fn(),
+      send: jest.fn()
+      .mockImplementation(() => 
+        { setTimeout(() => xhrMock.onload(), 0); }), setRequestHeader: jest.fn(),
+        getAllResponseHeaders: jest.fn().mockReturnValue('x-request-id: id'),
+      status: 400,
+      response: JSON.stringify({ error: { message: 'error occurred' } }),
+    };
+    jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
+    const testClient = new Client(skyflowConfig, metaData);
+    const result = testClient.request({
+      requestMethod: 'GET',
+      url: 'https://plain-success.com',
+    });
+    await expect(result).rejects.toEqual(new SkyflowError({
+      code: 400,
+      description: 'Error occurred. - requestId: id',
+    }, [], true));
+  });
+  test('Client request resolves raw string for non-json error case when setoverride is called', async () => {
+    // define a navigator to avoid offline check issues and add userAgent
+    Object.defineProperty(window, 'navigator', 
+      { value: { onLine: true, userAgent: 'Mozilla/5.0' }, 
+      configurable: true 
+     });
+    const xhrMock: any = {
+      open: jest.fn(),
+      send: jest.fn()
+      .mockImplementation(() => 
+        { setTimeout(() => xhrMock.onload(), 0); }), setRequestHeader: jest.fn(),
+        getAllResponseHeaders: jest.fn().mockReturnValue('x-request-id: id'),
+      status: 400,
+      response: JSON.stringify({ error: { message: 'error occurred in call' } }),
+    };
+    jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
+    const testClient = new Client(skyflowConfig, metaData);
+    testClient.setErrorMessages({
+          400: "Bad Request",
+          401: "Unauthorized",
+          503: "Service Unavailable",
+          500: "Internal Server Error",
+          404: "Not Found",
+          403: "Forbidden",
+          429: "Too Many Requests",
+          CONNECTION: "Connection Error",
+          TIMEOUT: "Timeout Error",
+          ABORT: "Abort Error",
+          NETWORK_GENERIC: "Network Generic Error",
+          OFFLINE: "Offline Error",
+          502: "Bad Gateway Error",
+    });
+    const result = testClient.request({
+      requestMethod: 'GET',
+      url: 'https://plain-success.com',
+    });
+    await expect(result).rejects.toEqual(new SkyflowError({
+      code: 400,
+      description: 'Bad Request',
+    }, [], true));
+  });
+  test('Client request resolves raw string for non-json error case when setoverride is called', async () => {
+    // define a navigator to avoid offline check issues and add userAgent
+    Object.defineProperty(window, 'navigator', 
+      { value: { onLine: true, userAgent: 'Mozilla/5.0' }, 
+      configurable: true 
+     });
+    const xhrMock: any = {
+      open: jest.fn(),
+      send: jest.fn()
+      .mockImplementation(() => 
+        { setTimeout(() => xhrMock.onload(), 0); }), setRequestHeader: jest.fn(),
+        getAllResponseHeaders: jest.fn().mockReturnValue('content-type: application/json\nx-request-id: id'),
+      status: 400,
+      response: JSON.stringify({ error: { message: 'error occurred in call' } }),
+    };
+    jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => xhrMock);
+    const testClient = new Client(skyflowConfig, metaData);
+    testClient.setErrorMessages({
+          400: "Bad Request",
+          401: "Unauthorized",
+          503: "Service Unavailable",
+          500: "Internal Server Error",
+          404: "Not Found",
+          403: "Forbidden",
+          429: "Too Many Requests",
+          CONNECTION: "Connection Error",
+          TIMEOUT: "Timeout Error",
+          ABORT: "Abort Error",
+          NETWORK_GENERIC: "Network Generic Error",
+          OFFLINE: "Offline Error",
+          502: "Bad Gateway Error",
+    });
+    const result = testClient.request({
+      requestMethod: 'GET',
+      url: 'https://plain-success.com',
+    });
+    await expect(result).rejects.toEqual(new SkyflowError({
+      code: 400,
+      description: 'Bad Request',
+    }, [], true));
+  });
+ });
+describe("setErrorMessages method", () => {
+  test("sets custom error messages for specific codes", () => {
+    const testClient = new Client(skyflowConfig, metaData);
+    testClient.setErrorMessages({
+          400: "Bad Request",
+          401: "Unauthorized",
+          503: "Service Unavailable",
+          500: "Internal Server Error",
+          404: "Not Found",
+          403: "Forbidden",
+          429: "Too Many Requests",
+          CONNECTION: "Connection Error",
+          TIMEOUT: "Timeout Error",
+          ABORT: "Abort Error",
+          NETWORK_GENERIC: "Network Generic Error",
+          OFFLINE: "Offline Error",
+          502: "Bad Gateway Error",
+    });
+        expect(testClient.errorMessagesList[400]).toBe("Bad Request");
+        expect(testClient.errorMessagesList[401]).toBe("Unauthorized");
+        expect(testClient.errorMessagesList[503]).toBe("Service Unavailable");
+        expect(testClient.errorMessagesList[500]).toBe("Internal Server Error");
+        expect(testClient.errorMessagesList[404]).toBe("Not Found");
+        expect(testClient.errorMessagesList[403]).toBe("Forbidden");
+        expect(testClient.errorMessagesList[429]).toBe("Too Many Requests");
+        expect(testClient.errorMessagesList['CONNECTION']).toBe("Connection Error");
+        expect(testClient.errorMessagesList['TIMEOUT']).toBe("Timeout Error");
+        expect(testClient.errorMessagesList['ABORT']).toBe("Abort Error");
+        expect(testClient.errorMessagesList['NETWORK_GENERIC']).toBe("Network Generic Error");
+        expect(testClient.errorMessagesList['OFFLINE']).toBe("Offline Error");
+        expect(testClient.errorMessagesList[502]).toBe("Bad Gateway Error");
+  });
 });

@@ -29,12 +29,13 @@ import {
   FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
   COMPOSABLE_REVEAL,
   REVEAL_TYPES,
+  CUSTOM_ERROR_MESSAGES,
 } from '../../constants';
 import Container from '../common/container';
 
 import ComposableRevealElement from './composable-reveal-element';
 import {
-  ContainerOptions, ErrorType, RevealElementInput, RevealResponse,
+  ContainerOptions, ErrorMessages, ErrorType, RevealElementInput, RevealResponse,
 } from '../../../index-node';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import ComposableRevealInternalElement from './composable-reveal-internal';
@@ -151,6 +152,14 @@ class ComposableRevealContainer extends Container {
       this.#eventEmitter,
       controllerIframeName);
   };
+
+  setError(errors: ErrorMessages) {
+    this.#customErrorMessages = errors;
+    // eslint-disable-next-line no-underscore-dangle
+    this.#eventEmitter._emit(`${CUSTOM_ERROR_MESSAGES}:${this.#containerId}`, {
+      errorMessages: this.#customErrorMessages,
+    });
+  }
 
   #createMultipleElement = (
     multipleElements: ComposableElementGroup,
@@ -294,12 +303,16 @@ class ComposableRevealContainer extends Container {
   };
 
   #emitEvent = (eventName: string, options?: Record<string, any>, callback?: any) => {
+    const option = {
+      ...options,
+      errorMessages: this.#customErrorMessages ?? {},
+    };
     if (this.#shadowRoot) {
       const iframe = this.#shadowRoot.getElementById(this.#iframeID) as HTMLIFrameElement;
       if (iframe?.contentWindow) {
         iframe.contentWindow.postMessage({
           name: eventName,
-          ...options,
+          ...option,
         }, properties.IFRAME_SECURE_ORIGIN);
       }
     } else {
@@ -307,7 +320,7 @@ class ComposableRevealContainer extends Container {
       if (iframe?.contentWindow) {
         iframe.contentWindow.postMessage({
           name: eventName,
-          ...options,
+          ...option,
         }, properties.IFRAME_SECURE_ORIGIN);
       }
     }
