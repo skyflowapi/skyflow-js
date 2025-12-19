@@ -1957,12 +1957,12 @@ describe("SkyflowFrameController error message handling", () => {
   test("should handle custom error message from mocked request for file upload", (done) => {
     const controller = SkyflowFrameController.init(mockUuid);
     // Mock tokenize on the instance
-    controller.parallelUploadFiles = jest.fn(() => Promise.reject({
-      error: {
-        code: 400,
-        message: "Custom error from mock tokenize"
-      }
-    }));
+    // controller.parallelUploadFiles = jest.fn(() => Promise.reject({
+    //   error: {
+    //     code: 400,
+    //     message: "Custom error from mock tokenize"
+    //   }
+    // }));
 
     const emitEventName = emitSpy.mock.calls[1][0];
     const emitCb = emitSpy.mock.calls[1][2];

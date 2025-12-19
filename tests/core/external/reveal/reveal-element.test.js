@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import { LogLevel,Env } from "../../../../src/utils/common";
-import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES} from "../../../../src/core/constants";
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES, CUSTOM_ERROR_MESSAGES} from "../../../../src/core/constants";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import SkyflowContainer from '../../../../src/core/external/skyflow-container';
 import Client from '../../../../src/client';
@@ -605,6 +605,9 @@ describe("Reveal Element Methods",()=>{
       name:testRevealElement.iframeName(),
     });
     testRevealElement.setError("errorText");
+    groupEmiitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {
+      errorMessages: { GENERIC_ERROR: "errorText" }
+    });
     expect(testRevealElement.isClientSetError()).toBe(true);
     expect(emitSpy.mock.calls[1][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[1][1]).toEqual({name: testRevealElement.iframeName(), clientErrorText: "errorText", isTriggerError: true});

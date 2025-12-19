@@ -189,43 +189,6 @@ describe("Collect container", () => {
     });
   });
 
-  it("should successfully upload files when elements are mounted", async () => {
-    const collectContainer = new CollectContainer(metaData, [], {
-      logLevel: LogLevel.ERROR,
-      env: Env.PROD,
-    });
-    const div = document.createElement("div");
-    const fileElement = collectContainer.create(fileInput);
-
-    fileElement.mount(div);
-
-    const mountCb = onSpy.mock.calls[2][1];
-    mountCb({
-      name: `element:${fileInput.type}:${btoa(fileElement.getID())}`,
-    });
-
-    collectContainer.setError({[ErrorType.NOT_FOUND]: "Test error message"});
-
-    const uploadPromise: Promise<UploadFilesResponse> =
-      collectContainer.uploadFiles();
-
-    const uploadFileCallRequestEvent = emitSpy.mock.calls.find((call) => {
-      return (
-        call[0] &&
-        call[0].includes(ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS)
-      );
-    });
-    expect(uploadFileCallRequestEvent).toBeDefined();
-    const uploadRequestCb = uploadFileCallRequestEvent[2];
-    uploadRequestCb({
-      fileUploadResonse: [{ skyflow_id: "abc-def" }],
-    });
-
-    const expectedResponse = await uploadPromise;
-    console.log(JSON.stringify(expectedResponse, null, 2));
-    expect(expectedResponse).toBeDefined();
-  });
-
   it("tests different collect element options for elements", () => {
     const collectContainer = new CollectContainer(metaData, [], {
       logLevel: LogLevel.ERROR,
@@ -286,6 +249,42 @@ describe("Collect container", () => {
     collectRequestCb({
       error: "error",
     });
+  });
+  it("should successfully upload files when elements are mounted", async () => {
+    const collectContainer = new CollectContainer(metaData, [], {
+      logLevel: LogLevel.ERROR,
+      env: Env.PROD,
+    });
+    const div = document.createElement("div");
+    const fileElement = collectContainer.create(fileInput);
+
+    fileElement.mount(div);
+
+    const mountCb = onSpy.mock.calls[2][1];
+    mountCb({
+      name: `element:${fileInput.type}:${btoa(fileElement.getID())}`,
+    });
+
+    collectContainer.setError({[ErrorType.NOT_FOUND]: "Test error message"});
+
+    const uploadPromise: Promise<UploadFilesResponse> =
+      collectContainer.uploadFiles();
+
+    const uploadFileCallRequestEvent = emitSpy.mock.calls.find((call) => {
+      return (
+        call[0] &&
+        call[0].includes(ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS)
+      );
+    });
+    expect(uploadFileCallRequestEvent).toBeDefined();
+    const uploadRequestCb = uploadFileCallRequestEvent[2];
+    uploadRequestCb({
+      fileUploadResonse: [{ skyflow_id: "abc-def" }],
+    });
+
+    const expectedResponse = await uploadPromise;
+    console.log(JSON.stringify(expectedResponse, null, 2));
+    expect(expectedResponse).toBeDefined();
   });
 });
 
@@ -412,7 +411,6 @@ describe("iframe cleanup logic", () => {
     const iframe1 = document.createElement("iframe");
     iframe1.id = element1.iframeName();
     document.body.appendChild(iframe1);
-
     // Trigger cleanup by calling collect
     collectContainer.collect().catch((error) => {
       expect(error).not.toBeDefined();
