@@ -9,7 +9,7 @@ import uuid from '../../../libs/uuid';
 import { ContainerType } from '../../../skyflow';
 import {
   ContainerOptions,
-  Context, ErrorMessages, ErrorType, MessageType,
+  Context, ErrorType, MessageType,
   RedactionType, RevealResponse,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
@@ -160,7 +160,7 @@ class RevealContainer extends Container {
     return revealElement;
   }
 
-  setError(errors: ErrorMessages) {
+  setError(errors: Partial<Record<ErrorType, string>>) {
     this.#customErrorMessages = errors;
     // eslint-disable-next-line no-underscore-dangle
     this.#eventEmmiter._emit(`${CUSTOM_ERROR_MESSAGES}:${this.#containerId}`, {

@@ -156,7 +156,7 @@ class CollectContainer extends Container {
     return this.#createMultipleElement(elementGroup, true);
   };
 
-  setError(errors: Record<ErrorType, string>) {
+  setError(errors: Partial<Record<ErrorType, string>>) {
     this.#customErrorMessages = errors;
   }
 

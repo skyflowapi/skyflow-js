@@ -153,7 +153,7 @@ class ComposableRevealContainer extends Container {
       controllerIframeName);
   };
 
-  setError(errors: ErrorMessages) {
+  setError(errors: Partial<Record<ErrorType, string>>) {
     this.#customErrorMessages = errors;
     // eslint-disable-next-line no-underscore-dangle
     this.#eventEmitter._emit(`${CUSTOM_ERROR_MESSAGES}:${this.#containerId}`, {

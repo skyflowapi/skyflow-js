@@ -9,6 +9,7 @@ import {
   REVEAL_TYPES,
   REVEAL_ELEMENT_OPTIONS_TYPES,
   ElementType,
+  CUSTOM_ERROR_MESSAGES,
 } from "../../../../src/core/constants";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
@@ -22,7 +23,7 @@ import { Metadata } from "../../../../src/core/internal/internal-types";
 import { ContainerType, ISkyflow } from "../../../../src/skyflow";
 import { IRevealElementInput } from "../../../../src/core/external/reveal/reveal-container";
 import EventEmitter from "../../../../src/event-emitter";
-import { RevealElementInput } from "../../../../src/index-node";
+import { ErrorType, RevealElementInput } from "../../../../src/index-node";
 
 jest
   .spyOn(busEvents, "getAccessToken")
@@ -448,6 +449,9 @@ describe("Reveal Element Class", () => {
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
     );
+      groupEmiitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {errorMessages: {
+      [ErrorType.NOT_FOUND]: "No Records Found",
+        }});
 
     const testEmptyDiv = document.createElement("div");
     testEmptyDiv.setAttribute("id", "testDiv");

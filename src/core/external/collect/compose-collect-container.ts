@@ -38,7 +38,7 @@ import {
 import {
   COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
   COLLECT_TYPES,
 } from '../../constants';
 import Container from '../common/container';
@@ -47,7 +47,6 @@ import ComposableElement from './compose-collect-element';
 import { ElementGroup, ElementGroupItem } from './collect-container';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
 import Client from '../../../client';
-import { getAccessToken } from '../../../utils/bus-events';
 
 export interface ComposableElementGroup extends ElementGroup {
   styles: InputStyles;
@@ -181,7 +180,7 @@ class ComposableContainer extends Container {
     );
   };
 
-  setError(errors: ErrorMessages) {
+  setError(errors: Partial<Record<ErrorType, string>>) {
     this.#customErrorMessages = errors;
   }
 

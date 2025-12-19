@@ -20,6 +20,7 @@ import {
   ICollectOptions,
   UploadFilesResponse,
   CollectElementOptions,
+  ErrorType,
 } from "../../../../src/utils/common";
 
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -203,6 +204,8 @@ describe("Collect container", () => {
       name: `element:${fileInput.type}:${btoa(fileElement.getID())}`,
     });
 
+    collectContainer.setError({[ErrorType.NOT_FOUND]: "Test error message"});
+
     const uploadPromise: Promise<UploadFilesResponse> =
       collectContainer.uploadFiles();
 
@@ -241,6 +244,48 @@ describe("Collect container", () => {
     const options = expiryElement.getOptions();
     expect(options.enableCardIcon).toBe(true);
     expect(options.enableCopy).toBe(true);
+  });
+  it("should successfully collect data from elements, call set error", () => {
+    const collectContainer = new CollectContainer(metaData, [], {
+      logLevel: LogLevel.ERROR,
+      env: Env.PROD,
+    });
+    const div1 = document.createElement("div1");
+    const div2 = document.createElement("div2");
+
+    const element1: CollectElement = collectContainer.create(cvvInput);
+    const element2: CollectElement = collectContainer.create(cardNumberInput);
+
+    element1.mount(div1);
+    element2.mount(div2);
+
+    const mountCvvCb = onSpy.mock.calls[2][1];
+    mountCvvCb({
+      name: `element:${cvvInput.type}:${btoa(element1.getID())}`,
+    });
+
+    const mountCardNumberCb = onSpy.mock.calls[5][1];
+    mountCardNumberCb({
+      name: `element:${cardNumberInput.type}:${btoa(element2.getID())}`,
+    });
+
+    collectContainer.setError({[ErrorType.NOT_FOUND]: "Test error message",})
+
+    collectContainer
+      .collect(options)
+      .then()
+      .catch((err: CollectResponse) => {
+        expect(err).toBeDefined();
+      });
+
+    const collectRequestCb = emitSpy.mock.calls[2][2];
+    collectRequestCb({
+      data: {},
+    });
+
+    collectRequestCb({
+      error: "error",
+    });
   });
 });
 
