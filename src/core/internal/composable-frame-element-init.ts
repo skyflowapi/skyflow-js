@@ -72,6 +72,7 @@ export default class RevealComposableFrameElementInit {
           uuid: '',
           clientDomain: '',
         });
+        this.#client.setErrorMessages(event?.data?.errorMessages || {});
 
         elementIds?.forEach((element) => {
           this.revealFrameList?.forEach((revealFrame) => {

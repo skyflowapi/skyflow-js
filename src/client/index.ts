@@ -11,6 +11,7 @@ import {
   getMetaObject,
 } from '../utils/helpers';
 import { ClientMetadata } from '../core/internal/internal-types';
+import { ErrorMessages } from '../index-node';
 
 export interface IClientRequest {
   body?: Document | XMLHttpRequestBodyInit | null;
@@ -42,9 +43,17 @@ class Client {
 
   #metaData: ClientMetadata;
 
+  errorMessagesList: Partial<ErrorMessages> = {};
+
   constructor(config: ISkyflow, metadata: ClientMetadata) {
     this.config = config;
     this.#metaData = metadata;
+  }
+
+  setErrorMessages(messages: ErrorMessages) {
+    this.errorMessagesList = {
+      ...messages,
+    };
   }
 
   toJSON(): ClientToJSON {
@@ -102,24 +111,36 @@ class Client {
       const contentType = headerMap['content-type'];
       const requestId = headerMap['x-request-id'];
       if (httpRequest.status < 200 || httpRequest.status >= 400) {
+        const overrideCodes = [400, 401, 403, 404, 429, 500];
         if (contentType && contentType.includes('application/json')) {
           let description = JSON.parse(httpRequest.response);
           if (description?.error?.message) {
             description = requestId ? `${description?.error?.message} - requestId: ${requestId}` : description?.error?.message;
+          }
+          if (overrideCodes.includes(httpRequest.status)) {
+            description = this.errorMessagesList[httpRequest.status] ?? description;
           }
           reject(new SkyflowError({
             code: httpRequest.status,
             description,
           }, [], true));
         } else if (contentType && contentType.includes('text/plain')) {
+          let description = requestId ? `${httpRequest.response} - requestId: ${requestId}` : httpRequest.response;
+          if (overrideCodes.includes(httpRequest.status)) {
+            description = this.errorMessagesList[httpRequest.status] ?? description;
+          }
           reject(new SkyflowError({
             code: httpRequest.status,
-            description: requestId ? `${httpRequest.response} - requestId: ${requestId}` : httpRequest.response,
+            description,
           }, [], true));
         } else {
+          let description = requestId ? `${logs.errorLogs.ERROR_OCCURED} - requestId: ${requestId}` : logs.errorLogs.ERROR_OCCURED;
+          if (overrideCodes.includes(httpRequest.status)) {
+            description = this.errorMessagesList[httpRequest.status] ?? description;
+          }
           reject(new SkyflowError({
             code: httpRequest.status,
-            description: requestId ? `${logs.errorLogs.ERROR_OCCURED} - requestId: ${requestId}` : logs.errorLogs.ERROR_OCCURED,
+            description,
           }, [], true));
         }
       }
@@ -132,24 +153,42 @@ class Client {
     httpRequest.onerror = () => {
       const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
       if (isOffline) {
-        reject(new SkyflowError(SKYFLOW_ERROR_CODE.OFFLINE_ERROR, [], true));
+        reject(new SkyflowError({
+          code: httpRequest.status,
+          description: this.errorMessagesList.OFFLINE
+             ?? SKYFLOW_ERROR_CODE.OFFLINE_ERROR.description,
+        }, [], true));
         return;
       }
-
       if (httpRequest.status === 0) {
-        reject(new SkyflowError(SKYFLOW_ERROR_CODE.GENERIC_ERROR, [], true));
+        reject(new SkyflowError({
+          code: httpRequest.status,
+          description: this.errorMessagesList.NETWORK_GENERIC
+             ?? SKYFLOW_ERROR_CODE.GENERIC_ERROR.description,
+        }, [], true));
         return;
       }
-
-      reject(new SkyflowError(SKYFLOW_ERROR_CODE.GENERIC_ERROR, [], true));
+      reject(new SkyflowError({
+        code: httpRequest.status,
+        description: this.errorMessagesList.NETWORK_GENERIC
+             ?? SKYFLOW_ERROR_CODE.GENERIC_ERROR.description,
+      }, [], true));
     };
 
     httpRequest.ontimeout = () => {
-      reject(new SkyflowError(SKYFLOW_ERROR_CODE.TIMEOUT_ERROR, [], true));
+      reject(new SkyflowError({
+        code: httpRequest.status,
+        description: this.errorMessagesList.TIMEOUT
+             ?? SKYFLOW_ERROR_CODE.TIMEOUT_ERROR.description,
+      }, [], true));
     };
 
     httpRequest.onabort = () => {
-      reject(new SkyflowError(SKYFLOW_ERROR_CODE.ABORT_ERROR, [], true));
+      reject(new SkyflowError({
+        code: httpRequest.status,
+        description: this.errorMessagesList.ABORT
+             ?? SKYFLOW_ERROR_CODE.ABORT_ERROR.description,
+      }, [], true));
     };
   });
 }

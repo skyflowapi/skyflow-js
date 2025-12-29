@@ -29,11 +29,14 @@ import {
   FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
   COMPOSABLE_REVEAL,
   REVEAL_TYPES,
+  CUSTOM_ERROR_MESSAGES,
 } from '../../constants';
 import Container from '../common/container';
 
 import ComposableRevealElement from './composable-reveal-element';
-import { ContainerOptions, RevealElementInput, RevealResponse } from '../../../index-node';
+import {
+  ContainerOptions, ErrorMessages, ErrorType, RevealElementInput, RevealResponse,
+} from '../../../index-node';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import ComposableRevealInternalElement from './composable-reveal-internal';
 import { formatRevealElementOptions } from '../../../utils/helpers';
@@ -82,6 +85,8 @@ class ComposableRevealContainer extends Container {
 
   #getSkyflowBearerToken: () => Promise<string> | undefined;
 
+  #customErrorMessages: Partial<Record<ErrorType, string>> = {};
+
   constructor(
     metaData: Metadata,
     skyflowElements:Array<SkyflowElementProps>,
@@ -122,19 +127,6 @@ class ComposableRevealContainer extends Container {
       MessageType.LOG,
       this.#context.logLevel);
     this.#containerMounted = true;
-    // bus
-    //   // .target(properties.IFRAME_SECURE_ORIGIN)
-    // eslint-disable-next-line max-len
-    //   .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, (data, callback) => {
-    //     printLog(parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
-    //       MessageType.LOG,
-    //       this.#context.logLevel);
-    //     callback({
-    //       client: this.#metaData.clientJSON,
-    //       context,
-    //     });
-    //     this.#isComposableFrameReady = true;
-    //   });
     window.addEventListener('message', (event) => {
       if (event.data.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
                   + this.#containerId) {
@@ -160,6 +152,14 @@ class ComposableRevealContainer extends Container {
       this.#eventEmitter,
       controllerIframeName);
   };
+
+  setError(errors: Partial<Record<ErrorType, string>>) {
+    this.#customErrorMessages = errors;
+    // eslint-disable-next-line no-underscore-dangle
+    this.#eventEmitter._emit(`${CUSTOM_ERROR_MESSAGES}:${this.#containerId}`, {
+      errorMessages: this.#customErrorMessages,
+    });
+  }
 
   #createMultipleElement = (
     multipleElements: ComposableElementGroup,
@@ -303,12 +303,16 @@ class ComposableRevealContainer extends Container {
   };
 
   #emitEvent = (eventName: string, options?: Record<string, any>, callback?: any) => {
+    const option = {
+      ...options,
+      errorMessages: this.#customErrorMessages,
+    };
     if (this.#shadowRoot) {
       const iframe = this.#shadowRoot.getElementById(this.#iframeID) as HTMLIFrameElement;
       if (iframe?.contentWindow) {
         iframe.contentWindow.postMessage({
           name: eventName,
-          ...options,
+          ...option,
         }, properties.IFRAME_SECURE_ORIGIN);
       }
     } else {
@@ -316,7 +320,7 @@ class ComposableRevealContainer extends Container {
       if (iframe?.contentWindow) {
         iframe.contentWindow.postMessage({
           name: eventName,
-          ...options,
+          ...option,
         }, properties.IFRAME_SECURE_ORIGIN);
       }
     }
