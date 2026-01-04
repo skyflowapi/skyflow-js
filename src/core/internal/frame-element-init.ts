@@ -270,6 +270,7 @@ export default class FrameElementInit {
               error: {
                 code: error?.error?.code,
                 description: error?.error?.description,
+                type: error?.error?.type,
               },
             });
           }
@@ -684,6 +685,7 @@ export default class FrameElementInit {
             error: {
               code: error?.error?.code,
               description: error?.error?.description,
+              type: error?.error?.type,
             },
           });
         }

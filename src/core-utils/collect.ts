@@ -285,6 +285,7 @@ export const updateRecordsBySkyflowID = async (
                 error: {
                   code: rejectedResult?.error?.code,
                   description: rejectedResult?.error?.description,
+                  type: rejectedResult?.error?.type,
                 },
               };
             }
@@ -342,6 +343,7 @@ export const updateRecordsBySkyflowIDComposable = async (
               error: {
                 code: rejectedResult?.error?.code,
                 description: rejectedResult?.error?.description,
+                type: rejectedResult?.error?.type,
               },
             };
           }
@@ -409,6 +411,7 @@ export const insertDataInCollect = async (
             error: {
               code: error?.error?.code,
               description: error?.error?.description,
+              type: error?.error?.type,
             },
           },
         ],
@@ -453,6 +456,7 @@ export const insertDataInMultipleFiles = async (
             error: {
               code: error?.error?.code,
               description: error?.error?.description,
+              type: error?.error?.type,
             },
           },
         ],

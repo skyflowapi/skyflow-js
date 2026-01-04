@@ -42,6 +42,7 @@ const formatForPureJsFailure = (cause, tokenId:string) => ({
   ...new SkyflowError({
     code: cause?.error?.code,
     description: cause?.error?.description,
+    type: cause?.error?.type,
   }, [], true),
 });
 const formatForRenderFileFailure = (cause, skyflowID:string, column: string) => ({
@@ -50,6 +51,7 @@ const formatForRenderFileFailure = (cause, skyflowID:string, column: string) => 
   error: {
     code: cause?.error?.code,
     description: cause?.error?.description,
+    type: cause?.error?.type,
   },
 });
 
@@ -441,6 +443,7 @@ export const fetchRecordsGET = async (
                   error: {
                     code: rejectedResult?.error?.code,
                     description: rejectedResult?.error?.description,
+                    type: rejectedResult?.error?.type,
                   },
                   ids: skyflowIdRecord.ids,
                   ...(skyflowIdRecord?.columnName ? { columnName: skyflowIdRecord?.columnName }
@@ -512,6 +515,7 @@ export const fetchRecordsBySkyflowID = async (
                   error: {
                     code: rejectedResult?.error?.code,
                     description: rejectedResult?.error?.description,
+                    type: rejectedResult?.error?.type,
                   },
                   ids: skyflowIdRecord.ids,
                 };
