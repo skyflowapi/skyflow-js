@@ -11,7 +11,7 @@ import {
   getMetaObject,
 } from '../utils/helpers';
 import { ClientMetadata } from '../core/internal/internal-types';
-import { ErrorMessages } from '../index-node';
+import { ErrorMessages, ErrorType } from '../utils/common';
 
 export interface IClientRequest {
   body?: Document | XMLHttpRequestBodyInit | null;
@@ -54,6 +54,14 @@ class Client {
     this.errorMessagesList = {
       ...messages,
     };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  #getErrorTypeKey(value: number): ErrorType | string {
+    const valStr = String(value);
+    const key = (Object.keys(ErrorType) as Array<keyof typeof ErrorType>)
+      .find((keys) => ErrorType[keys] === valStr);
+    return key ? ErrorType[key] : String(value);
   }
 
   toJSON(): ClientToJSON {
@@ -123,6 +131,7 @@ class Client {
           reject(new SkyflowError({
             code: httpRequest.status,
             description,
+            type: this.#getErrorTypeKey(httpRequest.status),
           }, [], true));
         } else if (contentType && contentType.includes('text/plain')) {
           let description = requestId ? `${httpRequest.response} - requestId: ${requestId}` : httpRequest.response;
@@ -132,6 +141,7 @@ class Client {
           reject(new SkyflowError({
             code: httpRequest.status,
             description,
+            type: this.#getErrorTypeKey(httpRequest.status),
           }, [], true));
         } else {
           let description = requestId ? `${logs.errorLogs.ERROR_OCCURED} - requestId: ${requestId}` : logs.errorLogs.ERROR_OCCURED;
@@ -141,6 +151,7 @@ class Client {
           reject(new SkyflowError({
             code: httpRequest.status,
             description,
+            type: this.#getErrorTypeKey(httpRequest.status),
           }, [], true));
         }
       }
@@ -157,6 +168,7 @@ class Client {
           code: httpRequest.status,
           description: this.errorMessagesList.OFFLINE
              ?? SKYFLOW_ERROR_CODE.OFFLINE_ERROR.description,
+          type: ErrorType.OFFLINE,
         }, [], true));
         return;
       }
@@ -165,6 +177,7 @@ class Client {
           code: httpRequest.status,
           description: this.errorMessagesList.NETWORK_GENERIC
              ?? SKYFLOW_ERROR_CODE.GENERIC_ERROR.description,
+          type: ErrorType.NETWORK_GENERIC,
         }, [], true));
         return;
       }
@@ -172,6 +185,7 @@ class Client {
         code: httpRequest.status,
         description: this.errorMessagesList.NETWORK_GENERIC
              ?? SKYFLOW_ERROR_CODE.GENERIC_ERROR.description,
+        type: ErrorType.NETWORK_GENERIC,
       }, [], true));
     };
 
@@ -180,6 +194,7 @@ class Client {
         code: httpRequest.status,
         description: this.errorMessagesList.TIMEOUT
              ?? SKYFLOW_ERROR_CODE.TIMEOUT_ERROR.description,
+        type: ErrorType.TIMEOUT,
       }, [], true));
     };
 
@@ -188,6 +203,7 @@ class Client {
         code: httpRequest.status,
         description: this.errorMessagesList.ABORT
              ?? SKYFLOW_ERROR_CODE.ABORT_ERROR.description,
+        type: ErrorType.ABORT,
       }, [], true));
     };
   });

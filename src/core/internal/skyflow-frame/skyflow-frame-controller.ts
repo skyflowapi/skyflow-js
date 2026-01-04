@@ -749,6 +749,7 @@ class SkyflowFrameController {
                       error: {
                         code: error?.error?.code,
                         description: error?.error?.description,
+                        type: error?.error?.type,
                       },
                     },
                   ],
