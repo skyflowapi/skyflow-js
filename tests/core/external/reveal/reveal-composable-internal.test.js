@@ -1,8 +1,8 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { LogLevel,Env, ErrorType } from "../../../../src/utils/common";
-import { ELEMENT_EVENTS_TO_IFRAME, COMPOSABLE_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES, CUSTOM_ERROR_MESSAGES} from "../../../../src/core/constants";
+import { LogLevel,Env } from "../../../../src/utils/common";
+import { ELEMENT_EVENTS_TO_IFRAME, COMPOSABLE_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES} from "../../../../src/core/constants";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import SkyflowContainer from '../../../../src/core/external/skyflow-container';
 import Client from '../../../../src/client';
@@ -213,9 +213,6 @@ describe("Reveal Element Class", () => {
         {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
-  groupEmiitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {errorMessages: {
-  [ErrorType.NOT_FOUND]: "No Records Found",
-    }});
     window.dispatchEvent(new MessageEvent('message', {
         data: {
             type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + "element1",

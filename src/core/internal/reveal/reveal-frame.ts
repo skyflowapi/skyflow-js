@@ -286,8 +286,7 @@ class RevealFrame {
       if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#name) {
         if (event?.data?.data?.iframeName === this.#name
           && event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
-          this.renderFile(this.#record, event?.data?.clientConfig,
-            event?.data?.errorMessages)?.then((resolvedResult) => {
+          this.renderFile(this.#record, event?.data?.clientConfig)?.then((resolvedResult) => {
             const result = formatForRenderClient(
               resolvedResult as IRenderResponseType,
               this.#record?.column,
@@ -413,13 +412,12 @@ class RevealFrame {
     }
   };
 
-  private renderFile(data: IRevealRecord, clientConfig, customErrorMessages):
+  private renderFile(data: IRevealRecord, clientConfig):
   Promise<IRenderResponseType> | undefined {
     this.#client = new Client(clientConfig, {
       uuid: '',
       clientDomain: '',
     });
-    this.#client.setErrorMessages(customErrorMessages ?? {});
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowIDComposable(data, this.#client, clientConfig.authToken)

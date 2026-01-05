@@ -5,7 +5,7 @@ import { getValueAndItsUnit, validateAndSetupGroupOptions } from '../../libs/ele
 import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
 import {
-  Context, Env, ErrorType, LogLevel,
+  Context, Env, LogLevel,
   MessageType,
 } from '../../utils/common';
 import {
@@ -84,8 +84,7 @@ export default class FrameElementInit {
           === ELEMENTS.MULTI_FILE_INPUT.name) {
           if (event?.data && event?.data?.name === `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${inputElement.iFrameName}`) {
             this.#client = Client.fromJSON(event?.data?.clientConfig);
-            this.multipleUploadFiles(inputElement, event?.data?.clientConfig,
-              event?.data?.options, event?.data?.errorMessages)
+            this.multipleUploadFiles(inputElement, event?.data?.clientConfig, event?.data?.options)
               ?.then((response: any) => {
                 window?.parent.postMessage({
                   type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${inputElement.iFrameName}`,
@@ -106,7 +105,7 @@ export default class FrameElementInit {
     if (event?.data && event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
          + this.containerId) {
       if (event?.data?.data && event?.data?.data?.type === COLLECT_TYPES.COLLECT) {
-        this.tokenize(event?.data?.data, event?.data?.clientConfig, event?.data?.errorMessages)
+        this.tokenize(event?.data?.data, event?.data?.clientConfig)
           .then((response: any) => {
             window?.parent.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
@@ -120,8 +119,7 @@ export default class FrameElementInit {
             }, this.clientMetaData?.clientDomain);
           });
       } else if (event.data.data && event.data.data.type === COLLECT_TYPES.FILE_UPLOAD) {
-        this.parallelUploadFiles(event.data.data,
-          event.data.clientConfig, event?.data?.errorMessages)
+        this.parallelUploadFiles(event.data.data, event.data.clientConfig)
           .then((response: any) => {
             window?.parent.postMessage({
               type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.containerId,
@@ -146,8 +144,7 @@ export default class FrameElementInit {
     // }
   };
 
-  private parallelUploadFiles = (options, config,
-    errorMessages?: Record<ErrorType, string>) => new Promise((rootResolve, rootReject) => {
+  private parallelUploadFiles = (options, config) => new Promise((rootResolve, rootReject) => {
     const promises: Promise<unknown>[] = [];
     this.iframeFormList.forEach((inputElement) => {
       let res: Promise<unknown>;
@@ -156,7 +153,7 @@ export default class FrameElementInit {
           inputElement.fieldType
           === ELEMENTS.FILE_INPUT.name
         ) {
-          res = this.uploadFiles(inputElement, config, errorMessages);
+          res = this.uploadFiles(inputElement, config);
           promises.push(res);
         }
       }
@@ -192,14 +189,11 @@ export default class FrameElementInit {
     });
   });
 
-  uploadFiles = (fileElement, clientConfig, errorMessages?: Record<ErrorType, string>) => {
+  uploadFiles = (fileElement, clientConfig) => {
     this.#client = new Client(clientConfig, {
       uuid: '',
       clientDomain: '',
     });
-    if (errorMessages && this.#client) {
-      this.#client.setErrorMessages(errorMessages);
-    }
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
     const fileUploadObject: any = {};
 
@@ -265,14 +259,6 @@ export default class FrameElementInit {
           rootResolve(response);
         })
         .catch((error) => {
-          if (error?.error) {
-            rootReject({
-              error: {
-                code: error?.error?.code,
-                description: error?.error?.description,
-              },
-            });
-          }
           rootReject(error);
         });
     });
@@ -286,7 +272,7 @@ export default class FrameElementInit {
     });
   };
 
-  private tokenize = (options, clientConfig: any, errorMessages?: Record<ErrorType, string>) => {
+  private tokenize = (options, clientConfig: any) => {
     let errorMessage = '';
     const insertRequestObject: any = {};
     const updateRequestObject: any = {};
@@ -416,9 +402,6 @@ export default class FrameElementInit {
       clientDomain: '',
     });
     const client = this.#client;
-    if (errorMessages && client) {
-      this.#client.setErrorMessages(errorMessages);
-    }
     const sendRequest = () => new Promise((rootResolve, rootReject) => {
       const insertPromiseSet: Promise<any>[] = [];
 
@@ -491,15 +474,11 @@ export default class FrameElementInit {
   // eslint-disable-next-line consistent-return
   private multipleUploadFiles =
   (fileElement: IFrameFormElement,
-    clientConfig, metaData,
-    errorMessages?: Record<ErrorType, string>) => new Promise((rootResolve, rootReject) => {
+    clientConfig, metaData) => new Promise((rootResolve, rootReject) => {
     this.#client = new Client(clientConfig, {
       uuid: '',
       clientDomain: '',
     });
-    if (errorMessages && this.#client) {
-      this.#client.setErrorMessages(errorMessages);
-    }
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
 
     const {
@@ -679,14 +658,6 @@ export default class FrameElementInit {
         });
       })
       .catch((error) => {
-        if (error?.error) {
-          rootReject({
-            error: {
-              code: error?.error?.code,
-              description: error?.error?.description,
-            },
-          });
-        }
         rootReject(error);
       });
   });
