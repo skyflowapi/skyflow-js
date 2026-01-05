@@ -372,8 +372,6 @@ describe("Reveal Container Class", () => {
     const onCb = on.mock.calls[0][1];
     onCb({ token: testToken, containerId: mockUuid });
 
-    testRevealContainer.setError({});
-
     // Call reveal and await response
     const revealPromise = testRevealContainer.reveal();
 
@@ -387,7 +385,6 @@ describe("Reveal Container Class", () => {
       type: REVEAL_TYPES.REVEAL,
       containerId: mockUuid,
       records: [{ token: testToken }],
-      errorMessages: {},
     });
 
     // Simulate successful reveal response
