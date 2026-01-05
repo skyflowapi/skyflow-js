@@ -9,6 +9,7 @@ import {
   REVEAL_TYPES,
   REVEAL_ELEMENT_OPTIONS_TYPES,
   ElementType,
+  CUSTOM_ERROR_MESSAGES,
 } from "../../../../src/core/constants";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
@@ -22,7 +23,7 @@ import { Metadata } from "../../../../src/core/internal/internal-types";
 import { ContainerType, ISkyflow } from "../../../../src/skyflow";
 import { IRevealElementInput } from "../../../../src/core/external/reveal/reveal-container";
 import EventEmitter from "../../../../src/event-emitter";
-import { RevealElementInput } from "../../../../src/index-node";
+import { ErrorType, RevealElementInput } from "../../../../src/index-node";
 
 jest
   .spyOn(busEvents, "getAccessToken")
@@ -367,6 +368,7 @@ describe("Reveal Element Class", () => {
       },
       containerId: mockUuid,
       iframeName: testIframeName,
+      "errorMessages": {},
     });
     const emitCb = emitSpy.mock.calls[3][2];
     emitCb({ success: { skyflow_id: "1244", column: "column" } });
@@ -447,6 +449,9 @@ describe("Reveal Element Class", () => {
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
     );
+      groupEmiitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {errorMessages: {
+      [ErrorType.NOT_FOUND]: "No Records Found",
+        }});
 
     const testEmptyDiv = document.createElement("div");
     testEmptyDiv.setAttribute("id", "testDiv");
@@ -484,6 +489,7 @@ describe("Reveal Element Class", () => {
   });
 
   test("file render error case", () => {
+    let emitter = new EventEmitter();
     const testRevealElement = new RevealElement(
       {
         skyflowID: "1244",
@@ -496,12 +502,13 @@ describe("Reveal Element Class", () => {
       {
         containerId: containerId,
         isMounted: true,
-        eventEmitter: groupEmiitter,
+        eventEmitter: emitter,
         type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
     );
+    emitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, undefined);
     const testEmptyDiv = document.createElement("div");
     testEmptyDiv.setAttribute("id", "testDiv");
     document.body.appendChild(testEmptyDiv);
@@ -534,7 +541,8 @@ describe("Reveal Element Class", () => {
     });
 
     expect(emitSpy.mock.calls[3][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + '123');
-    expect(emitSpy.mock.calls[3][1]).toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' }, containerId: mockUuid, iframeName: testIframeName});
+    expect(emitSpy.mock.calls[3][1])
+     .toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' }, containerId: mockUuid, iframeName: testIframeName, "errorMessages": {}},);
     const emitCb = emitSpy.mock.calls[3][2];
     emitCb({ errors: { skyflowId:'1244', error: "No Records Found", column: "Not column" } });
   });
@@ -636,6 +644,7 @@ describe("Reveal Element Methods", () => {
     elementId,
     { logLevel: LogLevel.ERROR, env: Env.PROD }
   );
+  const emit = new EventEmitter();
   const testRevealElement2 = new RevealElement(
     {
       skyflowID: "1244",
@@ -675,7 +684,7 @@ describe("Reveal Element Methods", () => {
     },
     undefined,
     metaData,
-    { containerId: containerId, isMounted: false, eventEmitter: groupEmiitter, type: ContainerType.REVEAL
+    { containerId: containerId, isMounted: false, eventEmitter: emit, type: ContainerType.REVEAL
  },
     elementId,
     { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -691,6 +700,64 @@ describe("Reveal Element Methods", () => {
       on,
       off,
     });
+  });
+    test("file render error case", () => {
+    let emitter = new EventEmitter();
+    const testRevealElement = new RevealElement(
+      {
+        skyflowID: "1244",
+        column: "column",
+        table: "table",
+        altText: "alt text",
+      },
+      undefined,
+      metaData,
+      {
+        containerId: containerId,
+        isMounted: true,
+        eventEmitter: emitter,
+        type: ContainerType.REVEAL
+      },
+      elementId,
+      { logLevel: LogLevel.ERROR, env: Env.PROD }
+    );
+    emitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {});
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    document.body.appendChild(testEmptyDiv);
+    expect(document.getElementById("testDiv")).not.toBeNull();
+
+    expect(testRevealElement.isMounted()).toBe(false);
+
+    testRevealElement.mount("#testDiv");
+
+    expect(document.querySelector("iframe")).toBeTruthy();
+    const testIframeName = `${FRAME_REVEAL}:${btoa(
+      mockUuid
+    )}:${containerId}:ERROR:${btoa(clientDomain)}`;
+    expect(document.querySelector("iframe")?.name).toBe(testIframeName);
+
+    const eventListenerName = ELEMENT_EVENTS_TO_CLIENT.MOUNTED + testIframeName;
+    const onCbName = on.mock.calls[0][0];
+    expect(onCbName).toBe(eventListenerName);
+    const onCb = on.mock.calls[0][1];
+    onCb({
+      name: testIframeName,
+    });
+    expect(testRevealElement.isMounted()).toBe(true);
+    expect(testRevealElement.iframeName()).toBe(testIframeName);
+    testRevealElement.renderFile().then(
+      data => console.log('data', data)
+      ).catch (
+      (error) => {
+        expect(error).toEqual({ errors: { skyflowId:'1244', error: "No Records Found", column: "Not column" } });
+    });
+
+    expect(emitSpy.mock.calls[3][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + '123');
+    expect(emitSpy.mock.calls[3][1])
+     .toEqual({type: REVEAL_TYPES.RENDER_FILE, records: {altText: "alt text", skyflowID: '1244', column: 'column', table: 'table' }, containerId: mockUuid, iframeName: testIframeName, "errorMessages": {}},);
+    const emitCb = emitSpy.mock.calls[3][2];
+    emitCb({ errors: { skyflowId:'1244', error: "No Records Found", column: "Not column" } });
   });
 
   test("unmount method", () => {

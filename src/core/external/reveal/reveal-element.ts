@@ -4,7 +4,9 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
-import { Context, MessageType, RenderFileResponse } from '../../../utils/common';
+import {
+  Context, ErrorType, MessageType, RenderFileResponse,
+} from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
   // eslint-disable-next-line max-len
@@ -17,6 +19,7 @@ import {
   ELEMENT_TYPES,
   EVENT_TYPES,
   REVEAL_TYPES,
+  CUSTOM_ERROR_MESSAGES,
 } from '../../constants';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
@@ -66,6 +69,8 @@ class RevealElement extends SkyflowElement {
 
   #isSkyflowFrameReady: boolean = false;
 
+  #customerErrorMessages: Partial<Record<ErrorType, string>> = {};
+
   constructor(
     record: IRevealElementInput,
     options: IRevealElementOptions = {},
@@ -101,6 +106,11 @@ class RevealElement extends SkyflowElement {
     this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;
     bus.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name, (data) => {
       this.#iframe.setIframeHeight(data.height);
+    });
+    this.#eventEmitter.on(`${CUSTOM_ERROR_MESSAGES}:${this.#containerId}`, (data) => {
+      if (data?.errorMessages) {
+        this.#customerErrorMessages = data.errorMessages as Record<ErrorType, string>;
+      }
     });
   }
 
@@ -196,6 +206,7 @@ class RevealElement extends SkyflowElement {
                 records: this.#recordData,
                 containerId: this.#containerId,
                 iframeName: this.#iframe.name,
+                errorMessages: this.#customerErrorMessages,
               },
               (revealData: any) => {
                 if (revealData.errors) {
@@ -247,6 +258,7 @@ class RevealElement extends SkyflowElement {
                   records: this.#recordData,
                   containerId: this.#containerId,
                   iframeName: this.#iframe.name,
+                  errorMessages: this.#customerErrorMessages,
                 },
                 (revealData: any) => {
                   if (revealData.errors) {
