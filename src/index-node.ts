@@ -45,8 +45,6 @@ export {
   LogLevel,
   Env,
   ElementState,
-  ErrorType,
-  ErrorMessages,
 } from './utils/common';
 
 export {

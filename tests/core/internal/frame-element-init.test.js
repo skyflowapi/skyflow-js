@@ -1,11 +1,10 @@
 import FrameElementInit from '../../../src/core/internal/frame-element-init';
-import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ElementType, COLLECT_TYPES } from '../../../src/core/constants';
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ElementType } from '../../../src/core/constants';
 import bus from 'framebus';
 import SkyflowError from '../../../src/libs/skyflow-error';
 import * as helpers from '../../../src/utils/helpers';
 import Client from '../../../src/client';
 import IFrameFormElement from '../../../src/core/internal/iframe-form';
-import { ErrorType } from '../../../src/index-node';
 
 // Helper to flush pending microtasks (Promise.allSettled resolution) deterministically
 const flushPromises = async (cycles = 3) => {
@@ -679,12 +678,6 @@ describe('FrameElementInit Additional Test Cases', () => {
                     },
                     options: {
                         // Additional metadata for file upload
-                    }, 
-                    errorMessages: {
-                        [ErrorType.ABORT]: 'File upload aborted by user',
-                    },
-                    data:{
-                        type: COLLECT_TYPES.FILE_UPLOAD
                     }
                 }
             }));

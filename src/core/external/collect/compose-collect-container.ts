@@ -25,8 +25,6 @@ import {
   ErrorTextStyles,
   ContainerOptions,
   UploadFilesResponse,
-  ErrorMessages,
-  ErrorType,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
@@ -38,7 +36,7 @@ import {
 import {
   COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER,
   COLLECT_TYPES,
 } from '../../constants';
 import Container from '../common/container';
@@ -47,6 +45,7 @@ import ComposableElement from './compose-collect-element';
 import { ElementGroup, ElementGroupItem } from './collect-container';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
 import Client from '../../../client';
+import { getAccessToken } from '../../../utils/bus-events';
 
 export interface ComposableElementGroup extends ElementGroup {
   styles: InputStyles;
@@ -92,8 +91,6 @@ class ComposableContainer extends Container {
   #iframeID: string = '';
 
   #getSkyflowBearerToken: () => Promise<string> | undefined;
-
-  #customErrorMessages: Partial<Record<ErrorType, string>> = {};
 
   constructor(
     metaData: Metadata,
@@ -179,10 +176,6 @@ class ComposableContainer extends Container {
       { ...this.#metaData, type: input.type },
     );
   };
-
-  setError(errors: Partial<Record<ErrorType, string>>) {
-    this.#customErrorMessages = errors;
-  }
 
   #createMultipleElement = (
     multipleElements: ComposableElementGroup,
@@ -369,7 +362,6 @@ class ComposableContainer extends Container {
               options: {
                 ...data?.options,
               },
-              errorMessages: this.#customErrorMessages,
             },
           );
         }).catch((err:any) => {
@@ -454,7 +446,6 @@ class ComposableContainer extends Container {
             vaultID: this.#metaData.clientJSON.config.vaultID,
             authToken,
           },
-          errorMessages: this.#customErrorMessages,
         });
       }).catch((err:any) => {
         printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
@@ -543,7 +534,6 @@ class ComposableContainer extends Container {
             vaultID: this.#metaData.clientJSON.config.vaultID,
             authToken,
           },
-          errorMessages: this.#customErrorMessages,
         });
         window.addEventListener('message', (event) => {
           if (event.data?.type

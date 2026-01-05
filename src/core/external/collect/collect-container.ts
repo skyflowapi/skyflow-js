@@ -18,7 +18,6 @@ import {
   ICollectOptions,
   UploadFilesResponse,
   ContainerOptions,
-  ErrorType,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
@@ -89,8 +88,6 @@ class CollectContainer extends Container {
 
   #isSkyflowFrameReady: boolean = false;
 
-  #customErrorMessages: Partial<Record<ErrorType, string>> = {};
-
   constructor(
     metaData: Metadata,
     skyflowElements: Array<SkyflowElementProps>,
@@ -155,10 +152,6 @@ class CollectContainer extends Container {
 
     return this.#createMultipleElement(elementGroup, true);
   };
-
-  setError(errors: Partial<Record<ErrorType, string>>) {
-    this.#customErrorMessages = errors;
-  }
 
   #createMultipleElement = (
     multipleElements: ElementGroup,
@@ -321,7 +314,6 @@ class CollectContainer extends Container {
                 tokens: options?.tokens !== undefined ? options.tokens : true,
                 elementIds,
                 containerId: this.#containerId,
-                errorMessages: this.#customErrorMessages,
               },
               (data: any) => {
                 if (!data || data?.error) {
@@ -382,7 +374,6 @@ class CollectContainer extends Container {
                   tokens: options?.tokens !== undefined ? options.tokens : true,
                   elementIds,
                   containerId: this.#containerId,
-                  errorMessages: this.#customErrorMessages,
                 },
                 (data: any) => {
                   if (!data || data?.error) {
@@ -432,7 +423,6 @@ class CollectContainer extends Container {
                 ...options,
                 elementIds,
                 containerId: this.#containerId,
-                errorMessages: this.#customErrorMessages,
               },
               (data: any) => {
                 if (!data || data?.error) {
@@ -483,7 +473,6 @@ class CollectContainer extends Container {
                   ...options,
                   elementIds,
                   containerId: this.#containerId,
-                  errorMessages: this.#customErrorMessages,
                 },
                 (data: any) => {
                   if (!data || data?.error) {

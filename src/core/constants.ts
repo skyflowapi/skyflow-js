@@ -31,7 +31,7 @@ export const DOMAIN = 'US2';
 export const CORALOGIX_DOMAIN = 'https://cdn.rum-ingress-coralogix.com/coralogix/browser/latest/coralogix-browser-sdk.js';
 export const FRAME_ELEMENT = 'element';
 export const COMPOSABLE_REVEAL = 'reveal-composable';
-export const CUSTOM_ERROR_MESSAGES = 'CUSTOM_ERROR_MESSAGES';
+
 export const ELEMENT_TYPES = {
   COLLECT: 'COLLECT',
   REVEAL: 'REVEAL',
