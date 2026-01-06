@@ -119,7 +119,7 @@ class Client {
       const contentType = headerMap['content-type'];
       const requestId = headerMap['x-request-id'];
       if (httpRequest.status < 200 || httpRequest.status >= 400) {
-        const overrideCodes = [400, 401, 403, 404, 429, 500];
+        const overrideCodes = [400, 401, 403, 404, 429, 500, 502, 503];
         if (contentType && contentType.includes('application/json')) {
           let description = JSON.parse(httpRequest.response);
           if (description?.error?.message) {
