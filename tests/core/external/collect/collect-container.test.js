@@ -14,7 +14,7 @@ import CollectContainer from '../../../../src/core/external/collect/collect-cont
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import SkyflowError from '../../../../src/libs/skyflow-error';
 import Skyflow from '../../../../src/skyflow';
-import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
+import { LogLevel, Env, ValidationRuleType, ErrorType } from '../../../../src/utils/common';
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import logs from '../../../../src/utils/logs';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
@@ -297,6 +297,63 @@ describe('Collect container', () => {
       expect(err).toBeDefined();
     })
   });
+
+  // it.only("container collect error case when set error is called", () => {
+  //   let collectContainer = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+  //   const div1 = document.createElement('div');
+  //   const div2 = document.createElement('div');
+
+  //   const element1 = collectContainer.create(cvvElement);
+  //   const element2 = collectContainer.create(cardNumberElement);
+
+  //   element1.mount(div1);
+  //   element2.mount(div2);
+
+  //   const mountCvvCb = onSpy.mock.calls[2][1];
+
+  //   mountCvvCb({
+  //     name: `element:${cvvElement.type}:${btoa(element1.getID())}`,
+  //   });
+
+  //   const mountCardNumberCb = onSpy.mock.calls[5][1];
+  //   mountCardNumberCb({
+  //     name: `element:${cardNumberElement.type}:${btoa(element2.getID())}`,
+  //   });
+
+  //   collectContainer.setError({
+  //     [ErrorType.BAD_REQUEST]: 'Custom error message for 400',
+  //   });
+
+  //   collectContainer.collect().then(
+  //     res => {
+  //       console.log('RESPONSE RECEIVED IN COLLECT', res);
+  //     }
+  //   ).catch(err => {
+  //     console.log('ERROR RECEIVED IN COLLECT', err);
+  //     expect(err).toBeDefined();
+  //   })
+
+  //   const collectRequestCb = emitSpy.mock.calls[2][2];
+  //   collectRequestCb({
+  //     error: {
+  //       code: 400,
+  //       description: 'Original error message',
+  //     }
+  //   })
+
+  //   collectRequestCb({
+  //     error:"error",
+  //   })
+
+  //   collectContainer.collect({
+  //     tokens: true,
+  //     additionalFields:true,
+  //     upsert: true
+  //   }).then().catch(err => {
+  //     expect(err).toBeDefined();
+  //   })
+  // });
+
 
   it("container collect case when tokens are invalid", () => {
     let collectContainer = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});

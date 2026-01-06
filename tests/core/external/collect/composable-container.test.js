@@ -5,7 +5,7 @@ import {
   ElementType
 } from '../../../../src/core/constants';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
-import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
+import { LogLevel, Env, ValidationRuleType, ErrorType } from '../../../../src/utils/common';
 import logs from '../../../../src/utils/logs';
 import ComposableContainer from "../../../../src/core/external/collect/compose-collect-container";
 import ComposableElement from '../../../../src/core/external/collect/compose-collect-element';
@@ -375,6 +375,8 @@ describe('test composable container class',()=>{
         },
       ],
     };
+
+    container.setError({[ErrorType.NOT_FOUND]: "Test error message",})
   
     const collectPromiseError =
       container.collect(options1);
@@ -643,7 +645,7 @@ describe('test composable container class',()=>{
     const element1 = container.create(FileInuptElement);  
     container.mount('#composable');
     const options = {};
-  
+    container.setError({[ErrorType.NOT_FOUND]: "Test error message",})
     const collectPromiseSuccess = container.uploadFiles(options);
 
     // Wait for the bearer token promise to resolve and event listener to be set up
