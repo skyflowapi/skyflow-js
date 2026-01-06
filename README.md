@@ -18,7 +18,7 @@ Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal
 - [**Securely collecting data client-side using Composable Elements**](#securely-collecting-data-client-side-using-composable-elements)
 - [**Securely revealing data client-side**](#securely-revealing-data-client-side)
 - [**Securely deleting data client-side**](#securely-deleting-data-client-side)
-
+- [**Set Custom Network messages on container**](#set-custom-network-messages-on-container)
 ---
 
 # Including Skyflow.js
@@ -1847,7 +1847,6 @@ collectContainer.uploadFiles();
 ```
 
 Note: File name should contain only alphanumeric characters and !-_.*()
-
 
 # Securely collecting data client-side using Composable Elements
 - [**Using Skyflow Composable Elements to collect data**](#using-skyflow-composable-elements-to-collect-data)
@@ -3859,7 +3858,7 @@ cardNumberRevealElement.update({
 ---
 
 
-# Using Composable Reveal Elements to reveal data
+## Using Composable Reveal Elements to reveal data
 
 Composable Reveal Elements combine multiple Skyflow Elements in a single iframe, letting you create multiple Skyflow Elements in a single row. The following steps create a composable reveal element and securely collect data through it.
 
@@ -4421,7 +4420,74 @@ A sample response:
 }
 ```
 
+# Set Custom Network messages on container:
+Helps to add custom network error messages on the container through the methods `setError`.
+
+`setError(ErrorMessages: string)` method is used to set the error text for the different network errors types, when this method is triggered, all the errors present on the error response will be overridden with the custom error message passed. This error will be sent on the collect or upload file call on the same container.
+
+### Sample code snippet for setError on collect container
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
+
+const cardNumber = container.create({
+  table: 'pii_fields',
+  column: 'primary_card.card_number',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+// Set custom error.
+container.setError({
+  [Skyflow.ErrorType.BAD_REQUEST]: "Bad request. Please check the request payload.",
+  [Skyflow.ErrorType.UNAUTHORIZED]: "You are not authorized. Please check your token.",
+  [Skyflow.ErrorType.FORBIDDEN]: "Access denied. You do not have permission to perform this action.",
+  [Skyflow.ErrorType.TOO_MANY_REQUESTS]: "Too many requests. Please try again later.",
+  [Skyflow.ErrorType.INTERNAL_SERVER_ERROR]: "Something went wrong on our end. Please try again later.",
+  [Skyflow.ErrorType.BAD_GATEWAY]: "Received an invalid response from the server. Please try again.",
+  [Skyflow.ErrorType.SERVICE_UNAVAILABLE]: "Service is temporarily unavailable. Please try again later.",
+  [Skyflow.ErrorType.CONNECTION]: "Unable to connect to the server. Please check your network connection.",
+  [Skyflow.ErrorType.NOT_FOUND]: "Table not found with custom message",
+  [Skyflow.ErrorType.OFFLINE]: "You appear to be offline. Please check your internet connection.",
+  [Skyflow.ErrorType.TIMEOUT]: "The request took too long to respond. Please try again.",
+  [Skyflow.ErrorType.ABORT]: "The request was aborted.",
+  [Skyflow.ErrorType.NETWORK_GENERIC]: "A network error occurred. Please try again.",
+});
+
+container
+  .collect()
+  .then(res => console.log(res))
+  .catch(err =>{
+    console.log(err);
+})
+```
+#### Sample Error structure:
+```json
+{ 
+  "error":{
+        "code":0,
+        "description":"You appear to be offline. Please check your internet connection.",
+        "type":"OFFLINE"
+  },
+}
+```
+
+**Skyflow.ErrorType accepts following**:
+    - `BAD_REQUEST`
+    - `UNAUTHORIZED`
+    - `FORBIDDEN`
+    - `TOO_MANY_REQUESTS`
+    - `INTERNAL_SERVER_ERROR`
+    - `BAD_GATEWAY`
+    - `SERVICE_UNAVAILABLE`
+    - `CONNECTION`
+    - `NOT_FOUND`
+    - `OFFLINE`
+    - `TIMEOUT`
+    - `NETWORK_GENERIC`
+    - `ABORT`
+
 
 ## Reporting a Vulnerability
 
 If you discover a potential security issue in this project, please reach out to us at security@skyflow.com. Please do not create public GitHub issues or Pull Requests, as malicious actors could potentially view them.
+
+
