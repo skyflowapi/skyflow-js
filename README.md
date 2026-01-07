@@ -4470,7 +4470,7 @@ container
 }
 ```
 
-**Skyflow.ErrorType accepts following**:
+`Skyflow.ErrorType` accepts following values:
     - `BAD_REQUEST`
     - `UNAUTHORIZED`
     - `FORBIDDEN`
