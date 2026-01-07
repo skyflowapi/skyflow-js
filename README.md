@@ -4472,19 +4472,19 @@ container
 ```
 
 `Skyflow.ErrorType` accepts following values:
-    - `BAD_REQUEST`
-    - `UNAUTHORIZED`
-    - `FORBIDDEN`
-    - `TOO_MANY_REQUESTS`
-    - `INTERNAL_SERVER_ERROR`
-    - `BAD_GATEWAY`
-    - `SERVICE_UNAVAILABLE`
-    - `CONNECTION`
-    - `NOT_FOUND`
-    - `OFFLINE`
-    - `TIMEOUT`
-    - `NETWORK_GENERIC`
-    - `ABORT`
+  - `BAD_REQUEST`
+  - `UNAUTHORIZED`
+  - `FORBIDDEN`
+  - `TOO_MANY_REQUESTS`
+  - `INTERNAL_SERVER_ERROR`
+  - `BAD_GATEWAY`
+  - `SERVICE_UNAVAILABLE`
+  - `CONNECTION`
+  - `NOT_FOUND`
+  - `OFFLINE`
+  - `TIMEOUT`
+  - `NETWORK_GENERIC`
+  - `ABORT`
 
 
 ## Reporting a Vulnerability
