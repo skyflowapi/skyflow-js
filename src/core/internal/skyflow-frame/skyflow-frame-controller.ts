@@ -140,6 +140,7 @@ class SkyflowFrameController {
             fetchRecordsByTokenId(
               data.records as IRevealRecord[],
               this.#client,
+              true,
             ).then(
               (resolvedResult: IRevealResponseType) => {
                 printLog(
@@ -431,7 +432,7 @@ class SkyflowFrameController {
   revealData(revealRecords: IRevealRecord[], containerId: string): Promise<RevealResponse> {
     const id = containerId;
     return new Promise((resolve, reject) => {
-      fetchRecordsByTokenId(revealRecords, this.#client).then(
+      fetchRecordsByTokenId(revealRecords, this.#client, false).then(
         (resolvedResult) => {
           const formattedResult = formatRecordsForIframe(resolvedResult);
           bus
@@ -486,6 +487,14 @@ class SkyflowFrameController {
             );
           })
           .catch((error) => {
+            if (error?.error?.type) {
+              error = {
+                error: {
+                  code: error?.error?.code,
+                  description: error?.error?.description,
+                },
+              };
+            }
             rootReject(error);
           });
       }).catch((err) => {
