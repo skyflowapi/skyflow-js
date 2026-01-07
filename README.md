@@ -4421,9 +4421,10 @@ A sample response:
 ```
 
 # Set Custom Network messages on container:
-Helps to add custom network error messages on the container through the methods `setError`.
 
-`setError(ErrorMessages: Record<ErrorType, string>)` method is used to set the error text for the different network errors types, when this method is triggered, all the errors present on the error response will be overridden with the custom error message passed. This error will be sent on the collect or upload file call on the same container.
+Add custom network error messages to a container with the `setError` method.
+
+`setError(ErrorMessages: Record<ErrorType, string>)` sets the error text for the different network errors types. When this method is triggered, all the errors present in the error response are overridden with the specified custom error message. This error is sent on the collect or upload file call on the same container.
 
 ### Sample code snippet for setError on collect container
 ```javascript
