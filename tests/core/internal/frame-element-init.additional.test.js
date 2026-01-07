@@ -307,11 +307,11 @@ describe('FrameElementInit extended unit tests', () => {
     helpers.fileValidation = jest.fn(() => true);
     helpers.vaildateFileName = jest.fn(() => true);
     mockClientRequest
-      .mockImplementationOnce(() => Promise.reject({error: 'badA'}))
+      .mockImplementationOnce(() => Promise.reject({error: {code: '500', message: 'badA'}}));
       // .mockImplementationOnce(() => Promise.reject('badB'));
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
     await expect(instance['multipleUploadFiles'](fileElement, config, undefined))
-      .rejects.toEqual({ errorResponse: [{ error: { error: 'badA' } }] });
+      .rejects.toEqual({ errorResponse: [{ error: {code: '500', message: 'badA'}}] });
     expect(mockClientRequest).toHaveBeenCalledTimes(1);
   });
 

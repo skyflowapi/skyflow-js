@@ -182,7 +182,11 @@ export default class FrameElementInit {
             }
           }
         } else if (result.status === 'rejected') {
-          errorResponse.push(result.reason);
+          if (result.reason?.error) {
+            errorResponse.push({ error: result.reason?.error });
+          } else {
+            errorResponse.push(result.reason);
+          }
         }
       });
       if (errorResponse.length === 0) {
@@ -568,7 +572,11 @@ export default class FrameElementInit {
                 }
               }
             } else if (result.status === 'rejected') {
-              errorResponse.push({ error: result.reason });
+              if (result?.reason?.error) {
+                errorResponse.push({ error: result?.reason?.error });
+              } else {
+                errorResponse.push({ error: result.reason });
+              }
             }
           });
           if (errorResponse.length === 0) {
@@ -600,7 +608,11 @@ export default class FrameElementInit {
               }
             }
           } else if (result.status === 'rejected') {
-            errorResponse.push({ error: result.reason });
+            if (result?.reason?.error) {
+              errorResponse.push({ error: result?.reason?.error });
+            } else {
+              errorResponse.push({ error: result.reason });
+            }
           }
         });
         if (errorResponse.length === 0) {
