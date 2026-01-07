@@ -45,6 +45,7 @@ import {
   IUpdateRequest,
   UpdateResponse,
   IUpdateOptions,
+  ErrorType,
 } from './utils/common';
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
@@ -346,6 +347,10 @@ class Skyflow {
 
   static get RedactionType() {
     return RedactionType;
+  }
+
+  static get ErrorType() {
+    return ErrorType;
   }
 
   static get RequestMethod() {

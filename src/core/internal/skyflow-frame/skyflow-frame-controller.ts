@@ -54,6 +54,7 @@ import {
   IUpdateRequest,
   UpdateResponse,
   IUpdateOptions,
+  ErrorType,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
@@ -139,6 +140,7 @@ class SkyflowFrameController {
             fetchRecordsByTokenId(
               data.records as IRevealRecord[],
               this.#client,
+              true,
             ).then(
               (resolvedResult: IRevealResponseType) => {
                 printLog(
@@ -301,6 +303,10 @@ class SkyflowFrameController {
     bus
       .target(this.#clientDomain)
       .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#clientId, (data, callback) => {
+        if (this.#client && data?.errorMessages) {
+          const errorMessages: Partial<Record<ErrorType, string>> = data?.errorMessages;
+          this.#client.setErrorMessages(errorMessages as Record<ErrorType, string>);
+        }
         printLog(
           parameterizedString(
             logs.infoLogs.CAPTURE_PURE_JS_REQUEST,
@@ -378,6 +384,11 @@ class SkyflowFrameController {
           MessageType.LOG,
           this.#context.logLevel,
         );
+        if (this.#client && data?.errorMessages) {
+          const errorMessages: Partial<Record<ErrorType, string>> = data?.errorMessages;
+          this.#client.setErrorMessages(errorMessages as Record<ErrorType, string>);
+        }
+
         if (data.type === REVEAL_TYPES.REVEAL) {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
@@ -421,7 +432,7 @@ class SkyflowFrameController {
   revealData(revealRecords: IRevealRecord[], containerId: string): Promise<RevealResponse> {
     const id = containerId;
     return new Promise((resolve, reject) => {
-      fetchRecordsByTokenId(revealRecords, this.#client).then(
+      fetchRecordsByTokenId(revealRecords, this.#client, false).then(
         (resolvedResult) => {
           const formattedResult = formatRecordsForIframe(resolvedResult);
           bus
@@ -476,6 +487,14 @@ class SkyflowFrameController {
             );
           })
           .catch((error) => {
+            if (error?.error?.type) {
+              error = {
+                error: {
+                  code: error?.error?.code,
+                  description: error?.error?.description,
+                },
+              };
+            }
             rootReject(error);
           });
       }).catch((err) => {
@@ -739,6 +758,7 @@ class SkyflowFrameController {
                       error: {
                         code: error?.error?.code,
                         description: error?.error?.description,
+                        type: error?.error?.type,
                       },
                     },
                   ],

@@ -37,19 +37,33 @@ const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
     { token: record.token, value: record.value, valueType: record.valueType }));
 };
 
-const formatForPureJsFailure = (cause, tokenId:string) => ({
-  token: tokenId,
-  ...new SkyflowError({
-    code: cause?.error?.code,
-    description: cause?.error?.description,
-  }, [], true),
-});
+const formatForPureJsFailure = (cause, tokenId:string, purejs: boolean) => {
+  if (purejs) {
+    return {
+      token: tokenId,
+      error: {
+        code: cause?.error?.code,
+        description: cause?.error?.description,
+      },
+    };
+  }
+  return ({
+    token: tokenId,
+    ...new SkyflowError({
+      code: cause?.error?.code,
+      description: cause?.error?.description,
+      type: cause?.error?.type,
+    }, [], true),
+  });
+};
+
 const formatForRenderFileFailure = (cause, skyflowID:string, column: string) => ({
   skyflowId: skyflowID,
   column,
   error: {
     code: cause?.error?.code,
     description: cause?.error?.description,
+    type: cause?.error?.type,
   },
 });
 
@@ -207,6 +221,7 @@ export const getFileURLFromVaultBySkyflowIDComposable = (
 export const fetchRecordsByTokenId = (
   tokenIdRecords: IRevealRecord[],
   client: Client,
+  purejs: boolean,
 ): Promise<IRevealResponseType> => new Promise((rootResolve, rootReject) => {
   const clientId = client.toJSON()?.metaData?.uuid || '';
   getAccessToken(clientId).then((authToken) => {
@@ -223,7 +238,7 @@ export const fetchRecordsByTokenId = (
               apiResponse.push(...fieldsData);
             },
             (cause: any) => {
-              const errorData = formatForPureJsFailure(cause, tokenRecord.token as string);
+              const errorData = formatForPureJsFailure(cause, tokenRecord.token as string, purejs);
               printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
               apiResponse.push(errorData);
             },
@@ -278,7 +293,7 @@ export const fetchRecordsByTokenIdComposable = (
             });
           },
           (cause: any) => {
-            const errorData = formatForPureJsFailure(cause, tokenRecord?.token ?? '');
+            const errorData = formatForPureJsFailure(cause, tokenRecord?.token ?? '', false);
             printLog(errorData?.error?.description ?? '', MessageType.ERROR, LogLevel.ERROR);
             apiResponse?.push({
               ...errorData,

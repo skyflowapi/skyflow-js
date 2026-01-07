@@ -48,6 +48,7 @@ import {
   insertDataInCollect,
   updateRecordsBySkyflowIDComposable,
 } from '../../../src/core-utils/collect';
+import { ErrorType } from '../../../src/index-node';
 // Mock element-options to bypass complex row merging logic that expects prior group structure
 jest.mock('../../../src/libs/element-options', () => ({
   validateAndSetupGroupOptions: (oldGroup, newGroup) => newGroup || oldGroup || { rows: [] },
@@ -306,11 +307,11 @@ describe('FrameElementInit extended unit tests', () => {
     helpers.fileValidation = jest.fn(() => true);
     helpers.vaildateFileName = jest.fn(() => true);
     mockClientRequest
-      .mockImplementationOnce(() => Promise.reject({error: 'badA'}))
+      .mockImplementationOnce(() => Promise.reject({error: {code: '500', message: 'badA'}}));
       // .mockImplementationOnce(() => Promise.reject('badB'));
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
     await expect(instance['multipleUploadFiles'](fileElement, config, undefined))
-      .rejects.toEqual({ errorResponse: [{ error: { error: 'badA' } }] });
+      .rejects.toEqual({ errorResponse: [{ error: {code: '500', message: 'badA'}}] });
     expect(mockClientRequest).toHaveBeenCalledTimes(1);
   });
 
@@ -462,10 +463,12 @@ describe('FrameElementInit extended unit tests', () => {
         name: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${multiElement.iFrameName}`,
         clientConfig,
         options: { meta: 'x' },
+        errorMessages:{},
       },
     });
     await flushPromises();
-    expect(instance['multipleUploadFiles']).toHaveBeenCalledWith(multiElement, clientConfig, { meta: 'x' });
+    expect(instance['multipleUploadFiles'])
+    .toHaveBeenCalledWith(multiElement, clientConfig, { meta: 'x' }, {});
     expect(parentPostSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${multiElement.iFrameName}`,
@@ -509,6 +512,9 @@ describe('FrameElementInit extended unit tests', () => {
         name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + instance.containerId,
         data: { type: COLLECT_TYPES.COLLECT },
         clientConfig,
+        errorMessages:{
+          [ErrorType.BAD_REQUEST]: 'Bad request error',
+        },
       },
     });
     await flushPromises();
@@ -532,6 +538,9 @@ describe('FrameElementInit extended unit tests', () => {
         name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + instance.containerId,
         data: { type: COLLECT_TYPES.COLLECT },
         clientConfig,
+        errorMessages:{
+          [ErrorType.BAD_REQUEST]: 'Bad request error',
+        },
       },
     });
     await flushPromises();
@@ -554,6 +563,9 @@ describe('FrameElementInit extended unit tests', () => {
         name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + instance.containerId,
         data: { type: COLLECT_TYPES.FILE_UPLOAD },
         clientConfig,
+        errorMessages:{
+          [ErrorType.BAD_REQUEST]: 'Bad request error',
+        },
       },
     });
     await flushPromises();
@@ -576,6 +588,9 @@ describe('FrameElementInit extended unit tests', () => {
         name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + instance.containerId,
         data: { type: COLLECT_TYPES.FILE_UPLOAD },
         clientConfig,
+        errorMessages:{
+          [ErrorType.BAD_REQUEST]: 'Bad request error',
+        },
       },
     });
     await flushPromises();
