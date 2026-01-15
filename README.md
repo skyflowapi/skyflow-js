@@ -132,6 +132,7 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 
 # Securely collecting data client-side
 - [**Insert data into the vault**](#insert-data-into-the-vault)
+- [**Update data in the vault**](#update-data-in-the-vault)
 - [**Using Skyflow Elements to collect data**](#using-skyflow-elements-to-collect-data)
 - [**Using Skyflow Elements to update data**](#using-skyflow-elements-to-update-data)
 - [**Bin lookup**](#bin-lookup)
