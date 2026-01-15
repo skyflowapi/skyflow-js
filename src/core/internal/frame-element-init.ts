@@ -408,9 +408,9 @@ export default class FrameElementInit {
     let finalUpdateRecords;
     try {
       [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
-        insertRequestObject, updateRequestObject, options.options,
+        insertRequestObject, updateRequestObject, options,
       );
-      finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options.options);
+      finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
     } catch (error:any) {
       return Promise.reject({
         error: error?.message,
