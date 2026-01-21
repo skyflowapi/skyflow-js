@@ -27,6 +27,7 @@ import {
 } from '../../../utils/common';
 import {
   constructMaskTranslation,
+  formatFrameNameToId,
   formatRevealElementOptions,
   getAtobValue,
   getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
@@ -282,7 +283,9 @@ class RevealFrame {
       }, this.#clientDomain,
     );
     this.updateRevealElementOptions();
+    console.log('RevealFrame initialized for element:', this.#name, formatFrameNameToId(this.#name));
     window.addEventListener('message', (event) => {
+      // console.log('message event received in reveal frame', event);
       if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#name) {
         if (event?.data?.data?.iframeName === this.#name
           && event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
@@ -333,6 +336,30 @@ class RevealFrame {
         }
       }
     });
+    window.addEventListener('message', async (event) => {
+      console.log('message event received in reveal frame for zip render', event);
+      if (event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.ZIP_RENDER_MOUNT + this.#name) {
+        // console.log('ZIP_RENDER_MOUNT message event received in child', event);
+        const blob2 = new Blob([event?.data?.buffer],
+          { type: this.getExtension(event?.data?.name as string) });
+        const blobUrl = URL.createObjectURL(blob2);
+        this.addFileRender(blobUrl, this.getExtension(event?.data?.name as string));
+      }
+    });
+    window.postMessage({
+      name: ELEMENT_EVENTS_TO_IFRAME.ZIP_RENDER_URL + this.#name,
+      data: { id: this.#name },
+    }, properties.IFRAME_SECURE_SITE);
+    // window.addEventListener('message', (e) => {
+    //   if (e?.data?.name === ELEMENT_EVENTS_TO_IFRAME.ZIP_RENDER_URL_RESPONSE + this.#name) {
+    //     console.log('ZIP_RENDER_URL_RESPONSE message event received in child', e);
+    //     this.addFileRender(e?.data?.data?.url, 'demo');
+    //   }
+    // });
+    window?.parent?.postMessage({
+      name: ELEMENT_EVENTS_TO_IFRAME.ZIP_RENDER_MOUNTED + this.#name,
+      data: {},
+    }, this.#clientDomain);
   }
 
   responseUpdate = (data) => {
@@ -486,6 +513,16 @@ class RevealFrame {
     }
     fileElement.setAttribute('src', responseUrl);
 
+    if (fileElement instanceof HTMLImageElement) {
+      fileElement.onload = () => {
+        console.log('1 natural height and width ', fileElement.naturalHeight, fileElement.naturalWidth);
+        // fileElement.style.width = `${fileElement.naturalWidth}px`;
+      };
+      // wait for 5 sec
+      setTimeout(() => {
+        console.log('2 natural height and width ', fileElement.naturalHeight, fileElement.naturalWidth);
+      }, 5000);
+    }
     if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
       this.#inputStyles = {};
       this.#inputStyles[STYLE_TYPE.BASE] = {

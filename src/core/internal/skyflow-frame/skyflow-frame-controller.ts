@@ -3,6 +3,8 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
 import get from 'lodash/get';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import JSZip from 'jszip';
 import Client from '../../../client';
 import {
   checkForElementMatchRule,
@@ -22,6 +24,7 @@ import {
   getFileURLFromVaultBySkyflowID,
   formatRecordsForClient,
   formatRecordsForIframe,
+  getFileURLForRender,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
 import {
@@ -417,6 +420,72 @@ class SkyflowFrameController {
           );
         }
       });
+    window.addEventListener('message', (event) => {
+      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.GET_ZIP_FILES + this.#clientId) {
+        const data = event.data.data;
+        // console.log('data received in iframe for GET_ZIP_FILES', data);
+        this.#context = event?.data?.context;
+        this.#client = new Client(event?.data?.clientConfig, {
+          uuid: '',
+          clientDomain: '',
+        });
+        // console.log('GET_ZIP_FILES event received in iframe', data?.containerId);
+        getFileURLForRender(data?.element, this.#client, event?.data?.clientConfig?.authToken)
+          .then((resolvedResult) => {
+            // console.log('GET_ZIP_FILES resolvedResult', resolvedResult);
+            let url = '';
+            if (resolvedResult.fields && data?.element?.column) {
+              url = resolvedResult.fields[data?.element?.column];
+            }
+            this.unZipFiles(url).then((fileUrls) => {
+              console.log('no of files in zip: after ', Object.keys(fileUrls).length);
+              window.parent.postMessage({
+                name: ELEMENT_EVENTS_TO_IFRAME.ZIP_FILES_RESPONSE + data?.containerId,
+                data: {
+                  fileCount: Object.keys(fileUrls).length,
+                  fileUrls,
+                },
+              }, this.#clientDomain);
+              window.addEventListener('message', (event1) => {
+                if (event1?.data?.name === ELEMENT_EVENTS_TO_IFRAME.ZIP_FILES_ELEMENTS_ID
+                  + data?.containerId) {
+                  console.log('elements ids received in iframe for ZIP_FILES_ELEMENTS_ID', event1?.data?.elementIds);
+                  // create a mapping of fileUrls and elementIds
+                  const elementIds = event1?.data?.elementIds;
+                  const uploadElementsArray = elementIds
+                    .map((elementId: string, index: number) => ({
+                      elementId,
+                      fileUrl: fileUrls[index],
+                    }));
+                  for (let i = 0; i < uploadElementsArray.length; i += 1) {
+                    console.log('uploadElementsArray mapping', uploadElementsArray[i]);
+                    // eslint-disable-next-line @typescript-eslint/no-loop-func
+                    window.addEventListener('message', (event2) => {
+                      console.log('message event received in zip upload iframe', event2);
+                      if (event2?.data?.name === ELEMENT_EVENTS_TO_IFRAME.ZIP_RENDER_URL
+                         + uploadElementsArray[i].elementId) {
+                        console.log('ZIP_RENDER_URL event received in iframe for elementId');
+                        window.postMessage({
+                          name: ELEMENT_EVENTS_TO_IFRAME.ZIP_RENDER_URL_RESPONSE
+                           + uploadElementsArray[i].elementId,
+                          data: {
+                            fileUrl: uploadElementsArray[i].fileUrl,
+                            iframeName: uploadElementsArray[i].elementId,
+                          },
+                        }, '*');
+                      }
+                    });
+                  }
+                }
+              });
+            }).catch((err) => {
+              console.log('Error in unzipping files', err);
+            });
+          }).catch((rejectedResult) => {
+            console.log('Error in fetching zip files', rejectedResult);
+          });
+      }
+    });
   }
 
   static init(clientId: string): SkyflowFrameController {
@@ -428,6 +497,39 @@ class SkyflowFrameController {
     }
     return new SkyflowFrameController(clientId);
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  async unZipFiles(url: string) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch ZIP file');
+    const arrayBuffer = await response.arrayBuffer();
+    const zip = await JSZip.loadAsync(arrayBuffer);
+
+    const fileUrls: string[] = [];
+    const fileNames = Object.keys(zip.files);
+
+    // Filter out directories and system files
+    const validFiles = fileNames.filter(
+      (filename) => !zip.files[filename].dir && !this.isSystemFile(filename),
+    );
+
+    // Process all files in parallel
+    const blobs = await Promise.all(
+      validFiles.map(async (filename) => {
+        const file = zip.files[filename];
+        const blob = await file.async('blob');
+        const fileBlobUrl = URL.createObjectURL(blob);
+        fileUrls.push(fileBlobUrl);
+        console.log('Unzipped file URL:', file, blob, fileBlobUrl);
+        return { url: fileBlobUrl, name: filename, buffer: await file.async('arraybuffer') };
+      }),
+    );
+
+    return blobs; // or return fileUrls, both are the same
+  }
+
+  isSystemFile = (path) => path.startsWith('__MACOSX/') || path.endsWith('.DS_Store')
+  || path.endsWith('Thumbs.db');
 
   revealData(revealRecords: IRevealRecord[], containerId: string): Promise<RevealResponse> {
     const id = containerId;

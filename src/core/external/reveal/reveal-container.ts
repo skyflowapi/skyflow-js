@@ -20,11 +20,13 @@ import {
   CONTROLLER_STYLES, CUSTOM_ERROR_MESSAGES,
   ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
   REVEAL_TYPES,
+  SKYFLOW_FRAME_CONTROLLER,
 } from '../../constants';
 import Container from '../common/container';
 import RevealElement from './reveal-element';
 import properties from '../../../properties';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
+import { RevealElementInput } from '../../../index-node';
 
 export interface IRevealElementInput {
   token?: string;
@@ -75,6 +77,12 @@ class RevealContainer extends Container {
 
   #customErrorMessages: Partial<Record<ErrorType, string>> = {};
 
+  #getSkyflowBearerToken: () => Promise<string> | undefined;
+
+  #shadowRoot: ShadowRoot | null = null;
+
+  #clientId: string = '';
+
   constructor(
     metaData: Metadata,
     skyflowElements: Array<SkyflowElementProps>,
@@ -96,11 +104,15 @@ class RevealContainer extends Container {
         },
       },
     };
+    this.#getSkyflowBearerToken = metaData?.getSkyflowBearerToken;
     this.#skyflowElements = skyflowElements;
     this.#containerId = uuid();
     this.#eventEmmiter = new EventEmitter();
     this.#context = context;
     const clientDomain = this.#metaData.clientDomain || '';
+    // console.log('Reveal Container Client Domain',
+    // // `${SKYFLOW_FRAME_CONTROLLER}:${this.#metaData.uuid}:${btoa(clientDomain)}`);
+    this.#clientId = `${SKYFLOW_FRAME_CONTROLLER}:${this.#metaData.uuid}:${btoa(clientDomain)}:${!!this.#metaData.clientJSON?.config?.options?.trackingKey}`;
     const iframe = iframer({
       name: `${REVEAL_FRAME_CONTROLLER}:${this.#containerId}:${btoa(clientDomain)}`,
       referrer: clientDomain,
@@ -292,6 +304,122 @@ class RevealContainer extends Container {
         }
       },
     );
+  }
+
+  #emitEvent = (eventName: string, options?: Record<string, any>) => {
+    const option = {
+      ...options,
+      errorMessages: this.#customErrorMessages,
+    };
+    console.log('emitEvent called for ', this.#metaData, this.#shadowRoot, this.#clientId);
+    if (this.#shadowRoot) {
+      const iframe = this.#shadowRoot.getElementById(this.#clientId) as HTMLIFrameElement;
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          name: eventName,
+          ...option,
+        }, properties.IFRAME_SECURE_ORIGIN);
+      }
+    } else {
+      const iframe = document.getElementById(`${this.#clientId}`) as HTMLIFrameElement;
+      console.log('iframe for emitEvent', iframe);
+      if (iframe?.contentWindow) {
+        iframe?.contentWindow?.postMessage({
+          name: eventName,
+          ...option,
+        }, properties.IFRAME_SECURE_ORIGIN);
+      }
+    }
+  };
+
+  getZipFiles(input: RevealElementInput,
+    options?: IRevealElementOptions): Promise<RevealElement[]> {
+    const elementsArray: RevealElement[] = [];
+    // Object.keys(this.#elements).forEach((key) => {
+    //   elementsArray.push(this.#elements[key]);
+    // });
+    this.#isSkyflowFrameReady = true;
+    const eventName = ELEMENT_EVENTS_TO_IFRAME.GET_ZIP_FILES + this.#metaData.uuid;
+    if (this.#isSkyflowFrameReady) {
+      return new Promise((resolve, reject) => {
+        try {
+          this.#getSkyflowBearerToken()?.then((authToken) => {
+            printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+              MessageType.LOG,
+              this.#context.logLevel);
+            this.#emitEvent(
+              eventName,
+              {
+                data: {
+                  containerId: this.#containerId,
+                  element: input,
+                  options,
+                },
+                clientConfig: {
+                  vaultURL: this.#metaData?.clientJSON?.config?.vaultURL,
+                  vaultID: this.#metaData?.clientJSON?.config?.vaultID,
+                  authToken,
+                },
+                context: this.#context,
+              },
+            );
+
+            window?.addEventListener('message', (event) => {
+              // console.log('getZipFiles message event received in parent', event);
+              if (event?.data?.name
+                   === ELEMENT_EVENTS_TO_IFRAME.ZIP_FILES_RESPONSE + this.#containerId) {
+                const revealData = event?.data?.data;
+                if (revealData?.errors) {
+                  printLog(
+                    parameterizedString(logs?.errorLogs?.FAILED_ZIP_FILES),
+                    MessageType.ERROR,
+                    this.#context?.logLevel,
+                  );
+                  reject(revealData);
+                } else {
+                  printLog(
+                    parameterizedString(logs?.infoLogs?.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
+                    MessageType.LOG,
+                    this.#context?.logLevel,
+                  );
+                  // console.log('revealData received in getZipFiles', revealData);
+                  for (let index = 0; index < revealData?.fileCount; index += 1) {
+                    console.log('creating reveal element for url', revealData?.fileUrls[index]);
+                    elementsArray.push(
+                      this.create({
+                        skyflowID: revealData?.fileUrls[index]?.url as string,
+                        column: revealData?.fileUrls[index]?.name as string,
+                        table: revealData?.fileUrls[index]?.buffer,
+                      },
+                      options) as RevealElement,
+                    );
+                  }
+                  // console.log('elementsArray in getZipFiles', elementsArray);
+                  // elementsArray.forEach((element) => {
+                  // console.log('elements ids in getZipFiles', element.getID());
+                  // });
+                  // send back the array of reveal elements ids
+                  this.#emitEvent(
+                    ELEMENT_EVENTS_TO_IFRAME.ZIP_FILES_ELEMENTS_ID + this.#containerId,
+                    {
+                      elementIds: elementsArray.map((element) => element.iframeName()),
+                    },
+                  );
+                  resolve(elementsArray);
+                }
+              }
+            });
+          }).catch((err:any) => {
+            printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+            reject(err);
+          });
+        } catch (err: any) {
+          printLog(`Error: ${err.message}`, MessageType.ERROR, this.#context.logLevel);
+          reject(err);
+        }
+      });
+    }
+    return Promise.resolve(elementsArray);
   }
 }
 export default RevealContainer;

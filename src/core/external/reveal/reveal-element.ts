@@ -71,6 +71,8 @@ class RevealElement extends SkyflowElement {
 
   #customerErrorMessages: Partial<Record<ErrorType, string>> = {};
 
+  #shadowRoot: ShadowRoot | null = null;
+
   constructor(
     record: IRevealElementInput,
     options: IRevealElementOptions = {},
@@ -180,6 +182,64 @@ class RevealElement extends SkyflowElement {
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
     }
   }
+
+  render(domElement: HTMLElement | string) {
+    if (domElement instanceof HTMLElement
+      && (domElement as HTMLElement).getRootNode() instanceof ShadowRoot) {
+      this.#shadowRoot = domElement.getRootNode() as ShadowRoot;
+    } else if (typeof domElement === 'string') {
+      const element = document.getElementById(domElement);
+      if (element && element.getRootNode() instanceof ShadowRoot) {
+        this.#shadowRoot = element.getRootNode() as ShadowRoot;
+      }
+    }
+    this.#iframe.mount(domElement, undefined, {
+      record: JSON.stringify({
+        ...this.#metaData,
+        record: this.#recordData,
+        context: this.#context,
+        containerId: this.#containerId,
+      }),
+    });
+    this.#isMounted = true;
+    window.addEventListener('message', (event) => {
+      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.ZIP_RENDER_MOUNTED + this.iframeName()) {
+        this.#isMounted = true;
+        console.log('RevealElement is mounted');
+        this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.ZIP_RENDER_MOUNT + this.iframeName(), {
+          url: this.#recordData.skyflowID,
+          name: this.#recordData.column,
+          type: ELEMENT_EVENTS_TO_IFRAME.ZIP_RENDER_MOUNT + this.iframeName(),
+          buffer: this.#recordData.table,
+        });
+      }
+    });
+  }
+
+  #emitEvent = (eventName: string, options?: Record<string, any>) => {
+    const option = {
+      ...options,
+      // errorMessages: this.#customErrorMessages,
+    };
+    if (this.#shadowRoot) {
+      const iframe = this.#shadowRoot.getElementById(this.iframeName()) as HTMLIFrameElement;
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          name: eventName,
+          ...option,
+        }, properties.IFRAME_SECURE_ORIGIN);
+      }
+    } else {
+      const iframe = document.getElementById(`${this.iframeName()}`) as HTMLIFrameElement;
+      console.log('iframe for emitEvent', iframe);
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          name: eventName,
+          ...option,
+        }, properties.IFRAME_SECURE_ORIGIN);
+      }
+    }
+  };
 
   renderFile(): Promise<RenderFileResponse> {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
