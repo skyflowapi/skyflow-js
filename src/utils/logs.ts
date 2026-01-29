@@ -4,6 +4,8 @@ Copyright (c) 2022 Skyflow, Inc.
 
 const logs = {
   infoLogs: {
+    FILE_DOWNLOADED: '%s1 - File %s2 downloaded successfully.',
+    FILES_UNZIPPED_SUCCESSFULLY: '%s1 - Files unzipped successfully for skyflowId: %s2',
     INITIALIZE_CLIENT: '%s1 - Initializing skyflow client.',
     CLIENT_INITIALIZED: '%s1 - Initialized skyflow client successfully.',
 
@@ -97,6 +99,8 @@ const logs = {
     VALIDATE_GET_BY_ID_INPUT: '%s1 - Validating getByID input.',
   },
   errorLogs: {
+    FAILED_DOWNLOAD_FILE: 'Failed to download file. Please try again later.',
+    FAILED_TO_UNZIP_FILES: 'Failed to unzip files. Please try again later.',
     MULTI_FILE_NOT_SUPPORTED: 'Multi file upload is only supported in MULT_FILE_INPUT element in composable container. Please use MULT_FILE_INPUT element for multi file upload.',
     INVALID_REVEAL_COMPOSABLE_INPUT: 'Reveal composable input is invalid. Please provide a valid input.',
     NO_ELEMENTS_IN_COLLECT: 'Validation error. No elements found in collect container',

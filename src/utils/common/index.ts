@@ -132,6 +132,7 @@ export interface IRenderResponseType {
   fields?: Record<string, any>
   errors?: Record<string, any>
   fileMetadata?: Record<string, any>
+  unZippedFilesMetadata?: { name: string; fileSize: number, type: string }[]
 }
 
 export interface IDetokenizeInput {

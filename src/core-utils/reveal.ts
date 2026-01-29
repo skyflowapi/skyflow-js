@@ -357,12 +357,23 @@ export const formatForRenderClient = (response: IRenderResponseType, column: str
 : RenderFileResponse => {
   const formattedResponse: RenderFileResponse = {};
   if (response.fields) {
-    const successRecord = {
-      skyflow_id: response.fields.skyflow_id,
-      column,
-      fileMetadata: response.fileMetadata,
-    };
-    formattedResponse.success = successRecord;
+    if (response.unZippedFilesMetadata) {
+      const successRecord = {
+        skyflow_id: response.fields.skyflow_id,
+        column,
+        fileMetadata: response.fileMetadata,
+        unZippedFilesMetadata: response.unZippedFilesMetadata,
+
+      };
+      formattedResponse.success = successRecord;
+    } else {
+      const successRecord = {
+        skyflow_id: response.fields.skyflow_id,
+        column,
+        fileMetadata: response.fileMetadata,
+      };
+      formattedResponse.success = successRecord;
+    }
   } else if (response.errors) {
     formattedResponse.errors = {
       skyflowId: response.errors.skyflowId,
