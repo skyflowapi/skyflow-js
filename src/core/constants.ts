@@ -107,6 +107,7 @@ export const ELEMENT_EVENTS_TO_CLIENT = {
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {
+  REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE: 'REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE',
   MULTIPLE_UPLOAD_FILES_RESPONSE: 'MULTIPLE_UPLOAD_FILES_RESPONSE',
   RENDER_MOUNTED: 'RENDER_MOUNTED',
   HEIGHT_CALLBACK: 'HEIGHT_CALLBACK',
@@ -500,10 +501,66 @@ export const REVEAL_ELEMENT_DIV_STYLE = {
     justifyContent: 'space-between',
   },
 };
+
+export const ZIP_CONTAINER_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    display: 'flex',
+    'flex-direction': 'row',
+    height: '100%',
+    width: '100%',
+  },
+};
 export const RENDER_ELEMENT_IMAGE_STYLES = {
   [STYLE_TYPE.BASE]: {
     maxHeight: '100%',
     maxWidth: '100%',
+  },
+};
+
+export const LEFT_NAV_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    width: '30%',
+    height: '100%',
+    borderRight: '1px solid #ccc',
+    boxSizing: 'border-box' as const,
+    margin: '4px',
+    // overflowY: 'auto' as const,
+    overflow: 'auto' as const,
+  },
+};
+
+export const LEFT_NAV_LIST_ITEM_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    // display: 'flex',
+    alignItems: 'center',
+    padding: '8px',
+    margin: '4px',
+    cursor: 'pointer',
+    borderRadius: '4px',
+    boxSizing: 'border-box' as const,
+    backgroundColor: '#f9f9f9',
+  },
+  [STYLE_TYPE.FOCUS]: {
+    alignItems: 'center',
+    padding: '8px',
+    margin: '4px',
+    cursor: 'pointer',
+    borderRadius: '4px',
+    boxSizing: 'border-box' as const,
+    backgroundColor: '#f9f9f9',
+    border: '2px solid #b0b3b8ff',
+  },
+};
+
+export const RIGHT_PANEL_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    width: '70%',
+    height: '100%',
+    boxSizing: 'border-box' as const,
+    padding: '10px 10px 10px 10px',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'auto',
   },
 };
 

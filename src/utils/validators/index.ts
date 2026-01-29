@@ -31,6 +31,50 @@ import { appendZeroToOne } from '../helpers';
 import logs from '../logs';
 import { printLog } from '../logs-helper';
 
+// List of dangerous file extensions and mime types
+const DANGEROUS_FILE_TYPES = [
+  // Executables
+  'application/x-msdownload', 'application/x-msdos-program', 'application/x-msinstaller',
+  'application/x-exe', 'application/x-dosexec', 'application/x-sh', 'application/x-bash',
+  'application/x-csh', 'application/x-shellscript', 'application/x-elf',
+  'application/x-msi', 'application/x-ms-shortcut',
+  'application/x-php', 'application/x-python', 'application/x-perl',
+  'application/x-ruby', 'application/x-java-applet',
+  'application/x-sql', 'application/x-powershell',
+  'application/x-dosexec', 'application/x-mach-binary',
+  // Scripts
+  'application/javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript',
+  'application/x-javascript', 'text/x-python', 'text/x-shellscript', 'text/x-perl',
+  'text/x-php', 'text/x-ruby', 'text/x-java-source', 'text/x-c', 'text/x-c++',
+  // HTML potentially dangerous
+  'text/html',
+  // Compressed archives that may contain dangerous files
+  'application/x-7z-compressed', 'application/x-rar-compressed', 'application/zip',
+  'application/x-tar', 'application/gzip', 'application/x-bzip2',
+  // Others
+  'application/x-mscardfile', 'application/x-msmetafile', 'application/x-mswrite',
+  'application/x-msaccess', 'application/x-msclip',
+];
+
+const DANGEROUS_FILE_EXTENSIONS = [
+  '.exe', '.msi', '.bat', '.cmd', '.sh', '.csh', '.bash', '.elf', '.php', '.py', '.pl', '.rb', '.jar', '.sql', '.ps1', '.scr', '.com', '.vbs', '.js', '.jse', '.wsf', '.wsh', '.hta', '.cpl', '.msc', '.msp', '.gadget', '.vb', '.vbe', '.lnk', '.app', '.bin', '.dll', '.drv', '.sys', '.vbscript', '.reg', '.scpt', '.command', '.mach-o', '.class', '.html', '.htm', '.7z', '.rar', '.tar', '.gz', '.bz2', '.xz', '.z', '.ace', '.cab', '.arj', '.uue', '.bz', '.tbz2', '.tgz', '.zoo', '.lzh', '.lha', '.apk', '.dmg', '.iso', '.img', '.toast', '.vmdk', '.vhd', '.vhdx', '.ova', '.ovf', '.vdi', '.vbox', '.vbs', '.ws', '.wsf', '.wsc', '.wsh', '.ps1', '.psm1', '.psd1', '.ps1xml', '.psc1', '.psc2', '.msh', '.msh1', '.msh2', '.mshxml', '.msh1xml', '.msh2xml', '.scf', '.lnk', '.inf', '.reg', '.msi', '.msp', '.mst', '.job', '.pif', '.scr', '.sct', '.shb', '.shs', '.url', '.vb', '.vbe', '.vbs', '.wsc', '.wsf', '.wsh', '.xnk', '.cpl', '.msc', '.msp', '.gadget', '.vb', '.vbe', '.lnk', '.app', '.bin', '.dll', '.drv', '.sys', '.vbscript', '.reg', '.scpt', '.command', '.mach-o', '.class', '.html', '.htm',
+];
+
+export function isDangerousFileType(file) {
+  // file: { name, type, url }
+  const lowerName = (file.name || '').toLowerCase();
+  const lowerType = (file.type || '').toLowerCase();
+  // Check extension
+  if (DANGEROUS_FILE_EXTENSIONS.some((ext) => lowerName.endsWith(ext))) {
+    return true;
+  }
+  // Check mime type
+  if (DANGEROUS_FILE_TYPES.some((mime) => lowerType === mime)) {
+    return true;
+  }
+  return false;
+}
+
 export const validateCreditCardNumber = (cardNumber: string) => {
   const value = cardNumber.replace(/[\s-]/g, '');
   let sum = 0;

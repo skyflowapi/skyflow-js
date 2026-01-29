@@ -61,6 +61,14 @@ class ComposableRevealElement {
       },
     );
   };
+
+  downloadCurrentFile = () => {
+    // eslint-disable-next-line no-underscore-dangle
+    this.#eventEmitter?._emit?.(
+      `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE}:${this.#elementName}`,
+      {},
+    );
+  };
 }
 
 export default ComposableRevealElement;
