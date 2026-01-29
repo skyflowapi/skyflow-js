@@ -4,6 +4,10 @@ Copyright (c) 2022 Skyflow, Inc.
 import logs from './logs';
 
 const SKYFLOW_ERROR_CODE = {
+  FAILED_TO_UNZIP_FILES: {
+    code: 400,
+    description: logs.errorLogs.FAILED_TO_UNZIP_FILES,
+  },
   MULTI_FILE_NOT_SUPPORTED: {
     code: 400,
     description: logs.errorLogs.MULTI_FILE_NOT_SUPPORTED,
