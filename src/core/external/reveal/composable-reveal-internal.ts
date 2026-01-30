@@ -144,6 +144,11 @@ class ComposableRevealInternalElement extends SkyflowElement {
             },
           );
           this.#eventEmitter?.on(
+            `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE}:${element?.name}`, () => {
+              this.downloadCurrentFile(element?.name as string);
+            },
+          );
+          this.#eventEmitter?.on(
             `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS}:${element?.name}`,
             (data) => {
               if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS) {
@@ -172,6 +177,15 @@ class ComposableRevealInternalElement extends SkyflowElement {
     } catch (error) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REVEAL_COMPOSABLE_INPUT, ['COMPOSABLE_REVEAL'], true);
     }
+  }
+
+  downloadCurrentFile(elementName: string) {
+    this.#emitEvent(
+      ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + elementName,
+      {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + elementName,
+      },
+    );
   }
 
   getID() {

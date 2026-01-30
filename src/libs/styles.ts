@@ -58,9 +58,9 @@ export const getFlexGridStyles = (obj: any) => {
   const styles = {
     'align-items': obj['align-items'] || 'stretch',
     'justify-content': obj['justify-content'] || 'flex-start',
-    height: obj.height === 'auto' ? 'auto' : `calc(100% + ${
-      Number.parseInt(spacingValueAndUnit[0], 10) * 2 + spacingValueAndUnit[1]
-    })`,
+    // height: obj.height === 'auto' ? 'auto' : `calc(100% + ${
+    //   Number.parseInt(spacingValueAndUnit[0], 10) * 2 + spacingValueAndUnit[1]
+    // })`,
     width: `calc(100% + ${
       Number.parseInt(spacingValueAndUnit[0], 10) * 2 + spacingValueAndUnit[1]
     }))`,
