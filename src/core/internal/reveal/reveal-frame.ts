@@ -14,7 +14,6 @@ import {
   REVEAL_ELEMENT_OPTIONS_TYPES,
   COPY_UTILS,
   REVEAL_COPY_ICON_STYLES,
-  RENDER_ELEMENT_IMAGE_STYLES,
   DEFAULT_FILE_RENDER_ERROR,
   ELEMENT_EVENTS_TO_CLIENT,
   REVEAL_TYPES,
@@ -784,7 +783,7 @@ class RevealFrame {
     if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
       this.#inputStyles = {};
       this.#inputStyles[STYLE_TYPE.BASE] = {
-        ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
+      //  ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
         ...this.#record.inputStyles[STYLE_TYPE.BASE],
       };
       getCssClassesFromJss(this.#inputStyles, tag);
@@ -794,6 +793,12 @@ class RevealFrame {
       this.#elementContainer.appendChild(fileElement);
     } else {
       this.#elementContainer.appendChild(fileElement);
+    }
+    if (fileElement instanceof HTMLImageElement) {
+      fileElement.onload = () => {
+        fileElement.style.width = `${fileElement.naturalWidth}px`;
+        fileElement.style.height = `${fileElement.naturalHeight}px`;
+      };
     }
   }
 
