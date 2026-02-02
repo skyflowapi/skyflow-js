@@ -779,7 +779,17 @@ class RevealFrame {
       fileElement.setAttribute('type', ext);
     }
     fileElement.setAttribute('src', responseUrl);
-
+    window.addEventListener('message', (event) => {
+      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE
+           + this.#name) {
+        const a = document.createElement('a');
+        a.href = fileElement.getAttribute('src') as string;
+        a.download = 'downloaded_image';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    });
     if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
       this.#inputStyles = {};
       this.#inputStyles[STYLE_TYPE.BASE] = {
