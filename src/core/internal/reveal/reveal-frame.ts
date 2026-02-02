@@ -788,6 +788,10 @@ class RevealFrame {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        printLog(parameterizedString(
+          logs.infoLogs.FILE_DOWNLOADED_NORMAL,
+          CLASS_NAME,
+        ), MessageType.LOG, this.#context?.logLevel);
       }
     });
     if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {

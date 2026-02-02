@@ -5,6 +5,7 @@ Copyright (c) 2022 Skyflow, Inc.
 const logs = {
   infoLogs: {
     FILE_DOWNLOADED: '%s1 - File %s2 downloaded successfully.',
+    FILE_DOWNLOADED_NORMAL: '%s1 - File downloaded successfully.',
     FILES_UNZIPPED_SUCCESSFULLY: '%s1 - Files unzipped successfully for skyflowId: %s2',
     INITIALIZE_CLIENT: '%s1 - Initializing skyflow client.',
     CLIENT_INITIALIZED: '%s1 - Initialized skyflow client successfully.',
