@@ -21,6 +21,8 @@ import {
   RIGHT_PANEL_STYLES,
   LEFT_NAV_LIST_ITEM_STYLES,
   ZIP_CONTAINER_STYLES,
+  RENDER_ELEMENT_IMAGE_STYLES,
+  DEFAULT_WARNING_FOR_DANGEROUS_FILE_TYPE,
 } from '../../constants';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import {
@@ -669,7 +671,7 @@ class RevealFrame {
     this.#rightPanel.innerHTML = '';
     if (isDangerousFileType(file)) {
       const warning = document.createElement('div');
-      warning.textContent = 'This file type is not supported for preview.';
+      warning.textContent = DEFAULT_WARNING_FOR_DANGEROUS_FILE_TYPE;
       warning.style.color = 'red';
       warning.style.padding = '10px';
       this.#rightPanel?.appendChild(warning);
@@ -796,12 +798,39 @@ class RevealFrame {
     });
     if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
       this.#inputStyles = {};
-      this.#inputStyles[STYLE_TYPE.BASE] = {
-      //  ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
-        ...this.#record.inputStyles[STYLE_TYPE.BASE],
-      };
-      getCssClassesFromJss(this.#inputStyles, tag);
+      if (tag === 'img') {
+        this.#inputStyles[STYLE_TYPE.BASE] = {
+          ...this.#record.inputStyles[STYLE_TYPE.BASE],
+        };
+        if (this.#record.inputStyles[STYLE_TYPE.BASE]?.overflow) {
+          this.#elementContainer.className = `SkyflowElement-div-container-${STYLE_TYPE.BASE}`;
+          const divStyles = {
+            [STYLE_TYPE.BASE]: {
+              ...this.#record.inputStyles[STYLE_TYPE.BASE],
+            },
+          };
+          this.#elementContainer.style.overflow = this.#record
+            .inputStyles[STYLE_TYPE.BASE].overflow as string;
+          this.#inputStyles[STYLE_TYPE.BASE] = {
+            ...this.#inputStyles[STYLE_TYPE.BASE],
+          };
+          getCssClassesFromJss(divStyles, 'div-container');
+        } else {
+          this.#inputStyles[STYLE_TYPE.BASE] = {
+            ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
+            ...this.#inputStyles[STYLE_TYPE.BASE],
+          };
+          getCssClassesFromJss(this.#inputStyles, tag);
+        }
+      } else {
+        this.#inputStyles[STYLE_TYPE.BASE] = {
+          ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
+          ...this.#record.inputStyles[STYLE_TYPE.BASE],
+        };
+        getCssClassesFromJss(this.#inputStyles, tag);
+      }
     }
+
     if (this.#elementContainer.childNodes[0] !== undefined) {
       this.#elementContainer.innerHTML = '';
       this.#elementContainer.appendChild(fileElement);
@@ -812,6 +841,21 @@ class RevealFrame {
       fileElement.onload = () => {
         fileElement.style.width = `${fileElement.naturalWidth}px`;
         fileElement.style.height = `${fileElement.naturalHeight}px`;
+        if (this.#record?.inputStyles
+               && this.#record?.inputStyles[STYLE_TYPE.BASE]?.width) {
+          this.#elementContainer.style.width = this.#record.inputStyles[STYLE_TYPE.BASE].width;
+        }
+        if (this.#record?.inputStyles
+               && this.#record?.inputStyles[STYLE_TYPE.BASE]?.height) {
+          this.#elementContainer.style.height = this.#record.inputStyles[STYLE_TYPE.BASE].height;
+        }
+        if (this.#record.inputStyles[STYLE_TYPE.BASE]?.overflow) {
+          this.#elementContainer.style.overflow = this.#record
+            .inputStyles[STYLE_TYPE.BASE].overflow as string;
+        }
+        window?.postMessage({
+          type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+        }, properties?.IFRAME_SECURE_ORIGIN);
       };
     }
   }

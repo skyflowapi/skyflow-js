@@ -18,6 +18,7 @@ import cartesBancairesIcon from '../../assets/carter-banceris.svg';
 
 import logs from '../utils/logs';
 
+export const DEFAULT_WARNING_FOR_DANGEROUS_FILE_TYPE = 'This file type is not supported for preview.';
 export const SESSION_ID = 'session_id';
 export const SKY_METADATA_HEADER = 'sky-metadata';
 export const SDK_VERSION = 'sdkVersion';
