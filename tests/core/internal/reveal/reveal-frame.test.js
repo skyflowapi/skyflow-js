@@ -3,7 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
-import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES, REVEAL_TYPES } from "../../../../src/core/constants";
+import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_ERROR_TEXT, REVEAL_ELEMENT_OPTIONS_TYPES, REVEAL_TYPES } from "../../../../src/core/constants";
 import { Env, LogLevel, RedactionType } from "../../../../src/utils/common";
 import getCssClassesFromJss from "../../../../src/libs/jss-styles";
 import { getFileURLFromVaultBySkyflowIDComposable } from "../../../../src/core-utils/reveal";
@@ -1233,4 +1233,242 @@ describe("Reveal Frame Class", () => {
     const heightCall = windowCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name));
     expect(heightCall).toBeTruthy();
   });
+
+  test("responseUpdate with signed token and mask applies both correctly", () => {
+    const actualToken = "response-update-with-mask";
+    const payload = JSON.stringify({ tok: actualToken });
+    const encodedPayload = btoa(payload);
+    const signedToken = `signed_token_header.${encodedPayload}.signature`;
+
+    const record = {
+      name: elementName,
+      token: signedToken,
+      mask: ['XXX-XX-XXXX', null, { X: '0-9' }],
+      inputStyles: { base: { color: "green" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    testFrame.responseUpdate({ frameId: elementName, 0: { token: actualToken, value: "12345678901" } });
+    const dataElement = document.getElementById(elementName);
+
+    const maskedValue = dataElement?.innerText;
+    expect(maskedValue).toBeTruthy();
+    expect(maskedValue).toContain('-');
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) with regular token decodes and applies value", () => {
+    const uniqueElementName = "reveal:container200:frame200:meta:" + btoa('http://localhost');
+    const token = "test-token-123";
+    const responseValue = "4111111111111111";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        label: "Card Number",
+        // No altText so it shows the actual value after reveal
+        inputStyles: { base: { color: "red" } },
+        labelStyles: { base: { color: "black" } },
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback for REVEAL_RESPONSE_READY
+    const onRevealResponseName = onMock.mock.calls[1][0];
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + "frame200");
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger the sub function with response
+    onRevealResponseCb({ [token]: responseValue });
+
+    // Verify the value was applied
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe(responseValue);
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) with signed token decodes tok field correctly", () => {
+    const uniqueElementName = "reveal:container201:frame201:meta:" + btoa('http://localhost');
+    const actualToken = "actual-token-456";
+    const payload = JSON.stringify({ tok: actualToken });
+    const encodedPayload = btoa(payload);
+    const signedToken = `signed_token_header.${encodedPayload}.signature`;
+    const responseValue = "sensitive-data-value";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token: signedToken,
+        label: "Card Number",
+        // No altText so it shows the actual value after reveal
+        inputStyles: { base: { color: "blue" } },
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with the decoded token (actual token, not signed)
+    onRevealResponseCb({ [actualToken]: responseValue });
+
+    // Verify the value was applied
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe(responseValue);
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) with signed token and mask applies both correctly", () => {
+    const uniqueElementName = "reveal:container202:frame202:meta:" + btoa('http://localhost');
+    const actualToken = "actual-token-789";
+    const payload = JSON.stringify({ tok: actualToken });
+    const encodedPayload = btoa(payload);
+    const signedToken = `signed_token_header.${encodedPayload}.signature`;
+    const responseValue = "1234567890";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token: signedToken,
+        label: "Phone Number",
+        mask: ["XXX-XXX-XXXX", null, { X: "0-9" }],
+        inputStyles: { base: { color: "green" } },
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with the decoded token
+    onRevealResponseCb({ [actualToken]: responseValue });
+
+    // Verify the masked value was applied
+    const dataElement = document.getElementById(uniqueElementName);
+    const maskedValue = dataElement?.innerText;
+    expect(maskedValue).toBeTruthy();
+    expect(maskedValue).toContain("-"); // Mask format includes dashes
+    expect(maskedValue.length).toBeGreaterThan(0);
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) shows error when token not found in response", () => {
+    const uniqueElementName = "reveal:container203:frame203:meta:" + btoa('http://localhost');
+    const token = "missing-token-999";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        label: "Card Number",
+        inputStyles: { base: { color: "red" } },
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with empty response (token not found)
+    onRevealResponseCb({});
+
+    const errorElements = document.getElementsByClassName(`SkyflowElement-${uniqueElementName}-error-base`);
+    expect(errorElements.length).toBeGreaterThan(0);
+    expect(errorElements[0]?.innerText).toBe(REVEAL_ELEMENT_ERROR_TEXT);
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) does not show error for skyflowID records when token missing", () => {
+    const uniqueElementName = "reveal:container204:frame204:meta:" + btoa('http://localhost');
+    const token = "test-token-skyflow";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        skyflowID: "sky-123-456", // Has skyflowID, so should not show error
+        label: "Card Number",
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with empty response (token not found)
+    onRevealResponseCb({});
+
+    const errorElements = document.getElementsByClassName(`SkyflowElement-${uniqueElementName}-error-base`);
+    if (errorElements.length > 0) {
+      expect(errorElements[0].innerText).toBe("");
+    }
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) with invalid signed token falls back to original token", () => {
+    const uniqueElementName = "reveal:container205:frame205:meta:" + btoa('http://localhost');
+    const invalidSignedToken = "signed_token_invalid_format";
+    const responseValue = "fallback-value";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token: invalidSignedToken,
+        label: "Card Number",
+        // No altText
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with the original (invalid) signed token as key
+    onRevealResponseCb({ [invalidSignedToken]: responseValue });
+
+    // Verify the value was applied using fallback token
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe(responseValue);
+  });
+
 });
