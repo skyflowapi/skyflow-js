@@ -528,6 +528,7 @@ export const REVEAL_ELEMENT_ERROR_TEXT_DEFAULT_STYLES = {
 };
 
 export const REVEAL_ELEMENT_ERROR_TEXT = 'Invalid Token';
+
 export const SIGNED_TOKEN_PREFIX = 'signed_token_';
 
 export const COLLECT_ELEMENT_LABEL_DEFAULT_STYLES = {
