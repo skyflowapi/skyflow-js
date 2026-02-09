@@ -1235,13 +1235,14 @@ describe("Reveal Frame Class", () => {
   });
 
   test("responseUpdate with signed token and mask applies both correctly", () => {
+    const uniqueElementName = "reveal:container300:frame300:meta:" + btoa('http://localhost');
     const actualToken = "response-update-with-mask";
     const payload = JSON.stringify({ tok: actualToken });
     const encodedPayload = btoa(payload);
     const signedToken = `signed_token_header.${encodedPayload}.signature`;
 
     const record = {
-      name: elementName,
+      name: uniqueElementName,
       token: signedToken,
       mask: ['XXX-XX-XXXX', null, { X: '0-9' }],
       inputStyles: { base: { color: "green" } },
@@ -1255,12 +1256,180 @@ describe("Reveal Frame Class", () => {
     
     const testFrame = new RevealFrame(record, context, '1234', rootDiv);
 
-    testFrame.responseUpdate({ frameId: elementName, 0: { token: actualToken, value: "12345678901" } });
-    const dataElement = document.getElementById(elementName);
-
+    // Call responseUpdate with proper data structure
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      0: { token: actualToken, value: "12345678901" } 
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
     const maskedValue = dataElement?.innerText;
     expect(maskedValue).toBeTruthy();
     expect(maskedValue).toContain('-');
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with regular token applies value correctly", () => {
+    const uniqueElementName = "reveal:container301:frame301:meta:" + btoa('http://localhost');
+    const token = "regular-token-123";
+    const responseValue = "test-value-12345";
+
+    const record = {
+      name: uniqueElementName,
+      token,
+      inputStyles: { base: { color: "blue" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with proper data structure
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      0: { token, value: responseValue } 
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe(responseValue);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with signed token without mask applies value correctly", () => {
+    const uniqueElementName = "reveal:container302:frame302:meta:" + btoa('http://localhost');
+    const actualToken = "decoded-token-456";
+    const payload = JSON.stringify({ tok: actualToken });
+    const encodedPayload = btoa(payload);
+    const signedToken = `signed_token_header.${encodedPayload}.signature`;
+    const responseValue = "sensitive-data";
+
+    const record = {
+      name: uniqueElementName,
+      token: signedToken,
+      inputStyles: { base: { color: "red" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with decoded token
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      0: { token: actualToken, value: responseValue } 
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe(responseValue);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with error shows error message", () => {
+    const uniqueElementName = "reveal:container303:frame303:meta:" + btoa('http://localhost');
+    const token = "error-token-789";
+
+    const record = {
+      name: uniqueElementName,
+      token,
+      inputStyles: { base: { color: "orange" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with error
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      error: "Token not found" 
+    });
+    
+    const errorElements = document.getElementsByClassName(`SkyflowElement-${uniqueElementName}-error-base`);
+    expect(errorElements.length).toBeGreaterThan(0);
+    expect(errorElements[0]?.innerText).toBe(REVEAL_ELEMENT_ERROR_TEXT);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with error on skyflowID record does not show error", () => {
+    const uniqueElementName = "reveal:container304:frame304:meta:" + btoa('http://localhost');
+    const token = "skyflow-token-999";
+
+    const record = {
+      name: uniqueElementName,
+      token,
+      skyflowID: "sky-123-456", // Has skyflowID
+      inputStyles: { base: { color: "purple" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with error
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      error: "Token not found" 
+    });
+    
+    const errorElements = document.getElementsByClassName(`SkyflowElement-${uniqueElementName}-error-base`);
+    // Should not show error for skyflowID records
+    if (errorElements.length > 0) {
+      expect(errorElements[0]?.innerText).toBe("");
+    }
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with mismatched token does nothing", () => {
+    const uniqueElementName = "reveal:container305:frame305:meta:" + btoa('http://localhost');
+    const recordToken = "expected-token-111";
+    const responseToken = "different-token-222";
+    const initialText = "initial-value";
+
+    const record = {
+      name: uniqueElementName,
+      token: recordToken,
+      altText: initialText,
+      inputStyles: { base: { color: "gray" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with different token
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      0: { token: responseToken, value: "should-not-appear" } 
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    // Should still show initial altText, not the response value
+    expect(dataElement?.innerText).toBe(initialText);
 
     document.body.removeChild(rootDiv);
   });
