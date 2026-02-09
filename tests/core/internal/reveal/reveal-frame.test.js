@@ -3,7 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
-import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES, REVEAL_TYPES } from "../../../../src/core/constants";
+import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_ERROR_TEXT, REVEAL_ELEMENT_OPTIONS_TYPES, REVEAL_TYPES } from "../../../../src/core/constants";
 import { Env, LogLevel, RedactionType } from "../../../../src/utils/common";
 import getCssClassesFromJss from "../../../../src/libs/jss-styles";
 import { getFileURLFromVaultBySkyflowIDComposable } from "../../../../src/core-utils/reveal";
@@ -1233,4 +1233,629 @@ describe("Reveal Frame Class", () => {
     const heightCall = windowCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name));
     expect(heightCall).toBeTruthy();
   });
+
+  test("responseUpdate with signed token and mask applies both correctly", () => {
+    const uniqueElementName = "reveal:container300:frame300:meta:" + btoa('http://localhost');
+    const actualToken = "response-update-with-mask";
+    const payload = JSON.stringify({ tok: actualToken });
+    const encodedPayload = btoa(payload);
+    const signedToken = `signed_token_header.${encodedPayload}.signature`;
+
+    const record = {
+      name: uniqueElementName,
+      token: signedToken,
+      mask: ['XXX-XX-XXXX', null, { X: '0-9' }],
+      inputStyles: { base: { color: "green" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with proper data structure
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      0: { token: actualToken, value: "12345678901" } 
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    const maskedValue = dataElement?.innerText;
+    expect(maskedValue).toBeTruthy();
+    expect(maskedValue).toContain('-');
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with regular token applies value correctly", () => {
+    const uniqueElementName = "reveal:container301:frame301:meta:" + btoa('http://localhost');
+    const token = "regular-token-123";
+    const responseValue = "test-value-12345";
+
+    const record = {
+      name: uniqueElementName,
+      token,
+      inputStyles: { base: { color: "blue" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with proper data structure
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      0: { token, value: responseValue } 
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe(responseValue);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with signed token without mask applies value correctly", () => {
+    const uniqueElementName = "reveal:container302:frame302:meta:" + btoa('http://localhost');
+    const actualToken = "decoded-token-456";
+    const payload = JSON.stringify({ tok: actualToken });
+    const encodedPayload = btoa(payload);
+    const signedToken = `signed_token_header.${encodedPayload}.signature`;
+    const responseValue = "sensitive-data";
+
+    const record = {
+      name: uniqueElementName,
+      token: signedToken,
+      inputStyles: { base: { color: "red" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with decoded token
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      0: { token: actualToken, value: responseValue } 
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe(responseValue);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with error shows error message", () => {
+    const uniqueElementName = "reveal:container303:frame303:meta:" + btoa('http://localhost');
+    const token = "error-token-789";
+
+    const record = {
+      name: uniqueElementName,
+      token,
+      inputStyles: { base: { color: "orange" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with error
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      error: "Token not found" 
+    });
+    
+    const errorElements = document.getElementsByClassName(`SkyflowElement-${uniqueElementName}-error-base`);
+    expect(errorElements.length).toBeGreaterThan(0);
+    expect(errorElements[0]?.innerText).toBe(REVEAL_ELEMENT_ERROR_TEXT);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with error on skyflowID record does not show error", () => {
+    const uniqueElementName = "reveal:container304:frame304:meta:" + btoa('http://localhost');
+    const token = "skyflow-token-999";
+
+    const record = {
+      name: uniqueElementName,
+      token,
+      skyflowID: "sky-123-456", // Has skyflowID
+      inputStyles: { base: { color: "purple" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with error
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      error: "Token not found" 
+    });
+    
+    const errorElements = document.getElementsByClassName(`SkyflowElement-${uniqueElementName}-error-base`);
+    // Should not show error for skyflowID records
+    if (errorElements.length > 0) {
+      expect(errorElements[0]?.innerText).toBe("");
+    }
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with mismatched token does nothing", () => {
+    const uniqueElementName = "reveal:container305:frame305:meta:" + btoa('http://localhost');
+    const recordToken = "expected-token-111";
+    const responseToken = "different-token-222";
+    const initialText = "initial-value";
+
+    const record = {
+      name: uniqueElementName,
+      token: recordToken,
+      altText: initialText,
+      inputStyles: { base: { color: "gray" } },
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call responseUpdate with different token
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      0: { token: responseToken, value: "should-not-appear" } 
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    // Should still show initial altText, not the response value
+    expect(dataElement?.innerText).toBe(initialText);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) with regular token decodes and applies value", () => {
+    const uniqueElementName = "reveal:container200:frame200:meta:" + btoa('http://localhost');
+    const token = "test-token-123";
+    const responseValue = "4111111111111111";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        label: "Card Number",
+        // No altText so it shows the actual value after reveal
+        inputStyles: { base: { color: "red" } },
+        labelStyles: { base: { color: "black" } },
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback for REVEAL_RESPONSE_READY
+    const onRevealResponseName = onMock.mock.calls[1][0];
+    expect(onRevealResponseName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + "frame200");
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger the sub function with response
+    onRevealResponseCb({ [token]: responseValue });
+
+    // Verify the value was applied
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe(responseValue);
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) with signed token decodes tok field correctly", () => {
+    const uniqueElementName = "reveal:container201:frame201:meta:" + btoa('http://localhost');
+    const actualToken = "actual-token-456";
+    const payload = JSON.stringify({ tok: actualToken });
+    const encodedPayload = btoa(payload);
+    const signedToken = `signed_token_header.${encodedPayload}.signature`;
+    const responseValue = "sensitive-data-value";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token: signedToken,
+        label: "Card Number",
+        // No altText so it shows the actual value after reveal
+        inputStyles: { base: { color: "blue" } },
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with the decoded token (actual token, not signed)
+    onRevealResponseCb({ [actualToken]: responseValue });
+
+    // Verify the value was applied
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe(responseValue);
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) with signed token and mask applies both correctly", () => {
+    const uniqueElementName = "reveal:container202:frame202:meta:" + btoa('http://localhost');
+    const actualToken = "actual-token-789";
+    const payload = JSON.stringify({ tok: actualToken });
+    const encodedPayload = btoa(payload);
+    const signedToken = `signed_token_header.${encodedPayload}.signature`;
+    const responseValue = "1234567890";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token: signedToken,
+        label: "Phone Number",
+        mask: ["XXX-XXX-XXXX", null, { X: "0-9" }],
+        inputStyles: { base: { color: "green" } },
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with the decoded token
+    onRevealResponseCb({ [actualToken]: responseValue });
+
+    // Verify the masked value was applied
+    const dataElement = document.getElementById(uniqueElementName);
+    const maskedValue = dataElement?.innerText;
+    expect(maskedValue).toBeTruthy();
+    expect(maskedValue).toContain("-"); // Mask format includes dashes
+    expect(maskedValue.length).toBeGreaterThan(0);
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) shows error when token not found in response", () => {
+    const uniqueElementName = "reveal:container203:frame203:meta:" + btoa('http://localhost');
+    const token = "missing-token-999";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        label: "Card Number",
+        inputStyles: { base: { color: "red" } },
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with empty response (token not found)
+    onRevealResponseCb({});
+
+    const errorElements = document.getElementsByClassName(`SkyflowElement-${uniqueElementName}-error-base`);
+    expect(errorElements.length).toBeGreaterThan(0);
+    expect(errorElements[0]?.innerText).toBe(REVEAL_ELEMENT_ERROR_TEXT);
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) does not show error for skyflowID records when token missing", () => {
+    const uniqueElementName = "reveal:container204:frame204:meta:" + btoa('http://localhost');
+    const token = "test-token-skyflow";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        skyflowID: "sky-123-456", // Has skyflowID, so should not show error
+        label: "Card Number",
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with empty response (token not found)
+    onRevealResponseCb({});
+
+    const errorElements = document.getElementsByClassName(`SkyflowElement-${uniqueElementName}-error-base`);
+    if (errorElements.length > 0) {
+      expect(errorElements[0].innerText).toBe("");
+    }
+  });
+
+  test("sub function (REVEAL_RESPONSE_READY) with invalid signed token falls back to original token", () => {
+    const uniqueElementName = "reveal:container205:frame205:meta:" + btoa('http://localhost');
+    const invalidSignedToken = "signed_token_invalid_format";
+    const responseValue = "fallback-value";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token: invalidSignedToken,
+        label: "Card Number",
+        // No altText
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with the original (invalid) signed token as key
+    onRevealResponseCb({ [invalidSignedToken]: responseValue });
+
+    // Verify the value was applied using fallback token
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe(responseValue);
+  });
+
+  test("decodeSignedToken with malformed JWT triggers catch block", () => {
+    const uniqueElementName = "reveal:container206:frame206:meta:" + btoa('http://localhost');
+    const malformedJWT = "signed_token_header.INVALID_BASE64!!!.signature";
+
+    const record = {
+      name: uniqueElementName,
+      token: malformedJWT,
+      label: "Card Number",
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call decodeSignedToken - it should handle the error and return original token
+    const result = testFrame.decodeSignedToken(malformedJWT);
+    
+    // Should return the original token when decoding fails
+    expect(result).toBe(malformedJWT);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("decodeSignedToken with JWT missing tok field returns token without modification", () => {
+    const uniqueElementName = "reveal:container207:frame207:meta:" + btoa('http://localhost');
+    const payload = JSON.stringify({ sub: "user123", iat: 1234567890 }); // No 'tok' field
+    const encodedPayload = btoa(payload);
+    const signedToken = `signed_token_header.${encodedPayload}.signature`;
+
+    const record = {
+      name: uniqueElementName,
+      token: signedToken,
+      label: "Card Number",
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call decodeSignedToken - should return original since no 'tok' field
+    const result = testFrame.decodeSignedToken(signedToken);
+    
+    // Should return the original token when tok field is missing
+    expect(result).toBe(signedToken);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("decodeSignedToken with JWT having only 2 parts returns original token", () => {
+    const uniqueElementName = "reveal:container208:frame208:meta:" + btoa('http://localhost');
+    const signedToken = "signed_token_header.payload"; // Only 2 parts, missing signature
+
+    const record = {
+      name: uniqueElementName,
+      token: signedToken,
+      label: "Card Number",
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call decodeSignedToken - should return original since parts.length !== 3
+    const result = testFrame.decodeSignedToken(signedToken);
+    
+    // Should return the original token when parts length is not 3
+    expect(result).toBe(signedToken);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with mismatched frameId does nothing", () => {
+    const uniqueElementName = "reveal:container209:frame209:meta:" + btoa('http://localhost');
+    const token = "test-token-mismatch";
+    const responseValue = "should-not-appear";
+
+    const record = {
+      name: uniqueElementName,
+      token,
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    const dataElement = document.getElementById(uniqueElementName);
+    const initialValue = dataElement?.innerText;
+
+    // Call responseUpdate with different frameId
+    testFrame.responseUpdate({ 
+      frameId: "different-frame-id", 
+      0: { token, value: responseValue } 
+    });
+    
+    // Value should not change since frameId doesn't match
+    expect(dataElement?.innerText).toBe(initialValue);
+    expect(dataElement?.innerText).not.toBe(responseValue);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with mismatched token does nothing", () => {
+    const uniqueElementName = "reveal:container210:frame210:meta:" + btoa('http://localhost');
+    const actualToken = "actual-token-xyz";
+    const wrongToken = "wrong-token-abc";
+    const responseValue = "should-not-appear";
+
+    const record = {
+      name: uniqueElementName,
+      token: actualToken,
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    const dataElement = document.getElementById(uniqueElementName);
+    const initialValue = dataElement?.innerText;
+
+    // Call responseUpdate with wrong token
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      0: { token: wrongToken, value: responseValue } 
+    });
+    
+    // Value should not change since token doesn't match
+    expect(dataElement?.innerText).toBe(initialValue);
+    expect(dataElement?.innerText).not.toBe(responseValue);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("sub function with wrong token in response does not update value", () => {
+    const uniqueElementName = "reveal:container211:frame211:meta:" + btoa('http://localhost');
+    const actualToken = "expected-token-123";
+    const wrongToken = "unexpected-token-456";
+    const responseValue = "should-not-appear";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token: actualToken,
+        label: "Card Number",
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    const dataElement = document.getElementById(uniqueElementName);
+    const initialValue = dataElement?.innerText;
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with wrong token (not the expected one)
+    onRevealResponseCb({ [wrongToken]: responseValue });
+
+    // Value should not change and error should be shown
+    expect(dataElement?.innerText).toBe(initialValue);
+    expect(dataElement?.innerText).not.toBe(responseValue);
+  });
+
+  test("responseUpdate without data[0] does nothing", () => {
+    const uniqueElementName = "reveal:container212:frame212:meta:" + btoa('http://localhost');
+    const token = "test-token-no-data";
+
+    const record = {
+      name: uniqueElementName,
+      token,
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    const dataElement = document.getElementById(uniqueElementName);
+    const initialValue = dataElement?.innerText;
+
+    // Call responseUpdate without data[0]
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName
+    });
+    
+    // Value should not change
+    expect(dataElement?.innerText).toBe(initialValue);
+
+    document.body.removeChild(rootDiv);
+  });
+
 });

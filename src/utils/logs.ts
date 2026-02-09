@@ -328,6 +328,7 @@ const logs = {
     INVALID_OPTION_CARD_SCHEME: 'Validation error. container create - Invalid options, scheme must be of string array type.',
     INVALID_FIELD_SHOW_3DS_CHALLEGNGE: 'Invalid field \'%s1\'. Cannot initiate 3DS Challenge. Verify \'%s1\'',
     NO_FILE_ELEMENT_FOUND: 'No FILE_INPUT element found in the container.',
+    SIGNED_TOKEN_DECODE_FAILED: 'Failed to decode the signed token. Please check the signed token and try again.',
   },
   warnLogs: {
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',
