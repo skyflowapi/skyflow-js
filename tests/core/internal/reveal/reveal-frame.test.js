@@ -1640,4 +1640,222 @@ describe("Reveal Frame Class", () => {
     expect(dataElement?.innerText).toBe(responseValue);
   });
 
+  test("decodeSignedToken with malformed JWT triggers catch block", () => {
+    const uniqueElementName = "reveal:container206:frame206:meta:" + btoa('http://localhost');
+    const malformedJWT = "signed_token_header.INVALID_BASE64!!!.signature";
+
+    const record = {
+      name: uniqueElementName,
+      token: malformedJWT,
+      label: "Card Number",
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call decodeSignedToken - it should handle the error and return original token
+    const result = testFrame.decodeSignedToken(malformedJWT);
+    
+    // Should return the original token when decoding fails
+    expect(result).toBe(malformedJWT);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("decodeSignedToken with JWT missing tok field returns token without modification", () => {
+    const uniqueElementName = "reveal:container207:frame207:meta:" + btoa('http://localhost');
+    const payload = JSON.stringify({ sub: "user123", iat: 1234567890 }); // No 'tok' field
+    const encodedPayload = btoa(payload);
+    const signedToken = `signed_token_header.${encodedPayload}.signature`;
+
+    const record = {
+      name: uniqueElementName,
+      token: signedToken,
+      label: "Card Number",
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call decodeSignedToken - should return original since no 'tok' field
+    const result = testFrame.decodeSignedToken(signedToken);
+    
+    // Should return the original token when tok field is missing
+    expect(result).toBe(signedToken);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("decodeSignedToken with JWT having only 2 parts returns original token", () => {
+    const uniqueElementName = "reveal:container208:frame208:meta:" + btoa('http://localhost');
+    const signedToken = "signed_token_header.payload"; // Only 2 parts, missing signature
+
+    const record = {
+      name: uniqueElementName,
+      token: signedToken,
+      label: "Card Number",
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    // Call decodeSignedToken - should return original since parts.length !== 3
+    const result = testFrame.decodeSignedToken(signedToken);
+    
+    // Should return the original token when parts length is not 3
+    expect(result).toBe(signedToken);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with mismatched frameId does nothing", () => {
+    const uniqueElementName = "reveal:container209:frame209:meta:" + btoa('http://localhost');
+    const token = "test-token-mismatch";
+    const responseValue = "should-not-appear";
+
+    const record = {
+      name: uniqueElementName,
+      token,
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    const dataElement = document.getElementById(uniqueElementName);
+    const initialValue = dataElement?.innerText;
+
+    // Call responseUpdate with different frameId
+    testFrame.responseUpdate({ 
+      frameId: "different-frame-id", 
+      0: { token, value: responseValue } 
+    });
+    
+    // Value should not change since frameId doesn't match
+    expect(dataElement?.innerText).toBe(initialValue);
+    expect(dataElement?.innerText).not.toBe(responseValue);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("responseUpdate with mismatched token does nothing", () => {
+    const uniqueElementName = "reveal:container210:frame210:meta:" + btoa('http://localhost');
+    const actualToken = "actual-token-xyz";
+    const wrongToken = "wrong-token-abc";
+    const responseValue = "should-not-appear";
+
+    const record = {
+      name: uniqueElementName,
+      token: actualToken,
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    const dataElement = document.getElementById(uniqueElementName);
+    const initialValue = dataElement?.innerText;
+
+    // Call responseUpdate with wrong token
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName, 
+      0: { token: wrongToken, value: responseValue } 
+    });
+    
+    // Value should not change since token doesn't match
+    expect(dataElement?.innerText).toBe(initialValue);
+    expect(dataElement?.innerText).not.toBe(responseValue);
+
+    document.body.removeChild(rootDiv);
+  });
+
+  test("sub function with wrong token in response does not update value", () => {
+    const uniqueElementName = "reveal:container211:frame211:meta:" + btoa('http://localhost');
+    const actualToken = "expected-token-123";
+    const wrongToken = "unexpected-token-456";
+    const responseValue = "should-not-appear";
+
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token: actualToken,
+        label: "Card Number",
+      },
+      clientJSON: { metaData: { uuid: "1234" } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl("http://localhost/?" + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, "name", { value: uniqueElementName, writable: true });
+    
+    const testFrame = RevealFrame.init();
+
+    const dataElement = document.getElementById(uniqueElementName);
+    const initialValue = dataElement?.innerText;
+
+    // Get the sub callback
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+
+    // Trigger with wrong token (not the expected one)
+    onRevealResponseCb({ [wrongToken]: responseValue });
+
+    // Value should not change and error should be shown
+    expect(dataElement?.innerText).toBe(initialValue);
+    expect(dataElement?.innerText).not.toBe(responseValue);
+  });
+
+  test("responseUpdate without data[0] does nothing", () => {
+    const uniqueElementName = "reveal:container212:frame212:meta:" + btoa('http://localhost');
+    const token = "test-token-no-data";
+
+    const record = {
+      name: uniqueElementName,
+      token,
+    };
+    const context = { logLevel: LogLevel.ERROR, env: Env.PROD };
+    const rootDiv = document.createElement('div');
+    document.body.appendChild(rootDiv);
+    
+    window.parent.postMessage = jest.fn();
+    window.postMessage = jest.fn();
+    
+    const testFrame = new RevealFrame(record, context, '1234', rootDiv);
+
+    const dataElement = document.getElementById(uniqueElementName);
+    const initialValue = dataElement?.innerText;
+
+    // Call responseUpdate without data[0]
+    testFrame.responseUpdate({ 
+      frameId: uniqueElementName
+    });
+    
+    // Value should not change
+    expect(dataElement?.innerText).toBe(initialValue);
+
+    document.body.removeChild(rootDiv);
+  });
+
 });
