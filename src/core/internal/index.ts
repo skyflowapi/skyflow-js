@@ -716,13 +716,45 @@ export default class FrameElement {
             this.iFrameFormElement.setValue(newFormattedOutput, target?.checkValidity());
           }
         } else {
+          const oldValue = target?.value || '';
+          const oldCursor = target?.selectionStart ?? 0;
+
+          const digitsBeforeCursor = oldValue.slice(0, oldCursor).replace(/\D/g, '').length;
+
           const { formattedOutput: output } = getMaskedOutput(target?.value, updatedMask[0], translation);
-          if (output.length >= value.length) {
-            this.iFrameFormElement.setValue(output, target?.checkValidity());
-          } else if (output === '' && target?.value === '') {
-            this.iFrameFormElement.setValue(target?.value, target?.checkValidity());
+
+          const isCursorAtEnd = oldCursor === oldValue.length;
+
+          this.iFrameFormElement.setValue(output, target?.checkValidity());
+          target.value = output;
+
+          let newCursor: number;
+
+          if (isCursorAtEnd) {
+            newCursor = output.length;
           } else {
-            target.value = output;
+            const targetDigitCount = digitsBeforeCursor;
+
+            newCursor = 0;
+            let digitsSeen = 0;
+            for (let i = 0; i < output.length; i += 1) {
+              if (/\d/.test(output[i])) {
+                digitsSeen += 1;
+                if (digitsSeen === targetDigitCount) {
+                  newCursor = i + 1;
+                  break;
+                }
+              }
+            }
+
+            if (digitsSeen < targetDigitCount) {
+              newCursor = output.length;
+            }
+          }
+
+          if (typeof target.setSelectionRange === 'function') {
+            const pos = Math.max(0, Math.min(newCursor, output.length));
+            target.setSelectionRange(pos, pos);
           }
         }
       } else {

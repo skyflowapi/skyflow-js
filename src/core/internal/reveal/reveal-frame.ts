@@ -16,6 +16,7 @@ import {
   DEFAULT_FILE_RENDER_ERROR,
   ELEMENT_EVENTS_TO_CLIENT,
   REVEAL_TYPES,
+  SIGNED_TOKEN_PREFIX,
 } from '../../constants';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import {
@@ -29,6 +30,7 @@ import {
   constructMaskTranslation,
   formatRevealElementOptions,
   getAtobValue,
+  getContainerType,
   getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
 import { formatForRenderClient, getFileURLFromVaultBySkyflowIDComposable } from '../../../core-utils/reveal';
@@ -75,6 +77,8 @@ class RevealFrame {
 
   #client!: Client;
 
+  #composableContainer: Boolean = false;
+
   static init() {
     const url = window.location?.href;
     const configIndex = url.indexOf('?');
@@ -88,6 +92,7 @@ class RevealFrame {
   constructor(record, context: Context, id: string, rootDiv?: HTMLDivElement) {
     this.#skyflowContainerId = id;
     this.#name = rootDiv ? record?.name : window.name;
+    this.#composableContainer = getContainerType(this.#name) === 'COMPOSABLE_REVEAL';
     this.#containerId = getValueFromName(this.#name, 2);
     const encodedClientDomain = getValueFromName(this.#name, 4);
     const clientDomain = getAtobValue(encodedClientDomain);
@@ -230,8 +235,10 @@ class RevealFrame {
       );
 
     const sub = (data) => {
-      if (Object.prototype.hasOwnProperty.call(data, this.#record.token)) {
-        const responseValue = data[this.#record.token] as string;
+      const tokenToMatch = this.decodeSignedToken(this.#record.token);
+
+      if (Object.prototype.hasOwnProperty.call(data, tokenToMatch)) {
+        const responseValue = data[tokenToMatch] as string;
         this.#revealedValue = responseValue;
         this.isRevealCalled = true;
         this.#dataElememt.innerText = responseValue;
@@ -242,7 +249,7 @@ class RevealFrame {
           this.#dataElememt.innerText = formattedOutput;
         }
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
-          CLASS_NAME, this.#record.token), MessageType.LOG, this.#context?.logLevel);
+          CLASS_NAME, tokenToMatch), MessageType.LOG, this.#context?.logLevel);
 
         // bus
         //   .target(window.location.origin)
@@ -340,32 +347,34 @@ class RevealFrame {
       if (!Object.prototype.hasOwnProperty.call(this.#record, 'skyflowID')) {
         this.setRevealError(REVEAL_ELEMENT_ERROR_TEXT);
       }
-    } else if (data?.frameId === this.#record?.name
-               && data?.[0]?.token
-               && this.#record?.token === data?.[0]?.token) {
-      const responseValue = data?.[0]?.value as string ?? '';
-      this.#revealedValue = responseValue;
-      this.isRevealCalled = true;
-      this.#dataElememt.innerText = responseValue;
+    } else if (data?.frameId === this.#record?.name && data?.[0]?.token) {
+      const tokenToMatch = this.decodeSignedToken(this.#record?.token);
 
-      if (this.#record?.mask) {
-        const { formattedOutput } = getMaskedOutput(
-          this.#dataElememt?.innerText ?? '',
-          this.#record?.mask?.[0],
-          constructMaskTranslation(this.#record?.mask),
+      if (tokenToMatch === data?.[0]?.token) {
+        const responseValue = data?.[0]?.value as string ?? '';
+        this.#revealedValue = responseValue;
+        this.isRevealCalled = true;
+        this.#dataElememt.innerText = responseValue;
+
+        if (this.#record?.mask) {
+          const { formattedOutput } = getMaskedOutput(
+            this.#dataElememt?.innerText ?? '',
+            this.#record?.mask?.[0],
+            constructMaskTranslation(this.#record?.mask),
+          );
+          this.#dataElememt.innerText = formattedOutput ?? '';
+        }
+
+        printLog(
+          parameterizedString(
+            logs?.infoLogs?.ELEMENT_REVEALED,
+            CLASS_NAME,
+            tokenToMatch,
+          ),
+          MessageType.LOG,
+          this.#context?.logLevel,
         );
-        this.#dataElememt.innerText = formattedOutput ?? '';
       }
-
-      printLog(
-        parameterizedString(
-          logs?.infoLogs?.ELEMENT_REVEALED,
-          CLASS_NAME,
-          this.#record?.token,
-        ),
-        MessageType.LOG,
-        this.#context?.logLevel,
-      );
     }
 
     window?.parent?.postMessage(
@@ -390,6 +399,33 @@ class RevealFrame {
   };
 
   getData = () => this.#record;
+
+  public decodeSignedToken(token: string): string {
+    let tokenToMatch = token;
+
+    if (tokenToMatch && tokenToMatch.startsWith(SIGNED_TOKEN_PREFIX)) {
+      try {
+        const bearerToken = tokenToMatch.substring(SIGNED_TOKEN_PREFIX.length);
+
+        const parts = bearerToken.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+
+          if (payload.tok) {
+            tokenToMatch = payload.tok;
+          }
+        }
+      } catch (err) {
+        printLog(
+          parameterizedString(logs.errorLogs.SIGNED_TOKEN_DECODE_FAILED),
+          MessageType.ERROR,
+          this.#context?.logLevel,
+        );
+      }
+    }
+
+    return tokenToMatch;
+  }
 
   private sub2 = (responseUrl: { iframeName?: string; error?: string; url?: string }) => {
     if (responseUrl.iframeName === this.#name) {
@@ -485,20 +521,72 @@ class RevealFrame {
       fileElement.setAttribute('type', ext);
     }
     fileElement.setAttribute('src', responseUrl);
-
     if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
       this.#inputStyles = {};
-      this.#inputStyles[STYLE_TYPE.BASE] = {
-        ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
-        ...this.#record.inputStyles[STYLE_TYPE.BASE],
-      };
-      getCssClassesFromJss(this.#inputStyles, tag);
+      if (tag === 'img') {
+        this.#inputStyles[STYLE_TYPE.BASE] = {
+          ...this.#record.inputStyles[STYLE_TYPE.BASE],
+        };
+        if (this.#record?.inputStyles
+          && this.#record?.inputStyles[STYLE_TYPE.BASE]
+           && this.#record?.inputStyles[STYLE_TYPE.BASE]?.overflow && this.#composableContainer) {
+          this.#elementContainer.className = `SkyflowElement-div-container-${STYLE_TYPE.BASE}`;
+          const divStyles = {
+            [STYLE_TYPE.BASE]: {
+              ...this.#record.inputStyles[STYLE_TYPE.BASE],
+            },
+          };
+          this.#elementContainer.style.overflow = this.#record
+            .inputStyles[STYLE_TYPE.BASE].overflow as string;
+          this.#inputStyles[STYLE_TYPE.BASE] = {
+            ...this.#inputStyles[STYLE_TYPE.BASE],
+          };
+          getCssClassesFromJss(divStyles, 'div-container');
+        } else {
+          this.#inputStyles[STYLE_TYPE.BASE] = {
+            ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
+            ...this.#inputStyles[STYLE_TYPE.BASE],
+          };
+          getCssClassesFromJss(this.#inputStyles, tag);
+        }
+      } else {
+        this.#inputStyles[STYLE_TYPE.BASE] = {
+          ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
+          ...this.#record.inputStyles[STYLE_TYPE.BASE],
+        };
+        getCssClassesFromJss(this.#inputStyles, tag);
+      }
     }
+
     if (this.#elementContainer.childNodes[0] !== undefined) {
       this.#elementContainer.innerHTML = '';
       this.#elementContainer.appendChild(fileElement);
     } else {
       this.#elementContainer.appendChild(fileElement);
+    }
+    if (fileElement instanceof HTMLImageElement
+      && this.#record?.inputStyles
+      && this.#record?.inputStyles[STYLE_TYPE.BASE]
+      && this.#record?.inputStyles[STYLE_TYPE.BASE]?.overflow && this.#composableContainer) {
+      fileElement.onload = () => {
+        if (fileElement?.naturalWidth && fileElement?.naturalHeight) {
+          fileElement.style.width = `${fileElement.naturalWidth}px`;
+          fileElement.style.height = `${fileElement.naturalHeight}px`;
+        }
+
+        if (this.#record?.inputStyles[STYLE_TYPE.BASE]?.width) {
+          this.#elementContainer.style.width = this.#record.inputStyles[STYLE_TYPE.BASE].width;
+        }
+        if (this.#record?.inputStyles[STYLE_TYPE.BASE]?.height) {
+          this.#elementContainer.style.height = this.#record.inputStyles[STYLE_TYPE.BASE].height;
+        }
+        this.#elementContainer.style.overflow = this.#record
+          .inputStyles[STYLE_TYPE.BASE].overflow as string;
+
+        window?.postMessage({
+          type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+        }, properties?.IFRAME_SECURE_ORIGIN);
+      };
     }
   }
 
