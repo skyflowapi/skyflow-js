@@ -25,12 +25,12 @@ properties.IFRAME_SECURE_ORIGIN = "http://localhost";
 const setFileURLResolve = (override = {}) => {
   mockGetFileURLFromVaultBySkyflowIDComposable.mockReset().mockImplementation(() => Promise.resolve({
     fields: {
-      primary_card_file: 'https://cdn.example.com/assets/whatever?response-content-disposition=logo.png',
+      primary_card_file: 'https://shorthand.com/the-craft/types-of-image-file-formats/assets/UPhtO6IIvn/sh-unsplash_4qgbmezb56c-4096x2731.jpeg?response-content-disposition=logo.png',
       skyflow_id: 'abc123',
       ...(override.fields || {}),
     },
     fileMetadata: {
-      contentType: 'image/png',
+      contentType: 'image/jpeg',
       ...(override.fileMetadata || {}),
     },
   }));
@@ -41,74 +41,94 @@ const setFileURLReject = (error = { code: 'GENERIC_ERROR', description: 'failed 
   mockGetFileURLFromVaultBySkyflowIDComposable.mockReset().mockImplementation(() => Promise.reject(error));
 };
 
-// Default to success for tests that don't explicitly set behavior
-beforeAll(() => {
-  setFileURLResolve();
-});
+// Global variables that will be initialized in beforeAll
+let testRecord;
+let defineUrl;
+let elementName;
+let elementNameComposable;
+let listen;
+let on;
+let off;
 
+describe("Reveal Frame Class",()=>{
+  beforeAll(() => {
+    // Set default file URL resolve behavior
+    setFileURLResolve();
 
-
-const testRecord = {
-  token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
-  // redaction: RedactionType.DEFAULT,
-  label: "date_of_birth",
-  inputStyles: {
-    base: {
-      color: "#ef3214",
-      fontSize: 20,
-    },
-  },
-};
-
-global.window = Object.create(window);
-const listen = jest.fn()
-const defineUrl = (url) => {
-  Object.defineProperty(window, "location", {
-    value: {
-      href: url,
-    },
-    writable: true,
-  });
-
-  const base64Domain = btoa('http://localhost');
-  Object.defineProperty(window, "name", {
-    value: `reveal:container123:frame123:meta:${base64Domain}`,
-    writable: true,
-  });
-  Object.defineProperty(window, "parent", {
-    value: {
-      frames: {
-        "element:CARD_NUMBER:${tableCol}": {
-          document: {
-            getElementById: () => ({ value: testValue }),
-          },
+    // Initialize test record
+    testRecord = {
+      token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+      // redaction: RedactionType.DEFAULT,
+      label: "date_of_birth",
+      inputStyles: {
+        base: {
+          color: "#ef3214",
+          fontSize: 20,
         },
       },
-      postMessage: jest.fn(),
-      addEventListener: listen,
-    },
-    writable: true,
+    };
+
+    // Setup global window
+    global.window = Object.create(window);
+    listen = jest.fn();
+    
+    // Define URL helper function
+    defineUrl = (url) => {
+      Object.defineProperty(window, "location", {
+        value: {
+          href: url,
+        },
+        writable: true,
+      });
+
+      const base64Domain = btoa('http://localhost');
+      // Set both normal and composable window.name for test coverage
+      Object.defineProperty(window, "name", {
+        value: `reveal:container123:frame123:meta:${base64Domain}`,
+        writable: true,
+      });
+      // For composable container scenario, you can set as below in relevant tests:
+      // Object.defineProperty(window, "name", {
+      //   value: `reveal-composable:container123:frame123:meta:${base64Domain}`,
+      //   writable: true,
+      // });
+      Object.defineProperty(window, "parent", {
+        value: {
+          frames: {
+            "element:CARD_NUMBER:${tableCol}": {
+              document: {
+                getElementById: () => ({ value: testValue }),
+              },
+            },
+          },
+          postMessage: jest.fn(),
+          addEventListener: listen,
+        },
+        writable: true,
+      });
+    };
+    
+    // Match the constructed window.name so event names align
+    elementName = `reveal:container123:frame123:meta:${btoa('http://localhost')}`;
+    elementNameComposable = `reveal-composable:container123:frame123:meta:${btoa('http://localhost')}`;
+
+    // Provide a localStorage mock for Node/JSDOM environment where it's undefined
+    if (typeof global.localStorage === 'undefined') {
+      const storage = {};
+      global.localStorage = {
+        getItem: jest.fn((key) => (key in storage ? storage[key] : null)),
+        setItem: jest.fn((key, value) => { storage[key] = String(value); }),
+        removeItem: jest.fn((key) => { delete storage[key]; }),
+        clear: jest.fn(() => { Object.keys(storage).forEach((k) => delete storage[k]); }),
+      };
+      // attach to window as well for code expecting window.localStorage
+      Object.defineProperty(window, 'localStorage', { value: global.localStorage, writable: false });
+    }
+
+    // Initialize mock functions
+    on = jest.fn();
+    off = jest.fn();
   });
-};
-// Match the constructed window.name so event names align
-const elementName = `reveal:container123:frame123:meta:${btoa('http://localhost')}`
-
-// Provide a localStorage mock for Node/JSDOM environment where it's undefined
-if (typeof global.localStorage === 'undefined') {
-  const storage = {};
-  global.localStorage = {
-    getItem: jest.fn((key) => (key in storage ? storage[key] : null)),
-    setItem: jest.fn((key, value) => { storage[key] = String(value); }),
-    removeItem: jest.fn((key) => { delete storage[key]; }),
-    clear: jest.fn(() => { Object.keys(storage).forEach((k) => delete storage[k]); }),
-  };
-  // attach to window as well for code expecting window.localStorage
-  Object.defineProperty(window, 'localStorage', { value: global.localStorage, writable: false });
-}
-
-const on = jest.fn();
-const off = jest.fn();
-describe("Reveal Frame Class",()=>{
   let emitSpy;
   let targetSpy;
   beforeEach(() => {
@@ -959,6 +979,85 @@ describe("Reveal Frame Class", () => {
   let onMock;
   let offMock;
 
+  beforeAll(() => {
+    // Set default file URL resolve behavior
+    setFileURLResolve();
+
+    // Initialize test record
+    testRecord = {
+      token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+      // redaction: RedactionType.DEFAULT,
+      label: "date_of_birth",
+      inputStyles: {
+        base: {
+          color: "#ef3214",
+          fontSize: 20,
+        },
+      },
+    };
+
+    // Setup global window
+    global.window = Object.create(window);
+    listen = jest.fn();
+    
+    // Define URL helper function
+    defineUrl = (url) => {
+      Object.defineProperty(window, "location", {
+        value: {
+          href: url,
+        },
+        writable: true,
+      });
+
+      const base64Domain = btoa('http://localhost');
+      // Set both normal and composable window.name for test coverage
+      Object.defineProperty(window, "name", {
+        value: `reveal:container123:frame123:meta:${base64Domain}`,
+        writable: true,
+      });
+      // For composable container scenario, you can set as below in relevant tests:
+      // Object.defineProperty(window, "name", {
+      //   value: `reveal-composable:container123:frame123:meta:${base64Domain}`,
+      //   writable: true,
+      // });
+      Object.defineProperty(window, "parent", {
+        value: {
+          frames: {
+            "element:CARD_NUMBER:${tableCol}": {
+              document: {
+                getElementById: () => ({ value: testValue }),
+              },
+            },
+          },
+          postMessage: jest.fn(),
+          addEventListener: listen,
+        },
+        writable: true,
+      });
+    };
+    
+    // Match the constructed window.name so event names align
+    elementName = `reveal:container123:frame123:meta:${btoa('http://localhost')}`;
+    elementNameComposable = `reveal-composable:container123:frame123:meta:${btoa('http://localhost')}`;
+
+    // Provide a localStorage mock for Node/JSDOM environment where it's undefined
+    if (typeof global.localStorage === 'undefined') {
+      const storage = {};
+      global.localStorage = {
+        getItem: jest.fn((key) => (key in storage ? storage[key] : null)),
+        setItem: jest.fn((key, value) => { storage[key] = String(value); }),
+        removeItem: jest.fn((key) => { delete storage[key]; }),
+        clear: jest.fn(() => { Object.keys(storage).forEach((k) => delete storage[k]); }),
+      };
+      // attach to window as well for code expecting window.localStorage
+      Object.defineProperty(window, 'localStorage', { value: global.localStorage, writable: false });
+    }
+
+    // Initialize mock functions
+    on = jest.fn();
+    off = jest.fn();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     emitSpy = jest.spyOn(bus, "emit");
@@ -1151,8 +1250,8 @@ describe("Reveal Frame Class", () => {
   test("render success response event (file render request message)", async () => {
     // Cover THEN block: successful resolve posts REVEAL_CALL_RESPONSE and HEIGHT_CALLBACK_COMPOSABLE
     setFileURLResolve({
-      fields: { primary_card_file: 'https://cdn.example.com/file?response-content-disposition=inline%3B%20filename%3Dsuccess.png' },
-      fileMetadata: { contentType: 'image/png' }
+      fields: { primary_card_file: 'https://shorthand.com/the-craft/types-of-image-file-formats/assets/UPhtO6IIvn/sh-unsplash_4qgbmezb56c-4096x2731.jpeg?response-content-disposition=logo.png' },
+      fileMetadata: { contentType: 'image/jpeg' }
     });
     window.postMessage = jest.fn();
 
@@ -1164,6 +1263,50 @@ describe("Reveal Frame Class", () => {
         label: 'Card Number',
         altText: 'xxxx-xxxx-xxxx-xxxx',
         inputStyles: { base: { color: 'red' } },
+        labelStyles: { base: { color: 'black' } },
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 0));
+
+    const parentCalls = window.parent.postMessage.mock.calls;
+    const successCall = parentCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + elementName));
+    expect(successCall).toBeTruthy();
+    expect(successCall[0].data.type).toBe(REVEAL_TYPES.RENDER_FILE);
+    expect(successCall[0].data.result).toBeDefined();
+    // Height callback
+    const windowCalls = window.postMessage.mock.calls;
+    const heightCall = windowCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name));
+    expect(heightCall).toBeTruthy();
+  });
+
+  test("render success response event (file render request message when style have overflow)", async () => {
+    // Cover THEN block: successful resolve posts REVEAL_CALL_RESPONSE and HEIGHT_CALLBACK_COMPOSABLE
+    setFileURLResolve({
+      fields: { primary_card_file: 'https://shorthand.com/the-craft/types-of-image-file-formats/assets/UPhtO6IIvn/sh-unsplash_4qgbmezb56c-4096x2731.jpeg?response-content-disposition=logo.png' },
+      fileMetadata: { contentType: 'image/jpeg' }
+    });
+    window.postMessage = jest.fn();
+
+    const data = {
+      record: {
+        skyflowID: '1815-6223-1073-1425',
+        table: 'pii_fields',
+        column: 'primary_card_file',
+        label: 'Card Number',
+        altText: 'xxxx-xxxx-xxxx-xxxx',
+        inputStyles: { base: { color: 'red', overflow: 'auto' } },
         labelStyles: { base: { color: 'black' } },
       },
       clientJSON: { metaData: { uuid: '1234' } },
@@ -1586,6 +1729,7 @@ describe("Reveal Frame Class", () => {
         token,
         skyflowID: "sky-123-456", // Has skyflowID, so should not show error
         label: "Card Number",
+        inputStyles: { base: { color: "red" } },
       },
       clientJSON: { metaData: { uuid: "1234" } },
       context: { logLevel: LogLevel.ERROR, env: Env.PROD },
@@ -1619,6 +1763,7 @@ describe("Reveal Frame Class", () => {
         token: invalidSignedToken,
         label: "Card Number",
         // No altText
+        inputStyles: { base: { color: "red" } },
       },
       clientJSON: { metaData: { uuid: "1234" } },
       context: { logLevel: LogLevel.ERROR, env: Env.PROD },
@@ -1803,6 +1948,7 @@ describe("Reveal Frame Class", () => {
         name: uniqueElementName,
         token: actualToken,
         label: "Card Number",
+        inputStyles: { base: { color: "red" } },
       },
       clientJSON: { metaData: { uuid: "1234" } },
       context: { logLevel: LogLevel.ERROR, env: Env.PROD },
@@ -1858,4 +2004,407 @@ describe("Reveal Frame Class", () => {
     document.body.removeChild(rootDiv);
   });
 
+});
+
+describe("Reveal Frame Class - Additional Tests", () => {
+  let emitSpy;
+  let targetSpy;
+  let onMock;
+  let offMock;
+
+  beforeAll(() => {
+    // Set default file URL resolve behavior
+    setFileURLResolve();
+
+    // Initialize test record
+    testRecord = {
+      token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+      // redaction: RedactionType.DEFAULT,
+      label: "date_of_birth",
+      inputStyles: {
+        base: {
+          color: "#ef3214",
+          fontSize: 20,
+        },
+      },
+    };
+
+    // Setup global window
+    global.window = Object.create(window);
+    listen = jest.fn();
+    
+    // Define URL helper function
+    defineUrl = (url) => {
+      Object.defineProperty(window, "location", {
+        value: {
+          href: url,
+        },
+        writable: true,
+      });
+
+      const base64Domain = btoa('http://localhost');
+      // Set both normal and composable window.name for test coverage
+      Object.defineProperty(window, "name", {
+        value: `reveal-composable:container123:frame123:meta:${base64Domain}`,
+        writable: true,
+      });
+      // For composable container scenario, you can set as below in relevant tests:
+      // Object.defineProperty(window, "name", {
+      //   value: `reveal-composable:container123:frame123:meta:${base64Domain}`,
+      //   writable: true,
+      // });
+      Object.defineProperty(window, "parent", {
+        value: {
+          frames: {
+            "element:CARD_NUMBER:${tableCol}": {
+              document: {
+                getElementById: () => ({ value: testValue }),
+              },
+            },
+          },
+          postMessage: jest.fn(),
+          addEventListener: listen,
+        },
+        writable: true,
+      });
+    };
+    
+    // Match the constructed window.name so event names align
+    elementName = `reveal:container123:frame123:meta:${btoa('http://localhost')}`;
+    elementNameComposable = `reveal-composable:container123:frame123:meta:${btoa('http://localhost')}`;
+
+    // Provide a localStorage mock for Node/JSDOM environment where it's undefined
+    if (typeof global.localStorage === 'undefined') {
+      const storage = {};
+      global.localStorage = {
+        getItem: jest.fn((key) => (key in storage ? storage[key] : null)),
+        setItem: jest.fn((key, value) => { storage[key] = String(value); }),
+        removeItem: jest.fn((key) => { delete storage[key]; }),
+        clear: jest.fn(() => { Object.keys(storage).forEach((k) => delete storage[k]); }),
+      };
+      // attach to window as well for code expecting window.localStorage
+      Object.defineProperty(window, 'localStorage', { value: global.localStorage, writable: false });
+    }
+
+    // Initialize mock functions
+    on = jest.fn();
+    off = jest.fn();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    emitSpy = jest.spyOn(bus, "emit");
+    targetSpy = jest.spyOn(bus, "target");
+    onMock = jest.fn();
+    offMock = jest.fn();
+    targetSpy.mockReturnValue({
+      on: onMock,
+      off: offMock,
+    });
+    
+    // Clean up DOM between tests to avoid interference
+  });
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  // Add your additional tests here
+    test("render success response event (file render request message)", async () => {
+    // Cover THEN block: successful resolve posts REVEAL_CALL_RESPONSE and HEIGHT_CALLBACK_COMPOSABLE
+    setFileURLResolve({
+      fields: { primary_card_file: 'https://shorthand.com/the-craft/types-of-image-file-formats/assets/UPhtO6IIvn/sh-unsplash_4qgbmezb56c-4096x2731.jpeg?response-content-disposition=logo.png' },
+      fileMetadata: { contentType: 'image/jpeg' }
+    });
+    window.postMessage = jest.fn();
+
+    const data = {
+      record: {
+        skyflowID: '1815-6223-1073-1425',
+        table: 'pii_fields',
+        column: 'primary_card_file',
+        label: 'Card Number',
+        altText: 'xxxx-xxxx-xxxx-xxxx',
+        inputStyles: { base: { color: 'red' } },
+        labelStyles: { base: { color: 'black' } },
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementNameComposable,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementNameComposable },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 0));
+
+    const parentCalls = window.parent.postMessage.mock.calls;
+    const successCall = parentCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + elementNameComposable));
+    expect(successCall).toBeTruthy();
+    expect(successCall[0].data.type).toBe(REVEAL_TYPES.RENDER_FILE);
+    expect(successCall[0].data.result).toBeDefined();
+    // Height callback
+    const windowCalls = window.postMessage.mock.calls;
+    const heightCall = windowCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name));
+    expect(heightCall).toBeTruthy();
+  });
+  test("fileElement.onload callback is triggered and sets dimensions correctly for composable container", async () => {
+    // Cover the fileElement.onload callback for image with overflow in composable container
+    setFileURLResolve({
+      fields: { primary_card_file: 'https://shorthand.com/the-craft/types-of-image-file-formats/assets/UPhtO6IIvn/sh-unsplash_4qgbmezb56c-4096x2731.jpeg?response-content-disposition=logo.png' },
+      fileMetadata: { contentType: 'image/jpeg' }
+    });
+    window.postMessage = jest.fn();
+
+    const data = {
+      record: {
+        skyflowID: '1815-6223-1073-1425',
+        table: 'pii_fields',
+        column: 'primary_card_file',
+        label: 'Card Number',
+        altText: 'xxxx-xxxx-xxxx-xxxx',
+        inputStyles: { 
+          base: { 
+            color: 'red', 
+            overflow: 'auto',
+            width: '300px',
+            height: '200px'
+          } 
+        },
+        labelStyles: { base: { color: 'black' } },
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    // Set composable container name
+    const composableElementName = `reveal-composable:container123:frame123:meta:${btoa('http://localhost')}`;
+    Object.defineProperty(window, "name", { value: composableElementName, writable: true });
+    
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + composableElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: composableElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    // Wait for async operations to complete (Promise resolution and DOM updates)
+    await new Promise(r => setTimeout(r, 0));
+
+    // Get the created image element
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    // Wait for onload handler to be attached
+    await new Promise(r => setTimeout(r, 0));
+
+    if (imgElement) {
+      Object.defineProperty(imgElement, 'naturalWidth', { value: 800, writable: true });
+      Object.defineProperty(imgElement, 'naturalHeight', { value: 600, writable: true });
+      imgElement.setAttribute('naturalWidth', '800');
+      imgElement.setAttribute('naturalHeight', '600');
+      console.log('Simulated natural dimensions:', imgElement.getAttribute('naturalWidth'), imgElement.getAttribute('naturalHeight'));
+      // imgElement.naturalHeight = 600;
+      
+      // Manually trigger onload callback if it exists (since it's set as a property, not event listener)
+      if (imgElement.onload) {
+        imgElement.onload(new Event('load'));
+      }
+      
+      // Verify dimensions were set
+      expect(imgElement?.style?.width).toBe('800px');
+      expect(imgElement?.style?.height).toBe('600px');
+      
+      // Verify height callback was posted
+      const windowCalls = window.postMessage.mock.calls;
+      const heightCall = windowCalls.find(c => c[0]?.type?.includes('HEIGHT_CALLBACK_COMPOSABLE'));
+      expect(heightCall).toBeTruthy();
+    }
+  });
+  test("fileElement.onload callback is triggered and sets dimensions correctly for composable container when overflow is not defined", async () => {
+    // Cover the fileElement.onload callback for image with overflow in composable container
+    setFileURLResolve({
+      fields: { primary_card_file: 'https://shorthand.com/the-craft/types-of-image-file-formats/assets/UPhtO6IIvn/sh-unsplash_4qgbmezb56c-4096x2731.jpeg?response-content-disposition=logo.png' },
+      fileMetadata: { contentType: 'image/jpeg' }
+    });
+    window.postMessage = jest.fn();
+
+    const data = {
+      record: {
+        skyflowID: '1815-6223-1073-1425',
+        table: 'pii_fields',
+        column: 'primary_card_file',
+        label: 'Card Number',
+        altText: 'xxxx-xxxx-xxxx-xxxx',
+        inputStyles: { 
+          base: { 
+            color: 'red', 
+          } 
+        },
+        labelStyles: { base: { color: 'black' } },
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    // Set composable container name
+    const composableElementName = `reveal-composable:container123:frame123:meta:${btoa('http://localhost')}`;
+    Object.defineProperty(window, "name", { value: composableElementName, writable: true });
+    
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + composableElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: composableElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    // Wait for async operations to complete (Promise resolution and DOM updates)
+    await new Promise(r => setTimeout(r, 0));
+
+    // Get the created image element
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    // Wait for onload handler to be attached
+    await new Promise(r => setTimeout(r, 0));
+
+    if (imgElement) {      
+      // Manually trigger onload callback if it exists (since it's set as a property, not event listener)
+      if (imgElement.onload) {
+        imgElement.onload(new Event('load'));
+      }
+      
+      // Verify dimensions were set
+      expect(imgElement?.style?.width).toBe('');
+      expect(imgElement?.style?.height).toBe('');
+      
+      // Verify height callback was posted
+      const windowCalls = window.postMessage.mock.calls;
+      const heightCall = windowCalls.find(c => c[0]?.type?.includes('HEIGHT_CALLBACK_COMPOSABLE'));
+      expect(heightCall).toBeTruthy();
+    }
+  });
+  test("fileElement.onload callback is triggered and sets dimensions correctly for composable container when base styles are not present", async () => {
+    // Cover the fileElement.onload callback for image with overflow in composable container
+    setFileURLResolve({
+      fields: { primary_card_file: 'https://shorthand.com/the-craft/types-of-image-file-formats/assets/UPhtO6IIvn/sh-unsplash_4qgbmezb56c-4096x2731.jpeg?response-content-disposition=logo.png' },
+      fileMetadata: { contentType: 'image/jpeg' }
+    });
+    window.postMessage = jest.fn();
+
+    const data = {
+      record: {
+        skyflowID: '1815-6223-1073-1425',
+        table: 'pii_fields',
+        column: 'primary_card_file',
+        label: 'Card Number',
+        altText: 'xxxx-xxxx-xxxx-xxxx',
+        inputStyles: { 
+          base: { 
+            color: 'red', 
+            overflow: 'auto',
+          } 
+        },
+        labelStyles: { base: { color: 'black' } },
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    // Set composable container name
+    const composableElementName = `reveal-composable:container123:frame123:meta:${btoa('http://localhost')}`;
+    Object.defineProperty(window, "name", { value: composableElementName, writable: true });
+    
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + composableElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: composableElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    // Wait for async operations to complete (Promise resolution and DOM updates)
+    await new Promise(r => setTimeout(r, 0));
+
+    // Get the created image element
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    // Wait for onload handler to be attached
+    // await new Promise(r => setTimeout(r, 0));
+
+    if (imgElement) {      
+      // Manually trigger onload callback if it exists (since it's set as a property, not event listener)
+      if (imgElement.onload) {
+        imgElement.onload(new Event('load'));
+      }
+      
+      // Verify dimensions were set
+      expect(imgElement?.style?.width).toBe('');
+      expect(imgElement?.style?.height).toBe('');
+      
+      // Verify height callback was posted
+      const windowCalls = window.postMessage.mock.calls;
+      const heightCall = windowCalls.find(c => c[0]?.type?.includes('HEIGHT_CALLBACK_COMPOSABLE'));
+      expect(heightCall).toBeTruthy();
+    }
+  });
+  test("render success response event (file render request message when style have overflow)", async () => {
+    // Cover THEN block: successful resolve posts REVEAL_CALL_RESPONSE and HEIGHT_CALLBACK_COMPOSABLE
+    setFileURLResolve({
+      fields: { primary_card_file: 'https://shorthand.com/the-craft/types-of-image-file-formats/assets/UPhtO6IIvn/sh-unsplash_4qgbmezb56c-4096x2731.jpeg?response-content-disposition=logo.png' },
+      fileMetadata: { contentType: 'image/jpeg' }
+    });
+    window.postMessage = jest.fn();
+
+    const data = {
+      record: {
+        skyflowID: '1815-6223-1073-1425',
+        table: 'pii_fields',
+        column: 'primary_card_file',
+        label: 'Card Number',
+        altText: 'xxxx-xxxx-xxxx-xxxx',
+        inputStyles: { base: { color: 'red', overflow: 'auto' } },
+        labelStyles: { base: { color: 'black' } },
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementNameComposable,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementNameComposable },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 0));
+
+    const parentCalls = window.parent.postMessage.mock.calls;
+    const successCall = parentCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + elementNameComposable));
+    expect(successCall).toBeTruthy();
+    expect(successCall[0].data.type).toBe(REVEAL_TYPES.RENDER_FILE);
+    expect(successCall[0].data.result).toBeDefined();
+    // Height callback
+    const windowCalls = window.postMessage.mock.calls;
+    const heightCall = windowCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name));
+    expect(heightCall).toBeTruthy();
+  });
 });

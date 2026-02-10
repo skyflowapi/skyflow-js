@@ -30,6 +30,7 @@ import {
   constructMaskTranslation,
   formatRevealElementOptions,
   getAtobValue,
+  getContainerType,
   getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
 import { formatForRenderClient, getFileURLFromVaultBySkyflowIDComposable } from '../../../core-utils/reveal';
@@ -76,6 +77,8 @@ class RevealFrame {
 
   #client!: Client;
 
+  #composableContainer: Boolean = false;
+
   static init() {
     const url = window.location?.href;
     const configIndex = url.indexOf('?');
@@ -89,6 +92,7 @@ class RevealFrame {
   constructor(record, context: Context, id: string, rootDiv?: HTMLDivElement) {
     this.#skyflowContainerId = id;
     this.#name = rootDiv ? record?.name : window.name;
+    this.#composableContainer = getContainerType(this.#name) === 'COMPOSABLE_REVEAL';
     this.#containerId = getValueFromName(this.#name, 2);
     const encodedClientDomain = getValueFromName(this.#name, 4);
     const clientDomain = getAtobValue(encodedClientDomain);
@@ -517,20 +521,72 @@ class RevealFrame {
       fileElement.setAttribute('type', ext);
     }
     fileElement.setAttribute('src', responseUrl);
-
     if (Object.prototype.hasOwnProperty.call(this.#record, 'inputStyles')) {
       this.#inputStyles = {};
-      this.#inputStyles[STYLE_TYPE.BASE] = {
-        ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
-        ...this.#record.inputStyles[STYLE_TYPE.BASE],
-      };
-      getCssClassesFromJss(this.#inputStyles, tag);
+      if (tag === 'img') {
+        this.#inputStyles[STYLE_TYPE.BASE] = {
+          ...this.#record.inputStyles[STYLE_TYPE.BASE],
+        };
+        if (this.#record?.inputStyles
+          && this.#record?.inputStyles[STYLE_TYPE.BASE]
+           && this.#record?.inputStyles[STYLE_TYPE.BASE]?.overflow && this.#composableContainer) {
+          this.#elementContainer.className = `SkyflowElement-div-container-${STYLE_TYPE.BASE}`;
+          const divStyles = {
+            [STYLE_TYPE.BASE]: {
+              ...this.#record.inputStyles[STYLE_TYPE.BASE],
+            },
+          };
+          this.#elementContainer.style.overflow = this.#record
+            .inputStyles[STYLE_TYPE.BASE].overflow as string;
+          this.#inputStyles[STYLE_TYPE.BASE] = {
+            ...this.#inputStyles[STYLE_TYPE.BASE],
+          };
+          getCssClassesFromJss(divStyles, 'div-container');
+        } else {
+          this.#inputStyles[STYLE_TYPE.BASE] = {
+            ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
+            ...this.#inputStyles[STYLE_TYPE.BASE],
+          };
+          getCssClassesFromJss(this.#inputStyles, tag);
+        }
+      } else {
+        this.#inputStyles[STYLE_TYPE.BASE] = {
+          ...RENDER_ELEMENT_IMAGE_STYLES[STYLE_TYPE.BASE],
+          ...this.#record.inputStyles[STYLE_TYPE.BASE],
+        };
+        getCssClassesFromJss(this.#inputStyles, tag);
+      }
     }
+
     if (this.#elementContainer.childNodes[0] !== undefined) {
       this.#elementContainer.innerHTML = '';
       this.#elementContainer.appendChild(fileElement);
     } else {
       this.#elementContainer.appendChild(fileElement);
+    }
+    if (fileElement instanceof HTMLImageElement
+      && this.#record?.inputStyles
+      && this.#record?.inputStyles[STYLE_TYPE.BASE]
+      && this.#record?.inputStyles[STYLE_TYPE.BASE]?.overflow && this.#composableContainer) {
+      fileElement.onload = () => {
+        if (fileElement?.naturalWidth && fileElement?.naturalHeight) {
+          fileElement.style.width = `${fileElement.naturalWidth}px`;
+          fileElement.style.height = `${fileElement.naturalHeight}px`;
+        }
+
+        if (this.#record?.inputStyles[STYLE_TYPE.BASE]?.width) {
+          this.#elementContainer.style.width = this.#record.inputStyles[STYLE_TYPE.BASE].width;
+        }
+        if (this.#record?.inputStyles[STYLE_TYPE.BASE]?.height) {
+          this.#elementContainer.style.height = this.#record.inputStyles[STYLE_TYPE.BASE].height;
+        }
+        this.#elementContainer.style.overflow = this.#record
+          .inputStyles[STYLE_TYPE.BASE].overflow as string;
+
+        window?.postMessage({
+          type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+        }, properties?.IFRAME_SECURE_ORIGIN);
+      };
     }
   }
 
