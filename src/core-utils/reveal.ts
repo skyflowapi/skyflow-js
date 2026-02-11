@@ -235,10 +235,12 @@ export const fetchRecordsByTokenId = (
           .then(
             (response: IApiSuccessResponse) => {
               const fieldsData = formatForPureJsSuccess(response);
-              const fieldsDataWithRedaction = fieldsData.map((field) => ({
-                ...field,
-                redaction,
-              }));
+              const fieldsDataWithRedaction = purejs
+                ? fieldsData
+                : fieldsData.map((field) => ({
+                  ...field,
+                  redaction,
+                }));
               apiResponse.push(...fieldsDataWithRedaction);
             },
             (cause: any) => {
