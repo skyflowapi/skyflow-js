@@ -153,10 +153,149 @@ describe("formatRecordsForIframe fn test",()=>{
     const fnResponse = formatRecordsForIframe(testInput);
     expect(fnResponse).toStrictEqual({});
   });
-  test("with records should return token value object",()=>{
-    const testInput = {"records":[{token:"7823-323-242-2232",value:"token_value","valueType" : "STRING"}]};
+  
+  test("with single record should return token with value and redaction object",()=>{
+    const testInput = {
+      "records": [{
+        token: "7823-323-242-2232",
+        value: "token_value",
+        valueType: "STRING",
+        redaction: "PLAIN_TEXT"
+      }]
+    };
     const fnResponse = formatRecordsForIframe(testInput);
-    expect(fnResponse).toStrictEqual({"7823-323-242-2232":"token_value"});
+    expect(fnResponse).toStrictEqual({
+      "7823-323-242-2232": {
+        value: "token_value",
+        redaction: "PLAIN_TEXT"
+      }
+    });
+  });
+
+  test("with single record without redaction should default to PLAIN_TEXT",()=>{
+    const testInput = {
+      "records": [{
+        token: "7823-323-242-2232",
+        value: "token_value",
+        valueType: "STRING"
+      }]
+    };
+    const fnResponse = formatRecordsForIframe(testInput);
+    expect(fnResponse).toStrictEqual({
+      "7823-323-242-2232": {
+        value: "token_value",
+        redaction: undefined
+      }
+    });
+  });
+
+  test("with duplicate tokens and different redactions should return array",()=>{
+    const testInput = {
+      "records": [
+        {
+          token: "4743-4218-2445-2633",
+          value: "*REDACTED*",
+          valueType: "STRING",
+          redaction: "REDACTED"
+        },
+        {
+          token: "4743-4218-2445-2633",
+          value: "4111111111111111",
+          valueType: "STRING",
+          redaction: "PLAIN_TEXT"
+        }
+      ]
+    };
+    const fnResponse = formatRecordsForIframe(testInput);
+    expect(fnResponse).toStrictEqual({
+      "4743-4218-2445-2633": [
+        {
+          value: "*REDACTED*",
+          redaction: "REDACTED"
+        },
+        {
+          value: "4111111111111111",
+          redaction: "PLAIN_TEXT"
+        }
+      ]
+    });
+  });
+
+  test("with multiple duplicate tokens should append to array",()=>{
+    const testInput = {
+      "records": [
+        {
+          token: "token-123",
+          value: "value1",
+          valueType: "STRING",
+          redaction: "REDACTED"
+        },
+        {
+          token: "token-123",
+          value: "value2",
+          valueType: "STRING",
+          redaction: "PLAIN_TEXT"
+        },
+        {
+          token: "token-123",
+          value: "value3",
+          valueType: "STRING",
+          redaction: "MASKED"
+        }
+      ]
+    };
+    const fnResponse = formatRecordsForIframe(testInput);
+    expect(fnResponse["token-123"]).toHaveLength(3);
+    expect(fnResponse["token-123"][0]).toEqual({
+      value: "value1",
+      redaction: "REDACTED"
+    });
+    expect(fnResponse["token-123"][1]).toEqual({
+      value: "value2",
+      redaction: "PLAIN_TEXT"
+    });
+    expect(fnResponse["token-123"][2]).toEqual({
+      value: "value3",
+      redaction: "MASKED"
+    });
+  });
+
+  test("with mixed unique and duplicate tokens should handle both",()=>{
+    const testInput = {
+      "records": [
+        {
+          token: "token-unique",
+          value: "unique_value",
+          valueType: "STRING",
+          redaction: "PLAIN_TEXT"
+        },
+        {
+          token: "token-dup",
+          value: "dup_value1",
+          valueType: "STRING",
+          redaction: "REDACTED"
+        },
+        {
+          token: "token-dup",
+          value: "dup_value2",
+          valueType: "STRING",
+          redaction: "PLAIN_TEXT"
+        }
+      ]
+    };
+    const fnResponse = formatRecordsForIframe(testInput);
+    expect(fnResponse["token-unique"]).toEqual({
+      value: "unique_value",
+      redaction: "PLAIN_TEXT"
+    });
+    expect(Array.isArray(fnResponse["token-dup"])).toBe(true);
+    expect(fnResponse["token-dup"]).toHaveLength(2);
+  });
+
+  test("should handle empty records array",()=>{
+    const testInput = { "records": [] };
+    const fnResponse = formatRecordsForIframe(testInput);
+    expect(fnResponse).toStrictEqual({});
   });
 });
 

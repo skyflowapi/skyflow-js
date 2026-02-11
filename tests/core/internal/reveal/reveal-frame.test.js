@@ -2407,4 +2407,207 @@ describe("Reveal Frame Class - Additional Tests", () => {
     const heightCall = windowCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name));
     expect(heightCall).toBeTruthy();
   });
+
+  test('sub function handles array response and matches by redaction type', () => {
+    const token = 'test-token-' + Date.now();
+    const uniqueElementName = 'reveal:container400:frame400:meta:' + btoa('http://localhost');
+    
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        redaction: 'MASKED',
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, 'name', {
+      value: uniqueElementName,
+      writable: true,
+    });
+    
+    const testFrame = RevealFrame.init();
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+    
+    onRevealResponseCb({
+      [token]: [
+        { value: '4111-1111-1111-1111', redaction: 'PLAIN_TEXT' },
+        { value: '4111-****-****-1111', redaction: 'MASKED' },
+        { value: '****-****-****-1111', redaction: 'REDACTED' },
+      ],
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe('4111-****-****-1111');
+  });
+
+  test('sub function handles array response and falls back to first element when no redaction match', () => {
+    const token = 'test-token-' + Date.now();
+    const uniqueElementName = 'reveal:container401:frame401:meta:' + btoa('http://localhost');
+    
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        redaction: 'CUSTOM_REDACTION', // This won't match any in array
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, 'name', {
+      value: uniqueElementName,
+      writable: true,
+    });
+    
+    const testFrame = RevealFrame.init();
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+    
+    onRevealResponseCb({
+      [token]: [
+        { value: '4111-1111-1111-1111', redaction: 'PLAIN_TEXT' },
+        { value: '4111-****-****-1111', redaction: 'MASKED' },
+      ],
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    // Should fall back to first element
+    expect(dataElement?.innerText).toBe('4111-1111-1111-1111');
+  });
+
+  test('sub function handles array response without redaction field in record', () => {
+    const token = 'test-token-' + Date.now();
+    const uniqueElementName = 'reveal:container402:frame402:meta:' + btoa('http://localhost');
+    
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        // No redaction field
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, 'name', {
+      value: uniqueElementName,
+      writable: true,
+    });
+    
+    const testFrame = RevealFrame.init();
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+    
+    onRevealResponseCb({
+      [token]: [
+        { value: 'john@example.com', redaction: 'PLAIN_TEXT' },
+        { value: 'j***@example.com', redaction: 'MASKED' },
+      ],
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    // Should fall back to first element when redaction is undefined
+    expect(dataElement?.innerText).toBe('john@example.com');
+  });
+
+  test('sub function handles object response with value property', () => {
+    const token = 'test-token-' + Date.now();
+    const uniqueElementName = 'reveal:container403:frame403:meta:' + btoa('http://localhost');
+    
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        redaction: 'PLAIN_TEXT',
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, 'name', {
+      value: uniqueElementName,
+      writable: true,
+    });
+    
+    const testFrame = RevealFrame.init();
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+    
+    onRevealResponseCb({
+      [token]: { value: 'Test Value 123', redaction: 'PLAIN_TEXT' },
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe('Test Value 123');
+  });
+
+  test('sub function handles string response for backward compatibility', () => {
+    const token = 'test-token-' + Date.now();
+    const uniqueElementName = 'reveal:container404:frame404:meta:' + btoa('http://localhost');
+    
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, 'name', {
+      value: uniqueElementName,
+      writable: true,
+    });
+    
+    const testFrame = RevealFrame.init();
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+    
+    onRevealResponseCb({
+      [token]: 'Plain String Value',
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe('Plain String Value');
+  });
+
+  test('sub function handles array with 5 items and finds correct REDACTED match', () => {
+    const token = 'test-token-' + Date.now();
+    const uniqueElementName = 'reveal:container405:frame405:meta:' + btoa('http://localhost');
+    
+    const data = {
+      record: {
+        name: uniqueElementName,
+        token,
+        redaction: 'REDACTED',
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, 'name', {
+      value: uniqueElementName,
+      writable: true,
+    });
+    
+    const testFrame = RevealFrame.init();
+    const onRevealResponseCb = onMock.mock.calls[1][1];
+    
+    onRevealResponseCb({
+      [token]: [
+        { value: '5555-5555-5555-4444', redaction: 'PLAIN_TEXT' },
+        { value: '5555-****-****-4444', redaction: 'MASKED' },
+        { value: '****-****-****-4444', redaction: 'REDACTED' },
+        { value: 'custom-format', redaction: 'CUSTOM' },
+        { value: 'another-format', redaction: 'OTHER' },
+      ],
+    });
+    
+    const dataElement = document.getElementById(uniqueElementName);
+    expect(dataElement?.innerText).toBe('****-****-****-4444');
+  });
 });
