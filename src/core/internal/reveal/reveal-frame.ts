@@ -236,7 +236,6 @@ class RevealFrame {
 
     const sub = (data) => {
       const tokenToMatch = this.decodeSignedToken(this.#record.token);
-
       if (Object.prototype.hasOwnProperty.call(data, tokenToMatch)) {
         let responseData = data[tokenToMatch];
 
