@@ -24,7 +24,7 @@ import {
 } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
-  Context, IRenderResponseType, IRevealRecord, MessageType,
+  Context, IRenderResponseType, IRevealRecord, MessageType, RedactionType,
 } from '../../../utils/common';
 import {
   constructMaskTranslation,
@@ -238,7 +238,17 @@ class RevealFrame {
       const tokenToMatch = this.decodeSignedToken(this.#record.token);
 
       if (Object.prototype.hasOwnProperty.call(data, tokenToMatch)) {
-        const responseValue = data[tokenToMatch] as string;
+        let responseData = data[tokenToMatch];
+
+        if (Array.isArray(responseData)) {
+          const recordRedaction = this.#record.redaction || RedactionType.PLAIN_TEXT;
+          const matchingRecord = responseData.find(
+            (item) => item.redaction === recordRedaction,
+          );
+          responseData = matchingRecord || responseData[0];
+        }
+
+        const responseValue = typeof responseData === 'string' ? responseData : responseData?.value;
         this.#revealedValue = responseValue;
         this.isRevealCalled = true;
         this.#dataElememt.innerText = responseValue;
