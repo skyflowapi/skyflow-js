@@ -25,6 +25,7 @@ import {
 import logs from '../../../utils/logs';
 import {
   Context, IRenderResponseType, IRevealRecord, MessageType,
+  RedactionType,
 } from '../../../utils/common';
 import {
   constructMaskTranslation,
@@ -245,7 +246,7 @@ class RevealFrame {
           const matchingRecord = responseData.find(
             (item) => item.redaction === recordRedaction,
           );
-          responseData = matchingRecord || responseData[0];
+          responseData = matchingRecord || RedactionType.PLAIN_TEXT;
         }
 
         const responseValue = typeof responseData === 'string' ? responseData : responseData?.value;
