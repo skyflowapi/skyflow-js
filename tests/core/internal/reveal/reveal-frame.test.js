@@ -2475,7 +2475,7 @@ describe("Reveal Frame Class - Additional Tests", () => {
     
     const dataElement = document.getElementById(uniqueElementName);
     // Should fall back to first element
-    expect(dataElement?.innerText).toBe('PLAIN_TEXT');
+    expect(dataElement?.innerText).toBe('4111-1111-1111-1111');
   });
 
   test('sub function handles array response without redaction field in record', () => {
@@ -2510,7 +2510,7 @@ describe("Reveal Frame Class - Additional Tests", () => {
     
     const dataElement = document.getElementById(uniqueElementName);
     // Should fall back to first element when redaction is undefined
-    expect(dataElement?.innerText).toBe('PLAIN_TEXT');
+    expect(dataElement?.innerText).toBe('john@example.com');
   });
 
   test('sub function handles object response with value property', () => {

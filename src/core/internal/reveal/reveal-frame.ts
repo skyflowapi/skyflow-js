@@ -24,8 +24,7 @@ import {
 } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
-  Context, IRenderResponseType, IRevealRecord, MessageType,
-  RedactionType,
+  Context, IRenderResponseType, IRevealRecord, MessageType, RedactionType,
 } from '../../../utils/common';
 import {
   constructMaskTranslation,
@@ -242,11 +241,11 @@ class RevealFrame {
         let responseData = data[tokenToMatch];
 
         if (Array.isArray(responseData)) {
-          const recordRedaction = this.#record.redaction;
+          const recordRedaction = this.#record.redaction || RedactionType.PLAIN_TEXT;
           const matchingRecord = responseData.find(
             (item) => item.redaction === recordRedaction,
           );
-          responseData = matchingRecord || RedactionType.PLAIN_TEXT;
+          responseData = matchingRecord || responseData[0];
         }
 
         const responseValue = typeof responseData === 'string' ? responseData : responseData?.value;
