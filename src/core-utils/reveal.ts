@@ -235,7 +235,13 @@ export const fetchRecordsByTokenId = (
           .then(
             (response: IApiSuccessResponse) => {
               const fieldsData = formatForPureJsSuccess(response);
-              apiResponse.push(...fieldsData);
+              const fieldsDataWithRedaction = purejs
+                ? fieldsData
+                : fieldsData.map((field) => ({
+                  ...field,
+                  redaction,
+                }));
+              apiResponse.push(...fieldsDataWithRedaction);
             },
             (cause: any) => {
               const errorData = formatForPureJsFailure(cause, tokenRecord.token as string, purejs);
@@ -332,10 +338,24 @@ export const fetchRecordsByTokenIdComposable = (
 });
 
 export const formatRecordsForIframe = (response: IRevealResponseType) => {
-  const result: Record<string, string> = {};
+  const result: Record<string, any> = {};
   if (response.records) {
     response.records.forEach((record) => {
-      result[record.token] = record.value;
+      const key = record.token;
+      const recordData = {
+        value: record.value,
+        redaction: record.redaction,
+      };
+
+      if (result[key]) {
+        if (Array.isArray(result[key])) {
+          result[key].push(recordData);
+        } else {
+          result[key] = [result[key], recordData];
+        }
+      } else {
+        result[key] = recordData;
+      }
     });
   }
   return result;

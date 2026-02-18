@@ -1738,6 +1738,252 @@ describe('FrameElement - onInputChange Tests for Card number', () => {
 
       expect(frameElement.domInput.setSelectionRange).toHaveBeenCalled();
     });
+
+    it('should position cursor correctly when typing in the middle - testing digit counting loop', () => {
+      mockOptions.masking = false;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      
+      const input = document.createElement('input');
+      input.value = '4111 11';
+      input.selectionStart = 5;
+      input.checkValidity = jest.fn().mockReturnValue(true);
+      
+      const setSelectionRangeSpy = jest.fn();
+      input.setSelectionRange = setSelectionRangeSpy;
+      
+      frameElement.domInput = input;
+
+      const mockEvent = {
+        target: input
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(setSelectionRangeSpy).toHaveBeenCalled();
+      const [[cursorPos, cursorPosEnd]] = setSelectionRangeSpy.mock.calls;
+      
+      expect(cursorPos).toBeGreaterThan(0);
+      expect(cursorPos).toBe(cursorPosEnd);
+    });
+
+    it('should execute digitsSeen increment when digit is found - testing if (/\\d/.test(output[i]))', () => {
+      mockOptions.masking = false;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      
+      const input = document.createElement('input');
+      input.value = '4111111111111111';
+      input.selectionStart = 8;
+      input.checkValidity = jest.fn().mockReturnValue(true);
+      
+      const setSelectionRangeSpy = jest.fn();
+      input.setSelectionRange = setSelectionRangeSpy;
+      
+      frameElement.domInput = input;
+
+      const mockEvent = {
+        target: input
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(setSelectionRangeSpy).toHaveBeenCalled();
+      const [[cursorPos]] = setSelectionRangeSpy.mock.calls;
+      
+      expect(cursorPos).toBeGreaterThanOrEqual(8);
+    });
+
+    it('should break loop when digitsSeen equals targetDigitCount - testing break statement', () => {
+      mockOptions.masking = false;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      
+      const input = document.createElement('input');
+      input.value = '41111111';
+      input.selectionStart = 4;
+      input.checkValidity = jest.fn().mockReturnValue(true);
+      
+      const setSelectionRangeSpy = jest.fn();
+      input.setSelectionRange = setSelectionRangeSpy;
+      
+      frameElement.domInput = input;
+
+      const mockEvent = {
+        target: input
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(setSelectionRangeSpy).toHaveBeenCalled();
+      const [[cursorPos]] = setSelectionRangeSpy.mock.calls;
+      
+      expect(cursorPos).toBeGreaterThan(0);
+      expect(cursorPos).toBeLessThanOrEqual(10);
+    });
+
+    it('should place cursor at end when digitsSeen < targetDigitCount', () => {
+      mockOptions.masking = false;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      
+      const input = document.createElement('input');
+      input.value = '41';
+      input.selectionStart = 5; 
+      input.checkValidity = jest.fn().mockReturnValue(true);
+      
+      const setSelectionRangeSpy = jest.fn();
+      input.setSelectionRange = setSelectionRangeSpy;
+      
+      frameElement.domInput = input;
+
+      const mockEvent = {
+        target: input
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(setSelectionRangeSpy).toHaveBeenCalled();
+      const [[cursorPos]] = setSelectionRangeSpy.mock.calls;
+      
+      expect(cursorPos).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should handle empty input gracefully', () => {
+      mockOptions.masking = false;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      
+      const input = document.createElement('input');
+      input.value = '';
+      input.selectionStart = 0;
+      input.checkValidity = jest.fn().mockReturnValue(true);
+      
+      const setSelectionRangeSpy = jest.fn();
+      input.setSelectionRange = setSelectionRangeSpy;
+      
+      frameElement.domInput = input;
+
+      const mockEvent = {
+        target: input
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(setSelectionRangeSpy).toHaveBeenCalled();
+      const [[cursorPos]] = setSelectionRangeSpy.mock.calls;
+      
+      expect(cursorPos).toBe(0);
+    });
+
+    it('should keep cursor at position 0 when at beginning of input', () => {
+      mockOptions.masking = false;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      
+      const input = document.createElement('input');
+      input.value = '4111';
+      input.selectionStart = 0;
+      input.checkValidity = jest.fn().mockReturnValue(true);
+      
+      const setSelectionRangeSpy = jest.fn();
+      input.setSelectionRange = setSelectionRangeSpy;
+      
+      frameElement.domInput = input;
+
+      const mockEvent = {
+        target: input
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(setSelectionRangeSpy).toHaveBeenCalled();
+      const [[cursorPos]] = setSelectionRangeSpy.mock.calls;
+      
+      expect(cursorPos).toBe(0);
+    });
+
+    it('should handle cursor after 4 digits (first group)', () => {
+      mockOptions.masking = false;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      
+      const input = document.createElement('input');
+      input.value = '4111111111111111';
+      input.selectionStart = 4;
+      input.checkValidity = jest.fn().mockReturnValue(true);
+      
+      const setSelectionRangeSpy = jest.fn();
+      input.setSelectionRange = setSelectionRangeSpy;
+      
+      frameElement.domInput = input;
+
+      const mockEvent = {
+        target: input
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(setSelectionRangeSpy).toHaveBeenCalled();
+      const [[cursorPos]] = setSelectionRangeSpy.mock.calls;
+      
+      expect(cursorPos).toBeGreaterThanOrEqual(4);
+      expect(cursorPos).toBeLessThanOrEqual(6);
+    });
+
+    it('should handle cursor after 12 digits (third group)', () => {
+      mockOptions.masking = false;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      
+      const input = document.createElement('input');
+      input.value = '4111111111111111';
+      input.selectionStart = 12;
+      input.checkValidity = jest.fn().mockReturnValue(true);
+      
+      const setSelectionRangeSpy = jest.fn();
+      input.setSelectionRange = setSelectionRangeSpy;
+      
+      frameElement.domInput = input;
+
+      const mockEvent = {
+        target: input
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(setSelectionRangeSpy).toHaveBeenCalled();
+      const [[cursorPos]] = setSelectionRangeSpy.mock.calls;
+      
+      expect(cursorPos).toBeGreaterThanOrEqual(12);
+    });
+
+    it('should reposition cursor correctly after deletion in middle', () => {
+      mockOptions.masking = false;
+      frameElement = new FrameElement(mockIFrameFormElement, mockOptions, mockHtmlDivElement);
+      frameElement.mount();
+      
+      const input = document.createElement('input');
+      input.value = '411111111111';
+      input.selectionStart = 6;
+      input.checkValidity = jest.fn().mockReturnValue(true);
+      
+      const setSelectionRangeSpy = jest.fn();
+      input.setSelectionRange = setSelectionRangeSpy;
+      
+      frameElement.domInput = input;
+
+      const mockEvent = {
+        target: input
+      };
+
+      frameElement.onInputChange(mockEvent);
+
+      expect(setSelectionRangeSpy).toHaveBeenCalled();
+      const [[cursorPos]] = setSelectionRangeSpy.mock.calls;
+      
+      expect(cursorPos).toBeGreaterThan(0);
+    });
   });
 
   describe('Non-masked Input Tests', () => {
