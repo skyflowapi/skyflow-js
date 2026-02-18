@@ -18,6 +18,7 @@ import {
   REVEAL_TYPES,
   COMPOSABLE_REVEAL,
   CUSTOM_ERROR_MESSAGES,
+  RENDER_LOADING_MESSAGE,
 } from '../../constants';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
@@ -322,7 +323,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
     if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
       altText = recordData.altText;
     }
-    this.setAltText('loading...', recordData);
+    this.setAltText(RENDER_LOADING_MESSAGE, recordData);
     const loglevel = this.#context.logLevel;
     if (this.#isComposableFrameReady) {
       return new Promise((resolve, reject) => {

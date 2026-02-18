@@ -18,7 +18,17 @@ import cartesBancairesIcon from '../../assets/carter-banceris.svg';
 
 import logs from '../utils/logs';
 
-export const DEFAULT_WARNING_FOR_DANGEROUS_FILE_TYPE = 'This file type is not supported for preview.';
+export const ZIP_FILE_CONSTANTS = {
+  NAV_ITEM_CLASSNAME: 'SkyflowElement-file-item',
+  NAV_ITEM_ACTIVE: 'active',
+  NO_FILE_MESSAGE: 'No files found in the ZIP archive.',
+  DANGEROUS_FILE_WARNING: 'This file type is not supported for preview.',
+  ZIP_FILE_LIST_CLASS: 'SkyflowElement-file-list-',
+  FILE_LIST: 'file-list',
+  SKYFLOW_ELEMENT: 'SkyflowElement-',
+};
+
+export const RENDER_LOADING_MESSAGE = '...loading';
 export const SESSION_ID = 'session_id';
 export const SKY_METADATA_HEADER = 'sky-metadata';
 export const SDK_VERSION = 'sdkVersion';
@@ -509,6 +519,9 @@ export const ZIP_CONTAINER_STYLES = {
     'flex-direction': 'row',
     height: '100%',
     width: '100%',
+    overflow: 'auto',
+    border: '1px solid #a5a2a2',
+    borderRadius: '4px',
   },
 };
 export const RENDER_ELEMENT_IMAGE_STYLES = {
@@ -525,31 +538,59 @@ export const LEFT_NAV_STYLES = {
     borderRight: '1px solid #ccc',
     boxSizing: 'border-box' as const,
     margin: '4px',
-    // overflowY: 'auto' as const,
     overflow: 'auto' as const,
+  },
+};
+
+export const ZIP_UL_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    listStyle: 'none',
+    margin: '0',
+    padding: '0',
+    overflow: 'auto',
+  },
+};
+
+export const ZIP_RENDER_WARNING_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    color: 'red',
+    padding: '10px',
   },
 };
 
 export const LEFT_NAV_LIST_ITEM_STYLES = {
   [STYLE_TYPE.BASE]: {
-    // display: 'flex',
     alignItems: 'center',
-    padding: '8px',
-    margin: '4px',
+    padding: '4px',
+    margin: '2px',
     cursor: 'pointer',
-    borderRadius: '4px',
+    // borderRadius: '4px',
     boxSizing: 'border-box' as const,
-    backgroundColor: '#f9f9f9',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    wordBreak: 'break-all',
   },
   [STYLE_TYPE.FOCUS]: {
     alignItems: 'center',
-    padding: '8px',
-    margin: '4px',
+    padding: '4px',
+    margin: '2px',
     cursor: 'pointer',
-    borderRadius: '4px',
+    // borderRadius: '4px',
     boxSizing: 'border-box' as const,
     backgroundColor: '#f9f9f9',
-    border: '2px solid #b0b3b8ff',
+    border: '2px solid rgb(155, 158, 164)',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    wordBreak: 'break-all',
+  },
+};
+
+export const EMBED_DEFAULT_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    width: '100%',
+    height: '100%',
   },
 };
 

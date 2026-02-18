@@ -1,7 +1,9 @@
 import EventEmitter from '../../../event-emitter';
+import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
 import { EventName, RenderFileResponse } from '../../../utils/common';
-import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from '../../constants';
+import SKYFLOW_ERROR_CODE from '../../../utils/constants';
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from '../../constants';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 
 class ComposableRevealElement {
@@ -68,6 +70,23 @@ class ComposableRevealElement {
       `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE}:${this.#elementName}`,
       {},
     );
+  };
+
+  on = (eventName: string, handler: Function) => {
+    if (!Object.values(ELEMENT_EVENTS_TO_CLIENT).includes(eventName)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_EVENT_LISTENER, [], true);
+    }
+    if (!handler) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_HANDLER_IN_EVENT_LISTENER, [], true);
+    }
+    if (typeof handler !== 'function') {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_HANDLER_IN_EVENT_LISTENER, [], true);
+    }
+    window.addEventListener('message', (event) => {
+      if (event?.data?.type === `${eventName}:${this.#elementName}`) {
+        handler(event.data?.data);
+      }
+    });
   };
 }
 

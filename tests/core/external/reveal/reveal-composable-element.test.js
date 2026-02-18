@@ -259,4 +259,182 @@ describe("Reveal Composable Element Class", () => {
 
     testRevealElement.update({redaction: RedactionType.MASKED})
   });
+
+  test("on method - CHANGE event handler is called when message is received", (done) => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "testElement",
+        eventEmitter,
+        '123',
+    );
+
+    const handler = jest.fn((data) => {
+      expect(data).toEqual({ value: 'test-value' });
+      expect(handler).toHaveBeenCalledTimes(1);
+      done();
+    });
+
+    testRevealElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, handler);
+
+    // Simulate message event from iframe
+    const messageEvent = new MessageEvent('message', {
+      data: {
+        type: `${ELEMENT_EVENTS_TO_CLIENT.CHANGE}:testElement`,
+        data: { value: 'test-value' }
+      }
+    });
+    window.dispatchEvent(messageEvent);
+  });
+
+  test("on method - handler not called for different element", (done) => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "testElement1",
+        eventEmitter,
+        '123',
+    );
+
+    const handler = jest.fn();
+    testRevealElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, handler);
+
+    // Simulate message event for different element
+    const messageEvent = new MessageEvent('message', {
+      data: {
+        type: `${ELEMENT_EVENTS_TO_CLIENT.CHANGE}:testElement2`,
+        data: { value: 'test-value' }
+      }
+    });
+    window.dispatchEvent(messageEvent);
+
+    setTimeout(() => {
+      expect(handler).not.toHaveBeenCalled();
+      done();
+    }, 100);
+  });
+
+  test("on method - throws error for invalid event name", () => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "name",
+        eventEmitter,
+        '123',
+    );
+
+    expect(() => {
+      testRevealElement.on('INVALID_EVENT', jest.fn());
+    }).toThrow();
+  });
+
+  test("on method - throws error when handler is missing", () => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "name",
+        eventEmitter,
+        '123',
+    );
+
+    expect(() => {
+      testRevealElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, null);
+    }).toThrow();
+  });
+
+  test("on method - throws error when handler is not a function", () => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "name",
+        eventEmitter,
+        '123',
+    );
+
+    expect(() => {
+      testRevealElement.on(ELEMENT_EVENTS_TO_CLIENT.CHANGE, "not-a-function");
+    }).toThrow();
+  });
+
+  test("on method - READY event handler works correctly", (done) => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "testElement",
+        eventEmitter,
+        '123',
+    );
+
+    const handler = jest.fn((data) => {
+      expect(data).toEqual({ ready: true });
+      done();
+    });
+
+    testRevealElement.on(ELEMENT_EVENTS_TO_CLIENT.READY, handler);
+
+    const messageEvent = new MessageEvent('message', {
+      data: {
+        type: `${ELEMENT_EVENTS_TO_CLIENT.READY}:testElement`,
+        data: { ready: true }
+      }
+    });
+    window.dispatchEvent(messageEvent);
+  });
+
+  test("on method - FOCUS event handler works correctly", (done) => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "testElement",
+        eventEmitter,
+        '123',
+    );
+
+    const handler = jest.fn((data) => {
+      expect(data).toEqual({ focused: true });
+      done();
+    });
+
+    testRevealElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, handler);
+
+    const messageEvent = new MessageEvent('message', {
+      data: {
+        type: `${ELEMENT_EVENTS_TO_CLIENT.FOCUS}:testElement`,
+        data: { focused: true }
+      }
+    });
+    window.dispatchEvent(messageEvent);
+  });
+
+  test("on method - BLUR event handler works correctly", (done) => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "testElement",
+        eventEmitter,
+        '123',
+    );
+
+    const handler = jest.fn((data) => {
+      expect(data).toEqual({ blurred: true });
+      done();
+    });
+
+    testRevealElement.on(ELEMENT_EVENTS_TO_CLIENT.BLUR, handler);
+
+    const messageEvent = new MessageEvent('message', {
+      data: {
+        type: `${ELEMENT_EVENTS_TO_CLIENT.BLUR}:testElement`,
+        data: { blurred: true }
+      }
+    });
+    window.dispatchEvent(messageEvent);
+  });
+
+  test("downloadCurrentFile method", () => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "name",
+        eventEmitter,
+        '123',
+    );
+    
+    eventEmitter.on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + ':name', (data) => {
+      expect(data).toEqual({});
+    });
+
+    testRevealElement.downloadCurrentFile();
+  });
 });

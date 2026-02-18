@@ -37,12 +37,16 @@ export interface IRevealElementInput {
   labelStyles?: object;
   altText?: string;
   errorTextStyles?: object;
+  zipNavStyles?: object;
+  zipNavListItemStyles?: object;
+  zipPanelStyles?: object;
 }
 
 export interface IRevealElementOptions {
   enableCopy?: boolean;
   format?: string;
   translation?:Record<string, string>
+  zipRender? : boolean;
 }
 
 const CLASS_NAME = 'RevealContainer';

@@ -2,7 +2,6 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import JSZip from 'jszip';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
@@ -22,8 +21,12 @@ import {
   LEFT_NAV_LIST_ITEM_STYLES,
   ZIP_CONTAINER_STYLES,
   RENDER_ELEMENT_IMAGE_STYLES,
-  DEFAULT_WARNING_FOR_DANGEROUS_FILE_TYPE,
   SIGNED_TOKEN_PREFIX,
+  RENDER_LOADING_MESSAGE,
+  EMBED_DEFAULT_STYLES,
+  ZIP_RENDER_WARNING_STYLES,
+  ZIP_FILE_CONSTANTS,
+  ZIP_UL_STYLES,
 } from '../../constants';
 import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import {
@@ -31,7 +34,7 @@ import {
 } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
-  Context, IRenderResponseType, IRevealRecord, MessageType, RedactionType,
+  Context, EventName, IRenderResponseType, IRevealRecord, MessageType, RedactionType,
 } from '../../../utils/common';
 import {
   constructMaskTranslation,
@@ -95,6 +98,10 @@ class RevealFrame {
   #rootDiv?: HTMLDivElement;
 
   #composableContainer: Boolean = false;
+
+  #downloadHandler?: (event: MessageEvent) => void;
+
+  #blobUrls: string[] = [];
 
   static init() {
     const url = window.location?.href;
@@ -497,15 +504,15 @@ class RevealFrame {
               url = resolvedResult.fields[data.column];
             }
             const fileType = this.getExtension(url);
-            if (fileType.includes('zip')) {
-              this.#dataElememt.innerText = '...loading';
+            if (fileType.includes('zip') && this.#record?.zipRender && this.#record?.zipRender === true) {
+              this.#dataElememt.innerText = RENDER_LOADING_MESSAGE;
               this.unZipFiles(url).then((blobs) => {
                 printLog(parameterizedString(logs.infoLogs.FILES_UNZIPPED_SUCCESSFULLY,
                   CLASS_NAME, this.#record?.skyflowID), MessageType.LOG, this.#context?.logLevel);
                 if (blobs?.length > 0) {
                   this.renderUnZipFile(blobs);
                 } else {
-                  this.#dataElememt.innerText = 'No files found in the ZIP archive.';
+                  this.#dataElememt.innerText = ZIP_FILE_CONSTANTS.NO_FILE_MESSAGE;
                 }
                 resolve({
                   ...resolvedResult,
@@ -516,19 +523,17 @@ class RevealFrame {
                   logs.errorLogs.FAILED_TO_UNZIP_FILES, CLASS_NAME,
                   zipError,
                 ), MessageType.LOG, this.#context?.logLevel);
-                reject(
-                  {
-                    errors: {
-                      error: {
-                        ...SKYFLOW_ERROR_CODE.FAILED_TO_UNZIP_FILES,
-                      },
-                    },
-                  },
-                );
                 this.sub2({
                   error: DEFAULT_FILE_RENDER_ERROR,
                   iframeName: this.#name,
                 });
+                reject(
+                  {
+                    error: {
+                      ...SKYFLOW_ERROR_CODE.FAILED_TO_UNZIP_FILES,
+                    },
+                  },
+                );
               });
             } else {
               this.sub2({
@@ -551,44 +556,25 @@ class RevealFrame {
     });
   }
 
-  private renderUnZipFile(blobs: { name: string; url: string, type: string }[]) {
+  private renderUnZipFile(blobs: { name: string; url: string, type: string, fileSize: number }[]) {
     const tag = 'div';
     this.#leftNav.innerHTML = '';
-    this.#leftNav.className = `SkyflowElement-${tag}-left-nav-${STYLE_TYPE.BASE}`;
-    this.#rightPanel.className = `SkyflowElement-${tag}-right-panel-${STYLE_TYPE.BASE}`;
+    this.#leftNav.className = `${ZIP_FILE_CONSTANTS.SKYFLOW_ELEMENT}${tag}-left-nav-${STYLE_TYPE.BASE}`;
+    this.#rightPanel.className = `${ZIP_FILE_CONSTANTS.SKYFLOW_ELEMENT}${tag}-right-panel-${STYLE_TYPE.BASE}`;
 
-    // Track the currently previewed file
     let currentFile = blobs[0];
-    // Update currentFile on file selection
     const origRenderZipFile = this.renderZipFile.bind(this);
     this.renderZipFile = (file) => {
       currentFile = file;
       origRenderZipFile(file);
     };
-    window.addEventListener('message', (event) => {
-      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE
-           + this.#name) {
-        if (!currentFile) {
-          printLog(logs.errorLogs.FAILED_DOWNLOAD_FILE, MessageType.LOG, this.#context?.logLevel);
-          return;
-        }
-        printLog(parameterizedString(
-          logs.infoLogs.FILE_DOWNLOADED,
-          CLASS_NAME,
-          currentFile.name,
-        ), MessageType.LOG, this.#context?.logLevel);
-        const a = document.createElement('a');
-        a.href = currentFile?.url;
-        a.download = currentFile?.name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
-    });
+
+    // Setup download handler once
+    this.setupFileDownloadHandler(() => currentFile);
     this.renderFileList(blobs);
     // create nav container and right panel container
     const divContainer = document.createElement('div');
-    divContainer.className = `SkyflowElement-panel-container-${STYLE_TYPE.BASE}`;
+    divContainer.className = `${ZIP_FILE_CONSTANTS.SKYFLOW_ELEMENT}panel-container-${STYLE_TYPE.BASE}`;
     let containerStyles = {};
     containerStyles = {
       [STYLE_TYPE?.BASE]: {
@@ -613,16 +599,16 @@ class RevealFrame {
       divContainer?.appendChild(this.#rightPanel);
     }
     this.#elementContainer?.appendChild(divContainer);
-    let leftNavStyles = {};
-    let rightPanelStyles = {};
+    let zipNavStyles = {};
+    let zipPanelStyles = {};
     if (this.#record?.inputStyles
                    && this.#record?.inputStyles[STYLE_TYPE.BASE]?.height) {
-      leftNavStyles = {
+      zipNavStyles = {
         [STYLE_TYPE?.BASE]: {
           height: this.#record?.inputStyles[STYLE_TYPE.BASE]?.height,
         },
       };
-      rightPanelStyles = {
+      zipPanelStyles = {
         [STYLE_TYPE?.BASE]: {
           height: this.#record?.inputStyles[STYLE_TYPE.BASE]?.height,
         },
@@ -630,80 +616,97 @@ class RevealFrame {
     }
     getCssClassesFromJss(containerStyles, 'panel-container');
 
-    if (this.#record?.leftNavStyles
-           && this.#record?.leftNavStyles[STYLE_TYPE.BASE]) {
-      leftNavStyles = {
+    if (this.#record?.zipNavStyles
+           && this.#record?.zipNavStyles[STYLE_TYPE.BASE]) {
+      zipNavStyles = {
         [STYLE_TYPE?.BASE]: {
           ...LEFT_NAV_STYLES[STYLE_TYPE.BASE],
-          ...leftNavStyles[STYLE_TYPE.BASE],
-          ...this.#record?.leftNavStyles[STYLE_TYPE.BASE],
+          ...zipNavStyles[STYLE_TYPE.BASE],
+          ...this.#record?.zipNavStyles[STYLE_TYPE.BASE],
         },
       };
-      getCssClassesFromJss(leftNavStyles, `${tag}-left-nav`);
     }
-    if (this.#record?.rightPanelStyles
-            && this.#record?.rightPanelStyles[STYLE_TYPE.BASE]) {
-      rightPanelStyles = {
+    getCssClassesFromJss(zipNavStyles, `${tag}-left-nav`);
+
+    if (this.#record?.zipPanelStyles
+            && this.#record?.zipPanelStyles[STYLE_TYPE.BASE]) {
+      zipPanelStyles = {
         [STYLE_TYPE?.BASE]: {
           ...RIGHT_PANEL_STYLES[STYLE_TYPE.BASE],
-          ...rightPanelStyles[STYLE_TYPE.BASE],
-          ...this.#record?.rightPanelStyles[STYLE_TYPE.BASE],
+          ...zipPanelStyles[STYLE_TYPE.BASE],
+          ...this.#record?.zipPanelStyles[STYLE_TYPE.BASE],
         },
       };
-      getCssClassesFromJss(rightPanelStyles, `${tag}-right-panel`);
     }
+    getCssClassesFromJss(zipPanelStyles, `${tag}-right-panel`);
   }
 
-  private renderFileList(files: { name: string; url: string, type: string }[]) {
+  private renderFileList(files: { name: string; url: string, type: string, fileSize: number }[]) {
     // Create a <ul> for the file list
     const ul = document.createElement('ul');
-    ul.style.listStyle = 'none';
-    ul.style.margin = '0';
-    ul.style.padding = '0';
-    ul.style.overflow = 'auto';
+    ul.className = `${ZIP_FILE_CONSTANTS.ZIP_FILE_LIST_CLASS}${STYLE_TYPE.BASE}`;
+    getCssClassesFromJss(ZIP_UL_STYLES, 'file-list');
     files.forEach((file, index) => {
       if (index === 0) {
         this.renderZipFile(file);
       }
       const li = document.createElement('li');
-      li.className = `SkyflowElement-file-item${index}-base`;
+      li.className = `${ZIP_FILE_CONSTANTS.NAV_ITEM_CLASSNAME}${index}-${STYLE_TYPE.BASE}`;
       li.textContent = file.name;
       li.title = file.name;
-      let leftNavListItemStyles = {};
-      if (this.#record.leftNavListItemStyles
-           && this.#record.leftNavListItemStyles[STYLE_TYPE.BASE]) {
-        leftNavListItemStyles = {
+      let zipNavListItemStyles = {};
+      zipNavListItemStyles = {
+        [STYLE_TYPE?.BASE]: {
+          ...LEFT_NAV_LIST_ITEM_STYLES[STYLE_TYPE.BASE],
+        },
+      };
+      if (this.#record.zipNavListItemStyles
+           && this.#record.zipNavListItemStyles[STYLE_TYPE.BASE]) {
+        zipNavListItemStyles = {
           [STYLE_TYPE?.BASE]: {
             ...LEFT_NAV_LIST_ITEM_STYLES[STYLE_TYPE.BASE],
-            ...this.#record.leftNavListItemStyles[STYLE_TYPE.BASE],
+            ...this.#record.zipNavListItemStyles[STYLE_TYPE.BASE],
           },
         };
-        getCssClassesFromJss(leftNavListItemStyles, `file-item${index}`);
       }
+      getCssClassesFromJss(zipNavListItemStyles, `file-item${index}`);
+
       li.addEventListener('click', () => {
         // Remove focus style from all items
         ul.querySelectorAll('li').forEach((el, idx) => {
-          el.classList.remove('active');
-          el.classList.remove(`SkyflowElement-file-item${idx}-focus`);
-          el.classList.add(`SkyflowElement-file-item${idx}-base`);
+          el.classList.remove(ZIP_FILE_CONSTANTS.NAV_ITEM_ACTIVE);
+          el.classList.remove(`${ZIP_FILE_CONSTANTS.NAV_ITEM_CLASSNAME}${idx}-${STYLE_TYPE.FOCUS}`);
+          el.classList.add(`${ZIP_FILE_CONSTANTS.NAV_ITEM_CLASSNAME}${idx}-${STYLE_TYPE.BASE}`);
         });
         // Add active class to clicked item
-        li.classList.add('active');
-        li.classList.add(`SkyflowElement-file-item${index}-focus`);
-        li.classList.remove(`SkyflowElement-file-item${index}-base`);
+        li.classList.add(ZIP_FILE_CONSTANTS.NAV_ITEM_ACTIVE);
+        li.classList.add(`${ZIP_FILE_CONSTANTS.NAV_ITEM_CLASSNAME}${index}-${STYLE_TYPE.FOCUS}`);
+        li.classList.remove(`${ZIP_FILE_CONSTANTS.NAV_ITEM_CLASSNAME}${index}-${STYLE_TYPE.BASE}`);
         // Apply focus style if defined
-        if (this.#record.leftNavListItemStyles
-           && this.#record.leftNavListItemStyles[STYLE_TYPE.FOCUS]) {
-          const focusStyles = {
+        let focusStyles = {};
+        focusStyles = {
+          [STYLE_TYPE.FOCUS]: {
+            ...LEFT_NAV_LIST_ITEM_STYLES[STYLE_TYPE.FOCUS],
+          },
+        };
+        if (this.#record.zipNavListItemStyles
+           && this.#record.zipNavListItemStyles[STYLE_TYPE.FOCUS]) {
+          focusStyles = {
             [STYLE_TYPE.FOCUS]: {
-              ...LEFT_NAV_LIST_ITEM_STYLES[STYLE_TYPE.BASE],
               ...LEFT_NAV_LIST_ITEM_STYLES[STYLE_TYPE.FOCUS],
-              ...this.#record.leftNavListItemStyles[STYLE_TYPE.BASE],
-              ...this.#record.leftNavListItemStyles[STYLE_TYPE.FOCUS],
+              ...this.#record.zipNavListItemStyles[STYLE_TYPE.FOCUS],
             },
           };
-          getCssClassesFromJss(focusStyles, `file-item${index}`);
         }
+        getCssClassesFromJss(focusStyles, `file-item${index}`);
+        window?.parent?.postMessage({
+          type: `${EventName.CHANGE}:${this.#name}`,
+          data: {
+            name: file.name,
+            type: file.type,
+            fileSize: file.fileSize,
+          },
+        }, this.#clientDomain);
         this.renderZipFile(file);
       });
       ul.appendChild(li);
@@ -713,52 +716,73 @@ class RevealFrame {
     this.#leftNav.appendChild(ul);
   }
 
-  private renderZipFile(file) {
+  private renderZipFile(file: { name: string; url: string; type: string, fileSize: number }) {
     this.#rightPanel.innerHTML = '';
+
+    if (!file?.url) {
+      printLog(
+        'Invalid file: missing URL',
+        MessageType.ERROR,
+        this.#context?.logLevel,
+      );
+      return;
+    }
+
     if (isDangerousFileType(file)) {
-      const warning = document.createElement('div');
-      warning.textContent = DEFAULT_WARNING_FOR_DANGEROUS_FILE_TYPE;
-      warning.style.color = 'red';
-      warning.style.padding = '10px';
+      const warning = document.createElement('pre');
+      warning.className = `${ZIP_FILE_CONSTANTS.SKYFLOW_ELEMENT}warning-${STYLE_TYPE.BASE}`;
+      warning.textContent = ZIP_FILE_CONSTANTS.DANGEROUS_FILE_WARNING;
+      getCssClassesFromJss(ZIP_RENDER_WARNING_STYLES, 'warning');
       this.#rightPanel?.appendChild(warning);
       return;
     }
-    if (file?.type?.includes('pdf')) {
-      // Try <embed> first
-      const embed = document.createElement('embed');
-      embed.src = file?.url ?? '';
-      embed.setAttribute('type', file?.type ?? '');
-      embed.style.width = '100%';
-      embed.style.height = '100%';
-      this.#rightPanel?.appendChild(embed);
-    } else if (file?.type?.includes('image')) {
-      const img = document.createElement('img');
-      img.src = file?.url ?? '';
-      this.#rightPanel?.appendChild(img);
-    } else if (file?.type?.includes('video')) {
-      const video = document.createElement('video');
-      video.src = file?.url ?? '';
-      video.controls = true;
-      this.#rightPanel?.appendChild(video);
-    } else {
-      const embed = document.createElement('embed');
-      embed.src = file?.url ?? '';
-      embed.style.width = '100%';
-      embed.style.height = '100%';
-      embed.setAttribute('type', file?.type ?? '');
-      this.#rightPanel?.appendChild(embed);
+    try {
+      if (file?.type?.includes('pdf')) {
+        const embed = document.createElement('embed');
+        embed.className = `${ZIP_FILE_CONSTANTS.SKYFLOW_ELEMENT}embed-${STYLE_TYPE.BASE}`;
+        embed.src = file.url;
+        embed.setAttribute('type', file?.type ?? 'application/pdf');
+        getCssClassesFromJss(EMBED_DEFAULT_STYLES, 'embed');
+        this.#rightPanel?.appendChild(embed);
+      } else if (file?.type?.includes('image')) {
+        const img = document.createElement('img');
+        img.src = file.url;
+        img.alt = file.name;
+        this.#rightPanel?.appendChild(img);
+      } else if (file?.type?.includes('video')) {
+        const video = document.createElement('video');
+        video.src = file.url;
+        video.controls = true;
+        this.#rightPanel?.appendChild(video);
+      } else if (file?.type?.includes('audio')) {
+        const audio = document.createElement('audio');
+        audio.src = file.url;
+        audio.controls = true;
+        this.#rightPanel?.appendChild(audio);
+      } else {
+        const embed = document.createElement('embed');
+        embed.src = file.url;
+        embed.setAttribute('type', file?.type ?? 'application/octet-stream');
+        getCssClassesFromJss(EMBED_DEFAULT_STYLES, 'embed');
+        this.#rightPanel?.appendChild(embed);
+      }
+    } catch (error) {
+      printLog(
+        `Error rendering file ${file.name}: ${error}`,
+        MessageType.ERROR,
+        this.#context?.logLevel,
+      );
     }
   }
 
   // eslint-disable-next-line class-methods-use-this
   private async unZipFiles(url: string) {
-    this.#filesList = [];
+    this.destroy(); // Clean up previous resources if any
     const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch ZIP file');
     const arrayBuffer = await response.arrayBuffer();
     const zip = await JSZip.loadAsync(arrayBuffer);
 
-    const fileUrls: string[] = [];
     const fileNames = Object.keys(zip.files);
 
     // Filter out directories and system files
@@ -773,13 +797,15 @@ class RevealFrame {
         const blob = await file.async('blob');
         const fileBlob = new Blob([blob], { type: getType(filename) });
         const fileBlobUrl = URL.createObjectURL(fileBlob);
-        fileUrls.push(fileBlobUrl);
+        this.#blobUrls.push(fileBlobUrl); // Track for cleanup
         this.#filesList.push({
           name: filename,
           fileSize: blob.size,
           type: getType(filename),
         });
-        return { url: fileBlobUrl, name: filename, type: getType(filename) };
+        return {
+          url: fileBlobUrl, name: filename, type: getType(filename), fileSize: blob.size,
+        };
       }),
     );
 
@@ -788,6 +814,38 @@ class RevealFrame {
 
   isSystemFile = (path) => path.startsWith('__MACOSX/') || path.endsWith('.DS_Store')
   || path.endsWith('Thumbs.db');
+
+  private setupFileDownloadHandler(getCurrentFile: () => any) {
+    // Remove any existing listener to prevent duplicates
+    const eventName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + this.#name;
+
+    const handleDownload = (event) => {
+      if (event?.data?.name === eventName) {
+        const currentFile = getCurrentFile();
+        if (!currentFile) {
+          printLog(logs.errorLogs.FAILED_DOWNLOAD_FILE, MessageType.LOG, this.#context?.logLevel);
+          return;
+        }
+        printLog(parameterizedString(
+          logs.infoLogs.FILE_DOWNLOADED,
+          CLASS_NAME,
+          currentFile.name,
+        ), MessageType.LOG, this.#context?.logLevel);
+
+        const a = document.createElement('a');
+        a.href = currentFile.url;
+        a.download = currentFile.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    };
+    // Store reference to remove later if needed
+    if (!this['#downloadHandler']) {
+      this['#downloadHandler'] = handleDownload;
+      window.addEventListener('message', handleDownload);
+    }
+  }
 
   // eslint-disable-next-line class-methods-use-this
   private getExtension(url: string) {
@@ -924,6 +982,23 @@ class RevealFrame {
               this.#dataElememt.innerText = formattedOutput ?? '';
             }
           }
+        } else if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT) {
+          if (data.updatedValue) {
+            this.#record = {
+              ...this.#record,
+              altText: data.updatedValue,
+            };
+          } else {
+            delete this.#record.altText;
+          }
+
+          this.updateDataView();
+        } else if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.TOKEN) {
+          this.#record = {
+            ...this.#record,
+            token: data.updatedValue,
+          };
+          this.updateDataView();
         }
       }
     });
@@ -1020,6 +1095,32 @@ class RevealFrame {
     } else if (Object.prototype.hasOwnProperty.call(this.#record, 'token')) {
       this.#dataElememt.innerText = this.#record.token;
     }
+  }
+
+  // Cleanup method to prevent memory leaks
+  public destroy() {
+    // Remove download event listener
+    if (this.#downloadHandler) {
+      window.removeEventListener('message', this.#downloadHandler);
+      this.#downloadHandler = undefined;
+    }
+
+    // Revoke blob URLs to free memory
+    this.#blobUrls.forEach((url: string) => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        printLog(
+          `Failed to revoke blob URL: ${error}`,
+          MessageType.ERROR,
+          this.#context?.logLevel,
+        );
+      }
+    });
+    this.#blobUrls = [];
+
+    // Clear file list
+    this.#filesList = [];
   }
 }
 

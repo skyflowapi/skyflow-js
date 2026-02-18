@@ -9,7 +9,21 @@ declare global {
     CoralogixRum: any;
   }
 }
-
+export interface IRevealComposableElementInput {
+  token?: string;
+  skyflowID?: string;
+  table?: string;
+  column?: string;
+  redaction?: RedactionType;
+  inputStyles?: object;
+  label?: string;
+  labelStyles?: object;
+  altText?: string;
+  errorTextStyles?: object;
+  zipNavStyles?: object;
+  zipNavListItemStyles?: object;
+  zipPanelStyles?: object;
+}
 // export type ErrorKey = typeof ERROR_TYPE[keyof typeof ERROR_TYPE];
 
 export enum ErrorType {

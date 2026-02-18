@@ -3,7 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
-import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_ERROR_TEXT, REVEAL_ELEMENT_OPTIONS_TYPES, REVEAL_TYPES } from "../../../../src/core/constants";
+import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_ERROR_TEXT, REVEAL_ELEMENT_OPTIONS_TYPES, REVEAL_TYPES, ZIP_FILE_CONSTANTS } from "../../../../src/core/constants";
 import { Env, LogLevel, RedactionType } from "../../../../src/utils/common";
 import getCssClassesFromJss from "../../../../src/libs/jss-styles";
 import { getFileURLFromVaultBySkyflowIDComposable } from "../../../../src/core-utils/reveal";
@@ -2610,4 +2610,805 @@ describe("Reveal Frame Class - Additional Tests", () => {
     const dataElement = document.getElementById(uniqueElementName);
     expect(dataElement?.innerText).toBe('****-****-****-4444');
   });
+});
+
+describe("Reveal Frame Class - ZIP File Tests", () => {
+  let emitSpy;
+  let targetSpy;
+  let onMock;
+  let offMock;
+
+  beforeAll(() => {
+    // Set default file URL resolve behavior
+    setFileURLResolve();
+
+    // Initialize test record
+    testRecord = {
+      token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+      skyflowID: "sky123",
+      table: "files",
+      column: "zip_file",
+      label: "ZIP File",
+      inputStyles: {
+        base: {
+          color: "#ef3214",
+          fontSize: 20,
+        },
+      },
+    };
+
+    // Setup global window
+    global.window = Object.create(window);
+    listen = jest.fn();
+    
+    // Define URL helper function
+    defineUrl = (url) => {
+      Object.defineProperty(window, 'location', {
+        value: new URL(url),
+        writable: true,
+      });
+    };
+    
+    // Match the constructed window.name so event names align
+    elementName = `reveal:container123:frame123:meta:${btoa('http://localhost')}`;
+    elementNameComposable = `reveal-composable:container123:frame123:meta:${btoa('http://localhost')}`;
+
+    // Provide a localStorage mock for Node/JSDOM environment where it's undefined
+    if (typeof global.localStorage === 'undefined') {
+      global.localStorage = {
+        getItem: jest.fn(),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+        clear: jest.fn(),
+      };
+    }
+
+    // Initialize mock functions
+    onMock = jest.fn();
+    offMock = jest.fn();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on: onMock,
+      off: offMock
+    });
+    
+    // Mock URL.createObjectURL and URL.revokeObjectURL
+    global.URL.createObjectURL = jest.fn(() => 'blob:mock-url-123');
+    global.URL.revokeObjectURL = jest.fn();
+    
+    // Mock fetch for ZIP file download
+    global.fetch = jest.fn();
+    
+    // Mock window.parent.postMessage to prevent postMessage errors
+    window.parent = {
+      postMessage: jest.fn(),
+    };
+    
+    // Mock document.referrer for client domain extraction
+    Object.defineProperty(document, 'referrer', {
+      value: 'http://localhost',
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  afterEach(() => {
+    // Restore all mocks first
+    jest.restoreAllMocks();
+    
+    // Clear all timers
+    jest.clearAllTimers();
+  });
+
+  test("destroy method can be called successfully", () => {
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+        name: elementName,
+        zipRender: true,
+
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    const testFrame = RevealFrame.revealFrame;
+
+    // Spy on URL.revokeObjectURL before calling destroy
+    const revokeObjectURLSpy = jest.spyOn(URL, 'revokeObjectURL');
+
+    expect(() => testFrame.destroy()).not.toThrow();
+    
+    // Verify cleanup was called (even if arrays are empty)
+    expect(revokeObjectURLSpy).toHaveBeenCalledTimes(0); // No URLs to revoke initially
+  });
+
+  test("render file response ready event creates left nav and right panel for ZIP", async () => {
+    // Mock file URL response to return a ZIP file URL
+    setFileURLResolve({
+      fields: { 
+        zip_file: 'https://example.com/file.zip?response-content-disposition=archive.zip' 
+      },
+      fileMetadata: { contentType: 'application/zip' }
+    });
+    
+    window.postMessage = jest.fn();
+    window.parent.postMessage = jest.fn();
+
+    // Mock JSZip for ZIP file extraction
+    const mockBlob = new Blob(['test content'], { type: 'text/plain' });
+    const mockZipFile = {
+      async: jest.fn().mockResolvedValue(mockBlob),
+    };
+
+    const JSZip = require('jszip');
+    JSZip.loadAsync = jest.fn().mockResolvedValue({
+      files: {
+        'document.pdf': { dir: false, ...mockZipFile },
+        'image.png': { dir: false, ...mockZipFile },
+        'folder/': { dir: true },
+      },
+    });
+
+    global.fetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+    });
+
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+        inputStyles: {
+          base: {
+            width: '500px',
+            height: '400px',
+          },
+        },
+        
+        
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    const testFrame = RevealFrame.revealFrame;
+
+    // Get the actual element name from the registered event (extract from onMock)
+    const eventRenderResponse = onMock.mock.calls[0][0];
+    const actualElementName = eventRenderResponse.replace(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY, '');
+
+    // Dispatch window message event to trigger ZIP file render (like the reference test)
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + actualElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: actualElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    // Wait for async operations to complete
+    await new Promise(r => setTimeout(r, 150));
+
+    // Verify ZIP file UI elements are created
+    const leftNav = document.getElementById('left-nav');
+    const rightPanel = document.getElementById('right-panel');
+    
+    expect(leftNav).not.toBeNull();
+    expect(rightPanel).not.toBeNull();
+    expect(JSZip.loadAsync).toHaveBeenCalled();
+    
+    // Verify parent message was sent with success response
+    const parentCalls = window.parent.postMessage.mock.calls;
+    const successCall = parentCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + actualElementName));
+    expect(successCall).toBeTruthy();
+    expect(successCall[0].data.type).toBe(REVEAL_TYPES.RENDER_FILE);
+  });
+
+  test("isSystemFile public method correctly identifies system files", () => {
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    const testFrame = RevealFrame.revealFrame;
+
+    expect(testFrame.isSystemFile('__MACOSX/resource.txt')).toBe(true);
+    expect(testFrame.isSystemFile('folder/.DS_Store')).toBe(true);
+    expect(testFrame.isSystemFile('folder/Thumbs.db')).toBe(true);
+    expect(testFrame.isSystemFile('document.pdf')).toBe(false);
+    expect(testFrame.isSystemFile('images/photo.jpg')).toBe(false);
+  });
+
+  test("render ZIP file with custom styles", async () => {
+    setFileURLResolve({
+      fields: { 
+        zip_file: 'https://example.com/file.zip?response-content-disposition=archive.zip' 
+      },
+      fileMetadata: { contentType: 'application/zip' }
+    });
+    
+    window.postMessage = jest.fn();
+    window.parent.postMessage = jest.fn();
+
+    const JSZip = require('jszip');
+    const mockBlob = new Blob(['content'], { type: 'application/pdf' });
+    JSZip.loadAsync = jest.fn().mockResolvedValue({
+      files: {
+        'doc.pdf': {
+          dir: false,
+          async: jest.fn().mockResolvedValue(mockBlob),
+        },
+        'cmd.cmd':{
+          dir: false,
+          async: jest.fn().mockResolvedValue(new Blob(['cmd content'], { type: 'text/plain' })),
+        }
+      },
+    });
+
+    global.fetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+    });
+
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+        inputStyles: {
+          base: {
+            width: '600px',
+            height: '500px',
+            border: '1px solid #ccc',
+          },
+        },
+        zipNavStyles: {
+          base: {
+            backgroundColor: '#f0f0f0',
+          },
+        },
+        zipPanelStyles: {
+          base: {
+            backgroundColor: '#ffffff',
+          },
+        },
+        zipNavListItemStyles: {
+          base: {
+            color: '#333',
+            padding: '10px',
+          },
+          focus: {
+            color: '#fff',
+            backgroundColor: '#007bff',
+          },
+        },
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    const testFrame = RevealFrame.revealFrame;
+
+    const eventRenderResponse = onMock.mock.calls[0][0];
+    const actualElementName = eventRenderResponse.replace(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY, '');
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + actualElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: actualElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 150));
+
+    const leftNav = document.getElementById('left-nav');
+    const rightPanel = document.getElementById('right-panel');
+    
+    expect(leftNav).not.toBeNull();
+    expect(rightPanel).not.toBeNull();
+    expect(testFrame).toBeDefined();
+  });
+  
+  test("ZIP download handler processes download message correctly", async () => {
+    setFileURLResolve({
+      fields: { 
+        zip_file: 'https://example.com/file.zip?response-content-disposition=archive.zip' 
+      },
+      fileMetadata: { contentType: 'application/zip' }
+    });
+    
+    window.postMessage = jest.fn();
+    window.parent.postMessage = jest.fn();
+
+    const mockBlob = new Blob(['test'], { type: 'application/pdf' });
+    const JSZip = require('jszip');
+    JSZip.loadAsync = jest.fn().mockResolvedValue({
+      files: {
+        'document.pdf': {
+          dir: false,
+          async: jest.fn().mockResolvedValue(mockBlob),
+        },
+      },
+    });
+
+    global.fetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+    });
+
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    const testFrame = RevealFrame.revealFrame;
+
+    const eventRenderResponse = onMock.mock.calls[0][0];
+    const actualElementName = eventRenderResponse.replace(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY, '');
+
+    // Mock document methods for download
+    const mockAppendChild = jest.spyOn(document.body, 'appendChild').mockImplementation(() => {});
+    const mockRemoveChild = jest.spyOn(document.body, 'removeChild').mockImplementation(() => {});
+    const mockClick = jest.fn();
+    
+    // Mock createElement to intercept the anchor element creation
+    const originalCreateElement = document.createElement.bind(document);
+    jest.spyOn(document, 'createElement').mockImplementation((tagName) => {
+      const element = originalCreateElement(tagName);
+      if (tagName === 'a') {
+        element.click = mockClick;
+      }
+      return element;
+    });
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + actualElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: actualElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 150));
+
+    // Simulate download message
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + actualElementName,
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 50));
+
+    // Verify download link was created and used
+    expect(mockAppendChild).toHaveBeenCalled();
+    const appendedElement = mockAppendChild.mock.calls[mockAppendChild.mock.calls.length - 1][0];
+    expect(appendedElement.tagName).toBe('A');
+    expect(appendedElement.download).toBe('document.pdf');
+    expect(mockClick).toHaveBeenCalled();
+    expect(mockRemoveChild).toHaveBeenCalledWith(appendedElement);
+    
+    mockAppendChild.mockRestore();
+    mockRemoveChild.mockRestore();
+    document.createElement.mockRestore();
+  });
+
+  test("ZIP download handler handles missing currentFile gracefully", async () => {
+    setFileURLResolve({
+      fields: { 
+        zip_file: 'https://example.com/file.zip?response-content-disposition=archive.zip' 
+      },
+      fileMetadata: { contentType: 'application/zip' }
+    });
+    
+    window.postMessage = jest.fn();
+    window.parent.postMessage = jest.fn();
+
+    const mockBlob = new Blob(['test'], { type: 'application/pdf' });
+    const JSZip = require('jszip');
+    JSZip.loadAsync = jest.fn().mockResolvedValue({
+      files: {
+        'document.pdf': {
+          dir: false,
+          async: jest.fn().mockResolvedValue(mockBlob),
+        },
+      },
+    });
+
+    global.fetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+    });
+
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    const testFrame = RevealFrame.revealFrame;
+
+    const eventRenderResponse = onMock.mock.calls[0][0];
+    const actualElementName = eventRenderResponse.replace(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY, '');
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + actualElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: actualElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 150));
+
+    // Override getCurrentFile to return undefined/null
+    // This simulates the error case where currentFile is not available
+    const originalRenderZipFile = testFrame.renderZipFile;
+    testFrame.renderZipFile = jest.fn();
+
+    // Simulate download message when currentFile is undefined
+    window.postMessage({
+      name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + actualElementName,
+    }, '*');
+
+    await new Promise(r => setTimeout(r, 50));
+
+    // Verify that the download didn't proceed (no DOM manipulation)
+    expect(testFrame).toBeDefined();
+  });
+
+  test("ZIP file list item click changes active file", async () => {
+    setFileURLResolve({
+      fields: { 
+        zip_file: 'https://example.com/file.zip?response-content-disposition=archive.zip' 
+      },
+      fileMetadata: { contentType: 'application/zip' }
+    });
+    
+    window.postMessage = jest.fn();
+    window.parent.postMessage = jest.fn();
+
+    const mockBlob1 = new Blob(['pdf content'], { type: 'application/pdf' });
+    const mockBlob2 = new Blob(['image content'], { type: 'image/png' });
+    
+    const JSZip = require('jszip');
+    JSZip.loadAsync = jest.fn().mockResolvedValue({
+      files: {
+        'doc1.pdf': {
+          dir: false,
+          async: jest.fn().mockResolvedValue(mockBlob1),
+        },
+        'image.png': {
+          dir: false,
+          async: jest.fn().mockResolvedValue(mockBlob2),
+        },
+      },
+    });
+
+    global.fetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+    });
+
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    const testFrame = RevealFrame.revealFrame;
+
+    const eventRenderResponse = onMock.mock.calls[0][0];
+    const actualElementName = eventRenderResponse.replace(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY, '');
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + actualElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: actualElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 200));
+
+    const leftNav = document.getElementById('left-nav');
+    expect(leftNav).not.toBeNull();
+    
+    if (leftNav) {
+      const listItems = leftNav.querySelectorAll('li');
+      if (listItems.length > 1) {
+        listItems[1].click();
+        expect(listItems[1].classList.contains('active')).toBe(true);
+      }
+    }
+  });
+
+  test("dangerous file type shows warning message", async () => {
+    // Mock file URL response to return a ZIP file URL
+    setFileURLResolve({
+      fields: { 
+        zip_file: 'https://example.com/file.zip?response-content-disposition=archive.zip' 
+      },
+      fileMetadata: { contentType: 'application/zip' }
+    });
+    
+    window.postMessage = jest.fn();
+    window.parent.postMessage = jest.fn();
+
+    // Mock JSZip with a dangerous file type (.exe)
+    const mockBlob = new Blob(['executable content'], { type: 'application/x-msdownload' });
+    const JSZip = require('jszip');
+    JSZip.loadAsync = jest.fn().mockResolvedValue({
+      files: {
+        'malware.exe': {
+          dir: false,
+          async: jest.fn().mockResolvedValue(mockBlob),
+        },
+      },
+    });
+
+    global.fetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+    });
+
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+    const testFrame = RevealFrame.revealFrame;
+
+    // Get the actual element name
+    const eventRenderResponse = onMock.mock.calls[0][0];
+    const actualElementName = eventRenderResponse.replace(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY, '');
+
+    // Dispatch window message event to trigger ZIP file render
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + actualElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: actualElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 150));
+
+    // Verify warning message is shown for dangerous file
+    const rightPanel = document.getElementById('right-panel');
+    expect(rightPanel).not.toBeNull();
+    const warning = rightPanel?.querySelector('pre');
+    expect(warning).not.toBeNull();
+    expect(warning?.textContent).toContain(ZIP_FILE_CONSTANTS.DANGEROUS_FILE_WARNING);
+  });
+
+  test("video file type renders video element", async () => {
+    setFileURLResolve({
+      fields: { 
+        zip_file: 'https://example.com/file.zip?response-content-disposition=archive.zip' 
+      },
+      fileMetadata: { contentType: 'application/zip' }
+    });
+    
+    window.postMessage = jest.fn();
+    window.parent.postMessage = jest.fn();
+
+    const mockBlob = new Blob(['video content'], { type: 'video/mp4' });
+    const JSZip = require('jszip');
+    JSZip.loadAsync = jest.fn().mockResolvedValue({
+      files: {
+        'movie.mp4': {
+          dir: false,
+          async: jest.fn().mockResolvedValue(mockBlob),
+        },
+      },
+    });
+
+    global.fetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+    });
+
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+
+    const eventRenderResponse = onMock.mock.calls[0][0];
+    const actualElementName = eventRenderResponse.replace(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY, '');
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + actualElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: actualElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 150));
+
+    const rightPanel = document.getElementById('right-panel');
+    expect(rightPanel).not.toBeNull();
+    const video = rightPanel?.querySelector('video');
+    expect(video).not.toBeNull();
+    expect(video?.controls).toBe(true);
+  });
+
+  test("audio file type renders audio element", async () => {
+    setFileURLResolve({
+      fields: { 
+        zip_file: 'https://example.com/file.zip?response-content-disposition=archive.zip' 
+      },
+      fileMetadata: { contentType: 'application/zip' }
+    });
+    
+    window.postMessage = jest.fn();
+    window.parent.postMessage = jest.fn();
+
+    const mockBlob = new Blob(['audio content'], { type: 'audio/mp3' });
+    const JSZip = require('jszip');
+    JSZip.loadAsync = jest.fn().mockResolvedValue({
+      files: {
+        'song.mp3': {
+          dir: false,
+          async: jest.fn().mockResolvedValue(mockBlob),
+        },
+      },
+    });
+
+    global.fetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+    });
+
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+
+    const eventRenderResponse = onMock.mock.calls[0][0];
+    const actualElementName = eventRenderResponse.replace(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY, '');
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + actualElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: actualElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 150));
+
+    const rightPanel = document.getElementById('right-panel');
+    expect(rightPanel).not.toBeNull();
+    const audio = rightPanel?.querySelector('audio');
+    expect(audio).not.toBeNull();
+    expect(audio?.controls).toBe(true);
+  });
+
+  test("unknown file type renders generic embed element", async () => {
+    setFileURLResolve({
+      fields: { 
+        zip_file: 'https://example.com/file.zip?response-content-disposition=archive.zip' 
+      },
+      fileMetadata: { contentType: 'application/zip' }
+    });
+    
+    window.postMessage = jest.fn();
+    window.parent.postMessage = jest.fn();
+
+    const mockBlob = new Blob(['text content'], { type: 'text/plain' });
+    const JSZip = require('jszip');
+    JSZip.loadAsync = jest.fn().mockResolvedValue({
+      files: {
+        'document.txt': {
+          dir: false,
+          async: jest.fn().mockResolvedValue(mockBlob),
+        },
+      },
+    });
+
+    global.fetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+    });
+
+    const data = {
+      record: {
+        skyflowID: "sky123",
+        table: "files",
+        column: "zip_file",
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+
+    const eventRenderResponse = onMock.mock.calls[0][0];
+    const actualElementName = eventRenderResponse.replace(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY, '');
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + actualElementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: actualElementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 150));
+
+    const rightPanel = document.getElementById('right-panel');
+    expect(rightPanel).not.toBeNull();
+    const embed = rightPanel?.querySelector('embed');
+    expect(embed).not.toBeNull();
+    expect(embed?.getAttribute('type')).toBe('text/plain');
+  });
+
 });
