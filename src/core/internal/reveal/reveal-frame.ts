@@ -22,7 +22,6 @@ import {
   ZIP_CONTAINER_STYLES,
   RENDER_ELEMENT_IMAGE_STYLES,
   SIGNED_TOKEN_PREFIX,
-  RENDER_LOADING_MESSAGE,
   EMBED_DEFAULT_STYLES,
   ZIP_RENDER_WARNING_STYLES,
   ZIP_FILE_CONSTANTS,
@@ -505,7 +504,6 @@ class RevealFrame {
             }
             const fileType = this.getExtension(url);
             if (fileType.includes('zip') && this.#record?.zipRender && this.#record?.zipRender === true) {
-              this.#dataElememt.innerText = RENDER_LOADING_MESSAGE;
               this.unZipFiles(url).then((blobs) => {
                 printLog(parameterizedString(logs.infoLogs.FILES_UNZIPPED_SUCCESSFULLY,
                   CLASS_NAME, this.#record?.skyflowID), MessageType.LOG, this.#context?.logLevel);
@@ -721,8 +719,8 @@ class RevealFrame {
 
     if (!file?.url) {
       printLog(
-        'Invalid file: missing URL',
-        MessageType.ERROR,
+        'Invalid file: missing URL in Zip file rendering.',
+        MessageType.LOG,
         this.#context?.logLevel,
       );
       return;
@@ -740,35 +738,35 @@ class RevealFrame {
       if (file?.type?.includes('pdf')) {
         const embed = document.createElement('embed');
         embed.className = `${ZIP_FILE_CONSTANTS.SKYFLOW_ELEMENT}embed-${STYLE_TYPE.BASE}`;
-        embed.src = file.url;
-        embed.setAttribute('type', file?.type ?? 'application/pdf');
+        embed.src = file?.url;
+        embed.setAttribute('type', file?.type);
         getCssClassesFromJss(EMBED_DEFAULT_STYLES, 'embed');
         this.#rightPanel?.appendChild(embed);
       } else if (file?.type?.includes('image')) {
         const img = document.createElement('img');
-        img.src = file.url;
-        img.alt = file.name;
+        img.src = file?.url;
+        img.alt = file?.name;
         this.#rightPanel?.appendChild(img);
       } else if (file?.type?.includes('video')) {
         const video = document.createElement('video');
-        video.src = file.url;
+        video.src = file?.url;
         video.controls = true;
         this.#rightPanel?.appendChild(video);
       } else if (file?.type?.includes('audio')) {
         const audio = document.createElement('audio');
-        audio.src = file.url;
+        audio.src = file?.url;
         audio.controls = true;
         this.#rightPanel?.appendChild(audio);
       } else {
         const embed = document.createElement('embed');
-        embed.src = file.url;
-        embed.setAttribute('type', file?.type ?? 'application/octet-stream');
+        embed.src = file?.url;
+        embed.setAttribute('type', file?.type);
         getCssClassesFromJss(EMBED_DEFAULT_STYLES, 'embed');
         this.#rightPanel?.appendChild(embed);
       }
     } catch (error) {
       printLog(
-        `Error rendering file ${file.name}: ${error}`,
+        `Error rendering file ${file?.name}: ${error}`,
         MessageType.ERROR,
         this.#context?.logLevel,
       );

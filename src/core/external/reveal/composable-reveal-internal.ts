@@ -380,6 +380,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
             });
           }).catch((err:any) => {
             printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+            this.setAltText(RENDER_LOADING_MESSAGE, recordData);
             reject(err);
           });
           printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
@@ -452,6 +453,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
               });
             }).catch((err:any) => {
               printLog(`${err?.message}`, MessageType.ERROR, this.#context.logLevel);
+              this.setAltText(RENDER_LOADING_MESSAGE, recordData);
               reject(err);
             });
           }
