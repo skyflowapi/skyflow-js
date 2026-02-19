@@ -4596,6 +4596,9 @@ const fileElement = container.create({
   });
 ```
 
+Note: 
+ - If a ZIP file exists inside ZIP, it is currently not extracted to avoid recursive decompression risks.
+
 ---
 
 # Securely deleting data client-side
