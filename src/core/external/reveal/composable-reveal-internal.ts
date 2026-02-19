@@ -18,6 +18,7 @@ import {
   REVEAL_TYPES,
   COMPOSABLE_REVEAL,
   CUSTOM_ERROR_MESSAGES,
+  RENDER_LOADING_MESSAGE,
 } from '../../constants';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
@@ -144,6 +145,11 @@ class ComposableRevealInternalElement extends SkyflowElement {
             },
           );
           this.#eventEmitter?.on(
+            `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE}:${element?.name}`, () => {
+              this.downloadCurrentFile(element?.name as string);
+            },
+          );
+          this.#eventEmitter?.on(
             `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS}:${element?.name}`,
             (data) => {
               if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS) {
@@ -172,6 +178,15 @@ class ComposableRevealInternalElement extends SkyflowElement {
     } catch (error) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REVEAL_COMPOSABLE_INPUT, ['COMPOSABLE_REVEAL'], true);
     }
+  }
+
+  downloadCurrentFile(elementName: string) {
+    this.#emitEvent(
+      ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + elementName,
+      {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + elementName,
+      },
+    );
   }
 
   getID() {
@@ -308,7 +323,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
     if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
       altText = recordData.altText;
     }
-    this.setAltText('loading...', recordData);
+    this.setAltText(RENDER_LOADING_MESSAGE, recordData);
     const loglevel = this.#context.logLevel;
     if (this.#isComposableFrameReady) {
       return new Promise((resolve, reject) => {
@@ -365,6 +380,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
             });
           }).catch((err:any) => {
             printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
+            this.setAltText(RENDER_LOADING_MESSAGE, recordData);
             reject(err);
           });
           printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
@@ -437,6 +453,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
               });
             }).catch((err:any) => {
               printLog(`${err?.message}`, MessageType.ERROR, this.#context.logLevel);
+              this.setAltText(RENDER_LOADING_MESSAGE, recordData);
               reject(err);
             });
           }
