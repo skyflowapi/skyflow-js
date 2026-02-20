@@ -83,5 +83,8 @@
     "webpack-dev-server": "^4.7.4",
     "webpack-manifest-plugin": "^4.0.2",
     "webpack-merge": "^5.8.0"
+  },
+  "overrides": {
+    "ajv": "^8.18.0"
   }
 }
