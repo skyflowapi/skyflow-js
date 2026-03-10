@@ -435,8 +435,8 @@ class ComposableRevealContainer extends Container {
           printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
             MessageType.LOG,
             this.#context.logLevel);
-          window.addEventListener('message', (messagEevent) => {
-            if (messagEevent?.data?.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+          window.addEventListener('message', (messageEvent) => {
+            if (messageEvent?.data?.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
                   + this.#containerId) {
               this.#emitEvent(
                 ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + this.#containerId, {

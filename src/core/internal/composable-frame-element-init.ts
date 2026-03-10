@@ -232,14 +232,14 @@ export default class RevealComposableFrameElementInit {
       row.spacing = getValueAndItsUnit(row?.spacing)?.join('') ?? '';
       const rowDiv = document?.createElement('div');
       rowDiv.id = `row-${rowIndex}`;
-      const intialRowStyles = {
+      const initialRowStyles = {
         'align-items': row?.alignItems ?? 'stretch',
         'justify-content': row?.justifyContent ?? 'flex-start',
         spacing: row?.spacing,
         padding: this.group?.spacing,
       };
 
-      const rowStylesByClassName = getFlexGridStyles(intialRowStyles);
+      const rowStylesByClassName = getFlexGridStyles(initialRowStyles);
       let errorTextElement;
 
       if (isComposableContainer) {

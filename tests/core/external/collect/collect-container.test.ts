@@ -279,7 +279,7 @@ describe("Collect container", () => {
     expect(uploadFileCallRequestEvent).toBeDefined();
     const uploadRequestCb = uploadFileCallRequestEvent[2];
     uploadRequestCb({
-      fileUploadResonse: [{ skyflow_id: "abc-def" }],
+      fileUploadResponse: [{ skyflow_id: "abc-def" }],
     });
 
     const expectedResponse = await uploadPromise;

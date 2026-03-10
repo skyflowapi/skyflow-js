@@ -107,7 +107,7 @@ describe("test composable element", () => {
     }
   });
 
-  it("should update element propeties when element is mounted", () => {
+  it("should update element properties when element is mounted", () => {
     const testUpdateOptions = { table: "table" };
     testElement.update(testUpdateOptions);
     expect(emitter).toBeCalledWith("COMPOSABLE_UPDATE_OPTIONS", {
@@ -116,7 +116,7 @@ describe("test composable element", () => {
     });
   });
 
-  it("should update element propeties when element is not mounted", () => {
+  it("should update element properties when element is not mounted", () => {
     const testUpdateOptions = { table: "table" };
     testElement2.update(testUpdateOptions);
     expect(emitter).not.toBeCalledWith("COMPOSABLE_UPDATE_OPTIONS", {
@@ -134,29 +134,29 @@ describe("test composable element", () => {
       rejects.toMatchObject({ error: { code: SKYFLOW_ERROR_CODE.MULTI_FILE_NOT_SUPPORTED.code } });
   });
   it('reject when multi file upload invoked on MULT_FILE_INPUT composable element case 1', async () => {
-    const testEventEmitt = new EventEmitter();
+    const testEventEmit = new EventEmitter();
     const testElement4 = new ComposableElement(
       "testce4",
-      testEventEmitt,
+      testEventEmit,
       iframeName,
       { type: "MULTI_FILE_INPUT" }
     );
     // Trigger upload then dispatch error event AFTER listener is attached.
-    testEventEmitt.on(`${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:testce4`, (_: any, cb: Function) => {
+    testEventEmit.on(`${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:testce4`, (_: any, cb: Function) => {
       cb({ error: 'Error occurred' });
     });
     await expect(testElement4.uploadMultipleFiles()).rejects.toMatchObject({ error: 'Error occurred' });
   });
   it('no reject when multi file upload invoked on MULT_FILE_INPUT composable element case 1', async () => {
-    const testEventEmitt = new EventEmitter();
+    const testEventEmit = new EventEmitter();
     const testElement4 = new ComposableElement(
       "testce4",
-      testEventEmitt,
+      testEventEmit,
       iframeName,
       { type: "MULTI_FILE_INPUT" }
     );
     // Trigger upload then dispatch error event AFTER listener is attached.
-    testEventEmitt.on(`${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:testce4`, (_: any, cb: Function) => {
+    testEventEmit.on(`${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:testce4`, (_: any, cb: Function) => {
       cb({});
     });
  // Trigger upload then dispatch error event AFTER listener is attached.
@@ -170,10 +170,10 @@ describe("test composable element", () => {
     await expect(p).rejects.toMatchObject({ error: 'Error occurred' });
   });
   it('reject when multi file upload invoked on MULT_FILE_INPUT composable element case 2', async () => {
-    const testEventEmitt = new EventEmitter();
+    const testEventEmit = new EventEmitter();
     const testElement4 = new ComposableElement(
       "testce4",
-      testEventEmitt,
+      testEventEmit,
       iframeName,
       { type: "MULTI_FILE_INPUT" }
     );
@@ -188,10 +188,10 @@ describe("test composable element", () => {
     await expect(p).rejects.toMatchObject({ error: 'Error occurred' });
   });
   it('reject when multi file upload invoked on MULT_FILE_INPUT composable element case 2', async () => {
-    const testEventEmitt = new EventEmitter();
+    const testEventEmit = new EventEmitter();
     const testElement4 = new ComposableElement(
       "testce4",
-      testEventEmitt,
+      testEventEmit,
       iframeName,
       { type: "MULTI_FILE_INPUT" }
     );

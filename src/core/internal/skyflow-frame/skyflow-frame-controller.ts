@@ -60,7 +60,7 @@ import { deleteData } from '../../../core-utils/delete';
 import properties from '../../../properties';
 import {
   fileValidation, generateUploadFileName,
-  getAtobValue, getSDKNameAndVersion, getValueFromName, vaildateFileName,
+  getAtobValue, getSDKNameAndVersion, getValueFromName, validateFileName,
 } from '../../../utils/helpers';
 import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
@@ -902,7 +902,7 @@ class SkyflowFrameController {
     const value: Blob = Object.values(fileUploadObject)[0] as Blob;
 
     if (preserveFileName) {
-      const isValidFileName = vaildateFileName(state.value.name);
+      const isValidFileName = validateFileName(state.value.name);
       if (!isValidFileName) {
         return Promise.reject(
           new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true),

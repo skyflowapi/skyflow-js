@@ -45,7 +45,7 @@ class RevealFrame {
 
   #elementContainer: HTMLDivElement;
 
-  #dataElememt: HTMLSpanElement;
+  #dataElement: HTMLSpanElement;
 
   #labelElement: HTMLSpanElement;
 
@@ -108,9 +108,9 @@ class RevealFrame {
     this.#labelElement = document.createElement('span');
     this.#labelElement.className = `SkyflowElement-${this.#name}-label-${STYLE_TYPE.BASE}`;
 
-    this.#dataElememt = document.createElement('span');
-    this.#dataElememt.className = `SkyflowElement-${this.#name}-content-${STYLE_TYPE.BASE}`;
-    this.#dataElememt.id = this.#name;
+    this.#dataElement = document.createElement('span');
+    this.#dataElement.className = `SkyflowElement-${this.#name}-content-${STYLE_TYPE.BASE}`;
+    this.#dataElement.id = this.#name;
 
     this.#errorElement = document.createElement('span');
     this.#errorElement.className = `SkyflowElement-${this.#name}-error-${STYLE_TYPE.BASE}`;
@@ -182,7 +182,7 @@ class RevealFrame {
       );
     }
 
-    this.#elementContainer.appendChild(this.#dataElememt);
+    this.#elementContainer.appendChild(this.#dataElement);
 
     if (rootDiv) rootDiv.append(this.#elementContainer);
     else document.body.append(this.#elementContainer);
@@ -211,7 +211,7 @@ class RevealFrame {
         if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
           this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
           if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
-            this.#dataElememt.innerText = this.#record.altText;
+            this.#dataElement.innerText = this.#record.altText;
           }
           bus
             .emit(
@@ -251,12 +251,12 @@ class RevealFrame {
         const responseValue = typeof responseData === 'string' ? responseData : responseData?.value;
         this.#revealedValue = responseValue;
         this.isRevealCalled = true;
-        this.#dataElememt.innerText = responseValue;
+        this.#dataElement.innerText = responseValue;
         if (this.#record.mask) {
-          const { formattedOutput } = getMaskedOutput(this.#dataElememt.innerText,
+          const { formattedOutput } = getMaskedOutput(this.#dataElement.innerText,
             this.#record.mask[0],
             constructMaskTranslation(this.#record.mask));
-          this.#dataElememt.innerText = formattedOutput;
+          this.#dataElement.innerText = formattedOutput;
         }
         printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
           CLASS_NAME, tokenToMatch), MessageType.LOG, this.#context?.logLevel);
@@ -364,15 +364,15 @@ class RevealFrame {
         const responseValue = data?.[0]?.value as string ?? '';
         this.#revealedValue = responseValue;
         this.isRevealCalled = true;
-        this.#dataElememt.innerText = responseValue;
+        this.#dataElement.innerText = responseValue;
 
         if (this.#record?.mask) {
           const { formattedOutput } = getMaskedOutput(
-            this.#dataElememt?.innerText ?? '',
+            this.#dataElement?.innerText ?? '',
             this.#record?.mask?.[0],
             constructMaskTranslation(this.#record?.mask),
           );
-          this.#dataElememt.innerText = formattedOutput ?? '';
+          this.#dataElement.innerText = formattedOutput ?? '';
         }
 
         printLog(
@@ -442,7 +442,7 @@ class RevealFrame {
       if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
         this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
         if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
-          this.#dataElememt.innerText = this.#record.altText;
+          this.#dataElement.innerText = this.#record.altText;
         }
         bus
           .emit(
@@ -625,7 +625,7 @@ class RevealFrame {
                 this.#record?.mask?.[0],
                 constructMaskTranslation(this.#record?.mask),
               );
-              this.#dataElememt.innerText = formattedOutput ?? '';
+              this.#dataElement.innerText = formattedOutput ?? '';
             }
           }
         }
@@ -718,11 +718,11 @@ class RevealFrame {
 
   private updateDataView() {
     if (Object.prototype.hasOwnProperty.call(this.#record, 'altText')) {
-      this.#dataElememt.innerText = this.#record.altText;
+      this.#dataElement.innerText = this.#record.altText;
     } else if (this.#revealedValue) {
-      this.#dataElememt.innerText = this.#revealedValue;
+      this.#dataElement.innerText = this.#revealedValue;
     } else if (Object.prototype.hasOwnProperty.call(this.#record, 'token')) {
-      this.#dataElememt.innerText = this.#record.token;
+      this.#dataElement.innerText = this.#record.token;
     }
   }
 }

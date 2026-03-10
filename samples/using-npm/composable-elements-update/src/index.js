@@ -157,7 +157,7 @@ try {
     // mount the container
     composableContainer.mount('#composableContainer');
 
-    // Add OnSubmit event listner on composable container
+    // Add OnSubmit event listener on composable container
     composableContainer.on(Skyflow.EventName.SUBMIT, () => {
         // Handle when enter key pressed in any container elements
         console.log('Submit Listener is being Triggered.');
@@ -221,7 +221,7 @@ try {
                 }
             });
 
-            // update table,coloumn on expiry date
+            // update table,column on expiry date
             expiryDateElement.update({
                 table: 'pii_fields',
                 column: 'primary_card.expiry_date',

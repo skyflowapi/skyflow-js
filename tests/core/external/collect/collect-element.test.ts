@@ -50,7 +50,7 @@ const composableElementName =
 
 const composableInput: CollectElementInput = {
   table: "pii_fields",
-  column: "primary_card.card_numner",
+  column: "primary_card.card_number",
   inputStyles: {
     base: {
       color: "#1d1d1d",
@@ -121,10 +121,10 @@ const updateElementInput = {
 
 const destroyCallback = jest.fn();
 const updateCallback = jest.fn();
-const groupEmittFn = jest.fn();
+const groupEmitFn = jest.fn();
 let groupOnCb: Function;
-const groupEmiitter: EventEmitter = {
-  _emit: groupEmittFn,
+const groupEmitter: EventEmitter = {
+  _emit: groupEmitFn,
   on: jest.fn().mockImplementation((_, cb) => {
     groupOnCb = cb;
   }),
@@ -399,7 +399,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
-      groupEmiitter
+      groupEmitter
     );
 
     const inputEvent = onSpy.mock.calls.filter(
@@ -468,7 +468,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
-      groupEmiitter
+      groupEmitter
     );
 
     const inputEvent = onSpy.mock.calls.filter(
@@ -530,7 +530,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
-      groupEmiitter
+      groupEmitter
     );
     expect(() => {
       element.mount("#123");
@@ -555,7 +555,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
-      groupEmiitter
+      groupEmitter
     );
 
     const div = document.createElement("div");
@@ -589,7 +589,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
-      groupEmiitter
+      groupEmitter
     );
 
     const div = document.createElement("div");
@@ -612,7 +612,7 @@ describe("testing collect element under various scenarios", () => {
     element.unmount();
   });
 
-  it("tests mount collect element before conatiner mount for valid dom element", () => {
+  it("tests mount collect element before container mount for valid dom element", () => {
     const onSpy = jest.spyOn(bus, "on");
 
     const element = new CollectElement(
@@ -631,7 +631,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
-      groupEmiitter
+      groupEmitter
     );
 
     const div = document.createElement("div");
@@ -654,7 +654,7 @@ describe("testing collect element under various scenarios", () => {
     element.unmount();
   });
 
-  it("tests mount collect element before conatiner mount for valid dom element with isMounted false", () => {
+  it("tests mount collect element before container mount for valid dom element with isMounted false", () => {
     const onSpy = jest.spyOn(bus, "on");
 
     const element = new CollectElement(
@@ -673,7 +673,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
-      groupEmiitter
+      groupEmitter
     );
 
     const div = document.createElement("div");

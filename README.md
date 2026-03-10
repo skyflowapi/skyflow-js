@@ -76,13 +76,13 @@ const getBearerToken = () => {
           const response = JSON.parse(Http.responseText);
           resolve(response.accessToken);
         } else {
-          reject('Error occured');
+          reject('Error occurred');
         }
       }
     };
 
     Http.onerror = error => {
-      reject('Error occured');
+      reject('Error occurred');
     };
 
     const url = 'https://api.acmecorp.com/skyflowToken';
@@ -634,7 +634,7 @@ const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 const element = container.create({
   table: 'cards',
   column: 'cardNumber',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -1211,7 +1211,7 @@ const confirmPinElement = collectContainer.create({
   validations: [elementMatchRule],
 });
 
-// Mount elements on screen - errors will be shown if any of the validaitons fail.
+// Mount elements on screen - errors will be shown if any of the validations fail.
 pinElement.mount('#collectPIN');
 confirmPinElement.mount('#collectConfirmPIN');
 
@@ -1421,7 +1421,7 @@ const cardNumber = container.create({
   type: Skyflow.ElementType.CARD_NUMBER,
 });
 
-// Set a value programatically.
+// Set a value programmatically.
 cardNumber.setValue('4111111111111111');
 
 // Clear the value.
@@ -2077,7 +2077,7 @@ To specify where the Elements are rendered on your page, create a placeholder `<
 ```
 Use the composable container's `mount(domElement)` method to insert the container's Elements into the specified `<div>`. For instance, the following call inserts Elements into the `<div>` with the `id "#composableContainer"`.
 
-```javacript
+```javascript
 container.mount('#composableContainer');
 ```
 
@@ -2377,7 +2377,7 @@ const cvvElement = composableContainer.create({
 });
 
 // Mount the composable container.
-composableContainer.mount('#compostableContainer'); // Assumes there is a div with id='#composableContainer' in the webpage.
+composableContainer.mount('#composableContainer'); // Assumes there is a div with id='#composableContainer' in the webpage.
 
 // ...
 
@@ -4033,7 +4033,7 @@ To specify where the Elements are rendered on your page, create a placeholder `<
 ```
 Use the composable container's `mount(domElement)` method to insert the container's Elements into the specified `<div>`. For instance, the following call inserts Elements into the `<div>` with the `id "#composableContainer"`.
 
-```javacript
+```javascript
 revealComposableContainer.mount('#composableRevealContainer');
 ```
 

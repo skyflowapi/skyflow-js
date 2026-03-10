@@ -8,7 +8,7 @@ import discoverIcon from '../../assets/discover.svg';
 import hipperCardIcon from '../../assets/hipercard.svg';
 import jcbIcon from '../../assets/jcb.svg';
 import maestroIcon from '../../assets/maestro.svg';
-import maseterCardIcon from '../../assets/mastercard.svg';
+import masterCardIcon from '../../assets/mastercard.svg';
 import unionPayIcon from '../../assets/unionpay.svg';
 import visaCardIcon from '../../assets/visa.svg';
 import copyIcon from '../../assets/copyIcon.svg';
@@ -600,7 +600,7 @@ export const CARD_ENCODED_ICONS = {
   [CardType.HIPERCARD]: hipperCardIcon,
   [CardType.JCB]: jcbIcon,
   [CardType.MAESTRO]: maestroIcon,
-  [CardType.MASTERCARD]: maseterCardIcon,
+  [CardType.MASTERCARD]: masterCardIcon,
   [CardType.UNIONPAY]: unionPayIcon,
   [CardType.VISA]: visaCardIcon,
 };
@@ -694,8 +694,8 @@ export const INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES = [
   ElementType.CVV,
 ];
 
-export const DEFAULT_CARD_NUMBER_SEPERATOR = ' ';
-export const CARD_NUMBER_HYPEN_SEPERATOR = '-';
+export const DEFAULT_CARD_NUMBER_SEPARATOR = ' ';
+export const CARD_NUMBER_HYPHEN_SEPARATOR = '-';
 
 export const DEFAULT_INPUT_FORMAT_TRANSLATION = { X: '[0-9]' };
 

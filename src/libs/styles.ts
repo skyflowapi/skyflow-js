@@ -5,7 +5,7 @@ import { STYLE_TYPE } from '../core/constants';
 import { getValueAndItsUnit } from './element-options';
 
 export function buildStylesFromClassesAndStyles(classes, styles) {
-  // if focus add to base styles with psudo element tag
+  // if focus add to base styles with pseudo element tag
   Object.values(STYLE_TYPE).forEach((classType) => {
     if (classes[classType] || styles[classType]) {
       switch (classType) {
