@@ -10,7 +10,7 @@ import {
 
 export const METRIC_OBJECT: SharedMeticsObjectType = { records: [] };
 
-export function initalizeMetricObject(metadata: any, elementId: string) {
+export function initializeMetricObject(metadata: any, elementId: string) {
   const metaDataObject = getMetaObject(sdkDetails, metadata, navigator);
   const elementMetricObject = {
     element_id: elementId,

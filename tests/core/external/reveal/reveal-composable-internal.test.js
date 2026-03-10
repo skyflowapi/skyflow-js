@@ -32,10 +32,10 @@ global.ResizeObserver = jest.fn(() => ({
 // const _emit = jest.fn();
 const getBearerToken = jest.fn().mockResolvedValue('token');
 
-const groupEmittFn = jest.fn();
+const groupEmitFn = jest.fn();
 let groupOnCb;
-const groupEmiitter = {
-  _emit: groupEmittFn,
+const groupEmitter = {
+  _emit: groupEmitFn,
   on:jest.fn().mockImplementation((args,cb)=>{
     groupOnCb = cb;
   })
@@ -153,7 +153,7 @@ describe("Reveal Element Class", () => {
         elementId,
         [],
         metaData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     expect(testRevealElement).toBeInstanceOf(ComposableRevealInternalElement);
@@ -173,7 +173,7 @@ describe("Reveal Element Class", () => {
         elementId,
         elementArray,
         metaData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     window.dispatchEvent(new MessageEvent('message', {
@@ -205,15 +205,15 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
-  groupEmiitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {errorMessages: {
+  groupEmitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {errorMessages: {
   [ErrorType.NOT_FOUND]: "No Records Found",
     }});
     window.dispatchEvent(new MessageEvent('message', {
@@ -239,7 +239,7 @@ describe("Reveal Element Class", () => {
       iframe.contentWindow.postMessage = jest.fn();
     }
 
-    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", {}, (response) => {
+    groupEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", {}, (response) => {
         expect(response).toBeDefined();
         expect(response).toEqual({ success: { skyflow_id: '1244', column: 'file' } });
     });
@@ -267,12 +267,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     window.dispatchEvent(new MessageEvent('message', {
@@ -298,7 +298,7 @@ describe("Reveal Element Class", () => {
       iframe.contentWindow.postMessage = jest.fn();
     }
 
-    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", {}, (response) => {
+    groupEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", {}, (response) => {
         expect(response).toBeDefined();
         expect(response).toEqual({ error: { skyflow_id: '1244', column: 'file', error:{code : 400, description: "No Records Found"} } });
     });
@@ -329,12 +329,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     window.dispatchEvent(new MessageEvent('message', {
@@ -360,7 +360,7 @@ describe("Reveal Element Class", () => {
       iframe.contentWindow.postMessage = jest.fn();
     }
 
-    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", {}, (response) => {
+    groupEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", {}, (response) => {
         expect(response).toBeDefined();
         expect(response).toEqual({ error: { skyflow_id: '1244', column: 'file', error:{code : 400, description: "No Records Found"} } });
     });
@@ -391,12 +391,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     const testEmptyDiv = document.createElement("div");
@@ -416,7 +416,7 @@ describe("Reveal Element Class", () => {
       iframe.contentWindow.postMessage = jest.fn();
     }
 
-    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
+    groupEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
         expect(response).toBeDefined();
         expect(response).toEqual({ success: { skyflow_id: '1244', column: 'file' } });
     });
@@ -450,12 +450,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     const testEmptyDiv = document.createElement("div");
@@ -475,7 +475,7 @@ describe("Reveal Element Class", () => {
       iframe.contentWindow.postMessage = jest.fn();
     }
 
-    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
+    groupEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
         expect(response).toBeDefined();
         expect(response).toEqual({ error: { skyflow_id: '1244', column: 'file', error:{code : 400, description: "No Records Found"} } });
     });
@@ -519,12 +519,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientDataFail,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     const testEmptyDiv = document.createElement("div");
@@ -546,7 +546,7 @@ describe("Reveal Element Class", () => {
 
     // Capture the callback response
     let callbackResponse;
-    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
+    groupEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
         callbackResponse = response;
     });
     
@@ -586,12 +586,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientDataFail,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     window.dispatchEvent(new MessageEvent('message', {
@@ -619,7 +619,7 @@ describe("Reveal Element Class", () => {
 
     // Capture the callback response
     let callbackResponse;
-    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
+    groupEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element2", {}, (response) => {
         callbackResponse = response;
     });
     
@@ -643,12 +643,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     const testEmptyDiv = document.createElement("div");
@@ -668,7 +668,7 @@ describe("Reveal Element Class", () => {
       iframe.contentWindow.postMessage = jest.fn();
     }
 
-    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + ":element2", {
+    groupEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + ":element2", {
         updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
         options: { altText: "Updated Alt Text" }
     });  
@@ -691,12 +691,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     window.dispatchEvent(new MessageEvent('message', {
@@ -722,7 +722,7 @@ describe("Reveal Element Class", () => {
       iframe.contentWindow.postMessage = jest.fn();
     }
 
-    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + ":element2", {
+    groupEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + ":element2", {
         updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
         options: { altText: "Updated Alt Text" }
     });
@@ -741,12 +741,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
     window.dispatchEvent(new MessageEvent('message', {
@@ -783,7 +783,7 @@ describe("Reveal Element Class", () => {
     const testIframeName = `${COMPOSABLE_REVEAL}:${btoa(mockUuid)}:${containerId}:ERROR:${btoa(clientDomain)}`;
     expect(hostElement.shadowRoot.getElementById('testDiv').querySelector('iframe')?.name).toBe(testIframeName);
 
-    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + ":element2", {
+    groupEmitter._emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + ":element2", {
         updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
         options: { altText: "Updated Alt Text" }
     });
@@ -801,12 +801,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
 
@@ -827,12 +827,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:true,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
 
@@ -864,12 +864,12 @@ describe("Reveal Element Class", () => {
         }]
     };
     properties.IFRAME_SECURE_ORIGIN = 'https://secure.origin';
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:true,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
 
@@ -936,12 +936,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:true,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
 
@@ -992,12 +992,12 @@ describe("Reveal Element Class", () => {
             }]
         }]
     };
-    const groupEmiitter = new EventEmitter();
+    const groupEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealInternalElement(
         elementId,
         elementArray,
         clientData,
-        {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+        {containerId:containerId,isMounted:true,eventEmitter:groupEmitter},
         { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
 

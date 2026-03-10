@@ -28,10 +28,10 @@ jest.mock('../../../../src/libs/uuid',()=>({
 // const _emit = jest.fn();
 const getBearerToken = jest.fn();
 
-const groupEmittFn = jest.fn();
+const groupEmitFn = jest.fn();
 let groupOnCb;
-const groupEmiitter = {
-  _emit: groupEmittFn,
+const groupEmitter = {
+  _emit: groupEmitFn,
   on:jest.fn().mockImplementation((args,cb)=>{
     groupOnCb = cb;
   })
@@ -160,7 +160,7 @@ describe("Reveal Element Class", () => {
       testRecord,
       undefined,
       metaData,
-      {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+      {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -171,7 +171,7 @@ describe("Reveal Element Class", () => {
       testRecord,
       undefined,
       metaData,
-      {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+      {containerId:containerId,isMounted:true,eventEmitter:groupEmitter},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -209,7 +209,7 @@ describe("Reveal Element Class", () => {
       },
       undefined,
       clientData,
-      {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter},
+      {containerId:containerId,isMounted:true,eventEmitter:groupEmitter},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -247,7 +247,7 @@ describe("Reveal Element Class", () => {
       },
       {} ,
       clientData2,
-      {containerId:containerId,isMounted:true,eventEmitter:groupEmiitter, isControllerFrameReady: false},
+      {containerId:containerId,isMounted:true,eventEmitter:groupEmitter, isControllerFrameReady: false},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -303,7 +303,7 @@ describe("Reveal Element Class", () => {
       },
       undefined,
       clientData2,
-      { containerId: containerId, isMounted: true, eventEmitter: groupEmiitter, isControllerFrameReady: true },
+      { containerId: containerId, isMounted: true, eventEmitter: groupEmitter, isControllerFrameReady: true },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
     );
@@ -352,7 +352,7 @@ describe("Reveal Element Class", () => {
       },
       undefined,
       clientData,
-      { containerId: containerId, isMounted: true, eventEmitter: groupEmiitter, isControllerFrameReady: false },
+      { containerId: containerId, isMounted: true, eventEmitter: groupEmitter, isControllerFrameReady: false },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
     );
@@ -462,7 +462,7 @@ describe("Reveal Element Class", () => {
       testRecord,
       undefined,
       metaData,
-      {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+      {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -488,7 +488,7 @@ describe("Reveal Element Class", () => {
       testRecord,
       undefined,
       metaData,
-      {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+      {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -514,7 +514,7 @@ describe("Reveal Element Class", () => {
       {},
       undefined,
       metaData,
-      {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+      {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
       elementId,
       { logLevel: LogLevel.ERROR,env:Env.PROD }
     );
@@ -530,7 +530,7 @@ describe("Reveal Element Methods",()=>{
     },
     undefined,
     metaData,
-    {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+    {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
     elementId,
     { logLevel: LogLevel.ERROR,env:Env.PROD }
   );
@@ -571,7 +571,7 @@ describe("Reveal Element Methods",()=>{
     },
     undefined,
     clientData,
-    {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+    {containerId:containerId,isMounted:false,eventEmitter:groupEmitter},
     elementId,
     { logLevel: LogLevel.ERROR,env:Env.PROD }
     
@@ -611,7 +611,7 @@ describe("Reveal Element Methods",()=>{
       name:testRevealElement.iframeName(),
     });
     testRevealElement.setError("errorText");
-    groupEmiitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {
+    groupEmitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {
       errorMessages: { GENERIC_ERROR: "errorText" }
     });
     expect(testRevealElement.isClientSetError()).toBe(true);
@@ -629,7 +629,7 @@ describe("Reveal Element Methods",()=>{
       name:testRevealElement.iframeName(),
     });
     testRevealElement.setError("errorText");
-    groupEmiitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, undefined);
+    groupEmitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, undefined);
     expect(testRevealElement.isClientSetError()).toBe(true);
     expect(emitSpy.mock.calls[1][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[1][1]).toEqual({name: testRevealElement.iframeName(), clientErrorText: "errorText", isTriggerError: true});
@@ -778,7 +778,7 @@ describe("Reveal Element Methods",()=>{
       label: 'Updated Label',
       inputStyles: {
         base: {
-          borderWitdth: '5px',
+          borderWidth: '5px',
         }
       }
     }
@@ -791,7 +791,7 @@ describe("Reveal Element Methods",()=>{
     });
     testRevealElement2.update(testUpdateOptions);
     expect(emitSpy.mock.calls[2][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + testRevealElement2.iframeName());
-    expect(emitSpy.mock.calls[2][1]).toEqual({name: testRevealElement2.iframeName(), updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS, updatedValue: {'label': 'Updated Label', inputStyles: { base: { borderWitdth: '5px' } }}});
+    expect(emitSpy.mock.calls[2][1]).toEqual({name: testRevealElement2.iframeName(), updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS, updatedValue: {'label': 'Updated Label', inputStyles: { base: { borderWidth: '5px' } }}});
     expect(emitSpy).toBeCalled();
   })
   it('should update the properties of elements', () => {
@@ -801,7 +801,7 @@ describe("Reveal Element Methods",()=>{
       label: 'Updated Label',
       inputStyles: {
         base: {
-          borderWitdth: '5px',
+          borderWidth: '5px',
         }
       }
     }
@@ -814,7 +814,7 @@ describe("Reveal Element Methods",()=>{
       name:testRevealElement2.iframeName(),
     });
     expect(emitSpy.mock.calls[0][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + testRevealElement2.iframeName());
-    expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement2.iframeName(), updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS, updatedValue: {'label': 'Updated Label', inputStyles: { base: { borderWitdth: '5px' } }}});
+    expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement2.iframeName(), updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS, updatedValue: {'label': 'Updated Label', inputStyles: { base: { borderWidth: '5px' } }}});
     expect(emitSpy).toBeCalled();
   })
 });

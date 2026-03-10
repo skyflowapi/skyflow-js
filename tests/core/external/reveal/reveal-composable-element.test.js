@@ -25,7 +25,7 @@ jest.mock('../../../../src/libs/uuid',()=>({
 // const _emit = jest.fn();
 const getBearerToken = jest.fn();
 
-const groupEmittFn = jest.fn();
+const groupEmitFn = jest.fn();
 let groupOnCb;
 jest.mock('../../../../src/libs/jss-styles', () => {
   return {
@@ -117,7 +117,7 @@ describe("Reveal Composable Element Class", () => {
     expect(testRevealElement).toBeInstanceOf(ComposableRevealElement);
 
   });
-  test("constructor when details are not passsed", () => {
+  test("constructor when details are not passed", () => {
     const eventEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealElement(
         undefined,

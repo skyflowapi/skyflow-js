@@ -223,7 +223,7 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
   return true;
 };
 
-export const vaildateFileName = (name: string) => ALLOWED_NAME_FOR_FILE.test(name);
+export const validateFileName = (name: string) => ALLOWED_NAME_FOR_FILE.test(name);
 
 export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
   `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`
@@ -239,12 +239,12 @@ export const getContainerType = (frameName:string):ContainerType => {
     : ContainerType.COLLECT;
 };
 
-export const addSeperatorToCardNumberMask = (
+export const addSeparatorToCardNumberMask = (
   cardNumberMask: any,
-  seperator?: string,
+  separator?: string,
 ) => {
-  if (seperator) {
-    return [cardNumberMask[0].replace(/[\s]/g, seperator), cardNumberMask[1]];
+  if (separator) {
+    return [cardNumberMask[0].replace(/[\s]/g, separator), cardNumberMask[1]];
   }
   return cardNumberMask;
 };
@@ -425,8 +425,8 @@ export function checkAndSetForCustomUrl(config: ISkyflow) {
 }
 
 export const generateUploadFileName = (fileName:string) => {
-  const fileExtentsion = fileName?.split('.')?.pop() || '';
-  return `${uuid()}${fileExtentsion && `.${fileExtentsion}`}`;
+  const fileExtension = fileName?.split('.')?.pop() || '';
+  return `${uuid()}${fileExtension && `.${fileExtension}`}`;
 };
 
 export const getValueFromName = (name: string, index: number) => {

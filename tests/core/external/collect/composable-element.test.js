@@ -44,13 +44,13 @@ describe("test composable element", () => {
     expect(id).toBe("testce3");
   });
 
-  it("test valid listner - 2 ", () => {
+  it("test valid listener - 2 ", () => {
     expect(testElement.type).toBe(ContainerType.COMPOSABLE);
     testElement.on("CHANGE", handler);
     expect(handler).toBeCalledWith({ value: "", isValid: true });
   });
 
-  it("test valid listiner 1", () => {
+  it("test valid listener 1", () => {
     expect(testElement.type).toBe(ContainerType.COMPOSABLE);
     testElement.on("FOCUS", handler);
     expect(handler).toBeCalledWith({ value: "", isValid: true });
@@ -78,7 +78,7 @@ describe("test composable element", () => {
     }
   });
 
-  it("update element propeties when element is mounted", () => {
+  it("update element properties when element is mounted", () => {
     const testUpdateOptions = { table: "table" };
     testElement.update(testUpdateOptions);
     expect(emitter).toBeCalledWith("COMPOSABLE_UPDATE_OPTIONS", {
@@ -87,7 +87,7 @@ describe("test composable element", () => {
     });
   });
 
-  it("update element propeties when element is not mounted", () => {
+  it("update element properties when element is not mounted", () => {
     const testUpdateOptions = { table: "table" };
     testElement2.update(testUpdateOptions);
     expect(emitter).not.toBeCalledWith("COMPOSABLE_UPDATE_OPTIONS", {

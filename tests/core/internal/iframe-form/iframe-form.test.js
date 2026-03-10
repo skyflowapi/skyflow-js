@@ -44,7 +44,7 @@ const records = {
 
 const clientObj1 = {
     config: {},
-    request: jest.fn(() => Promise.rejects({"error": 'not foound'})),
+    request: jest.fn(() => Promise.rejects({"error": 'not found'})),
     toJSON: jest.fn(() => ({
         config: {},
         metaData: {
@@ -441,7 +441,7 @@ describe('test iframeFormelement', () => {
         });
     });
 
-    test('set mask  should throw warining invalid regex in translation mask',()=>{
+    test('set mask  should throw warning invalid regex in translation mask',()=>{
         const spy = jest.spyOn(console, 'warn'); 
         const element = new IFrameFormElement(collect_element, '',{} ,{logLevel:LogLevel.WARN,env:Env.PROD});
         element.setMask(["XXX", { X: "*" }]);
@@ -449,7 +449,7 @@ describe('test iframeFormelement', () => {
             'CVV')}`)
     });
 
-    test('set mask should not throw warining invalid regex in translation mask with error log level',()=>{
+    test('set mask should not throw warning invalid regex in translation mask with error log level',()=>{
         const spy = jest.spyOn(console, 'warn'); 
         const element = new IFrameFormElement(collect_element, '',{} ,{env:Env.PROD});
         element.setMask(["XXX", { X: "*" }]);
