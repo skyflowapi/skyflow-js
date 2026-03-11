@@ -143,7 +143,7 @@ const cardNumberElement = {
   ...collectStylesOptions,
 };
 
-const FileInuptElement = {
+const FileInputElement = {
   table: 'pii_fields',
   column: 'profile_picture',
   type: ElementType.FILE_INPUT,
@@ -311,10 +311,10 @@ describe('test composable container class',()=>{
       window.dispatchEvent(new MessageEvent('message', {
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + '1234', // containerId
-        data: { error: "Error occured"}
+        data: { error: "Error occurred"}
       }
     }));
-    await expect(collectPromiseError).rejects.toEqual("Error occured");
+    await expect(collectPromiseError).rejects.toEqual("Error occurred");
 
   });
 
@@ -565,7 +565,7 @@ describe('test composable container class',()=>{
       container.collect(options);
       const collectCb = emitSpy.mock.calls[0][2];
       collectCb(collectResponse);
-      collectCb({ error: 'Error occured' })
+      collectCb({ error: 'Error occurred' })
     },200);
 
   });
@@ -642,7 +642,7 @@ describe('test composable container class',()=>{
       { layout: [1], styles: { base: { width: '100px' } } }
     );
   
-    const element1 = container.create(FileInuptElement);  
+    const element1 = container.create(FileInputElement);  
     container.mount('#composable');
     const options = {};
     container.setError({[ErrorType.NOT_FOUND]: "Test error message",})
@@ -669,11 +669,11 @@ describe('test composable container class',()=>{
     window.dispatchEvent(new MessageEvent('message', {
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + '1234', // containerId
-        data: { error: "Error occured"}
+        data: { error: "Error occurred"}
       }
     }));
     
-    await expect(collectPromiseError).rejects.toEqual("Error occured");
+    await expect(collectPromiseError).rejects.toEqual("Error occurred");
 
     // Test error scenario case 2 - no fileUploadResponse and no error
     const collectPromiseError2 = container.uploadFiles(options);
@@ -683,11 +683,11 @@ describe('test composable container class',()=>{
     window.dispatchEvent(new MessageEvent('message', {
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + '1234', // containerId
-        data: { errors: "Error occured"}
+        data: { errors: "Error occurred"}
       }
     }));
     
-    await expect(collectPromiseError2).rejects.toEqual({ errors: "Error occured"});
+    await expect(collectPromiseError2).rejects.toEqual({ errors: "Error occurred"});
   });
   it('test upload FILES when bearer token fails', async () => {
   const getBearerTokenFail = jest.fn().mockRejectedValue({ error: 'token generation failed' });
@@ -701,7 +701,7 @@ describe('test composable container class',()=>{
   document.body.append(div);
 
   const container = new ComposableContainer(metaDataFail, {}, context, { layout: [1] });
-  const element1 = container.create(FileInuptElement);
+  const element1 = container.create(FileInputElement);
   container.mount('#composable2');
 
   await expect(container.uploadFiles({})).rejects.toEqual({ error: 'token generation failed' });

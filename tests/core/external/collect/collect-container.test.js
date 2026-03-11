@@ -836,7 +836,7 @@ describe('Collect container', () => {
 
   });
 
-  it('element type radio or checkox created', async () => {
+  it('element type radio or checkbox created', async () => {
     const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
     const div1 = document.createElement('div');
     const div2 = document.createElement('div');

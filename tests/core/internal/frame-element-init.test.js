@@ -20,7 +20,7 @@ jest.mock('../../../src/utils/helpers', () => {
   return {
     ...actual,
     fileValidation: (...args) => {return true},
-    vaildateFileName: () => true,
+    validateFileName: () => true,
     generateUploadFileName: (name) => `generated_${name}`,
   };
 });
