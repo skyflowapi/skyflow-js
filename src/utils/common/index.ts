@@ -321,7 +321,7 @@ export interface InputStyles extends ErrorTextStyles {
 export interface CollectElementOptions {
   required?: boolean,
   format?: string,
-  translation?: Record<string, Style>,
+  translation?: Record<string, string>,
   enableCardIcon?: boolean,
   enableCopy?: boolean,
   cardMetadata?: CardMetadata,
