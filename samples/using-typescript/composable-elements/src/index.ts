@@ -57,7 +57,10 @@ try {
 				fontWeight: '400',
 				fontSize: '14px',
 				lineHeight: '21px',
-				width: '294px'
+				width: '294px',
+				"&:hover": {
+     			   borderColor: "green",
+    			},
 			},
 			global: {
 				'@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
