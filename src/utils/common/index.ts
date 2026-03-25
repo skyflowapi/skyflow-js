@@ -291,8 +291,6 @@ export interface DeleteErrorRecords {
   error: ErrorRecord,
 }
 
-export type Style = string | { [key: string]: Style };
-
 export interface ContainerOptions {
   layout: number[],
   styles?: InputStyles, // check implementation below
@@ -300,22 +298,22 @@ export interface ContainerOptions {
 }
 
 export interface ErrorTextStyles {
-  base?: Record<string, Style>,
-  global?: Record<string, Style>,
+  base?: Record<string, string>,
+  global?: Record<string, string>,
 }
 
 export interface LabelStyles extends ErrorTextStyles {
-  focus?: Record<string, Style>,
-  requiredAsterisk?: Record<string, Style>,
+  focus?: Record<string, string>,
+  requiredAsterisk?: Record<string, string>,
 }
 
 export interface InputStyles extends ErrorTextStyles {
-  focus?: Record<string, Style>,
-  complete?: Record<string, Style>,
-  empty?: Record<string, Style>,
-  invalid?: Record<string, Style>,
-  cardIcon?: Record<string, Style>,
-  copyIcon?: Record<string, Style>,
+  focus?: Record<string, string>,
+  complete?: Record<string, string>,
+  empty?: Record<string, string>,
+  invalid?: Record<string, string>,
+  cardIcon?: Record<string, string>,
+  copyIcon?: Record<string, string>,
 }
 
 export interface CollectElementOptions {
