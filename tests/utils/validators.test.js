@@ -66,6 +66,56 @@ describe('Validation card number and Expiry Date', () => {
     expect(validateExpiryDate(expiryDate, "MM/YY")).toBe(false);
   });
 
+  test('validate expiry date with month 00, MM/YY', () => {
+    const expiryDate = '00/45';
+    expect(validateExpiryDate(expiryDate, "MM/YY")).toBe(false);
+  });
+
+  test('validate expiry date with month 13, MM/YY', () => {
+    const expiryDate = '13/45';
+    expect(validateExpiryDate(expiryDate, "MM/YY")).toBe(false);
+  });
+
+  test('validate expiry date with month 00, YY/MM', () => {
+    const expiryDate = '45/00';
+    expect(validateExpiryDate(expiryDate, "YY/MM")).toBe(false);
+  });
+
+  test('validate expiry date with month 13, YY/MM', () => {
+    const expiryDate = '45/13';
+    expect(validateExpiryDate(expiryDate, "YY/MM")).toBe(false);
+  });
+
+  test('validate expiry date with month 00, YYYY/MM', () => {
+    const expiryDate = '2045/00';
+    expect(validateExpiryDate(expiryDate, "YYYY/MM")).toBe(false);
+  });
+
+  test('validate expiry date with month 13, YYYY/MM', () => {
+    const expiryDate = '2045/13';
+    expect(validateExpiryDate(expiryDate, "YYYY/MM")).toBe(false);
+  });
+
+  test('validate older expiry date with month 00, YYYY/MM', () => {
+    const expiryDate = '2024/00';
+    expect(validateExpiryDate(expiryDate, "YYYY/MM")).toBe(false);
+  });
+
+  test('validate older expiry date with month 13, YYYY/MM', () => {
+    const expiryDate = '2024/13';
+    expect(validateExpiryDate(expiryDate, "YYYY/MM")).toBe(false);
+  });
+
+  test('validate expiry date with month 00, MM/YYYY', () => {
+    const expiryDate = '00/2045';
+    expect(validateExpiryDate(expiryDate, "MM/YYYY")).toBe(false);
+  });
+
+  test('validate expiry date with month 13, MM/YYYY', () => {
+    const expiryDate = '13/2045';
+    expect(validateExpiryDate(expiryDate, "MM/YYYY")).toBe(false);
+  });
+
   test('validate expired date, MM/YY', () => {
     const currentDate = new Date();
     const expiryDate = `${currentDate.getMonth()}/${currentDate.getFullYear().toString().slice(-2)}`;
