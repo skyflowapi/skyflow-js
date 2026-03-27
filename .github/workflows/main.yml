@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 14.17.6
+          node-version: 14.18.0
       - name: install modules
         run: npm ci
 
