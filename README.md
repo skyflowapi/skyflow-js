@@ -3055,6 +3055,7 @@ Note: File name should contain only alphanumeric characters and !-_.*()
 -  [**Using Composable Reveal Elements to reveal data**](#using-composable-reveal-elements-to-reveal-data)
 -  [**Update Composable Reveal Elements**](#update-reveal-composable-elements)
 -  [**Render a file with a composable file element**](#render-a-file-with-a-composable-file-element)
+-  [**Render ZIP files with Composable Reveal Elements**](#render-zip-files-with-composable-reveal-elements)
 
 
 ## Retrieving data from the vault
@@ -4364,6 +4365,241 @@ fetch("<BACKEND_URL>")
   });
 
 ```
+
+## Render ZIP files with Composable Reveal Elements
+You can render and interact with ZIP file contents using Composable Reveal Elements. This feature allows users to browse files within a ZIP archive and download individual files. Use the following steps to securely render a ZIP file.
+
+### Step 1: Create a composable reveal container
+Create a container for the composable reveal element using the `container(Skyflow.ContainerType)` method of the Skyflow client:
+
+```javascript
+const container = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
+```
+
+### Step 2: Create a File Element with ZIP rendering enabled
+Define a Skyflow Element to render the ZIP file with the `zipRender` option enabled:
+
+```javascript
+const renderZipFileInput = {  
+  skyflowID: 'string',        // Required, skyflow id of the file to render
+  column: 'string',           // Required, column name of the file to render
+  table: 'string',            // Required, table name of the file to render
+  inputStyles: {},            // Optional, styles for the file viewer container
+  zipNavStyles: {},           // Optional, styles for the ZIP file navigation panel
+  zipNavListItemStyles: {},   // Optional, styles for ZIP file list items
+  zipPanelStyles: {},         // Optional, styles for the ZIP content panel
+  errorTextStyles: {},        // Optional, styles for error messages
+  altText: 'string',          // Optional, text shown before file render
+};
+```
+
+The styling parameters accept style objects as described in the [previous section](#step-2-create-a-collect-element). Here are some examples:
+
+**inputStyles** - Applied to the main file viewer container:
+```javascript
+inputStyles: {
+  base: {
+    height: '600px',
+    width: '800px',
+    border: '1px solid #ccc',
+  },
+  global: {
+    '@import': 'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+  }
+}
+```
+
+**zipNavStyles** - Applied to the ZIP file navigation panel:
+```javascript
+zipNavStyles: {
+  base: {
+    backgroundColor: '#f5f5f5',
+    borderRight: '1px solid #ddd',
+  },
+}
+```
+
+**zipNavListItemStyles** - Applied to each file item in the navigation list:
+```javascript
+zipNavListItemStyles: {
+  base: {
+    padding: '8px',
+    cursor: 'pointer',
+    borderBottom: '1px solid #eee',
+  },
+  focus:{
+    backgroundColor: '#d0f0c0',
+  }
+}
+```
+
+**zipPanelStyles** - Applied to the content panel that displays the selected file:
+```javascript
+zipPanelStyles: {
+  base: {
+    backgroundColor: '#ffffff',
+    padding: '16px',
+  },
+}
+```
+**Enable Zip Render** - 
+```javascript
+const options = {
+  zipRender: true  // Enable ZIP file rendering, defaults to false
+};
+```
+
+### Step 3: Enable ZIP rendering in options
+After you create and mount the element, call the renderFile() method on the element as shown below:
+```javascript
+  const options = {
+          zipRender: true, // Enable zip file rendering, Default is false
+  };
+
+  const renderZipFileElement = revealContainer.create(renderZipFileInput, options);
+
+  renderZipFileElement
+    .renderFile()
+    .then(data => {
+      // Handle success
+    })
+    .catch(err => {
+      // Handle error
+  });
+```
+
+### Step 4: Download files from ZIP
+To enable downloading individual files from the ZIP archive, use the `downloadCurrentFile()` method:
+
+```javascript
+// Get the currently displayed file from the ZIP archive
+renderZipFileElement.downloadCurrentFile();
+```
+
+### Response format
+When rendering a ZIP file, the response includes metadata about all files in the archive:
+
+```json
+{
+  "success": [
+    {
+      "skyflowID": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+      "column": "file_column",
+      "table": "files_table",
+      "fields": {
+        "file_column": "vault://prod/b63ec4e0-bbad-4e43-96e6-6bd50f483f75"
+      },
+      "unZippedFilesMetadata": [
+        {
+          "fileName": "document1.pdf",
+          "fileType": "application/pdf",
+          "size": 245632
+        },
+        {
+          "fileName": "image.png",
+          "fileType": "image/png",
+          "size": 102400
+        },
+        {
+          "fileName": "data.txt",
+          "fileType": "text/plain",
+          "size": 1024
+        }
+      ]
+    }
+  ],
+  "errors": []
+}
+```
+
+### End to end example
+A complete working example can be found in [render-zip-file.html](https://github.com/skyflowapi/skyflow-js/blob/main/samples/using-script-tag/render-zip-file.html).
+
+```javascript
+// Step 1: Create container
+const container = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, {
+  layout: [1],
+  styles: {
+    base: {
+      border: '1px solid #DFE3EB',
+      padding: '8px',
+      borderRadius: '4px',
+      margin: '12px 2px',
+    },
+  },
+});
+const options = {
+  zipRender: true  // Enable ZIP file rendering, defaults to false
+};
+// Step 2: Create file element with ZIP-specific styles
+const fileElement = container.create({
+  skyflowID: skyflowID,
+  column: "file_column",
+  table: "files_table",
+  inputStyles: {
+        base: {
+          height: "600px",
+          width: "800px",
+        },
+      },
+  zipNavStyles: {
+        base: {
+          backgroundColor: '#f5f5f5',
+        }
+      },
+  zipNavListItemStyles: {
+        base: {
+          padding: '8px',
+          cursor: 'pointer',
+        }
+      },
+  zipPanelStyles: {
+        base: {
+          backgroundColor: '#ffffff',
+        }
+      },
+  errorTextStyles: {
+        base: {
+          color: "#f44336",
+        },
+      },
+  altText: "Loading ZIP file...",
+  }, options);
+
+    // Step 3: Mount element
+    fileElement.mount("#zipFileContainer");
+
+    // Render ZIP file with zipRender option enabled
+    const renderButton = document.getElementById("renderButton");
+    if (renderButton) {
+      renderButton.addEventListener("click", () => {
+        fileElement
+          .renderFile({ zipRender: true })  // Enable ZIP file rendering
+          .then((data) => {
+            console.log("ZIP file rendered successfully:", data);
+          })
+          .catch((err) => {
+            console.error("Error rendering ZIP file:", err);
+          });
+      });
+    }
+
+    // Step 4: Add download functionality
+    const downloadButton = document.getElementById("downloadButton");
+    if (downloadButton) {
+      downloadButton.addEventListener("click", () => {
+        fileElement.downloadCurrentFile();
+      });
+    }
+  .catch((err) => {
+    console.error("Failed to fetch skyflow_id:", err);
+  });
+```
+
+Note: 
+ - If a ZIP file exists inside ZIP, it is currently not extracted to avoid recursive decompression risks.
+
+---
 
 # Securely deleting data client-side
 -  [**Deleting data from the vault**](#deleting-data-from-the-vault)
