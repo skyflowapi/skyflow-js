@@ -8,7 +8,7 @@ import properties from '../../properties';
 export function getAccessToken(clientId: string) {
   return new Promise((resolve, reject) => {
     bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
+      // .target(properties.IFRAME_SECURE_ORIGIN)
       .emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + clientId, {},
         (data:any) => {
           if (data?.error) {
@@ -17,13 +17,15 @@ export function getAccessToken(clientId: string) {
           resolve(data.authToken);
         });
 
-    bus.target(properties.IFRAME_SECURE_ORIGIN).emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, {},
-      (data:any) => {
-        if (data?.error) {
-          reject(data.error);
-        }
-        resolve(data.authToken);
-      });
+    bus
+      // .target(properties.IFRAME_SECURE_ORIGIN)
+      .emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, {},
+        (data:any) => {
+          if (data?.error) {
+            reject(data.error);
+          }
+          resolve(data.authToken);
+        });
   });
 }
 

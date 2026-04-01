@@ -135,17 +135,19 @@ class SkyflowContainer {
         bus
           .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
-            bus.emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
-              {
-                type: PUREJS_TYPES.DETOKENIZE,
-                records: detokenizeInput.records,
-              },
-              (revealData: any) => {
-                if (revealData.error) reject(revealData.error);
-                else resolve(revealData);
-              },
-            );
+            bus
+              .target(properties.IFRAME_SECURE_ORIGIN)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
+                {
+                  type: PUREJS_TYPES.DETOKENIZE,
+                  records: detokenizeInput.records,
+                },
+                (revealData: any) => {
+                  if (revealData.error) reject(revealData.error);
+                  else resolve(revealData);
+                },
+              );
           });
         printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
           PUREJS_TYPES.DETOKENIZE),
@@ -221,20 +223,22 @@ class SkyflowContainer {
         bus
           .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
-            bus.emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
-              {
-                type: PUREJS_TYPES.INSERT,
-                records,
-                options,
-              },
-              (insertedData: any) => {
-                if (insertedData.error) {
-                  printLog(`${JSON.stringify(insertedData.error)}`, MessageType.ERROR, this.#context.logLevel);
-                  reject(insertedData.error);
-                } else resolve(insertedData);
-              },
-            );
+            bus
+              .target(properties.IFRAME_SECURE_ORIGIN)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
+                {
+                  type: PUREJS_TYPES.INSERT,
+                  records,
+                  options,
+                },
+                (insertedData: any) => {
+                  if (insertedData.error) {
+                    printLog(`${JSON.stringify(insertedData.error)}`, MessageType.ERROR, this.#context.logLevel);
+                    reject(insertedData.error);
+                  } else resolve(insertedData);
+                },
+              );
           });
         printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
           PUREJS_TYPES.INSERT),
@@ -292,20 +296,22 @@ class SkyflowContainer {
         bus
           .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
-            bus.emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
-              {
-                type: PUREJS_TYPES.UPDATE,
-                record,
-                options,
-              },
-              (updatedData: any) => {
-                if (updatedData.error) {
-                  printLog(`${JSON.stringify(updatedData.error)}`, MessageType.ERROR, this.#context.logLevel);
-                  reject(updatedData.error);
-                } else resolve(updatedData);
-              },
-            );
+            bus
+              .target(properties.IFRAME_SECURE_ORIGIN)
+              .emit(
+                ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
+                {
+                  type: PUREJS_TYPES.UPDATE,
+                  record,
+                  options,
+                },
+                (updatedData: any) => {
+                  if (updatedData.error) {
+                    printLog(`${JSON.stringify(updatedData.error)}`, MessageType.ERROR, this.#context.logLevel);
+                    reject(updatedData.error);
+                  } else resolve(updatedData);
+                },
+              );
           });
         printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
           PUREJS_TYPES.UPDATE),
