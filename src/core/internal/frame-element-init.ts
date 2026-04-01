@@ -66,7 +66,7 @@ export default class FrameElementInit {
     this.updateGroupData();
     this.createContainerDiv(this.group);
     bus
-      // .target(this.clientMetaData.clientDomain)
+      .target(this.clientMetaData?.clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
         data.client.config = {
           ...data.client.config,
@@ -78,7 +78,7 @@ export default class FrameElementInit {
   }
 
   private handleCollectCall = (event: MessageEvent) => {
-    if (event?.origin === this.clientMetaData.clientDomain) {
+    if (event?.origin === this.clientMetaData?.clientDomain) {
       this.iframeFormList.forEach((inputElement) => {
         if (inputElement) {
           if (inputElement.fieldType

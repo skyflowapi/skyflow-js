@@ -7,15 +7,17 @@ import properties from '../../properties';
 
 export function getAccessToken(clientId: string) {
   return new Promise((resolve, reject) => {
-    bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + clientId, {},
-      (data:any) => {
-        if (data?.error) {
-          reject(data.error);
-        }
-        resolve(data.authToken);
-      });
+    bus
+      .target(properties.IFRAME_SECURE_ORIGIN)
+      .emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + clientId, {},
+        (data:any) => {
+          if (data?.error) {
+            reject(data.error);
+          }
+          resolve(data.authToken);
+        });
 
-    bus.emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, {},
+    bus.target(properties.IFRAME_SECURE_ORIGIN).emit(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN, {},
       (data:any) => {
         if (data?.error) {
           reject(data.error);

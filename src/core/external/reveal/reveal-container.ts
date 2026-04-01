@@ -270,28 +270,30 @@ class RevealContainer extends Container {
   }
 
   #emitRevealRequest(resolve, reject) {
-    bus.emit(
-      ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
-      {
-        type: REVEAL_TYPES.REVEAL,
-        records: this.#revealRecords,
-        containerId: this.#containerId,
-        errorMessages: this.#customErrorMessages,
-      },
-      (revealData: any) => {
-        this.#mountedRecords = [];
-        if (revealData.error) {
-          printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
-            MessageType.ERROR, this.#context.logLevel);
-          reject(revealData.error);
-        } else {
-          printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
-            MessageType.LOG,
-            this.#context.logLevel);
-          resolve(revealData);
-        }
-      },
-    );
+    bus
+      .target(properties.IFRAME_SECURE_ORIGIN)
+      .emit(
+        ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
+        {
+          type: REVEAL_TYPES.REVEAL,
+          records: this.#revealRecords,
+          containerId: this.#containerId,
+          errorMessages: this.#customErrorMessages,
+        },
+        (revealData: any) => {
+          this.#mountedRecords = [];
+          if (revealData.error) {
+            printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
+              MessageType.ERROR, this.#context.logLevel);
+            reject(revealData.error);
+          } else {
+            printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
+              MessageType.LOG,
+              this.#context.logLevel);
+            resolve(revealData);
+          }
+        },
+      );
   }
 }
 export default RevealContainer;
