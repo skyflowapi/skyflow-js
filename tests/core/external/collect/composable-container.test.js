@@ -15,6 +15,7 @@ import EventEmitter from '../../../../src/event-emitter';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
 import { SKYFLOW_FRAME_CONTROLLER_READY } from '../../../../src/core/constants';
 import SkyflowError from '../../../../src/libs/skyflow-error';
+import properties from '../../../../src/properties';
 
 const bus = require('framebus');
 
@@ -297,6 +298,7 @@ describe('test composable container class',()=>{
     const collectPromiseSuccess =
       container.collect(options);
     window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + '1234', // containerId
         data: {...collectResponse}
@@ -308,8 +310,9 @@ describe('test composable container class',()=>{
 
     const collectPromiseError =
       container.collect(options);
-    
-      window.dispatchEvent(new MessageEvent('message', {
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + '1234', // containerId
         data: { error: "Error occured"}
@@ -653,6 +656,7 @@ describe('test composable container class',()=>{
     await Promise.resolve('token');
 
     window.dispatchEvent(new MessageEvent('message', {
+      origin: 'http://localhost:3040',
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + '1234', // containerId
         data: { fileUploadResponse: [{ skyflow_id: 'id1' }] }
@@ -668,20 +672,22 @@ describe('test composable container class',()=>{
     await Promise.resolve('token');
     
     window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + '1234', // containerId
         data: { error: "Error occured"}
       }
     }));
-    
+
     await expect(collectPromiseError).rejects.toEqual("Error occured");
 
     // Test error scenario case 2 - no fileUploadResponse and no error
     const collectPromiseError2 = container.uploadFiles(options);
-    
+
     await Promise.resolve('token');
-    
+
     window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + '1234', // containerId
         data: { errors: "Error occured"}

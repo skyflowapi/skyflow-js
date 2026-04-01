@@ -12,7 +12,6 @@ import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
 import SkyflowError from "../../../../src/libs/skyflow-error";
 import logs from "../../../../src/utils/logs";
-
 // Mock internal element to intercept constructor arguments for mount coverage
 jest.mock('../../../../src/core/external/reveal/composable-reveal-internal', () => {
   return {
@@ -31,6 +30,7 @@ jest.mock('../../../../src/core/external/reveal/composable-reveal-internal', () 
   };
 });
 import ComposableRevealInternalElement from '../../../../src/core/external/reveal/composable-reveal-internal';
+import properties from "../../../../src/properties";
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 const mockUuid = '1234'; 
@@ -371,6 +371,7 @@ describe("Reveal Composable Container Class", () => {
     await Promise.resolve('token');
     expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
     window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
         data: data
@@ -378,6 +379,7 @@ describe("Reveal Composable Container Class", () => {
     }));
     await Promise.resolve();
     window.dispatchEvent(new MessageEvent('message', {
+      origin: 'http://localhost:3040',
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
         data: {"success":[{token:"1815-6223-1073-1425"}]}
@@ -402,6 +404,7 @@ describe("Reveal Composable Container Class", () => {
     await Promise.resolve('token');
     expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
     window.dispatchEvent(new MessageEvent('message', {
+      origin: 'http://localhost:3040',
       data: {
         type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
         data: data
@@ -409,6 +412,7 @@ describe("Reveal Composable Container Class", () => {
     }));
     await Promise.resolve();
     window.dispatchEvent(new MessageEvent('message', {
+      origin: 'http://localhost:3040',
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
         data: {"errors":{
@@ -428,12 +432,12 @@ describe("Reveal Composable Container Class", () => {
         description: "Failed to fetch bearer token"
       }
     });
-    
+
     const clientDataFail = {
       ...clientData,
       getSkyflowBearerToken: getBearerTokenFail,
     };
-    
+
     const testRevealContainer = new ComposableRevealContainer(clientDataFail, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
@@ -444,9 +448,9 @@ describe("Reveal Composable Container Class", () => {
       token: "1815-6223-1073-1425",
       containerId:mockUuid
     }
-  
+
     const res = testRevealContainer.reveal();
-    
+
     await expect(res).rejects.toEqual({errors:{code:400,description:"Failed to fetch bearer token"}});
   });
 
@@ -473,6 +477,7 @@ describe("Reveal Composable Container Class", () => {
     await Promise.resolve('token');
     expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
     window.dispatchEvent(new MessageEvent('message', {
+      origin: 'http://localhost:3040',
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
         data: {"success":[{token:"1815-6223-1073-1425"}]}
@@ -504,6 +509,7 @@ describe("Reveal Composable Container Class", () => {
     expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
 
     window.dispatchEvent(new MessageEvent('message', {
+      origin: 'http://localhost:3040',
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
         data: {"errors":{

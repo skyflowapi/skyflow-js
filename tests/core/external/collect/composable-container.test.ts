@@ -25,6 +25,7 @@ import SkyflowContainer from "../../../../src/core/external/skyflow-container";
 import { ContainerType } from "../../../../src/skyflow";
 import { Metadata } from "../../../../src/core/internal/internal-types";
 import IFrame from "../../../../src/core/external/common/iframe";
+import properties from "../../../../src/properties";
 
 global.ResizeObserver = jest.fn(() => ({
   observe: jest.fn(),
@@ -298,6 +299,7 @@ describe("test composable container class", () => {
     const collectPromiseSuccess: Promise<CollectResponse> =
       container.collect(options);
     window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + '1234', // containerId
         data: {...collectResponse}
@@ -309,8 +311,9 @@ describe("test composable container class", () => {
 
     const collectPromiseError: Promise<CollectResponse> =
       container.collect(options);
-    
-      window.dispatchEvent(new MessageEvent('message', {
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + '1234', // containerId
         data: { error: "Error occured"}
