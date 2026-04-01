@@ -45,6 +45,8 @@ import {
   domReady, getMaskedOutput, handleCopyIconClick, styleToString,
 } from '../../utils/helpers';
 import { ContainerType } from '../../skyflow';
+import successIcon from '../../../assets/successIcon.svg'
+import errorIcon from '../../../assets/errorIcon.svg'
 
 export default class FrameElement {
   // all html events like focus blur events will be handled here
@@ -74,6 +76,10 @@ export default class FrameElement {
   private labelDiv?: HTMLDivElement;
 
   private isRequiredLabel?: HTMLLabelElement;
+
+  private isValidIcon?: HTMLImageElement;
+
+  private isInvalidIcon?: HTMLImageElement;
 
   private dropdownIcon?: HTMLImageElement;
 
@@ -221,6 +227,16 @@ export default class FrameElement {
       this.isRequiredLabel.className = `SkyflowElement-label-${this.options.elementName}-${STYLE_TYPE.REQUIRED_ASTERISK}`;
       this.labelDiv.append(this.isRequiredLabel);
     }
+    if (this.domError) {
+      this.isValidIcon = document.createElement('img');
+      this.isValidIcon.src = successIcon;
+      this.labelDiv.append(this.isValidIcon);
+    }
+    if (this.domError) {
+      this.isInvalidIcon = document.createElement('img');
+      this.isInvalidIcon.src = errorIcon;
+      this.labelDiv.append(this.isInvalidIcon);
+    }
     this.iFrameFormElement.on(ELEMENT_EVENTS_TO_CLIENT.FOCUS, (state) => {
       this.focusChange(true);
       state.isEmpty = !state.value;
@@ -279,6 +295,18 @@ export default class FrameElement {
         this.domCopy.style.display = 'block';
       } else if (this.domCopy) {
         this.domCopy.style.display = 'none';
+      }
+
+      if (!state.isEmpty && state.isValid && this.domError && this.isValidIcon) {
+        this.isValidIcon.style.display = 'block';
+      } else if(this.isValidIcon) {
+        this.isValidIcon.style.display = 'none';
+      }
+
+      if(!state.isEmpty && !state.isValid && this.domError && this.isInvalidIcon) {
+        this.isInvalidIcon.style.display = 'block';
+      } else if(this.isInvalidIcon) {
+        this.isInvalidIcon.style.display = 'none';
       }
 
       // On CHANGE set isEmpty to false
