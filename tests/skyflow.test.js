@@ -201,6 +201,7 @@ describe('skyflow insert', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -407,6 +408,7 @@ describe('skyflow update', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -414,7 +416,7 @@ describe('skyflow update', () => {
       vaultURL: 'https://vaulturl.com',
       getBearerToken: jest.fn(),
     });
-  }); 
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -609,7 +611,7 @@ describe('skyflow detokenize', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      emit,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -863,6 +865,7 @@ describe('skyflow get', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -1004,6 +1007,7 @@ describe('skyflow getById', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -1152,6 +1156,7 @@ describe('skyflow get', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -1447,6 +1452,7 @@ describe('skyflow get with options', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -1636,6 +1642,7 @@ describe('Get BearerToken Listener', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
   });
   test('listener with valid Token', (done) => {
@@ -1723,7 +1730,7 @@ describe('Skyflow delete tests', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      emit
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({

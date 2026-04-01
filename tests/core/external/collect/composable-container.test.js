@@ -193,7 +193,8 @@ describe('test composable container class',()=>{
     onSpy = jest.spyOn(bus, 'on');
     targetSpy.mockReturnValue({
       on,
-      off: jest.fn()
+      off: jest.fn(),
+      emit: emitSpy,
     });
     windowSpy = jest.spyOn(window, "window", "get");
   });

@@ -184,6 +184,7 @@ describe("test composable container class", () => {
     targetSpy.mockReturnValue({
       on,
       off: jest.fn(),
+      emit: emitSpy,
     });
   });
 

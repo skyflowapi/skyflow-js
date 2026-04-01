@@ -51,7 +51,8 @@ describe("Reveal Composable Container Class", () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      off
+      off,
+      emit: emitSpy,
     });
   });
   const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve('token'));
