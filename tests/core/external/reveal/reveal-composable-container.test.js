@@ -379,7 +379,7 @@ describe("Reveal Composable Container Class", () => {
     }));
     await Promise.resolve();
     window.dispatchEvent(new MessageEvent('message', {
-      origin: 'http://localhost:3040',
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
         data: {"success":[{token:"1815-6223-1073-1425"}]}
@@ -404,7 +404,7 @@ describe("Reveal Composable Container Class", () => {
     await Promise.resolve('token');
     expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
     window.dispatchEvent(new MessageEvent('message', {
-      origin: 'http://localhost:3040',
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
         data: data
@@ -412,7 +412,7 @@ describe("Reveal Composable Container Class", () => {
     }));
     await Promise.resolve();
     window.dispatchEvent(new MessageEvent('message', {
-      origin: 'http://localhost:3040',
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
         data: {"errors":{
@@ -459,12 +459,6 @@ describe("Reveal Composable Container Class", () => {
     const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
-    window.dispatchEvent(new MessageEvent('message', {
-      data: {
-        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
-        data: data
-      }
-    }));
      testRevealContainer.create({
       token: "1815-6223-1073-1425",
     });
@@ -472,12 +466,20 @@ describe("Reveal Composable Container Class", () => {
       token: "1815-6223-1073-1425",
       containerId:mockUuid
     }
-  
+
     const res = testRevealContainer.reveal();
     await Promise.resolve('token');
     expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
     window.dispatchEvent(new MessageEvent('message', {
-      origin: 'http://localhost:3040',
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: data
+      }
+    }));
+    await Promise.resolve();
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
         data: {"success":[{token:"1815-6223-1073-1425"}]}
@@ -490,12 +492,6 @@ describe("Reveal Composable Container Class", () => {
     const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
-    window.dispatchEvent(new MessageEvent('message', {
-      data: {
-        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
-        data: data
-      }
-    }));
     testRevealContainer.create({
       token: "1815-6223-1073-1425",
     });
@@ -503,13 +499,20 @@ describe("Reveal Composable Container Class", () => {
       token: "1815-6223-1073-1425",
       containerId:mockUuid
     }
-  
+
     const res = testRevealContainer.reveal();
     await Promise.resolve('token');
     expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
-
     window.dispatchEvent(new MessageEvent('message', {
-      origin: 'http://localhost:3040',
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: data
+      }
+    }));
+    await Promise.resolve();
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
         data: {"errors":{

@@ -567,9 +567,11 @@ describe('test composable container class',()=>{
     emitterSpy();
     setTimeout(()=>{
       container.collect(options);
-      const collectCb = emitSpy.mock.calls[0][2];
-      collectCb(collectResponse);
-      collectCb({ error: 'Error occured' })
+      const collectCb = emitSpy.mock.calls[0]?.[2];
+      if (collectCb) {
+        collectCb(collectResponse);
+        collectCb({ error: 'Error occured' });
+      }
     },200);
 
   });
@@ -656,7 +658,7 @@ describe('test composable container class',()=>{
     await Promise.resolve('token');
 
     window.dispatchEvent(new MessageEvent('message', {
-      origin: 'http://localhost:3040',
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + '1234', // containerId
         data: { fileUploadResponse: [{ skyflow_id: 'id1' }] }
