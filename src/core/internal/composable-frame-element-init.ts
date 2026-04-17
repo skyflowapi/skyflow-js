@@ -62,7 +62,11 @@ export default class RevealComposableFrameElementInit {
     this.createContainerDiv(this.group);
 
     window?.addEventListener('message', (event) => {
-      if (event?.origin === this.clientMetaData.clientDomain) {
+      const clientDomain = this.clientMetaData?.clientDomain;
+      if (!clientDomain) {
+        return;
+      }
+      if (event?.origin === clientDomain) {
         if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL
           + this.containerId && event?.data?.data?.type === REVEAL_TYPES.REVEAL) {
           this.#context = event?.data?.context;
