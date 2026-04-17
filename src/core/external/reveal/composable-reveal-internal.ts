@@ -34,7 +34,7 @@ import EventEmitter from '../../../event-emitter';
 import { formatRevealElementOptions } from '../../../utils/helpers';
 import { Metadata, RevealContainerProps } from '../../internal/internal-types';
 
-const CLASS_NAME = 'RevealElementInteranalElement';
+const CLASS_NAME = 'RevealElementInternalElement';
 
 export interface RevealComposableGroup{
   record: IRevealElementInput
@@ -147,7 +147,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
             `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS}:${element?.name}`,
             (data) => {
               if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS) {
-              // make this change in original elememt that is inside rows
+              // make this change in original element that is inside rows
                 const updatedElement = {
                   ...element,
                   ...data.options,

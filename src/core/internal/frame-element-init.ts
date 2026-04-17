@@ -9,7 +9,7 @@ import {
   MessageType,
 } from '../../utils/common';
 import {
-  fileValidation, generateUploadFileName, getContainerType, vaildateFileName,
+  fileValidation, generateUploadFileName, getContainerType, validateFileName,
 } from '../../utils/helpers';
 import {
   ALLOWED_MULTIPLE_FIELDS_STYLES,
@@ -237,7 +237,7 @@ export default class FrameElementInit {
     formData.append('tableName', tableName);
 
     if (preserveFileName) {
-      const isValidFileName = vaildateFileName(state.value.name);
+      const isValidFileName = validateFileName(state.value.name);
       if (!isValidFileName) {
         return Promise.reject(
           new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true),
@@ -632,7 +632,7 @@ export default class FrameElementInit {
       }
 
       // Check filename validation
-      const isValidFileName = vaildateFileName(file.name);
+      const isValidFileName = validateFileName(file.name);
       if (!isValidFileName) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true);
       }
@@ -774,13 +774,13 @@ export default class FrameElementInit {
       const rowDiv = document.createElement('div');
       rowDiv.id = `row-${rowIndex}`;
 
-      const intialRowStyles = {
+      const initialRowStyles = {
         'align-items': row.alignItems || 'stretch',
         'justify-content': row.justifyContent || 'flex-start',
         spacing: row.spacing,
         padding: this.group.spacing,
       };
-      const rowStylesByClassName = getFlexGridStyles(intialRowStyles);
+      const rowStylesByClassName = getFlexGridStyles(initialRowStyles);
       let errorTextElement;
       if (isComposableContainer) {
         rowDiv.className = `${rowDiv.id} SkyflowElement-${rowDiv.id}-base`;
@@ -901,11 +901,11 @@ export default class FrameElementInit {
   };
 
   #updateCombinedErrorText = (elementId, errorMessages) => {
-    const currentErrorElememt = document.getElementById(elementId);
+    const currentErrorElement = document.getElementById(elementId);
     let errorText = '';
     Object.values(errorMessages).forEach((message) => {
       errorText += (message) && `${message}. `;
     });
-    if (currentErrorElememt) { currentErrorElememt.innerText = errorText; }
+    if (currentErrorElement) { currentErrorElement.innerText = errorText; }
   };
 }

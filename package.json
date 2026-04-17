@@ -2,7 +2,7 @@
   "name": "skyflow-js",
   "preferGlobal": true,
   "analyze": false,
-  "version": "2.7.4-dev.81aa0e9",
+  "version": "2.7.4-dev.68dd5e3",
   "author": "Skyflow",
   "description": "Skyflow JavaScript SDK",
   "homepage": "https://github.com/skyflowapi/skyflow-js",
@@ -26,7 +26,8 @@
     "build-browser-sdk": "webpack --config=webpack.skyflow-browser.js",
     "build-node-sdk": "webpack --config=webpack.skyflow-node.js",
     "build-iframe": "webpack --config=webpack.iframe.js",
-    "test": "jest --config=jest.config.json"
+    "test": "jest --config=jest.config.json",
+    "spellcheck": "cspell '**/*.{ts,js,md}'"
   },
   "repository": {
     "type": "git",
@@ -68,6 +69,7 @@
     "babel-loader": "^9.1.2",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "compression-webpack-plugin": "^8.0.1",
+    "cspell": "^4.2.8",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-airbnb-typescript": "^14.0.0",

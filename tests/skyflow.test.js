@@ -1405,31 +1405,31 @@ describe('skyflow get', () => {
       done();
     });
   });
-  test("get missing columnn name", () => {
+  test("get missing column name", () => {
     const res = skyflow.get(getInputMissingColumnName);
     res.catch((err) => {
       expect(err).toBeDefined();
     });
   }); 
-  test("get missing columnn values", () => {
+  test("get missing column values", () => {
     const res = skyflow.get(getInputMissingColumnValues);
     res.catch((err) => {
       expect(err).toBeDefined();
     });
   }); 
-  test("get invalid columnn name type", () => {
+  test("get invalid column name type", () => {
     const res = skyflow.get(getInputInvalidColumnNameType);
     res.catch((err) => {
       expect(err).toBeDefined();
     });
   });
-  test("get invalid columnn value type", () => {
+  test("get invalid column value type", () => {
     const res = skyflow.get(getInputInvalidColumnValuesType);
     res.catch((err) => {
       expect(err).toBeDefined();
     });
   });
-  test("get empty columnn value", () => {
+  test("get empty column value", () => {
     const res = skyflow.get(getInputEmptyColumnValues);
     res.catch((err) => {
       expect(err).toBeDefined();
@@ -1615,18 +1615,18 @@ describe('Skyflow Enums', () => {
     expect(Skyflow.EventName.BLUR).toEqual(EventName.BLUR);
   });
 
-  test('Skflow.Env', () => {
+  test('Skyflow.Env', () => {
     expect(Skyflow.Env.DEV).toEqual(Env.DEV);
     expect(Skyflow.Env.PROD).toEqual(Env.PROD);
   });
 
-  test('Skflow.ValidationRuleType', () => {
+  test('Skyflow.ValidationRuleType', () => {
     expect(Skyflow.ValidationRuleType.ELEMENT_VALUE_MATCH_RULE).toEqual(ValidationRuleType.ELEMENT_VALUE_MATCH_RULE);
     expect(Skyflow.ValidationRuleType.LENGTH_MATCH_RULE).toEqual(ValidationRuleType.LENGTH_MATCH_RULE);
     expect(Skyflow.ValidationRuleType.REGEX_MATCH_RULE).toEqual(ValidationRuleType.REGEX_MATCH_RULE);
   });
 
-  test('Skflow.CardType', () => {
+  test('Skyflow.CardType', () => {
     expect(Skyflow.CardType.VISA).toEqual("VISA");
     expect(Skyflow.CardType.CARTES_BANCAIRES).toEqual("CARTES BANCAIRES");
   });

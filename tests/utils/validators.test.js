@@ -180,7 +180,7 @@ describe('Detect Card Type', () => {
   test("Detects Hipper Card Type", () => {
     expect(detectCardType("6062828888666688")).toBe(CardType.HIPERCARD);
   });
-  test("Detects Mastero Card Type", () => {
+  test("Detects Maestro Card Type", () => {
     expect(detectCardType("6759649826438453")).toBe(CardType.MAESTRO);
   });
   test("Detects Union Pay Card Type", () => {
@@ -740,14 +740,14 @@ describe('get input validation for fetching unique column values',() => {
   // })
   test('invalid column values error', () => {
     try {
-      validateGetInput({ records: [{ columnValues: {}, columnName:'cloumn', table: 'test', redaction: RedactionType.PLAIN_TEXT }] })
+      validateGetInput({ records: [{ columnValues: {}, columnName:'column', table: 'test', redaction: RedactionType.PLAIN_TEXT }] })
     } catch (err) {
       expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COLUMN_VALUES_IN_GET.description, 0))
     }
   })
   test('empty column values error', () => {
     try {
-      validateGetInput({ records: [{ columnValues: [], columnName:'cloumn', table: 'test', redaction: RedactionType.PLAIN_TEXT }] })
+      validateGetInput({ records: [{ columnValues: [], columnName:'column', table: 'test', redaction: RedactionType.PLAIN_TEXT }] })
     } catch (err) {
       expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_RECORD_COLUMN_VALUES.description,  0))
     }

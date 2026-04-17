@@ -734,7 +734,7 @@ name: elementName,
       token: 'test-token-re-1',
       inputStyles: {
         base: {
-          borderWitdth: '5px',
+          borderWidth: '5px',
         },
         global: {
           '@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',

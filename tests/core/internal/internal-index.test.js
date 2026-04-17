@@ -672,7 +672,7 @@ describe('FrameElement', () => {
     mockIFrameFormElement.fieldType = ELEMENTS.CARD_NUMBER.name;
   
     const mockCardNumberMask = ['####', '####', '####', '####'];
-    jest.spyOn(helpers, 'addSeperatorToCardNumberMask').mockReturnValue(mockCardNumberMask);
+    jest.spyOn(helpers, 'addSeparatorToCardNumberMask').mockReturnValue(mockCardNumberMask);
   
     const changeEventHandler = mockIFrameFormElement.on.mock.calls.find(
       ([eventType]) => eventType === ELEMENT_EVENTS_TO_CLIENT.CHANGE
@@ -1564,7 +1564,7 @@ describe('FrameElement - onInputChange Tests for Card number', () => {
     mockOptions = {
       masking: true,
       maskingChar: 'X',
-      cardSeperator: ' ',
+      cardSeparator: ' ',
       enableCardIcon: true,
       elementName: 'card'
     };
@@ -2088,7 +2088,7 @@ describe('FrameElement - onInputChange Tests for other field', () => {
     mockOptions = {
       masking: true,
       maskingChar: 'X',
-      cardSeperator: ' ',
+      cardSeparator: ' ',
       enableCardIcon: true,
       elementName: 'card',
       fieldType: ELEMENTS.INPUT_FIELD.name,

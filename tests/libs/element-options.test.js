@@ -5,7 +5,7 @@ import SKYFLOW_ERROR_CODE from "../../src/utils/constants";
 import { parameterizedString } from "../../src/utils/logs-helper";
 import logs from "../../src/utils/logs";
 import { validateInputFormatOptions } from "../../src/utils/validators";
-import { DEFAULT_CARD_NUMBER_SEPERATOR } from "../../src/core/constants";
+import { DEFAULT_CARD_NUMBER_SEPARATOR } from "../../src/core/constants";
 import ComposableElement from "../../src/core/external/collect/compose-collect-element";
 
 jest.mock('../../src/utils/validators',()=>{
@@ -27,12 +27,12 @@ describe('test formatOptions function with format and translation', () => {
         const options = { format: 'XXXX' }
         
         formatOptions(ElementType.CVV, options, LogLevel.WARN);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
+        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPORTED,
             ElementType.CVV)}`);
         expect(spy).toBeCalledTimes(1);
 
         formatOptions(ElementType.EXPIRATION_MONTH, options, LogLevel.WARN);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
+        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPORTED,
             ElementType.EXPIRATION_MONTH)}`);
         expect(spy).toBeCalledTimes(2);
         
@@ -40,17 +40,17 @@ describe('test formatOptions function with format and translation', () => {
         expect(spy).toBeCalledTimes(2);
         
         formatOptions(ElementType.CARDHOLDER_NAME, options, LogLevel.WARN);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
+        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPORTED,
             ElementType.CARDHOLDER_NAME)}`);
         expect(spy).toBeCalledTimes(3);
         
         formatOptions(ElementType.FILE_INPUT, options, LogLevel.WARN);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
+        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPORTED,
             ElementType.FILE_INPUT)}`);
         expect(spy).toBeCalledTimes(4);
         
         formatOptions(ElementType.PIN, options, LogLevel.WARN);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
+        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPORTED,
             ElementType.PIN)}`);
         expect(spy).toBeCalledTimes(5);
 
@@ -76,39 +76,39 @@ describe('test formatOptions function with format and translation', () => {
         expect(formattedOptions).toEqual(res)
     });
 
-    test('should return default cardSeperator in the options as default only for card number field type - no format',()=>{
+    test('should return default cardSeparator in the options as default only for card number field type - no format',()=>{
         const formattedOptions = formatOptions(ElementType.CARD_NUMBER,{required:false},LogLevel.ERROR);
-        expect(formattedOptions).toEqual({required:false,cardSeperator:DEFAULT_CARD_NUMBER_SEPERATOR,enableCardIcon:true});
+        expect(formattedOptions).toEqual({required:false,cardSeparator:DEFAULT_CARD_NUMBER_SEPARATOR,enableCardIcon:true});
     });
 
-    test('should return default cardSeperator in the options as default only for card number field type - not allowed format',()=>{
+    test('should return default cardSeparator in the options as default only for card number field type - not allowed format',()=>{
         const formattedOptions = formatOptions(ElementType.CARD_NUMBER,{required:false,format:'XXXX/XXXX/XXXX/XXXX'},LogLevel.ERROR);
-        expect(formattedOptions).toEqual({required:false,cardSeperator:DEFAULT_CARD_NUMBER_SEPERATOR,enableCardIcon:true});
+        expect(formattedOptions).toEqual({required:false,cardSeparator:DEFAULT_CARD_NUMBER_SEPARATOR,enableCardIcon:true});
     });
 
-    test('should return hypen cardSeperator in the options format only for card number field type - with dash format',()=>{
+    test('should return hyphen cardSeparator in the options format only for card number field type - with dash format',()=>{
         const cardFormat = CARDNUMBER_INPUT_FORMAT.DASH_FORMAT
         const formattedOptions = formatOptions(ElementType.CARD_NUMBER,{required:false,format:cardFormat},LogLevel.ERROR);
-        expect(formattedOptions).toEqual({required:false,cardSeperator:'-',enableCardIcon:true});
+        expect(formattedOptions).toEqual({required:false,cardSeparator:'-',enableCardIcon:true});
     });
 
-    test('should return space cardSeperator in the options format only for card number field type - space format',()=>{
+    test('should return space cardSeparator in the options format only for card number field type - space format',()=>{
         const cardFormat = CARDNUMBER_INPUT_FORMAT.SPACE_FORMAT
         const formattedOptions = formatOptions(ElementType.CARD_NUMBER,{required:false,format:cardFormat},LogLevel.ERROR);
-        expect(formattedOptions).toEqual({required:false,cardSeperator:DEFAULT_CARD_NUMBER_SEPERATOR,enableCardIcon:true});
+        expect(formattedOptions).toEqual({required:false,cardSeparator:DEFAULT_CARD_NUMBER_SEPARATOR,enableCardIcon:true});
     });
 
-    test('should return preserveFileName true when not provied in options',()=>{
+    test('should return preserveFileName true when not provided in options',()=>{
         const formattedOptions = formatOptions(ElementType.FILE_INPUT,{required:true},LogLevel.ERROR);
         expect(formattedOptions).toEqual({required:true,preserveFileName:true});
     });
 
-    test('should return preserveFileName false when not provied as false in options',()=>{
+    test('should return preserveFileName false when not provided as false in options',()=>{
         const formattedOptions = formatOptions(ElementType.FILE_INPUT,{required:true,preserveFileName:false},LogLevel.ERROR);
         expect(formattedOptions).toEqual({required:true,preserveFileName:false});
     });
 
-    test('should throw errror for preserveFileName provied as not of boolean type',(done)=>{
+    test('should throw error for preserveFileName provided as not of boolean type',(done)=>{
         try{
             formatOptions(ElementType.FILE_INPUT,{required:true,preserveFileName:undefined},LogLevel.ERROR);
             done('should throw error');
@@ -158,7 +158,7 @@ describe('test formatOptions function with format and translation', () => {
         }
     });
 
-    test('should throw errror for cardMetadata provied as not of object type',(done)=>{
+    test('should throw error for cardMetadata provided as not of object type',(done)=>{
         try{
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:true},LogLevel.ERROR);
             done('should throw error');
@@ -168,7 +168,7 @@ describe('test formatOptions function with format and translation', () => {
         }
     });
 
-    test('should throw errror for cardMetadata provied value is object type',(done)=>{
+    test('should throw error for cardMetadata provided value is object type',(done)=>{
         try{
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:[]},LogLevel.ERROR);
             done('should throw error');
@@ -178,7 +178,7 @@ describe('test formatOptions function with format and translation', () => {
         }
     });
 
-    test('should throw errror for cardMetadata schema provied value is array type',(done)=>{
+    test('should throw error for cardMetadata schema provided value is array type',(done)=>{
         try{
             formatOptions(ElementType.CARD_NUMBER,{cardMetadata:{scheme:{}}},LogLevel.ERROR);
             done('should throw error');
@@ -188,9 +188,9 @@ describe('test formatOptions function with format and translation', () => {
         }
     });
 
-    test('should return the array of Cardtype provided in scheme of cardmetadata',()=>{
+    test('should return the array of CardType provided in scheme of cardmetadata',()=>{
         const options = formatOptions(ElementType.CARD_NUMBER,{cardMetadata:{scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]}},LogLevel.ERROR);
-        expect(options).toEqual({cardMetadata:{scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]}, "cardSeperator": " ","enableCardIcon": true,"required": false,})
+        expect(options).toEqual({cardMetadata:{scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]}, "cardSeparator": " ","enableCardIcon": true,"required": false,})
     });
 
 

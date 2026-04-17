@@ -35,7 +35,7 @@ const input = {
 const composableElementName = 'element:group:YXJ5X2NhcmQuY3Z2cGlpX2ZpZWxkcy5wcmlt';
 const composableInput = {
   table: 'pii_fields',
-  column: 'primary_card.card_numner',
+  column: 'primary_card.card_number',
   inputStyles: {
     base: {
       color: '#1d1d1d',
@@ -109,10 +109,10 @@ const updateElementInput = {
 const destroyCallback = jest.fn();
 const updateCallback = jest.fn();
 
-const groupEmittFn = jest.fn();
+const groupEmitFn = jest.fn();
 let groupOnCb;
-const groupEmiitter = {
-  _emit: groupEmittFn,
+const groupEmitter = {
+  _emit: groupEmitFn,
   on:jest.fn().mockImplementation((args,cb)=>{
     groupOnCb = cb;
   })
@@ -313,7 +313,7 @@ describe('collect element', () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
-      groupEmiitter
+      groupEmitter
       );
 
     const inputEvent = onSpy.mock.calls
@@ -365,7 +365,7 @@ describe('collect element', () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
-      groupEmiitter
+      groupEmitter
       );
 
     const inputEvent = onSpy.mock.calls
@@ -415,7 +415,7 @@ describe('collect element', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmitter);
     // groupOnCb({containerId:'containerId'});
     expect(() => { element.mount('#123'); }).not.toThrow(SkyflowError);
 
@@ -451,7 +451,7 @@ describe('collect element', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmitter);
 
     const div = document.createElement('div');
 
@@ -485,7 +485,7 @@ describe('collect element', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmitter);
 
     const div = document.createElement('div');
 
@@ -508,7 +508,7 @@ describe('collect element', () => {
   });
 
 
-  it('mount before conatiner mount, valid dom element ', () => {
+  it('mount before container mount, valid dom element ', () => {
     const onSpy = jest.spyOn(bus, 'on');
 
     const element = new CollectElement(id, {
@@ -520,7 +520,7 @@ describe('collect element', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmitter);
 
     const div = document.createElement('div');
 
@@ -543,7 +543,7 @@ describe('collect element', () => {
     element.unmount();
   });
 
-  it('mount before conatiner mount, valid dom element  isMounted false ', () => {
+  it('mount before container mount, valid dom element  isMounted false ', () => {
     const onSpy = jest.spyOn(bus, 'on');
 
     const element = new CollectElement(id, {
@@ -555,7 +555,7 @@ describe('collect element', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmitter);
 
     const div = document.createElement('div');
 
@@ -1239,7 +1239,7 @@ describe('collect element methods', () => {
     const groupEmitterLocal = { _emit: jest.fn(), on: jest.fn() };
     // isSingleElementAPI must be false for composable container to keep state.value an object
     const collectEl = new CollectElement(id, { elementName, rows: composableRowsForTest }, { containerType: ContainerType.COMPOSABLE }, { type: ContainerType.COMPOSABLE, containerId: 'containerId', isMounted: true }, true, destroyCallback, updateCallback, { logLevel: LogLevel.INFO, env: Env.DEV }, groupEmitterLocal);
-    groupEmiitter.on(ELEMENT_EVENTS_TO_CLIENT.READY + ':' + elementName, (data) => {
+    groupEmitter.on(ELEMENT_EVENTS_TO_CLIENT.READY + ':' + elementName, (data) => {
       expect(data.name).toBe(elementName);
     });
     const dispatchEventFor = (targetElementName, eventType, valueObj = {}) => {

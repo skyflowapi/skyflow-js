@@ -144,7 +144,7 @@ class Client {
             type: this.#getErrorTypeKey(httpRequest.status),
           }, [], true));
         } else {
-          let description = requestId ? `${logs.errorLogs.ERROR_OCCURED} - requestId: ${requestId}` : logs.errorLogs.ERROR_OCCURED;
+          let description = requestId ? `${logs.errorLogs.ERROR_OCCURRED} - requestId: ${requestId}` : logs.errorLogs.ERROR_OCCURRED;
           if (overrideCodes.includes(httpRequest.status)) {
             description = this.errorMessagesList[httpRequest.status] ?? description;
           }

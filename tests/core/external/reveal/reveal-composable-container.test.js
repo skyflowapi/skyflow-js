@@ -560,7 +560,7 @@ describe("Reveal Composable Container Class", () => {
     await expect(res).rejects.toEqual({errors:{code:400,description:"Failed to fetch bearer token"}});
   });
 
-  test("reveal when elment is empty when skyflow ready",(done)=>{
+  test("reveal when element is empty when skyflow ready",(done)=>{
     const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
@@ -579,7 +579,7 @@ describe("Reveal Composable Container Class", () => {
       expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_COMPOSABLE);
     })
   });
-  test("reveal when elment is empty when skyflow frame not ready",(done)=>{
+  test("reveal when element is empty when skyflow frame not ready",(done)=>{
     const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });

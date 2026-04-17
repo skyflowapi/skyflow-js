@@ -453,7 +453,7 @@ describe("Reveal Container Class", () => {
       expect(error.errors[0].description).toEqual(logs.errorLogs.REVEAL_ELEMENT_ERROR_STATE);
     })
   });
-  test("reveal when elment is empty when skyflow ready",(done)=>{
+  test("reveal when element is empty when skyflow ready",(done)=>{
     const testRevealContainer = new RevealContainer(clientData2, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
 
     testRevealContainer.reveal().catch((error) => {
@@ -464,7 +464,7 @@ describe("Reveal Container Class", () => {
       expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_REVEAL);
     })
   });
-  test("reveal when elment is empty when skyflow frame not ready",(done)=>{
+  test("reveal when element is empty when skyflow frame not ready",(done)=>{
     const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
 
     testRevealContainer.reveal().catch((error) => {

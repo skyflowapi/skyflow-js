@@ -53,7 +53,7 @@ All notable changes to this project will be documented in this file.
 
 ## [2.2.3] - 2025-05-08
 ### Added
-- Add overloading method signatures for container initialisation.
+- Add overloading method signatures for container initialization.
 
 ## [2.2.2] - 2025-04-22
 ### Added
@@ -100,7 +100,7 @@ All notable changes to this project will be documented in this file.
 - Element validations for element value match rule.
 
 ## [1.38.0] - 2024-09-11
-### Chnages
+### Changes
 - Error messages for various scenarios.
 
 ## [1.37.1] - 2024-09-03
@@ -371,7 +371,7 @@ All notable changes to this project will be documented in this file.
 - Added validation of JWT token format from TokenProvider
 
 ### Fixed 
--  Request headers not getting overriden due to case sensitivity
+-  Request headers not getting overridden due to case sensitivity
 
 ## [1.12.1] - 2022-03-22
 
@@ -459,7 +459,7 @@ Detecting card type and displaying icon in the card number element
 
 - `logLevel` option to allow different levels of logging
 - event listeners for collect element
-- `env` option for accessibilty of value in event listeners
+- `env` option for accessibility of value in event listeners
 
 ### Changed
 - Standardized error information for easier debugging

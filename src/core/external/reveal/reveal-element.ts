@@ -26,7 +26,7 @@ import SkyflowElement from '../common/skyflow-element';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import { formatRevealElementOptions } from '../../../utils/helpers';
 import {
-  initalizeMetricObject,
+  initializeMetricObject,
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
@@ -63,7 +63,7 @@ class RevealElement extends SkyflowElement {
 
   #isFrameReady: boolean;
 
-  #domSelecter: string;
+  #domSelector: string;
 
   #clientId: string;
 
@@ -91,7 +91,7 @@ class RevealElement extends SkyflowElement {
     this.#readyToMount = container.isMounted;
     this.#eventEmitter = container.eventEmitter;
     this.#context = context;
-    initalizeMetricObject(metaData, elementId);
+    initializeMetricObject(metaData, elementId);
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, ELEMENT_TYPES.REVEAL);
     updateMetricObjectValue(this.#elementId, METRIC_TYPES.CONTAINER_NAME, ELEMENT_TYPES.REVEAL);
     this.#iframe = new IFrame(
@@ -100,7 +100,7 @@ class RevealElement extends SkyflowElement {
       this.#containerId,
       this.#context.logLevel,
     );
-    this.#domSelecter = '';
+    this.#domSelector = '';
     this.#isFrameReady = false;
     this.#readyToMount = true;
     this.#isSkyflowFrameReady = metaData.skyflowContainer.isControllerFrameReady;

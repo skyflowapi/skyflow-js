@@ -295,7 +295,7 @@ describe('push event', () => {
     }, 1000);
   });
 
-  test('push event throw error resopnse', (done) => {
+  test('push event throw error response', (done) => {
     window.CoralogixRum = {
       isInited: false,
       init: jest.fn(),
@@ -1221,7 +1221,7 @@ describe('Deleting records from the vault', () => {
   });
 });
 
-describe('getAcessToken error delete', () => {
+describe('getAccessToken error delete', () => {
   let emitSpy;
   let targetSpy;
   beforeEach(() => {
@@ -1316,7 +1316,7 @@ describe('test render file request', () => {
     }, 10000);
   });
 
-  test("render files succes case",()=>{
+  test("render files success case",()=>{
     const clientReq = jest.fn(() => Promise.resolve({ fields: { skyflow_id: '1815-6223-1073-1425', file: 'https://demo.com' }, tokens: null }));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
@@ -1397,7 +1397,7 @@ describe('test reveal request', () => {
     }, 10000);
   });
 
-  test("reveal succes case",()=>{
+  test("reveal success case",()=>{
     const clientReq = jest.fn(() => Promise.resolve({"records":[{"token":"7402-2242-2342-232","value":"231", "valueType" : "STRING"}] }));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
