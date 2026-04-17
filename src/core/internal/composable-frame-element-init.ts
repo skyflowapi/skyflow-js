@@ -62,38 +62,73 @@ export default class RevealComposableFrameElementInit {
     this.createContainerDiv(this.group);
 
     window?.addEventListener('message', (event) => {
-      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL
+      const clientDomain = this.clientMetaData?.clientDomain;
+      if (!clientDomain) {
+        return;
+      }
+      if (event?.origin === clientDomain) {
+        if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL
           + this.containerId && event?.data?.data?.type === REVEAL_TYPES.REVEAL) {
-        this.#context = event?.data?.context;
-        const data = event?.data?.data ?? {};
-        const elementIds = data?.elementIds ?? [];
-        const revealDataInput: IRevealRecordComposable[] = [];
-        this.#client = new Client(event?.data?.clientConfig ?? {}, {
-          uuid: '',
-          clientDomain: '',
-        });
-        this.#client.setErrorMessages(event?.data?.errorMessages || {});
-
-        elementIds?.forEach((element) => {
-          this.revealFrameList?.forEach((revealFrame) => {
-            const data2 = revealFrame?.getData?.();
-            if (data2?.name === element?.frameId) {
-              if (data2 && !data2?.skyflowID) {
-                const revealRecord: IRevealRecordComposable = {
-                  token: data2?.token ?? '',
-                  redaction: data2?.redaction,
-                  iframeName: data2?.name ?? '',
-                };
-                revealDataInput?.push(revealRecord);
-              }
-            }
+          this.#context = event?.data?.context;
+          const data = event?.data?.data ?? {};
+          const elementIds = data?.elementIds ?? [];
+          const revealDataInput: IRevealRecordComposable[] = [];
+          this.#client = new Client(event?.data?.clientConfig ?? {}, {
+            uuid: '',
+            clientDomain: '',
           });
-        });
+          this.#client.setErrorMessages(event?.data?.errorMessages || {});
 
-        this.revealData(revealDataInput, this.containerId, event?.data?.clientConfig?.authToken)
-          ?.then((revealResponse: any) => {
-            if (revealResponse?.records?.length > 0) {
-              const formattedRecord = formatRecordsForClientComposable(revealResponse);
+          elementIds?.forEach((element) => {
+            this.revealFrameList?.forEach((revealFrame) => {
+              const data2 = revealFrame?.getData?.();
+              if (data2?.name === element?.frameId) {
+                if (data2 && !data2?.skyflowID) {
+                  const revealRecord: IRevealRecordComposable = {
+                    token: data2?.token ?? '',
+                    redaction: data2?.redaction,
+                    iframeName: data2?.name ?? '',
+                  };
+                  revealDataInput?.push(revealRecord);
+                }
+              }
+            });
+          });
+
+          this.revealData(revealDataInput, this.containerId, event?.data?.clientConfig?.authToken)
+            ?.then((revealResponse: any) => {
+              if (revealResponse?.records?.length > 0) {
+                const formattedRecord = formatRecordsForClientComposable(revealResponse);
+                window?.parent?.postMessage(
+                  {
+                    type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
+                    data: formattedRecord,
+                  },
+                  this.clientMetaData?.clientDomain,
+                );
+
+                revealResponse?.records?.forEach((record: any) => {
+                  this.revealFrameList?.forEach((revealFrame) => {
+                    if (revealFrame?.getData()?.name === record?.frameId) {
+                      revealFrame?.responseUpdate?.(record);
+                    }
+                  });
+                });
+              }
+
+              window?.parent?.postMessage(
+                {
+                  type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+                  data: {
+                    height: this.rootDiv?.scrollHeight ?? 0,
+                    name: window?.name,
+                  },
+                },
+                this.clientMetaData?.clientDomain,
+              );
+            })
+            ?.catch((error) => {
+              const formattedRecord = formatRecordsForClientComposable(error);
               window?.parent?.postMessage(
                 {
                   type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
@@ -102,63 +137,34 @@ export default class RevealComposableFrameElementInit {
                 this.clientMetaData?.clientDomain,
               );
 
-              revealResponse?.records?.forEach((record: any) => {
+              error?.records?.forEach((record: any) => {
                 this.revealFrameList?.forEach((revealFrame) => {
                   if (revealFrame?.getData()?.name === record?.frameId) {
                     revealFrame?.responseUpdate?.(record);
                   }
                 });
               });
-            }
 
-            window?.parent?.postMessage(
-              {
-                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
-                data: {
-                  height: this.rootDiv?.scrollHeight ?? 0,
-                  name: window?.name,
-                },
-              },
-              this.clientMetaData?.clientDomain,
-            );
-          })
-          ?.catch((error) => {
-            const formattedRecord = formatRecordsForClientComposable(error);
-            window?.parent?.postMessage(
-              {
-                type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
-                data: formattedRecord,
-              },
-              this.clientMetaData?.clientDomain,
-            );
-
-            error?.records?.forEach((record: any) => {
-              this.revealFrameList?.forEach((revealFrame) => {
-                if (revealFrame?.getData()?.name === record?.frameId) {
-                  revealFrame?.responseUpdate?.(record);
-                }
+              error?.errors?.forEach((error1: any) => {
+                this.revealFrameList?.forEach((revealFrame) => {
+                  if (revealFrame?.getData()?.name === error1?.frameId) {
+                    revealFrame?.responseUpdate?.(error1);
+                  }
+                });
               });
-            });
 
-            error?.errors?.forEach((error1: any) => {
-              this.revealFrameList?.forEach((revealFrame) => {
-                if (revealFrame?.getData()?.name === error1?.frameId) {
-                  revealFrame?.responseUpdate?.(error1);
-                }
-              });
-            });
-
-            window?.parent?.postMessage(
-              {
-                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
-                data: {
-                  height: this.rootDiv?.scrollHeight ?? 0,
-                  name: window?.name,
+              window?.parent?.postMessage(
+                {
+                  type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+                  data: {
+                    height: this.rootDiv?.scrollHeight ?? 0,
+                    name: window?.name,
+                  },
                 },
-              },
-              this.clientMetaData?.clientDomain,
-            );
-          });
+                this.clientMetaData?.clientDomain,
+              );
+            });
+        }
       }
     });
 
@@ -341,30 +347,32 @@ export default class RevealComposableFrameElementInit {
     );
 
     window?.addEventListener('message', (event) => {
-      if (event?.data?.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name) {
-        window?.parent?.postMessage(
-          {
-            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
-            data: {
-              height: this.rootDiv?.scrollHeight ?? 0,
-              name: window?.name,
+      if (event?.origin === this.clientMetaData.clientDomain) {
+        if (event?.data?.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name) {
+          window?.parent?.postMessage(
+            {
+              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+              data: {
+                height: this.rootDiv?.scrollHeight ?? 0,
+                name: window?.name,
+              },
             },
-          },
-          this.clientMetaData?.clientDomain,
-        );
-      }
-      if (event?.data?.type
+            this.clientMetaData?.clientDomain,
+          );
+        }
+        if (event?.data?.type
          === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name) {
-        window?.parent?.postMessage(
-          {
-            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
-            data: {
-              height: this.rootDiv?.scrollHeight ?? 0,
-              name: window?.name,
+          window?.parent?.postMessage(
+            {
+              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+              data: {
+                height: this.rootDiv?.scrollHeight ?? 0,
+                name: window?.name,
+              },
             },
-          },
-          this.clientMetaData?.clientDomain,
-        );
+            this.clientMetaData?.clientDomain,
+          );
+        }
       }
     });
   };

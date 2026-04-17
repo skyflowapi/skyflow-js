@@ -288,7 +288,7 @@ class SkyflowFrameController {
         },
       );
     bus
-      // .target(this.#clientDomain)
+      .target(this.#clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#clientId, {}, (data: any) => {
         this.#context = data.context;
         data.client.config = {
@@ -356,6 +356,7 @@ class SkyflowFrameController {
         }
       });
     bus
+      .target(this.#clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#clientId,
         {}, (data: any) => {
           this.#context = data.context;

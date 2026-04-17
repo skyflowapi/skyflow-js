@@ -168,13 +168,13 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       RevealComposableFrameElementInit.startFrameElement();
 
       postMessageSpy.mockClear();
-      window.dispatchEvent(new MessageEvent('message', { data: { name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + id } }));
+      window.dispatchEvent(new MessageEvent('message', { origin: 'http://localhost.com', data: { name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + id } }));
       const call1 = postMessageSpy.mock.calls.find(c => c[0]?.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + id);
       expect(call1).toBeTruthy();
       expect(call1[0].data).toMatchObject({ name: id, height: expect.any(Number) });
 
       postMessageSpy.mockClear();
-      window.dispatchEvent(new MessageEvent('message', { data: { type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + id } }));
+      window.dispatchEvent(new MessageEvent('message', { origin: 'http://localhost.com', data: { type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + id } }));
       const call2 = postMessageSpy.mock.calls.find(c => c[0]?.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + id);
       expect(call2).toBeTruthy();
       expect(call2[0].data).toMatchObject({ name: id, height: expect.any(Number) });
@@ -1003,6 +1003,7 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       
       if (messageHandler) {
           messageHandler({
+            origin: 'http://localhost.com',
             data:{
                 name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
                 context:{
@@ -1097,6 +1098,7 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       });
       if (messageHandler) {
           messageHandler({
+            origin: 'http://localhost.com',
             data:{
                 name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
                 context:{

@@ -461,20 +461,22 @@ class ComposableContainer extends Container {
         reject(err);
       });
       window.addEventListener('message', (event) => {
-        if (event.data?.type
+        if (event?.origin === properties.IFRAME_SECURE_ORIGIN) {
+          if (event?.data?.type
               === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.#containerId) {
-          const data = event.data.data;
-          if (!data || data?.error) {
-            printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-            reject(data?.error);
-          } else if (data?.records) {
-            printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-              MessageType.LOG,
-              this.#context.logLevel);
-            resolve(data);
-          } else {
-            printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
-            reject(data);
+            const data = event.data.data;
+            if (!data || data?.error) {
+              printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+              reject(data?.error);
+            } else if (data?.records) {
+              printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                MessageType.LOG,
+                this.#context.logLevel);
+              resolve(data);
+            } else {
+              printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
+              reject(data);
+            }
           }
         }
       });
@@ -546,20 +548,22 @@ class ComposableContainer extends Container {
           errorMessages: this.#customErrorMessages,
         });
         window.addEventListener('message', (event) => {
-          if (event.data?.type
+          if (event?.origin === properties.IFRAME_SECURE_ORIGIN) {
+            if (event.data?.type
               === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.#containerId) {
-            const data = event.data.data;
-            if (!data || data?.error) {
-              printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-              reject(data?.error);
-            } else if (data?.fileUploadResponse) {
-              printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                MessageType.LOG,
-                this.#context.logLevel);
-              resolve(data);
-            } else {
-              printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
-              reject(data);
+              const data = event.data.data;
+              if (!data || data?.error) {
+                printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data?.error);
+              } else if (data?.fileUploadResponse) {
+                printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                  MessageType.LOG,
+                  this.#context.logLevel);
+                resolve(data);
+              } else {
+                printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
+                reject(data);
+              }
             }
           }
         });

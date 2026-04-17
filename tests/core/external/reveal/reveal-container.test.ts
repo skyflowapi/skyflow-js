@@ -105,6 +105,7 @@ describe("Reveal Container Class", () => {
     targetSpy.mockReturnValue({
       on,
       off,
+      emit: emitSpy,
     });
   });
 

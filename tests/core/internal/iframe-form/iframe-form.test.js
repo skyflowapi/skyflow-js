@@ -67,6 +67,7 @@ describe('test iframeFormelement', () => {
         targetSpy = jest.spyOn(bus, 'target');
         targetSpy.mockReturnValue({
             on,
+            emit: emitSpy,
         });
         windowSpy = jest.spyOn(global, 'window', 'get');
         windowSpy.mockImplementation(()=>({
