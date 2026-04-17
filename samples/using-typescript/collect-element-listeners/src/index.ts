@@ -53,6 +53,9 @@ try {
       borderRadius: '4px',
       color: '#1d1d1d',
       marginTop: '4px',
+      "&:hover": {
+      borderColor: "green",
+    },
     },
     complete: {
       color: '#4caf50',
