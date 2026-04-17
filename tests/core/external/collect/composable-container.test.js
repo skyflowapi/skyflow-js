@@ -570,7 +570,7 @@ describe('test composable container class',()=>{
       const collectCb = emitSpy.mock.calls[0]?.[2];
       if (collectCb) {
         collectCb(collectResponse);
-        collectCb({ error: 'Error occured' });
+        collectCb({ error: 'Error occurred' });
       }
     },200);
 
