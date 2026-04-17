@@ -137,7 +137,8 @@ describe("Reveal Element Class", () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      off
+      off,
+      emit: emitSpy,
     });
     windowSpy = jest.spyOn(window, "window", "get");
     const client = new Client(clientData.client.config, clientData);

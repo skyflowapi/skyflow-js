@@ -198,7 +198,7 @@ class RevealElement extends SkyflowElement {
             loglevel);
           validateRenderElementRecord(this.#recordData);
           bus
-          // .target(properties.IFRAME_SECURE_ORIGIN)
+            .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
               {
@@ -250,7 +250,7 @@ class RevealElement extends SkyflowElement {
           .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#metaData.uuid, () => {
             bus
-              // .target(properties.IFRAME_SECURE_ORIGIN)
+              .target(properties.IFRAME_SECURE_ORIGIN)
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
                 {

@@ -669,6 +669,7 @@ describe('FrameElementInit Additional Test Cases', () => {
         // Simulate multi file upload message event
         if (messageHandler) {
             messageHandler(new MessageEvent('message', {
+                origin: 'http://localhost.com',
                 data: {
                     name: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:element:MULTI_FILE_INPUT:123`,
                     clientConfig: {

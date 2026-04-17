@@ -129,6 +129,7 @@ describe('push event', () => {
     onSpy = jest.spyOn(bus, 'on');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
     busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
   });
@@ -335,6 +336,7 @@ describe('Inserting records into the vault', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
   });
 
@@ -465,6 +467,7 @@ describe('Updating records in the vault', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
     busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
   });
@@ -607,6 +610,7 @@ describe('Retrieving data using skyflowId', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
   });
 
@@ -670,6 +674,7 @@ describe('Retrieving data using skyflow tokens', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
   });
 
@@ -763,6 +768,7 @@ describe('Retrieving data using skyflow tokens', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
   });
 
@@ -827,6 +833,7 @@ describe('Retrieving data using get', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
   });
 
@@ -1020,6 +1027,7 @@ describe('Failed to fetch accessToken get', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
   });
 
@@ -1066,6 +1074,7 @@ describe('Failed to fetch accessToken Getbyid', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
   });
 
@@ -1143,7 +1152,7 @@ describe('Deleting records from the vault', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      emit
+      emit: emitSpy,
     });
     busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
   });
@@ -1220,7 +1229,7 @@ describe('getAccessToken error delete', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      emit
+      emit: emitSpy,
     });
   });
   
@@ -1262,7 +1271,7 @@ describe('test render file request', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      emit
+      emit: emitSpy,
     });
     busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
   });
@@ -1345,7 +1354,7 @@ describe('test reveal request', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      emit
+      emit: emitSpy,
     });
     busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
   });

@@ -178,6 +178,7 @@ describe("testing collect element under various scenarios", () => {
     targetSpy.mockReturnValue({
       on,
       off: jest.fn(),
+      emit: emitSpy,
     });
   });
 

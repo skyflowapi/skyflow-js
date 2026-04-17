@@ -139,6 +139,7 @@ describe("Collect container", () => {
     targetSpy.mockReturnValue({
       on,
       off: jest.fn(),
+      emit: emitSpy,
     });
   });
 
@@ -303,6 +304,7 @@ describe("iframe cleanup logic", () => {
     targetSpy.mockReturnValue({
       on,
       off: jest.fn(),
+      emit: emitSpy,
     });
     div1 = document.createElement("div");
     div2 = document.createElement("div");

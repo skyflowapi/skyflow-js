@@ -137,7 +137,8 @@ describe("Reveal Frame Class",()=>{
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      off
+      off,
+      emit: emitSpy,
     });
   });
 
@@ -1067,6 +1068,7 @@ describe("Reveal Frame Class", () => {
     targetSpy.mockReturnValue({
       on: onMock,
       off: offMock,
+      emit: emitSpy,
     });
   });
 
@@ -2100,6 +2102,7 @@ describe("Reveal Frame Class - Additional Tests", () => {
     targetSpy.mockReturnValue({
       on: onMock,
       off: offMock,
+      emit: emitSpy,
     });
     
     // Clean up DOM between tests to avoid interference

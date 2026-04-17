@@ -177,6 +177,7 @@ describe("Reveal Element Class", () => {
     targetSpy.mockReturnValue({
       on,
       off,
+      emit: emitSpy,
     });
     const client = new Client(skyflowConfig, metaData);
     skyflowContainer = new SkyflowContainer(client, {
@@ -699,6 +700,7 @@ describe("Reveal Element Methods", () => {
     targetSpy.mockReturnValue({
       on,
       off,
+      emit: emitSpy,
     });
   });
     test("file render error case", () => {

@@ -114,6 +114,7 @@ describe("skyflow insert", () => {
     targetSpy = jest.spyOn(bus, "target");
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     const config: ISkyflow = {
@@ -216,6 +217,7 @@ describe("skyflow update", () => {
     targetSpy = jest.spyOn(bus, "target");
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     const config: ISkyflow = {
@@ -428,7 +430,7 @@ describe("skyflow detokenize", () => {
     targetSpy = jest.spyOn(bus, "target");
     targetSpy.mockReturnValue({
       on,
-      emit,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -447,6 +449,7 @@ describe("skyflow detokenize", () => {
     const frameReayEvent = on.mock.calls.filter((data) =>
       data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY)
     );
+
     const frameReadyCb = frameReayEvent[0][1];
     const cb2 = jest.fn();
     frameReadyCb({}, cb2);
@@ -557,6 +560,7 @@ describe("skyflow get", () => {
     targetSpy = jest.spyOn(bus, "target");
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -633,6 +637,7 @@ describe("skyflow getById", () => {
     targetSpy = jest.spyOn(bus, "target");
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -709,6 +714,7 @@ describe("skyflow get", () => {
     targetSpy = jest.spyOn(bus, "target");
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -838,6 +844,7 @@ describe("skyflow get with options", () => {
     targetSpy = jest.spyOn(bus, "target");
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -944,7 +951,7 @@ describe("Skyflow delete tests", () => {
     targetSpy = jest.spyOn(bus, "target");
     targetSpy.mockReturnValue({
       on,
-      emit,
+      emit: emitSpy,
     });
 
     skyflow = Skyflow.init({
@@ -970,6 +977,7 @@ describe("Skyflow delete tests", () => {
       const emitEvent = emitSpy.mock.calls.filter((data) =>
         data[0].includes(ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST)
       );
+      console.log("emitEvent", emitSpy);
       const emitCb = emitEvent[0][2];
       emitCb(deleteResponse);
 

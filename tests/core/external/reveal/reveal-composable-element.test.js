@@ -100,7 +100,8 @@ describe("Reveal Composable Element Class", () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      off
+      off,
+      emit: emitSpy,
     });
     const client = new Client(clientData.client.config, clientData);
     skyflowContainer = new SkyflowContainer(client, { logLevel: LogLevel.DEBUG, env: Env.PROD });

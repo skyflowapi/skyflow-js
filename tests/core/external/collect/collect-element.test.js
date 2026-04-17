@@ -135,7 +135,8 @@ describe('collect element', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
-      off: jest.fn()
+      off: jest.fn(),
+      emit: emitSpy,
     });
   });
 
