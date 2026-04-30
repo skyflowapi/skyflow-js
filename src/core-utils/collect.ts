@@ -163,6 +163,7 @@ export const constructFinalUpdateRecordResponse = (
 
 export const constructUploadResponse = (response) => {
   const data = typeof response === 'string' ? JSON.parse(response) : response;
+
   return JSON.stringify({ skyflow_id: data.skyflowID }) as any;
 };
 
