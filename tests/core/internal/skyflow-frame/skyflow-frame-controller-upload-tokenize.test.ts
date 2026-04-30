@@ -246,7 +246,7 @@ describe("Uploading files to the vault", () => {
       },
     }));
     const clientReq = jest.fn(() =>
-      Promise.resolve(JSON.stringify({ skyflow_id: "file-upload-skyflow-id" }))
+      Promise.resolve(JSON.stringify({ skyflowID: "file-upload-skyflow-id", fileMetadata: { fileName: "test-file.txt", fileSize: 1024, fileType: "file" } }))
     );
     jest.spyOn(clientModule, "fromJSON").mockImplementation(
       () =>
@@ -311,13 +311,13 @@ describe("Uploading files to the vault", () => {
 
     // Mock client request to succeed for first file and fail for second
     const clientReq = jest.fn((request) => {
-      if (request.body.get("file2")) {
+      if (request.body.get("columnName") === "file2") {
         return Promise.reject({
           error: { code: 400, description: "Upload failed" },
         });
       } else {
         return Promise.resolve(
-          JSON.stringify({ skyflow_id: "success-file-id" })
+          JSON.stringify({ skyflowID: "success-file-id", fileMetadata: { fileName: "test-file.txt", fileSize: 1024, fileType: "file" } })
         );
       }
     });
