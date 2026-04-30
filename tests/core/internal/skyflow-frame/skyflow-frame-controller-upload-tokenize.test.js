@@ -490,8 +490,54 @@ describe('Uploading files to the vault', () => {
         done();
       }, 1000);
     });
+
+    test('should upload file with preserveFileName false and skyflowID set', (done) => {
+      testValue.iFrameFormElement.preserveFileName = false;
+      testValue.iFrameFormElement.skyflowID = 'test-skyflow-id';
+      windowSpy.mockImplementation(()=>({
+        frames:{
+          'element:FILE_INPUT:ID:CONTAINER-ID:ERROR:':{document:{
+              getElementById:()=>(testValue)
+          }}
+        }
+      }));
+      const clientReq = jest.fn(() => Promise.resolve({ skyflowID: 'file-upload-skyflow-id' }));
+      jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+        ...clientData.client,
+        request: clientReq,
+        toJSON: toJson
+      }));
+
+      SkyflowFrameController.init();
+
+      const emitEventName = emitSpy.mock.calls[1][0];
+      const emitCb = emitSpy.mock.calls[1][2];
+      expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY);
+      emitCb(clientData);
+
+      const onCb = on.mock.calls[1][1];
+      const data = {
+        type: COLLECT_TYPES.FILE_UPLOAD,
+        elementIds: ['element:FILE_INPUT:ID'],
+        containerId: 'CONTAINER-ID',
+      };
+      const cb2 = jest.fn();
+
+      onCb(data, cb2);
+
+      setTimeout(() => {
+        expect(cb2).toHaveBeenCalled();
+        expect(cb2.mock.calls[0][0].fileUploadResponse).toBeDefined();
+        expect(cb2.mock.calls[0][0].fileUploadResponse.length).toBe(1);
+        const parsedResponse = JSON.parse(cb2.mock.calls[0][0].fileUploadResponse[0]);
+        expect(parsedResponse.skyflow_id).toBe('file-upload-skyflow-id');
+        const requestArgs = clientReq.mock.calls[0][0];
+        expect(requestArgs.body.get('skyflowID')).toBe('test-skyflow-id');
+        done();
+      }, 1000);
+    });
 });
-  
+
 describe('SkyflowFrameController - tokenize function', () => {
   let emitSpy;
   let targetSpy;
