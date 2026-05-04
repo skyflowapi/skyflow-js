@@ -67,7 +67,7 @@ export default class RevealComposableFrameElementInit {
         return;
       }
       if (event?.origin === clientDomain) {
-        console.log('origin matches, processing message: in external comp rev', event?.origin, clientDomain);
+        console.log('origin matches, processing message: in internal comp rev', event?.origin, clientDomain);
         if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL
           + this.containerId && event?.data?.data?.type === REVEAL_TYPES.REVEAL) {
           this.#context = event?.data?.context;
