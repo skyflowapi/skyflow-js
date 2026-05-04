@@ -462,6 +462,7 @@ class ComposableContainer extends Container {
       });
       window.addEventListener('message', (event) => {
         if (event?.origin === properties.IFRAME_SECURE_ORIGIN) {
+          console.log('origin matches, processing message: in external comp col', properties.IFRAME_SECURE_ORIGIN, event?.origin);
           if (event?.data?.type
               === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.#containerId) {
             const data = event.data.data;
@@ -549,6 +550,7 @@ class ComposableContainer extends Container {
         });
         window.addEventListener('message', (event) => {
           if (event?.origin === properties.IFRAME_SECURE_ORIGIN) {
+            console.log('origin matches, processing message: in external comp col', properties.IFRAME_SECURE_ORIGIN, event?.origin);
             if (event.data?.type
               === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.#containerId) {
               const data = event.data.data;

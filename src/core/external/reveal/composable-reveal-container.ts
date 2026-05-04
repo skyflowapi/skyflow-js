@@ -377,6 +377,7 @@ class ComposableRevealContainer extends Container {
 
             window?.addEventListener('message', (event) => {
               if (event?.origin === properties.IFRAME_SECURE_ORIGIN) {
+                console.log('origin matches, processing message: in external comp rev', properties.IFRAME_SECURE_ORIGIN, event?.origin);
                 if (event?.data?.type
                  === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
                   const revealData = event?.data?.data;
@@ -439,6 +440,7 @@ class ComposableRevealContainer extends Container {
             this.#context.logLevel);
           window.addEventListener('message', (messagEevent) => {
             if (messagEevent?.origin === properties.IFRAME_SECURE_ORIGIN) {
+              console.log('origin matches, processing message: in external comp rev', properties.IFRAME_SECURE_ORIGIN, messagEevent?.origin);
               if (messagEevent?.data?.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
                   + this.#containerId) {
                 this.#emitEvent(

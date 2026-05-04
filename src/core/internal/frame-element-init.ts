@@ -79,6 +79,7 @@ export default class FrameElementInit {
 
   private handleCollectCall = (event: MessageEvent) => {
     if (event?.origin === this.clientMetaData?.clientDomain) {
+      console.log('origin matches, processing message:', this.clientMetaData?.clientDomain, event?.origin);
       this.iframeFormList.forEach((inputElement) => {
         if (inputElement) {
           if (inputElement.fieldType

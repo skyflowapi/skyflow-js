@@ -67,6 +67,7 @@ export default class RevealComposableFrameElementInit {
         return;
       }
       if (event?.origin === clientDomain) {
+        console.log('origin matches, processing message: in external comp rev', event?.origin, clientDomain);
         if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL
           + this.containerId && event?.data?.data?.type === REVEAL_TYPES.REVEAL) {
           this.#context = event?.data?.context;
@@ -347,33 +348,35 @@ export default class RevealComposableFrameElementInit {
     );
 
     window?.addEventListener('message', (event) => {
-      if (event?.origin === this.clientMetaData.clientDomain) {
-        if (event?.data?.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name) {
-          window?.parent?.postMessage(
-            {
-              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
-              data: {
-                height: this.rootDiv?.scrollHeight ?? 0,
-                name: window?.name,
-              },
+      // if (event?.origin === this.clientMetaData.clientDomain) {
+      // eslint-disable-next-line max-len
+      // console.log('origin matches, processing message: in height callback listener', event?.origin, this.clientMetaData.clientDomain);
+      if (event?.data?.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name) {
+        window?.parent?.postMessage(
+          {
+            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+            data: {
+              height: this.rootDiv?.scrollHeight ?? 0,
+              name: window?.name,
             },
-            this.clientMetaData?.clientDomain,
-          );
-        }
-        if (event?.data?.type
-         === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name) {
-          window?.parent?.postMessage(
-            {
-              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
-              data: {
-                height: this.rootDiv?.scrollHeight ?? 0,
-                name: window?.name,
-              },
-            },
-            this.clientMetaData?.clientDomain,
-          );
-        }
+          },
+          this.clientMetaData?.clientDomain,
+        );
       }
+      if (event?.data?.type
+         === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name) {
+        window?.parent?.postMessage(
+          {
+            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+            data: {
+              height: this.rootDiv?.scrollHeight ?? 0,
+              name: window?.name,
+            },
+          },
+          this.clientMetaData?.clientDomain,
+        );
+      }
+      // }
     });
   };
 }
