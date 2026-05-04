@@ -376,23 +376,26 @@ class ComposableRevealContainer extends Container {
             );
 
             window?.addEventListener('message', (event) => {
-              if (event?.data?.type
+              if (event?.origin === properties.IFRAME_SECURE_ORIGIN) {
+                console.log('origin matches, processing message: in external comp rev', properties.IFRAME_SECURE_ORIGIN, event?.origin);
+                if (event?.data?.type
                  === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
-                const revealData = event?.data?.data;
-                if (revealData?.errors) {
-                  printLog(
-                    parameterizedString(logs?.errorLogs?.FAILED_REVEAL),
-                    MessageType.ERROR,
-                    this.#context?.logLevel,
-                  );
-                  reject(revealData);
-                } else {
-                  printLog(
-                    parameterizedString(logs?.infoLogs?.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
-                    MessageType.LOG,
-                    this.#context?.logLevel,
-                  );
-                  resolve(revealData);
+                  const revealData = event?.data?.data;
+                  if (revealData?.errors) {
+                    printLog(
+                      parameterizedString(logs?.errorLogs?.FAILED_REVEAL),
+                      MessageType.ERROR,
+                      this.#context?.logLevel,
+                    );
+                    reject(revealData);
+                  } else {
+                    printLog(
+                      parameterizedString(logs?.infoLogs?.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
+                      MessageType.LOG,
+                      this.#context?.logLevel,
+                    );
+                    resolve(revealData);
+                  }
                 }
               }
             });
@@ -436,39 +439,46 @@ class ComposableRevealContainer extends Container {
             MessageType.LOG,
             this.#context.logLevel);
           window.addEventListener('message', (messagEevent) => {
-            if (messagEevent?.data?.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+            if (messagEevent?.origin === properties.IFRAME_SECURE_ORIGIN) {
+              console.log('origin matches, processing message: in external comp rev', properties.IFRAME_SECURE_ORIGIN, messagEevent?.origin);
+              if (messagEevent?.data?.type === ELEMENT_EVENTS_TO_CLIENT.MOUNTED
                   + this.#containerId) {
-              this.#emitEvent(
-                ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + this.#containerId, {
-                  data: {
-                    type: REVEAL_TYPES.REVEAL,
-                    containerId: this.#containerId,
-                    elementIds,
+                this.#emitEvent(
+                  ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + this.#containerId, {
+                    data: {
+                      type: REVEAL_TYPES.REVEAL,
+                      containerId: this.#containerId,
+                      elementIds,
+                    },
+                    clientConfig: {
+                      vaultURL: this.#metaData.clientJSON.config.vaultURL,
+                      vaultID: this.#metaData.clientJSON.config.vaultID,
+                      authToken,
+                    },
+                    context: this.#context,
                   },
-                  clientConfig: {
-                    vaultURL: this.#metaData.clientJSON.config.vaultURL,
-                    vaultID: this.#metaData.clientJSON.config.vaultID,
-                    authToken,
-                  },
-                  context: this.#context,
-                },
-              );
-              window.addEventListener('message', (event) => {
-                if (event?.data?.type
+                );
+                window.addEventListener('message', (event) => {
+                  if (event?.origin === properties.IFRAME_SECURE_ORIGIN) {
+                    if (event?.data?.type
                === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
-                  const revealData = event?.data?.data;
-                  if (revealData?.errors) {
-                    printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
-                      MessageType.ERROR, this.#context.logLevel);
-                    reject(revealData);
-                  } else {
-                    printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
-                      MessageType.LOG,
-                      this.#context.logLevel);
-                    resolve(revealData);
+                      const revealData = event?.data?.data;
+                      if (revealData?.errors) {
+                        printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
+                          MessageType.ERROR, this.#context.logLevel);
+                        reject(revealData);
+                      } else {
+                        printLog(
+                          parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
+                          MessageType.LOG,
+                          this.#context.logLevel,
+                        );
+                        resolve(revealData);
+                      }
+                    }
                   }
-                }
-              });
+                });
+              }
             }
           });
         }).catch((err:any) => {

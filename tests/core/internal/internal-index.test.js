@@ -40,6 +40,7 @@ describe('domReady function - FrameElement', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
         on,
+        emit: emitSpy,
     });
     windowSpy = jest.spyOn(window,'parent','get');
           const originalPostMessage = window.postMessage;
@@ -275,6 +276,7 @@ describe('FrameElement', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
         on,
+        emit: emitSpy,
     });
     windowSpy = jest.spyOn(window,'parent','get');
 

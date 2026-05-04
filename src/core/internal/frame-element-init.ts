@@ -66,7 +66,7 @@ export default class FrameElementInit {
     this.updateGroupData();
     this.createContainerDiv(this.group);
     bus
-      // .target(this.clientMetaData.clientDomain)
+      .target(this.clientMetaData?.clientDomain)
       .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
         data.client.config = {
           ...data.client.config,
@@ -78,72 +78,73 @@ export default class FrameElementInit {
   }
 
   private handleCollectCall = (event: MessageEvent) => {
-    this.iframeFormList.forEach((inputElement) => {
-      if (inputElement) {
-        if (inputElement.fieldType
+    if (event?.origin === this.clientMetaData?.clientDomain) {
+      console.log('origin matches, processing message:', this.clientMetaData?.clientDomain, event?.origin);
+      this.iframeFormList.forEach((inputElement) => {
+        if (inputElement) {
+          if (inputElement.fieldType
           === ELEMENTS.MULTI_FILE_INPUT.name) {
-          if (event?.data && event?.data?.name === `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${inputElement.iFrameName}`) {
-            this.#client = Client.fromJSON(event?.data?.clientConfig);
-            this.multipleUploadFiles(inputElement, event?.data?.clientConfig,
-              event?.data?.options, event?.data?.errorMessages)
-              ?.then((response: any) => {
-                window?.parent.postMessage({
-                  type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${inputElement.iFrameName}`,
-                  data: response,
-                }, this.clientMetaData?.clientDomain);
-              }).catch((error) => {
-                window?.parent.postMessage({
-                  type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${inputElement.iFrameName}`,
-                  data: error,
-                }, this.clientMetaData?.clientDomain);
-              });
+            if (event?.data && event?.data?.name === `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${inputElement.iFrameName}`) {
+              this.#client = Client.fromJSON(event?.data?.clientConfig);
+              this.multipleUploadFiles(inputElement, event?.data?.clientConfig,
+                event?.data?.options, event?.data?.errorMessages)
+                ?.then((response: any) => {
+                  window?.parent.postMessage({
+                    type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${inputElement.iFrameName}`,
+                    data: response,
+                  }, this.clientMetaData?.clientDomain);
+                }).catch((error) => {
+                  window?.parent.postMessage({
+                    type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${inputElement.iFrameName}`,
+                    data: error,
+                  }, this.clientMetaData?.clientDomain);
+                });
+            }
           }
         }
-      }
-    });
+      });
 
-    // if (event.origin === this.clientMetaData.clientDomain) {
-    if (event?.data && event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
+      if (event?.data && event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS
          + this.containerId) {
-      if (event?.data?.data && event?.data?.data?.type === COLLECT_TYPES.COLLECT) {
-        this.tokenize(event?.data?.data, event?.data?.clientConfig, event?.data?.errorMessages)
-          .then((response: any) => {
-            window?.parent.postMessage({
-              type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
-              data: response,
-            }, this.clientMetaData?.clientDomain);
-          })
-          .catch((error) => {
-            window?.parent.postMessage({
-              type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
-              data: error,
-            }, this.clientMetaData?.clientDomain);
-          });
-      } else if (event.data.data && event.data.data.type === COLLECT_TYPES.FILE_UPLOAD) {
-        this.parallelUploadFiles(event.data.data,
-          event.data.clientConfig, event?.data?.errorMessages)
-          .then((response: any) => {
-            window?.parent.postMessage({
-              type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.containerId,
-              data: response,
-            }, this.clientMetaData?.clientDomain);
-          })
-          .catch((error) => {
-            window?.parent.postMessage({
-              type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.containerId,
-              data: error,
-            }, this.clientMetaData?.clientDomain);
-          });
+        if (event?.data?.data && event?.data?.data?.type === COLLECT_TYPES.COLLECT) {
+          this.tokenize(event?.data?.data, event?.data?.clientConfig, event?.data?.errorMessages)
+            .then((response: any) => {
+              window?.parent.postMessage({
+                type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
+                data: response,
+              }, this.clientMetaData?.clientDomain);
+            })
+            .catch((error) => {
+              window?.parent.postMessage({
+                type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + this.containerId,
+                data: error,
+              }, this.clientMetaData?.clientDomain);
+            });
+        } else if (event.data.data && event.data.data.type === COLLECT_TYPES.FILE_UPLOAD) {
+          this.parallelUploadFiles(event.data.data,
+            event.data.clientConfig, event?.data?.errorMessages)
+            .then((response: any) => {
+              window?.parent.postMessage({
+                type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.containerId,
+                data: response,
+              }, this.clientMetaData?.clientDomain);
+            })
+            .catch((error) => {
+              window?.parent.postMessage({
+                type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.containerId,
+                data: error,
+              }, this.clientMetaData?.clientDomain);
+            });
+        }
+      }
+      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId) {
+        const data = event.data;
+        data.client.config = {
+          ...data.client.config,
+        };
+        this.#client = Client.fromJSON(data.client) as any;
       }
     }
-    if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId) {
-      const data = event.data;
-      data.client.config = {
-        ...data.client.config,
-      };
-      this.#client = Client.fromJSON(data.client) as any;
-    }
-    // }
   };
 
   private parallelUploadFiles = (options, config,
