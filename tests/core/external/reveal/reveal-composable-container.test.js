@@ -658,6 +658,72 @@ describe("Reveal Composable Container Class", () => {
     await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
   });
 
+  test("reveal when frame not ready - inner listener rejects when revealData has errors", async () => {
+    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+
+    const res = container.reveal();
+    await Promise.resolve(); // let getBearerToken resolve and outer MOUNTED listener attach
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: { token: "1815-6223-1073-1425", containerId: mockUuid }
+      }
+    }));
+    await Promise.resolve();
+
+    // revealData.errors is truthy → line 464 true branch → reject
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { errors: { code: 500, description: "Internal Server Error" } }
+      }
+    }));
+
+    await expect(res).rejects.toEqual({ errors: { code: 500, description: "Internal Server Error" } });
+  });
+
+  test("reveal when frame not ready - inner listener ignores REVEAL_RESPONSE_READY from wrong origin", async () => {
+    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+
+    const res = container.reveal();
+    await Promise.resolve(); // let getBearerToken resolve and outer MOUNTED listener attach
+
+    // Correct MOUNTED - registers the inner REVEAL_RESPONSE_READY listener
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: { token: "1815-6223-1073-1425", containerId: mockUuid }
+      }
+    }));
+    await Promise.resolve();
+
+    // Wrong origin for REVEAL_RESPONSE_READY - line 464 origin check is false, skipped
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://attacker.com',
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    // Correct origin - now resolves
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
+  });
+
   // Tests for the "frame IS already ready" path (lines 378-400 in composable-reveal-container.ts)
   // #isComposableFrameReady is set to true by dispatching MOUNTED before calling reveal()
 
