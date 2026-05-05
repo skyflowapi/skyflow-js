@@ -7,6 +7,7 @@ import EventEmitter from "../../../../src/event-emitter";
 import { ContainerType } from "../../../../src/skyflow";
 import { ElementState } from "../../../../src/utils/common";
 import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
+import properties from "../../../../src/properties";
 
 describe("test composable element", () => {
   const emitter = jest.fn();
@@ -162,6 +163,7 @@ describe("test composable element", () => {
  // Trigger upload then dispatch error event AFTER listener is attached.
     const p = testElement4.uploadMultipleFiles();
     window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:testce4`,
         data: { error: 'Error occurred' }
@@ -180,6 +182,7 @@ describe("test composable element", () => {
     // Trigger upload then dispatch error event AFTER listener is attached.
     const p = testElement4.uploadMultipleFiles();
     window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:testce4`,
         data: { error: 'Error occurred' }
@@ -198,6 +201,7 @@ describe("test composable element", () => {
     // Trigger upload then dispatch error event AFTER listener is attached.
     const p = testElement4.uploadMultipleFiles();
     window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:testce4`,
         data: 'error occurred'
@@ -216,7 +220,7 @@ describe("test composable element", () => {
     const promise = multiEl.uploadMultipleFiles();
     expect(messageHandler).toBeDefined();
     // Simulate success
-    messageHandler({ data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { fileUploadResponse: [{ filename: 'doc.pdf' }] } } });
+    messageHandler({ origin: properties.IFRAME_SECURE_ORIGIN, data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { fileUploadResponse: [{ filename: 'doc.pdf' }] } } });
     await expect(promise).resolves.toMatchObject({ fileUploadResponse: [{ filename: 'doc.pdf' }] });
     addSpy.mockRestore();
   });
@@ -228,7 +232,7 @@ describe("test composable element", () => {
     let messageHandler: any;
     const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => { if (evt === 'message') messageHandler = handler; });
     const promise = multiEl.uploadMultipleFiles();
-    messageHandler({ data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { errorResponse: 'Upload failed' } } });
+    messageHandler({ origin: properties.IFRAME_SECURE_ORIGIN, data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { errorResponse: 'Upload failed' } } });
     await expect(promise).rejects.toMatchObject({ errorResponse: 'Upload failed' });
     addSpy.mockRestore();
   });
@@ -240,8 +244,41 @@ describe("test composable element", () => {
     let messageHandler: any;
     const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => { if (evt === 'message') messageHandler = handler; });
     const promise = multiEl.uploadMultipleFiles();
-    messageHandler({ data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { error: 'Validation error' } } });
+    messageHandler({ origin: properties.IFRAME_SECURE_ORIGIN, data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { error: 'Validation error' } } });
     await expect(promise).rejects.toMatchObject({ error: 'Validation error' });
+    addSpy.mockRestore();
+  });
+    it('uploadMultipleFiles ignores message from wrong origin', async () => {
+    const elementName = 'multiWrongOrigin';
+    const emitterStub: any = { _emit: jest.fn(), on: jest.fn() };
+    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: ElementType.MULTI_FILE_INPUT });
+    let messageHandler: any;
+    const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => {
+      if (evt === 'message') messageHandler = handler;
+    });
+    const promise = multiEl.uploadMultipleFiles();
+    // Wrong origin — origin check is false, inner code skipped
+    messageHandler({ origin: 'https://attacker.com', data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { fileUploadResponse: [{ filename: 'doc.pdf' }] } } });
+    // Correct origin — now resolves
+    messageHandler({ origin: properties.IFRAME_SECURE_ORIGIN, data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { fileUploadResponse: [{ filename: 'doc.pdf' }] } } });
+    await expect(promise).resolves.toMatchObject({ fileUploadResponse: [{ filename: 'doc.pdf' }] });
+    addSpy.mockRestore();
+  });
+
+  it('uploadMultipleFiles ignores message with wrong event type', async () => {
+    const elementName = 'multiWrongType';
+    const emitterStub: any = { _emit: jest.fn(), on: jest.fn() };
+    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: ElementType.MULTI_FILE_INPUT });
+    let messageHandler: any;
+    const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => {
+      if (evt === 'message') messageHandler = handler;
+    });
+    const promise = multiEl.uploadMultipleFiles();
+    // Correct origin but wrong type — type check is false, inner code skipped
+    messageHandler({ origin: properties.IFRAME_SECURE_ORIGIN, data: { type: 'WRONG_EVENT_TYPE', data: { fileUploadResponse: [{ filename: 'doc.pdf' }] } } });
+    // Correct type — now resolves
+    messageHandler({ origin: properties.IFRAME_SECURE_ORIGIN, data: { type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${elementName}`, data: { fileUploadResponse: [{ filename: 'doc.pdf' }] } } });
+    await expect(promise).resolves.toMatchObject({ fileUploadResponse: [{ filename: 'doc.pdf' }] });
     addSpy.mockRestore();
   });
 });
