@@ -52,6 +52,7 @@ describe('Uploading files to the vault', () => {
       targetSpy = jest.spyOn(bus, 'target');
       targetSpy.mockReturnValue({
         on,
+        emit: emitSpy,
       });
   
       testValue = {
@@ -550,6 +551,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     targetSpy = jest.spyOn(bus, 'target');
     targetSpy.mockReturnValue({
       on,
+      emit: emitSpy,
     });
 
     testValue = {

@@ -211,7 +211,8 @@ describe('Collect container', () => {
     onSpy = jest.spyOn(bus, 'on');
     targetSpy.mockReturnValue({
       on,
-      off: jest.fn()
+      off: jest.fn(),
+      emit: emitSpy,
     });
   });
 
@@ -1742,7 +1743,8 @@ describe('iframe cleanup logic', () => {
     onSpy = jest.spyOn(bus, 'on');
     targetSpy.mockReturnValue({
       on,
-      off: jest.fn()
+      off: jest.fn(),
+      emit: emitSpy,
     });
     div1 = document.createElement('div');
     div2 = document.createElement('div');

@@ -459,6 +459,7 @@ describe('FrameElementInit extended unit tests', () => {
     const clientConfig = { vaultID: 'v1', vaultURL: 'https://vault.url', authToken: 'tok' };
     // Directly invoke private handler with synthetic event
     instance['handleCollectCall']({
+      origin: 'http://localhost.com',
       data: {
         name: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${multiElement.iFrameName}`,
         clientConfig,
@@ -486,6 +487,7 @@ describe('FrameElementInit extended unit tests', () => {
     instance['multipleUploadFiles'] = jest.fn().mockRejectedValue({ error: 'fail' });
     const clientConfig = { vaultID: 'v1', vaultURL: 'https://vault.url', authToken: 'tok' };
     instance['handleCollectCall']({
+      origin: 'http://localhost.com',
       data: {
         name: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${multiElement.iFrameName}`,
         clientConfig,
@@ -508,6 +510,7 @@ describe('FrameElementInit extended unit tests', () => {
     instance['tokenize'] = jest.fn().mockResolvedValue({ records: [{ id: '1' }] });
     const clientConfig = { vaultID: 'v1', vaultURL: 'https://vault.url', authToken: 'tok' };
     instance['handleCollectCall']({
+      origin: 'http://localhost.com',
       data: {
         name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + instance.containerId,
         data: { type: COLLECT_TYPES.COLLECT },
@@ -534,6 +537,7 @@ describe('FrameElementInit extended unit tests', () => {
     instance['tokenize'] = jest.fn().mockRejectedValue({ error: 'bad' });
     const clientConfig = { vaultID: 'v1', vaultURL: 'https://vault.url', authToken: 'tok' };
     instance['handleCollectCall']({
+      origin: 'http://localhost.com',
       data: {
         name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + instance.containerId,
         data: { type: COLLECT_TYPES.COLLECT },
@@ -559,6 +563,7 @@ describe('FrameElementInit extended unit tests', () => {
     instance['parallelUploadFiles'] = jest.fn().mockResolvedValue({ fileUploadResponse: [{ ok: true }] });
     const clientConfig = { vaultID: 'v1', vaultURL: 'https://vault.url', authToken: 'tok' };
     instance['handleCollectCall']({
+      origin: 'http://localhost.com',
       data: {
         name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + instance.containerId,
         data: { type: COLLECT_TYPES.FILE_UPLOAD },
@@ -584,6 +589,7 @@ describe('FrameElementInit extended unit tests', () => {
     instance['parallelUploadFiles'] = jest.fn().mockRejectedValue({ error: 'upload-fail' });
     const clientConfig = { vaultID: 'v1', vaultURL: 'https://vault.url', authToken: 'tok' };
     instance['handleCollectCall']({
+      origin: 'http://localhost.com',
       data: {
         name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + instance.containerId,
         data: { type: COLLECT_TYPES.FILE_UPLOAD },
@@ -608,6 +614,7 @@ describe('FrameElementInit extended unit tests', () => {
     const spyFromJSON = jest.spyOn(Client, 'fromJSON');
     const clientConfigPayload = { config: { vaultURL: 'https://vault.url', vaultID: 'vaultX' } };
     instance['handleCollectCall']({
+      origin: 'http://localhost.com',
       data: {
         name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + instance.containerId,
         client: clientConfigPayload,
