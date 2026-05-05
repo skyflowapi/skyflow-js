@@ -599,12 +599,12 @@ describe("Reveal Composable Container Class", () => {
         description: "Failed to fetch bearer token"
       }
     });
-    
+
     const clientDataFail = {
       ...clientData,
       getSkyflowBearerToken: getBearerTokenFail,
     };
-    
+
     const testRevealContainer = new ComposableRevealContainer(clientDataFail, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
@@ -617,7 +617,183 @@ describe("Reveal Composable Container Class", () => {
     }
     testRevealContainer.setError({[SKYFLOW_ERROR_CODE.NOT_FOUND]: "Test error message",})
     const res = testRevealContainer.reveal();
-    
+
     await expect(res).rejects.toEqual({errors:{code:400,description:"Failed to fetch bearer token"}});
+  });
+
+  test("reveal when frame not ready - ignores MOUNTED message from wrong origin", async () => {
+    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+
+    const res = container.reveal();
+    await Promise.resolve(); // let getBearerToken resolve and outer message listener attach
+
+    // Wrong origin - line 441 evaluates false, inner code is skipped
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://attacker.com',
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: { token: "1815-6223-1073-1425", containerId: mockUuid }
+      }
+    }));
+
+    // Correct origin MOUNTED - now proceeds to emit COMPOSABLE_REVEAL and attach REVEAL_RESPONSE_READY listener
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: { token: "1815-6223-1073-1425", containerId: mockUuid }
+      }
+    }));
+    await Promise.resolve();
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
+  });
+
+  // Tests for the "frame IS already ready" path (lines 378-400 in composable-reveal-container.ts)
+  // #isComposableFrameReady is set to true by dispatching MOUNTED before calling reveal()
+
+  test("reveal when frame already ready - resolves with success data", async () => {
+    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+    // Set #isComposableFrameReady = true before calling reveal()
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    const res = container.reveal();
+    await Promise.resolve(); // let getBearerToken resolve and message listener attach
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
+  });
+
+  test("reveal when frame already ready - rejects with error data", async () => {
+    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    const res = container.reveal();
+    await Promise.resolve();
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { errors: { code: 404, description: "Not Found" } }
+      }
+    }));
+
+    await expect(res).rejects.toEqual({ errors: { code: 404, description: "Not Found" } });
+  });
+
+  test("reveal when frame already ready - ignores message from wrong origin", async () => {
+    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    const res = container.reveal();
+    await Promise.resolve();
+
+    // Wrong origin - listener should skip this
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://attacker.com',
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    // Correct message after wrong-origin one - should still resolve correctly
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
+  });
+
+  test("reveal when frame already ready - ignores message with wrong type", async () => {
+    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    const res = container.reveal();
+    await Promise.resolve();
+
+    // Wrong type - listener should skip this
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: 'WRONG_EVENT_TYPE',
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    // Correct message after wrong-type one - should still resolve correctly
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
+  });
+
+  test("reveal when frame already ready - rejects when bearer token fails", async () => {
+    const getBearerTokenFail = jest.fn().mockRejectedValue({
+      errors: { code: 400, description: "Failed to fetch bearer token" }
+    });
+    const clientDataFail = { ...clientData, getSkyflowBearerToken: getBearerTokenFail };
+
+    const container = new ComposableRevealContainer(clientDataFail, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    const res = container.reveal();
+
+    await expect(res).rejects.toEqual({ errors: { code: 400, description: "Failed to fetch bearer token" } });
+  });
+
+  test("reveal when frame already ready - throws error when no elements in container", (done) => {
+    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    container.reveal().catch((error) => {
+      done();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.error.code).toEqual(400);
+      expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_COMPOSABLE);
+    });
   });
 });
