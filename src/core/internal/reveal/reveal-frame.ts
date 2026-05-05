@@ -607,25 +607,27 @@ class RevealFrame {
 
   private updateRevealElementOptions() {
     window.addEventListener('message', (event) => {
-      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS
+      if (event?.origin === this.#clientDomain) {
+        if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS
          + this.#name) {
-        const data = event?.data;
-        if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS) {
-          const updatedValue = data.updatedValue as object;
-          this.#record = {
-            ...this.#record,
-            ...updatedValue,
-            ...formatRevealElementOptions(updatedValue),
-          };
-          this.updateElementProps();
-          if (this.isRevealCalled) {
-            if (this.#record?.mask) {
-              const { formattedOutput } = getMaskedOutput(
-                this.#revealedValue ?? '',
-                this.#record?.mask?.[0],
-                constructMaskTranslation(this.#record?.mask),
-              );
-              this.#dataElememt.innerText = formattedOutput ?? '';
+          const data = event?.data;
+          if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS) {
+            const updatedValue = data.updatedValue as object;
+            this.#record = {
+              ...this.#record,
+              ...updatedValue,
+              ...formatRevealElementOptions(updatedValue),
+            };
+            this.updateElementProps();
+            if (this.isRevealCalled) {
+              if (this.#record?.mask) {
+                const { formattedOutput } = getMaskedOutput(
+                  this.#revealedValue ?? '',
+                  this.#record?.mask?.[0],
+                  constructMaskTranslation(this.#record?.mask),
+                );
+                this.#dataElememt.innerText = formattedOutput ?? '';
+              }
             }
           }
         }
