@@ -411,7 +411,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
                 },
               );
               window.addEventListener('message', (event1) => {
-                if (event1.origin === properties.IFRAME_SECURE_ORIGIN) {
+                if (event1?.origin === properties.IFRAME_SECURE_ORIGIN) {
                   if (event1?.data
                          && event1?.data?.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
              + recordData.name) {
