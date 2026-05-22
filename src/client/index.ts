@@ -97,13 +97,16 @@ class Client {
 
     if (request.headers?.['content-type']?.includes(ContentType.FORMURLENCODED)
       || request.headers?.['content-type']?.includes(ContentType.FORMDATA)) {
+      console.log('Request body sent as is without stringifying since content-type is form related');
       httpRequest.send(request.body);
+      console.log('Request body sent as is without stringifying since content-type is form related');
     } else {
       /* Earlier we were stringifying here, but due to TS, we're stringifying
         at the point where we are creating the request. Since the body parameter
         doesn't accept JSON object.
       */
       httpRequest.send(request.body);
+      console.log('Request body sent as is without stringifying since content-type is form related');
     }
 
     httpRequest.onload = () => {
