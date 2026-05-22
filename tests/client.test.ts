@@ -795,4 +795,51 @@ describe("setErrorMessages method", () => {
         expect(testClient.errorMessagesList['OFFLINE']).toBe("Offline Error");
         expect(testClient.errorMessagesList[502]).toBe("Bad Gateway Error");
   });
+
+  test("Client request rejects with code 429 and server message for Cloudflare JSON rate limit response (INF-5498 format)", async () => {
+    const cloudflare429Body = JSON.stringify({
+      error: {
+        grpc_code: 8,
+        http_code: 429,
+        http_status: "Too Many Requests",
+        message: "Rate limit exceeded. Please retry after some time.",
+      },
+    });
+
+    let capturedXhr: any;
+    jest.spyOn(window, "XMLHttpRequest").mockImplementation(() => {
+      capturedXhr = {
+        open: jest.fn(),
+        send: jest.fn(),
+        setRequestHeader: jest.fn(),
+        readyState: 4,
+        status: 429,
+        response: cloudflare429Body,
+        getAllResponseHeaders: jest
+          .fn()
+          .mockReturnValue(
+            "content-type: application/json\nx-request-id: req-429"
+          ),
+      };
+      return capturedXhr as XMLHttpRequest;
+    });
+
+    const testClient = new Client(skyflowConfig, metaData);
+    const requestPromise = testClient.request({
+      requestMethod: "GET",
+      url: "https://example.com/vault",
+      headers: { Auth: "token" },
+    });
+
+    // SDK assigns onload after send() — trigger it now to simulate response arriving
+    capturedXhr.onload();
+
+    await requestPromise.catch((err) => {
+      expect(err).toBeInstanceOf(SkyflowError);
+      expect(err.error.code).toBe(429);
+      expect(err.error.description).toContain(
+        "Rate limit exceeded. Please retry after some time."
+      );
+    });
+  });
 });
