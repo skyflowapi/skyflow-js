@@ -1,5 +1,5 @@
 # skyflow-js
-Skyflow’s JavaScript SDK can be used to securely collect, tokenize, and reveal sensitive data in the browser without exposing your front-end infrastructure to sensitive data.
+Skyflow's JavaScript SDK can be used to securely collect, tokenize, and reveal sensitive data in the browser without exposing your front-end infrastructure to sensitive data.
 
 ---
 
@@ -2791,7 +2791,8 @@ Note:
 ### File upload limitations:
 
 - Only non-executable file are allowed to be uploaded.
-- Files must have a maximum size of 32 MB
+- Files have a default maximum size of 32 MB per file. This limit is configurable using the `maxFileSize` option.
+- Up to 4 files can be uploaded at a time by default. This limit is configurable using the `maxFileCount` option.
 - File columns can't enable tokenization, redaction, or arrays.
 - Re-uploading a file overwrites previously uploaded data.
 - Partial uploads or resuming a previous upload isn't supported.
@@ -2851,10 +2852,19 @@ element.uploadMultipleFiles();
 Along with fileElementInput, you can define other options in the Options object as described below: 
 ```js
 const options = {
- allowedFileType: String[],  // Optional, indicates the allowed file types for upload
+  allowedFileType: String[],  // Optional. Restricts uploads to the listed file extensions (e.g. [".pdf", ".png"]).
+  blockEmptyFiles: Boolean,   // Optional. When true, rejects files with 0 bytes. Default: false.
+  preserveFileName: Boolean,  // Optional. When true, keeps the original filename on upload. Default: false.
+  maxFileSize: Number,        // Optional. Maximum size in bytes for each individual file. Default: 32000000 (32 MB).
+  maxFileCount: Number,       // Optional. Maximum number of files that can be selected at once. Must be a positive integer. Default: 4.
 }
 ```
-`allowedFileType`: An array of string value that indicates the allowedFileTypes to be uploaded.
+
+- `allowedFileType`: An array of strings indicating which file extensions are accepted for upload.
+- `blockEmptyFiles`: When `true`, files with a size of 0 bytes are rejected.
+- `preserveFileName`: When `true`, the original filename is preserved on upload.
+- `maxFileSize`: Maximum allowed size **per file**, in bytes. If any file exceeds this limit, a validation error is shown with the filename. Defaults to `32000000` (32 MB). Only applies to `MULTI_FILE_INPUT` elements.
+- `maxFileCount`: Maximum number of files that can be selected for a single upload. Must be a positive integer. Defaults to `4`. Only applies to `MULTI_FILE_INPUT` elements.
 
 #### File upload with options example
 
@@ -2889,8 +2899,10 @@ const cardNumberElement = collectContainer.create({
   label: 'Card Number',
   type: Skyflow.ElementType.CARD_NUMBER,
 });
-const options = { 
-    allowedFileType: [".pdf",".png"];
+const options = {
+  allowedFileType: [".pdf", ".png"],
+  maxFileSize: 5000000,   // 5 MB per file
+  maxFileCount: 3,        // up to 3 files at once
 };
 const fileElement = collectContainer.create({
   table: 'newTable',

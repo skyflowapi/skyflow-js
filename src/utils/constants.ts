@@ -396,6 +396,22 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.NO_FILE_SELECTED,
   },
+  FILE_COUNT_EXCEEDED: {
+    code: 400,
+    description: logs.errorLogs.FILE_COUNT_EXCEEDED,
+  },
+  FILE_SIZE_EXCEEDED_SINGLE: {
+    code: 400,
+    description: logs.errorLogs.FILE_SIZE_EXCEEDED_SINGLE,
+  },
+  FILE_SIZE_EXCEEDED_WITH_NAME: {
+    code: 400,
+    description: logs.errorLogs.FILE_SIZE_EXCEEDED_WITH_NAME,
+  },
+  FILE_COUNT_AND_SIZE_EXCEEDED: {
+    code: 400,
+    description: logs.errorLogs.FILE_COUNT_AND_SIZE_EXCEEDED,
+  },
   INVALID_TABLE_IN_UPSERT_OPTION: {
     code: 400,
     description: logs.errorLogs.INVALID_TABLE_IN_UPSERT_OPTION,
@@ -551,6 +567,10 @@ const SKYFLOW_ERROR_CODE = {
   INVALID_BOOLEAN_OPTIONS: {
     code: 400,
     description: logs.errorLogs.INVALID_BOOLEAN_OPTIONS,
+  },
+  INVALID_POSITIVE_NUMBER_OPTIONS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_POSITIVE_NUMBER_OPTIONS,
   },
   INVALID_MASKING_CHARACTER: {
     code: 400,

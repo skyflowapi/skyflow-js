@@ -328,6 +328,8 @@ export interface CollectElementOptions {
   preserveFileName?: boolean,
   allowedFileType?: string[],
   blockEmptyFiles?: boolean,
+  maxFileSize?: number,
+  maxFileCount?: number,
   masking?: boolean,
   maskingChar?: string,
 }

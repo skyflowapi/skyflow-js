@@ -116,6 +116,12 @@ export default class FrameElement {
     if (Object.prototype.hasOwnProperty.call(options, 'blockEmptyFiles')) {
       this.iFrameFormElement.blockEmptyFiles = options?.blockEmptyFiles;
     }
+    if (Object.prototype.hasOwnProperty.call(options, 'maxFileSize')) {
+      this.iFrameFormElement.maxFileSize = options?.maxFileSize;
+    }
+    if (Object.prototype.hasOwnProperty.call(options, 'maxFileCount')) {
+      this.iFrameFormElement.maxFileCount = options?.maxFileCount;
+    }
   }
 
   // mount element onto dom

@@ -113,6 +113,10 @@ export default class IFrameFormElement extends EventEmitter {
 
   blockEmptyFiles: boolean = false;
 
+  maxFileSize: number = 32_000_000;
+
+  maxFileCount: number = 4;
+
   constructor(name: string, label: string, metaData: any, context: Context, skyflowID?: string) {
     super();
     const frameValues = name.split(':');
@@ -510,6 +514,7 @@ export default class IFrameFormElement extends EventEmitter {
   validator(value: any) {
     let resp = true;
     let vaildateFileNames = true;
+    let fileSpecificError = '';
 
     if (this.fieldType === ElementType.CARD_NUMBER && value) {
       if (this.regex) {
@@ -537,16 +542,55 @@ export default class IFrameFormElement extends EventEmitter {
       const files = this.state.value instanceof FileList
         ? Array.from(this.state.value)
         : [this.state.value];
-      for (let i = 0; i < files.length; i += 1) {
-        try {
-          resp = fileValidation(files[i], this.state.isRequired, {
-            allowedFileType: this.allowedFileType,
-            blockEmptyFiles: this.blockEmptyFiles,
-          });
-        } catch (err) {
-          resp = false;
+      const sizeMBDisplay = `${Math.round(this.maxFileSize / 1_000_000)} MB`;
+      const countExceeded = files.length > this.maxFileCount;
+      const firstOversizedFile = files.find((f) => f.size > this.maxFileSize);
+
+      if (countExceeded && firstOversizedFile) {
+        resp = false;
+        fileSpecificError = parameterizedString(
+          logs.errorLogs.FILE_COUNT_AND_SIZE_EXCEEDED,
+          String(this.maxFileCount),
+          sizeMBDisplay,
+        );
+      } else if (countExceeded) {
+        resp = false;
+        fileSpecificError = parameterizedString(
+          logs.errorLogs.FILE_COUNT_EXCEEDED,
+          String(this.maxFileCount),
+        );
+      } else {
+        const oversizedFileNames: string[] = [];
+        for (let i = 0; i < files.length; i += 1) {
+          try {
+            const fileValid = fileValidation(files[i], this.state.isRequired, {
+              allowedFileType: this.allowedFileType,
+              blockEmptyFiles: this.blockEmptyFiles,
+              maxFileSize: this.maxFileSize,
+            });
+            if (!fileValid) resp = false;
+          } catch (err: any) {
+            resp = false;
+            if (files[i].size > this.maxFileSize) {
+              oversizedFileNames.push(files[i].name);
+            }
+          }
+          if (this.preserveFileName) vaildateFileNames = vaildateFileName(files[i].name);
         }
-        if (this.preserveFileName) vaildateFileNames = vaildateFileName(files[i].name);
+        if (oversizedFileNames.length > 0) {
+          if (files.length === 1) {
+            fileSpecificError = parameterizedString(
+              logs.errorLogs.FILE_SIZE_EXCEEDED_SINGLE,
+              sizeMBDisplay,
+            );
+          } else {
+            fileSpecificError = parameterizedString(
+              logs.errorLogs.FILE_SIZE_EXCEEDED_WITH_NAME,
+              oversizedFileNames.join(', '),
+              sizeMBDisplay,
+            );
+          }
+        }
       }
     } else {
       // eslint-disable-next-line no-lonely-if
@@ -557,7 +601,9 @@ export default class IFrameFormElement extends EventEmitter {
     if (!resp || !vaildateFileNames) {
       this.isCustomValidationFailed = false;
       if (!resp) {
-        if (this.label) {
+        if (fileSpecificError) {
+          this.errorText = fileSpecificError;
+        } else if (this.label) {
           this.errorText = `${parameterizedString(
             logs.errorLogs.INVALID_COLLECT_VALUE_WITH_LABEL,
             this.label,
