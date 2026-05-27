@@ -63,6 +63,14 @@ const makeFile = (name = 'test.txt', size = 10, type = 'text/plain') => {
   return new File([content], name, { type });
 };
 
+// Builds a FileList-like object that passes `instanceof FileList` (DataTransfer unavailable in jsdom)
+const makeFileList = (...files) => {
+  const arr = [...files];
+  Object.defineProperty(arr, 'item', { value: (i) => arr[i] });
+  if (typeof FileList !== 'undefined') Object.setPrototypeOf(arr, FileList.prototype);
+  return arr;
+};
+
 // Minimal stub for an iframe form element expected by FrameElementInit internals
 const makeFileElement = ({
   multiple = false,
@@ -311,7 +319,7 @@ describe('FrameElementInit extended unit tests', () => {
     const instance = new FrameElementInit();
     const files = [makeFile('a.txt'), makeFile('b.txt'), makeFile('c.txt')];
     const fileElement = makeFileElement({ multiple: true, files, maxFileCount: 2 });
-    fileElement.state.value = files;
+    fileElement.state.value = makeFileList(...files); // FileList so Array.from() is used, preserving count
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
     helpers.vaildateFileName = jest.fn(() => true);
@@ -358,7 +366,7 @@ describe('FrameElementInit extended unit tests', () => {
     const instance = new FrameElementInit();
     const files = [makeFile('a.txt'), makeFile('b.txt'), makeFile('c.txt')];
     const fileElement = makeFileElement({ multiple: true, files, maxFileCount: 2 });
-    fileElement.state.value = files;
+    fileElement.state.value = makeFileList(...files); // FileList so Array.from() is used, preserving count
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
     helpers.vaildateFileName = jest.fn(() => true);
@@ -366,7 +374,7 @@ describe('FrameElementInit extended unit tests', () => {
     const err = await instance['multipleUploadFiles'](fileElement, config, { meta: 'x' }).catch(e => e);
     expect(err).toHaveProperty('errorResponse');
     expect(err.errorResponse[0].error).toMatchObject({ code: 400 });
-    // insertDataCallInMultiFiles must NOT have been called
+    // insertDataCallInMultiFiles must NOT have been called since validation failed first
     expect(mockClientRequest).not.toHaveBeenCalled();
   });
 
