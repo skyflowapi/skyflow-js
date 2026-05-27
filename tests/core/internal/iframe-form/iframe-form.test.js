@@ -1159,3 +1159,152 @@ describe('getFileDetails isolated tests', () => {
     expect(details).toEqual([]);
   });
 });
+
+describe('MULTI_FILE_INPUT validator - specific UI error messages', () => {
+  // Builds a FileList-like object (DataTransfer is unavailable in this jsdom version)
+  const makeFileList = (...files) => {
+    const arr = [...files];
+    Object.defineProperty(arr, 'item', { value: (i) => arr[i] });
+    if (typeof FileList !== 'undefined') Object.setPrototypeOf(arr, FileList.prototype);
+    return arr;
+  };
+
+  test('invalid file type in MULTI_FILE_INPUT shows generic error not size-specific message', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.maxFileSize = 10_000_000; // 10 MB — file below this so size is not the issue
+    element.allowedFileType = ['.pdf'];
+    // .zip is not in allowedFileType — fileValidation throws INVALID_FILE_TYPE
+    const file = { name: 'archive.zip', size: 100, type: 'application/zip' };
+    element.state.value = file;
+    const result = element.validator(file);
+    expect(result).toBe(false);
+    // fileSpecificError must NOT be set — size was fine, so no size message
+    expect(element.errorText).not.toContain('size limit');
+  });
+
+  test('default maxFileSize is 32 MB when no option is provided', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    expect(element.maxFileSize).toBe(32_000_000);
+  });
+
+  test('default maxFileCount is 4 when no option is provided', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    expect(element.maxFileCount).toBe(4);
+  });
+
+  test('maxFileCount=1 with single oversized file gives size error, not count error', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.maxFileCount = 1;
+    element.maxFileSize = 5_000_000; // 5 MB
+    const file = { name: 'large.pdf', size: 6_000_000, type: 'application/pdf' };
+    element.state.value = file;
+    const result = element.validator(file);
+    expect(result).toBe(false);
+    expect(element.errorText).toBe(
+      parameterizedString(logs.errorLogs.FILE_SIZE_EXCEEDED_SINGLE, '5 MB'),
+    );
+  });
+
+  test('single file exceeding configured maxFileSize shows FILE_SIZE_EXCEEDED_SINGLE with correct size', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.maxFileSize = 5_000_000; // 5 MB
+    const file = { name: 'report.pdf', size: 5_000_001, type: 'application/pdf' };
+    element.state.value = file;
+    const result = element.validator(file);
+    expect(result).toBe(false);
+    expect(element.errorText).toBe(
+      parameterizedString(logs.errorLogs.FILE_SIZE_EXCEEDED_SINGLE, '5 MB'),
+    );
+  });
+
+  test('one of multiple files too large shows FILE_SIZE_EXCEEDED_WITH_NAME with filename and configured size', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.maxFileSize = 3; // 3 bytes — keep files tiny for test speed
+    const okFile = new File(['ok'], 'small.pdf', { type: 'application/pdf' });    // 2 bytes — within limit
+    const bigFile = new File(['toobig!'], 'bigfile.pdf', { type: 'application/pdf' }); // 7 bytes — over limit
+    const fileList = makeFileList(okFile, bigFile);
+    element.state.value = fileList;
+    const result = element.validator(fileList);
+    expect(result).toBe(false);
+    expect(element.errorText).toBe(
+      parameterizedString(logs.errorLogs.FILE_SIZE_EXCEEDED_WITH_NAME, 'bigfile.pdf', '0 MB'),
+    );
+  });
+
+  test('oversized file first followed by valid file still reports error (order-independent)', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.maxFileSize = 3; // 3 bytes limit
+    const bigFile = new File(['toobig!'], 'bigfile.pdf', { type: 'application/pdf' }); // 7 bytes — over limit
+    const okFile = new File(['ok'], 'small.pdf', { type: 'application/pdf' });          // 2 bytes — within limit
+    const fileList = makeFileList(bigFile, okFile); // oversized file is first
+    element.state.value = fileList;
+    const result = element.validator(fileList);
+    expect(result).toBe(false);
+    expect(element.errorText).toBe(
+      parameterizedString(logs.errorLogs.FILE_SIZE_EXCEEDED_WITH_NAME, 'bigfile.pdf', '0 MB'),
+    );
+  });
+
+  test('multiple oversized files shows all filenames joined in error message', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.maxFileSize = 3; // 3 bytes limit
+    const bigFile1 = new File(['toobig!'], 'large1.pdf', { type: 'application/pdf' }); // 7 bytes — over limit
+    const bigFile2 = new File(['alsobig'], 'large2.pdf', { type: 'application/pdf' }); // 7 bytes — over limit
+    const okFile = new File(['ok'], 'small.pdf', { type: 'application/pdf' });          // 2 bytes — within limit
+    const fileList = makeFileList(bigFile1, okFile, bigFile2);
+    element.state.value = fileList;
+    const result = element.validator(fileList);
+    expect(result).toBe(false);
+    expect(element.errorText).toBe(
+      parameterizedString(logs.errorLogs.FILE_SIZE_EXCEEDED_WITH_NAME, 'large1.pdf, large2.pdf', '0 MB'),
+    );
+  });
+
+  test('file count exceeds configured maxFileCount shows FILE_COUNT_EXCEEDED with that count', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.maxFileCount = 2; // configurable — not the default 4
+    const fileList = makeFileList(
+      new File(['a'], 'f1.pdf', { type: 'application/pdf' }),
+      new File(['b'], 'f2.pdf', { type: 'application/pdf' }),
+      new File(['c'], 'f3.pdf', { type: 'application/pdf' }),
+    );
+    element.state.value = fileList;
+    const result = element.validator(fileList);
+    expect(result).toBe(false);
+    expect(element.errorText).toBe(
+      parameterizedString(logs.errorLogs.FILE_COUNT_EXCEEDED, '2'),
+    );
+  });
+
+  test('FILE_COUNT_EXCEEDED message changes when maxFileCount is different (e.g. 6)', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.maxFileCount = 6;
+    const files = Array.from({ length: 7 }, (_, i) =>
+      new File(['x'], `f${i + 1}.pdf`, { type: 'application/pdf' }),
+    );
+    const fileList = makeFileList(...files);
+    element.state.value = fileList;
+    const result = element.validator(fileList);
+    expect(result).toBe(false);
+    expect(element.errorText).toBe(
+      parameterizedString(logs.errorLogs.FILE_COUNT_EXCEEDED, '6'),
+    );
+  });
+
+  test('count and size both exceeded shows FILE_COUNT_AND_SIZE_EXCEEDED with configured count and size', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.maxFileCount = 2;
+    element.maxFileSize = 3; // 3 bytes
+    const fileList = makeFileList(
+      new File(['toobig1'], 'f1.pdf', { type: 'application/pdf' }), // 7 bytes > 3
+      new File(['toobig2'], 'f2.pdf', { type: 'application/pdf' }), // 7 bytes > 3
+      new File(['toobig3'], 'f3.pdf', { type: 'application/pdf' }), // 7 bytes > 3
+    );
+    element.state.value = fileList;
+    const result = element.validator(fileList);
+    expect(result).toBe(false);
+    expect(element.errorText).toBe(
+      parameterizedString(logs.errorLogs.FILE_COUNT_AND_SIZE_EXCEEDED, '2', '0 MB'),
+    );
+  });
+});

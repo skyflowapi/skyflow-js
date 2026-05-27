@@ -423,9 +423,26 @@ export const formatOptions = (
     if (Object.prototype.hasOwnProperty.call(options, 'blockEmptyFiles')) {
       formattedOptions = {
         ...formattedOptions,
-        blockEmptyFiles: formattedOptions.blockEmptyFiles,
+        blockEmptyFiles: options.blockEmptyFiles,
       };
     }
+  }
+  if (elementType === ELEMENTS.MULTI_FILE_INPUT.name) {
+    if (Object.prototype.hasOwnProperty.call(options, 'maxFileSize')) {
+      if (typeof options.maxFileSize !== 'number' || options.maxFileSize <= 0) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS, ['maxFileSize'], true);
+      }
+      formattedOptions = { ...formattedOptions, maxFileSize: options.maxFileSize };
+    }
+    if (Object.prototype.hasOwnProperty.call(options, 'maxFileCount')) {
+      if (typeof options.maxFileCount !== 'number' || options.maxFileCount <= 0 || !Number.isInteger(options.maxFileCount)) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS, ['maxFileCount'], true);
+      }
+      formattedOptions = { ...formattedOptions, maxFileCount: options.maxFileCount };
+    }
+  } else {
+    delete formattedOptions?.maxFileSize;
+    delete formattedOptions?.maxFileCount;
   }
 
   if (Object.prototype.hasOwnProperty.call(options, 'masking')) {

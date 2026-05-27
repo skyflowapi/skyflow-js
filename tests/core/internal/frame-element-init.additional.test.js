@@ -39,6 +39,8 @@ jest.mock('../../../src/core-utils/collect', () => {
 import FrameElementInit from '../../../src/core/internal/frame-element-init';
 import SkyflowError from '../../../src/libs/skyflow-error';
 import { ELEMENTS } from '../../../src/core/constants';
+import logs from '../../../src/utils/logs';
+import { parameterizedString } from '../../../src/utils/logs-helper';
 import * as helpers from '../../../src/utils/helpers';
 import Client, { mockClientRequest } from '../../../src/client';
 import { ELEMENT_EVENTS_TO_IFRAME, COLLECT_TYPES } from '../../../src/core/constants';
@@ -62,7 +64,15 @@ const makeFile = (name = 'test.txt', size = 10, type = 'text/plain') => {
 };
 
 // Minimal stub for an iframe form element expected by FrameElementInit internals
-const makeFileElement = ({ multiple = false, files, name = 'upload', tableName = 'files_table', preserveFileName = true }) => {
+const makeFileElement = ({
+  multiple = false,
+  files,
+  name = 'upload',
+  tableName = 'files_table',
+  preserveFileName = true,
+  maxFileCount = 4,
+  maxFileSize = 32_000_000,
+}) => {
   const value = multiple ? files : files[0];
   return {
     state: {
@@ -73,6 +83,8 @@ const makeFileElement = ({ multiple = false, files, name = 'upload', tableName =
     tableName,
     onFocusChange: jest.fn(),
     preserveFileName,
+    maxFileCount,
+    maxFileSize,
     fieldType: multiple ? ELEMENTS.MULTI_FILE_INPUT.name : ELEMENTS.FILE_INPUT.name,
     iFrameName: `element:${multiple ? 'MULTI' : 'SINGLE'}_FILE_INPUT:123`,
   };
@@ -320,6 +332,92 @@ describe('FrameElementInit extended unit tests', () => {
     const files = [makeFile('first.txt'), makeFile('second.txt')];
     const fileElement = makeFileElement({ multiple: true, files });
     helpers.fileValidation = jest.fn(file => file.name !== 'second.txt'); // second invalid
+    helpers.vaildateFileName = jest.fn(() => true);
+    expect(() => instance['validateFiles'](files, fileElement.state, fileElement)).toThrow(SkyflowError);
+  });
+
+  test('validateFiles throws FILE_COUNT_EXCEEDED when file count exceeds maxFileCount', () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('a.txt'), makeFile('b.txt'), makeFile('c.txt')];
+    const fileElement = makeFileElement({ multiple: true, files, maxFileCount: 2 });
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    expect(() => instance['validateFiles'](files, fileElement.state, fileElement)).toThrow(SkyflowError);
+  });
+
+  test('validateFiles FILE_COUNT_EXCEEDED error message contains the configured maxFileCount', () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('a.txt'), makeFile('b.txt'), makeFile('c.txt')];
+    const fileElement = makeFileElement({ multiple: true, files, maxFileCount: 2 });
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    let caughtError;
+    try {
+      instance['validateFiles'](files, fileElement.state, fileElement);
+    } catch (err) {
+      caughtError = err;
+    }
+    expect(caughtError).toBeInstanceOf(SkyflowError);
+    expect(caughtError.error.description).toBe(
+      parameterizedString(logs.errorLogs.FILE_COUNT_EXCEEDED, '2'),
+    );
+  });
+
+  test('validateFiles FILE_COUNT_EXCEEDED message reflects a different configured maxFileCount', () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('a.txt'), makeFile('b.txt'), makeFile('c.txt'), makeFile('d.txt'), makeFile('e.txt')];
+    const fileElement = makeFileElement({ multiple: true, files, maxFileCount: 3 });
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    let caughtError;
+    try {
+      instance['validateFiles'](files, fileElement.state, fileElement);
+    } catch (err) {
+      caughtError = err;
+    }
+    expect(caughtError.error.description).toBe(
+      parameterizedString(logs.errorLogs.FILE_COUNT_EXCEEDED, '3'),
+    );
+  });
+
+  test('validateFiles passes when file count equals maxFileCount', () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('a.txt'), makeFile('b.txt')];
+    const fileElement = makeFileElement({ multiple: true, files, maxFileCount: 2 });
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    expect(() => instance['validateFiles'](files, fileElement.state, fileElement)).not.toThrow();
+  });
+
+  test('validateFiles passes when file count is within default maxFileCount of 4', () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('a.txt'), makeFile('b.txt'), makeFile('c.txt'), makeFile('d.txt')];
+    const fileElement = makeFileElement({ multiple: true, files });
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    expect(() => instance['validateFiles'](files, fileElement.state, fileElement)).not.toThrow();
+  });
+
+  test('validateFiles with maxFileCount=1 and single oversized file throws size error not count error', () => {
+    const instance = new FrameElementInit();
+    const largeFile = makeFile('large.pdf', 6000000);
+    const files = [largeFile]; // 1 file — does NOT exceed maxFileCount=1
+    const fileElement = makeFileElement({ multiple: true, files, maxFileCount: 1, maxFileSize: 5000000 });
+    helpers.fileValidation = jest.fn(() => {
+      throw new SkyflowError({ code: 400, description: 'Invalid File Size' }, [], true);
+    });
+    helpers.vaildateFileName = jest.fn(() => true);
+    // Should throw the size error (from fileValidation), NOT the count error
+    expect(() => instance['validateFiles'](files, fileElement.state, fileElement)).toThrow(SkyflowError);
+    expect(helpers.fileValidation).toHaveBeenCalledTimes(1);
+  });
+
+  test('validateFiles throws when single file exceeds maxFileSize', () => {
+    const instance = new FrameElementInit();
+    const largeFile = makeFile('large.pdf', 5000001);
+    const files = [largeFile];
+    const fileElement = makeFileElement({ multiple: true, files, maxFileSize: 5000000 });
+    helpers.fileValidation = jest.fn(() => { throw new SkyflowError({ code: 400, description: 'Invalid File Size' }, [], true); });
     helpers.vaildateFileName = jest.fn(() => true);
     expect(() => instance['validateFiles'](files, fileElement.state, fileElement)).toThrow(SkyflowError);
   });
