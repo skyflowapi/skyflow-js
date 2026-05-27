@@ -457,7 +457,6 @@ export default class IFrameFormElement extends EventEmitter {
           )}`;
         } else {
           this.errorText = this.containerType === ContainerType.COLLECT
-          // || this.containerType === ContainerType.COMPOSABLE
             ? logs.errorLogs.INVALID_COLLECT_VALUE
             : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
         }
@@ -468,7 +467,6 @@ export default class IFrameFormElement extends EventEmitter {
             this.label)}`;
         } else {
           this.errorText = this.containerType === ContainerType.COLLECT
-          // || this.containerType === ContainerType.COMPOSABLE
             ? logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE
             : DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES[this.fieldType];
         }
@@ -612,7 +610,6 @@ export default class IFrameFormElement extends EventEmitter {
           )}`;
         } else {
           this.errorText = this.containerType === ContainerType.COLLECT
-          // || this.containerType === ContainerType.COMPOSABLE
             ? logs.errorLogs.INVALID_COLLECT_VALUE
             : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
         }
@@ -620,7 +617,6 @@ export default class IFrameFormElement extends EventEmitter {
       }
       if (!vaildateFileNames) {
         this.errorText = this.containerType === ContainerType.COLLECT
-        //  || this.containerType === ContainerType.COMPOSABLE
           ? parameterizedString(
             logs.errorLogs.INVALID_FILE_NAME,
           )
