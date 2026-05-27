@@ -520,7 +520,12 @@ export default class FrameElementInit {
     }
 
     const files = state.value instanceof FileList ? Array.from(state.value) : [state.value];
-    this.validateFiles(files, state, fileElement);
+    try {
+      this.validateFiles(files, state, fileElement);
+    } catch (err: any) {
+      rootReject({ errorResponse: [{ error: err?.error || err?.errors?.[0] || err }] });
+      return;
+    }
 
     const uploadFile = (file: File, skyflowID?: string) => {
       const formData = new FormData();
@@ -533,11 +538,11 @@ export default class FrameElementInit {
         formData.append('file', new File([file], generatedFileName, { type: file.type }));
       }
       if (skyflowID) formData.append('skyflowID', skyflowID);
-      const client = this.#client;
+      // const client = this.#client;
       return this.#client.request({
         body: formData,
         requestMethod: 'POST',
-        url: `${client.config.vaultURL}/v2/vaults/${this.#client.config.vaultID}/files/upload`,
+        url: `vault/v2/vaults/${this.#client.config.vaultID}/files/upload`,
         headers: {
           authorization: `Bearer ${clientConfig.authToken}`,
           'content-type': 'multipart/form-data',
@@ -705,8 +710,9 @@ export default class FrameElementInit {
               type: error?.error?.type,
             },
           });
+        } else {
+          rootReject(error);
         }
-        rootReject(error);
       });
   });
 

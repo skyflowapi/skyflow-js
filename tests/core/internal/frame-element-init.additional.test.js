@@ -279,7 +279,7 @@ describe('FrameElementInit extended unit tests', () => {
     await expect(instance['multipleUploadFiles'](fileElement, config, { meta: 'x' })).rejects.toEqual({ error: 'No skyflow IDs returned from insert data' });
   });
 
-  test('multipleUploadFiles filename validation failure', async () => {
+  test('multipleUploadFiles filename validation failure returns errorResponse format', async () => {
     const instance = new FrameElementInit();
     const files = [makeFile('bad.txt')];
     const fileElement = makeFileElement({ multiple: true, files });
@@ -287,7 +287,87 @@ describe('FrameElementInit extended unit tests', () => {
     helpers.fileValidation = jest.fn(() => true);
     helpers.vaildateFileName = jest.fn(() => false); // force invalid name
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
-    await expect(instance['multipleUploadFiles'](fileElement, config, {})).rejects.toBeTruthy();
+    const err = await instance['multipleUploadFiles'](fileElement, config, {}).catch(e => e);
+    expect(err).toHaveProperty('errorResponse');
+    expect(err.errorResponse).toHaveLength(1);
+    expect(err.errorResponse[0]).toHaveProperty('error');
+  });
+
+  test('multipleUploadFiles rejects with errorResponse format when file size validation fails', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('large.pdf', 6000000)];
+    const fileElement = makeFileElement({ multiple: true, files, maxFileSize: 5000000 });
+    fileElement.state.value = files;
+    instance.iframeFormList = [fileElement];
+    const sizeError = new SkyflowError({ code: 400, description: 'Invalid File Size' }, [], true);
+    helpers.fileValidation = jest.fn(() => { throw sizeError; });
+    helpers.vaildateFileName = jest.fn(() => true);
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    await expect(instance['multipleUploadFiles'](fileElement, config, undefined))
+      .rejects.toEqual({ errorResponse: [{ error: { code: 400, description: 'Invalid File Size' } }] });
+  });
+
+  test('multipleUploadFiles rejects with errorResponse format when file count exceeded', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('a.txt'), makeFile('b.txt'), makeFile('c.txt')];
+    const fileElement = makeFileElement({ multiple: true, files, maxFileCount: 2 });
+    fileElement.state.value = files;
+    instance.iframeFormList = [fileElement];
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    const err = await instance['multipleUploadFiles'](fileElement, config, undefined).catch(e => e);
+    expect(err).toHaveProperty('errorResponse');
+    expect(err.errorResponse).toHaveLength(1);
+    expect(err.errorResponse[0].error).toMatchObject({ code: 400 });
+  });
+
+  test('multipleUploadFiles rejects with { error: "No files selected" } when state.value is empty', async () => {
+    const instance = new FrameElementInit();
+    const fileElement = makeFileElement({ multiple: true, files: [makeFile('a.txt')] });
+    fileElement.state.value = '';
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    await expect(instance['multipleUploadFiles'](fileElement, config, undefined))
+      .rejects.toEqual({ error: 'No files selected' });
+  });
+
+  test('multipleUploadFiles rejects with { error: "No files selected" } when state.value is null', async () => {
+    const instance = new FrameElementInit();
+    const fileElement = makeFileElement({ multiple: true, files: [makeFile('a.txt')] });
+    fileElement.state.value = null;
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    await expect(instance['multipleUploadFiles'](fileElement, config, undefined))
+      .rejects.toEqual({ error: 'No files selected' });
+  });
+
+  test('multipleUploadFiles errorResponse contains error when SkyflowError has .errors[] (plural)', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('test.txt')];
+    const fileElement = makeFileElement({ multiple: true, files });
+    fileElement.state.value = files;
+    const pluralError = new SkyflowError({ code: 400, description: 'Multiple issues' }, [], false);
+    helpers.fileValidation = jest.fn(() => { throw pluralError; });
+    helpers.vaildateFileName = jest.fn(() => true);
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    const err = await instance['multipleUploadFiles'](fileElement, config, undefined).catch(e => e);
+    expect(err).toHaveProperty('errorResponse');
+    expect(err.errorResponse[0].error).toBeDefined();
+  });
+
+  test('multipleUploadFiles rejects with errorResponse format when validation fails in metaData branch', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('a.txt'), makeFile('b.txt'), makeFile('c.txt')];
+    const fileElement = makeFileElement({ multiple: true, files, maxFileCount: 2 });
+    fileElement.state.value = files;
+    instance.iframeFormList = [fileElement];
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    const err = await instance['multipleUploadFiles'](fileElement, config, { meta: 'x' }).catch(e => e);
+    expect(err).toHaveProperty('errorResponse');
+    expect(err.errorResponse[0].error).toMatchObject({ code: 400 });
+    // insertDataCallInMultiFiles must NOT have been called
+    expect(mockClientRequest).not.toHaveBeenCalled();
   });
 
   // ===== multipleUploadFiles else branch (no metaData) coverage lines ~548-587 =====
