@@ -147,6 +147,8 @@
       const options = {
         allowedFileType: ["<allowedFileType1>", "<allowedFileType2>"],
         blockEmptyFiles: true, // default is false, if set to true, it will block empty files
+        maxFileSize: 1000000, // default is 32000000 (32MB), if set, it will block files greater than the specified size
+        maxFileCount: 3, // default is 5, if set, it will block if the number of files exceeds the specified number
       }
 
       const fileElement = collectContainer.create({
