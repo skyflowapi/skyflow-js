@@ -2761,3 +2761,81 @@ describe('setDropdownIconStyle Tests', () => {
   });
 
 });
+
+describe('FrameElement constructor - maxFileSize and maxFileCount options', () => {
+  let mockIFrameFormElement;
+  let mockHtmlDivElement;
+
+  beforeEach(() => {
+    jest.spyOn(bus, 'target').mockReturnValue({ on: jest.fn(), emit: jest.fn() });
+    jest.spyOn(bus, 'on');
+    mockIFrameFormElement = {
+      resetEvents: jest.fn(),
+      on: jest.fn(),
+      setValue: jest.fn(),
+      setMask: jest.fn(),
+      setValidation: jest.fn(),
+      setReplacePattern: jest.fn(),
+      setFormat: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({
+        isFocused: false, isValid: true, isEmpty: true,
+        isComplete: false, isRequired: false, isTouched: false, value: '',
+      }),
+      getValue: jest.fn().mockReturnValue(''),
+      getUnformattedValue: jest.fn().mockReturnValue(''),
+      onFocusChange: jest.fn(),
+      onDropdownSelect: jest.fn(),
+      fieldType: ELEMENTS.MULTI_FILE_INPUT.name,
+      iFrameName: 'mockMultiFileFrame',
+      cardType: 'DEFAULT',
+      state: { value: undefined, isFocused: false, isValid: false, isEmpty: true, isComplete: false, name: '', isRequired: false, isTouched: false },
+      mask: [],
+      replacePattern: '',
+      maxFileSize: 32_000_000,
+      maxFileCount: 4,
+    };
+    mockHtmlDivElement = document.createElement('div');
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  it('sets maxFileSize on iFrameFormElement when option is provided', () => {
+    const options = { column: 'file', table: 'files', maxFileSize: 5_000_000 };
+    new FrameElement(mockIFrameFormElement, options, mockHtmlDivElement);
+    expect(mockIFrameFormElement.maxFileSize).toBe(5_000_000);
+  });
+
+  it('does not overwrite maxFileSize when option is absent', () => {
+    const options = { column: 'file', table: 'files' };
+    new FrameElement(mockIFrameFormElement, options, mockHtmlDivElement);
+    expect(mockIFrameFormElement.maxFileSize).toBe(32_000_000);
+  });
+
+  it('sets maxFileCount on iFrameFormElement when option is provided', () => {
+    const options = { column: 'file', table: 'files', maxFileCount: 2 };
+    new FrameElement(mockIFrameFormElement, options, mockHtmlDivElement);
+    expect(mockIFrameFormElement.maxFileCount).toBe(2);
+  });
+
+  it('does not overwrite maxFileCount when option is absent', () => {
+    const options = { column: 'file', table: 'files' };
+    new FrameElement(mockIFrameFormElement, options, mockHtmlDivElement);
+    expect(mockIFrameFormElement.maxFileCount).toBe(4);
+  });
+
+  it('sets both maxFileSize and maxFileCount together when both are provided', () => {
+    const options = { column: 'file', table: 'files', maxFileSize: 10_000_000, maxFileCount: 3 };
+    new FrameElement(mockIFrameFormElement, options, mockHtmlDivElement);
+    expect(mockIFrameFormElement.maxFileSize).toBe(10_000_000);
+    expect(mockIFrameFormElement.maxFileCount).toBe(3);
+  });
+
+  it('sets maxFileSize to 0 when explicitly passed as 0 (hasOwnProperty check, not falsy check)', () => {
+    const options = { column: 'file', table: 'files', maxFileSize: 0 };
+    new FrameElement(mockIFrameFormElement, options, mockHtmlDivElement);
+    expect(mockIFrameFormElement.maxFileSize).toBe(0);
+  });
+});

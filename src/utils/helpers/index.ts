@@ -211,7 +211,10 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
       }
     }
   }
-  if (value.size > 32000000) {
+  const sizeLimit = (Object.prototype.hasOwnProperty.call(fileElement, 'maxFileSize') && typeof fileElement.maxFileSize === 'number')
+    ? fileElement.maxFileSize
+    : 32_000_000;
+  if (value.size > sizeLimit) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
   }
   if (Object.prototype.hasOwnProperty.call(fileElement, 'blockEmptyFiles') && fileElement.blockEmptyFiles) {

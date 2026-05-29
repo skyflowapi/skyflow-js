@@ -269,6 +269,10 @@ const logs = {
     INVALID_FILE_TYPE: 'Invalid File Type.',
     INVALID_FILE_SIZE: 'Invalid File Size',
     NO_FILE_SELECTED: 'No File Selected',
+    FILE_COUNT_EXCEEDED: 'You can upload up to %s1 files. Remove file(s) to add more',
+    FILE_SIZE_EXCEEDED_SINGLE: 'File exceeds the %s1 size limit. Choose a smaller file',
+    FILE_SIZE_EXCEEDED_WITH_NAME: '%s1 exceeds the %s2 size limit. Remove it or choose a smaller file',
+    FILE_COUNT_AND_SIZE_EXCEEDED: 'You can upload up to %s1 files, each under %s2',
     INVALID_UPSERT_OPTION_TYPE:
       'Validation error. Invalid \'upsert\' key in insert options. Specify a value of type array instead',
     EMPTY_UPSERT_OPTIONS_ARRAY:
@@ -317,6 +321,7 @@ const logs = {
     INVALID_COMPOSABLE_CONTAINER_OPTIONS: 'Mount failed. Invalid options object. Specify a valid options object.',
     COMPOSABLE_CONTAINER_NOT_MOUNTED: 'Mount elements first. Make sure all elements are mounted before calling \'collect\' on the container.',
     INVALID_BOOLEAN_OPTIONS: 'Validation error. Invalid %s1 found in collect options. Specify a value of type boolean instead.',
+    INVALID_POSITIVE_NUMBER_OPTIONS: 'Validation error. Invalid %s1 found in collect options. Specify a positive number instead.',
     INVALID_MASKING_CHARACTER: 'Validation error. Invalid masking character. Specify a valid masking character. ',
     INVALID_INPUT_OPTIONS_FORMAT: 'Mount failed. Format must be a non-empty string. Specify a valid format.',
     INVALID_INPUT_OPTIONS_TRANSLATION: 'Mount failed. Translation must be a non-empty object. Specify a valid translation.',

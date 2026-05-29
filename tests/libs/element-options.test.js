@@ -193,6 +193,85 @@ describe('test formatOptions function with format and translation', () => {
         expect(options).toEqual({cardMetadata:{scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]}, "cardSeperator": " ","enableCardIcon": true,"required": false,})
     });
 
+    test('should include maxFileSize in formatted options for MULTI_FILE_INPUT', () => {
+        const formattedOptions = formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileSize: 4000000 }, LogLevel.ERROR);
+        expect(formattedOptions.maxFileSize).toBe(4000000);
+    });
+
+    test('should throw error for maxFileSize provided as non-number for MULTI_FILE_INPUT', (done) => {
+        try {
+            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileSize: 'large' }, LogLevel.ERROR);
+            done('should throw error');
+        } catch (err) {
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileSize'));
+            done();
+        }
+    });
+
+    test('should throw error for maxFileSize provided as zero for MULTI_FILE_INPUT', (done) => {
+        try {
+            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileSize: 0 }, LogLevel.ERROR);
+            done('should throw error');
+        } catch (err) {
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileSize'));
+            done();
+        }
+    });
+
+    test('should throw error for maxFileSize provided as negative number for MULTI_FILE_INPUT', (done) => {
+        try {
+            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileSize: -1000 }, LogLevel.ERROR);
+            done('should throw error');
+        } catch (err) {
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileSize'));
+            done();
+        }
+    });
+
+    test('should include maxFileCount in formatted options for MULTI_FILE_INPUT', () => {
+        const formattedOptions = formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileCount: 2 }, LogLevel.ERROR);
+        expect(formattedOptions.maxFileCount).toBe(2);
+    });
+
+    test('should throw error for maxFileCount provided as non-integer for MULTI_FILE_INPUT', (done) => {
+        try {
+            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileCount: 2.5 }, LogLevel.ERROR);
+            done('should throw error');
+        } catch (err) {
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileCount'));
+            done();
+        }
+    });
+
+    test('should throw error for maxFileCount provided as zero for MULTI_FILE_INPUT', (done) => {
+        try {
+            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileCount: 0 }, LogLevel.ERROR);
+            done('should throw error');
+        } catch (err) {
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileCount'));
+            done();
+        }
+    });
+
+    test('should throw error for maxFileCount provided as negative number for MULTI_FILE_INPUT', (done) => {
+        try {
+            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileCount: -1 }, LogLevel.ERROR);
+            done('should throw error');
+        } catch (err) {
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileCount'));
+            done();
+        }
+    });
+
+    test('should not include maxFileSize in formatted options for FILE_INPUT', () => {
+        const formattedOptions = formatOptions(ElementType.FILE_INPUT, { maxFileSize: 4000000 }, LogLevel.ERROR);
+        expect(formattedOptions.maxFileSize).toBeUndefined();
+    });
+
+    test('should not include maxFileCount in formatted options for FILE_INPUT', () => {
+        const formattedOptions = formatOptions(ElementType.FILE_INPUT, { maxFileCount: 2 }, LogLevel.ERROR);
+        expect(formattedOptions.maxFileCount).toBeUndefined();
+    });
 
 });
 

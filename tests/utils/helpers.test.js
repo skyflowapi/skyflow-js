@@ -324,6 +324,63 @@ describe('test file validation', () => {
     }
     expect(fileValidation(file, false, {allowedFileType: ['image/jpeg']})).toBe(true);
   })
+
+  test('valid file within custom maxFileSize limit', () => {
+    const file = {
+      name: "sample.pdf",
+      size: 3000000,
+      type: "application/pdf",
+    }
+    expect(fileValidation(file, false, { maxFileSize: 4000000 })).toBe(true);
+  })
+
+  test('invalid file exceeding custom maxFileSize limit', () => {
+    const file = {
+      name: "sample.pdf",
+      size: 5000000,
+      type: "application/pdf",
+    }
+    expect(() => {
+      fileValidation(file, false, { maxFileSize: 4000000 });
+    }).toThrowError(expect.objectContaining({
+      error: expect.objectContaining({
+        description: parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description)
+      })
+    }));
+  })
+
+  test('file at exact custom maxFileSize boundary is valid', () => {
+    const file = {
+      name: "sample.pdf",
+      size: 4000000,
+      type: "application/pdf",
+    }
+    expect(fileValidation(file, false, { maxFileSize: 4000000 })).toBe(true);
+  })
+
+  test('falls back to 32MB default when maxFileSize not provided: file just within limit', () => {
+    const file = {
+      name: "sample.pdf",
+      size: 32000000,
+      type: "application/pdf",
+    }
+    expect(fileValidation(file, false, {})).toBe(true);
+  })
+
+  test('falls back to 32MB default when maxFileSize not provided: file exceeds limit', () => {
+    const file = {
+      name: "sample.pdf",
+      size: 32000001,
+      type: "application/pdf",
+    }
+    expect(() => {
+      fileValidation(file, false, {});
+    }).toThrowError(expect.objectContaining({
+      error: expect.objectContaining({
+        description: parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description)
+      })
+    }));
+  })
 })
 
 
