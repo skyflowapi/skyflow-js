@@ -269,7 +269,7 @@ const logs = {
     INVALID_FILE_TYPE: 'Invalid File Type.',
     INVALID_FILE_SIZE: 'Invalid File Size',
     NO_FILE_SELECTED: 'No File Selected',
-    FILE_COUNT_EXCEEDED: 'You can upload up to %s1 files. Remove file/s to add a new one',
+    FILE_COUNT_EXCEEDED: 'You can upload up to %s1 files. Remove file(s) to add more',
     FILE_SIZE_EXCEEDED_SINGLE: 'File exceeds the %s1 size limit. Choose a smaller file',
     FILE_SIZE_EXCEEDED_WITH_NAME: '%s1 exceeds the %s2 size limit. Remove it or choose a smaller file',
     FILE_COUNT_AND_SIZE_EXCEEDED: 'You can upload up to %s1 files, each under %s2',
