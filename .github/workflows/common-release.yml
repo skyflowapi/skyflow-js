@@ -47,7 +47,7 @@ jobs:
           node-version: 14.17.6
           registry-url: ${{ inputs.REGISTRY_URL }}
 
-      - run: npm install
+      - run: npm install --ignore-scripts
 
       - name: Get Previous Tag
         run: |
