@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 14.17.6
       - name: install modules
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Check code quality
         uses: stefanoeb/eslint-action@1.0.2
