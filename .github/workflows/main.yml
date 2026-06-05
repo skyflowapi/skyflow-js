@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: 14.17.6
       - name: install modules
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Run tests
         run: npm run test
