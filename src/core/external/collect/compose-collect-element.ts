@@ -141,8 +141,11 @@ class ComposableElement {
               printLog(`${event?.data?.data.errorResponse || event?.data?.data.error}`, MessageType.ERROR, this.#context.logLevel);
               reject(event?.data?.data);
             } else if (event?.data?.data.fileUploadResponse) {
-              printLog(logs.infoLogs.MULTI_UPLOAD_FILES_SUCCESS,
-                MessageType.LOG, this.#context.logLevel);
+              printLog(
+                logs.infoLogs.MULTI_UPLOAD_FILES_SUCCESS,
+                MessageType.LOG,
+                this.#context.logLevel,
+              );
               resolve(event?.data?.data);
             } else {
               printLog(`${event?.data?.data}`, MessageType.ERROR, this.#context.logLevel);
