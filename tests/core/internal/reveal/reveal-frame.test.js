@@ -820,7 +820,7 @@ name: elementName,
   const onCb =  emitSpy.mock.calls[1][2];
   onCb({}, emitterCb);
   setTimeout(()=>{
-    expect(emitterCb).toBeCalled();
+    expect(emitterCb).toHaveBeenCalled();
     done();
   },1000);
   })

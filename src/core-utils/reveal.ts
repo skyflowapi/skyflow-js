@@ -180,13 +180,15 @@ export const getFileURLFromVaultBySkyflowID = (
   try {
     const clientId = client.toJSON().metaData.uuid || '';
     getAccessToken(clientId).then((authToken) => {
-      getFileURLForRender(
-        skyflowIdRecord, client, authToken as string,
-      ).then((resolvedResult: IRenderResponseType) => {
+      // eslint-disable-next-line max-len
+      getFileURLForRender(skyflowIdRecord, client, authToken as string).then((resolvedResult: IRenderResponseType) => {
         rootResolve(resolvedResult);
       }).catch((err: any) => {
-        const errorData = formatForRenderFileFailure(err, skyflowIdRecord.skyflowID as string,
-          skyflowIdRecord.column as string);
+        const errorData = formatForRenderFileFailure(
+          err,
+          skyflowIdRecord.skyflowID as string,
+          skyflowIdRecord.column as string,
+        );
         printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
         rootReject(errorData);
       });
@@ -204,13 +206,15 @@ export const getFileURLFromVaultBySkyflowIDComposable = (
   authToken: string,
 ): Promise<IRenderResponseType> => new Promise((rootResolve, rootReject) => {
   try {
-    getFileURLForRender(
-      skyflowIdRecord, client, authToken as string,
-    ).then((resolvedResult: IRenderResponseType) => {
+    // eslint-disable-next-line max-len
+    getFileURLForRender(skyflowIdRecord, client, authToken as string).then((resolvedResult: IRenderResponseType) => {
       rootResolve(resolvedResult);
     }).catch((err: any) => {
-      const errorData = formatForRenderFileFailure(err, skyflowIdRecord.skyflowID as string,
-        skyflowIdRecord.column as string);
+      const errorData = formatForRenderFileFailure(
+        err,
+        skyflowIdRecord.skyflowID as string,
+        skyflowIdRecord.column as string,
+      );
       printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
       rootReject(errorData);
     });

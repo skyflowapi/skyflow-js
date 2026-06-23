@@ -1,7 +1,8 @@
+/* eslint-disable no-unsafe-optional-chaining */
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import bus from 'framebus';
+import { framebusInstance as bus } from '../../../libs/bus';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import {
@@ -72,11 +73,13 @@ class ComposableRevealInternalElement extends SkyflowElement {
 
   #customerErrorMessages: Partial<Record<ErrorType, string>> = {};
 
-  constructor(elementId: string,
+  constructor(
+    elementId: string,
     recordGroup,
     metaData: Metadata,
     container: RevealContainerProps,
-    context: Context) {
+    context: Context,
+  ) {
     super();
     this.#elementId = elementId;
     this.#metaData = metaData;
@@ -97,11 +100,13 @@ class ComposableRevealInternalElement extends SkyflowElement {
     this.#readyToMount = true;
     this.#getSkyflowBearerToken = metaData?.getSkyflowBearerToken;
 
+    // eslint-disable-next-line no-unsafe-optional-chaining
     bus?.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe?.name, (data) => {
       this.#iframe?.setIframeHeight(data?.height);
     });
 
     window?.addEventListener('message', (event) => {
+      // eslint-disable-next-line no-unsafe-optional-chaining
       if (event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + this.#iframe?.name) {
         this.#iframe?.setIframeHeight(event?.data?.data?.height);
       }
@@ -234,7 +239,7 @@ class ComposableRevealInternalElement extends SkyflowElement {
         }),
       });
       bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
+        .target({ origin: properties.IFRAME_SECURE_ORIGIN })
         .on(ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.#iframe.name, () => {
           this.#isMounted = true;
           if (this.#recordData.skyflowID) {
@@ -263,10 +268,13 @@ class ComposableRevealInternalElement extends SkyflowElement {
             updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
           }
           if (Object.prototype.hasOwnProperty.call(this.#recordData, 'skyflowID')) {
-            bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-              {}, (payload:any) => {
+            bus.emit(
+              ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+              {},
+              (payload:any) => {
                 this.#iframe.setIframeHeight(payload.height);
-              });
+              },
+            );
           }
         });
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
@@ -314,14 +322,18 @@ class ComposableRevealInternalElement extends SkyflowElement {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#metaData.clientJSON.config);
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
+          printLog(
+            parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
             MessageType.LOG,
-            loglevel);
+            loglevel,
+          );
           validateRenderElementRecord(recordData);
           this.#getSkyflowBearerToken()?.then((authToken) => {
-            printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+            printLog(
+              parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
               MessageType.LOG,
-              this.#context.logLevel);
+              this.#context.logLevel,
+            );
             this.#emitEvent(
               ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + recordData.name,
               {
@@ -345,21 +357,32 @@ class ComposableRevealInternalElement extends SkyflowElement {
                   if (event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
                     const revealData = event?.data?.data?.result;
                     if (revealData?.error || revealData?.errors) {
-                      printLog(parameterizedString(
-                        logs.errorLogs.FAILED_RENDER,
-                      ), MessageType.ERROR,
-                      this.#context.logLevel);
+                      printLog(
+                        parameterizedString(
+                          logs.errorLogs.FAILED_RENDER,
+                        ),
+                        MessageType.ERROR,
+                        this.#context.logLevel,
+                      );
                       if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
                         this.setAltText(altText, recordData);
                       }
                       reject(revealData?.error || revealData?.errors);
                     } else {
-                      printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
+                      printLog(
+                        parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
                         MessageType.LOG,
-                        this.#context.logLevel);
-                      printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
-                        CLASS_NAME, recordData.skyflowID),
-                      MessageType.LOG, this.#context.logLevel);
+                        this.#context.logLevel,
+                      );
+                      printLog(
+                        parameterizedString(
+                          logs.infoLogs.FILE_RENDERED,
+                          CLASS_NAME,
+                          recordData.skyflowID,
+                        ),
+                        MessageType.LOG,
+                        this.#context.logLevel,
+                      );
                       resolve(revealData);
                     }
                   }
@@ -370,12 +393,21 @@ class ComposableRevealInternalElement extends SkyflowElement {
             printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
             reject(err);
           });
-          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-          MessageType.LOG, loglevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EMIT_EVENT,
+              CLASS_NAME,
+              ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST,
+            ),
+            MessageType.LOG,
+            loglevel,
+          );
         } catch (err: any) {
-          printLog(`Error: ${err.message}`, MessageType.ERROR,
-            loglevel);
+          printLog(
+            `Error: ${err.message}`,
+            MessageType.ERROR,
+            loglevel,
+          );
           reject(err);
         }
       });
@@ -383,18 +415,22 @@ class ComposableRevealInternalElement extends SkyflowElement {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#metaData.clientJSON.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
+        printLog(
+          parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
           MessageType.LOG,
-          loglevel);
+          loglevel,
+        );
         validateRenderElementRecord(recordData);
         window.addEventListener('message', (event) => {
           if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
                   + recordData?.name) {
             this.#isMounted = true;
             this.#getSkyflowBearerToken()?.then((authToken) => {
-              printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+              printLog(
+                parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
                 MessageType.LOG,
-                this.#context.logLevel);
+                this.#context.logLevel,
+              );
               this.#emitEvent(
                 ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + recordData.name,
                 {
@@ -418,22 +454,33 @@ class ComposableRevealInternalElement extends SkyflowElement {
                     if (event1?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
                       const revealData = event1?.data?.data?.result;
                       if (revealData?.error || revealData?.errors) {
-                        printLog(parameterizedString(
-                          logs.errorLogs.FAILED_RENDER,
-                        ), MessageType.ERROR,
-                        this.#context.logLevel);
+                        printLog(
+                          parameterizedString(
+                            logs.errorLogs.FAILED_RENDER,
+                          ),
+                          MessageType.ERROR,
+                          this.#context.logLevel,
+                        );
                         if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
                           this.setAltText(altText, recordData);
                         }
                         reject(revealData?.error || revealData?.errors);
                       } else {
                       // eslint-disable-next-line max-len
-                        printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
+                        printLog(
+                          parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
                           MessageType.LOG,
-                          this.#context.logLevel);
-                        printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
-                          CLASS_NAME, recordData.skyflowID),
-                        MessageType.LOG, this.#context.logLevel);
+                          this.#context.logLevel,
+                        );
+                        printLog(
+                          parameterizedString(
+                            logs.infoLogs.FILE_RENDERED,
+                            CLASS_NAME,
+                            recordData.skyflowID,
+                          ),
+                          MessageType.LOG,
+                          this.#context.logLevel,
+                        );
                         resolve(revealData);
                       }
                     }
@@ -446,12 +493,21 @@ class ComposableRevealInternalElement extends SkyflowElement {
             });
           }
         });
-        printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-          CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-        MessageType.LOG, loglevel);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.EMIT_EVENT,
+            CLASS_NAME,
+            ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST,
+          ),
+          MessageType.LOG,
+          loglevel,
+        );
       } catch (err: any) {
-        printLog(`Error: ${err?.message}`, MessageType.ERROR,
-          loglevel);
+        printLog(
+          `Error: ${err?.message}`,
+          MessageType.ERROR,
+          loglevel,
+        );
         reject(err);
       }
     });

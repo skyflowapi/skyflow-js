@@ -1,9 +1,11 @@
 {
   "verbose": true,
   "collectCoverage": true,
-  "testEnvironment": "jsdom",
+  "testEnvironment": "<rootDir>/tests/custom-environment.js",
   "testTimeout": 30000,
+  "setupFiles": ["<rootDir>/tests/setup.js"],
   "moduleNameMapper":{
+    "^framebus$": "<rootDir>/__mocks__/framebus.js",
     "^.+\\.svg$": "<rootDir>/tests/__mocks__/file-mock.js"
   },
   "transformIgnorePatterns": ["/node_modules/(?!mime)"]

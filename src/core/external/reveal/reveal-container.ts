@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import bus from 'framebus';
+import { framebusInstance as bus } from '../../../libs/bus';
 import EventEmitter from '../../../event-emitter';
 import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe-libs/iframer';
 import SkyflowError from '../../../libs/skyflow-error';
@@ -109,12 +109,14 @@ class RevealContainer extends Container {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-    printLog(parameterizedString(logs.infoLogs.CREATE_REVEAL_CONTAINER, CLASS_NAME),
+    printLog(
+      parameterizedString(logs.infoLogs.CREATE_REVEAL_CONTAINER, CLASS_NAME),
       MessageType.LOG,
-      this.#context.logLevel);
+      this.#context.logLevel,
+    );
 
     bus
-      .target(window.location.origin)
+      .target({ origin: window.location.origin })
       .on(
         ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
         (data) => {
@@ -148,13 +150,19 @@ class RevealContainer extends Container {
     // this.#revealRecords.push(record);
     const elementId = uuid();
     validateInputFormatOptions(options);
-    const revealElement = new RevealElement(record, options, this.#metaData,
+    const revealElement = new RevealElement(
+      record,
+      options,
+      this.#metaData,
       {
         containerId: this.#containerId,
         isMounted: this.#isMounted,
         eventEmitter: this.#eventEmmiter,
         type: ContainerType.REVEAL,
-      }, elementId, this.#context);
+      },
+      elementId,
+      this.#context,
+    );
     this.#revealElements.push(revealElement);
     this.#skyflowElements[elementId] = revealElement;
     return revealElement;
@@ -175,9 +183,11 @@ class RevealContainer extends Container {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#metaData.clientJSON.config);
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
+          printLog(
+            parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
             MessageType.LOG,
-            this.#context.logLevel);
+            this.#context.logLevel,
+          );
           this.#revealElements.forEach((currentElement) => {
             if (currentElement.isClientSetError()) {
               throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
@@ -192,8 +202,11 @@ class RevealContainer extends Container {
           validateRevealElementRecords(this.#revealRecords);
           if (!this.#isElementsMounted) {
             const timeout = setTimeout(() => {
-              printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
-                MessageType.ERROR, this.#context.logLevel);
+              printLog(
+                logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
+                MessageType.ERROR,
+                this.#context.logLevel,
+              );
               reject(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL));
             }, 10000);
 
@@ -216,9 +229,11 @@ class RevealContainer extends Container {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#metaData.clientJSON.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
+        printLog(
+          parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
           MessageType.LOG,
-          this.#context.logLevel);
+          this.#context.logLevel,
+        );
         this.#revealElements.forEach((currentElement) => {
           if (currentElement.isClientSetError()) {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
@@ -233,8 +248,11 @@ class RevealContainer extends Container {
         validateRevealElementRecords(this.#revealRecords);
         if (!this.#isElementsMounted) {
           const timeout = setTimeout(() => {
-            printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
-              MessageType.ERROR, this.#context.logLevel);
+            printLog(
+              logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
+              MessageType.ERROR,
+              this.#context.logLevel,
+            );
             reject(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL));
           }, 10000);
 
@@ -246,7 +264,7 @@ class RevealContainer extends Container {
                 this.#emitRevealRequest(resolve, reject);
               } else {
                 bus
-                  .target(properties.IFRAME_SECURE_ORIGIN)
+                  .target({ origin: properties.IFRAME_SECURE_ORIGIN })
                   .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
          + this.#metaData.uuid, () => {
                     this.#emitRevealRequest(resolve, reject);
@@ -256,7 +274,7 @@ class RevealContainer extends Container {
           );
         } else {
           bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
+            .target({ origin: properties.IFRAME_SECURE_ORIGIN })
             .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
          + this.#metaData.uuid, () => {
               this.#emitRevealRequest(resolve, reject);
@@ -271,7 +289,7 @@ class RevealContainer extends Container {
 
   #emitRevealRequest(resolve, reject) {
     bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
+      .target({ origin: properties.IFRAME_SECURE_ORIGIN })
       .emit(
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
         {
@@ -283,13 +301,18 @@ class RevealContainer extends Container {
         (revealData: any) => {
           this.#mountedRecords = [];
           if (revealData.error) {
-            printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
-              MessageType.ERROR, this.#context.logLevel);
+            printLog(
+              parameterizedString(logs.errorLogs.FAILED_REVEAL),
+              MessageType.ERROR,
+              this.#context.logLevel,
+            );
             reject(revealData.error);
           } else {
-            printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
+            printLog(
+              parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
               MessageType.LOG,
-              this.#context.logLevel);
+              this.#context.logLevel,
+            );
             resolve(revealData);
           }
         },

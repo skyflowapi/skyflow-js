@@ -295,7 +295,8 @@ export const formatOptions = (
     if (INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES.includes(elementType)) {
       printLog(
         parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED, elementType),
-        MessageType.WARN, logLevel,
+        MessageType.WARN,
+        logLevel,
       );
       delete formattedOptions?.format;
       delete formattedOptions?.translation;
@@ -350,8 +351,10 @@ export const formatOptions = (
       if (formattedOptions.format) {
         isvalidFormat = isValidExpiryDateFormat(formattedOptions.format.toUpperCase());
         if (!isvalidFormat) {
-          printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
-            ALLOWED_EXPIRY_DATE_FORMATS.toString()), MessageType.WARN, logLevel);
+          printLog(parameterizedString(
+            logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
+            ALLOWED_EXPIRY_DATE_FORMATS.toString(),
+          ), MessageType.WARN, logLevel);
         }
       }
       formattedOptions = {
@@ -367,8 +370,10 @@ export const formatOptions = (
       if (formattedOptions.format) {
         isvalidFormat = isValidExpiryYearFormat(formattedOptions.format.toUpperCase());
         if (!isvalidFormat) {
-          printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_YEAR_FORMAT,
-            ALLOWED_EXPIRY_YEAR_FORMATS.toString()), MessageType.WARN, logLevel);
+          printLog(parameterizedString(
+            logs.warnLogs.INVALID_EXPIRATION_YEAR_FORMAT,
+            ALLOWED_EXPIRY_YEAR_FORMATS.toString(),
+          ), MessageType.WARN, logLevel);
         }
       }
       formattedOptions = {

@@ -5,8 +5,6 @@ const path = require('path');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const BundleAnalyser = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-
 const minify = {
   collapseWhitespace: true,
   removeComments: true,
@@ -36,6 +34,7 @@ module.exports = () => merge(common, {
     port: 3040,
     historyApiFallback: true,
     open: true,
+    allowedHosts: 'all',
     // todo: add routes for iframe and index ex: / for index.html and iframe for iframe.html
     // contentBase: commonPaths.outputPath,
     compress: true,
@@ -49,7 +48,6 @@ module.exports = () => merge(common, {
     },
   },
   plugins: [
-    new BundleAnalyser({ analyzerPort: 8881 }),
     new HtmlWebpackPlugin({
       template: 'assets/index.html',
       chunks: ['skyflow'],

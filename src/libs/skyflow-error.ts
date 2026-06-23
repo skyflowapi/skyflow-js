@@ -15,8 +15,11 @@ export default class SkyflowError extends Error {
 
   errors?: ISkyflowError[];
 
-  constructor(errorCode: ISkyflowError,
-    args?: any[], isSingularError: boolean = false) {
+  constructor(
+    errorCode: ISkyflowError,
+    args?: any[],
+    isSingularError: boolean = false,
+  ) {
     const formattedError = {
       code: errorCode.code,
       description: (args && args?.length > 0)

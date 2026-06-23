@@ -3,8 +3,8 @@
 /*
 Copyright (c) 2023 Skyflow, Inc.
 */
-import bus from 'framebus';
 import sum from 'lodash/sum';
+import { framebusInstance as bus } from '../../../libs/bus';
 import EventEmitter from '../../../event-emitter';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
@@ -131,17 +131,21 @@ class ComposableContainer extends Container {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-    printLog(parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
+    printLog(
+      parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
       MessageType.LOG,
-      this.#context.logLevel);
+      this.#context.logLevel,
+    );
     this.#containerMounted = true;
     this.#updateListeners();
     bus
       // .target(properties.IFRAME_SECURE_ORIGIN)
       .on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.#containerId, (data, callback) => {
-        printLog(parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
+        printLog(
+          parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
           MessageType.LOG,
-          this.#context.logLevel);
+          this.#context.logLevel,
+        );
         callback({
           client: this.#metaData.clientJSON,
           context,
@@ -175,7 +179,9 @@ class ComposableContainer extends Container {
     const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.#tempElements)}:${this.#containerId}:${this.#context.logLevel}:${btoa(this.#clientDomain)}`;
     this.#iframeID = controllerIframeName;
     return new ComposableElement(
-      elementName, this.#eventEmitter, controllerIframeName,
+      elementName,
+      this.#eventEmitter,
+      controllerIframeName,
       { ...this.#metaData, type: input.type },
     );
   };
@@ -310,8 +316,11 @@ class ComposableContainer extends Container {
 
   mount = (domElement: HTMLElement | string) => {
     if (!domElement) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT,
-        ['CollectElement'], true);
+      throw new SkyflowError(
+        SKYFLOW_ERROR_CODE.EMPTY_ELEMENT_IN_MOUNT,
+        ['CollectElement'],
+        true,
+      );
     }
 
     const { layout } = this.#options;
@@ -350,9 +359,11 @@ class ComposableContainer extends Container {
     this.#elementsList.forEach((element) => {
       this.#eventEmitter.on(`${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${element.elementName}`, (data, callback) => {
         this.#getSkyflowBearerToken()?.then((authToken) => {
-          printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+          printLog(
+            parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
             MessageType.LOG,
-            this.#context.logLevel);
+            this.#context.logLevel,
+          );
           this.#emitEvent(
             `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${element.elementName}`,
             {
@@ -438,9 +449,11 @@ class ComposableContainer extends Container {
       const client = Client.fromJSON(this.#metaData.clientJSON) as any;
       const clientId = client.toJSON()?.metaData?.uuid || '';
       this.#getSkyflowBearerToken()?.then((authToken) => {
-        printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+        printLog(
+          parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
           MessageType.LOG,
-          this.#context.logLevel);
+          this.#context.logLevel,
+        );
         this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + this.#containerId, {
           data: {
             type: COLLECT_TYPES.COLLECT,
@@ -469,9 +482,11 @@ class ComposableContainer extends Container {
               printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
               reject(data?.error);
             } else if (data?.records) {
-              printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+              printLog(
+                parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                 MessageType.LOG,
-                this.#context.logLevel);
+                this.#context.logLevel,
+              );
               resolve(data);
             } else {
               printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
@@ -480,9 +495,15 @@ class ComposableContainer extends Container {
           }
         }
       });
-      printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-        CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
-      MessageType.LOG, this.#context.logLevel);
+      printLog(
+        parameterizedString(
+          logs.infoLogs.EMIT_EVENT,
+          CLASS_NAME,
+          ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST,
+        ),
+        MessageType.LOG,
+        this.#context.logLevel,
+      );
     } catch (err:any) {
       printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
       reject(err);
@@ -529,9 +550,11 @@ class ComposableContainer extends Container {
       const client = Client.fromJSON(this.#metaData.clientJSON) as any;
       const clientId = client.toJSON()?.metaData?.uuid || '';
       this.#getSkyflowBearerToken()?.then((authToken) => {
-        printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+        printLog(
+          parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
           MessageType.LOG,
-          this.#context.logLevel);
+          this.#context.logLevel,
+        );
         this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + this.#containerId, {
           data: {
             type: COLLECT_TYPES.FILE_UPLOAD,
@@ -556,9 +579,11 @@ class ComposableContainer extends Container {
                 printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
                 reject(data?.error);
               } else if (data?.fileUploadResponse) {
-                printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                printLog(
+                  parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                   MessageType.LOG,
-                  this.#context.logLevel);
+                  this.#context.logLevel,
+                );
                 resolve(data);
               } else {
                 printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);

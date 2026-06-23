@@ -27,39 +27,39 @@ describe('test formatOptions function with format and translation', () => {
         const options = { format: 'XXXX' }
         
         formatOptions(ElementType.CVV, options, LogLevel.WARN);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
+        expect(spy).toHaveBeenCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
             ElementType.CVV)}`);
-        expect(spy).toBeCalledTimes(1);
+        expect(spy).toHaveBeenCalledTimes(1);
 
         formatOptions(ElementType.EXPIRATION_MONTH, options, LogLevel.WARN);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
+        expect(spy).toHaveBeenCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
             ElementType.EXPIRATION_MONTH)}`);
-        expect(spy).toBeCalledTimes(2);
+        expect(spy).toHaveBeenCalledTimes(2);
         
         formatOptions(ElementType.PIN, {enableCardIcon:true}, LogLevel.WARN);
-        expect(spy).toBeCalledTimes(2);
+        expect(spy).toHaveBeenCalledTimes(2);
         
         formatOptions(ElementType.CARDHOLDER_NAME, options, LogLevel.WARN);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
+        expect(spy).toHaveBeenCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
             ElementType.CARDHOLDER_NAME)}`);
-        expect(spy).toBeCalledTimes(3);
+        expect(spy).toHaveBeenCalledTimes(3);
         
         formatOptions(ElementType.FILE_INPUT, options, LogLevel.WARN);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
+        expect(spy).toHaveBeenCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
             ElementType.FILE_INPUT)}`);
-        expect(spy).toBeCalledTimes(4);
+        expect(spy).toHaveBeenCalledTimes(4);
         
         formatOptions(ElementType.PIN, options, LogLevel.WARN);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
+        expect(spy).toHaveBeenCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
             ElementType.PIN)}`);
-        expect(spy).toBeCalledTimes(5);
+        expect(spy).toHaveBeenCalledTimes(5);
 
     });
 
     test('should call validateInputFormatOptions function if the format or translation is provided for supported element types',()=>{
         const options = {format:'XXXX',translation:{X:'[0-9]'}}
         formatOptions(ElementType.INPUT_FIELD,options,LogLevel.ERROR);
-        expect(validateInputFormatOptions).toBeCalled();
+        expect(validateInputFormatOptions).toHaveBeenCalled();
     });
 
     test('should return mask array object with valid format and translation for input field type',()=>{

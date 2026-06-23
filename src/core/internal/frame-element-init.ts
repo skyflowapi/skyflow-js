@@ -1,6 +1,7 @@
-import injectStylesheet from 'inject-stylesheet';
-import bus from 'framebus';
+import { injectWithAllowlist } from 'inject-stylesheet';
 import get from 'lodash/get';
+import set from 'set-value';
+import { framebusInstance as bus } from '../../libs/bus';
 import { getValueAndItsUnit, validateAndSetupGroupOptions } from '../../libs/element-options';
 import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
@@ -28,8 +29,6 @@ import SkyflowError from '../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../utils/constants';
 import Client from '../../client';
 import { printLog } from '../../utils/logs-helper';
-
-const set = require('set-value');
 
 export default class FrameElementInit {
   iframeFormElement: IFrameFormElement | undefined;
@@ -66,7 +65,7 @@ export default class FrameElementInit {
     this.updateGroupData();
     this.createContainerDiv(this.group);
     bus
-      .target(this.clientMetaData?.clientDomain)
+      .target({ origin: this.clientMetaData?.clientDomain })
       .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
         data.client.config = {
           ...data.client.config,
@@ -85,8 +84,12 @@ export default class FrameElementInit {
           === ELEMENTS.MULTI_FILE_INPUT.name) {
             if (event?.data && event?.data?.name === `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${inputElement.iFrameName}`) {
               this.#client = Client.fromJSON(event?.data?.clientConfig);
-              this.multipleUploadFiles(inputElement, event?.data?.clientConfig,
-                event?.data?.options, event?.data?.errorMessages)
+              this.multipleUploadFiles(
+                inputElement,
+                event?.data?.clientConfig,
+                event?.data?.options,
+                event?.data?.errorMessages,
+              )
                 ?.then((response: any) => {
                   window?.parent.postMessage({
                     type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${inputElement.iFrameName}`,
@@ -120,8 +123,11 @@ export default class FrameElementInit {
               }, this.clientMetaData?.clientDomain);
             });
         } else if (event.data.data && event.data.data.type === COLLECT_TYPES.FILE_UPLOAD) {
-          this.parallelUploadFiles(event.data.data,
-            event.data.clientConfig, event?.data?.errorMessages)
+          this.parallelUploadFiles(
+            event.data.data,
+            event.data.clientConfig,
+            event?.data?.errorMessages,
+          )
             .then((response: any) => {
               window?.parent.postMessage({
                 type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.containerId,
@@ -146,8 +152,11 @@ export default class FrameElementInit {
     }
   };
 
-  private parallelUploadFiles = (options, config,
-    errorMessages?: Record<ErrorType, string>) => new Promise((rootResolve, rootReject) => {
+  private parallelUploadFiles = (
+    options,
+    config,
+    errorMessages?: Record<ErrorType, string>,
+  ) => new Promise((rootResolve, rootReject) => {
     const promises: Promise<unknown>[] = [];
     this.iframeFormList.forEach((inputElement) => {
       let res: Promise<unknown>;
@@ -358,8 +367,11 @@ export default class FrameElementInit {
             } else if (insertRequestObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
               if (get(insertRequestObject[tableName], state.name)
             && !(validations && checkForElementMatchRule(validations))) {
-                return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
-                  [state.name, tableName], true));
+                return Promise.reject(new SkyflowError(
+                  SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
+                  [state.name, tableName],
+                  true,
+                ));
               }
               set(
                 insertRequestObject[tableName],
@@ -407,9 +419,8 @@ export default class FrameElementInit {
     let finalInsertRecords;
     let finalUpdateRecords;
     try {
-      [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
-        insertRequestObject, updateRequestObject, options,
-      );
+      // eslint-disable-next-line max-len
+      [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(insertRequestObject, updateRequestObject, options);
       finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
     } catch (error:any) {
       return Promise.reject({
@@ -431,15 +442,19 @@ export default class FrameElementInit {
       // getAccessToken(clientId).then((authToken) => {
       if (finalInsertRequest.length !== 0) {
         insertPromiseSet.push(
-          insertDataInCollect(finalInsertRequest,
-            client, options, finalInsertRecords, clientConfig.authToken as string),
+          insertDataInCollect(
+            finalInsertRequest,
+            client,
+            options,
+            finalInsertRecords,
+            clientConfig.authToken as string,
+          ),
         );
       }
       if (finalUpdateRecords.updateRecords.length !== 0) {
         insertPromiseSet.push(
-          updateRecordsBySkyflowIDComposable(
-            finalUpdateRecords, client, options, clientConfig.authToken as string,
-          ),
+          // eslint-disable-next-line max-len
+          updateRecordsBySkyflowIDComposable(finalUpdateRecords, client, options, clientConfig.authToken as string),
         );
       }
       if (insertPromiseSet.length !== 0) {
@@ -494,10 +509,12 @@ export default class FrameElementInit {
   };
 
   // eslint-disable-next-line consistent-return
-  private multipleUploadFiles =
-  (fileElement: IFrameFormElement,
-    clientConfig, metaData,
-    errorMessages?: Record<ErrorType, string>) => new Promise((rootResolve, rootReject) => {
+  private multipleUploadFiles = (
+    fileElement: IFrameFormElement,
+    clientConfig,
+    metaData,
+    errorMessages?: Record<ErrorType, string>,
+  ) => new Promise((rootResolve, rootReject) => {
     this.#client = new Client(clientConfig, {
       uuid: '',
       clientDomain: '',
@@ -552,49 +569,49 @@ export default class FrameElementInit {
 
     if (metaData && Object.keys(metaData).length > 0) {
       const insertRequest = this.createInsertRequest(files.length, metaData);
-      this.insertDataCallInMultiFiles(
-        insertRequest, this.#client, tableName as string, clientConfig.authToken as string,
-      ).then((response: any) => {
-        const skyflowIDs = this.extractSkyflowIDs(response);
-        if (skyflowIDs.length === 0) {
-          rootReject({ error: 'No skyflow IDs returned from insert data' });
-          return;
-        }
-        const promises = files.map((file, idx) => uploadFile(file, skyflowIDs[idx]));
-        Promise.allSettled(promises).then((resultSet) => {
-          const fileUploadResponse: any[] = [];
-          const errorResponse: any[] = [];
-          resultSet.forEach((result) => {
-            if (result.status === 'fulfilled') {
-              if (result.value !== undefined && result.value !== null) {
-                if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
-                  errorResponse.push(result.value);
+      // eslint-disable-next-line max-len
+      this.insertDataCallInMultiFiles(insertRequest, this.#client, tableName as string, clientConfig.authToken as string)
+        .then((response: any) => {
+          const skyflowIDs = this.extractSkyflowIDs(response);
+          if (skyflowIDs.length === 0) {
+            rootReject({ error: 'No skyflow IDs returned from insert data' });
+            return;
+          }
+          const promises = files.map((file, idx) => uploadFile(file, skyflowIDs[idx]));
+          Promise.allSettled(promises).then((resultSet) => {
+            const fileUploadResponse: any[] = [];
+            const errorResponse: any[] = [];
+            resultSet.forEach((result) => {
+              if (result.status === 'fulfilled') {
+                if (result.value !== undefined && result.value !== null) {
+                  if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
+                    errorResponse.push(result.value);
+                  } else {
+                    const response1 = typeof result.value === 'string'
+                      ? JSON.parse(result.value)
+                      : result.value;
+                    fileUploadResponse.push(response1);
+                  }
+                }
+              } else if (result.status === 'rejected') {
+                if (result?.reason?.error) {
+                  errorResponse.push({ error: result?.reason?.error });
                 } else {
-                  const response1 = typeof result.value === 'string'
-                    ? JSON.parse(result.value)
-                    : result.value;
-                  fileUploadResponse.push(response1);
+                  errorResponse.push({ error: result.reason });
                 }
               }
-            } else if (result.status === 'rejected') {
-              if (result?.reason?.error) {
-                errorResponse.push({ error: result?.reason?.error });
-              } else {
-                errorResponse.push({ error: result.reason });
-              }
-            }
+            });
+            if (errorResponse.length === 0) {
+              rootResolve({ fileUploadResponse });
+            } else if (fileUploadResponse.length === 0) rootReject({ errorResponse });
+            else rootReject({ fileUploadResponse, errorResponse });
           });
-          if (errorResponse.length === 0) {
-            rootResolve({ fileUploadResponse });
-          } else if (fileUploadResponse.length === 0) rootReject({ errorResponse });
-          else rootReject({ fileUploadResponse, errorResponse });
+        }).catch((error) => {
+          printLog(`${error}`, MessageType.LOG, this.context?.logLevel);
+          rootReject({
+            error: error?.error || error,
+          });
         });
-      }).catch((error) => {
-        printLog(`${error}`, MessageType.LOG, this.context?.logLevel);
-        rootReject({
-          error: error?.error || error,
-        });
-      });
     } else {
       const promises = files.map((file) => uploadFile(file));
       Promise.allSettled(promises).then((resultSet) => {
@@ -628,6 +645,7 @@ export default class FrameElementInit {
     }
   });
 
+  // eslint-disable-next-line class-methods-use-this
   private validateFiles = (files: File[], state: any, fileElement: IFrameFormElement) => {
     if (files.length > fileElement.maxFileCount) {
       throw new SkyflowError(
@@ -650,6 +668,7 @@ export default class FrameElementInit {
     return true;
   };
 
+  // eslint-disable-next-line class-methods-use-this
   private createInsertRequest = (numberOfRequests: number, options = {}) => {
   // Create basic request structure
     const request = {
@@ -667,6 +686,7 @@ export default class FrameElementInit {
     return request;
   };
 
+  // eslint-disable-next-line class-methods-use-this
   private extractSkyflowIDs = (response: { records: Array<{ skyflow_id: string }> }): string[] => {
     if (!response?.records || !Array.isArray(response.records)) {
       return [];
@@ -730,7 +750,7 @@ export default class FrameElementInit {
     this.group = parsedRecord.record;
     this.containerId = parsedRecord.containerId;
     bus
-      .target(this.clientMetaData?.clientDomain)
+      .target({ origin: this.clientMetaData?.clientDomain })
       .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE + frameName, (data) => {
         if (data.name === frameName) {
           if (data.options !== undefined) {
@@ -773,7 +793,7 @@ export default class FrameElementInit {
       spacing: this.group.spacing,
     });
 
-    injectStylesheet.injectWithAllowlist(
+    injectWithAllowlist(
       {
         [`.${rootDiv.className}`]: containerStylesByClassName,
       },
@@ -822,7 +842,7 @@ export default class FrameElementInit {
         }
       } else {
         rowDiv.className = `row-${rowIndex}`;
-        injectStylesheet.injectWithAllowlist(
+        injectWithAllowlist(
           {
             [`.${rowDiv.className}`]: rowStylesByClassName,
           },
@@ -839,7 +859,7 @@ export default class FrameElementInit {
         const elementStylesByClassName = {
           padding: row.spacing,
         };
-        injectStylesheet.injectWithAllowlist(
+        injectWithAllowlist(
           {
             [`.${elementDiv.className}`]: elementStylesByClassName,
           },
@@ -911,6 +931,7 @@ export default class FrameElementInit {
     });
   };
 
+  // eslint-disable-next-line class-methods-use-this
   #updateCombinedErrorText = (elementId, errorMessages) => {
     const currentErrorElememt = document.getElementById(elementId);
     let errorText = '';

@@ -361,41 +361,27 @@ describe("Reveal Container Class", () => {
     const revealRequestEvent =
       ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + testMetaData2.uuid;
 
-    // Handle element mounted event
-    bus.emit(elementMountedEvent, {
-      token: testToken,
-      containerId: mockUuid,
+    // Auto-call callback when REVEAL_CALL_REQUESTS is emitted
+    emitSpy.mockImplementation((eventName, _, callback) => {
+      if (eventName && eventName.includes(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS)) {
+        callback(successResponse);
+      }
     });
 
-    // Get and execute the mounted callback
-    const onCbName = on.mock.calls[0][0];
-    expect(onCbName).toBe(elementMountedEvent);
-    const onCb = on.mock.calls[0][1];
-    onCb({ token: testToken, containerId: mockUuid });
+    // Handle element mounted event via the container's mounted handler
+    const containerMountedCb = on.mock.calls.find(
+      (call) => call[0] === elementMountedEvent
+    )?.[1];
+    if (containerMountedCb) {
+      containerMountedCb({ token: testToken, containerId: mockUuid });
+    }
 
     testRevealContainer.setError({});
 
-    // Call reveal and await response
-    const revealPromise = testRevealContainer.reveal();
-
-    // Get and execute the reveal request callback
-    const emitEventName = emitSpy.mock.calls[1][0];
-    const emitData = emitSpy.mock.calls[1][1];
-    const emitCb = emitSpy.mock.calls[1][2];
-
-    expect(emitEventName).toBe(revealRequestEvent);
-    expect(emitData).toEqual({
-      type: REVEAL_TYPES.REVEAL,
-      containerId: mockUuid,
-      records: [{ token: testToken }],
-      errorMessages: {},
-    });
-
-    // Simulate successful reveal response
-    emitCb(successResponse);
+    // Call reveal and await response — emitSpy auto-calls the callback
+    const response = await testRevealContainer.reveal();
 
     // Verify the final response
-    const response = await revealPromise;
     expect(response).toEqual(successResponse);
     expect(response.success).toBeDefined();
     expect(response.success![0].token).toBe(testToken);

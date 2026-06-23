@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import bus from 'framebus';
+import { framebusInstance as bus } from './libs/bus';
 import uuid from './libs/uuid';
 import {
   ElementType,
@@ -110,13 +110,17 @@ class Skyflow {
     this.#logLevel = config?.options?.logLevel || LogLevel.ERROR;
     this.#env = config?.options?.env || Env.PROD;
     this.#skyflowElements = [];
-    this.#skyflowContainer = new SkyflowContainer(this.#client,
-      { logLevel: this.#logLevel, env: this.#env });
+    this.#skyflowContainer = new SkyflowContainer(
+      this.#client,
+      { logLevel: this.#logLevel, env: this.#env },
+    );
 
     const cb = (data, callback: Function) => {
-      printLog(parameterizedString(logs.infoLogs.CAPTURED_BEARER_TOKEN_EVENT, CLASS_NAME),
+      printLog(
+        parameterizedString(logs.infoLogs.CAPTURED_BEARER_TOKEN_EVENT, CLASS_NAME),
         MessageType.LOG,
-        this.#logLevel);
+        this.#logLevel,
+      );
       if (
         this.#client.config.getBearerToken
         && (!this.#bearerToken || !isTokenValid(this.#bearerToken))
@@ -125,9 +129,11 @@ class Skyflow {
           .getBearerToken()
           .then((bearerToken) => {
             if (isTokenValid(bearerToken)) {
-              printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+              printLog(
+                parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
                 MessageType.LOG,
-                this.#logLevel);
+                this.#logLevel,
+              );
               this.#bearerToken = bearerToken;
               callback({ authToken: this.#bearerToken });
             } else {
@@ -142,40 +148,60 @@ class Skyflow {
             }
           })
           .catch((err) => {
-            printLog(parameterizedString(logs.errorLogs.BEARER_TOKEN_REJECTED), MessageType.ERROR,
-              this.#logLevel);
+            printLog(
+              parameterizedString(logs.errorLogs.BEARER_TOKEN_REJECTED),
+              MessageType.ERROR,
+              this.#logLevel,
+            );
             callback({ error: err });
           });
       } else {
-        printLog(parameterizedString(logs.infoLogs.REUSE_BEARER_TOKEN, CLASS_NAME),
+        printLog(
+          parameterizedString(logs.infoLogs.REUSE_BEARER_TOKEN, CLASS_NAME),
           MessageType.LOG,
-          this.#logLevel);
+          this.#logLevel,
+        );
         callback({ authToken: this.#bearerToken });
       }
     };
 
     bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
+      .target({ origin: properties.IFRAME_SECURE_ORIGIN })
       .on(ELEMENT_EVENTS_TO_IFRAME.GET_BEARER_TOKEN + this.#uuid, cb);
-    printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_LISTENER, CLASS_NAME), MessageType.LOG,
-      this.#logLevel);
-    printLog(parameterizedString(logs.infoLogs.CURRENT_ENV, CLASS_NAME, this.#env),
-      MessageType.LOG, this.#logLevel);
-    printLog(parameterizedString(logs.infoLogs.CURRENT_LOG_LEVEL, CLASS_NAME, this.#logLevel),
-      MessageType.LOG, this.#logLevel);
+    printLog(
+      parameterizedString(logs.infoLogs.BEARER_TOKEN_LISTENER, CLASS_NAME),
+      MessageType.LOG,
+      this.#logLevel,
+    );
+    printLog(
+      parameterizedString(logs.infoLogs.CURRENT_ENV, CLASS_NAME, this.#env),
+      MessageType.LOG,
+      this.#logLevel,
+    );
+    printLog(
+      parameterizedString(logs.infoLogs.CURRENT_LOG_LEVEL, CLASS_NAME, this.#logLevel),
+      MessageType.LOG,
+      this.#logLevel,
+    );
   }
 
   static init(config: ISkyflow): Skyflow {
     const logLevel = config?.options?.logLevel || LogLevel.ERROR;
     checkAndSetForCustomUrl(config);
-    printLog(parameterizedString(logs.infoLogs.INITIALIZE_CLIENT, CLASS_NAME), MessageType.LOG,
-      logLevel);
+    printLog(
+      parameterizedString(logs.infoLogs.INITIALIZE_CLIENT, CLASS_NAME),
+      MessageType.LOG,
+      logLevel,
+    );
 
     const tempConfig = config;
     tempConfig.vaultURL = formatVaultURL(config.vaultURL);
     const skyflow = new Skyflow(tempConfig);
-    printLog(parameterizedString(logs.infoLogs.CLIENT_INITIALIZED, CLASS_NAME),
-      MessageType.LOG, logLevel);
+    printLog(
+      parameterizedString(logs.infoLogs.CLIENT_INITIALIZED, CLASS_NAME),
+      MessageType.LOG,
+      logLevel,
+    );
     return skyflow;
   }
 
@@ -188,9 +214,11 @@ class Skyflow {
         .getBearerToken()
         .then((bearerToken) => {
           if (isTokenValid(bearerToken)) {
-            printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
+            printLog(
+              parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
               MessageType.LOG,
-              this.#logLevel);
+              this.#logLevel,
+            );
             this.#bearerToken = bearerToken;
             resolve(this.#bearerToken);
           } else {
@@ -205,14 +233,19 @@ class Skyflow {
           }
         })
         .catch((err) => {
-          printLog(parameterizedString(logs.errorLogs.BEARER_TOKEN_REJECTED), MessageType.ERROR,
-            this.#logLevel);
+          printLog(
+            parameterizedString(logs.errorLogs.BEARER_TOKEN_REJECTED),
+            MessageType.ERROR,
+            this.#logLevel,
+          );
           reject({ error: err });
         });
     } else {
-      printLog(parameterizedString(logs.infoLogs.REUSE_BEARER_TOKEN, CLASS_NAME),
+      printLog(
+        parameterizedString(logs.infoLogs.REUSE_BEARER_TOKEN, CLASS_NAME),
         MessageType.LOG,
-        this.#logLevel);
+        this.#logLevel,
+      );
       resolve(this.#bearerToken);
     }
   });
@@ -226,66 +259,86 @@ class Skyflow {
   container(type: ContainerType, options?: ContainerOptions) {
     switch (type) {
       case ContainerType.COLLECT: {
-        const collectContainer = new CollectContainer({
-          ...this.#metadata,
-          clientJSON: this.#client.toJSON(),
-          containerType: type,
-          skyflowContainer: this.#skyflowContainer,
-          getSkyflowBearerToken: this.#getSkyflowBearerToken,
-        },
-        this.#skyflowElements,
-        { logLevel: this.#logLevel, env: this.#env }, options);
-        printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
+        const collectContainer = new CollectContainer(
+          {
+            ...this.#metadata,
+            clientJSON: this.#client.toJSON(),
+            containerType: type,
+            skyflowContainer: this.#skyflowContainer,
+            getSkyflowBearerToken: this.#getSkyflowBearerToken,
+          },
+          this.#skyflowElements,
+          { logLevel: this.#logLevel, env: this.#env },
+          options,
+        );
+        printLog(
+          parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
-          this.#logLevel);
+          this.#logLevel,
+        );
         return collectContainer;
       }
       case ContainerType.REVEAL: {
-        const revealContainer = new RevealContainer({
-          ...this.#metadata,
-          clientJSON: this.#client.toJSON(),
-          containerType: type,
-          skyflowContainer: this.#skyflowContainer,
-          getSkyflowBearerToken: this.#getSkyflowBearerToken,
-        },
-        this.#skyflowElements,
-        { logLevel: this.#logLevel, env: this.#env }, options);
-        printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
+        const revealContainer = new RevealContainer(
+          {
+            ...this.#metadata,
+            clientJSON: this.#client.toJSON(),
+            containerType: type,
+            skyflowContainer: this.#skyflowContainer,
+            getSkyflowBearerToken: this.#getSkyflowBearerToken,
+          },
+          this.#skyflowElements,
+          { logLevel: this.#logLevel, env: this.#env },
+          options,
+        );
+        printLog(
+          parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
-          this.#logLevel);
+          this.#logLevel,
+        );
         return revealContainer;
       }
       case ContainerType.COMPOSABLE: {
         validateComposableContainerOptions(options!);
-        const composableContainer = new ComposableContainer({
-          ...this.#metadata,
-          clientJSON: this.#client.toJSON(),
-          containerType: type,
-          skyflowContainer: this.#skyflowContainer,
-          getSkyflowBearerToken: this.#getSkyflowBearerToken,
-        },
-        this.#skyflowElements,
-        { logLevel: this.#logLevel, env: this.#env }, options!);
-        printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
+        const composableContainer = new ComposableContainer(
+          {
+            ...this.#metadata,
+            clientJSON: this.#client.toJSON(),
+            containerType: type,
+            skyflowContainer: this.#skyflowContainer,
+            getSkyflowBearerToken: this.#getSkyflowBearerToken,
+          },
+          this.#skyflowElements,
+          { logLevel: this.#logLevel, env: this.#env },
+          options!,
+        );
+        printLog(
+          parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
-          this.#logLevel);
+          this.#logLevel,
+        );
         return composableContainer;
       }
 
       case ContainerType.COMPOSE_REVEAL: {
         validateComposableContainerOptions(options!);
-        const revealComposableContainer = new ComposableRevealContainer({
-          ...this.#metadata,
-          clientJSON: this.#client.toJSON(),
-          containerType: type,
-          skyflowContainer: this.#skyflowContainer,
-          getSkyflowBearerToken: this.#getSkyflowBearerToken,
-        },
-        this.#skyflowElements,
-        { logLevel: this.#logLevel, env: this.#env }, options);
-        printLog(parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
+        const revealComposableContainer = new ComposableRevealContainer(
+          {
+            ...this.#metadata,
+            clientJSON: this.#client.toJSON(),
+            containerType: type,
+            skyflowContainer: this.#skyflowContainer,
+            getSkyflowBearerToken: this.#getSkyflowBearerToken,
+          },
+          this.#skyflowElements,
+          { logLevel: this.#logLevel, env: this.#env },
+          options,
+        );
+        printLog(
+          parameterizedString(logs.infoLogs.REVEAL_CONTAINER_CREATED, CLASS_NAME),
           MessageType.LOG,
-          this.#logLevel);
+          this.#logLevel,
+        );
         return revealComposableContainer;
       }
 
@@ -301,39 +354,57 @@ class Skyflow {
     records: IInsertRecordInput,
     options?: IInsertOptions,
   ): Promise<InsertResponse> {
-    printLog(parameterizedString(logs.infoLogs.INSERT_TRIGGERED, CLASS_NAME), MessageType.LOG,
-      this.#logLevel);
+    printLog(
+      parameterizedString(logs.infoLogs.INSERT_TRIGGERED, CLASS_NAME),
+      MessageType.LOG,
+      this.#logLevel,
+    );
     return this.#skyflowContainer.insert(records, options);
   }
 
   detokenize(detokenizeInput: IDetokenizeInput): Promise<DetokenizeResponse> {
-    printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
-      MessageType.LOG, this.#logLevel);
+    printLog(
+      parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
+      MessageType.LOG,
+      this.#logLevel,
+    );
     return this.#skyflowContainer.detokenize(detokenizeInput);
   }
 
   getById(getByIdInput: IGetByIdInput): Promise<GetByIdResponse> {
     printLog(logs.warnLogs.GET_BY_ID_DEPRECATED, MessageType.WARN, this.#logLevel);
-    printLog(parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
-      MessageType.LOG, this.#logLevel);
+    printLog(
+      parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
+      MessageType.LOG,
+      this.#logLevel,
+    );
     return this.#skyflowContainer.getById(getByIdInput);
   }
 
   get(getInput: IGetInput, options?: IGetOptions): Promise<GetResponse> {
-    printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
-      MessageType.LOG, this.#logLevel);
+    printLog(
+      parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
+      MessageType.LOG,
+      this.#logLevel,
+    );
     return this.#skyflowContainer.get(getInput, options);
   }
 
   delete(records: IDeleteRecordInput, options?: IDeleteOptions): Promise<DeleteResponse> {
-    printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,
-      this.#logLevel);
+    printLog(
+      parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME),
+      MessageType.LOG,
+      this.#logLevel,
+    );
     return this.#skyflowContainer.delete(records, options);
   }
 
   update(record: IUpdateRequest, options?: IUpdateOptions): Promise<UpdateResponse> {
-    printLog(parameterizedString(logs.infoLogs.UPDATE_TRIGGERED, CLASS_NAME), MessageType.LOG,
-      this.#logLevel);
+    printLog(
+      parameterizedString(logs.infoLogs.UPDATE_TRIGGERED, CLASS_NAME),
+      MessageType.LOG,
+      this.#logLevel,
+    );
     return this.#skyflowContainer.update(record, options);
   }
 

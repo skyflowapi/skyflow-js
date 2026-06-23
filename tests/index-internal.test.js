@@ -13,23 +13,20 @@ import {
   } from './../src/core/constants';
 
 jest.mock('framebus')
-jest.mock('jquery-mask-plugin/dist/jquery.mask.min')
 jest.mock('jss-preset-default')
 
 describe('test index-internal', () => {
+  let origName;
   beforeEach(() => {
     jest.resetModules();
+    origName = window.name;
+  });
+  afterEach(() => {
+    window.name = origName;
   });
 
   test('test init SkyflowFrameController', () => {
-    const windowSpy = jest.spyOn(global, 'window', 'get');
-    windowSpy.mockImplementation(() => ({
-      name: `${SKYFLOW_FRAME_CONTROLLER}`,
-      location: {
-        origin: '',
-      },
-      addEventListener: jest.fn(),
-    }));
+    window.name = `${SKYFLOW_FRAME_CONTROLLER}`;
 
     const mock = jest.fn();
     jest.mock('./../src/core/internal/skyflow-frame/skyflow-frame-controller', () => ({
@@ -41,14 +38,7 @@ describe('test index-internal', () => {
   });
 
   test('test init collect FrameElement with proper name values', () => {
-    let windowSpy = jest.spyOn(global, 'window', 'get');
-    windowSpy.mockImplementation(() => ({
-        name: `${FRAME_ELEMENT}:group:ERROR`,
-        location: {
-            origin: ''
-        },
-        addEventListener: jest.fn()
-    }));
+    window.name = `${FRAME_ELEMENT}:group:ERROR`;
 
     const mock = jest.fn()
     jest.mock( './../src/core/internal/frame-element-init', () => {
@@ -63,36 +53,22 @@ describe('test index-internal', () => {
 })
 
   test('test init collect FrameElement', () => {
-      let windowSpy = jest.spyOn(global, 'window', 'get');
-      windowSpy.mockImplementation(() => ({
-          name: `${FRAME_ELEMENT}:ERROR`,
-          location: {
-              origin: ''
-          },
-          addEventListener: jest.fn()
-      }));
+    window.name = `${FRAME_ELEMENT}:ERROR`;
 
-      const mock = jest.fn()
-      jest.mock( './../src/core/internal/frame-element-init.ts', () => {
-          return {
-              start: mock
-          }
-      })
-      try {
-        const init = require('./../src/index-internal')
-      } catch(er) {}
-    //   expect(mock).toHaveBeenCalledTimes(1);
+    const mock = jest.fn()
+    jest.mock( './../src/core/internal/frame-element-init.ts', () => {
+        return {
+            start: mock
+        }
+    })
+    try {
+      const init = require('./../src/index-internal')
+    } catch(er) {}
+  //   expect(mock).toHaveBeenCalledTimes(1);
   })
 
   test('test init reveal FrameElement', () => {
-    const windowSpy = jest.spyOn(global, 'window', 'get');
-    windowSpy.mockImplementation(() => ({
-      name: `${FRAME_REVEAL}:${btoa('{test: demo}')}:ERROR`,
-      location: {
-        origin: '',
-      },
-      addEventListener: jest.fn(),
-    }));
+    window.name = `${FRAME_REVEAL}:${btoa('{test: demo}')}:ERROR`;
 
     const mock = jest.fn();
     jest.mock('./../src/core/internal/reveal/reveal-frame', () => {
@@ -105,14 +81,7 @@ describe('test index-internal', () => {
   });
 
   test('test init reveal FrameElement without btoa', () => {
-    const windowSpy = jest.spyOn(global, 'window', 'get');
-    windowSpy.mockImplementation(() => ({
-      name: `${FRAME_REVEAL}:ERROR`,
-      location: {
-        origin: '',
-      },
-      addEventListener: jest.fn(),
-    }));
+    window.name = `${FRAME_REVEAL}:ERROR`;
 
     const mock = jest.fn();
     jest.mock('./../src/core/internal/reveal/reveal-frame', () => {
@@ -124,14 +93,7 @@ describe('test index-internal', () => {
     expect(mock).toHaveBeenCalledTimes(1);
   });
   test('test init reveal composable FrameElement without btoa', () => {
-    const windowSpy = jest.spyOn(global, 'window', 'get');
-    windowSpy.mockImplementation(() => ({
-      name: `${COMPOSABLE_REVEAL}:${btoa('{test: demo}')}:ERROR`,
-      location: {
-        origin: '',
-      },
-      addEventListener: jest.fn(),
-    }));
+    window.name = `${COMPOSABLE_REVEAL}:${btoa('{test: demo}')}:ERROR`;
 
     const mock = jest.fn();
     // For composable reveal frames, index-internal calls static startFrameElement()

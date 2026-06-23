@@ -186,7 +186,6 @@ describe('test composable container class',()=>{
   let targetSpy;
   let onSpy;
   let eventEmitterSpy;
-  let windowSpy;
   beforeEach(() => {
     emitSpy = jest.spyOn(bus, 'emit');
     targetSpy = jest.spyOn(bus, 'target');
@@ -197,7 +196,6 @@ describe('test composable container class',()=>{
       off: jest.fn(),
       emit: emitSpy,
     });
-    windowSpy = jest.spyOn(window, "window", "get");
   });
   
 
@@ -592,7 +590,7 @@ describe('test composable container class',()=>{
     setTimeout(()=>{
       container.mount('#composable');
       container.unmount();
-      expect(mockUnmount).toBeCalled();
+      expect(mockUnmount).toHaveBeenCalled();
     },0)
 
   });

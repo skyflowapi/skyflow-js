@@ -194,9 +194,7 @@ export const constructElementsInsertReq = (req, update, options) => {
     additionalFields.records.forEach((record) => {
       if (record.fields.skyflowID) {
         if (ids.includes(record.fields.skyflowID)) {
-          checkDuplicateColumns(
-            record.fields, update[record.fields.skyflowID], record.table,
-          );
+          checkDuplicateColumns(record.fields, update[record.fields.skyflowID], record.table);
           const temp = record.fields;
           merge(temp, update[record.fields.skyflowID]);
           update[record.fields.skyflowID] = temp;
@@ -275,26 +273,27 @@ export const updateRecordsBySkyflowID = async (
     updateResponseSet = skyflowIdRecords.updateRecords.map(
       (skyflowIdRecord: IInsertRecord) => new Promise((resolve, reject) => {
         updateRecordsInVault(skyflowIdRecord, client, authToken as string, options)
-          .then((resolvedResult: any) => {
-            const resp = constructFinalUpdateRecordResponse(
-              resolvedResult, options?.tokens, skyflowIdRecord,
-            );
-            resolve(resp);
-          },
-          (rejectedResult) => {
-            let errorResponse = rejectedResult;
-            if (rejectedResult && rejectedResult.error) {
-              errorResponse = {
-                error: {
-                  code: rejectedResult?.error?.code,
-                  description: rejectedResult?.error?.description,
-                  type: rejectedResult?.error?.type,
-                },
-              };
-            }
-            printLog(rejectedResult.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
-            reject(errorResponse);
-          }).catch((error) => {
+          .then(
+            (resolvedResult: any) => {
+              // eslint-disable-next-line max-len
+              const resp = constructFinalUpdateRecordResponse(resolvedResult, options?.tokens, skyflowIdRecord);
+              resolve(resp);
+            },
+            (rejectedResult) => {
+              let errorResponse = rejectedResult;
+              if (rejectedResult && rejectedResult.error) {
+                errorResponse = {
+                  error: {
+                    code: rejectedResult?.error?.code,
+                    description: rejectedResult?.error?.description,
+                    type: rejectedResult?.error?.type,
+                  },
+                };
+              }
+              printLog(rejectedResult.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
+              reject(errorResponse);
+            },
+          ).catch((error) => {
             reject(error);
           });
       }),
@@ -331,28 +330,30 @@ export const updateRecordsBySkyflowIDComposable = async (
   updateResponseSet = skyflowIdRecords?.updateRecords?.map(
     (skyflowIdRecord: IInsertRecord) => new Promise((resolve, reject) => {
       updateRecordsInVault(skyflowIdRecord, client, authToken, options)
-        ?.then((resolvedResult: any) => {
-          const resp = constructFinalUpdateRecordResponse(
-            resolvedResult,
-            options?.tokens,
-            skyflowIdRecord,
-          );
-          resolve(resp);
-        },
-        (rejectedResult) => {
-          let errorResponse = rejectedResult;
-          if (rejectedResult?.error) {
-            errorResponse = {
-              error: {
-                code: rejectedResult?.error?.code,
-                description: rejectedResult?.error?.description,
-                type: rejectedResult?.error?.type,
-              },
-            };
-          }
-          printLog(rejectedResult?.error?.description ?? '', MessageType.ERROR, LogLevel.ERROR);
-          reject(errorResponse);
-        })?.catch((error) => {
+        ?.then(
+          (resolvedResult: any) => {
+            const resp = constructFinalUpdateRecordResponse(
+              resolvedResult,
+              options?.tokens,
+              skyflowIdRecord,
+            );
+            resolve(resp);
+          },
+          (rejectedResult) => {
+            let errorResponse = rejectedResult;
+            if (rejectedResult?.error) {
+              errorResponse = {
+                error: {
+                  code: rejectedResult?.error?.code,
+                  description: rejectedResult?.error?.description,
+                  type: rejectedResult?.error?.type,
+                },
+              };
+            }
+            printLog(rejectedResult?.error?.description ?? '', MessageType.ERROR, LogLevel.ERROR);
+            reject(errorResponse);
+          },
+        )?.catch((error) => {
           reject(error);
         });
     }),

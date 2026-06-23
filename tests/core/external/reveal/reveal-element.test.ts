@@ -792,7 +792,7 @@ describe("Reveal Element Methods", () => {
       clientErrorText: "errorText",
       isTriggerError: true,
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   });
 
   test("when element is not mounted then setError method", () => {
@@ -808,7 +808,7 @@ describe("Reveal Element Methods", () => {
       name: testRevealElement.iframeName(),
     });
     expect(testRevealElement.isClientSetError()).toBe(true);
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     expect(emitSpy.mock.calls[0][0]).toBe(
       ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR +
         testRevealElement.iframeName()
@@ -818,7 +818,7 @@ describe("Reveal Element Methods", () => {
       clientErrorText: "errorText",
       isTriggerError: true,
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     testRevealElement.mount("123");
   });
 
@@ -833,7 +833,7 @@ describe("Reveal Element Methods", () => {
       clientErrorText: "errorText",
       isTriggerError: true,
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   });
 
   test("setErrorOverride method when element is not mounted", () => {
@@ -856,7 +856,7 @@ describe("Reveal Element Methods", () => {
       clientErrorText: "errorText",
       isTriggerError: true,
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     testRevealElement.mount("123");
   });
 
@@ -880,7 +880,7 @@ describe("Reveal Element Methods", () => {
       name: testRevealElement.iframeName(),
     });
     expect(testRevealElement.isClientSetError()).toBe(false);
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     expect(emitSpy.mock.calls[0][0]).toBe(
       ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR +
         testRevealElement.iframeName()
@@ -889,7 +889,7 @@ describe("Reveal Element Methods", () => {
       name: testRevealElement.iframeName(),
       isTriggerError: false,
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     testRevealElement.mount("123");
   });
 
@@ -904,7 +904,7 @@ describe("Reveal Element Methods", () => {
       updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
       updatedValue: "altText",
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   });
 
   test("setAltText method when element is not mounted", () => {
@@ -927,7 +927,7 @@ describe("Reveal Element Methods", () => {
       updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
       updatedValue: "altText",
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     testRevealElement.mount("123");
   });
 
@@ -942,7 +942,7 @@ describe("Reveal Element Methods", () => {
       updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
       updatedValue: null,
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   });
 
   test("clearAltText method when element is not mounted", () => {
@@ -966,7 +966,7 @@ describe("Reveal Element Methods", () => {
       updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT,
       updatedValue: null,
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     testRevealElement.mount("123");
   });
 
@@ -1034,7 +1034,7 @@ describe("Reveal Element Methods", () => {
         inputStyles: { base: { borderWitdth: "5px" } },
       },
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   });
 
   test("update the properties of elements when element is unmounted", () => {
@@ -1069,6 +1069,6 @@ describe("Reveal Element Methods", () => {
         inputStyles: { base: { borderWitdth: "5px" } },
       },
     });
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   });
 });
