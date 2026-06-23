@@ -9,10 +9,10 @@ jobs:
   ci-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 14.17.6
+          node-version: 22
       - name: install modules
         run: npm ci --ignore-scripts
 
@@ -20,7 +20,7 @@ jobs:
         run: npm run test
       
       - name: Codecov
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_REPO_UPLOAD_TOKEN }}
           files: coverage/lcov.info
