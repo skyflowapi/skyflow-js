@@ -1,8 +1,8 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { framebusInstance as bus } from '../../../libs/bus';
 import mime from 'mime';
+import { framebusInstance as bus } from '../../../libs/bus';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
