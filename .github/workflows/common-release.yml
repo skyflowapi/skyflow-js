@@ -37,14 +37,14 @@ jobs:
   build-sdk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_ACTIONS }}
           fetch-depth: 0
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
-          node-version: 14.17.6
+          node-version: 22
           registry-url: ${{ inputs.REGISTRY_URL }}
 
       - run: npm install --ignore-scripts
