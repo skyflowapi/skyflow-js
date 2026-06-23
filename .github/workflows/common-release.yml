@@ -138,14 +138,17 @@ jobs:
           if [ "${{ inputs.TAG }}" == "beta" ]; then
             npm publish --tag ${{ inputs.TAG }}
           elif [ "${{ inputs.TAG }}" == "internal" ]; then
-            curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
             npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
+            npm config set "//prekarilabs.jfrog.io/prekarilabs/api/npm/npm/:_auth" "$(echo -n "${JFROG_USERNAME}:${JFROG_PASSWORD}" | base64 -w 0)"
+            npm config set "//prekarilabs.jfrog.io/prekarilabs/api/npm/npm/:always-auth" true
             npm publish
           else
             npm publish
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+          JFROG_USERNAME: ${{ secrets.JFROG_USERNAME }}
+          JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
 
       - name: Invalidate CloudFront cache 10 times
         run: |
