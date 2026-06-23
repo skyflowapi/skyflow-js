@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check JIRA ID
-        uses: gsactions/commit-message-checker@v1
+        uses: gsactions/commit-message-checker@v2
         with:
           pattern: '(\[?[A-Z]{1,5}-[1-9][0-9]*)|(\[AUTOMATED\])|(Merge)|(Release).+$'
           flags: 'gm'
@@ -24,21 +24,21 @@ jobs:
   ci-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 14.17.6
+          node-version: 22
       - name: install modules
         run: npm ci --ignore-scripts
 
       - name: Check code quality
-        uses: stefanoeb/eslint-action@1.0.2
+        run: npx eslint src/ --ext .ts
 
       - name: Run tests
         run: npm run test
       
       - name: Codecov
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_REPO_UPLOAD_TOKEN }}
           files: coverage/lcov.info
