@@ -155,6 +155,9 @@ const metaData: Metadata = {
   skyflowContainer: {
     isFrameControllerReady: true,
   } as unknown as SkyflowContainer,
+  getSkyflowBearerToken: function (): Promise<string> {
+    throw new Error("Function not implemented.");
+  }
 };
 
 jest.mock("../../../../src/event-emitter");

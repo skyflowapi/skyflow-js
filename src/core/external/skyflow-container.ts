@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import bus from 'framebus';
+import { framebusInstance as bus } from '../../libs/bus';
 import Client from '../../client';
 import iframer, {
   getIframeSrc,
@@ -76,20 +76,24 @@ class SkyflowContainer {
     setStyles(iframe, { ...CONTROLLER_STYLES });
     document.body.append(iframe);
     bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
+      .target({ origin: properties.IFRAME_SECURE_ORIGIN })
       .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, (data, callback) => {
-        printLog(parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
+        printLog(
+          parameterizedString(logs.infoLogs.CAPTURE_PUREJS_FRAME, CLASS_NAME),
           MessageType.LOG,
-          this.#context.logLevel);
+          this.#context.logLevel,
+        );
         callback({
           client: this.#client,
           context,
         });
         this.isControllerFrameReady = true;
       });
-    printLog(parameterizedString(logs.infoLogs.PUREJS_CONTROLLER_INITIALIZED, CLASS_NAME),
+    printLog(
+      parameterizedString(logs.infoLogs.PUREJS_CONTROLLER_INITIALIZED, CLASS_NAME),
       MessageType.LOG,
-      this.#context.logLevel);
+      this.#context.logLevel,
+    );
   }
 
   detokenize(detokenizeInput: IDetokenizeInput): Promise<DetokenizeResponse> {
@@ -97,13 +101,15 @@ class SkyflowContainer {
       return new Promise((resolve, reject) => {
         try {
           validateInitConfig(this.#client.config);
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, CLASS_NAME),
+          printLog(
+            parameterizedString(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, CLASS_NAME),
             MessageType.LOG,
-            this.#context.logLevel);
+            this.#context.logLevel,
+          );
 
           validateDetokenizeInput(detokenizeInput);
           bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
+            .target({ origin: properties.IFRAME_SECURE_ORIGIN })
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -115,9 +121,15 @@ class SkyflowContainer {
                 else resolve(revealData);
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-            PUREJS_TYPES.DETOKENIZE),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EMIT_PURE_JS_REQUEST,
+              CLASS_NAME,
+              PUREJS_TYPES.DETOKENIZE,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
         } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
           reject(e);
@@ -127,16 +139,18 @@ class SkyflowContainer {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#client.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, CLASS_NAME),
+        printLog(
+          parameterizedString(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, CLASS_NAME),
           MessageType.LOG,
-          this.#context.logLevel);
+          this.#context.logLevel,
+        );
 
         validateDetokenizeInput(detokenizeInput);
         bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
+          .target({ origin: properties.IFRAME_SECURE_ORIGIN })
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
+              .target({ origin: properties.IFRAME_SECURE_ORIGIN })
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
                 {
@@ -149,9 +163,15 @@ class SkyflowContainer {
                 },
               );
           });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-          PUREJS_TYPES.DETOKENIZE),
-        MessageType.LOG, this.#context.logLevel);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.EMIT_PURE_JS_REQUEST,
+            CLASS_NAME,
+            PUREJS_TYPES.DETOKENIZE,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);
@@ -164,8 +184,11 @@ class SkyflowContainer {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
-            this.#context.logLevel);
+          printLog(
+            parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
           if (options) {
             options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
           } else {
@@ -178,7 +201,7 @@ class SkyflowContainer {
           }
           validateInsertRecords(records, options);
           bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
+            .target({ origin: properties.IFRAME_SECURE_ORIGIN })
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -193,9 +216,15 @@ class SkyflowContainer {
                 } else resolve(insertedData);
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-            PUREJS_TYPES.INSERT),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EMIT_PURE_JS_REQUEST,
+              CLASS_NAME,
+              PUREJS_TYPES.INSERT,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
         } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
@@ -206,8 +235,11 @@ class SkyflowContainer {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#client.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
-          this.#context.logLevel);
+        printLog(
+          parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
 
         if (options) {
           options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
@@ -221,10 +253,10 @@ class SkyflowContainer {
         }
         validateInsertRecords(records, options);
         bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
+          .target({ origin: properties.IFRAME_SECURE_ORIGIN })
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
+              .target({ origin: properties.IFRAME_SECURE_ORIGIN })
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
                 {
@@ -240,9 +272,15 @@ class SkyflowContainer {
                 },
               );
           });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-          PUREJS_TYPES.INSERT),
-        MessageType.LOG, this.#context.logLevel);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.EMIT_PURE_JS_REQUEST,
+            CLASS_NAME,
+            PUREJS_TYPES.INSERT,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);
@@ -255,13 +293,16 @@ class SkyflowContainer {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
-            this.#context.logLevel);
+          printLog(
+            parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
 
           validateUpdateRecord(record, options);
 
           bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
+            .target({ origin: properties.IFRAME_SECURE_ORIGIN })
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -276,9 +317,15 @@ class SkyflowContainer {
                 } else resolve(updatedData);
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-            PUREJS_TYPES.UPDATE),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EMIT_PURE_JS_REQUEST,
+              CLASS_NAME,
+              PUREJS_TYPES.UPDATE,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
         } catch (e: any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
           reject(e);
@@ -288,16 +335,19 @@ class SkyflowContainer {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#client.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
-          this.#context.logLevel);
+        printLog(
+          parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
 
         validateUpdateRecord(record, options);
 
         bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
+          .target({ origin: properties.IFRAME_SECURE_ORIGIN })
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
+              .target({ origin: properties.IFRAME_SECURE_ORIGIN })
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
                 {
@@ -313,9 +363,15 @@ class SkyflowContainer {
                 },
               );
           });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-          PUREJS_TYPES.UPDATE),
-        MessageType.LOG, this.#context.logLevel);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.EMIT_PURE_JS_REQUEST,
+            CLASS_NAME,
+            PUREJS_TYPES.UPDATE,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
       } catch (e: any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);
@@ -328,14 +384,16 @@ class SkyflowContainer {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT, CLASS_NAME),
+          printLog(
+            parameterizedString(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT, CLASS_NAME),
             MessageType.LOG,
-            this.#context.logLevel);
+            this.#context.logLevel,
+          );
 
           validateGetByIdInput(getByIdInput);
 
           bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
+            .target({ origin: properties.IFRAME_SECURE_ORIGIN })
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -347,9 +405,15 @@ class SkyflowContainer {
                 else resolve(revealData);
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-            CLASS_NAME, PUREJS_TYPES.GET_BY_SKYFLOWID),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EMIT_PURE_JS_REQUEST,
+              CLASS_NAME,
+              PUREJS_TYPES.GET_BY_SKYFLOWID,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
         } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
@@ -360,16 +424,21 @@ class SkyflowContainer {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#client.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT,
-          CLASS_NAME), MessageType.LOG,
-        this.#context.logLevel);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.VALIDATE_GET_BY_ID_INPUT,
+            CLASS_NAME,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
 
         validateGetByIdInput(getByIdInput);
         bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
+          .target({ origin: properties.IFRAME_SECURE_ORIGIN })
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
+              .target({ origin: properties.IFRAME_SECURE_ORIGIN })
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
                 {
@@ -382,9 +451,15 @@ class SkyflowContainer {
                 },
               );
           });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-          CLASS_NAME, PUREJS_TYPES.GET_BY_SKYFLOWID),
-        MessageType.LOG, this.#context.logLevel);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.EMIT_PURE_JS_REQUEST,
+            CLASS_NAME,
+            PUREJS_TYPES.GET_BY_SKYFLOWID,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
@@ -398,12 +473,14 @@ class SkyflowContainer {
       return new Promise((resolve, reject) => {
         validateInitConfig(this.#client.config);
         try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_INPUT, CLASS_NAME),
+          printLog(
+            parameterizedString(logs.infoLogs.VALIDATE_GET_INPUT, CLASS_NAME),
             MessageType.LOG,
-            this.#context.logLevel);
+            this.#context.logLevel,
+          );
           validateGetInput(getInput, options);
           bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
+            .target({ origin: properties.IFRAME_SECURE_ORIGIN })
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -416,9 +493,15 @@ class SkyflowContainer {
                 else resolve(revealData);
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-            CLASS_NAME, PUREJS_TYPES.GET),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EMIT_PURE_JS_REQUEST,
+              CLASS_NAME,
+              PUREJS_TYPES.GET,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
         } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
@@ -429,16 +512,21 @@ class SkyflowContainer {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#client.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_INPUT,
-          CLASS_NAME), MessageType.LOG,
-        this.#context.logLevel);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.VALIDATE_GET_INPUT,
+            CLASS_NAME,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
 
         validateGetInput(getInput, options);
         bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
+          .target({ origin: properties.IFRAME_SECURE_ORIGIN })
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
+              .target({ origin: properties.IFRAME_SECURE_ORIGIN })
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
                 {
@@ -452,9 +540,15 @@ class SkyflowContainer {
                 },
               );
           });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-          CLASS_NAME, PUREJS_TYPES.GET),
-        MessageType.LOG, this.#context.logLevel);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.EMIT_PURE_JS_REQUEST,
+            CLASS_NAME,
+            PUREJS_TYPES.GET,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
@@ -469,13 +563,14 @@ class SkyflowContainer {
         validateInitConfig(this.#client.config);
         try {
           printLog(
-            parameterizedString(logs.infoLogs.VALIDATE_DELETE_INPUT, CLASS_NAME), MessageType.LOG,
+            parameterizedString(logs.infoLogs.VALIDATE_DELETE_INPUT, CLASS_NAME),
+            MessageType.LOG,
             this.#context.logLevel,
           );
 
           validateDeleteRecords(records, options);
           bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
+            .target({ origin: properties.IFRAME_SECURE_ORIGIN })
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
               {
@@ -492,9 +587,15 @@ class SkyflowContainer {
                 }
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-            PUREJS_TYPES.DELETE),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EMIT_PURE_JS_REQUEST,
+              CLASS_NAME,
+              PUREJS_TYPES.DELETE,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
         } catch (e:any) {
           printLog(e.message, MessageType.ERROR, this.#context.logLevel);
 
@@ -505,15 +606,18 @@ class SkyflowContainer {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.#client.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
-          this.#context.logLevel);
+        printLog(
+          parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
 
         validateDeleteRecords(records, options);
         bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
+          .target({ origin: properties.IFRAME_SECURE_ORIGIN })
           .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#containerId, () => {
             bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
+              .target({ origin: properties.IFRAME_SECURE_ORIGIN })
               .emit(
                 ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#containerId,
                 {
@@ -529,9 +633,15 @@ class SkyflowContainer {
                 },
               );
           });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-          PUREJS_TYPES.DELETE),
-        MessageType.LOG, this.#context.logLevel);
+        printLog(
+          parameterizedString(
+            logs.infoLogs.EMIT_PURE_JS_REQUEST,
+            CLASS_NAME,
+            PUREJS_TYPES.DELETE,
+          ),
+          MessageType.LOG,
+          this.#context.logLevel,
+        );
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.#context.logLevel);
         reject(e);

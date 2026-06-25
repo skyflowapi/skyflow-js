@@ -57,34 +57,30 @@ describe('test iframeFormelement', () => {
     let emitSpy;
     let targetSpy;
     let on = jest.fn()
-    let windowSpy
     let onSpy;
     let testValue;
+    let origPostMessage;
     beforeEach(() => {
         jest.clearAllMocks()
         emitSpy = jest.spyOn(bus, 'emit');
         onSpy = jest.spyOn(bus, 'on');
         targetSpy = jest.spyOn(bus, 'target');
-        targetSpy.mockReturnValue({
-            on,
-            emit: emitSpy,
+        targetSpy.mockImplementation((opts) => {
+            bus.origin = opts?.origin ?? '*';
+            return { on, emit: emitSpy };
         });
-        windowSpy = jest.spyOn(global, 'window', 'get');
-        windowSpy.mockImplementation(()=>({
-                parent:{
-                    frames:{
-                'element:CARD_NUMBER:${tableCol}':{document:{
-                    getElementById:()=>({value:testValue})
-                }}
-                },
-                    postMessage: jest.fn(),
-                },
-                addEventListener: jest.fn(),
-        }));
+        // jsdom 20+ does not allow replacing window wholesale via jest.spyOn.
+        // Patch individual properties instead. In jsdom, window.parent === window.
+        origPostMessage = window.postMessage.bind(window);
+        window.parent.postMessage = jest.fn();
+        window.frames[`element:CARD_NUMBER:\${tableCol}`] = {
+            document: { getElementById: () => ({ value: testValue }) },
+        };
     });
     afterEach(() => {
-        windowSpy.mockRestore();
-      });
+        window.parent.postMessage = origPostMessage;
+        delete window.frames[`element:CARD_NUMBER:\${tableCol}`];
+    });
 
       
     test('iframeFormelement constructor', () => {
@@ -333,7 +329,7 @@ describe('test iframeFormelement', () => {
         element.setMask(["XXX"]);
         expect(element.mask).toBe(undefined)
         expect(element.replacePattern).toBe(undefined);
-        expect(spy).not.toBeCalledTimes(1);
+        expect(spy).not.toHaveBeenCalledTimes(1);
     });
     test('collect bus event', () => {
         const element = new IFrameFormElement(collect_element, '',{clientDomain :'*'} ,context);
@@ -446,7 +442,7 @@ describe('test iframeFormelement', () => {
         const spy = jest.spyOn(console, 'warn'); 
         const element = new IFrameFormElement(collect_element, '',{} ,{logLevel:LogLevel.WARN,env:Env.PROD});
         element.setMask(["XXX", { X: "*" }]);
-        expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
+        expect(spy).toHaveBeenCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
             'CVV')}`)
     });
 
@@ -454,7 +450,7 @@ describe('test iframeFormelement', () => {
         const spy = jest.spyOn(console, 'warn'); 
         const element = new IFrameFormElement(collect_element, '',{} ,{env:Env.PROD});
         element.setMask(["XXX", { X: "*" }]);
-        expect(spy).not.toBeCalledTimes(1);
+        expect(spy).not.toHaveBeenCalledTimes(1);
     });
 
     test('test setValue for expiration_month', () => {
@@ -757,7 +753,7 @@ describe('test iframeFormelement', () => {
     });
 
     test('card number custom validation with error',()=>{
-        windowSpy.mockImplementation(()=>({}));
+        delete window.frames[`element:CARD_NUMBER:\${tableCol}`];
         testValue = '5555 3412 4444 '
         const elementRule = {
             type: ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
@@ -1054,7 +1050,7 @@ describe('test file Upload method', () => {
       
         expect(()=>{
             formatOptions(elementType, options, logLevel)
-        }).toThrowError(parameterizedString(logs.errorLogs.INVALID_BOOLEAN_OPTIONS, "blockEmptyFiles"));
+        }).toThrow(parameterizedString(logs.errorLogs.INVALID_BOOLEAN_OPTIONS, "blockEmptyFiles"));
       });  
     test('validate for file input - valid allowedFileType array', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
@@ -1073,7 +1069,7 @@ describe('test file Upload method', () => {
       
         expect(() => {
           const formattedOptions = formatOptions(elementType, options, logLevel);
-        }).toThrowError(parameterizedString(logs.errorLogs.INVALID_ALLOWED_FILETYPE_ARRAY));
+        }).toThrow(parameterizedString(logs.errorLogs.INVALID_ALLOWED_FILETYPE_ARRAY));
       });
     test('validate for file input - invalid allowedFileType (not an array)', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
@@ -1082,7 +1078,7 @@ describe('test file Upload method', () => {
       
         expect(() => {
           const formattedOptions = formatOptions(elementType, options, logLevel);
-        }).toThrowError(parameterizedString(logs.errorLogs.INVALID_ALLOWED_OPTIONS));
+        }).toThrow(parameterizedString(logs.errorLogs.INVALID_ALLOWED_OPTIONS));
       });
     test('validate for file input - empty allowedFileType array', () => {
         const elementType = ELEMENTS.FILE_INPUT.name;
@@ -1091,7 +1087,7 @@ describe('test file Upload method', () => {
       
         expect(() => {
           const formattedOptions = formatOptions(elementType, options, logLevel);
-        }).toThrowError(parameterizedString(logs.errorLogs.EMPTY_ALLOWED_OPTIONS_ARRAY));
+        }).toThrow(parameterizedString(logs.errorLogs.EMPTY_ALLOWED_OPTIONS_ARRAY));
       });
 })
 

@@ -73,43 +73,30 @@ const element = {
     },
     clientDomain: 'https://demo.com'
 }
+
+const encoded = btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}));
+
 describe('test frame elements', () => {
     let emitSpy;
-    let windowSpy;
-    let windowSpy1;
+    let origName;
+    let origPostMessage;
+
     beforeEach(() => {
-        windowSpy = jest.spyOn(global, 'window', 'get');
-        windowSpy.mockImplementation(() => ({
-            name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
-            location: {
-              href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-            },
-            parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
-                console.log("postMessage called with:", message, targetOrigin, args);
-              }
-            },
-            addEventListener: jest.fn(),
-        }));
+        origName = window.name;
+        origPostMessage = window.parent.postMessage;
+        window.name = `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`;
+        window.history.pushState({}, '', `/?${encoded}`);
+        window.parent.postMessage = jest.fn();
         emitSpy = jest.spyOn(bus, 'emit');
-    })
+    });
+
+    afterEach(() => {
+        window.name = origName;
+        window.parent.postMessage = origPostMessage;
+        jest.clearAllMocks();
+    });
+
     test('FrameElementInit constructor : empty path', () => {
-      windowSpy = jest.spyOn(global, 'window', 'get');
-      windowSpy.mockImplementation(() => ({
-        name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
-        location: {
-          href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-        },
-        parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
-              }
-            },
-            addEventListener: jest.fn(),
-      }))
         const onSpy = jest.spyOn(bus, 'on');
         FrameElementInit.startFrameElement('123')
         const mockCreateElement = jest.fn().mockImplementation(()=>{
@@ -163,67 +150,53 @@ describe('test frame elements', () => {
 
 describe('test composable frame elements', () => {
   let emitSpy;
-  let windowSpy;
-  beforeEach(() => {
-      windowSpy = jest.spyOn(global, 'window', 'get');
-      windowSpy.mockImplementation(() => ({
-          name: `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR:`,
-          location: {
-            href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-          },
-          parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
-              }
-            },
-            addEventListener: jest.fn(),
-      }));
+  let origName;
+  let origPostMessage;
 
-      emitSpy = jest.spyOn(bus, 'emit');
+  beforeEach(() => {
+    origName = window.name;
+    origPostMessage = window.parent.postMessage;
+    window.name = `${FRAME_ELEMENT}:group:${btoa('123')}:ERROR:`;
+    window.history.pushState({}, '', `/?${encoded}`);
+    window.parent.postMessage = jest.fn();
+    emitSpy = jest.spyOn(bus, 'emit');
+  });
+
+  afterEach(() => {
+    window.name = origName;
+    window.parent.postMessage = origPostMessage;
+    jest.clearAllMocks();
   });
 
   test('FrameElementInit constructor with composable elements : empty path', () => {
-    windowSpy.mockImplementation(() => ({
-      name: `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR:`,
-      location: {
-        href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'https://demo.com'}}))}`,
-      },
-      parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
-              }
-            },
-            addEventListener: jest.fn(),
-    }))
-      const onSpy = jest.spyOn(bus, 'on');
-      FrameElementInit.group = [];
+    window.name = `${FRAME_ELEMENT}:CARD_NUMBER:${btoa('123')}:ERROR:`;
+    const onSpy = jest.spyOn(bus, 'on');
+    FrameElementInit.group = [];
 
-      FrameElementInit.startFrameElement()
-      const mockCreateElement = jest.fn().mockImplementation(()=>{
-          return {
-              resetEvents: jest.fn(),
-              on: jest.fn(),
-              getStatus: jest.fn(()=>({
-                  isFocused: false,
-                  isValid: false,
-                  isEmpty: true,
-                  isComplete: false,
-              })),
-              fieldType: 'CARD_NUMBER',
-              state:{name:''},
-              setValidation:jest.fn(),
-              setReplacePattern: jest.fn(),
-              setMask:jest.fn(),
-              getValue: jest.fn(),
-              setValue: jest.fn(),
-          }
-      })
-      const frameElement = new FrameElementInit(mockCreateElement, {}, 'ERROR')
+    FrameElementInit.startFrameElement()
+    const mockCreateElement = jest.fn().mockImplementation(()=>{
+        return {
+            resetEvents: jest.fn(),
+            on: jest.fn(),
+            getStatus: jest.fn(()=>({
+                isFocused: false,
+                isValid: false,
+                isEmpty: true,
+                isComplete: false,
+            })),
+            fieldType: 'CARD_NUMBER',
+            state:{name:''},
+            setValidation:jest.fn(),
+            setReplacePattern: jest.fn(),
+            setMask:jest.fn(),
+            getValue: jest.fn(),
+            setValue: jest.fn(),
+        }
+    })
+    const frameElement = new FrameElementInit(mockCreateElement, {}, 'ERROR')
   })
 
-    
+
   test('FrameElementInit init', () => {
     FrameElementInit.startFrameElement()
 

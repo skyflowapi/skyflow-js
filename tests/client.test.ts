@@ -89,9 +89,9 @@ describe("Client Class", () => {
           key: "value",
         }),
       });
-      expect(xhrMock.open).toBeCalledWith("GET", "https://example-test.com");
-      expect(xhrMock.setRequestHeader).toBeCalledWith("Auth", "eyde.ed.ewe");
-      expect(xhrMock.send).toBeCalledWith(
+      expect(xhrMock.open).toHaveBeenCalledWith("GET", "https://example-test.com");
+      expect(xhrMock.setRequestHeader).toHaveBeenCalledWith("Auth", "eyde.ed.ewe");
+      expect(xhrMock.send).toHaveBeenCalledWith(
         JSON.stringify({
           key: "value",
         })
@@ -149,7 +149,7 @@ describe("Client Class", () => {
           key: "value",
         }),
       });
-      expect(xhrMock.setRequestHeader).toBeCalledWith(
+      expect(xhrMock.setRequestHeader).toHaveBeenCalledWith(
         "content-type",
         "application/x-www-form-urlencoded"
       );
@@ -207,7 +207,7 @@ describe("Client Class", () => {
           key: "value",
         }),
       });
-      expect(xhrMock.setRequestHeader).toBeCalledWith("Auth", "eyde.ed.ewe");
+      expect(xhrMock.setRequestHeader).toHaveBeenCalledWith("Auth", "eyde.ed.ewe");
     } catch (err) {
       console.log(err);
     }
@@ -274,7 +274,7 @@ describe("Client Class", () => {
           key: "value",
         }),
       });
-      expect(xhrMock.setRequestHeader).toBeCalledWith(
+      expect(xhrMock.setRequestHeader).toHaveBeenCalledWith(
         "content-type",
         "application/x-www-form-urlencoded"
       );
@@ -335,9 +335,9 @@ describe("Client Class", () => {
         .catch((err) => {
           expect(err).toBeDefined();
         });
-      expect(xhrMock.open).toBeCalledWith("GET", "https://example-test.com");
-      expect(xhrMock.setRequestHeader).toBeCalledWith("Auth", "eyde.ed.ewe");
-      expect(xhrMock.send).toBeCalledWith(
+      expect(xhrMock.open).toHaveBeenCalledWith("GET", "https://example-test.com");
+      expect(xhrMock.setRequestHeader).toHaveBeenCalledWith("Auth", "eyde.ed.ewe");
+      expect(xhrMock.send).toHaveBeenCalledWith(
         JSON.stringify({
           key: "value",
         })
@@ -400,9 +400,9 @@ describe("Client Class", () => {
         .catch((err) => {
           expect(err).toBeDefined();
         });
-      expect(xhrMock.open).toBeCalledWith("GET", "https://example-test.com");
-      expect(xhrMock.setRequestHeader).toBeCalledWith("Auth", "eyde.ed.ewe");
-      expect(xhrMock.send).toBeCalledWith(
+      expect(xhrMock.open).toHaveBeenCalledWith("GET", "https://example-test.com");
+      expect(xhrMock.setRequestHeader).toHaveBeenCalledWith("Auth", "eyde.ed.ewe");
+      expect(xhrMock.send).toHaveBeenCalledWith(
         JSON.stringify({
           key: "value",
         })

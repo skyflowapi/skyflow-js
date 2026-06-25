@@ -1,8 +1,9 @@
+/* eslint-disable class-methods-use-this */
 /* eslint-disable max-len */
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import bus from 'framebus';
+import { framebusInstance as bus } from '../../libs/bus';
 import { setAttributes } from '../../iframe-libs/iframer';
 import { validateElementOptions } from '../../libs/element-options';
 import {
@@ -1187,9 +1188,14 @@ export default class FrameElement {
           if (!this.domInput.getAttribute('maxlength')) { this.domInput.setAttribute('maxlength', mask[0].length); }
         }
       } catch (err) {
-        printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
-          this.iFrameFormElement.fieldType), MessageType.WARN,
-        (this.iFrameFormElement?.context?.logLevel || LogLevel.ERROR));
+        printLog(
+          parameterizedString(
+            logs.warnLogs.INVALID_INPUT_TRANSLATION,
+            this.iFrameFormElement.fieldType,
+          ),
+          MessageType.WARN,
+          (this.iFrameFormElement?.context?.logLevel || LogLevel.ERROR),
+        );
       }
     }
   }

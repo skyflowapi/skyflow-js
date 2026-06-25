@@ -130,7 +130,6 @@ let skyflowContainer;
 describe("Reveal Element Class", () => {
   let emitSpy;
   let targetSpy;
-  let windowSpy;
   beforeEach(() => {
     jest.clearAllMocks();
     emitSpy = jest.spyOn(bus, 'emit');
@@ -140,12 +139,8 @@ describe("Reveal Element Class", () => {
       off,
       emit: emitSpy,
     });
-    windowSpy = jest.spyOn(window, "window", "get");
     const client = new Client(clientData.client.config, clientData);
     skyflowContainer = new SkyflowContainer(client, { logLevel: LogLevel.DEBUG, env: Env.PROD });
-  });
-  afterEach(() => {
-    windowSpy.mockRestore();
   });
 
   const containerId = mockUuid;

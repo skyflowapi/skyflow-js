@@ -44,19 +44,23 @@ const makeTextElement = ({ name = 'field1', tableName = 'patients', value = 'abc
 
 const getCollectMocks = () => ({ constructElementsInsertReq, constructInsertRecordRequest, insertDataInCollect, updateRecordsBySkyflowIDComposable });
 
-// Minimal window mock
+// Minimal window mock — jsdom 20+ makes window/location non-configurable;
+// use individual assignments and history.pushState to avoid redefinition errors.
+let origName;
+const mockPostMessage = jest.fn();
 beforeEach(() => {
   const payload = { record: { rows: [] }, metaData: { clientDomain: 'http://localhost.com', clientJSON: { config: { options: {} } } }, containerId: 'group' };
   const encoded = btoa(JSON.stringify(payload));
-  jest.spyOn(global, 'window', 'get').mockReturnValue({
-    name: 'FRAME_ELEMENT:group:123:ERROR:',
-    location: { href: `http://localhost/?${encoded}` },
-    parent: { postMessage: jest.fn() },
-    addEventListener: jest.fn(),
-  });
+
+  origName = window.name;
+  window.name = 'FRAME_ELEMENT:group:123:ERROR:';
+  window.history.pushState({}, '', `/?${encoded}`);
+  // parent is window itself in jsdom; patch postMessage on the existing object
+  window.parent.postMessage = mockPostMessage;
 });
 
 afterEach(() => {
+  window.name = origName;
   jest.clearAllMocks();
 });
 

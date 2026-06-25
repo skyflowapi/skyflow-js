@@ -199,10 +199,8 @@ describe('Collect container', () => {
   let emitSpy;
   let targetSpy;
   let onSpy;
-  let windowSpy;
 
   beforeEach(() => {
-    windowSpy = jest.spyOn(window, "window", "get");
     emitSpy = null;
     targetSpy = null;
     onSpy = null;
@@ -217,7 +215,6 @@ describe('Collect container', () => {
   });
 
   afterEach(() => {
-    windowSpy.mockRestore();
     jest.clearAllMocks();
     jest.restoreAllMocks();
     document.body.innerHTML = '';

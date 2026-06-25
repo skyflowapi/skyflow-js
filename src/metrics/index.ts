@@ -1,4 +1,4 @@
-import bus from 'framebus';
+import { framebusInstance as bus } from '../libs/bus';
 import { MeticsObjectType, SharedMeticsObjectType } from '../utils/common';
 import sdkDetails from '../../package.json';
 import { getMetaObject } from '../utils/helpers';

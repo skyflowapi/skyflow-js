@@ -1,5 +1,5 @@
-import injectStylesheet from 'inject-stylesheet';
-import bus from 'framebus';
+import { injectWithAllowlist } from 'inject-stylesheet';
+import { framebusInstance as bus } from '../../libs/bus';
 import { getValueAndItsUnit } from '../../libs/element-options';
 import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
@@ -118,10 +118,10 @@ export default class RevealComposableFrameElementInit {
 
               window?.parent?.postMessage(
                 {
-                  type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+                  type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
                   data: {
                     height: this.rootDiv?.scrollHeight ?? 0,
-                    name: window?.name,
+                    name: window.name,
                   },
                 },
                 this.clientMetaData?.clientDomain,
@@ -155,10 +155,10 @@ export default class RevealComposableFrameElementInit {
 
               window?.parent?.postMessage(
                 {
-                  type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+                  type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
                   data: {
                     height: this.rootDiv?.scrollHeight ?? 0,
-                    name: window?.name,
+                    name: window.name,
                   },
                 },
                 this.clientMetaData?.clientDomain,
@@ -215,7 +215,7 @@ export default class RevealComposableFrameElementInit {
       styles,
       errorTextStyles,
     } = this.group ?? {};
-    const isComposableContainer = getContainerType(window?.name) === ContainerType?.COMPOSE_REVEAL;
+    const isComposableContainer = getContainerType(window.name) === ContainerType?.COMPOSE_REVEAL;
     this.group.spacing = getValueAndItsUnit(this.group?.spacing)?.join('') ?? '';
     this.rootDiv = document?.createElement('div');
     this.rootDiv.className = 'container';
@@ -226,7 +226,7 @@ export default class RevealComposableFrameElementInit {
       spacing: this.group?.spacing,
     });
 
-    injectStylesheet?.injectWithAllowlist(
+    injectWithAllowlist(
       {
         [`.${this.rootDiv?.className}`]: containerStylesByClassName,
       },
@@ -274,7 +274,7 @@ export default class RevealComposableFrameElementInit {
         }
       } else {
         rowDiv.className = `row-${rowIndex}`;
-        injectStylesheet?.injectWithAllowlist(
+        injectWithAllowlist(
           {
             [`.${rowDiv?.className}`]: rowStylesByClassName,
           },
@@ -292,15 +292,19 @@ export default class RevealComposableFrameElementInit {
           padding: row?.spacing,
         };
 
-        injectStylesheet?.injectWithAllowlist(
+        injectWithAllowlist(
           {
             [`.${elementDiv?.className}`]: elementStylesByClassName,
           },
           ALLOWED_MULTIPLE_FIELDS_STYLES,
         );
 
-        const revealFrame = new RevealFrame(element, this.#context,
-          this.containerId, elementDiv);
+        const revealFrame = new RevealFrame(
+          element,
+          this.#context,
+          this.containerId,
+          elementDiv,
+        );
         this.revealFrameList?.push(revealFrame);
         rowDiv?.append(elementDiv);
       });
@@ -322,51 +326,51 @@ export default class RevealComposableFrameElementInit {
       {
         type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + this.containerId,
         data: {
-          name: window?.name,
+          name: window.name,
         },
       },
       this.clientMetaData?.clientDomain,
     );
 
-    bus?.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name, (data, callback) => {
+    bus?.on(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name, (data, callback) => {
       callback?.({
         height: this.rootDiv?.scrollHeight ?? 0,
-        name: window?.name,
+        name: window.name,
       });
     });
 
     window?.parent?.postMessage(
       {
-        type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+        type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
         data: {
           height: this.rootDiv?.scrollHeight ?? 0,
-          name: window?.name,
+          name: window.name,
         },
       },
       this.clientMetaData?.clientDomain,
     );
 
     window?.addEventListener('message', (event) => {
-      if (event?.data?.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name) {
+      if (event?.data?.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window.name) {
         window?.parent?.postMessage(
           {
-            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
             data: {
               height: this.rootDiv?.scrollHeight ?? 0,
-              name: window?.name,
+              name: window.name,
             },
           },
           this.clientMetaData?.clientDomain,
         );
       }
       if (event?.data?.type
-         === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name) {
+         === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name) {
         window?.parent?.postMessage(
           {
-            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window.name,
             data: {
               height: this.rootDiv?.scrollHeight ?? 0,
-              name: window?.name,
+              name: window.name,
             },
           },
           this.clientMetaData?.clientDomain,

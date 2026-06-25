@@ -3,11 +3,14 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 // todo: implement bus to save event id/functions and on kill remove those events(turn off)
 
-import bus from 'framebus';
+import Framebus from 'framebus';
 import {
   FramebusOnHandler,
   FramebusReplyHandler,
 } from 'framebus/dist/lib/types';
+
+const bus = new Framebus();
+export { bus as framebusInstance };
 
 class Bus {
   listeners: any[];

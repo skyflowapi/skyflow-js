@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import jwt_decode, { JwtPayload } from 'jwt-decode';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 
 const isString = (x) => Object.prototype.toString.call(x) === '[object String]';
 
@@ -14,7 +14,7 @@ const isTokenValid = (token: string) => {
       return false;
     }
     let isJwtExpired = false;
-    const decoded: JwtPayload = jwt_decode(token);
+    const decoded: JwtPayload = jwtDecode(token);
     const currentTime = new Date().getTime() / 1000;
     const expiryTime = decoded.exp;
 

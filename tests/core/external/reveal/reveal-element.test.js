@@ -619,7 +619,7 @@ describe("Reveal Element Methods",()=>{
     expect(testRevealElement.isClientSetError()).toBe(true);
     expect(emitSpy.mock.calls[1][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[1][1]).toEqual({name: testRevealElement.iframeName(), clientErrorText: "errorText", isTriggerError: true});
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   });
   it("setError method case 2",()=>{
     testRevealElement.mount("#testDiv");
@@ -635,7 +635,7 @@ describe("Reveal Element Methods",()=>{
     expect(testRevealElement.isClientSetError()).toBe(true);
     expect(emitSpy.mock.calls[1][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[1][1]).toEqual({name: testRevealElement.iframeName(), clientErrorText: "errorText", isTriggerError: true});
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   });
   it("when element is not mounted then setError method",()=>{
     testRevealElement.unmount();
@@ -649,10 +649,10 @@ describe("Reveal Element Methods",()=>{
       name:testRevealElement.iframeName(),
     });
     expect(testRevealElement.isClientSetError()).toBe(true);
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     expect(emitSpy.mock.calls[0][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement.iframeName(), clientErrorText: "errorText", isTriggerError: true});
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     testRevealElement.mount('123');
   });
 
@@ -660,7 +660,7 @@ describe("Reveal Element Methods",()=>{
     testRevealElement.setErrorOverride("errorText");
     expect(emitSpy.mock.calls[0][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement.iframeName(), clientErrorText: "errorText", isTriggerError: true});
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   });
   it("setErrorOverride method when element is not mounted",()=>{
     testRevealElement.unmount();
@@ -674,7 +674,7 @@ describe("Reveal Element Methods",()=>{
     });
     expect(emitSpy.mock.calls[0][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement.iframeName(), clientErrorText: "errorText", isTriggerError: true});
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     testRevealElement.mount('123');
   });
   it("check for isSetError True",()=>{
@@ -694,17 +694,17 @@ describe("Reveal Element Methods",()=>{
       name:testRevealElement.iframeName(),
     });
     expect(testRevealElement.isClientSetError()).toBe(false);
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     expect(emitSpy.mock.calls[0][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement.iframeName(), isTriggerError: false});
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     testRevealElement.mount('123');
   });
   it("setAltText method",()=>{
     testRevealElement.setAltText("altText");
     expect(emitSpy.mock.calls[0][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement.iframeName(), updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT, updatedValue: "altText"});
-    expect(emitSpy).toBeCalled(); 
+    expect(emitSpy).toHaveBeenCalled(); 
   });
   
   it("setAltText method when element is not mounted",()=>{
@@ -719,14 +719,14 @@ describe("Reveal Element Methods",()=>{
     });
     expect(emitSpy.mock.calls[0][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement.iframeName(), updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT, updatedValue: "altText"});
-    expect(emitSpy).toBeCalled(); 
+    expect(emitSpy).toHaveBeenCalled(); 
     testRevealElement.mount('123');
   });
   it("clearAltText method",()=>{
     testRevealElement.clearAltText();
     expect(emitSpy.mock.calls[0][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement.iframeName(), updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT, updatedValue: null});
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   });
   it("clearAltText method when element is not mounted",()=>{
     testRevealElement.unmount();
@@ -741,7 +741,7 @@ describe("Reveal Element Methods",()=>{
     });
     expect(emitSpy.mock.calls[0][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + testRevealElement.iframeName());
     expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement.iframeName(), updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT, updatedValue: null});
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
     testRevealElement.mount('123');
   });
   it("getRecord Data",()=>{
@@ -794,7 +794,7 @@ describe("Reveal Element Methods",()=>{
     testRevealElement2.update(testUpdateOptions);
     expect(emitSpy.mock.calls[2][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + testRevealElement2.iframeName());
     expect(emitSpy.mock.calls[2][1]).toEqual({name: testRevealElement2.iframeName(), updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS, updatedValue: {'label': 'Updated Label', inputStyles: { base: { borderWitdth: '5px' } }}});
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   })
   it('should update the properties of elements', () => {
     testRevealElement2.unmount('#mockElement');
@@ -817,6 +817,6 @@ describe("Reveal Element Methods",()=>{
     });
     expect(emitSpy.mock.calls[0][0]).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + testRevealElement2.iframeName());
     expect(emitSpy.mock.calls[0][1]).toEqual({name: testRevealElement2.iframeName(), updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS, updatedValue: {'label': 'Updated Label', inputStyles: { base: { borderWitdth: '5px' } }}});
-    expect(emitSpy).toBeCalled();
+    expect(emitSpy).toHaveBeenCalled();
   })
 });

@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 /* eslint-disable no-underscore-dangle */
-import bus from 'framebus';
+import { framebusInstance as bus } from '../../../libs/bus';
 
 import {
   ELEMENT_EVENTS_TO_CLIENT,
@@ -308,14 +308,20 @@ export default class IFrameFormElement extends EventEmitter {
         newMask[2]['*'] = /[a-zA-Z0-9]/;
       }
     } catch (err) {
-      printLog(parameterizedString(logs.warnLogs.INVALID_INPUT_TRANSLATION,
-        this.fieldType),
-      MessageType.WARN, this.context?.logLevel || LogLevel.ERROR);
+      printLog(
+        parameterizedString(
+          logs.warnLogs.INVALID_INPUT_TRANSLATION,
+          this.fieldType,
+        ),
+        MessageType.WARN,
+        this.context?.logLevel || LogLevel.ERROR,
+      );
       return;
     }
     this.mask = newMask;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   getFileDetails = (value: FileList | File | null): Array<{
     fileName: string;
     fileSizeKB: number;
@@ -463,8 +469,10 @@ export default class IFrameFormElement extends EventEmitter {
       }
       if (!this.state.isValid && this.state.isEmpty && this.state.isRequired) {
         if (this.label) {
-          this.errorText = `${parameterizedString(logs.errorLogs.REQUIRED_COLLECT_VALUE,
-            this.label)}`;
+          this.errorText = `${parameterizedString(
+            logs.errorLogs.REQUIRED_COLLECT_VALUE,
+            this.label,
+          )}`;
         } else {
           this.errorText = this.containerType === ContainerType.COLLECT
             ? logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE
@@ -506,8 +514,11 @@ export default class IFrameFormElement extends EventEmitter {
     isTouched: this.state.isTouched,
     // Card Number should return 8 digit bin data
     value: this.state.value
-      && getReturnValue(this.state.value, this.fieldType,
-        EnvOptions[this.context?.env]?.doesReturnValue),
+      && getReturnValue(
+        this.state.value,
+        this.fieldType,
+        EnvOptions[this.context?.env]?.doesReturnValue,
+      ),
     ...(this.state.selectedCardScheme ? { selectedCardScheme: this.state.selectedCardScheme } : {}),
   });
 
@@ -681,7 +692,7 @@ export default class IFrameFormElement extends EventEmitter {
   // on client force focus
   collectBusEvents = () => {
     bus
-      .target(this.metaData.clientDomain)
+      .target({ origin: this.metaData.clientDomain })
       .on(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + this.iFrameName, (data) => {
         if (bus.origin === this.metaData.clientDomain) {
           if (data.name === this.iFrameName) {
@@ -699,7 +710,7 @@ export default class IFrameFormElement extends EventEmitter {
       });
 
     bus
-      .target(this.metaData.clientDomain)
+      .target({ origin: this.metaData.clientDomain })
       .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE + this.iFrameName, (data: any) => {
         if (data.options.elementName === this.iFrameName) {
           if (data.options.value !== undefined) {
@@ -767,7 +778,7 @@ export default class IFrameFormElement extends EventEmitter {
     //     }
     //   });
 
-    bus.target(this.metaData.clientDomain)
+    bus.target({ origin: this.metaData.clientDomain })
       .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE + this.iFrameName, (data) => {
         if (data.name === this.iFrameName) {
           this._emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE
@@ -778,7 +789,7 @@ export default class IFrameFormElement extends EventEmitter {
         }
       });
 
-    bus.target(this.metaData.clientDomain)
+    bus.target({ origin: this.metaData.clientDomain })
       .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR + this.iFrameName, (data) => {
         if (data.name === this.iFrameName) {
           this.doesClientHasError = data.isTriggerError as boolean;
@@ -793,7 +804,7 @@ export default class IFrameFormElement extends EventEmitter {
     // for radio buttons
     if (this.fieldType === ELEMENTS.radio.name) {
       bus
-        .target(window.location.origin)
+        .target({ origin: window.location.origin })
         .on(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE + this.iFrameName, (data) => {
           if (
             data.value !== null
@@ -930,7 +941,7 @@ export default class IFrameFormElement extends EventEmitter {
 
     // send change states for radio button(sync)
     if (inputEvent && this.fieldType === ELEMENTS.radio.name) {
-      bus.target(window.location.origin).emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE
+      bus.target({ origin: window.location.origin }).emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE
         + this.iFrameName, {
         fieldName: this.fieldName,
         fieldType: this.fieldType,
