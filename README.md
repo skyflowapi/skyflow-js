@@ -3683,6 +3683,21 @@ errorTextStyles: {
 }
 ```
 
+#### Overflow support for rendered images
+By default, an image rendered by a File Element scales responsively to fit its `width`/`height`. If you'd rather show the image at its full/natural size inside a fixed-size, scrollable container, set `overflow` (e.g. `'auto'` or `'scroll'`) alongside `width`/`height` in `inputStyles.base`:
+
+```javascript
+inputStyles: {
+  base: {
+    height: '250px',
+    width: '400px',
+    overflow: 'auto', // renders the image at full size and makes the container scrollable
+  },
+}
+```
+
+`overflow` is optional — if you don't set it, rendering behaves exactly as before. This only affects image renders (`<img>`); it has no effect on non-image files rendered via `<embed>` (e.g. PDFs).
+
 ### Step 3: Mount Elements to the DOM
 Elements used for rendering files are mounted to the DOM the same way as Elements used for collecting data. Refer to Step 3 of the [section above](https://github.com/skyflowapi/skyflow-js#step-3-mount-elements-to-the-dom).
 
@@ -4303,6 +4318,10 @@ errorTextStyles: {
   }
 }
 ```
+
+#### Overflow support for rendered images
+Composable File Elements support the same `overflow` style property as regular File Elements. Refer to the [Overflow support for rendered images](https://github.com/skyflowapi/skyflow-js#overflow-support-for-rendered-images) section above.
+
 ### Step 3: Mount Container to the DOM
 Mount Elements for file rendering to the DOM the same way as Elements used for revealing data. Refer to Step 3 of the [section above](#step-3-mount-container-to-the-dom).
 
@@ -4351,7 +4370,9 @@ fetch("<BACKEND_URL>")
       altText: "This is an altText",
     });
     // Step 3.
-    fileElement.mount("#renderFile"); // Assumes there is a placeholder div with id=renderFile on the page
+    // Note: for composable File Elements, `.mount()` is called on the container,
+    // not on the element returned by `.create()`.
+    container.mount("#renderFile"); // Assumes there is a placeholder div with id=renderFile on the page
 
     const renderButton = document.getElementById("renderFiles"); // button to call render file
 
