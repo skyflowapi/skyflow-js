@@ -7,6 +7,7 @@ import { Env, LogLevel } from '../../src/utils/common';
 import { getAccessToken } from '../../src/utils/bus-events';
 import Client from '../../src/client';
 import { url } from 'inspector';
+import { FILE_DOWNLOAD_URL_PARAM } from '../../src/core/constants';
 
 const testTokenId = '1677f7bd-c087-4645-b7da-80a6fd1a81a4';
 const testInvalidTokenId = '80a6fd1a81a4-b7da-c087-4645';
@@ -733,5 +734,33 @@ describe('getFileURLForRender', () => {
     mockClient.request = jest.fn().mockRejectedValue(new Error('Mock error message'));
 
     expect(getFileURLForRender(mockSkyflowIdRecord, mockClient, 'mockAuthToken')).rejects.toThrow();
+  });
+
+  it('SK-2958: requests a relative /vault path so the dev-server proxy can intercept it, instead of the absolute vaultURL', async () => {
+    // Regression guard: getFileURLForRender must build a same-origin relative URL
+    // (`/vault/v1/vaults/...`) so it can be proxied (see webpack.dev.js `/vault` proxy rule).
+    // If this regresses back to `${vaultURL}/v1/vaults/...` or drops the leading slash,
+    // the request resolves relative to the current document path and silently hits the
+    // dev-server's index.html fallback instead of the vault.
+    const mockSkyflowIdRecord = {
+      skyflowID: 'mockSkyflowID',
+      column: 'mockColumn',
+      table: 'mockTable',
+    };
+
+    const mockClient = Client.fromJSON(clientData.clientJSON);
+    mockClient.request = jest.fn().mockResolvedValue('mockResponse');
+
+    await getFileURLForRender(mockSkyflowIdRecord, mockClient, 'mockAuthToken');
+
+    expect(mockClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: `/vault/v1/vaults/${clientData.client.config.vaultID}/mockTable/mockSkyflowID?fields=mockColumn&${FILE_DOWNLOAD_URL_PARAM}&returnFileMetadata=true`,
+      }),
+    );
+
+    const calledUrl = mockClient.request.mock.calls[0][0].url;
+    expect(calledUrl.startsWith('/vault/')).toBe(true);
+    expect(calledUrl).not.toContain(clientData.client.config.vaultURL);
   });
 });

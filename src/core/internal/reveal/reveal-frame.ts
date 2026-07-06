@@ -24,7 +24,8 @@ import {
 } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
 import {
-  Context, IRenderResponseType, IRevealRecord, MessageType, RedactionType,
+  Context, IRenderResponseType, IRevealRecord, MessageType,
+  RedactionType,
 } from '../../../utils/common';
 import {
   constructMaskTranslation,
@@ -36,6 +37,7 @@ import {
 import { formatForRenderClient, getFileURLFromVaultBySkyflowIDComposable } from '../../../core-utils/reveal';
 import Client from '../../../client';
 import properties from '../../../properties';
+import { ContainerType } from '../../../skyflow';
 
 const { getType } = require('mime');
 
@@ -79,20 +81,26 @@ class RevealFrame {
 
   #composableContainer: Boolean = false;
 
+  #rootDiv: HTMLDivElement | undefined;
+
   static init() {
     const url = window.location?.href;
     const configIndex = url.indexOf('?');
     const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
     const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
     const skyflowContainerId = parsedRecord.clientJSON.metaData.uuid;
-    RevealFrame.revealFrame = new RevealFrame(parsedRecord.record,
-      parsedRecord.context, skyflowContainerId);
+    RevealFrame.revealFrame = new RevealFrame(
+      parsedRecord.record,
+      parsedRecord.context,
+      skyflowContainerId,
+    );
   }
 
   constructor(record, context: Context, id: string, rootDiv?: HTMLDivElement) {
     this.#skyflowContainerId = id;
     this.#name = rootDiv ? record?.name : window.name;
-    this.#composableContainer = getContainerType(this.#name) === 'COMPOSABLE_REVEAL';
+    this.#composableContainer = getContainerType(this.#name) === ContainerType.COMPOSE_REVEAL;
+    this.#rootDiv = rootDiv;
     this.#containerId = getValueFromName(this.#name, 2);
     const encodedClientDomain = getValueFromName(this.#name, 4);
     const clientDomain = getAtobValue(encodedClientDomain);
@@ -218,7 +226,8 @@ class RevealFrame {
               ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
               {
                 height: this.#elementContainer.scrollHeight,
-              }, () => {
+              },
+              () => {
               },
             );
         } else {
@@ -290,14 +299,12 @@ class RevealFrame {
           if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
         }
       });
-    window.parent.postMessage(
-      {
-        type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + this.#name,
-        data: {
-          name: window.name,
-        },
-      }, this.#clientDomain,
-    );
+    window.parent.postMessage({
+      type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + this.#name,
+      data: {
+        name: window.name,
+      },
+    }, this.#clientDomain);
     this.updateRevealElementOptions();
     window.addEventListener('message', (event) => {
       if (event?.origin === this.#clientDomain) {
@@ -333,22 +340,22 @@ class RevealFrame {
               }, this.#clientDomain);
 
               window?.postMessage({
-                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name,
               }, properties?.IFRAME_SECURE_ORIGIN);
             });
           }
-        }
-      }
 
-      if (event?.data?.type === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name) {
-        if (event?.data?.data?.height) {
-          window?.parent?.postMessage({
-            type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
-            data: {
-              height: this.#elementContainer?.scrollHeight ?? 0,
-              name: this.#name,
-            },
-          }, this.#clientDomain);
+          if (event?.data?.type === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name) {
+            if (event?.data?.data?.height) {
+              window?.parent?.postMessage({
+                type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+                data: {
+                  height: this.#elementContainer?.scrollHeight ?? 0,
+                  name: this.#name,
+                },
+              }, this.#clientDomain);
+            }
+          }
         }
       }
     });
@@ -519,14 +526,16 @@ class RevealFrame {
     }
     const fileElement = document.createElement(tag);
     fileElement.addEventListener('load', () => {
-      bus
-        .emit(
-          ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
-          {
-            height: this.#elementContainer.scrollHeight,
-          }, () => {
-          },
-        );
+      if (!this.#record?.inputStyles?.[STYLE_TYPE.BASE]?.overflow && tag !== 'img') {
+        bus
+          .emit(
+            ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
+            {
+              height: this.#elementContainer.scrollHeight,
+            }, () => {
+            },
+          );
+      }
     });
     fileElement.className = `SkyflowElement-${tag}-${STYLE_TYPE.BASE}`;
     if (tag === 'embed' && typeof ext === 'string') {
@@ -539,9 +548,7 @@ class RevealFrame {
         this.#inputStyles[STYLE_TYPE.BASE] = {
           ...this.#record.inputStyles[STYLE_TYPE.BASE],
         };
-        if (this.#record?.inputStyles
-          && this.#record?.inputStyles[STYLE_TYPE.BASE]
-           && this.#record?.inputStyles[STYLE_TYPE.BASE]?.overflow && this.#composableContainer) {
+        if (this.#record.inputStyles[STYLE_TYPE.BASE]?.overflow) {
           this.#elementContainer.className = `SkyflowElement-div-container-${STYLE_TYPE.BASE}`;
           const divStyles = {
             [STYLE_TYPE.BASE]: {
@@ -576,27 +583,22 @@ class RevealFrame {
     } else {
       this.#elementContainer.appendChild(fileElement);
     }
-    if (fileElement instanceof HTMLImageElement
-      && this.#record?.inputStyles
-      && this.#record?.inputStyles[STYLE_TYPE.BASE]
-      && this.#record?.inputStyles[STYLE_TYPE.BASE]?.overflow && this.#composableContainer) {
+    if (fileElement instanceof HTMLImageElement) {
       fileElement.onload = () => {
-        if (fileElement?.naturalWidth && fileElement?.naturalHeight) {
+        if (this.#record?.inputStyles?.[STYLE_TYPE.BASE]?.overflow) {
           fileElement.style.width = `${fileElement.naturalWidth}px`;
           fileElement.style.height = `${fileElement.naturalHeight}px`;
+          if (this.#record.inputStyles[STYLE_TYPE.BASE]?.width) {
+            this.#elementContainer.style.width = this.#record.inputStyles[STYLE_TYPE.BASE].width;
+          }
+          if (this.#record.inputStyles[STYLE_TYPE.BASE]?.height) {
+            this.#elementContainer.style.height = this.#record.inputStyles[STYLE_TYPE.BASE].height;
+          }
+          this.#elementContainer.style.overflow = this.#record
+            .inputStyles[STYLE_TYPE.BASE].overflow as string;
         }
-
-        if (this.#record?.inputStyles[STYLE_TYPE.BASE]?.width) {
-          this.#elementContainer.style.width = this.#record.inputStyles[STYLE_TYPE.BASE].width;
-        }
-        if (this.#record?.inputStyles[STYLE_TYPE.BASE]?.height) {
-          this.#elementContainer.style.height = this.#record.inputStyles[STYLE_TYPE.BASE].height;
-        }
-        this.#elementContainer.style.overflow = this.#record
-          .inputStyles[STYLE_TYPE.BASE].overflow as string;
-
         window?.postMessage({
-          type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+          type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name,
         }, properties?.IFRAME_SECURE_ORIGIN);
       };
     }
