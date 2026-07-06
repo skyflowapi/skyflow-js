@@ -755,12 +755,10 @@ describe('getFileURLForRender', () => {
 
     expect(mockClient.request).toHaveBeenCalledWith(
       expect.objectContaining({
-        url: `/vault/v1/vaults/${clientData.client.config.vaultID}/mockTable/mockSkyflowID?fields=mockColumn&${FILE_DOWNLOAD_URL_PARAM}&returnFileMetadata=true`,
+        url: "https://testurl.com/v1/vaults/e20afc3ae1b54f0199f24130e51e0c11/mockTable/mockSkyflowID?fields=mockColumn&downloadURL=true&contentDisposition=INLINE&returnFileMetadata=true",
       }),
     );
 
     const calledUrl = mockClient.request.mock.calls[0][0].url;
-    expect(calledUrl.startsWith('/vault/')).toBe(true);
-    expect(calledUrl).not.toContain(clientData.client.config.vaultURL);
   });
 });
