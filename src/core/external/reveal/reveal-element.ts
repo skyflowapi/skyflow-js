@@ -5,7 +5,7 @@ import bus from 'framebus';
 import SkyflowError from '../../../libs/skyflow-error';
 import uuid from '../../../libs/uuid';
 import {
-  Context, ErrorType, MessageType, RenderFileResponse,
+  Context, ErrorType,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
@@ -18,7 +18,6 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_TYPES,
   EVENT_TYPES,
-  REVEAL_TYPES,
   CUSTOM_ERROR_MESSAGES,
 } from '../../constants';
 import IFrame from '../common/iframe';
@@ -30,15 +29,9 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
-import logs from '../../../utils/logs';
-import { parameterizedString, printLog } from '../../../utils/logs-helper';
-import { formatForRenderClient } from '../../../core-utils/reveal';
 import properties from '../../../properties';
-import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
 import { Metadata, RevealContainerProps } from '../../internal/internal-types';
 import EventEmitter from '../../../event-emitter';
-
-const CLASS_NAME = 'RevealElement';
 
 class RevealElement extends SkyflowElement {
   #iframe: IFrame;
@@ -179,121 +172,6 @@ class RevealElement extends SkyflowElement {
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.READY);
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.MOUNT_START_TIME, Date.now());
     }
-  }
-
-  renderFile(): Promise<RenderFileResponse> {
-    this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
-    let altText = '';
-    if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
-      altText = this.#recordData.altText;
-    }
-    this.setAltText('loading...');
-    const loglevel = this.#context.logLevel;
-    if (this.#isSkyflowFrameReady) {
-      return new Promise((resolve, reject) => {
-        try {
-          validateInitConfig(this.#metaData.clientJSON.config);
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
-            MessageType.LOG,
-            loglevel);
-          validateRenderElementRecord(this.#recordData);
-          bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
-              {
-                type: REVEAL_TYPES.RENDER_FILE,
-                records: this.#recordData,
-                containerId: this.#containerId,
-                iframeName: this.#iframe.name,
-                errorMessages: this.#customerErrorMessages,
-              },
-              (revealData: any) => {
-                if (revealData.errors) {
-                  printLog(parameterizedString(
-                    logs.errorLogs.FAILED_RENDER,
-                  ), MessageType.ERROR,
-                  this.#context.logLevel);
-                  if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
-                    this.setAltText(altText);
-                  }
-                  reject(formatForRenderClient(revealData, this.#recordData.column as string));
-                } else {
-                  printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
-                    MessageType.LOG,
-                    this.#context.logLevel);
-                  printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
-                    CLASS_NAME, this.#recordData.skyflowID),
-                  MessageType.LOG, this.#context.logLevel);
-                  resolve(formatForRenderClient(revealData, this.#recordData.column as string));
-                }
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-          MessageType.LOG, loglevel);
-        } catch (err: any) {
-          printLog(`Error: ${err.message}`, MessageType.ERROR,
-            loglevel);
-          reject(err);
-        }
-      });
-    }
-    return new Promise((resolve, reject) => {
-      try {
-        validateInitConfig(this.#metaData.clientJSON.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_RENDER_RECORDS, CLASS_NAME),
-          MessageType.LOG,
-          loglevel);
-        validateRenderElementRecord(this.#recordData);
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#metaData.uuid, () => {
-            bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
-                {
-                  type: REVEAL_TYPES.RENDER_FILE,
-                  records: this.#recordData,
-                  containerId: this.#containerId,
-                  iframeName: this.#iframe.name,
-                  errorMessages: this.#customerErrorMessages,
-                },
-                (revealData: any) => {
-                  if (revealData.errors) {
-                    printLog(parameterizedString(
-                      logs.errorLogs.FAILED_RENDER,
-                    ), MessageType.ERROR,
-                    this.#context.logLevel);
-                    if (Object.prototype.hasOwnProperty.call(this.#recordData, 'altText')) {
-                      this.setAltText(altText);
-                    }
-                    reject(formatForRenderClient(revealData, this.#recordData.column as string));
-                  } else {
-                    printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
-                      MessageType.LOG,
-                      this.#context.logLevel);
-                    printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
-                      CLASS_NAME, this.#recordData.skyflowID),
-                    MessageType.LOG, this.#context.logLevel);
-                    resolve(formatForRenderClient(revealData, this.#recordData.column as string));
-                  }
-                },
-              );
-            printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-            MessageType.LOG, loglevel);
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-          CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-        MessageType.LOG, loglevel);
-      } catch (err: any) {
-        printLog(`Error: ${err.message}`, MessageType.ERROR,
-          loglevel);
-        reject(err);
-      }
-    });
   }
 
   iframeName(): string {

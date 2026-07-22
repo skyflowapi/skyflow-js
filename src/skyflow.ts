@@ -70,6 +70,7 @@ export interface SkyflowConfigOptions {
 export interface ISkyflow {
   vaultID?: string;
   vaultURL?: string;
+  clusterId?: string;
   getBearerToken: () => Promise<string>;
   options?: SkyflowConfigOptions;
 }

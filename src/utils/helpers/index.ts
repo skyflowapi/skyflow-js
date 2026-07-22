@@ -8,6 +8,7 @@ import {
   COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType,
 } from '../../core/constants';
 import { IRevealElementOptions } from '../../core/external/reveal/reveal-container';
+import { Env } from '../common';
 import SkyflowError from '../../libs/skyflow-error';
 import { ContainerType, ISkyflow } from '../../skyflow';
 import SKYFLOW_ERROR_CODE from '../constants';
@@ -36,6 +37,27 @@ export function removeSpaces(inputString:string) {
 export function formatVaultURL(vaultURL?: string) {
   if (typeof vaultURL !== 'string') return vaultURL;
   return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
+}
+
+const FLOW_DB_VAULT_DOMAIN = '.skyvault.';
+const FLOW_DB_ENV_DOMAIN: Record<Env, string> = {
+  [Env.DEV]: 'skyflowapis.dev',
+  [Env.STAGE]: 'skyflowapis.tech',
+  [Env.SANDBOX]: 'skyflowapis-preview.com',
+  [Env.PROD]: 'skyflowapis.com',
+};
+
+// Builds the FlowDB base URL from clusterId + env, mirroring the server SDKs:
+// https://{clusterId}.skyvault.{envDomain}
+export function getFlowDBVaultURL(clusterId?: string, env: Env = Env.PROD): string {
+  const envDomain = FLOW_DB_ENV_DOMAIN[env] || FLOW_DB_ENV_DOMAIN[Env.PROD];
+  return `https://${clusterId}${FLOW_DB_VAULT_DOMAIN}${envDomain}`;
+}
+
+// Resolves the FlowDB base URL for a client config. An explicitly provided
+// vaultURL wins (local/testing override); otherwise it is derived from clusterId + env.
+export function resolveVaultBaseURL(config: ISkyflow): string {
+  return config?.vaultURL || getFlowDBVaultURL(config?.clusterId, config?.options?.env);
 }
 
 export function checkIfDuplicateExists(arr) {

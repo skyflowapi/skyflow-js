@@ -14,6 +14,7 @@ import {
   constructUpdateRecordResponse,
   constructUploadResponse,
   updateRecordsBySkyflowID,
+  FlowDBInsertRecord,
 } from '../../../core-utils/collect';
 import {
   fetchRecordsGET,
@@ -61,11 +62,12 @@ import properties from '../../../properties';
 import {
   fileValidation, generateUploadFileName,
   getAtobValue, getSDKNameAndVersion, getValueFromName, vaildateFileName,
+  resolveVaultBaseURL,
 } from '../../../utils/helpers';
 import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
-  BatchInsertRequestBody, ElementInfo, TokenizeDataInput, UploadFileDataInput,
+  ElementInfo, TokenizeDataInput, UploadFileDataInput,
 } from '../internal-types';
 import IFrameFormElement from '../iframe-form';
 
@@ -329,6 +331,7 @@ class SkyflowFrameController {
             elementIds: data.elementIds as Array<ElementInfo>,
             containerId: data.containerId as string,
           };
+          //change to flow db
           this.tokenize(tokenizeDataInput)
             .then((response: CollectResponse) => {
               callback(response);
@@ -461,18 +464,16 @@ class SkyflowFrameController {
   }
 
   insertData(records: IInsertRecordInput, options: IInsertOptions): Promise<InsertResponse> {
-    const requestBody: Array<BatchInsertRequestBody> = constructInsertRecordRequest(
+    const requestBody: Array<FlowDBInsertRecord> = constructInsertRecordRequest(
       records, options,
     );
     return new Promise((rootResolve, rootReject) => {
       getAccessToken(this.#clientId).then((authToken) => {
         this.#client
           .request({
-            body: JSON.stringify({ records: requestBody }),
+            body: JSON.stringify({ vaultID: this.#client.config.vaultID, records: requestBody }),
             requestMethod: 'POST',
-            url:
-            `${this.#client.config.vaultURL}/v1/vaults/${
-              this.#client.config.vaultID}`,
+            url: `${resolveVaultBaseURL(this.#client.config)}/v2/records/insert`,
             headers: {
               Authorization: `Bearer ${authToken}`,
             },
@@ -690,7 +691,7 @@ class SkyflowFrameController {
         }
       }
     }
-    let finalInsertRequest: Array<BatchInsertRequestBody>;
+    let finalInsertRequest: Array<FlowDBInsertRecord>;
     let finalInsertRecords;
     let finalUpdateRecords;
     let insertResponse: InsertResponse;
@@ -716,9 +717,9 @@ class SkyflowFrameController {
         if (finalInsertRequest.length !== 0) {
           client
             .request({
-              body: JSON.stringify({ records: finalInsertRequest }),
+              body: JSON.stringify({ vaultID: client.config.vaultID, records: finalInsertRequest }),
               requestMethod: 'POST',
-              url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+              url: `${resolveVaultBaseURL(client.config)}/v2/records/insert`,
               headers: {
                 authorization: `Bearer ${authToken}`,
                 'content-type': 'application/json',

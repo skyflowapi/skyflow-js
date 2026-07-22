@@ -17,6 +17,8 @@ const SKYFLOW_ERROR_CODE = {
   VAULTURL_IS_REQUIRED: { code: 400, description: logs.errorLogs.VAULTURL_IS_REQUIRED },
   EMPTY_VAULTURL_IN_INIT: { code: 400, description: logs.errorLogs.EMPTY_VAULTURL_IN_INIT },
   INVALID_VAULTURL_IN_INIT: { code: 400, description: logs.errorLogs.INVALID_VAULTURL_IN_INIT },
+  CLUSTER_ID_IS_REQUIRED: { code: 400, description: logs.errorLogs.CLUSTER_ID_IS_REQUIRED },
+  EMPTY_CLUSTER_ID_IN_INIT: { code: 400, description: logs.errorLogs.EMPTY_CLUSTER_ID_IN_INIT },
   GET_BEARER_TOKEN_IS_REQUIRED: {
     code: 400,
     description: logs.errorLogs.GET_BEARER_TOKEN_IS_REQUIRED,

@@ -614,9 +614,10 @@ describe('fetchRecordsByTokenIdComposable', () => {
 
     await fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken');
     
+    // FlowDB detokenize omits per-token redaction; the request carries the token list.
     expect(mockClient.request).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.stringContaining('PLAIN_TEXT'),
+        body: expect.stringContaining('token1'),
       })
     );
   });
@@ -633,9 +634,10 @@ describe('fetchRecordsByTokenIdComposable', () => {
 
     await fetchRecordsByTokenIdComposable(mockTokenRecords, mockClient, 'mockToken');
     
+    // FlowDB detokenize omits per-token redaction; the request carries the token list.
     expect(mockClient.request).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.stringContaining('PLAIN_TEXT'),
+        body: expect.stringContaining('token1'),
       })
     );
   });

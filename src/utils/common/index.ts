@@ -64,6 +64,8 @@ export enum LogLevel{
 
 export enum Env{
   DEV = 'DEV',
+  STAGE = 'STAGE',
+  SANDBOX = 'SANDBOX',
   PROD = 'PROD',
 }
 

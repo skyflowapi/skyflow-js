@@ -292,8 +292,7 @@ const buildUpdateRecords = (overrides = {}) => ({
   test("resolves with tokenized fields when options.tokens=true", async () => {
     const mockClient = buildClient();
     jest.spyOn(mockClient, 'request').mockResolvedValue({
-      skyflow_id: 'id1',
-      tokens: { name: 'tok123' },
+      records: [{ skyflowID: 'id1', tokens: { name: 'tok123' } }],
     });
     const skyflowRecords = buildUpdateRecords();
     await expect(updateRecordsBySkyflowIDComposable(skyflowRecords, mockClient, { tokens: true }, 'auth-token'))
@@ -309,7 +308,7 @@ const buildUpdateRecords = (overrides = {}) => ({
 
   test("resolves with non-tokenized fields when options.tokens=false", async () => {
     const mockClient = buildClient();
-    jest.spyOn(mockClient, 'request').mockResolvedValue({ skyflow_id: 'id1' });
+    jest.spyOn(mockClient, 'request').mockResolvedValue({ records: [{ skyflowID: 'id1' }] });
     const skyflowRecords = buildUpdateRecords();
     await expect(updateRecordsBySkyflowIDComposable(skyflowRecords, mockClient, { tokens: false }, 'auth-token'))
       .resolves.toEqual({
@@ -340,7 +339,7 @@ const buildUpdateRecords = (overrides = {}) => ({
     const mockClient = buildClient();
     // First call succeeds, second fails
     jest.spyOn(mockClient, 'request')
-      .mockResolvedValueOnce({ skyflow_id: 'id1', tokens: { name: 'tok123' } })
+      .mockResolvedValueOnce({ records: [{ skyflowID: 'id1', tokens: { name: 'tok123' } }] })
       .mockRejectedValueOnce({ error: { code: 400, description: 'bad request' } });
     const skyflowRecords = {
       updateRecords: [
@@ -384,21 +383,21 @@ describe('updateRecordsBySkyflowID', () => {
 
   test('resolves with tokenized records when tokens=true and all succeed', async () => {
     const client = buildClient();
-    client.request.mockResolvedValue({ skyflow_id: 'id1', tokens: { name: 'tok123' } });
+    client.request.mockResolvedValue({ records: [{ skyflowID: 'id1', tokens: { name: 'tok123' } }] });
     const skyflowRecords = buildUpdateRecords();
     await expect(updateRecordsBySkyflowID(skyflowRecords, client, { tokens: true }))
       .resolves.toEqual([
         { table: 'table1', fields: { skyflow_id: 'id1', name: 'tok123' } },
       ]);
     expect(client.request).toHaveBeenCalledWith(expect.objectContaining({
-      requestMethod: 'PUT',
-      url: 'https://vaulturl.com/v1/vaults/vault123/table1/id1',
+      requestMethod: 'POST',
+      url: 'https://vaulturl.com/v2/records/update',
     }));
   });
 
   test('resolves with non-tokenized records when tokens=false and all succeed', async () => {
     const client = buildClient();
-    client.request.mockResolvedValue({ skyflow_id: 'id1' });
+    client.request.mockResolvedValue({ records: [{ skyflowID: 'id1' }] });
     const skyflowRecords = buildUpdateRecords();
     await expect(updateRecordsBySkyflowID(skyflowRecords, client, { tokens: false }))
       .resolves.toEqual([
@@ -421,7 +420,7 @@ describe('updateRecordsBySkyflowID', () => {
   test('rejects with mixed records & errors when partial failure occurs', async () => {
     const client = buildClient();
     client.request
-      .mockResolvedValueOnce({ skyflow_id: 'id1', tokens: { name: 'tok123' } })
+      .mockResolvedValueOnce({ records: [{ skyflowID: 'id1', tokens: { name: 'tok123' } }] })
       .mockRejectedValueOnce({ error: { code: 400, description: 'bad request' } });
     const skyflowRecords = {
       updateRecords: [
@@ -453,11 +452,10 @@ describe('insertDataInCollect', () => {
     const client = buildClient();
     const options = { tokens: true };
     const recordsPayload = { records: [{ table: 'table1', fields: { cvv: '122' } }] };
-    // Mock response shape expected by constructInsertRecordResponse when tokens=true
+    // Mock FlowDB insert response shape expected by constructInsertRecordResponse when tokens=true
     client.request.mockResolvedValue({
-      responses: [
-        { records: [{ skyflow_id: 'sky123' }] }, // POST response (index 0)
-        { fields: { '*': 'ignore', cvv: 'tok-cvv-999' } }, // GET response (index 1)
+      records: [
+        { skyflowID: 'sky123', tableName: 'table1', tokens: { cvv: 'tok-cvv-999' } },
       ],
     });
   const result = await insertDataInCollect(recordsPayload.records, client, options, finalInsertRecords, 'auth-token');
@@ -469,10 +467,10 @@ describe('insertDataInCollect', () => {
         },
       ],
     });
-    // Ensure request invoked with proper vault path/method
+    // Ensure request invoked with proper FlowDB path/method
     expect(client.request).toHaveBeenCalledWith(expect.objectContaining({
       requestMethod: 'POST',
-      url: 'https://vaulturl.com/v1/vaults/vault123',
+      url: 'https://vaulturl.com/v2/records/insert',
     }));
   });
 
@@ -481,8 +479,8 @@ describe('insertDataInCollect', () => {
     const options = { tokens: false };
     const recordsPayload = { records: [{ table: 'table1', fields: { cvv: '122' } }] };
     client.request.mockResolvedValue({
-      responses: [
-        { records: [{ skyflow_id: 'sky123' }] },
+      records: [
+        { skyflowID: 'sky123', tableName: 'table1' },
       ],
     });
   const result = await insertDataInCollect(recordsPayload.records, client, options, finalInsertRecords, 'auth-token');
@@ -520,9 +518,8 @@ describe('insertDataInMultipleFiles', () => {
     const options = { tokens: true };
     const recordsPayload = { records: [{ table: 'files_table', fields: { file_ref: 'ref1' } }] };
     client.request.mockResolvedValue({
-      responses: [
-        { records: [{ skyflow_id: 'file123' }] },
-        { fields: { '*': 'ignore', file_ref: 'tok-file-abc' } },
+      records: [
+        { skyflowID: 'file123', tableName: 'files_table', tokens: { file_ref: 'tok-file-abc' } },
       ],
     });
   const result = await insertDataInMultipleFiles(recordsPayload.records, client, options, finalInsertRecords, 'auth-token');
@@ -541,8 +538,8 @@ describe('insertDataInMultipleFiles', () => {
     const options = { tokens: false };
     const recordsPayload = { records: [{ table: 'files_table', fields: { file_ref: 'ref1' } }] };
     client.request.mockResolvedValue({
-      responses: [
-        { records: [{ skyflow_id: 'file123' }] },
+      records: [
+        { skyflowID: 'file123', tableName: 'files_table' },
       ],
     });
   const result = await insertDataInMultipleFiles(recordsPayload.records, client, options, finalInsertRecords, 'auth-token');

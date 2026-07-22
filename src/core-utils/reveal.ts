@@ -19,22 +19,25 @@ import {
   IRevealRecordComposable,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
+import { resolveVaultBaseURL } from '../utils/helpers';
 import { FILE_DOWNLOAD_URL_PARAM } from '../core/constants';
 
 interface IApiSuccessResponse {
-  records: [
+  response: [
     {
       token: string;
-      valueType:string;
-      value:string;
+      value: any;
+      tokenGroupName?: string;
+      error?: string;
+      httpCode?: number;
     },
   ];
 }
 
 const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
-  const currentResponseRecords = response.records;
+  const currentResponseRecords = response?.response || [];
   return currentResponseRecords.map((record) => (
-    { token: record.token, value: record.value, valueType: record.valueType }));
+    { token: record.token, value: record.value, valueType: record.tokenGroupName }));
 };
 
 const formatForPureJsFailure = (cause, tokenId:string, purejs: boolean) => {
@@ -131,7 +134,9 @@ const getTokenRecordsFromVault = (
   client: Client,
   authToken:string,
 ): Promise<any> => {
-  const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/detokenize`;
+  // FlowDB detokenize. Redaction in FlowDB is applied per token-group (optional
+  // tokenGroupRedactions); it is omitted here so the vault applies default redaction.
+  const vaultEndPointurl: string = `${resolveVaultBaseURL(client.config)}/v2/tokens/detokenize`;
   return client.request({
     requestMethod: 'POST',
     url: vaultEndPointurl,
@@ -141,12 +146,8 @@ const getTokenRecordsFromVault = (
     },
     body:
       JSON.stringify({
-        detokenizationParameters: [
-          {
-            token,
-            redaction,
-          },
-        ],
+        vaultID: client.config.vaultID,
+        tokens: [token],
       }),
   });
 };

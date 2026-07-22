@@ -16,7 +16,6 @@ import {
   CollectElementOptions,
   CollectResponse,
   ICollectOptions,
-  UploadFilesResponse,
   ContainerOptions,
   ErrorType,
 } from '../../../utils/common';
@@ -402,110 +401,6 @@ class CollectContainer extends Container {
         printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
         reject(err);
       }
-    });
-  };
-
-  uploadFiles = (options?: ICollectOptions): Promise<UploadFilesResponse> => {
-    this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
-    if (this.#isSkyflowFrameReady) {
-      return new Promise((resolve, reject) => {
-        try {
-          validateInitConfig(this.#metaData.clientJSON.config);
-          if (Object.keys(this.#elements).length === 0) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
-          }
-          this.#removeStaleElements();
-          const fileElements = Object.values(this.#elements);
-          const elementIds = Object.keys(this.#elements);
-          fileElements.forEach((element) => {
-            if (!element.isMounted()) {
-              throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
-            }
-            element.isValidElement();
-          });
-          bus
-            // .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
-              {
-                type: COLLECT_TYPES.FILE_UPLOAD,
-                ...options,
-                elementIds,
-                containerId: this.#containerId,
-                errorMessages: this.#customErrorMessages,
-              },
-              (data: any) => {
-                if (!data || data?.error) {
-                  printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                  reject(data?.error);
-                } else {
-                  printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                    MessageType.LOG,
-                    this.#context.logLevel);
-
-                  resolve(data);
-                }
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
-          MessageType.LOG, this.#context.logLevel);
-        } catch (err:any) {
-          printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
-          reject(err);
-        }
-      });
-    }
-    return new Promise((resolve, reject) => {
-      bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
-        .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
-          try {
-            validateInitConfig(this.#metaData.clientJSON.config);
-            if (Object.keys(this.#elements).length === 0) {
-              throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
-            }
-            this.#removeStaleElements();
-            const fileElements = Object.values(this.#elements);
-            const elementIds = Object.keys(this.#elements);
-            fileElements.forEach((element) => {
-              if (!element.isMounted()) {
-                throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
-              }
-              element.isValidElement();
-            });
-            bus
-              // .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#metaData.uuid,
-                {
-                  type: COLLECT_TYPES.FILE_UPLOAD,
-                  ...options,
-                  elementIds,
-                  containerId: this.#containerId,
-                  errorMessages: this.#customErrorMessages,
-                },
-                (data: any) => {
-                  if (!data || data?.error) {
-                    printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                    reject(data?.error);
-                  } else {
-                    printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                      MessageType.LOG,
-                      this.#context.logLevel);
-
-                    resolve(data);
-                  }
-                },
-              );
-            printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
-            MessageType.LOG, this.#context.logLevel);
-          } catch (err:any) {
-            printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
-            reject(err);
-          }
-        });
     });
   };
 

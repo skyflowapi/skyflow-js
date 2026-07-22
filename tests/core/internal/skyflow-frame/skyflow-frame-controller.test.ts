@@ -86,20 +86,11 @@ const pushEventResponse = {
 };
 
 const insertResponse = {
-  vaultID: "vault123",
-  responses: [
+  records: [
     {
-      table: "table1",
-      records: [
-        {
-          skyflow_id: "testId",
-        },
-      ],
-    },
-    {
-      table: "table1",
-      fields: {
-        "*": "testId",
+      skyflowID: "testId",
+      tableName: "table1",
+      tokens: {
         first_name: "token1",
         primary_card: {
           card_number: "token2",
@@ -111,14 +102,10 @@ const insertResponse = {
 };
 
 const insertResponseWithoutTokens = {
-  vaultID: "vault123",
-  responses: [
+  records: [
     {
-      records: [
-        {
-          skyflow_id: "testId",
-        },
-      ],
+      skyflowID: "testId",
+      tableName: "table1",
     },
   ],
 };
@@ -657,20 +644,18 @@ const detokenizeRecordWithRedaction: IRevealRecord[] = [
 ];
 
 const detokenizeResponse = {
-  records: [
+  response: [
     {
-      token_id: "token1",
-      fields: {
-        cvv: "123",
-      },
+      token: "token1",
+      value: "123",
     },
   ],
 };
 
 const detokenizeResponseWithRedaction = {
-  records: [
+  response: [
     {
-      token_id: "token1",
+      token: "token1",
       value: "123",
     },
   ],

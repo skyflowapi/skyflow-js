@@ -577,14 +577,25 @@ export const validateInitConfig = (initConfig: ISkyflow) => {
   if (!initConfig.vaultID) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_VAULTID_IN_INIT, [], true);
   }
-  if (!Object.prototype.hasOwnProperty.call(initConfig, 'vaultURL')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.VAULTURL_IS_REQUIRED, [], true);
-  }
-  if (!initConfig.vaultURL) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT, [], true);
-  }
-  if (initConfig.vaultURL && !isValidURL(initConfig.vaultURL)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VAULTURL_IN_INIT, [], true);
+  const hasClusterId = Object.prototype.hasOwnProperty.call(initConfig, 'clusterId');
+  if (hasClusterId) {
+    // FlowDB path: base URL is derived from clusterId. vaultURL is an optional override.
+    if (!initConfig.clusterId) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_CLUSTER_ID_IN_INIT, [], true);
+    }
+    if (initConfig.vaultURL && !isValidURL(initConfig.vaultURL)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VAULTURL_IN_INIT, [], true);
+    }
+  } else {
+    if (!Object.prototype.hasOwnProperty.call(initConfig, 'vaultURL')) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.VAULTURL_IS_REQUIRED, [], true);
+    }
+    if (!initConfig.vaultURL) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_VAULTURL_IN_INIT, [], true);
+    }
+    if (initConfig.vaultURL && !isValidURL(initConfig.vaultURL)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_VAULTURL_IN_INIT, [], true);
+    }
   }
   if (!Object.prototype.hasOwnProperty.call(initConfig, 'getBearerToken')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.GET_BEARER_TOKEN_IS_REQUIRED, [], true);

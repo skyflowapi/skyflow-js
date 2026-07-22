@@ -7,6 +7,7 @@ import get from 'lodash/get';
 import Client from '../client';
 import SkyflowError from '../libs/skyflow-error';
 import { getAccessToken } from '../utils/bus-events';
+import { resolveVaultBaseURL } from '../utils/helpers';
 import {
   IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
   MessageType, LogLevel,
@@ -19,11 +20,22 @@ import {
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
 import IFrameFormElement from '../core/internal/iframe-form';
-import { BatchInsertRequestBody } from '../core/internal/internal-types';
 
 export interface IUpsertOptions{
   table: string,
   column:string,
+}
+
+export interface FlowDBUpsert {
+  uniqueColumns: string[],
+  updateType?: string,
+}
+
+export interface FlowDBInsertRecord {
+  data: Record<string, any>,
+  tableName: string,
+  tokens?: Record<string, any>,
+  upsert?: FlowDBUpsert,
 }
 
 export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions> | undefined) => {
@@ -41,72 +53,39 @@ export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions>
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
   options: Record<string, any> = { tokens: true },
-): Array<BatchInsertRequestBody> => {
-  const requestBody: Array<BatchInsertRequestBody> = [];
-  if (options?.tokens || options === null) {
-    records.records.forEach((record, index) => {
-      const upsertColumn = getUpsertColumn(record.table, options.upsert);
-      requestBody.push({
-        method: 'POST',
-        quorum: true,
-        tableName: record.table,
-        fields: record.fields,
-        ...(options?.upsert ? { upsert: upsertColumn } : {}),
-      });
-      requestBody.push({
-        method: 'GET',
-        tableName: record.table,
-        ID: `$responses.${2 * index}.records.0.skyflow_id`,
-        tokenization: true,
-      });
-    });
-  } else {
-    records.records.forEach((record) => {
-      const elseUpsertColumn = getUpsertColumn(record.table, options.upsert);
+): Array<FlowDBInsertRecord> => records.records.map((record) => {
+  const upsertColumn = getUpsertColumn(record.table, options?.upsert);
+  return {
+    data: record.fields,
+    tableName: record.table,
+    ...(options?.upsert && upsertColumn ? { upsert: { uniqueColumns: [upsertColumn] } } : {}),
+  };
+});
 
-      requestBody.push({
-        method: 'POST',
-        quorum: true,
-        tableName: record.table,
-        fields: record.fields,
-        ...(options?.upsert ? { upsert: elseUpsertColumn } : {}),
-      });
-    });
-  }
-  return requestBody;
-};
-
+// Maps a FlowDB insert response ({ records: [{ skyflowID, tokens, tableName }] }) back
+// into the existing public CollectResponse shape so the SDK contract is unchanged.
 export const constructInsertRecordResponse = (
   responseBody: any,
   tokens: boolean,
   records: IInsertRecord[],
-): InsertResponse => {
-  if (tokens) {
+): InsertResponse => ({
+  records: (responseBody?.records || []).map((record: any, index: number) => {
+    const table = record?.tableName || records[index]?.table;
+    if (tokens) {
+      return {
+        table,
+        fields: {
+          skyflow_id: record?.skyflowID,
+          ...(record?.tokens || {}),
+        },
+      };
+    }
     return {
-      records: responseBody.responses
-        .map((res, index) => {
-          if (index % 2 !== 0) {
-            const skyflowId = responseBody.responses[index - 1].records[0].skyflow_id;
-            delete res.fields['*'];
-            return {
-              table: records[Math.floor(index / 2)].table,
-              fields: {
-                skyflow_id: skyflowId,
-                ...res.fields,
-              },
-            };
-          }
-          return res;
-        }).filter((res, index) => index % 2 !== 0),
+      table,
+      skyflow_id: record?.skyflowID,
     };
-  }
-  return {
-    records: responseBody.responses.map((res, index) => ({
-      table: records[index].table,
-      skyflow_id: res.records[0].skyflow_id,
-    })),
-  };
-};
+  }),
+});
 
 export const constructUpdateRecordRequest = (
   updateData: IUpdateRequest,
@@ -146,18 +125,19 @@ export const constructFinalUpdateRecordResponse = (
   tokens: boolean,
   records: any,
 ) => {
+  const updatedRecord = responseBody?.records?.[0] || {};
   if (tokens) {
     return {
       table: records.table,
       fields: {
         skyflow_id: records.skyflowID,
-        ...responseBody.tokens,
+        ...(updatedRecord.tokens || {}),
       },
     };
   }
   return {
     table: records.table,
-    skyflow_id: responseBody.skyflow_id,
+    skyflow_id: updatedRecord.skyflowID,
   };
 };
 
@@ -250,13 +230,17 @@ const updateRecordsInVault = (
   skyflowIdRecord.fields = omit(skyflowIdRecord.fields, 'skyflowID');
   return client.request({
     body: JSON.stringify({
-      record: {
-        fields: { ...skyflowIdRecord.fields },
-      },
-      tokenization: options?.tokens !== undefined ? options.tokens : true,
+      vaultID: client.config.vaultID,
+      records: [
+        {
+          skyflowID,
+          tableName: table,
+          data: { ...skyflowIdRecord.fields },
+        },
+      ],
     }),
-    requestMethod: 'PUT',
-    url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${table}/${skyflowID}`,
+    requestMethod: 'POST',
+    url: `${resolveVaultBaseURL(client.config)}/v2/records/update`,
     headers: {
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',
@@ -390,10 +374,11 @@ export const insertDataInCollect = async (
   client
     ?.request({
       body: JSON.stringify({
+        vaultID: client.config.vaultID,
         records,
       }),
       requestMethod: 'POST',
-      url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+      url: `${resolveVaultBaseURL(client.config)}/v2/records/insert`,
       headers: {
         authorization: `Bearer ${authToken}`,
         'content-type': 'application/json',

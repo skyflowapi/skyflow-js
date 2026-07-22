@@ -112,6 +112,8 @@ const logs = {
     VAULTURL_IS_REQUIRED: 'Initialization failed. Invalid credentials. Specify a valid \'vaultURL\'',
     EMPTY_VAULTURL_IN_INIT: 'Initialization failed. Invalid credentials. Specify a valid \'vaultURL\'',
     INVALID_VAULTURL_IN_INIT: 'Initialization failed. Invalid client credentials. \'vaultURL\' must be begin with \'https://.\'',
+    CLUSTER_ID_IS_REQUIRED: 'Initialization failed. Invalid credentials. Specify a valid \'clusterId\' or \'vaultURL\'',
+    EMPTY_CLUSTER_ID_IN_INIT: 'Initialization failed. Invalid credentials. Specify a valid \'clusterId\'',
     GET_BEARER_TOKEN_IS_REQUIRED: 'Initialization failed. Invalid client credentials. Specify a valid bearer token.',
     EMPTY_CONTAINER_TYPE: 'Container creation failed. \'containerType\' is invalid. Specify a valid container type.',
     INVALID_CONTAINER_TYPE: 'Container creation failed. \'%s1\' is invalid. Specify a valid container type.',

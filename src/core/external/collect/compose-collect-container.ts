@@ -24,7 +24,6 @@ import {
   InputStyles,
   ErrorTextStyles,
   ContainerOptions,
-  UploadFilesResponse,
   ErrorMessages,
   ErrorType,
 } from '../../../utils/common';
@@ -347,37 +346,6 @@ class ComposableContainer extends Container {
       this.#containerElement.mount(domElement);
       this.#isMounted = true;
     }
-    this.#elementsList.forEach((element) => {
-      this.#eventEmitter.on(`${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${element.elementName}`, (data, callback) => {
-        this.#getSkyflowBearerToken()?.then((authToken) => {
-          printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
-            MessageType.LOG,
-            this.#context.logLevel);
-          this.#emitEvent(
-            `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:${element.elementName}`,
-            {
-              elementName: element.name,
-              data: {
-                type: COLLECT_TYPES.FILE_UPLOAD,
-                containerId: this.#containerId,
-              },
-              clientConfig: {
-                vaultURL: this.#metaData?.clientJSON?.config?.vaultURL,
-                vaultID: this.#metaData?.clientJSON?.config?.vaultID,
-                authToken,
-              },
-              options: {
-                ...data?.options,
-              },
-              errorMessages: this.#customErrorMessages,
-            },
-          );
-        }).catch((err:any) => {
-          printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
-          callback(err);
-        });
-      });
-    });
     if (domElement instanceof HTMLElement
       && (domElement as HTMLElement).getRootNode() instanceof ShadowRoot) {
       this.#shadowRoot = domElement.getRootNode() as ShadowRoot;
@@ -508,74 +476,6 @@ class ComposableContainer extends Container {
       }
     }
   };
-
-  uploadFiles = (options: ICollectOptions):
-  Promise<UploadFilesResponse> => new Promise((resolve, reject) => {
-    try {
-      validateInitConfig(this.#metaData.clientJSON.config);
-      if (!this.#elementsList || this.#elementsList.length === 0) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE, [], true);
-      }
-      if (!this.#isMounted) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.COMPOSABLE_CONTAINER_NOT_MOUNTED, [], true);
-      }
-      const elementIds:{ frameId:string, elementId:string }[] = [];
-      this.#elementsList.forEach((element) => {
-        elementIds.push({
-          frameId: this.#tempElements.elementName,
-          elementId: element.elementName ?? '',
-        });
-      });
-      const client = Client.fromJSON(this.#metaData.clientJSON) as any;
-      const clientId = client.toJSON()?.metaData?.uuid || '';
-      this.#getSkyflowBearerToken()?.then((authToken) => {
-        printLog(parameterizedString(logs.infoLogs.BEARER_TOKEN_RESOLVED, CLASS_NAME),
-          MessageType.LOG,
-          this.#context.logLevel);
-        this.#emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + this.#containerId, {
-          data: {
-            type: COLLECT_TYPES.FILE_UPLOAD,
-            ...options,
-            // tokens: options?.tokens !== undefined ? options.tokens : true,
-            elementIds,
-            containerId: this.#containerId,
-          },
-          clientConfig: {
-            vaultURL: this.#metaData.clientJSON.config.vaultURL,
-            vaultID: this.#metaData.clientJSON.config.vaultID,
-            authToken,
-          },
-          errorMessages: this.#customErrorMessages,
-        });
-        window.addEventListener('message', (event) => {
-          if (event?.origin === properties.IFRAME_SECURE_ORIGIN) {
-            if (event.data?.type
-              === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_FILE_CALL_RESPONSE + this.#containerId) {
-              const data = event.data.data;
-              if (!data || data?.error) {
-                printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                reject(data?.error);
-              } else if (data?.fileUploadResponse) {
-                printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                  MessageType.LOG,
-                  this.#context.logLevel);
-                resolve(data);
-              } else {
-                printLog(`${JSON.stringify(data)}`, MessageType.ERROR, this.#context.logLevel);
-                reject(data);
-              }
-            }
-          }
-        });
-      }).catch((err:any) => {
-        printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
-        reject(err);
-      });
-    } catch (err:any) {
-      printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
-      reject(err);
-    }
-  });
 
   #updateListeners = () => {
     this.#eventEmitter.on(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_UPDATE_OPTIONS, (data) => {

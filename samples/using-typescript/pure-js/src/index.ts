@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2025 Skyflow, Inc.
 */
-import Skyflow, { 
+import Skyflow, {
   DetokenizeResponse,
   DetokenizeRequest,
   InsertRequest,
@@ -9,6 +9,7 @@ import Skyflow, {
   InsertResponse,
   RevealRecord,
   SkyflowConfig,
+  Env,
 } from 'skyflow-js';
 
 try {
@@ -19,7 +20,10 @@ try {
 
   const config: SkyflowConfig = {
     vaultID: '<VAULT_ID>',
-    vaultURL: '<VAULT_URL>',
+    clusterId: '<CLUSTER_ID>',
+    options: {
+      env: Env.PROD,
+    },
     getBearerToken: () => {
       return new Promise((resolve, reject) => {
         const Http = new XMLHttpRequest();
