@@ -21,8 +21,11 @@ import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-st
 import FrameElement from '.';
 import {
   checkForElementMatchRule, checkForValueMatch, constructElementsInsertReq,
-  constructInsertRecordRequest, insertDataInCollect,
-  updateRecordsBySkyflowIDComposable,
+  constructFlowDBInsertRequest,
+  constructFlowDBUpdateRequest,
+  // constructInsertRecordRequest, insertDataInCollect,
+  insertDataInCollectFlowDB,
+  updateDataInCollectFlowDB,
 } from '../../core-utils/collect';
 import SkyflowError from '../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../utils/constants';
@@ -406,11 +409,17 @@ export default class FrameElementInit {
     let finalInsertRequest;
     let finalInsertRecords;
     let finalUpdateRecords;
+    let finalUpdateRequest;
     try {
       [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
         insertRequestObject, updateRequestObject, options,
       );
-      finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
+      finalInsertRequest = constructFlowDBInsertRequest(
+        finalInsertRecords, options, clientConfig.vaultID,
+      );
+      finalUpdateRequest = constructFlowDBUpdateRequest(
+        finalUpdateRecords, options, clientConfig.vaultID,
+      );
     } catch (error:any) {
       return Promise.reject({
         error: error?.message,
@@ -429,16 +438,17 @@ export default class FrameElementInit {
 
       // const clientId = client.toJSON()?.metaData?.uuid || '';
       // getAccessToken(clientId).then((authToken) => {
-      if (finalInsertRequest.length !== 0) {
+      if (finalInsertRecords.records.length !== 0) {
         insertPromiseSet.push(
-          insertDataInCollect(finalInsertRequest,
+          insertDataInCollectFlowDB(finalInsertRequest,
             client, options, finalInsertRecords, clientConfig.authToken as string),
         );
       }
       if (finalUpdateRecords.updateRecords.length !== 0) {
         insertPromiseSet.push(
-          updateRecordsBySkyflowIDComposable(
-            finalUpdateRecords, client, options, clientConfig.authToken as string,
+          updateDataInCollectFlowDB(
+            finalUpdateRequest, client, options, finalUpdateRecords,
+            clientConfig.authToken as string,
           ),
         );
       }
@@ -450,6 +460,7 @@ export default class FrameElementInit {
           resultSet.forEach((result:
           { status: string; value: any; reason?: any; }) => {
             if (result.status === 'fulfilled') {
+              console.log('result.value', result.value);
               if (result.value.records !== undefined && Array.isArray(result.value.records)) {
                 result.value.records.forEach((record) => {
                   recordsResponse.push(record);

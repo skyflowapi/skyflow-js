@@ -34,6 +34,79 @@ export interface BatchInsertRequestBody {
   [key: string]: any;
 }
 
+export interface FlowDBUpsert {
+  updateType?: 'UPDATE' | 'REPLACE';
+  uniqueColumns: string[];
+}
+
+export interface FlowDBInsertRecordData {
+  data: Record<string, any>;
+  tokens?: Record<string, any>;
+  tableName?: string;
+  upsert?: FlowDBUpsert;
+}
+
+export interface FlowDBInsertRequestBody {
+  vaultID: string | undefined;
+  tableName?: string;
+  records: FlowDBInsertRecordData[];
+  upsert?: FlowDBUpsert;
+}
+
+export interface FlowDBUpdateRecordData {
+  skyflowID: string;
+  data: Record<string, any>;
+  tokens?: Record<string, any>;
+  tableName?: string;
+  updateType?: 'UPDATE' | 'REPLACE';
+}
+
+export interface FlowDBUpdateRequestBody {
+  vaultID: string | undefined;
+  tableName?: string;
+  records: FlowDBUpdateRecordData[];
+  updateType?: 'UPDATE' | 'REPLACE';
+}
+
+export interface FlowDBRecordResponse {
+  skyflowID: string;
+  tokens?: Record<string, any>;
+  data?: Record<string, any>;
+  hashedData?: Record<string, any>;
+  error?: string | null;
+  httpCode?: number;
+  tableName: string;
+}
+
+export interface FlowDBInsertResponseBody {
+  records: FlowDBRecordResponse[];
+}
+
+export interface FlowDBError {
+  code?: number | string;
+  description?: string;
+}
+
+export interface FlowDBInsertResponseRecord {
+  table: string;
+  fields: Record<string, any>;
+  hashedData?: Record<string, any>;
+}
+
+export interface FlowDBInsertResponseRecordError {
+  table?: string;
+  error: FlowDBError;
+}
+
+export interface FlowDBInsertResponse {
+  records: FlowDBInsertResponseRecord[];
+  errors: FlowDBInsertResponseRecordError[];
+}
+
+export interface FlowDBInsertRequestError {
+  errors: FlowDBInsertResponseRecordError[];
+}
+
 export interface ContainerProps {
   containerId: string;
   isMounted: boolean;

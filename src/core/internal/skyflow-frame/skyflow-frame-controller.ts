@@ -8,12 +8,15 @@ import {
   checkForElementMatchRule,
   checkForValueMatch,
   constructElementsInsertReq,
+  constructFlowDBInsertRequest,
+  constructFlowDBUpdateRequest,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
   constructUpdateRecordRequest,
   constructUpdateRecordResponse,
   constructUploadResponse,
-  updateRecordsBySkyflowID,
+  insertDataInCollectFlowDB,
+  updateDataInCollectFlowDB,
 } from '../../../core-utils/collect';
 import {
   fetchRecordsGET,
@@ -65,7 +68,8 @@ import {
 import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
-  BatchInsertRequestBody, ElementInfo, TokenizeDataInput, UploadFileDataInput,
+  BatchInsertRequestBody, ElementInfo, FlowDBInsertRequestBody, FlowDBUpdateRequestBody,
+  TokenizeDataInput, UploadFileDataInput,
 } from '../internal-types';
 import IFrameFormElement from '../iframe-form';
 
@@ -690,7 +694,8 @@ class SkyflowFrameController {
         }
       }
     }
-    let finalInsertRequest: Array<BatchInsertRequestBody>;
+    let finalInsertRequest: FlowDBInsertRequestBody;
+    let finalUpdateRequest: FlowDBUpdateRequestBody;
     let finalInsertRecords;
     let finalUpdateRecords;
     let insertResponse: InsertResponse;
@@ -703,7 +708,12 @@ class SkyflowFrameController {
       [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
         insertResponseObject, updateResponseObject, options,
       );
-      finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
+      finalInsertRequest = constructFlowDBInsertRequest(
+        finalInsertRecords, options, this.#client.config.vaultID,
+      );
+      finalUpdateRequest = constructFlowDBUpdateRequest(
+        finalUpdateRecords, options, this.#client.config.vaultID,
+      );
     } catch (error:any) {
       return Promise.reject({
         error: error?.message,
@@ -713,106 +723,96 @@ class SkyflowFrameController {
     const sendRequest = (): Promise<InsertResponse> => new Promise((rootResolve, rootReject) => {
       const clientId = client.toJSON()?.metaData?.uuid || '';
       getAccessToken(clientId).then((authToken) => {
-        if (finalInsertRequest.length !== 0) {
-          client
-            .request({
-              body: JSON.stringify({ records: finalInsertRequest }),
-              requestMethod: 'POST',
-              url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
-              headers: {
-                authorization: `Bearer ${authToken}`,
-                'content-type': 'application/json',
-              },
-            })
+        if (finalInsertRecords.records.length !== 0) {
+          insertDataInCollectFlowDB(
+            finalInsertRequest,
+            client,
+            options,
+            finalInsertRecords,
+            authToken as string,
+          )
             .then((response: any) => {
-              insertResponse = constructInsertRecordResponse(
-                response,
-                options.tokens ?? true,
-                finalInsertRecords.records,
-              );
               insertDone = true;
-              if (finalUpdateRecords.updateRecords.length === 0) {
-                rootResolve(insertResponse);
-              }
-              if (updateDone && updateErrorResponse !== undefined) {
-                if (updateErrorResponse.records === undefined) {
-                  updateErrorResponse.records = insertResponse.records;
-                } else {
-                  updateErrorResponse.records = (insertResponse.records || [])
-                    .concat(updateErrorResponse.records);
+              if (response.records !== undefined) {
+                insertResponse = response;
+                if (finalUpdateRecords.updateRecords.length === 0) {
+                  rootResolve(insertResponse);
                 }
-                rootReject(updateErrorResponse);
-              } else if (updateDone && updateResponse !== undefined) {
-                rootResolve(
-                  { records: (insertResponse.records || []).concat(updateResponse.records || []) },
-                );
-              }
-            })
-            .catch((error) => {
-              insertDone = true;
-              if (finalUpdateRecords.updateRecords.length === 0) {
-                rootReject(error);
+                if (updateDone && updateErrorResponse !== undefined) {
+                  if (updateErrorResponse.records === undefined) {
+                    updateErrorResponse.records = insertResponse.records;
+                  } else {
+                    updateErrorResponse.records = (insertResponse.records || [])
+                      .concat(updateErrorResponse.records);
+                  }
+                  rootReject(updateErrorResponse);
+                } else if (updateDone && updateResponse !== undefined) {
+                  rootResolve({
+                    records: (insertResponse.records || [])
+                      .concat(updateResponse.records || []),
+                  });
+                }
               } else {
-                insertErrorResponse = {
-                  errors: [
-                    {
-                      error: {
-                        code: error?.error?.code,
-                        description: error?.error?.description,
-                        type: error?.error?.type,
-                      },
-                    },
-                  ],
-                };
-              }
-              if (updateDone && updateResponse !== undefined) {
-                const errors = insertErrorResponse.errors;
-                const records = updateResponse.records;
-                rootReject({ errors, records });
-              } else if (updateDone && updateErrorResponse !== undefined) {
-                updateErrorResponse.errors = updateErrorResponse.errors
-                  .concat(insertErrorResponse.errors);
-                rootReject(updateErrorResponse);
+                if (finalUpdateRecords.updateRecords.length === 0) {
+                  rootReject(response);
+                } else {
+                  insertErrorResponse = response;
+                }
+                if (updateDone && updateResponse !== undefined) {
+                  const errors = insertErrorResponse.errors;
+                  const records = updateResponse.records;
+                  rootReject({ errors, records });
+                } else if (updateDone && updateErrorResponse !== undefined) {
+                  updateErrorResponse.errors = updateErrorResponse.errors
+                    .concat(insertErrorResponse.errors);
+                  rootReject(updateErrorResponse);
+                }
               }
             });
         }
         if (finalUpdateRecords.updateRecords.length !== 0) {
-          updateRecordsBySkyflowID(finalUpdateRecords, client, options)
+          updateDataInCollectFlowDB(
+            finalUpdateRequest,
+            client,
+            options,
+            finalUpdateRecords,
+            authToken as string,
+          )
             .then((response: any) => {
-              updateResponse = {
-                records: response,
-              };
               updateDone = true;
-              if (finalInsertRequest.length === 0) {
-                rootResolve(updateResponse);
-              }
-              if (insertDone && insertResponse !== undefined) {
-                rootResolve(
-                  { records: (insertResponse.records || []).concat(updateResponse.records || []) },
-                );
-              } else if (insertDone && insertErrorResponse !== undefined) {
-                const errors = insertErrorResponse.errors;
-                const records = updateResponse.records;
-                rootReject({ errors, records });
-              }
-            }).catch((error) => {
-              updateErrorResponse = error;
-              updateDone = true;
-              if (finalInsertRequest.length === 0) {
-                rootReject(error);
-              }
-              if (insertDone && insertResponse !== undefined) {
-                if (updateErrorResponse.records === undefined) {
-                  updateErrorResponse.records = insertResponse.records;
-                } else {
-                  updateErrorResponse.records = (insertResponse.records || [])
-                    .concat(updateErrorResponse.records);
+              if (response.records !== undefined) {
+                updateResponse = response;
+                if (finalInsertRecords.records.length === 0) {
+                  rootResolve(updateResponse);
                 }
-                rootReject(updateErrorResponse);
-              } else if (insertDone && insertErrorResponse !== undefined) {
-                updateErrorResponse.errors = updateErrorResponse.errors
-                  .concat(insertErrorResponse.errors);
-                rootReject(updateErrorResponse);
+                if (insertDone && insertResponse !== undefined) {
+                  rootResolve({
+                    records: (insertResponse.records || [])
+                      .concat(updateResponse.records || []),
+                  });
+                } else if (insertDone && insertErrorResponse !== undefined) {
+                  const errors = insertErrorResponse.errors;
+                  const records = updateResponse.records;
+                  rootReject({ errors, records });
+                }
+              } else {
+                updateErrorResponse = response;
+                if (finalInsertRecords.records.length === 0) {
+                  rootReject(response);
+                }
+                if (insertDone && insertResponse !== undefined) {
+                  if (updateErrorResponse.records === undefined) {
+                    updateErrorResponse.records = insertResponse.records;
+                  } else {
+                    updateErrorResponse.records = (insertResponse.records || [])
+                      .concat(updateErrorResponse.records);
+                  }
+                  rootReject(updateErrorResponse);
+                } else if (insertDone && insertErrorResponse !== undefined) {
+                  updateErrorResponse.errors = updateErrorResponse.errors
+                    .concat(insertErrorResponse.errors);
+                  rootReject(updateErrorResponse);
+                }
               }
             });
         }

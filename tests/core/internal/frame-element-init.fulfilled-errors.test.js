@@ -60,8 +60,12 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+// NOTE: These tokenize tests mock the privacyDB (v1) collect functions. frame-element-init now
+// uses the flowDB variant, so they are skipped for now. Re-enable when the privacyDB (PDB) variant
+// is restored. flowDB equivalents live in frame-element-init.flowdb.test.js.
+
 // Test 1: both promises fulfilled with only errors arrays
-it('tokenize rejects when both insert and update promises fulfill with only errors arrays (fulfilled errors-only branch)', async () => {
+it.skip('tokenize rejects when both insert and update promises fulfill with only errors arrays (fulfilled errors-only branch)', async () => {
   const instance = new FrameElementInit();
   const ins = makeTextElement({ name: 'alpha', tableName: 'patients', value: 'A' });
   const upd = makeTextElement({ name: 'beta', tableName: 'patients', value: 'B', skyflowID: 'idErr' });
@@ -76,7 +80,7 @@ it('tokenize rejects when both insert and update promises fulfill with only erro
 });
 
 // Test 2: mixed fulfilled records and fulfilled errors array
-it('tokenize rejects with combined object when insert fulfills records and update fulfills errors array (fulfilled mixed branch)', async () => {
+it.skip('tokenize rejects with combined object when insert fulfills records and update fulfills errors array (fulfilled mixed branch)', async () => {
   const instance = new FrameElementInit();
   const ins = makeTextElement({ name: 'alpha', tableName: 'patients', value: 'A' });
   const upd = makeTextElement({ name: 'first', tableName: 'patients', value: 'X', skyflowID: 'id999' });

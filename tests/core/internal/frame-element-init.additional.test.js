@@ -811,7 +811,12 @@ describe('FrameElementInit extended unit tests', () => {
   });
 
   // ===== Additional tokenize branch coverage (lines ~315-469) =====
-  test('tokenize accumulates checkbox values into comma-separated string', async () => {
+  // NOTE: The tokenize tests below mock the privacyDB (v1) collect functions
+  // (constructInsertRecordRequest / insertDataInCollect / updateRecordsBySkyflowIDComposable).
+  // frame-element-init now uses the flowDB variant, so these are skipped for now.
+  // Re-enable when the privacyDB (PDB) variant is restored. flowDB equivalents live in
+  // frame-element-init.flowdb.test.js.
+  test.skip('tokenize accumulates checkbox values into comma-separated string', async () => {
     const instance = new FrameElementInit();
     const checkbox1 = { ...makeTextElement({ name: 'agree', value: 'yes' }), fieldType: ELEMENTS.checkbox.name };
     const checkbox2 = { ...makeTextElement({ name: 'agree', value: 'no' }), fieldType: ELEMENTS.checkbox.name };
@@ -848,7 +853,7 @@ describe('FrameElementInit extended unit tests', () => {
     }
   });
 
-  test('tokenize builds updateRecords for same skyflowID and resolves update-only', async () => {
+  test.skip('tokenize builds updateRecords for same skyflowID and resolves update-only', async () => {
     const instance = new FrameElementInit();
     const e1 = makeTextElement({ name: 'first', tableName: 'patients', value: 'A', skyflowID: 'id123' });
     const e2 = makeTextElement({ name: 'second', tableName: 'patients', value: 'B', skyflowID: 'id123' });
@@ -862,7 +867,7 @@ describe('FrameElementInit extended unit tests', () => {
     expect(updateObj).toHaveProperty('id123');
   });
 
-  test('tokenize insert-only path resolves with insert records', async () => {
+  test.skip('tokenize insert-only path resolves with insert records', async () => {
     const instance = new FrameElementInit();
     const elem = makeTextElement({ name: 'alpha', tableName: 'patients', value: 'A' });
     instance.iframeFormList = [elem];
@@ -874,7 +879,7 @@ describe('FrameElementInit extended unit tests', () => {
     expect(res.records[0].id).toBe('ins1');
   });
 
-  test('tokenize mixed insert/update with one rejection returns combined object', async () => {
+  test.skip('tokenize mixed insert/update with one rejection returns combined object', async () => {
     const instance = new FrameElementInit();
     const ins = makeTextElement({ name: 'alpha', tableName: 'patients', value: 'A' });
     const upd = makeTextElement({ name: 'first', tableName: 'patients', value: 'X', skyflowID: 'id999' });
@@ -887,7 +892,7 @@ describe('FrameElementInit extended unit tests', () => {
     await expect(instance['tokenize']({ options: {} }, config)).rejects.toEqual({ records: [{ id: 'ins1' }], errors: [{ code: 'E1' }] });
   });
 
-  test('tokenize error-only path rejects with aggregated errors (no records)', async () => {
+  test.skip('tokenize error-only path rejects with aggregated errors (no records)', async () => {
     const instance = new FrameElementInit();
     const ins = makeTextElement({ name: 'alpha', tableName: 'patients', value: 'A' });
     const upd = makeTextElement({ name: 'beta', tableName: 'patients', value: 'B', skyflowID: 'idErr' });
@@ -901,7 +906,7 @@ describe('FrameElementInit extended unit tests', () => {
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
     await expect(instance['tokenize']({ options: {} }, config)).rejects.toEqual({ errors: [{ code: 'E_INS' }, { code: 'E_UPD' }]});
   });
-    test('tokenize error-only path rejects with aggregated errors (no records) case 2', async () => {
+    test.skip('tokenize error-only path rejects with aggregated errors (no records) case 2', async () => {
     const instance = new FrameElementInit();
     const ins = makeTextElement({ name: 'alpha', tableName: 'patients', value: 'A' });
     instance.iframeFormList = [ins];
@@ -914,7 +919,7 @@ describe('FrameElementInit extended unit tests', () => {
     await expect(instance['tokenize']({ options: {} }, config)).rejects.toEqual({ errors: [{ code: 'E_INS' }]});
   });
 
-  test('tokenize resolve with no errors (no errors)', async () => {
+  test.skip('tokenize resolve with no errors (no errors)', async () => {
     const instance = new FrameElementInit();
     const ins = makeTextElement({ name: 'alpha', tableName: 'patients', value: 'A' });
     // const upd = makeTextElement({ name: 'beta', tableName: 'patients', value: 'B', skyflowID: 'idErr' });
@@ -937,7 +942,7 @@ describe('FrameElementInit extended unit tests', () => {
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
     await expect(instance['tokenize']({ options: {} }, config)).rejects.toEqual({ error: 'bad-request' });
   });
-    test('tokenize PARTIAL error', async () => {
+    test.skip('tokenize PARTIAL error', async () => {
     const instance = new FrameElementInit();
     const ins = makeTextElement({ name: 'alpha', tableName: 'patients', value: 'A' });
     const upd = makeTextElement({ name: 'beta', tableName: 'patients', value: 'B', skyflowID: 'idErr' });
