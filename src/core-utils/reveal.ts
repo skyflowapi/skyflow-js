@@ -17,9 +17,16 @@ import {
   GetByIdResponse,
   GetByIdResponseRecord,
   IRevealRecordComposable,
+  RevealResponseFlowDB,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
 import { FILE_DOWNLOAD_URL_PARAM } from '../core/constants';
+import {
+  FlowDBDetokenizeRequestBody,
+  FlowDBDetokenizeResponseBody,
+  FlowDBDetokenizeResponse,
+  FlowDBDetokenizeRequestError,
+} from '../core/internal/internal-types';
 
 interface IApiSuccessResponse {
   records: [
@@ -150,6 +157,121 @@ const getTokenRecordsFromVault = (
       }),
   });
 };
+
+export const constructFlowDBDetokenizeRequest = (
+  tokenIdRecords: IRevealRecord[] | IRevealRecordComposable[],
+  vaultID: string | undefined,
+  options?: Record<string, any>,
+): FlowDBDetokenizeRequestBody => {
+  const tokens = tokenIdRecords.map((record) => record.token as string);
+
+  const explicit = options?.tokenGroupRedactions;
+  let tokenGroupRedactions;
+  if (Array.isArray(explicit) && explicit.length > 0) {
+    tokenGroupRedactions = explicit;
+  } else {
+    const fromElements = tokenIdRecords
+      .filter((record: any) => record?.tokenGroupName && record?.redaction)
+      .map((record: any) => ({
+        tokenGroupName: record.tokenGroupName,
+        redaction: record.redaction,
+      }));
+    if (fromElements.length > 0) {
+      tokenGroupRedactions = fromElements;
+    }
+  }
+
+  return {
+    vaultID,
+    tokens,
+    ...(tokenGroupRedactions ? { tokenGroupRedactions } : {}),
+  };
+};
+
+export const constructFlowDBDetokenizeResponse = (
+  responseBody: FlowDBDetokenizeResponseBody,
+): FlowDBDetokenizeResponse => {
+  const records: FlowDBDetokenizeResponse['records'] = [];
+  const errors: FlowDBDetokenizeResponse['errors'] = [];
+  (responseBody?.response || []).forEach((res) => {
+    if (res.error) {
+      errors.push({
+        token: res.token,
+        error: { code: res.httpCode, description: res.error },
+      });
+      return;
+    }
+    const hasMetadata = res.metadata && Object.keys(res.metadata).length > 0;
+    records.push({
+      token: res.token,
+      value: res.value,
+      ...(res.tokenGroupName ? { tokenGroupName: res.tokenGroupName } : {}),
+      ...(hasMetadata ? { metadata: res.metadata } : {}),
+    });
+  });
+  return { records, errors };
+};
+
+export const constructFlowDBDetokenizeError = (
+  error: any,
+): FlowDBDetokenizeRequestError => ({
+  errors: [
+    {
+      token: '',
+      error: {
+        code: error?.error?.code,
+        description: error?.error?.description,
+      },
+    },
+  ],
+});
+
+interface IDetokenizeVariant {
+  buildRequest(
+    client: Client,
+    tokenIdRecords: IRevealRecord[] | IRevealRecordComposable[],
+    options: Record<string, any> | undefined,
+    authToken: string,
+  ): Promise<any> | undefined;
+  parseSuccess(response: any): FlowDBDetokenizeResponse;
+  parseError(error: any): FlowDBDetokenizeRequestError;
+}
+
+const flowDBDetokenizeVariant: IDetokenizeVariant = {
+  buildRequest: (client, tokenIdRecords, options, authToken) => client?.request({
+    body: JSON.stringify(
+      constructFlowDBDetokenizeRequest(tokenIdRecords, client.config.vaultID, options),
+    ),
+    requestMethod: 'POST',
+    url: `${client.config.vaultURL}/v2/tokens/detokenize`,
+    headers: {
+      authorization: `Bearer ${authToken}`,
+      'content-type': 'application/json',
+    },
+  }),
+  parseSuccess: (response) => constructFlowDBDetokenizeResponse(response),
+  parseError: (error) => constructFlowDBDetokenizeError(error),
+};
+
+const executeDetokenize = (
+  variant: IDetokenizeVariant,
+  tokenIdRecords: IRevealRecord[] | IRevealRecordComposable[],
+  client: Client,
+  options: Record<string, any> | undefined,
+  authToken: string,
+): Promise<FlowDBDetokenizeResponse | FlowDBDetokenizeRequestError> => new Promise((resolve) => {
+  try {
+    variant.buildRequest(client, tokenIdRecords, options, authToken)
+      ?.then((response: any) => {
+        resolve(variant.parseSuccess(response));
+      })
+      ?.catch((error: any) => {
+        resolve(variant.parseError(error));
+      });
+  } catch (error) {
+    resolve(variant.parseError(error));
+  }
+});
 
 export const getFileURLForRender = (
   skyflowIdRecord: IRevealRecord,
@@ -337,6 +459,91 @@ export const fetchRecordsByTokenIdComposable = (
   });
 });
 
+export const fetchRecordsByTokenIdFlowDB = (
+  tokenIdRecords: IRevealRecord[],
+  client: Client,
+  purejs: boolean,
+  options?: Record<string, any>,
+): Promise<IRevealResponseType> => new Promise((rootResolve, rootReject) => {
+  const clientId = client.toJSON()?.metaData?.uuid || '';
+  getAccessToken(clientId).then((authToken) => {
+    executeDetokenize(
+      flowDBDetokenizeVariant, tokenIdRecords, client, options, authToken as string,
+    ).then((result) => {
+      const successRecords = (result as FlowDBDetokenizeResponse).records || [];
+      const failedRecords = (result.errors || []).map((errRecord) => {
+        const errorData = formatForPureJsFailure(
+          { error: { code: errRecord.error?.code, description: errRecord.error?.description } },
+          errRecord.token,
+          purejs,
+        );
+        printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
+        return errorData;
+      });
+      if (failedRecords.length === 0) {
+        rootResolve({ records: successRecords });
+      } else if (successRecords.length === 0) {
+        rootReject({ errors: failedRecords });
+      } else {
+        rootReject({ records: successRecords, errors: failedRecords });
+      }
+    });
+  }).catch((err) => {
+    rootReject(err);
+  });
+});
+
+export const fetchRecordsByTokenIdComposableFlowDB = (
+  tokenIdRecords: IRevealRecordComposable[],
+  client: Client,
+  authToken: string,
+  options?: Record<string, any>,
+): Promise<IRevealResponseType> => new Promise((rootResolve, rootReject) => {
+  const frameIdByToken: Record<string, string> = {};
+  tokenIdRecords?.forEach((record) => {
+    frameIdByToken[record?.token ?? ''] = record?.iframeName ?? '';
+  });
+
+  executeDetokenize(flowDBDetokenizeVariant, tokenIdRecords, client, options, authToken)
+    .then((result) => {
+      const recordsResponse: Record<string, any>[] = [];
+      const errorResponse: Record<string, any>[] = [];
+
+      ((result as FlowDBDetokenizeResponse).records || []).forEach((record) => {
+        recordsResponse.push({
+          0: {
+            token: record.token,
+            value: record.value,
+            ...(record.tokenGroupName ? { tokenGroupName: record.tokenGroupName } : {}),
+            ...(record.metadata ? { metadata: record.metadata } : {}),
+          },
+          frameId: frameIdByToken[record.token] ?? '',
+        });
+      });
+
+      (result.errors || []).forEach((errRecord) => {
+        const errorData = formatForPureJsFailure(
+          { error: { code: errRecord.error?.code, description: errRecord.error?.description } },
+          errRecord.token,
+          false,
+        );
+        printLog(errorData?.error?.description ?? '', MessageType.ERROR, LogLevel.ERROR);
+        errorResponse.push({
+          ...errorData,
+          frameId: frameIdByToken[errRecord.token] ?? '',
+        });
+      });
+
+      if (errorResponse.length === 0) {
+        rootResolve({ records: recordsResponse });
+      } else if (recordsResponse.length === 0) {
+        rootReject({ errors: errorResponse });
+      } else {
+        rootReject({ records: recordsResponse, errors: errorResponse });
+      }
+    });
+});
+
 export const formatRecordsForIframe = (response: IRevealResponseType) => {
   const result: Record<string, any> = {};
   if (response.records) {
@@ -410,6 +617,57 @@ export const formatRecordsForClient = (response: IRevealResponseType): RevealRes
     revealResponse.errors = errorRecords;
   }
   return revealResponse;
+};
+
+export const formatRecordsForClientFlowDB = (
+  response: IRevealResponseType,
+): RevealResponseFlowDB => {
+  const revealResponse: RevealResponseFlowDB = {};
+  if (response.records) {
+    revealResponse.success = response.records.map((record: any) => ({
+      token: record.token,
+      ...(record.tokenGroupName ? { tokenGroupName: record.tokenGroupName } : {}),
+      ...(record.metadata && Object.keys(record.metadata).length > 0
+        ? { metadata: record.metadata } : {}),
+    }));
+  }
+  if (response.errors) {
+    revealResponse.errors = response.errors.map((errorRecord: any) => ({
+      token: errorRecord.token,
+      error: errorRecord.error,
+    }));
+  }
+  return revealResponse;
+};
+
+export const formatRecordsForClientComposableFlowDB = (response) => {
+  let successRecords = [];
+  let errorRecords = [];
+
+  if (response?.errors && response?.errors?.length > 0) {
+    errorRecords = response?.errors?.map((errors) => ({
+      error: errors?.error ?? {},
+    }));
+  }
+
+  if (response?.records) {
+    successRecords = response?.records?.map((record) => ({
+      token: record?.[0]?.token ?? '',
+      ...(record?.[0]?.tokenGroupName ? { tokenGroupName: record[0].tokenGroupName } : {}),
+      ...(record?.[0]?.metadata && Object.keys(record[0].metadata).length > 0
+        ? { metadata: record[0].metadata } : {}),
+    }));
+  }
+
+  if (successRecords?.length > 0 && errorRecords?.length > 0) {
+    return { success: successRecords, errors: errorRecords };
+  }
+
+  if (successRecords?.length > 0) {
+    return { success: successRecords };
+  }
+
+  return { errors: errorRecords };
 };
 
 export const formatRecordsForClientComposable = (response) => {

@@ -1033,7 +1033,12 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       }
     });
 
-    test('should handle reveal error response', async () => {
+    // NOTE: This test asserts the privacyDB (v1) composable reveal shape (success records carry
+    // `valueType`) and mocks `fetchRecordsByTokenIdComposable`. The composable frame now uses the
+    // flowDB variant (`fetchRecordsByTokenIdComposableFlowDB`, which drops `valueType`), so this is
+    // skipped for now. Re-enable when the privacyDB (PDB) variant is restored. flowDB equivalents
+    // live in composable-frame-element-init.flowdb.test.js.
+    test.skip('should handle reveal error response', async () => {
       const containerId = 'reveal-error-test';
       const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
       const postMessageSpy= jest.fn().mockImplementation((data) => {

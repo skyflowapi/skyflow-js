@@ -2,7 +2,7 @@ import { ClientToJSON } from '../../../client';
 import EventEmitter from '../../../event-emitter';
 import { CollectContainer, ComposableContainer, RevealContainer } from '../../../index-node';
 import { ContainerType } from '../../../skyflow';
-import { CollectElementOptions, ICollectOptions } from '../../../utils/common';
+import { CollectElementOptions, ICollectOptions, RedactionType } from '../../../utils/common';
 import { ElementType } from '../../constants';
 import SkyflowContainer from '../../external/skyflow-container';
 
@@ -105,6 +105,51 @@ export interface FlowDBInsertResponse {
 
 export interface FlowDBInsertRequestError {
   errors: FlowDBInsertResponseRecordError[];
+}
+
+export interface FlowDBTokenGroupRedaction {
+  tokenGroupName: string;
+  redaction: RedactionType | string;
+}
+
+export interface FlowDBDetokenizeRequestBody {
+  vaultID: string | undefined;
+  tokens: string[];
+  tokenGroupRedactions?: FlowDBTokenGroupRedaction[];
+}
+
+export interface FlowDBDetokenizeResponseObject {
+  token: string;
+  value?: any;
+  tokenGroupName?: string | null;
+  error?: string | null;
+  httpCode?: number;
+  metadata?: Record<string, any>;
+}
+
+export interface FlowDBDetokenizeResponseBody {
+  response: FlowDBDetokenizeResponseObject[];
+}
+
+export interface FlowDBDetokenizeResponseRecord {
+  token: string;
+  value?: any;
+  tokenGroupName?: string | null;
+  metadata?: Record<string, any>;
+}
+
+export interface FlowDBDetokenizeResponseRecordError {
+  token: string;
+  error: FlowDBError;
+}
+
+export interface FlowDBDetokenizeResponse {
+  records: FlowDBDetokenizeResponseRecord[];
+  errors: FlowDBDetokenizeResponseRecordError[];
+}
+
+export interface FlowDBDetokenizeRequestError {
+  errors: FlowDBDetokenizeResponseRecordError[];
 }
 
 export interface ContainerProps {

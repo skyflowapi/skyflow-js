@@ -20,10 +20,10 @@ import {
 } from '../../../core-utils/collect';
 import {
   fetchRecordsGET,
-  fetchRecordsByTokenId,
+  fetchRecordsByTokenIdFlowDB,
   fetchRecordsBySkyflowID,
   getFileURLFromVaultBySkyflowID,
-  formatRecordsForClient,
+  formatRecordsForClientFlowDB,
   formatRecordsForIframe,
 } from '../../../core-utils/reveal';
 import { getAccessToken } from '../../../utils/bus-events';
@@ -45,7 +45,7 @@ import {
   IInsertRecordInput,
   IInsertOptions,
   UploadFilesResponse,
-  RevealResponse,
+  RevealResponseFlowDB,
   InsertResponse,
   CollectResponse,
   IRevealResponseType,
@@ -141,10 +141,11 @@ class SkyflowFrameController {
           );
 
           if (data.type === PUREJS_TYPES.DETOKENIZE) {
-            fetchRecordsByTokenId(
+            fetchRecordsByTokenIdFlowDB(
               data.records as IRevealRecord[],
               this.#client,
               true,
+              data.options as Record<string, any>,
             ).then(
               (resolvedResult: IRevealResponseType) => {
                 printLog(
@@ -434,10 +435,10 @@ class SkyflowFrameController {
     return new SkyflowFrameController(clientId);
   }
 
-  revealData(revealRecords: IRevealRecord[], containerId: string): Promise<RevealResponse> {
+  revealData(revealRecords: IRevealRecord[], containerId: string): Promise<RevealResponseFlowDB> {
     const id = containerId;
     return new Promise((resolve, reject) => {
-      fetchRecordsByTokenId(revealRecords, this.#client, false).then(
+      fetchRecordsByTokenIdFlowDB(revealRecords, this.#client, false).then(
         (resolvedResult) => {
           const formattedResult = formatRecordsForIframe(resolvedResult);
           bus
@@ -447,7 +448,7 @@ class SkyflowFrameController {
                 + id,
               formattedResult,
             );
-          resolve(formatRecordsForClient(resolvedResult));
+          resolve(formatRecordsForClientFlowDB(resolvedResult));
         },
         (rejectedResult) => {
           const formattedResult = formatRecordsForIframe(rejectedResult);
@@ -458,7 +459,7 @@ class SkyflowFrameController {
                 + id,
               formattedResult,
             );
-          reject(formatRecordsForClient(rejectedResult));
+          reject(formatRecordsForClientFlowDB(rejectedResult));
         },
       );
     });

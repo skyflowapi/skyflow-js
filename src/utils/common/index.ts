@@ -125,7 +125,7 @@ export interface IInsertResponseReocrds {
   skyflowID?: string;
 }
 export interface IRevealResponseType {
-  records?: Record<string, string>[];
+  records?: Record<string, any>[];
   errors?: Record<string, any>[];
 }
 export interface IRenderResponseType {
@@ -382,6 +382,18 @@ export interface RevealResponse {
   success?: Array<{
     token: string,
     valueType: string,
+  }>,
+  errors?: Array<{
+    error: ErrorRecord,
+    token: string,
+  }>
+}
+
+export interface RevealResponseFlowDB {
+  success?: Array<{
+    token: string,
+    tokenGroupName?: string | null,
+    metadata?: Record<string, any>,
   }>,
   errors?: Array<{
     error: ErrorRecord,

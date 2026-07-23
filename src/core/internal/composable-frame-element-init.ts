@@ -19,7 +19,7 @@ import FrameElement from '.';
 import Client from '../../client';
 import RevealFrame from './reveal/reveal-frame';
 import {
-  fetchRecordsByTokenIdComposable, formatRecordsForClientComposable,
+  fetchRecordsByTokenIdComposableFlowDB, formatRecordsForClientComposableFlowDB,
 } from '../../core-utils/reveal';
 
 export default class RevealComposableFrameElementInit {
@@ -98,7 +98,7 @@ export default class RevealComposableFrameElementInit {
           this.revealData(revealDataInput, this.containerId, event?.data?.clientConfig?.authToken)
             ?.then((revealResponse: any) => {
               if (revealResponse?.records?.length > 0) {
-                const formattedRecord = formatRecordsForClientComposable(revealResponse);
+                const formattedRecord = formatRecordsForClientComposableFlowDB(revealResponse);
                 window?.parent?.postMessage(
                   {
                     type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
@@ -128,7 +128,7 @@ export default class RevealComposableFrameElementInit {
               );
             })
             ?.catch((error) => {
-              const formattedRecord = formatRecordsForClientComposable(error);
+              const formattedRecord = formatRecordsForClientComposableFlowDB(error);
               window?.parent?.postMessage(
                 {
                   type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
@@ -197,7 +197,7 @@ export default class RevealComposableFrameElementInit {
 
   revealData(revealRecords: IRevealRecordComposable[], containerId: string, authToken: string) {
     return new Promise((resolve, reject) => {
-      fetchRecordsByTokenIdComposable(revealRecords, this.#client, authToken)?.then(
+      fetchRecordsByTokenIdComposableFlowDB(revealRecords, this.#client, authToken)?.then(
         (resolvedResult) => {
           resolve(resolvedResult);
         },
