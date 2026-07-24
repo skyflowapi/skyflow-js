@@ -1150,7 +1150,10 @@ describe("validate upsert options in collect", () => {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_UPSERT_OPTION.description, 0))
     }
   })
-  test('missing column key', () => {
+  // NOTE: privacyDB (v1) upsert used a single 'column' string. flowDB switches the
+  // public upsert option to 'uniqueColumns' (array) + optional 'updateType'. This v1
+  // 'column' test is skipped in favour of the 'missing uniqueColumns key' flowDB test below.
+  test.skip('missing column key', () => {
     try {
       validateUpsertOptions([{
         table: 'table'
@@ -1169,7 +1172,9 @@ describe("validate upsert options in collect", () => {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_UPSERT_OPTION.description, 0))
     }
   })
-  test('invalid column key type', () => {
+  // NOTE: v1 'column' string validation. Replaced by the 'invalid uniqueColumns key'
+  // flowDB test below.
+  test.skip('invalid column key type', () => {
     try {
       validateUpsertOptions([{
         table: 'table',
@@ -1178,6 +1183,49 @@ describe("validate upsert options in collect", () => {
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_UPSERT_OPTION.description, 0))
     }
+  })
+
+  // flowDB upsert option shape: { table, uniqueColumns: string[], updateType?: 'UPDATE'|'REPLACE' }
+  test('missing uniqueColumns key', () => {
+    try {
+      validateUpsertOptions([{ table: 'table' }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_UNIQUE_COLUMNS_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('invalid uniqueColumns key type (not an array)', () => {
+    try {
+      validateUpsertOptions([{ table: 'table', uniqueColumns: 'email' }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('empty uniqueColumns array', () => {
+    try {
+      validateUpsertOptions([{ table: 'table', uniqueColumns: [] }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('non-string entry in uniqueColumns array', () => {
+    try {
+      validateUpsertOptions([{ table: 'table', uniqueColumns: ['email', 123] }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('invalid updateType value', () => {
+    try {
+      validateUpsertOptions([{ table: 'table', uniqueColumns: ['email'], updateType: 'MERGE' }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UPDATE_TYPE_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('valid upsert option with uniqueColumns and updateType does not throw', () => {
+    expect(() => validateUpsertOptions([
+      { table: 'table', uniqueColumns: ['email', 'phone_number'], updateType: 'REPLACE' },
+      { table: 'table2', uniqueColumns: ['ssn'] },
+    ])).not.toThrow()
   })
 
 })

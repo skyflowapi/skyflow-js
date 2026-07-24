@@ -15,6 +15,7 @@ import {
   IUpdateOptions,
   UpdateResponse,
   UpdateResponseType,
+  UpdateType,
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
@@ -23,12 +24,18 @@ import {
   BatchInsertRequestBody, FlowDBInsertRecordData, FlowDBInsertRequestBody,
   FlowDBInsertResponseBody, FlowDBInsertResponse, FlowDBInsertResponseRecord,
   FlowDBInsertResponseRecordError, FlowDBInsertRequestError,
-  FlowDBUpdateRecordData, FlowDBUpdateRequestBody,
+  FlowDBUpdateRecordData, FlowDBUpdateRequestBody, FlowDBUpsert,
 } from '../core/internal/internal-types';
 
 export interface IUpsertOptions{
   table: string,
   column:string,
+}
+
+export interface IFlowDBUpsertOptions {
+  table: string,
+  uniqueColumns: string[],
+  updateType?: UpdateType,
 }
 
 export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions> | undefined) => {
@@ -42,6 +49,19 @@ export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions>
   }
 
   return uniqueColumn;
+};
+
+export const getFlowDBUpsertForTable = (
+  tableName: string,
+  options: Array<IFlowDBUpsertOptions> | undefined,
+): FlowDBUpsert | undefined => {
+  if (!options) return undefined;
+  const match = options.find((upsertOption) => upsertOption.table === tableName);
+  if (!match) return undefined;
+  return {
+    uniqueColumns: match.uniqueColumns,
+    ...(match.updateType ? { updateType: match.updateType } : {}),
+  };
 };
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
@@ -87,11 +107,11 @@ export const constructFlowDBInsertRequest = (
   vaultID: string | undefined,
 ): FlowDBInsertRequestBody => {
   const insertRecords: FlowDBInsertRecordData[] = records.records.map((record) => {
-    const upsertColumn = getUpsertColumn(record.table, options?.upsert);
+    const upsert = getFlowDBUpsertForTable(record.table, options?.upsert);
     return {
       tableName: record.table,
       data: record.fields,
-      ...(upsertColumn ? { upsert: { uniqueColumns: [upsertColumn] } } : {}),
+      ...(upsert ? { upsert } : {}),
     };
   });
 

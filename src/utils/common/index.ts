@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2025 Skyflow, Inc.
 */
-import { IUpsertOptions } from '../../core-utils/collect';
+import { IFlowDBUpsertOptions } from '../../core-utils/collect';
 import { CardType, ElementType } from '../../core/constants';
 
 declare global {
@@ -37,6 +37,11 @@ export enum RedactionType {
   PLAIN_TEXT = 'PLAIN_TEXT',
   MASKED = 'MASKED',
   REDACTED = 'REDACTED',
+}
+
+export enum UpdateType {
+  UPDATE = 'UPDATE',
+  REPLACE = 'REPLACE',
 }
 
 export enum RequestMethod {
@@ -362,7 +367,7 @@ export interface CollectElementInput extends CollectElementCommonProps {
 export interface ICollectOptions {
   tokens?: boolean,
   additionalFields?: IInsertRecordInput,
-  upsert?: Array<IUpsertOptions>,
+  upsert?: Array<IFlowDBUpsertOptions>,
 }
 export interface MetaData {
   [key: string]: any,

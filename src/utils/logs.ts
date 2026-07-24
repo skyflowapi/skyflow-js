@@ -278,11 +278,17 @@ const logs = {
     EMPTY_UPSERT_OPTIONS_ARRAY:
       'Validation error. \'upsert\' key cannot be an empty array in insert options. Make sure to add atleast one table column object in upsert array.',
     INVALID_UPSERT_OPTION_OBJECT_TYPE:
-      'Validation error. Invalid value in upsert array at index %s1 in insert options. Specify objects with \'table\' and \'column\' keys instead.',
+      'Validation error. Invalid value in upsert array at index %s1 in insert options. Specify objects with \'table\' and \'uniqueColumns\' keys instead.',
     MISSING_TABLE_IN_UPSERT_OPTION:
       'Validation error. Missing \'table\' key in upsert array at index %s1. Provide a valid \'table\' key.',
     MISSING_COLUMN_IN_UPSERT_OPTION:
       'Validation error. Missing \'column\' key in upsert array at index %s1. Provide a valid \'column\' key',
+    MISSING_UNIQUE_COLUMNS_IN_UPSERT_OPTION:
+      'Validation error. Missing \'uniqueColumns\' key in upsert array at index %s1. Provide a valid \'uniqueColumns\' key.',
+    INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION:
+      'Validation error. Invalid \'uniqueColumns\' key in upsert array at index %s1. Specify a non-empty array of column name strings instead.',
+    INVALID_UPDATE_TYPE_IN_UPSERT_OPTION:
+      'Validation error. Invalid \'updateType\' key in upsert array at index %s1. Specify one of \'UPDATE\' or \'REPLACE\' instead.',
     INVALID_TABLE_IN_UPSERT_OPTION:
       'Validation error. Invalid \'table\' key in upsert array at index %s1. Specify a value of type string instead.',
     INVALID_COLUMN_IN_UPSERT_OPTION:

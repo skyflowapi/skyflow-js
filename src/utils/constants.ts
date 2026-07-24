@@ -442,6 +442,18 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.MISSING_COLUMN_IN_UPSERT_OPTION,
   },
+  MISSING_UNIQUE_COLUMNS_IN_UPSERT_OPTION: {
+    code: 400,
+    description: logs.errorLogs.MISSING_UNIQUE_COLUMNS_IN_UPSERT_OPTION,
+  },
+  INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION: {
+    code: 400,
+    description: logs.errorLogs.INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION,
+  },
+  INVALID_UPDATE_TYPE_IN_UPSERT_OPTION: {
+    code: 400,
+    description: logs.errorLogs.INVALID_UPDATE_TYPE_IN_UPSERT_OPTION,
+  },
   INVALID_RECORD_COLUMN_VALUE_TYPE:
   { code: 400, description: logs.errorLogs.INVALID_RECORD_COLUMN_VALUE_TYPE },
   INVALID_COLUMN_VALUES_TYPE:

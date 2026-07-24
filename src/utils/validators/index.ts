@@ -25,6 +25,7 @@ import {
   ContainerOptions,
   IUpdateRequest,
   IUpdateOptions,
+  UpdateType,
 } from '../common';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { appendZeroToOne } from '../helpers';
@@ -653,9 +654,9 @@ export const validateUpsertOptions = (upsertOptions) => {
         true,
       );
     }
-    if (!Object.prototype.hasOwnProperty.call(upsertOption, 'column')) {
+    if (!Object.prototype.hasOwnProperty.call(upsertOption, 'uniqueColumns')) {
       throw new SkyflowError(
-        SKYFLOW_ERROR_CODE.MISSING_COLUMN_IN_UPSERT_OPTION,
+        SKYFLOW_ERROR_CODE.MISSING_UNIQUE_COLUMNS_IN_UPSERT_OPTION,
         [index],
         true,
       );
@@ -663,13 +664,26 @@ export const validateUpsertOptions = (upsertOptions) => {
 
     if (
       !(
-        upsertOption.column
-        && typeof upsertOption.column === 'string'
-        && upsertOption.column.length
+        Array.isArray(upsertOption.uniqueColumns)
+        && upsertOption.uniqueColumns.length
+        && upsertOption.uniqueColumns.every(
+          (uniqueColumn) => uniqueColumn && typeof uniqueColumn === 'string' && uniqueColumn.length,
+        )
       )
     ) {
       throw new SkyflowError(
-        SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_UPSERT_OPTION,
+        SKYFLOW_ERROR_CODE.INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION,
+        [index],
+        true,
+      );
+    }
+
+    if (
+      Object.prototype.hasOwnProperty.call(upsertOption, 'updateType')
+      && !Object.values(UpdateType).includes(upsertOption.updateType)
+    ) {
+      throw new SkyflowError(
+        SKYFLOW_ERROR_CODE.INVALID_UPDATE_TYPE_IN_UPSERT_OPTION,
         [index],
         true,
       );

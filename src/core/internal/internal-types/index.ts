@@ -2,7 +2,9 @@ import { ClientToJSON } from '../../../client';
 import EventEmitter from '../../../event-emitter';
 import { CollectContainer, ComposableContainer, RevealContainer } from '../../../index-node';
 import { ContainerType } from '../../../skyflow';
-import { CollectElementOptions, ICollectOptions, RedactionType } from '../../../utils/common';
+import {
+  CollectElementOptions, ICollectOptions, RedactionType, UpdateType,
+} from '../../../utils/common';
 import { ElementType } from '../../constants';
 import SkyflowContainer from '../../external/skyflow-container';
 
@@ -35,7 +37,7 @@ export interface BatchInsertRequestBody {
 }
 
 export interface FlowDBUpsert {
-  updateType?: 'UPDATE' | 'REPLACE';
+  updateType?: UpdateType;
   uniqueColumns: string[];
 }
 
