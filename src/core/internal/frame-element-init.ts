@@ -453,41 +453,17 @@ export default class FrameElementInit {
         );
       }
       if (insertPromiseSet.length !== 0) {
-        Promise.allSettled(insertPromiseSet).then((resultSet: any) => {
-          const recordsResponse: any[] = [];
-          const errorsResponse: any[] = [];
-
-          resultSet.forEach((result:
-          { status: string; value: any; reason?: any; }) => {
-            if (result.status === 'fulfilled') {
-              console.log('result.value', result.value);
-              if (result.value.records !== undefined && Array.isArray(result.value.records)) {
-                result.value.records.forEach((record) => {
-                  recordsResponse.push(record);
-                });
-              }
-              if (result.value.errors !== undefined && Array.isArray(result.value.errors)) {
-                result.value.errors.forEach((error) => {
-                  errorsResponse.push(error);
-                });
-              }
-            } else {
-              if (result.reason?.records !== undefined && Array.isArray(result.reason?.records)) {
-                result.reason.records.forEach((record) => {
-                  recordsResponse.push(record);
-                });
-              }
-              if (result.reason?.errors !== undefined && Array.isArray(result.reason?.errors)) {
-                result.reason.errors.forEach((error) => {
-                  errorsResponse.push(error);
-                });
-              }
-            }
-          });
-          if (errorsResponse.length === 0) {
-            rootResolve({ records: recordsResponse });
-          } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
-          else rootReject({ records: recordsResponse, errors: errorsResponse });
+        Promise.all(insertPromiseSet).then((responses: any[]) => {
+          const failure = responses.find((response) => response?.error !== undefined);
+          if (failure) {
+            rootReject(failure);
+            return;
+          }
+          const records = responses.reduce(
+            (acc, response) => acc.concat(response?.records || []),
+            [] as any[],
+          );
+          rootResolve({ records });
         });
       }
       // }).catch((err) => {

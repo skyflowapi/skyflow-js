@@ -121,7 +121,8 @@ class Client {
       if (httpRequest.status < 200 || httpRequest.status >= 400) {
         const overrideCodes = [400, 401, 403, 404, 429, 500, 502, 503];
         if (contentType && contentType.includes('application/json')) {
-          let description = JSON.parse(httpRequest.response);
+          const parsedBody = JSON.parse(httpRequest.response);
+          let description = parsedBody;
           if (description?.error?.message) {
             description = requestId ? `${description?.error?.message} - requestId: ${requestId}` : description?.error?.message;
           }
@@ -132,7 +133,7 @@ class Client {
             code: httpRequest.status,
             description,
             type: this.#getErrorTypeKey(httpRequest.status),
-          }, [], true));
+          }, [], true, parsedBody));
         } else if (contentType && contentType.includes('text/plain')) {
           let description = requestId ? `${httpRequest.response} - requestId: ${requestId}` : httpRequest.response;
           if (overrideCodes.includes(httpRequest.status)) {

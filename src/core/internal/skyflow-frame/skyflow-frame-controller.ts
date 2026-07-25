@@ -699,12 +699,6 @@ class SkyflowFrameController {
     let finalUpdateRequest: FlowDBUpdateRequestBody;
     let finalInsertRecords;
     let finalUpdateRecords;
-    let insertResponse: InsertResponse;
-    let updateResponse: InsertResponse;
-    let insertErrorResponse: any;
-    let updateErrorResponse;
-    let insertDone = false;
-    let updateDone = false;
     try {
       [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
         insertResponseObject, updateResponseObject, options,
@@ -724,99 +718,41 @@ class SkyflowFrameController {
     const sendRequest = (): Promise<InsertResponse> => new Promise((rootResolve, rootReject) => {
       const clientId = client.toJSON()?.metaData?.uuid || '';
       getAccessToken(clientId).then((authToken) => {
+        const requests: Promise<any>[] = [];
         if (finalInsertRecords.records.length !== 0) {
-          insertDataInCollectFlowDB(
+          requests.push(insertDataInCollectFlowDB(
             finalInsertRequest,
             client,
             options,
             finalInsertRecords,
             authToken as string,
-          )
-            .then((response: any) => {
-              insertDone = true;
-              if (response.records !== undefined) {
-                insertResponse = response;
-                if (finalUpdateRecords.updateRecords.length === 0) {
-                  rootResolve(insertResponse);
-                }
-                if (updateDone && updateErrorResponse !== undefined) {
-                  if (updateErrorResponse.records === undefined) {
-                    updateErrorResponse.records = insertResponse.records;
-                  } else {
-                    updateErrorResponse.records = (insertResponse.records || [])
-                      .concat(updateErrorResponse.records);
-                  }
-                  rootReject(updateErrorResponse);
-                } else if (updateDone && updateResponse !== undefined) {
-                  rootResolve({
-                    records: (insertResponse.records || [])
-                      .concat(updateResponse.records || []),
-                  });
-                }
-              } else {
-                if (finalUpdateRecords.updateRecords.length === 0) {
-                  rootReject(response);
-                } else {
-                  insertErrorResponse = response;
-                }
-                if (updateDone && updateResponse !== undefined) {
-                  const errors = insertErrorResponse.errors;
-                  const records = updateResponse.records;
-                  rootReject({ errors, records });
-                } else if (updateDone && updateErrorResponse !== undefined) {
-                  updateErrorResponse.errors = updateErrorResponse.errors
-                    .concat(insertErrorResponse.errors);
-                  rootReject(updateErrorResponse);
-                }
-              }
-            });
+          ));
         }
         if (finalUpdateRecords.updateRecords.length !== 0) {
-          updateDataInCollectFlowDB(
+          requests.push(updateDataInCollectFlowDB(
             finalUpdateRequest,
             client,
             options,
             finalUpdateRecords,
             authToken as string,
-          )
-            .then((response: any) => {
-              updateDone = true;
-              if (response.records !== undefined) {
-                updateResponse = response;
-                if (finalInsertRecords.records.length === 0) {
-                  rootResolve(updateResponse);
-                }
-                if (insertDone && insertResponse !== undefined) {
-                  rootResolve({
-                    records: (insertResponse.records || [])
-                      .concat(updateResponse.records || []),
-                  });
-                } else if (insertDone && insertErrorResponse !== undefined) {
-                  const errors = insertErrorResponse.errors;
-                  const records = updateResponse.records;
-                  rootReject({ errors, records });
-                }
-              } else {
-                updateErrorResponse = response;
-                if (finalInsertRecords.records.length === 0) {
-                  rootReject(response);
-                }
-                if (insertDone && insertResponse !== undefined) {
-                  if (updateErrorResponse.records === undefined) {
-                    updateErrorResponse.records = insertResponse.records;
-                  } else {
-                    updateErrorResponse.records = (insertResponse.records || [])
-                      .concat(updateErrorResponse.records);
-                  }
-                  rootReject(updateErrorResponse);
-                } else if (insertDone && insertErrorResponse !== undefined) {
-                  updateErrorResponse.errors = updateErrorResponse.errors
-                    .concat(insertErrorResponse.errors);
-                  rootReject(updateErrorResponse);
-                }
-              }
-            });
+          ));
         }
+        if (requests.length === 0) {
+          rootResolve({ records: [] });
+          return;
+        }
+        Promise.all(requests).then((responses: any[]) => {
+          const failure = responses.find((response) => response?.error !== undefined);
+          if (failure) {
+            rootReject(failure);
+            return;
+          }
+          const records = responses.reduce(
+            (acc, response) => acc.concat(response?.records || []),
+            [] as any[],
+          );
+          rootResolve({ records });
+        });
       }).catch((err) => {
         rootReject(err);
       });

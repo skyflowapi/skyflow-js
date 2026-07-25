@@ -157,42 +157,43 @@ export const constructFlowDBInsertResponse = (
   responseBody: FlowDBInsertResponseBody,
   tokens: boolean,
 ): FlowDBInsertResponse => {
-  const records: FlowDBInsertResponseRecord[] = [];
-  const errors: FlowDBInsertResponseRecordError[] = [];
+  const records: Array<FlowDBInsertResponseRecord | FlowDBInsertResponseRecordError> = [];
 
   responseBody.records.forEach((res) => {
     if (res.error) {
-      errors.push({
-        table: res.tableName,
-        error: {
-          code: res.httpCode,
-          description: res.error,
-        },
+      records.push({
+        error: res.error,
+        skyflowID: res.skyflowID,
+        tableName: res.tableName,
+        httpCode: res.httpCode,
       });
       return;
     }
     const hasHashedData = res.hashedData && Object.keys(res.hashedData).length > 0;
     records.push({
-      table: res.tableName,
-      fields: {
-        skyflow_id: res.skyflowID,
-        ...(tokens ? res.tokens : {}),
-      },
+      tableName: res.tableName,
+      skyflowID: res.skyflowID,
+      fields: tokens ? (res.tokens ?? {}) : {},
       ...(hasHashedData ? { hashedData: res.hashedData } : {}),
+      httpCode: res.httpCode,
     });
   });
 
-  return { records, errors };
+  return { records };
 };
 
-export const constructFlowDBInsertError = (error: any): FlowDBInsertRequestError => ({
-  errors: [{
+export const constructFlowDBInsertError = (error: any): FlowDBInsertRequestError => {
+  const rawError = error?.data?.error;
+  if (rawError) {
+    return { error: rawError };
+  }
+  return {
     error: {
-      code: error?.error?.code,
-      description: error?.error?.description,
+      httpCode: error?.error?.code,
+      message: error?.error?.description,
     },
-  }],
-});
+  };
+};
 
 export const constructFlowDBUpdateRequest = (
   updateRecords: { updateRecords: IInsertRecord[] },
@@ -530,7 +531,7 @@ const flowDBInsertVariant: IInsertVariant = {
       constructFlowDBInsertRequest(finalInsertRecords, options, client.config.vaultID),
     ),
     requestMethod: 'POST',
-    url: `${client.config.vaultURL}/v2/records/insert`,
+    url: 'vault/v2/records/insert',
     headers: {
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',
@@ -546,7 +547,7 @@ const flowDBUpdateVariant: IInsertVariant = {
       constructFlowDBUpdateRequest(finalUpdateRecords, options, client.config.vaultID),
     ),
     requestMethod: 'POST',
-    url: `${client.config.vaultURL}/v2/records/update`,
+    url: 'vault/v2/records/update',
     headers: {
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',

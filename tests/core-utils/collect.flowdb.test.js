@@ -76,40 +76,45 @@ describe('constructFlowDBInsertResponse', () => {
     ],
   };
 
-  test('builds { table, fields: { skyflow_id, ...tokens } } when tokens enabled', () => {
+  test('builds { tableName, skyflowID, fields, httpCode } when tokens enabled', () => {
     const res = constructFlowDBInsertResponse(responseBody, true);
     expect(res).toEqual({
       records: [
         {
-          table: 'table1',
+          tableName: 'table1',
+          skyflowID: 'id1',
           fields: {
-            skyflow_id: 'id1',
             card_number: [{ token: 'tok-1', tokenGroupName: 'nondeterministic' }],
           },
+          httpCode: 200,
         },
       ],
-      errors: [],
     });
   });
 
-  test('fields has only skyflow_id when tokens disabled', () => {
+  test('fields is empty and skyflowID is top-level when tokens disabled', () => {
     const res = constructFlowDBInsertResponse(responseBody, false);
-    expect(res.records[0].fields).toEqual({ skyflow_id: 'id1' });
+    expect(res.records[0].fields).toEqual({});
+    expect(res.records[0].skyflowID).toBe('id1');
+    expect(res.records[0]).not.toHaveProperty('errors');
   });
 
-  test('splits per-record error into errors array using tableName/httpCode', () => {
+  test('inlines per-record error into records, passing through API skyflowID/tableName', () => {
     const body = {
       records: [
         { skyflowID: 'ok1', tableName: 'table1', httpCode: 200, tokens: {} },
-        { tableName: 'table2', httpCode: 404, error: 'not found' },
+        { skyflowID: null, tableName: '', httpCode: 400, error: 'not found' },
       ],
     };
     const res = constructFlowDBInsertResponse(body, true);
-    expect(res.records).toHaveLength(1);
-    expect(res.records[0].fields.skyflow_id).toBe('ok1');
-    expect(res.errors).toEqual([
-      { table: 'table2', error: { code: 404, description: 'not found' } },
-    ]);
+    expect(res).not.toHaveProperty('errors');
+    expect(res.records).toHaveLength(2);
+    expect(res.records[0]).toEqual({
+      tableName: 'table1', skyflowID: 'ok1', fields: {}, httpCode: 200,
+    });
+    expect(res.records[1]).toEqual({
+      error: 'not found', skyflowID: null, tableName: '', httpCode: 400,
+    });
   });
 
   test('includes hashedData only when non-empty', () => {
@@ -128,9 +133,29 @@ describe('constructFlowDBInsertResponse', () => {
 });
 
 describe('constructFlowDBInsertError', () => {
-  test('wraps error code/description in errors array', () => {
-    const out = constructFlowDBInsertError({ error: { code: 500, description: 'boom' } });
-    expect(out).toEqual({ errors: [{ error: { code: 500, description: 'boom' } }] });
+  test('passes through raw API error body when present on error.data', () => {
+    const out = constructFlowDBInsertError({
+      data: {
+        error: {
+          httpCode: 404,
+          message: 'Vault not found.',
+          httpStatus: 'Not Found',
+          details: [],
+        },
+      },
+    });
+    expect(out).toEqual({
+      error: {
+        httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+      },
+    });
+  });
+
+  test('falls back to SkyflowError code/description when no raw body', () => {
+    const out = constructFlowDBInsertError({ error: { code: 500, description: 'boom', type: 'INTERNAL_SERVER_ERROR' } });
+    expect(out).toEqual({
+      error: { httpCode: 500, message: 'boom' },
+    });
   });
 });
 
@@ -167,16 +192,19 @@ describe('insertDataInCollectFlowDB', () => {
     });
     const out = await insertDataInCollectFlowDB(undefined, client, { tokens: true }, finalInsertRecords, 'auth-token');
     expect(out).toEqual({
-      records: [{ table: 'table1', fields: { skyflow_id: 'id1', ssn: [{ token: 't1', tokenGroupName: 'det' }] } }],
-      errors: [],
+      records: [{
+        tableName: 'table1', skyflowID: 'id1', fields: { ssn: [{ token: 't1', tokenGroupName: 'det' }] }, httpCode: 200,
+      }],
     });
   });
 
-  test('always resolves with { errors } on request failure', async () => {
+  test('always resolves with { error } on request failure', async () => {
     const client = buildClient();
     jest.spyOn(client, 'request').mockRejectedValue({ error: { code: 500, description: 'insert failed' } });
     const out = await insertDataInCollectFlowDB(undefined, client, { tokens: true }, finalInsertRecords, 'auth-token');
-    expect(out).toEqual({ errors: [{ error: { code: 500, description: 'insert failed' } }] });
+    expect(out).toEqual({
+      error: { httpCode: 500, message: 'insert failed' },
+    });
     expect(out.records).toBeUndefined();
   });
 });
@@ -193,15 +221,18 @@ describe('updateDataInCollectFlowDB', () => {
     });
     const out = await updateDataInCollectFlowDB(undefined, client, { tokens: true }, finalUpdateRecords, 'auth-token');
     expect(out).toEqual({
-      records: [{ table: 'table1', fields: { skyflow_id: 'id1', name: [{ token: 't1', tokenGroupName: 'det' }] } }],
-      errors: [],
+      records: [{
+        tableName: 'table1', skyflowID: 'id1', fields: { name: [{ token: 't1', tokenGroupName: 'det' }] }, httpCode: 200,
+      }],
     });
   });
 
-  test('always resolves with { errors } on request failure', async () => {
+  test('always resolves with { error } on request failure', async () => {
     const client = buildClient();
     jest.spyOn(client, 'request').mockRejectedValue({ error: { code: 400, description: 'update failed' } });
     const out = await updateDataInCollectFlowDB(undefined, client, { tokens: true }, finalUpdateRecords, 'auth-token');
-    expect(out).toEqual({ errors: [{ error: { code: 400, description: 'update failed' } }] });
+    expect(out).toEqual({
+      error: { httpCode: 400, message: 'update failed' },
+    });
   });
 });

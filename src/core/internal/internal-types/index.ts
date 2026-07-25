@@ -71,7 +71,7 @@ export interface FlowDBUpdateRequestBody {
 }
 
 export interface FlowDBRecordResponse {
-  skyflowID: string;
+  skyflowID: string | null;
   tokens?: Record<string, any>;
   data?: Record<string, any>;
   hashedData?: Record<string, any>;
@@ -90,23 +90,33 @@ export interface FlowDBError {
 }
 
 export interface FlowDBInsertResponseRecord {
-  table: string;
+  tableName: string;
+  skyflowID: string | null;
   fields: Record<string, any>;
   hashedData?: Record<string, any>;
+  httpCode?: number;
 }
 
 export interface FlowDBInsertResponseRecordError {
-  table?: string;
-  error: FlowDBError;
+  error: string;
+  skyflowID: string | null;
+  tableName: string;
+  httpCode?: number;
 }
 
 export interface FlowDBInsertResponse {
-  records: FlowDBInsertResponseRecord[];
-  errors: FlowDBInsertResponseRecordError[];
+  records: Array<FlowDBInsertResponseRecord | FlowDBInsertResponseRecordError>;
+}
+
+export interface FlowDBFullError {
+  httpCode?: number | string;
+  message?: string;
+  httpStatus?: string;
+  details?: any[];
 }
 
 export interface FlowDBInsertRequestError {
-  errors: FlowDBInsertResponseRecordError[];
+  error: FlowDBFullError;
 }
 
 export interface FlowDBTokenGroupRedaction {
