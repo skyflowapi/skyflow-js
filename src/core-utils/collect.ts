@@ -531,7 +531,7 @@ const flowDBInsertVariant: IInsertVariant = {
       constructFlowDBInsertRequest(finalInsertRecords, options, client.config.vaultID),
     ),
     requestMethod: 'POST',
-    url: 'vault/v2/records/insert',
+    url: `${client.config.vaultURL}/v2/records/insert`,
     headers: {
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',
@@ -547,7 +547,7 @@ const flowDBUpdateVariant: IInsertVariant = {
       constructFlowDBUpdateRequest(finalUpdateRecords, options, client.config.vaultID),
     ),
     requestMethod: 'POST',
-    url: 'vault/v2/records/update',
+    url: `${client.config.vaultURL}/v2/records/update`,
     headers: {
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',

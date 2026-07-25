@@ -109,6 +109,7 @@ export interface FlowDBInsertResponse {
 }
 
 export interface FlowDBFullError {
+  grpcCode?: number;
   httpCode?: number | string;
   message?: string;
   httpStatus?: string;
@@ -148,6 +149,7 @@ export interface FlowDBDetokenizeResponseRecord {
   value?: any;
   tokenGroupName?: string | null;
   metadata?: Record<string, any>;
+  httpCode?: number;
 }
 
 export interface FlowDBDetokenizeResponseRecordError {
@@ -162,6 +164,8 @@ export interface FlowDBDetokenizeResponse {
 
 export interface FlowDBDetokenizeRequestError {
   errors: FlowDBDetokenizeResponseRecordError[];
+  // Raw full-failure body passed through for the element/composable reveal contract.
+  error?: FlowDBFullError;
 }
 
 export interface ContainerProps {

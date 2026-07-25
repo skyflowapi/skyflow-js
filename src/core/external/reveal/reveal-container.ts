@@ -10,7 +10,7 @@ import { ContainerType } from '../../../skyflow';
 import {
   ContainerOptions,
   Context, ErrorType, MessageType,
-  RedactionType, RevealResponse,
+  RevealResponse,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
@@ -31,7 +31,8 @@ export interface IRevealElementInput {
   skyflowID?: string;
   table?: string;
   column?: string;
-  redaction?: RedactionType;
+  redaction?: string;
+  tokenGroupName?: string;
   inputStyles?: object;
   label?: string;
   labelStyles?: object;

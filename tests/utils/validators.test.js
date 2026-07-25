@@ -995,9 +995,20 @@ describe("validate reveal element input", () => {
     }
   })
 
-  test("invalid redaction type", () => {
+  // flowDB: redaction accepts any string (token group redaction), not just the enum
+  test("accepts any string redaction (flowDB)", () => {
+    expect(() => validateRevealElementRecords([{ token: '123', redaction: 'CUSTOM_GROUP' }]))
+      .not.toThrow()
+  })
+
+  test("accepts tokenGroupName (flowDB)", () => {
+    expect(() => validateRevealElementRecords([{ token: '123', tokenGroupName: 'grp1', redaction: 'PLAIN_TEXT' }]))
+      .not.toThrow()
+  })
+
+  test("throws when redaction is a non-string (flowDB)", () => {
     try {
-      validateRevealElementRecords([{ token: '123', redaction: 'invalid' }])
+      validateRevealElementRecords([{ token: '123', redaction: {} }])
     } catch (err) {
       expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL.description))
     }

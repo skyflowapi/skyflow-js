@@ -59,10 +59,20 @@ describe('constructFlowDBDetokenizeRequest', () => {
       { tokenGroupName: 'grp1', redaction: RedactionType.MASKED },
     ]);
   });
+
+  it('forwards an arbitrary (non-enum) string redaction verbatim', () => {
+    const records = [
+      { token: 'token1', tokenGroupName: 'grp1', redaction: 'CUSTOM_REDACTION' },
+    ];
+    const req = constructFlowDBDetokenizeRequest(records, 'vault123');
+    expect(req.tokenGroupRedactions).toEqual([
+      { tokenGroupName: 'grp1', redaction: 'CUSTOM_REDACTION' },
+    ]);
+  });
 });
 
 describe('constructFlowDBDetokenizeResponse', () => {
-  it('splits response into records (with tokenGroupName, no valueType) and inline errors', () => {
+  it('splits response into records (with tokenGroupName + httpCode) and inline errors', () => {
     const responseBody = {
       response: [
         { token: 'token1', value: 'Bata Gali', tokenGroupName: 'nondet_reg', error: null, httpCode: 200 },
@@ -71,7 +81,7 @@ describe('constructFlowDBDetokenizeResponse', () => {
     };
     const result = constructFlowDBDetokenizeResponse(responseBody);
     expect(result.records).toEqual([
-      { token: 'token1', value: 'Bata Gali', tokenGroupName: 'nondet_reg' },
+      { token: 'token1', value: 'Bata Gali', tokenGroupName: 'nondet_reg', httpCode: 200 },
     ]);
     expect(result.records[0].valueType).toBeUndefined();
     expect(result.errors).toEqual([
@@ -120,54 +130,101 @@ describe('constructFlowDBDetokenizeResponse', () => {
 });
 
 describe('constructFlowDBDetokenizeError', () => {
-  it('wraps a request-level failure into the errors shape', () => {
-    const err = { error: { code: 500, description: 'network error' } };
-    expect(constructFlowDBDetokenizeError(err)).toEqual({
-      errors: [{ token: '', error: { code: 500, description: 'network error' } }],
+  it('passes the raw API error body through when present on error.data', () => {
+    const err = {
+      data: {
+        error: {
+          grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+        },
+      },
+      error: { code: 404, description: 'Vault not found.' },
+    };
+    expect(constructFlowDBDetokenizeError(err).error).toEqual({
+      grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
     });
+  });
+
+  it('falls back to httpCode/message from SkyflowError when no raw body', () => {
+    const err = { error: { code: 500, description: 'network error' } };
+    const out = constructFlowDBDetokenizeError(err);
+    expect(out.error).toEqual({ httpCode: 500, message: 'network error' });
+    expect(out.errors).toEqual([{ token: '', error: { code: 500, description: 'network error' } }]);
   });
 });
 
 describe('formatRecordsForClientFlowDB', () => {
-  it('maps success records to token (drops valueType) and includes tokenGroupName/metadata when present', () => {
+  it('builds unified records: success carries token/tokenGroupName/metadata/httpCode, no value', () => {
     const response = {
       records: [
-        { token: 't1', value: 'a' },
-        { token: 't2', value: 'b', tokenGroupName: 'nondet_reg', metadata: { table: 'persons' } },
+        { token: 't1', value: 'a', httpCode: 200 },
+        {
+          token: 't2', value: 'b', tokenGroupName: 'nondet_reg', metadata: { table: 'persons', skyflowID: 'id1' }, httpCode: 200,
+        },
       ],
     };
     expect(formatRecordsForClientFlowDB(response)).toEqual({
-      success: [
-        { token: 't1' },
-        { token: 't2', tokenGroupName: 'nondet_reg', metadata: { table: 'persons' } },
+      records: [
+        { token: 't1', httpCode: 200 },
+        {
+          token: 't2', tokenGroupName: 'nondet_reg', metadata: { table: 'persons', skyflowID: 'id1' }, httpCode: 200,
+        },
       ],
     });
   });
 
-  it('maps errors', () => {
-    const response = { errors: [{ token: 't1', error: { code: 404, description: 'nf' } }] };
+  it('inlines per-record errors into records as { error, token, httpCode }', () => {
+    const response = {
+      records: [{ token: 'ok', value: 'v', httpCode: 200 }],
+      errors: [{ token: 'bad', error: { code: 404, description: 'invalid token' } }],
+    };
     expect(formatRecordsForClientFlowDB(response)).toEqual({
-      errors: [{ token: 't1', error: { code: 404, description: 'nf' } }],
+      records: [
+        { token: 'ok', httpCode: 200 },
+        { error: 'invalid token', token: 'bad', httpCode: 404 },
+      ],
+    });
+  });
+
+  it('passes a full-failure raw body through as a top-level { error }', () => {
+    const response = {
+      error: {
+        grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+      },
+    };
+    expect(formatRecordsForClientFlowDB(response)).toEqual({
+      error: {
+        grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+      },
     });
   });
 });
 
 describe('formatRecordsForClientComposableFlowDB', () => {
-  it('reads token from index-0 shape and drops valueType', () => {
-    const response = { records: [{ 0: { token: 't1', value: 'a' }, frameId: 'f1' }] };
+  it('builds unified records from index-0 shape with httpCode, no value', () => {
+    const response = { records: [{ 0: { token: 't1', value: 'a', httpCode: 200 }, frameId: 'f1' }] };
     expect(formatRecordsForClientComposableFlowDB(response)).toEqual({
-      success: [{ token: 't1' }],
+      records: [{ token: 't1', httpCode: 200 }],
     });
   });
 
-  it('returns both success and errors when present', () => {
+  it('inlines errors into records and keeps successes', () => {
     const response = {
-      records: [{ 0: { token: 't1', value: 'a' }, frameId: 'f1' }],
-      errors: [{ token: 't2', error: { code: 404 }, frameId: 'f2' }],
+      records: [{ 0: { token: 't1', value: 'a', httpCode: 200 }, frameId: 'f1' }],
+      errors: [{ token: 't2', error: { code: 404, description: 'nf' }, frameId: 'f2' }],
     };
-    const out = formatRecordsForClientComposableFlowDB(response);
-    expect(out.success).toEqual([{ token: 't1' }]);
-    expect(out.errors).toEqual([{ error: { code: 404 } }]);
+    expect(formatRecordsForClientComposableFlowDB(response)).toEqual({
+      records: [
+        { token: 't1', httpCode: 200 },
+        { error: 'nf', token: 't2', httpCode: 404 },
+      ],
+    });
+  });
+
+  it('passes a full-failure raw body through as a top-level { error }', () => {
+    const response = { error: { httpCode: 404, message: 'Vault not found.' } };
+    expect(formatRecordsForClientComposableFlowDB(response)).toEqual({
+      error: { httpCode: 404, message: 'Vault not found.' },
+    });
   });
 });
 
@@ -238,6 +295,35 @@ describe('fetchRecordsByTokenIdFlowDB', () => {
         errors: [{ token: '', error: { code: 500, description: 'network error' } }],
       });
   });
+
+  it('element path (purejs=false) keeps httpCode on resolved success records', async () => {
+    const client = makeClient();
+    jest.spyOn(client, 'request').mockResolvedValue({
+      response: [{ token: 'token1', value: 'val1', httpCode: 200 }],
+    });
+
+    const result = await fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client, false);
+    expect(result).toEqual({ records: [{ token: 'token1', value: 'val1', httpCode: 200 }] });
+  });
+
+  it('element path (purejs=false) rejects a full failure as a top-level { error }', async () => {
+    const client = makeClient();
+    jest.spyOn(client, 'request').mockRejectedValue({
+      data: {
+        error: {
+          grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+        },
+      },
+      error: { code: 404, description: 'Vault not found.' },
+    });
+
+    await expect(fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client, false))
+      .rejects.toEqual({
+        error: {
+          grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+        },
+      });
+  });
 });
 
 describe('fetchRecordsByTokenIdComposableFlowDB', () => {
@@ -258,8 +344,13 @@ describe('fetchRecordsByTokenIdComposableFlowDB', () => {
 
     expect(client.request).toHaveBeenCalledTimes(1);
     expect(result.records).toEqual([
-      { 0: { token: 'token1', value: 'val1' }, frameId: 'frame1' },
-      { 0: { token: 'token2', value: 'val2', metadata: { table: 't' } }, frameId: 'frame2' },
+      { 0: { token: 'token1', value: 'val1', httpCode: 200 }, frameId: 'frame1' },
+      {
+        0: {
+          token: 'token2', value: 'val2', metadata: { table: 't' }, httpCode: 200,
+        },
+        frameId: 'frame2',
+      },
     ]);
   });
 
@@ -291,8 +382,28 @@ describe('fetchRecordsByTokenIdComposableFlowDB', () => {
     ];
     await expect(fetchRecordsByTokenIdComposableFlowDB(records, client, 'mockToken'))
       .rejects.toEqual({
-        records: [{ 0: { token: 'ok', value: 'v' }, frameId: 'frame1' }],
+        records: [{ 0: { token: 'ok', value: 'v', httpCode: 200 }, frameId: 'frame1' }],
         errors: [expect.objectContaining({ token: 'bad', frameId: 'frame2' })],
       });
+  });
+
+  it('rejects with a top-level { error } raw body on a request-level failure', async () => {
+    const client = makeClient();
+    jest.spyOn(client, 'request').mockRejectedValue({
+      data: {
+        error: {
+          grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+        },
+      },
+      error: { code: 404, description: 'Vault not found.' },
+    });
+
+    await expect(
+      fetchRecordsByTokenIdComposableFlowDB([{ token: 'token1', iframeName: 'frame1' }], client, 'mockToken'),
+    ).rejects.toEqual({
+      error: {
+        grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+      },
+    });
   });
 });

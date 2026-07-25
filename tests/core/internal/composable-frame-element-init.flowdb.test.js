@@ -60,17 +60,17 @@ describe('composable flowDB reveal responses', () => {
     const containerId = 'reveal-success-flowdb';
     const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
 
-    // flowDB composable success record: index-0 shape + frameId, no valueType
+    // flowDB composable success record: index-0 shape + frameId, no value in client output
     mockFetchRecordsByTokenIdComposableFlowDB.mockResolvedValue({
-      records: [{ 0: { token: 'skyflow-id-1', value: '4111111111111111' }, frameId: 'reveal-composable:123' }],
+      records: [{ 0: { token: 'skyflow-id-1', value: '4111111111111111', httpCode: 200 }, frameId: 'reveal-composable:123' }],
     });
 
     let assertedType = false;
     const postMessageSpy = jest.fn().mockImplementation((data) => {
       if (data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + containerId) {
         assertedType = true;
-        expect(data.data).toEqual({ success: [{ token: 'skyflow-id-1' }] });
-        expect(data.data.success[0].valueType).toBeUndefined();
+        expect(data.data).toEqual({ records: [{ token: 'skyflow-id-1', httpCode: 200 }] });
+        expect(data.data.records[0].value).toBeUndefined();
       }
     });
     let messageHandler;
@@ -121,7 +121,7 @@ describe('composable flowDB reveal responses', () => {
       if (data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + containerId) {
         assertedType = true;
         expect(data.data).toEqual({
-          errors: [{ error: { code: 404, description: 'Token not found' } }],
+          records: [{ error: 'Token not found', token: 'skyflow-id-1', httpCode: 404 }],
         });
       }
     });

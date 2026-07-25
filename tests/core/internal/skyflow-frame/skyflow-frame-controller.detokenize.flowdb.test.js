@@ -132,10 +132,11 @@ describe('flowDB detokenize via skyflow-frame-controller', () => {
       expect(clientReq).toHaveBeenCalledTimes(1);
       expect(clientReq.mock.calls[0][0].url).toBe('https://testurl.com/v2/tokens/detokenize');
       const result = cb.mock.calls[0][0];
-      expect(result.success).toEqual([
-        { token: 'token1', tokenGroupName: 'nondet_reg' },
-        { token: 'token2', tokenGroupName: 'nondet_reg' },
+      expect(result.records).toEqual([
+        { token: 'token1', tokenGroupName: 'nondet_reg', httpCode: 200 },
+        { token: 'token2', tokenGroupName: 'nondet_reg', httpCode: 200 },
       ]);
+      expect(result.records[0].value).toBeUndefined();
       // iframe payload emitted on the REVEAL_RESPONSE_READY channel
       const emittedReadyEvent = emitSpy.mock.calls.find(
         (c) => typeof c[0] === 'string'

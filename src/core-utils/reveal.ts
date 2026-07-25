@@ -207,6 +207,7 @@ export const constructFlowDBDetokenizeResponse = (
       value: res.value,
       ...(res.tokenGroupName ? { tokenGroupName: res.tokenGroupName } : {}),
       ...(hasMetadata ? { metadata: res.metadata } : {}),
+      httpCode: res.httpCode,
     });
   });
   return { records, errors };
@@ -224,6 +225,8 @@ export const constructFlowDBDetokenizeError = (
       },
     },
   ],
+  // Pass the raw API error body through for the element/composable reveal contract.
+  error: error?.data?.error ?? { httpCode: error?.error?.code, message: error?.error?.description },
 });
 
 interface IDetokenizeVariant {
@@ -470,6 +473,12 @@ export const fetchRecordsByTokenIdFlowDB = (
     executeDetokenize(
       flowDBDetokenizeVariant, tokenIdRecords, client, options, authToken as string,
     ).then((result) => {
+      // Element contract: a full API failure surfaces the raw body as a top-level { error }.
+      if (!purejs && (result as FlowDBDetokenizeRequestError).error
+        && !(result as FlowDBDetokenizeResponse).records) {
+        rootReject({ error: (result as FlowDBDetokenizeRequestError).error });
+        return;
+      }
       const successRecords = (result as FlowDBDetokenizeResponse).records || [];
       const failedRecords = (result.errors || []).map((errRecord) => {
         const errorData = formatForPureJsFailure(
@@ -480,6 +489,23 @@ export const fetchRecordsByTokenIdFlowDB = (
         printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
         return errorData;
       });
+      if (purejs) {
+        // Keep pure-js detokenize() output unchanged (no per-record httpCode leak).
+        const pureRecords = successRecords.map((record: any) => ({
+          token: record.token,
+          value: record.value,
+          ...(record.tokenGroupName ? { tokenGroupName: record.tokenGroupName } : {}),
+          ...(record.metadata ? { metadata: record.metadata } : {}),
+        }));
+        if (failedRecords.length === 0) {
+          rootResolve({ records: pureRecords });
+        } else if (pureRecords.length === 0) {
+          rootReject({ errors: failedRecords });
+        } else {
+          rootReject({ records: pureRecords, errors: failedRecords });
+        }
+        return;
+      }
       if (failedRecords.length === 0) {
         rootResolve({ records: successRecords });
       } else if (successRecords.length === 0) {
@@ -506,6 +532,12 @@ export const fetchRecordsByTokenIdComposableFlowDB = (
 
   executeDetokenize(flowDBDetokenizeVariant, tokenIdRecords, client, options, authToken)
     .then((result) => {
+      // Full API failure: surface the raw body as a top-level { error }.
+      if ((result as FlowDBDetokenizeRequestError).error
+        && !(result as FlowDBDetokenizeResponse).records) {
+        rootReject({ error: (result as FlowDBDetokenizeRequestError).error });
+        return;
+      }
       const recordsResponse: Record<string, any>[] = [];
       const errorResponse: Record<string, any>[] = [];
 
@@ -516,6 +548,7 @@ export const fetchRecordsByTokenIdComposableFlowDB = (
             value: record.value,
             ...(record.tokenGroupName ? { tokenGroupName: record.tokenGroupName } : {}),
             ...(record.metadata ? { metadata: record.metadata } : {}),
+            httpCode: record.httpCode,
           },
           frameId: frameIdByToken[record.token] ?? '',
         });
@@ -620,54 +653,60 @@ export const formatRecordsForClient = (response: IRevealResponseType): RevealRes
 };
 
 export const formatRecordsForClientFlowDB = (
-  response: IRevealResponseType,
+  response: any,
 ): RevealResponseFlowDB => {
-  const revealResponse: RevealResponseFlowDB = {};
-  if (response.records) {
-    revealResponse.success = response.records.map((record: any) => ({
+  // Full API failure: pass the raw error body straight through.
+  if (response?.error) {
+    return { error: response.error };
+  }
+  const records: RevealResponseFlowDB['records'] = [];
+  (response?.records || []).forEach((record: any) => {
+    records.push({
       token: record.token,
       ...(record.tokenGroupName ? { tokenGroupName: record.tokenGroupName } : {}),
       ...(record.metadata && Object.keys(record.metadata).length > 0
         ? { metadata: record.metadata } : {}),
-    }));
-  }
-  if (response.errors) {
-    revealResponse.errors = response.errors.map((errorRecord: any) => ({
+      httpCode: record.httpCode,
+    });
+  });
+  (response?.errors || []).forEach((errorRecord: any) => {
+    records.push({
+      error: errorRecord.error?.description ?? errorRecord.error,
       token: errorRecord.token,
-      error: errorRecord.error,
-    }));
-  }
-  return revealResponse;
+      httpCode: errorRecord.error?.code,
+    });
+  });
+  return { records };
 };
 
 export const formatRecordsForClientComposableFlowDB = (response) => {
-  let successRecords = [];
-  let errorRecords = [];
-
-  if (response?.errors && response?.errors?.length > 0) {
-    errorRecords = response?.errors?.map((errors) => ({
-      error: errors?.error ?? {},
-    }));
+  // Full API failure: pass the raw error body straight through.
+  if (response?.error) {
+    return { error: response.error };
   }
 
-  if (response?.records) {
-    successRecords = response?.records?.map((record) => ({
-      token: record?.[0]?.token ?? '',
-      ...(record?.[0]?.tokenGroupName ? { tokenGroupName: record[0].tokenGroupName } : {}),
-      ...(record?.[0]?.metadata && Object.keys(record[0].metadata).length > 0
-        ? { metadata: record[0].metadata } : {}),
-    }));
-  }
+  const records: any[] = [];
 
-  if (successRecords?.length > 0 && errorRecords?.length > 0) {
-    return { success: successRecords, errors: errorRecords };
-  }
+  (response?.records || []).forEach((record) => {
+    const data = record?.[0] ?? {};
+    records.push({
+      token: data.token ?? '',
+      ...(data.tokenGroupName ? { tokenGroupName: data.tokenGroupName } : {}),
+      ...(data.metadata && Object.keys(data.metadata).length > 0
+        ? { metadata: data.metadata } : {}),
+      httpCode: data.httpCode,
+    });
+  });
 
-  if (successRecords?.length > 0) {
-    return { success: successRecords };
-  }
+  (response?.errors || []).forEach((errorRecord) => {
+    records.push({
+      error: errorRecord?.error?.description ?? errorRecord?.error,
+      token: errorRecord?.token ?? '',
+      httpCode: errorRecord?.error?.code,
+    });
+  });
 
-  return { errors: errorRecords };
+  return { records };
 };
 
 export const formatRecordsForClientComposable = (response) => {

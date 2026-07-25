@@ -478,10 +478,9 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
     }
 
     const recordRedaction = record.redaction;
-    if (recordRedaction) {
-      if (!Object.values(RedactionType).includes(recordRedaction)) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL, []);
-      }
+    if (recordRedaction !== undefined && recordRedaction !== null
+      && typeof recordRedaction !== 'string') {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL, []);
     }
 
     if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') {
