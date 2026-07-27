@@ -652,6 +652,21 @@ export const formatRecordsForClient = (response: IRevealResponseType): RevealRes
   return revealResponse;
 };
 
+// SDK convention: normalize the raw flowDB token metadata keys to SDK naming
+// (`table` -> `tableName`, `skyflowID` -> `skyflowId`). Other keys pass through unchanged.
+const normalizeFlowDBMetadata = (metadata: Record<string, any>): Record<string, any> => {
+  const result: Record<string, any> = { ...metadata };
+  if (Object.prototype.hasOwnProperty.call(result, 'table')) {
+    result.tableName = result.table;
+    delete result.table;
+  }
+  if (Object.prototype.hasOwnProperty.call(result, 'skyflowID')) {
+    result.skyflowId = result.skyflowID;
+    delete result.skyflowID;
+  }
+  return result;
+};
+
 export const formatRecordsForClientFlowDB = (
   response: any,
 ): RevealResponseFlowDB => {
@@ -665,7 +680,7 @@ export const formatRecordsForClientFlowDB = (
       token: record.token,
       ...(record.tokenGroupName ? { tokenGroupName: record.tokenGroupName } : {}),
       ...(record.metadata && Object.keys(record.metadata).length > 0
-        ? { metadata: record.metadata } : {}),
+        ? { metadata: normalizeFlowDBMetadata(record.metadata) } : {}),
       httpCode: record.httpCode,
     });
   });
@@ -693,7 +708,7 @@ export const formatRecordsForClientComposableFlowDB = (response) => {
       token: data.token ?? '',
       ...(data.tokenGroupName ? { tokenGroupName: data.tokenGroupName } : {}),
       ...(data.metadata && Object.keys(data.metadata).length > 0
-        ? { metadata: data.metadata } : {}),
+        ? { metadata: normalizeFlowDBMetadata(data.metadata) } : {}),
       httpCode: data.httpCode,
     });
   });

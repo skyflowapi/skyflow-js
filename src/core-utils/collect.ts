@@ -163,7 +163,7 @@ export const constructFlowDBInsertResponse = (
     if (res.error) {
       records.push({
         error: res.error,
-        skyflowID: res.skyflowID,
+        skyflowId: res.skyflowID,
         tableName: res.tableName,
         httpCode: res.httpCode,
       });
@@ -172,7 +172,7 @@ export const constructFlowDBInsertResponse = (
     const hasHashedData = res.hashedData && Object.keys(res.hashedData).length > 0;
     records.push({
       tableName: res.tableName,
-      skyflowID: res.skyflowID,
+      skyflowId: res.skyflowID,
       fields: tokens ? (res.tokens ?? {}) : {},
       ...(hasHashedData ? { hashedData: res.hashedData } : {}),
       httpCode: res.httpCode,

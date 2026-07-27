@@ -91,7 +91,7 @@ export interface FlowDBError {
 
 export interface FlowDBInsertResponseRecord {
   tableName: string;
-  skyflowID: string | null;
+  skyflowId: string | null;
   fields: Record<string, any>;
   hashedData?: Record<string, any>;
   httpCode?: number;
@@ -99,7 +99,7 @@ export interface FlowDBInsertResponseRecord {
 
 export interface FlowDBInsertResponseRecordError {
   error: string;
-  skyflowID: string | null;
+  skyflowId: string | null;
   tableName: string;
   httpCode?: number;
 }

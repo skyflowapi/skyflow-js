@@ -166,7 +166,7 @@ describe('formatRecordsForClientFlowDB', () => {
       records: [
         { token: 't1', httpCode: 200 },
         {
-          token: 't2', tokenGroupName: 'nondet_reg', metadata: { table: 'persons', skyflowID: 'id1' }, httpCode: 200,
+          token: 't2', tokenGroupName: 'nondet_reg', metadata: { tableName: 'persons', skyflowId: 'id1' }, httpCode: 200,
         },
       ],
     });
@@ -217,6 +217,20 @@ describe('formatRecordsForClientComposableFlowDB', () => {
         { token: 't1', httpCode: 200 },
         { error: 'nf', token: 't2', httpCode: 404 },
       ],
+    });
+  });
+
+  it('normalizes metadata keys (table -> tableName, skyflowID -> skyflowId)', () => {
+    const response = {
+      records: [{
+        0: {
+          token: 't1', value: 'a', metadata: { table: 'persons', skyflowID: 'id1' }, httpCode: 200,
+        },
+        frameId: 'f1',
+      }],
+    };
+    expect(formatRecordsForClientComposableFlowDB(response)).toEqual({
+      records: [{ token: 't1', metadata: { tableName: 'persons', skyflowId: 'id1' }, httpCode: 200 }],
     });
   });
 
