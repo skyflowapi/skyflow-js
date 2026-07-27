@@ -99,7 +99,7 @@ describe('constructFlowDBInsertResponse', () => {
     expect(res.records[0]).not.toHaveProperty('errors');
   });
 
-  test('inlines per-record error into records, mapping API skyflowID to skyflowId', () => {
+  test('inlines per-record error into records without a skyflowId field', () => {
     const body = {
       records: [
         { skyflowID: 'ok1', tableName: 'table1', httpCode: 200, tokens: {} },
@@ -113,7 +113,7 @@ describe('constructFlowDBInsertResponse', () => {
       tableName: 'table1', skyflowId: 'ok1', fields: {}, httpCode: 200,
     });
     expect(res.records[1]).toEqual({
-      error: 'not found', skyflowId: null, tableName: '', httpCode: 400,
+      error: 'not found', tableName: '', httpCode: 400,
     });
   });
 

@@ -11,13 +11,12 @@ import {
   IRenderResponseType,
   IGetOptions,
   RenderFileResponse,
-  RevealResponse,
   GetResponse,
   GetResponseRecord,
   GetByIdResponse,
   GetByIdResponseRecord,
   IRevealRecordComposable,
-  RevealResponseFlowDB,
+  RevealResponse as RevealResponsePrivacyDB,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
 import { FILE_DOWNLOAD_URL_PARAM } from '../core/constants';
@@ -26,6 +25,8 @@ import {
   FlowDBDetokenizeResponseBody,
   FlowDBDetokenizeResponse,
   FlowDBDetokenizeRequestError,
+  RevealResponse,
+  RevealError,
 } from '../core/internal/internal-types';
 
 interface IApiSuccessResponse {
@@ -246,7 +247,7 @@ const flowDBDetokenizeVariant: IDetokenizeVariant = {
       constructFlowDBDetokenizeRequest(tokenIdRecords, client.config.vaultID, options),
     ),
     requestMethod: 'POST',
-    url: `${client.config.vaultURL}/v2/tokens/detokenize`,
+    url: 'vault/v2/tokens/detokenize',
     headers: {
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',
@@ -633,8 +634,10 @@ export const formatForRenderClient = (response: IRenderResponseType, column: str
   return formattedResponse;
 };
 
-export const formatRecordsForClient = (response: IRevealResponseType): RevealResponse => {
-  const revealResponse: RevealResponse = {};
+export const formatRecordsForClient = (
+  response: IRevealResponseType,
+): RevealResponsePrivacyDB => {
+  const revealResponse: RevealResponsePrivacyDB = {};
   if (response.records) {
     const successRecords = response.records.map((record) => ({
       token: record.token,
@@ -669,12 +672,12 @@ const normalizeFlowDBMetadata = (metadata: Record<string, any>): Record<string, 
 
 export const formatRecordsForClientFlowDB = (
   response: any,
-): RevealResponseFlowDB => {
+): RevealResponse | RevealError => {
   // Full API failure: pass the raw error body straight through.
   if (response?.error) {
     return { error: response.error };
   }
-  const records: RevealResponseFlowDB['records'] = [];
+  const records: RevealResponse['records'] = [];
   (response?.records || []).forEach((record: any) => {
     records.push({
       token: record.token,

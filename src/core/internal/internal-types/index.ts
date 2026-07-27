@@ -89,7 +89,7 @@ export interface FlowDBError {
   description?: string;
 }
 
-export interface FlowDBInsertResponseRecord {
+export interface CollectRecordSuccess {
   tableName: string;
   skyflowId: string | null;
   fields: Record<string, any>;
@@ -97,15 +97,14 @@ export interface FlowDBInsertResponseRecord {
   httpCode?: number;
 }
 
-export interface FlowDBInsertResponseRecordError {
-  error: string;
-  skyflowId: string | null;
-  tableName: string;
+export interface CollectRecordError {
+  tableName?: string;
+  error?: string;
   httpCode?: number;
 }
 
-export interface FlowDBInsertResponse {
-  records: Array<FlowDBInsertResponseRecord | FlowDBInsertResponseRecordError>;
+export interface CollectResponse {
+  records: Array<CollectRecordSuccess | CollectRecordError>;
 }
 
 export interface FlowDBFullError {
@@ -116,7 +115,7 @@ export interface FlowDBFullError {
   details?: any[];
 }
 
-export interface FlowDBInsertRequestError {
+export interface CollectError {
   error: FlowDBFullError;
 }
 
@@ -166,6 +165,27 @@ export interface FlowDBDetokenizeRequestError {
   errors: FlowDBDetokenizeResponseRecordError[];
   // Raw full-failure body passed through for the element/composable reveal contract.
   error?: FlowDBFullError;
+}
+
+export interface RevealRecordSuccess {
+  token: string;
+  tokenGroupName?: string | null;
+  metadata?: Record<string, any>;
+  httpCode?: number;
+}
+
+export interface RevealRecordError {
+  token?: string;
+  error?: string;
+  httpCode?: number;
+}
+
+export interface RevealResponse {
+  records: Array<RevealRecordSuccess | RevealRecordError>;
+}
+
+export interface RevealError {
+  error: FlowDBFullError;
 }
 
 export interface ContainerProps {

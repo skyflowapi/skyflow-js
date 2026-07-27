@@ -394,24 +394,6 @@ export interface RevealResponse {
   }>
 }
 
-export interface RevealResponseFlowDBRecord {
-  token: string,
-  tokenGroupName?: string | null,
-  metadata?: Record<string, any>,
-  httpCode?: number,
-}
-
-export interface RevealResponseFlowDBRecordError {
-  error: string,
-  token: string,
-  httpCode?: number,
-}
-
-export interface RevealResponseFlowDB {
-  records?: Array<RevealResponseFlowDBRecord | RevealResponseFlowDBRecordError>,
-  error?: Record<string, any>,
-}
-
 export interface RenderFileResponse {
   success?: {
     skyflow_id: string,

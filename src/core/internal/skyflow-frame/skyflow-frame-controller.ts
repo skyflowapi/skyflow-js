@@ -45,7 +45,6 @@ import {
   IInsertRecordInput,
   IInsertOptions,
   UploadFilesResponse,
-  RevealResponseFlowDB,
   InsertResponse,
   CollectResponse,
   IRevealResponseType,
@@ -69,7 +68,7 @@ import SkyflowError from '../../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
   BatchInsertRequestBody, ElementInfo, FlowDBInsertRequestBody, FlowDBUpdateRequestBody,
-  TokenizeDataInput, UploadFileDataInput,
+  TokenizeDataInput, UploadFileDataInput, RevealResponse, RevealError,
 } from '../internal-types';
 import IFrameFormElement from '../iframe-form';
 
@@ -435,7 +434,10 @@ class SkyflowFrameController {
     return new SkyflowFrameController(clientId);
   }
 
-  revealData(revealRecords: IRevealRecord[], containerId: string): Promise<RevealResponseFlowDB> {
+  revealData(
+    revealRecords: IRevealRecord[],
+    containerId: string,
+  ): Promise<RevealResponse | RevealError> {
     const id = containerId;
     return new Promise((resolve, reject) => {
       fetchRecordsByTokenIdFlowDB(revealRecords, this.#client, false).then(

@@ -22,8 +22,8 @@ import { printLog } from '../utils/logs-helper';
 import IFrameFormElement from '../core/internal/iframe-form';
 import {
   BatchInsertRequestBody, FlowDBInsertRecordData, FlowDBInsertRequestBody,
-  FlowDBInsertResponseBody, FlowDBInsertResponse, FlowDBInsertResponseRecord,
-  FlowDBInsertResponseRecordError, FlowDBInsertRequestError,
+  FlowDBInsertResponseBody, CollectResponse, CollectRecordSuccess,
+  CollectRecordError, CollectError,
   FlowDBUpdateRecordData, FlowDBUpdateRequestBody, FlowDBUpsert,
 } from '../core/internal/internal-types';
 
@@ -156,14 +156,13 @@ export const constructInsertRecordResponse = (
 export const constructFlowDBInsertResponse = (
   responseBody: FlowDBInsertResponseBody,
   tokens: boolean,
-): FlowDBInsertResponse => {
-  const records: Array<FlowDBInsertResponseRecord | FlowDBInsertResponseRecordError> = [];
+): CollectResponse => {
+  const records: Array<CollectRecordSuccess | CollectRecordError> = [];
 
   responseBody.records.forEach((res) => {
     if (res.error) {
       records.push({
         error: res.error,
-        skyflowId: res.skyflowID,
         tableName: res.tableName,
         httpCode: res.httpCode,
       });
@@ -182,7 +181,7 @@ export const constructFlowDBInsertResponse = (
   return { records };
 };
 
-export const constructFlowDBInsertError = (error: any): FlowDBInsertRequestError => {
+export const constructFlowDBInsertError = (error: any): CollectError => {
   const rawError = error?.data?.error;
   if (rawError) {
     return { error: rawError };
@@ -531,7 +530,7 @@ const flowDBInsertVariant: IInsertVariant = {
       constructFlowDBInsertRequest(finalInsertRecords, options, client.config.vaultID),
     ),
     requestMethod: 'POST',
-    url: `${client.config.vaultURL}/v2/records/insert`,
+    url: 'vault/v2/records/insert',
     headers: {
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',
@@ -547,7 +546,7 @@ const flowDBUpdateVariant: IInsertVariant = {
       constructFlowDBUpdateRequest(finalUpdateRecords, options, client.config.vaultID),
     ),
     requestMethod: 'POST',
-    url: `${client.config.vaultURL}/v2/records/update`,
+    url: 'vault/v2/records/update',
     headers: {
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',
