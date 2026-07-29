@@ -10,6 +10,7 @@ import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
 import SkyflowError from "../../../../src/libs/skyflow-error";
+import SkyflowFlowDBError from "../../../../src/libs/skyflow-flowdb-error";
 import logs from "../../../../src/utils/logs";
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
@@ -186,9 +187,9 @@ describe("Reveal Container Class", () => {
 
 
     testRevealContainer.reveal().catch(error => {
-      expect(error).toBeDefined()
-      expect(error.code).toEqual(404);
-      expect(error.description).toEqual('Not Found');
+      expect(error).toBeInstanceOf(SkyflowFlowDBError);
+      expect(error.httpCode).toEqual(404);
+      expect(error.message).toEqual('Not Found');
     });
     const eventName1 = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY+mockUuid
 
@@ -199,7 +200,7 @@ describe("Reveal Container Class", () => {
     const emitEventName = emitSpy.mock.calls[1][0];
     const emitCb = emitSpy.mock.calls[1][2];
     expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
-    emitCb({error:{code:404,description:"Not Found"}});
+    emitCb({error:{grpc_code:5,http_code:404,message:"Not Found",http_status:"Not Found",details:[]}});
   });
   test("on container mounted call back 2",()=>{
     const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
@@ -358,7 +359,7 @@ describe("Reveal Container Class", () => {
     const emitEventName = emitSpy.mock.calls[1][0];
     const emitCb = emitSpy.mock.calls[1][2];
     expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
-    emitCb({error:{code:404,description:"Not Found"}});
+    emitCb({error:{grpc_code:5,http_code:404,message:"Not Found",http_status:"Not Found",details:[]}});
   });
   test("on container mounted else call back 1",()=>{
     const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });

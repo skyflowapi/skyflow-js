@@ -57,8 +57,8 @@ const options = {
     additionalFields: {
       records: [
         {
-          table: "table1",
-          fields: {
+          tableName: "table1",
+          data: {
             name: 'name'
           },
         },
@@ -70,11 +70,11 @@ const options = {
     additionalFields: {
       records: [
         {
-          table: "table1",
-          fields: {
+          tableName: "table1",
+          data: {
             column: '122',
-            skyflowID: 'table1'
           },
+          skyflowId: 'table1'
         },
       ],
     },

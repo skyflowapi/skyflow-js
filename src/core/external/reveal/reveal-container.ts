@@ -5,17 +5,23 @@ import bus from 'framebus';
 import EventEmitter from '../../../event-emitter';
 import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe-libs/iframer';
 import SkyflowError from '../../../libs/skyflow-error';
+import SkyflowFlowDBError from '../../../libs/skyflow-flowdb-error';
 import uuid from '../../../libs/uuid';
 import { ContainerType } from '../../../skyflow';
 import {
   ContainerOptions,
   Context, ErrorType, MessageType,
-  RedactionType, RevealResponse,
+  RevealResponse,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
-import { validateInitConfig, validateInputFormatOptions, validateRevealElementRecords } from '../../../utils/validators';
+import {
+  validateInitConfig,
+  validateInputFormatOptions,
+  validateRevealElementRecords,
+  validateRevealOptions,
+} from '../../../utils/validators';
 import {
   CONTROLLER_STYLES, CUSTOM_ERROR_MESSAGES,
   ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
@@ -31,7 +37,16 @@ export interface IRevealElementInput {
   skyflowID?: string;
   table?: string;
   column?: string;
-  redaction?: RedactionType;
+  inputStyles?: object;
+  label?: string;
+  labelStyles?: object;
+  altText?: string;
+  errorTextStyles?: object;
+}
+
+// flowDB reveal input — token-based only (excludes V1 file-render keys)
+export interface IFlowDBRevealElementInput {
+  token?: string;
   inputStyles?: object;
   label?: string;
   labelStyles?: object;
@@ -43,6 +58,15 @@ export interface IRevealElementOptions {
   enableCopy?: boolean;
   format?: string;
   translation?:Record<string, string>
+}
+
+export interface TokenGroupRedaction {
+  tokenGroupName: string;
+  redaction: string;
+}
+
+export interface IRevealOptions {
+  tokenGroupRedactions?: TokenGroupRedaction[];
 }
 
 const CLASS_NAME = 'RevealContainer';
@@ -168,7 +192,7 @@ class RevealContainer extends Container {
     });
   }
 
-  reveal(): Promise<RevealResponse> {
+  reveal(options?: IRevealOptions): Promise<RevealResponse> {
     this.#isRevealCalled = true;
     this.#revealRecords = [];
     if (this.#metaData.skyflowContainer.isControllerFrameReady) {
@@ -190,6 +214,7 @@ class RevealContainer extends Container {
             throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_REVEAL, [], true);
           }
           validateRevealElementRecords(this.#revealRecords);
+          validateRevealOptions(options);
           if (!this.#isElementsMounted) {
             const timeout = setTimeout(() => {
               printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
@@ -201,11 +226,11 @@ class RevealContainer extends Container {
               ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
               () => {
                 clearTimeout(timeout);
-                this.#emitRevealRequest(resolve, reject);
+                this.#emitRevealRequest(resolve, reject, options);
               },
             );
           } else {
-            this.#emitRevealRequest(resolve, reject);
+            this.#emitRevealRequest(resolve, reject, options);
           }
         } catch (err: any) {
           printLog(`Error: ${err.message}`, MessageType.ERROR, this.#context.logLevel);
@@ -231,6 +256,7 @@ class RevealContainer extends Container {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_REVEAL, [], true);
         }
         validateRevealElementRecords(this.#revealRecords);
+        validateRevealOptions(options);
         if (!this.#isElementsMounted) {
           const timeout = setTimeout(() => {
             printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
@@ -243,13 +269,13 @@ class RevealContainer extends Container {
             () => {
               clearTimeout(timeout);
               if (this.#metaData.skyflowContainer.isControllerFrameReady) {
-                this.#emitRevealRequest(resolve, reject);
+                this.#emitRevealRequest(resolve, reject, options);
               } else {
                 bus
                   .target(properties.IFRAME_SECURE_ORIGIN)
                   .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
          + this.#metaData.uuid, () => {
-                    this.#emitRevealRequest(resolve, reject);
+                    this.#emitRevealRequest(resolve, reject, options);
                   });
               }
             },
@@ -259,7 +285,7 @@ class RevealContainer extends Container {
             .target(properties.IFRAME_SECURE_ORIGIN)
             .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
          + this.#metaData.uuid, () => {
-              this.#emitRevealRequest(resolve, reject);
+              this.#emitRevealRequest(resolve, reject, options);
             });
         }
       } catch (err: any) {
@@ -269,7 +295,7 @@ class RevealContainer extends Container {
     });
   }
 
-  #emitRevealRequest(resolve, reject) {
+  #emitRevealRequest(resolve, reject, options?: IRevealOptions) {
     bus
       .target(properties.IFRAME_SECURE_ORIGIN)
       .emit(
@@ -279,13 +305,14 @@ class RevealContainer extends Container {
           records: this.#revealRecords,
           containerId: this.#containerId,
           errorMessages: this.#customErrorMessages,
+          options,
         },
         (revealData: any) => {
           this.#mountedRecords = [];
           if (revealData.error) {
             printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
               MessageType.ERROR, this.#context.logLevel);
-            reject(revealData.error);
+            reject(new SkyflowFlowDBError(revealData.error));
           } else {
             printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
               MessageType.LOG,

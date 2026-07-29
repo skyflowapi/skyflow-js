@@ -15,6 +15,7 @@ import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
 import SkyflowError from "../../../../src/libs/skyflow-error";
+import SkyflowFlowDBError from "../../../../src/libs/skyflow-flowdb-error";
 import logs from "../../../../src/utils/logs";
 import { Metadata } from "../../../../src/core/internal/internal-types";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
@@ -196,7 +197,7 @@ describe("Reveal Container Class", () => {
     // First emit the mounted event
     emitSpy.mockImplementation((eventName, _, callback) => {
       if (eventName.includes(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS)) {
-        callback({ error: { code: 404, description: "Not Found" } });
+        callback({ error: { grpc_code: 5, http_code: 404, message: "Not Found", http_status: "Not Found", details: [] } });
       }
     });
 
@@ -207,9 +208,16 @@ describe("Reveal Container Class", () => {
     mountedCallback({ name: element.iframeName() });
 
     // Now try to reveal
-    await expect(testRevealContainer.reveal()).rejects.toEqual({
-      code: 404,
-      description: "Not Found",
+    const revealError: any = await testRevealContainer.reveal().catch((e) => e);
+    expect(revealError).toBeInstanceOf(SkyflowFlowDBError);
+    expect(revealError.httpCode).toBe(404);
+    expect(revealError.message).toBe("Not Found");
+    expect(revealError.error).toEqual({
+      grpcCode: 5,
+      httpCode: 404,
+      message: "Not Found",
+      httpStatus: "Not Found",
+      details: [],
     });
   });
 
@@ -286,7 +294,7 @@ describe("Reveal Container Class", () => {
     // Mock error response
     emitSpy.mockImplementation((eventName, _, callback) => {
       if (eventName.includes(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS)) {
-        callback({ error: { code: 404, description: "Not Found" } });
+        callback({ error: { grpc_code: 5, http_code: 404, message: "Not Found", http_status: "Not Found", details: [] } });
       }
     });
 
@@ -295,9 +303,16 @@ describe("Reveal Container Class", () => {
     )[1];
     mountedCallback({ name: element.iframeName() });
 
-    await expect(testRevealContainer.reveal()).rejects.toEqual({
-      code: 404,
-      description: "Not Found",
+    const revealError: any = await testRevealContainer.reveal().catch((e) => e);
+    expect(revealError).toBeInstanceOf(SkyflowFlowDBError);
+    expect(revealError.httpCode).toBe(404);
+    expect(revealError.message).toBe("Not Found");
+    expect(revealError.error).toEqual({
+      grpcCode: 5,
+      httpCode: 404,
+      message: "Not Found",
+      httpStatus: "Not Found",
+      details: [],
     });
   });
 

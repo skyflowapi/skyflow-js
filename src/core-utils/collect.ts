@@ -6,6 +6,7 @@ import omit from 'lodash/omit';
 import get from 'lodash/get';
 import Client from '../client';
 import SkyflowError from '../libs/skyflow-error';
+import { normalizeFlowDBError } from '../libs/skyflow-flowdb-error';
 import { getAccessToken } from '../utils/bus-events';
 import {
   IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
@@ -15,15 +16,26 @@ import {
   IUpdateOptions,
   UpdateResponse,
   UpdateResponseType,
+  UpdateType,
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
 import IFrameFormElement from '../core/internal/iframe-form';
-import { BatchInsertRequestBody } from '../core/internal/internal-types';
+import {
+  BatchInsertRequestBody, FlowDBInsertRecordData, FlowDBInsertRequestBody,
+  FlowDBInsertResponseBody, CollectResponse, CollectRecord, CollectError,
+  FlowDBUpdateRecordData, FlowDBUpdateRequestBody, FlowDBUpsert,
+} from '../core/internal/internal-types';
 
 export interface IUpsertOptions{
   table: string,
   column:string,
+}
+
+export interface IFlowDBUpsertOptions {
+  table: string,
+  uniqueColumns: string[],
+  updateType?: UpdateType,
 }
 
 export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions> | undefined) => {
@@ -37,6 +49,19 @@ export const getUpsertColumn = (tableName: string, options:Array<IUpsertOptions>
   }
 
   return uniqueColumn;
+};
+
+export const getFlowDBUpsertForTable = (
+  tableName: string,
+  options: Array<IFlowDBUpsertOptions> | undefined,
+): FlowDBUpsert | undefined => {
+  if (!options) return undefined;
+  const match = options.find((upsertOption) => upsertOption.table === tableName);
+  if (!match) return undefined;
+  return {
+    uniqueColumns: match.uniqueColumns,
+    ...(match.updateType ? { updateType: match.updateType } : {}),
+  };
 };
 export const constructInsertRecordRequest = (
   records: IInsertRecordInput,
@@ -76,6 +101,26 @@ export const constructInsertRecordRequest = (
   return requestBody;
 };
 
+export const constructFlowDBInsertRequest = (
+  records: IInsertRecordInput,
+  options: Record<string, any> = { tokens: true },
+  vaultID: string | undefined,
+): FlowDBInsertRequestBody => {
+  const insertRecords: FlowDBInsertRecordData[] = records.records.map((record) => {
+    const upsert = getFlowDBUpsertForTable(record.table, options?.upsert);
+    return {
+      tableName: record.table,
+      data: record.fields,
+      ...(upsert ? { upsert } : {}),
+    };
+  });
+
+  return {
+    vaultID,
+    records: insertRecords,
+  };
+};
+
 export const constructInsertRecordResponse = (
   responseBody: any,
   tokens: boolean,
@@ -105,6 +150,64 @@ export const constructInsertRecordResponse = (
       table: records[index].table,
       skyflow_id: res.records[0].skyflow_id,
     })),
+  };
+};
+
+export const constructFlowDBInsertResponse = (
+  responseBody: FlowDBInsertResponseBody,
+): CollectResponse => {
+  const records: Array<CollectRecord> = [];
+
+  responseBody.records.forEach((res) => {
+    if (res.error) {
+      records.push({
+        error: res.error,
+        tableName: res.tableName,
+        httpCode: res.httpCode as number,
+      });
+      return;
+    }
+    const hasHashedData = res.hashedData && Object.keys(res.hashedData).length > 0;
+    records.push({
+      tableName: res.tableName,
+      ...(res.skyflowID ? { skyflowId: res.skyflowID } : {}),
+      tokens: res.tokens ?? {},
+      ...(hasHashedData ? { hashedData: res.hashedData } : {}),
+      httpCode: res.httpCode as number,
+    });
+  });
+
+  return { records };
+};
+
+export const constructFlowDBInsertError = (error: any): CollectError => {
+  const rawError = error?.data?.error;
+  if (rawError) {
+    return { error: normalizeFlowDBError(rawError) };
+  }
+  return {
+    error: {
+      httpCode: error?.error?.code,
+      message: error?.error?.description,
+    },
+  };
+};
+
+export const constructFlowDBUpdateRequest = (
+  updateRecords: { updateRecords: IInsertRecord[] },
+  options: Record<string, any> = { tokens: true },
+  vaultID: string | undefined,
+): FlowDBUpdateRequestBody => {
+  const records: FlowDBUpdateRecordData[] = updateRecords.updateRecords.map((record) => ({
+    skyflowID: record.skyflowID as string,
+    tableName: record.table,
+    data: omit(record.fields, ['table', 'skyflowID']),
+    ...(options?.updateType ? { updateType: options.updateType } : {}),
+  }));
+
+  return {
+    vaultID,
+    records,
   };
 };
 
@@ -192,29 +295,26 @@ export const constructElementsInsertReq = (req, update, options) => {
   if (additionalFields) {
     // merge additionalFields in req
     additionalFields.records.forEach((record) => {
-      if (record.fields.skyflowID) {
-        if (ids.includes(record.fields.skyflowID)) {
-          checkDuplicateColumns(
-            record.fields, update[record.fields.skyflowID], record.table,
-          );
-          const temp = record.fields;
-          merge(temp, update[record.fields.skyflowID]);
-          update[record.fields.skyflowID] = temp;
+      const { tableName, data, skyflowId } = record;
+      if (skyflowId) {
+        if (ids.includes(skyflowId)) {
+          checkDuplicateColumns(data, update[skyflowId], tableName);
+          const temp = { ...data };
+          merge(temp, update[skyflowId]);
+          update[skyflowId] = temp;
         } else {
-          update[record.fields.skyflowID] = {
-            ...record.fields,
-            table: record.table,
+          update[skyflowId] = {
+            ...data,
+            table: tableName,
           };
         }
-      } else if (!record.fields.skyflowID) {
-        if (tables.includes(record.table)) {
-          checkDuplicateColumns(record.fields, req[record.table], record.table);
-          const temp = record.fields;
-          merge(temp, req[record.table]);
-          req[record.table] = temp;
-        } else {
-          req[record.table] = record.fields;
-        }
+      } else if (tables.includes(tableName)) {
+        checkDuplicateColumns(data, req[tableName], tableName);
+        const temp = { ...data };
+        merge(temp, req[tableName]);
+        req[tableName] = temp;
+      } else {
+        req[tableName] = { ...data };
       }
     });
   }
@@ -378,50 +478,131 @@ export const updateRecordsBySkyflowIDComposable = async (
   });
 });
 
-export const insertDataInCollect = async (
+interface IInsertVariant {
+  buildRequest(
+    client: Client,
+    records,
+    options,
+    finalInsertRecords,
+    authToken: string,
+  ): Promise<any> | undefined;
+  parseSuccess(response: any, options, finalInsertRecords): any;
+  parseError(error: any, options?): any;
+}
+
+// When the flowDB API rejects with a non-2xx status it can still return a body
+// carrying a `records` key (partial failure). In that case resolve the request
+// through the success constructor so the per-record results/errors flow to the
+// client, and only fall back to the top-level error envelope on a full failure.
+const parseFlowDBError = (error: any) => {
+  if (Array.isArray(error?.data?.records)) {
+    return constructFlowDBInsertResponse(error.data);
+  }
+  return constructFlowDBInsertError(error);
+};
+
+const privacyDBInsertVariant: IInsertVariant = {
+  buildRequest: (client, records, options, finalInsertRecords, authToken) => client?.request({
+    body: JSON.stringify({
+      records,
+    }),
+    requestMethod: 'POST',
+    url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
+    headers: {
+      authorization: `Bearer ${authToken}`,
+      'content-type': 'application/json',
+    },
+  }),
+  parseSuccess: (response, options, finalInsertRecords) => constructInsertRecordResponse(
+    response,
+    options?.tokens,
+    finalInsertRecords?.records,
+  ),
+  parseError: (error) => ({
+    errors: [
+      {
+        error: {
+          code: error?.error?.code,
+          description: error?.error?.description,
+          type: error?.error?.type,
+        },
+      },
+    ],
+  }),
+};
+
+const flowDBInsertVariant: IInsertVariant = {
+  buildRequest: (client, records, options, finalInsertRecords, authToken) => client?.request({
+    body: JSON.stringify(
+      constructFlowDBInsertRequest(finalInsertRecords, options, client.config.vaultID),
+    ),
+    requestMethod: 'POST',
+    url: `${client.config.vaultURL}/v2/records/insert`,
+    headers: {
+      authorization: `Bearer ${authToken}`,
+      'content-type': 'application/json',
+    },
+  }),
+  parseSuccess: (response) => constructFlowDBInsertResponse(response),
+  parseError: (error) => parseFlowDBError(error),
+};
+
+const flowDBUpdateVariant: IInsertVariant = {
+  buildRequest: (client, records, options, finalUpdateRecords, authToken) => client?.request({
+    body: JSON.stringify(
+      constructFlowDBUpdateRequest(finalUpdateRecords, options, client.config.vaultID),
+    ),
+    requestMethod: 'POST',
+    url: `${client.config.vaultURL}/v2/records/update`,
+    headers: {
+      authorization: `Bearer ${authToken}`,
+      'content-type': 'application/json',
+    },
+  }),
+  parseSuccess: (response) => constructFlowDBInsertResponse(response),
+  parseError: (error) => parseFlowDBError(error),
+};
+
+const executeInsert = (
+  variant: IInsertVariant,
   records,
   client: Client,
   options,
   finalInsertRecords,
   authToken: string,
 ) => new Promise((resolve) => {
-  let insertResponse: any;
-  let insertErrorResponse: any;
-  client
-    ?.request({
-      body: JSON.stringify({
-        records,
-      }),
-      requestMethod: 'POST',
-      url: `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}`,
-      headers: {
-        authorization: `Bearer ${authToken}`,
-        'content-type': 'application/json',
-      },
-    })
+  variant.buildRequest(client, records, options, finalInsertRecords, authToken)
     ?.then((response: any) => {
-      insertResponse = constructInsertRecordResponse(
-        response,
-        options?.tokens,
-        finalInsertRecords?.records,
-      );
-      resolve(insertResponse);
+      resolve(variant.parseSuccess(response, options, finalInsertRecords));
     })
-    ?.catch((error) => {
-      insertErrorResponse = {
-        errors: [
-          {
-            error: {
-              code: error?.error?.code,
-              description: error?.error?.description,
-              type: error?.error?.type,
-            },
-          },
-        ],
-      };
-      resolve(insertErrorResponse);
+    ?.catch((error: any) => {
+      resolve(variant.parseError(error, options));
     });
 });
+
+export const insertDataInCollect = async (
+  records,
+  client: Client,
+  options,
+  finalInsertRecords,
+  authToken: string,
+) => executeInsert(privacyDBInsertVariant, records, client, options, finalInsertRecords, authToken);
+
+export const insertDataInCollectFlowDB = async (
+  records,
+  client: Client,
+  options,
+  finalInsertRecords,
+  authToken: string,
+) => executeInsert(flowDBInsertVariant, records, client, options, finalInsertRecords, authToken);
+
+export const updateDataInCollectFlowDB = async (
+  records,
+  client: Client,
+  options,
+  finalUpdateRecords,
+  authToken: string,
+) => executeInsert(flowDBUpdateVariant, records, client, options, finalUpdateRecords, authToken);
 
 export const insertDataInMultipleFiles = async (
   records,

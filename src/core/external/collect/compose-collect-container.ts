@@ -203,7 +203,7 @@ class ComposableContainer extends Container {
         options.isMounted = false;
 
         options.label = element.label;
-        options.skyflowID = element.skyflowID;
+        options.skyflowID = element.skyflowId;
 
         elements.push(options);
       });
@@ -399,7 +399,7 @@ class ComposableContainer extends Container {
     this.#containerElement.unmount();
   };
 
-  collect = (options: ICollectOptions = { tokens: true }) :
+  collect = (options: ICollectOptions = {}) :
   Promise<CollectResponse> => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);
@@ -420,9 +420,6 @@ class ComposableContainer extends Container {
       collectElements.forEach((element) => {
         element.isValidElement();
       });
-      if (options && options.tokens && typeof options.tokens !== 'boolean') {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
-      }
       if (options?.additionalFields) {
         validateAdditionalFieldsInCollect(options.additionalFields);
       }
@@ -445,7 +442,7 @@ class ComposableContainer extends Container {
           data: {
             type: COLLECT_TYPES.COLLECT,
             ...options,
-            tokens: options?.tokens !== undefined ? options.tokens : true,
+            tokens: true,
             elementIds,
             containerId: this.#containerId,
           },
@@ -509,7 +506,7 @@ class ComposableContainer extends Container {
     }
   };
 
-  uploadFiles = (options: ICollectOptions):
+  #uploadFiles = (options: ICollectOptions):
   Promise<UploadFilesResponse> => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.#metaData.clientJSON.config);

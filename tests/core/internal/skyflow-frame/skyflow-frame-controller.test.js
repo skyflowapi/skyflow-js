@@ -678,7 +678,11 @@ describe('Retrieving data using skyflow tokens', () => {
     });
   });
 
-  test('detokenize success', (done) => {
+  // NOTE: Asserts the privacyDB (v1) detokenize response shape ({ records: [...] }). The controller
+  // now uses the flowDB variant (POST /v2/tokens/detokenize, response { response: [...] }), so this
+  // is skipped for now. Re-enable when the privacyDB (PDB) variant is restored. flowDB equivalents
+  // live in skyflow-frame-controller.detokenize.flowdb.test.js.
+  test.skip('detokenize success', (done) => {
     const clientReq = jest.fn(() => Promise.resolve(detokenizeResponse));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 
@@ -772,7 +776,11 @@ describe('Retrieving data using skyflow tokens', () => {
     });
   });
 
-  test('detokenize success', (done) => {
+  // NOTE: Asserts the privacyDB (v1) detokenize response shape ({ records: [...] }). The controller
+  // now uses the flowDB variant (POST /v2/tokens/detokenize, response { response: [...] }), so this
+  // is skipped for now. Re-enable when the privacyDB (PDB) variant is restored. flowDB equivalents
+  // live in skyflow-frame-controller.detokenize.flowdb.test.js.
+  test.skip('detokenize success', (done) => {
     const clientReq = jest.fn(() => Promise.resolve(detokenizeResponseWithRedaction));
     jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({ ...clientData.client, request: clientReq, toJSON: toJson }));
 

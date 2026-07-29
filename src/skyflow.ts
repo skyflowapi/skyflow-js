@@ -46,6 +46,7 @@ import {
   UpdateResponse,
   IUpdateOptions,
   ErrorType,
+  UpdateType,
 } from './utils/common';
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import ComposableContainer from './core/external/collect/compose-collect-container';
@@ -297,7 +298,7 @@ class Skyflow {
     }
   }
 
-  insert(
+  #insert(
     records: IInsertRecordInput,
     options?: IInsertOptions,
   ): Promise<InsertResponse> {
@@ -306,32 +307,32 @@ class Skyflow {
     return this.#skyflowContainer.insert(records, options);
   }
 
-  detokenize(detokenizeInput: IDetokenizeInput): Promise<DetokenizeResponse> {
+  #detokenize(detokenizeInput: IDetokenizeInput): Promise<DetokenizeResponse> {
     printLog(parameterizedString(logs.infoLogs.DETOKENIZE_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.detokenize(detokenizeInput);
   }
 
-  getById(getByIdInput: IGetByIdInput): Promise<GetByIdResponse> {
+  #getById(getByIdInput: IGetByIdInput): Promise<GetByIdResponse> {
     printLog(logs.warnLogs.GET_BY_ID_DEPRECATED, MessageType.WARN, this.#logLevel);
     printLog(parameterizedString(logs.infoLogs.GET_BY_ID_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.getById(getByIdInput);
   }
 
-  get(getInput: IGetInput, options?: IGetOptions): Promise<GetResponse> {
+  #get(getInput: IGetInput, options?: IGetOptions): Promise<GetResponse> {
     printLog(parameterizedString(logs.infoLogs.GET_TRIGGERED, CLASS_NAME),
       MessageType.LOG, this.#logLevel);
     return this.#skyflowContainer.get(getInput, options);
   }
 
-  delete(records: IDeleteRecordInput, options?: IDeleteOptions): Promise<DeleteResponse> {
+  #delete(records: IDeleteRecordInput, options?: IDeleteOptions): Promise<DeleteResponse> {
     printLog(parameterizedString(logs.infoLogs.DELETE_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
     return this.#skyflowContainer.delete(records, options);
   }
 
-  update(record: IUpdateRequest, options?: IUpdateOptions): Promise<UpdateResponse> {
+  #update(record: IUpdateRequest, options?: IUpdateOptions): Promise<UpdateResponse> {
     printLog(parameterizedString(logs.infoLogs.UPDATE_TRIGGERED, CLASS_NAME), MessageType.LOG,
       this.#logLevel);
     return this.#skyflowContainer.update(record, options);
@@ -347,6 +348,10 @@ class Skyflow {
 
   static get RedactionType() {
     return RedactionType;
+  }
+
+  static get UpdateType() {
+    return UpdateType;
   }
 
   static get ErrorType() {

@@ -34,8 +34,8 @@ const records = {
     additionalFields: {
     records: [
       {
-        table: 'pii_fields',
-        fields: {
+        tableName: 'pii_fields',
+        data: {
       },
       },
     ],
@@ -834,15 +834,15 @@ const on = jest.fn();
 const data = {
     additionalFields: {
         records: [{
-            table: "pii_fields",
-            fields: {
+            tableName: "pii_fields",
+            data: {
                 cvv: '123',
                 name:'name',
-                skyflowID: 'ghgjhjh2',
-            }
+            },
+            skyflowId: 'ghgjhjh2',
         }, {
-            table: 'table',
-            fields: {
+            tableName: 'table',
+            data: {
                 name: 'joey'
             }
         }]
@@ -854,11 +854,11 @@ const data = {
 const data2 = {
     additionalFields: {
         records: [{
-            table: "pii_fields",
-            fields: {
+            tableName: "pii_fields",
+            data: {
                 cvv: '123',
-                skyflowID: 'ghgjhjh2',
-            }
+            },
+            skyflowId: 'ghgjhjh2',
         }]
     },
     tokens: false,
@@ -867,11 +867,11 @@ const data2 = {
 const data3 = {
     additionalFields: {
         records: [{
-            table: "pii_fields",
-            fields: {
+            tableName: "pii_fields",
+            data: {
                 cvv: '123',
-                skyflowID: '',
-            }
+            },
+            skyflowId: '',
         }]
     },
     tokens: true,

@@ -272,6 +272,14 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_REDACTION_TYPE_REVEAL,
   },
+  INVALID_TOKEN_GROUP_REDACTIONS_REVEAL: {
+    code: 400,
+    description: logs.errorLogs.INVALID_TOKEN_GROUP_REDACTIONS_REVEAL,
+  },
+  INVALID_TOKEN_GROUP_REDACTION_ENTRY_REVEAL: {
+    code: 400,
+    description: logs.errorLogs.INVALID_TOKEN_GROUP_REDACTION_ENTRY_REVEAL,
+  },
   EMPTY_TABLE_IN_ADDITIONAL_FIELDS: {
     code: 400,
     description: logs.errorLogs.EMPTY_TABLE_IN_ADDITIONAL_FIELDS,
@@ -441,6 +449,18 @@ const SKYFLOW_ERROR_CODE = {
   MISSING_COLUMN_IN_UPSERT_OPTION: {
     code: 400,
     description: logs.errorLogs.MISSING_COLUMN_IN_UPSERT_OPTION,
+  },
+  MISSING_UNIQUE_COLUMNS_IN_UPSERT_OPTION: {
+    code: 400,
+    description: logs.errorLogs.MISSING_UNIQUE_COLUMNS_IN_UPSERT_OPTION,
+  },
+  INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION: {
+    code: 400,
+    description: logs.errorLogs.INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION,
+  },
+  INVALID_UPDATE_TYPE_IN_UPSERT_OPTION: {
+    code: 400,
+    description: logs.errorLogs.INVALID_UPDATE_TYPE_IN_UPSERT_OPTION,
   },
   INVALID_RECORD_COLUMN_VALUE_TYPE:
   { code: 400, description: logs.errorLogs.INVALID_RECORD_COLUMN_VALUE_TYPE },
