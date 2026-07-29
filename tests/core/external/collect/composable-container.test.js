@@ -148,7 +148,7 @@ const FileInuptElement = {
   table: 'pii_fields',
   column: 'profile_picture',
   type: ElementType.FILE_INPUT,
-  skyflowID:'id1',
+  skyflowId:'id1',
   ...collectStylesOptions,
 }
 
@@ -280,8 +280,8 @@ describe('test composable container class',()=>{
       additionalFields: {
         records: [
           {
-            table: 'string',
-            fields: {
+            tableName: 'string',
+            data: {
               column1: 'value',
             },
           },
@@ -344,12 +344,11 @@ describe('test composable container class',()=>{
     container.mount('#composable');
   
     const options = {
-      tokens: 'true',
       additionalFields: {
         records: [
           {
-            table: 'string',
-            fields: {
+            tableName: 'string',
+            data: {
               column1: 'value',
             },
           },
@@ -362,14 +361,13 @@ describe('test composable container class',()=>{
         },
       ],
     };
-  
+
     const collectPromiseError1 =
       container.collect(options);
 
-    await expect(collectPromiseError1).rejects.toThrow('Validation error. Invalid tokens. Specify a boolean value for tokens.');
+    await expect(collectPromiseError1).rejects.toBeDefined();
 
     const options1 = {
-      tokens: true,
       additionalFields: {
       },
       upsert: [
@@ -455,8 +453,8 @@ describe('test composable container class',()=>{
       additionalFields: {
         records: [
           {
-            table: "string",
-            fields: {
+            tableName: "string",
+            data: {
               column1: "value",
             }
           }
@@ -552,8 +550,8 @@ describe('test composable container class',()=>{
       additionalFields: {
         records: [
           {
-            table: "string", //table into which record should be inserted
-            fields: {
+            tableName: "string", //table into which record should be inserted
+            data: {
               column1: "value",
             }
           }

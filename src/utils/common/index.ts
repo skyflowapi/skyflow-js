@@ -353,7 +353,7 @@ interface CollectElementCommonProps {
   placeholder?: string,
   altText?: string,
   validations?: IValidationRule[],
-  skyflowID?: string,
+  skyflowId?: string,
 }
 
 export interface CollectElementUpdateOptions extends CollectElementCommonProps {
@@ -364,9 +364,18 @@ export interface CollectElementInput extends CollectElementCommonProps {
   type: ElementType,
 }
 
+export interface AdditionalFieldsRecord {
+  tableName: string;
+  data: Record<string, any>;
+  skyflowId?: string;
+}
+
+export interface AdditionalFields {
+  records: AdditionalFieldsRecord[];
+}
+
 export interface ICollectOptions {
-  tokens?: boolean,
-  additionalFields?: IInsertRecordInput,
+  additionalFields?: AdditionalFields,
   upsert?: Array<IFlowDBUpsertOptions>,
 }
 export interface MetaData {

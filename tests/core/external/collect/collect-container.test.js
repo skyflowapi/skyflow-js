@@ -13,6 +13,7 @@ import {
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
 import * as iframerUtils from '../../../../src/iframe-libs/iframer';
 import SkyflowError from '../../../../src/libs/skyflow-error';
+import SkyflowFlowDBError from '../../../../src/libs/skyflow-flowdb-error';
 import Skyflow from '../../../../src/skyflow';
 import { LogLevel, Env, ValidationRuleType, ErrorType } from '../../../../src/utils/common';
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
@@ -102,7 +103,7 @@ const cvvElement2 = {
   placeholder: 'cvv',
   label: 'cvv',
   type: 'CVV',
-  skyflowID: '123'
+  skyflowId: '123'
 };
 
 
@@ -140,7 +141,7 @@ const FileElement = {
   table: 'pii_fields',
   column: 'primary_card.file',
   type: 'FILE_INPUT',
-  skyflowID: "abc-def"
+  skyflowId: "abc-def"
 };
 
 const cvvFileElementElement = {
@@ -186,8 +187,8 @@ const records = {
   additionalFields: {
   records: [
     {
-      table: 'pii_fields',
-      fields: {
+      tableName: 'pii_fields',
+      data: {
         "primary_card.cvv": '1234',
     },
     },
@@ -630,12 +631,15 @@ describe('Collect container', () => {
   
     const emitCallback = emitSpy.mock.calls[2][2];
     emitCallback({
-      error: { code: 400, description: 'Skyflow frame controller is not ready' },
+      error: { grpc_code: 9, http_code: 400, message: 'Skyflow frame controller is not ready', http_status: 'Bad Request', details: [] },
     });
     collectPromise.catch(err => {
-      expect(err).toBeDefined();
-      expect(err.code).toEqual(400);
-      expect(err.description).toEqual('Skyflow frame controller is not ready');
+      expect(err).toBeInstanceOf(SkyflowFlowDBError);
+      expect(err.httpCode).toEqual(400);
+      expect(err.message).toEqual('Skyflow frame controller is not ready');
+      expect(err.error).toEqual({
+        grpcCode: 9, httpCode: 400, message: 'Skyflow frame controller is not ready', httpStatus: 'Bad Request', details: [],
+      });
     });
   });
   it('should throw error when collect is called and isSkyflowFrameReady is false and tokens is invalid', async () => {
@@ -1408,7 +1412,7 @@ describe('Collect container', () => {
     try {
       const file = container.create({
         ...cvvFileElementElement,
-        skyflowID: undefined,
+        skyflowId: undefined,
       });
       file.isValidElement()
     } catch (err) {
@@ -1629,8 +1633,8 @@ describe('Collect container', () => {
       additionalFields: {
         records: [
           {
-            table: "string", //table into which record should be inserted
-            fields: {
+            tableName: "string", //table into which record should be inserted
+            data: {
               column1: "value",
             }
           }
@@ -1659,11 +1663,11 @@ describe('Collect container', () => {
       additionalFields: {
         records: [
           {
-            table: "string", //table into which record should be inserted
-            fields: {
+            tableName: "string", //table into which record should be inserted
+            data: {
               column1: "value",
-              skyflowID:''
-            }
+            },
+            skyflowId: ''
           }
         ]
       },
@@ -1707,11 +1711,11 @@ describe('Collect container', () => {
       additionalFields: {
         records: [
           {
-            table: "string", //table into which record should be inserted
-            fields: {
+            tableName: "string", //table into which record should be inserted
+            data: {
               column1: "value",
-              skyflowID: 'id'
-            }
+            },
+            skyflowId: 'id'
           }
         ]
       },

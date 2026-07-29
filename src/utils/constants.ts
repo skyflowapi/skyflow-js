@@ -272,6 +272,14 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_REDACTION_TYPE_REVEAL,
   },
+  INVALID_TOKEN_GROUP_REDACTIONS_REVEAL: {
+    code: 400,
+    description: logs.errorLogs.INVALID_TOKEN_GROUP_REDACTIONS_REVEAL,
+  },
+  INVALID_TOKEN_GROUP_REDACTION_ENTRY_REVEAL: {
+    code: 400,
+    description: logs.errorLogs.INVALID_TOKEN_GROUP_REDACTION_ENTRY_REVEAL,
+  },
   EMPTY_TABLE_IN_ADDITIONAL_FIELDS: {
     code: 400,
     description: logs.errorLogs.EMPTY_TABLE_IN_ADDITIONAL_FIELDS,

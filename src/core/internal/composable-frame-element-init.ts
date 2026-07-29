@@ -86,7 +86,6 @@ export default class RevealComposableFrameElementInit {
                 if (data2 && !data2?.skyflowID) {
                   const revealRecord: IRevealRecordComposable = {
                     token: data2?.token ?? '',
-                    redaction: data2?.redaction,
                     iframeName: data2?.name ?? '',
                   };
                   revealDataInput?.push(revealRecord);
@@ -95,7 +94,12 @@ export default class RevealComposableFrameElementInit {
             });
           });
 
-          this.revealData(revealDataInput, this.containerId, event?.data?.clientConfig?.authToken)
+          this.revealData(
+            revealDataInput,
+            this.containerId,
+            event?.data?.clientConfig?.authToken,
+            data?.options,
+          )
             ?.then((revealResponse: any) => {
               if (revealResponse?.records?.length > 0) {
                 const formattedRecord = formatRecordsForClientComposableFlowDB(revealResponse);
@@ -195,9 +199,14 @@ export default class RevealComposableFrameElementInit {
     RevealComposableFrameElementInit.frameEle = new RevealComposableFrameElementInit();
   };
 
-  revealData(revealRecords: IRevealRecordComposable[], containerId: string, authToken: string) {
+  revealData(
+    revealRecords: IRevealRecordComposable[],
+    containerId: string,
+    authToken: string,
+    options?: Record<string, any>,
+  ) {
     return new Promise((resolve, reject) => {
-      fetchRecordsByTokenIdComposableFlowDB(revealRecords, this.#client, authToken)?.then(
+      fetchRecordsByTokenIdComposableFlowDB(revealRecords, this.#client, authToken, options)?.then(
         (resolvedResult) => {
           resolve(resolvedResult);
         },

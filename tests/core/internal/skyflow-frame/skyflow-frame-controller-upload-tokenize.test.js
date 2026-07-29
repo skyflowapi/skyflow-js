@@ -811,6 +811,67 @@ describe('SkyflowFrameController - tokenize function', () => {
     expect(clientReq.mock.calls.find(([a]) => a.requestMethod === 'PUT')).toBeUndefined();
   });
 
+  test('COLLECT full API failure forwards a single-level camelCase { error } (no double-wrap)', async () => {
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        'frameId:containerId:ERROR:': {
+          document: { getElementById: jest.fn(() => testValue) },
+        },
+        'frameId2:containerId:ERROR:': {
+          document: { getElementById: jest.fn(() => testValue2) },
+        },
+      },
+    }));
+
+    // Client rejects like a real non-2xx JSON response: SkyflowError-shaped with
+    // the raw snake_case API body on `.data.error`.
+    const apiErrorBody = {
+      grpc_code: 5,
+      http_code: 404,
+      message: 'Invalid request. Vault not found.',
+      http_status: 'Not Found',
+      details: [],
+    };
+    const clientReq = jest.fn(() => Promise.reject({
+      error: { code: 404, description: 'Invalid request. Vault not found.' },
+      data: { error: apiErrorBody },
+    }));
+    jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
+      ...clientData.client,
+      request: clientReq,
+      toJSON: toJson,
+    }));
+
+    SkyflowFrameController.init();
+
+    const emitCb = emitSpy.mock.calls[1][2];
+    emitCb(clientData);
+    const onCb = on.mock.calls[1][1];
+
+    const data = {
+      containerId: 'containerId',
+      tokens: true,
+      type: 'COLLECT',
+      elementIds: [
+        { frameId: 'frameId', elementId: 'elementId' },
+        { frameId: 'frameId2', elementId: 'elementId2' },
+      ],
+    };
+
+    const result = await new Promise((resolve) => { onCb(data, resolve); });
+
+    // Single-level envelope: the normalized (camelCase) flowDB body sits directly
+    // under `error` — not nested as { error: { error: ... } }.
+    expect(result.error).toEqual({
+      grpcCode: 5,
+      httpCode: 404,
+      message: 'Invalid request. Vault not found.',
+      httpStatus: 'Not Found',
+      details: [],
+    });
+    expect(result.error.error).toBeUndefined();
+  });
+
   test('should tokenize data successfully case 2', async () => {
     windowSpy.mockImplementation(() => ({
       frames: {

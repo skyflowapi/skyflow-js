@@ -5,6 +5,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import Client from '../client';
 import { getAccessToken } from '../utils/bus-events';
 import SkyflowError from '../libs/skyflow-error';
+import { normalizeFlowDBError } from '../libs/skyflow-flowdb-error';
 import {
   IRevealRecord, IRevealResponseType, MessageType, LogLevel, IGetRecord, ISkyflowIdRecord,
   RedactionType,
@@ -166,26 +167,14 @@ export const constructFlowDBDetokenizeRequest = (
 ): FlowDBDetokenizeRequestBody => {
   const tokens = tokenIdRecords.map((record) => record.token as string);
 
-  const explicit = options?.tokenGroupRedactions;
-  let tokenGroupRedactions;
-  if (Array.isArray(explicit) && explicit.length > 0) {
-    tokenGroupRedactions = explicit;
-  } else {
-    const fromElements = tokenIdRecords
-      .filter((record: any) => record?.tokenGroupName && record?.redaction)
-      .map((record: any) => ({
-        tokenGroupName: record.tokenGroupName,
-        redaction: record.redaction,
-      }));
-    if (fromElements.length > 0) {
-      tokenGroupRedactions = fromElements;
-    }
-  }
+  const tokenGroupRedactions = options?.tokenGroupRedactions;
 
   return {
     vaultID,
     tokens,
-    ...(tokenGroupRedactions ? { tokenGroupRedactions } : {}),
+    ...(Array.isArray(tokenGroupRedactions) && tokenGroupRedactions.length > 0
+      ? { tokenGroupRedactions }
+      : {}),
   };
 };
 
@@ -226,8 +215,14 @@ export const constructFlowDBDetokenizeError = (
       },
     },
   ],
-  // Pass the raw API error body through for the element/composable reveal contract.
-  error: error?.data?.error ?? { httpCode: error?.error?.code, message: error?.error?.description },
+  // Pass the raw API error body through for the element/composable reveal contract,
+  // normalized to the SDK camelCase convention. flowDB returns a flat error envelope
+  // ({ grpcCode, httpCode, message, httpStatus, details }); accept that or a nested
+  // { error } shape, and fall back to the SkyflowError envelope only when there is no
+  // raw body (e.g. non-JSON responses).
+  error: error?.data
+    ? normalizeFlowDBError(error?.data?.error ?? error.data)
+    : { httpCode: error?.error?.code, message: error?.error?.description },
 });
 
 interface IDetokenizeVariant {
@@ -238,8 +233,21 @@ interface IDetokenizeVariant {
     authToken: string,
   ): Promise<any> | undefined;
   parseSuccess(response: any): FlowDBDetokenizeResponse;
-  parseError(error: any): FlowDBDetokenizeRequestError;
+  parseError(error: any): FlowDBDetokenizeResponse | FlowDBDetokenizeRequestError;
 }
+
+// When the flowDB detokenize API rejects with a non-2xx status it can still return
+// a body carrying a `response` array (partial failure). In that case route it through
+// the success constructor so per-token results/errors flow to the client, and only
+// fall back to the top-level error envelope on a full failure.
+const parseFlowDBDetokenizeError = (
+  error: any,
+): FlowDBDetokenizeResponse | FlowDBDetokenizeRequestError => {
+  if (Array.isArray(error?.data?.response)) {
+    return constructFlowDBDetokenizeResponse(error.data);
+  }
+  return constructFlowDBDetokenizeError(error);
+};
 
 const flowDBDetokenizeVariant: IDetokenizeVariant = {
   buildRequest: (client, tokenIdRecords, options, authToken) => client?.request({
@@ -247,14 +255,14 @@ const flowDBDetokenizeVariant: IDetokenizeVariant = {
       constructFlowDBDetokenizeRequest(tokenIdRecords, client.config.vaultID, options),
     ),
     requestMethod: 'POST',
-    url: 'vault/v2/tokens/detokenize',
+    url: `${client.config.vaultURL}/v2/tokens/detokenize`,
     headers: {
       authorization: `Bearer ${authToken}`,
       'content-type': 'application/json',
     },
   }),
   parseSuccess: (response) => constructFlowDBDetokenizeResponse(response),
-  parseError: (error) => constructFlowDBDetokenizeError(error),
+  parseError: (error) => parseFlowDBDetokenizeError(error),
 };
 
 const executeDetokenize = (

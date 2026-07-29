@@ -337,8 +337,12 @@ class SkyflowFrameController {
             .then((response: CollectResponse) => {
               callback(response);
             })
-            .catch((error: CollectResponse) => {
-              callback({ error });
+            .catch((error: any) => {
+              // tokenize already rejects with the final client envelope
+              // ({ error: <flowDB body> } on API failure, or a SkyflowError on
+              // validation). Forward it as-is; wrapping again would nest the
+              // body one level too deep and blank out the client error.
+              callback(error?.error !== undefined ? error : { error });
             });
         } else if (data.type === COLLECT_TYPES.FILE_UPLOAD) {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
@@ -398,12 +402,20 @@ class SkyflowFrameController {
           printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
           MessageType.LOG, this.#context.logLevel);
-          this.revealData(data.records as IRevealRecord[], data.containerId as string).then(
+          this.revealData(
+            data.records as IRevealRecord[],
+            data.containerId as string,
+            data.options as Record<string, any>,
+          ).then(
             (resolvedResult) => {
               callback(resolvedResult);
             },
-            (rejectedResult) => {
-              callback({ error: rejectedResult });
+            (rejectedResult: any) => {
+              // Full API failure already carries { error: <flowDB body> }; forward
+              // it as-is so the client error isn't nested a level too deep.
+              callback(
+                rejectedResult?.error !== undefined ? rejectedResult : { error: rejectedResult },
+              );
             },
           );
         } else if (data.type === REVEAL_TYPES.RENDER_FILE) {
@@ -437,10 +449,11 @@ class SkyflowFrameController {
   revealData(
     revealRecords: IRevealRecord[],
     containerId: string,
+    options?: Record<string, any>,
   ): Promise<RevealResponse | RevealError> {
     const id = containerId;
     return new Promise((resolve, reject) => {
-      fetchRecordsByTokenIdFlowDB(revealRecords, this.#client, false).then(
+      fetchRecordsByTokenIdFlowDB(revealRecords, this.#client, false, options).then(
         (resolvedResult) => {
           const formattedResult = formatRecordsForIframe(resolvedResult);
           bus
@@ -452,7 +465,7 @@ class SkyflowFrameController {
             );
           resolve(formatRecordsForClientFlowDB(resolvedResult));
         },
-        (rejectedResult) => {
+        (rejectedResult: any) => {
           const formattedResult = formatRecordsForIframe(rejectedResult);
           bus
             .target(properties.IFRAME_SECURE_SITE)
@@ -461,7 +474,16 @@ class SkyflowFrameController {
                 + id,
               formattedResult,
             );
-          reject(formatRecordsForClientFlowDB(rejectedResult));
+          // fetchRecordsByTokenIdFlowDB rejects for both a full API failure
+          // ({ error }) and a partial/all-token failure ({ records, errors }).
+          // Only a full failure is a client-facing reject; a partial result must
+          // resolve as success so the merged { records: [...] } (with inline
+          // per-token errors) reaches the client per the reveal contract.
+          if (rejectedResult?.error !== undefined) {
+            reject(formatRecordsForClientFlowDB(rejectedResult));
+          } else {
+            resolve(formatRecordsForClientFlowDB(rejectedResult));
+          }
         },
       );
     });

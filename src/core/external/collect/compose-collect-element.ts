@@ -117,7 +117,7 @@ class ComposableElement {
     }
   };
 
-  uploadMultipleFiles = (metaData?: MetaData) => new Promise((resolve, reject) => {
+  #uploadMultipleFiles = (metaData?: MetaData) => new Promise((resolve, reject) => {
     try {
       if (this.#elementType !== ElementType.MULTI_FILE_INPUT) {
         throw new SkyflowError(

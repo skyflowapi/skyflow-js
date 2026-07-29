@@ -9,6 +9,7 @@ import EventEmitter from '../../../event-emitter';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
 import SkyflowError from '../../../libs/skyflow-error';
+import SkyflowFlowDBError from '../../../libs/skyflow-flowdb-error';
 import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
 import { ContainerType } from '../../../skyflow';
@@ -22,6 +23,7 @@ import {
   validateInitConfig,
   validateInputFormatOptions,
   validateRevealElementRecords,
+  validateRevealOptions,
 } from '../../../utils/validators';
 import {
   COLLECT_FRAME_CONTROLLER,
@@ -37,7 +39,7 @@ import ComposableRevealElement from './composable-reveal-element';
 import {
   ContainerOptions, ErrorMessages, ErrorType, RevealElementInput, RevealResponse,
 } from '../../../index-node';
-import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
+import { IRevealElementInput, IRevealElementOptions, IRevealOptions } from './reveal-container';
 import ComposableRevealInternalElement from './composable-reveal-internal';
 import { formatRevealElementOptions } from '../../../utils/helpers';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
@@ -326,7 +328,7 @@ class ComposableRevealContainer extends Container {
     }
   };
 
-  reveal(): Promise<RevealResponse> {
+  reveal(options?: IRevealOptions): Promise<RevealResponse> {
     this.#revealRecords = [];
     if (this.#isComposableFrameReady) {
       return new Promise((resolve, reject) => {
@@ -347,6 +349,7 @@ class ComposableRevealContainer extends Container {
             }
           });
           validateRevealElementRecords(this.#revealRecords);
+          validateRevealOptions(options);
           const elementIds:{ frameId:string, token:string }[] = [];
           this.#elementsList.forEach((element) => {
             elementIds.push({
@@ -365,6 +368,7 @@ class ComposableRevealContainer extends Container {
                   type: REVEAL_TYPES.REVEAL,
                   containerId: this.#containerId,
                   elementIds,
+                  options,
                 },
                 clientConfig: {
                   vaultURL: this.#metaData?.clientJSON?.config?.vaultURL,
@@ -380,13 +384,16 @@ class ComposableRevealContainer extends Container {
                 if (event?.data?.type
                  === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
                   const revealData = event?.data?.data;
-                  if (revealData?.errors) {
+                  // Only a full API failure ({ error }) is a client-facing reject.
+                  // Partial results arrive as { records: [...with inline errors] } and
+                  // resolve as success, mirroring the standard reveal container.
+                  if (revealData?.error) {
                     printLog(
                       parameterizedString(logs?.errorLogs?.FAILED_REVEAL),
                       MessageType.ERROR,
                       this.#context?.logLevel,
                     );
-                    reject(revealData);
+                    reject(new SkyflowFlowDBError(revealData.error));
                   } else {
                     printLog(
                       parameterizedString(logs?.infoLogs?.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
@@ -426,6 +433,7 @@ class ComposableRevealContainer extends Container {
           }
         });
         validateRevealElementRecords(this.#revealRecords);
+        validateRevealOptions(options);
         const elementIds:{ frameId:string, token:string }[] = [];
         this.#elementsList.forEach((element) => {
           elementIds.push({
@@ -447,6 +455,7 @@ class ComposableRevealContainer extends Container {
                       type: REVEAL_TYPES.REVEAL,
                       containerId: this.#containerId,
                       elementIds,
+                      options,
                     },
                     clientConfig: {
                       vaultURL: this.#metaData.clientJSON.config.vaultURL,
@@ -461,10 +470,13 @@ class ComposableRevealContainer extends Container {
                     if (event?.data?.type
                === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId) {
                       const revealData = event?.data?.data;
-                      if (revealData?.errors) {
+                      // Only a full API failure ({ error }) is a client-facing reject.
+                      // Partial results arrive as { records: [...with inline errors] } and
+                      // resolve as success, mirroring the standard reveal container.
+                      if (revealData?.error) {
                         printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
                           MessageType.ERROR, this.#context.logLevel);
-                        reject(revealData);
+                        reject(new SkyflowFlowDBError(revealData.error));
                       } else {
                         printLog(
                           parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),

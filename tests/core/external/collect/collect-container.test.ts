@@ -109,7 +109,7 @@ const fileInput: CollectElementInput = {
   table: "pii_fields",
   column: "primary_card.file",
   type: ElementType.FILE_INPUT,
-  skyflowID: "abc-def",
+  skyflowId: "abc-def",
 };
 
 const on = jest.fn();
@@ -119,8 +119,8 @@ const options: ICollectOptions = {
   additionalFields: {
     records: [
       {
-        table: "pii_fields",
-        fields: {
+        tableName: "pii_fields",
+        data: {
           "primary_card.cvv": "1234",
         },
       },

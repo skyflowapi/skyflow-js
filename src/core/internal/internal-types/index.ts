@@ -89,22 +89,17 @@ export interface FlowDBError {
   description?: string;
 }
 
-export interface CollectRecordSuccess {
-  tableName: string;
-  skyflowId: string | null;
-  fields: Record<string, any>;
-  hashedData?: Record<string, any>;
-  httpCode?: number;
-}
-
-export interface CollectRecordError {
+export interface CollectRecord {
   tableName?: string;
+  skyflowId?: string;
+  tokens?: Record<string, any>;
+  hashedData?: Record<string, any>;
+  httpCode: number;
   error?: string;
-  httpCode?: number;
 }
 
 export interface CollectResponse {
-  records: Array<CollectRecordSuccess | CollectRecordError>;
+  records: Array<CollectRecord>;
 }
 
 export interface FlowDBFullError {
@@ -167,21 +162,16 @@ export interface FlowDBDetokenizeRequestError {
   error?: FlowDBFullError;
 }
 
-export interface RevealRecordSuccess {
+export interface RevealRecord {
   token: string;
-  tokenGroupName?: string | null;
+  tokenGroupName?: string;
   metadata?: Record<string, any>;
-  httpCode?: number;
-}
-
-export interface RevealRecordError {
-  token?: string;
+  httpCode: number;
   error?: string;
-  httpCode?: number;
 }
 
 export interface RevealResponse {
-  records: Array<RevealRecordSuccess | RevealRecordError>;
+  records: Array<RevealRecord>;
 }
 
 export interface RevealError {

@@ -39,7 +39,7 @@ describe('constructFlowDBDetokenizeRequest', () => {
     expect(req.tokenGroupRedactions).toBeUndefined();
   });
 
-  it('uses explicit tokenGroupRedactions from options when provided', () => {
+  it('uses tokenGroupRedactions from reveal options when provided', () => {
     const records = [{ token: 'token1' }];
     const tokenGroupRedactions = [
       { tokenGroupName: 'det_reg_rtf', redaction: RedactionType.PLAIN_TEXT },
@@ -48,26 +48,31 @@ describe('constructFlowDBDetokenizeRequest', () => {
     expect(req).toEqual({ vaultID: 'vault123', tokens: ['token1'], tokenGroupRedactions });
   });
 
-  it('builds tokenGroupRedactions from elements carrying tokenGroupName + redaction', () => {
-    const records = [
-      { token: 'token1', tokenGroupName: 'grp1', redaction: RedactionType.MASKED },
-      { token: 'token2' },
-    ];
-    const req = constructFlowDBDetokenizeRequest(records, 'vault123');
-    expect(req.tokens).toEqual(['token1', 'token2']);
-    expect(req.tokenGroupRedactions).toEqual([
+  it('forwards multiple tokenGroupRedactions entries verbatim from options', () => {
+    const records = [{ token: 'token1' }, { token: 'token2' }];
+    const tokenGroupRedactions = [
       { tokenGroupName: 'grp1', redaction: RedactionType.MASKED },
-    ]);
+      { tokenGroupName: 'grp2', redaction: 'CUSTOM_REDACTION' },
+    ];
+    const req = constructFlowDBDetokenizeRequest(records, 'vault123', { tokenGroupRedactions });
+    expect(req.tokens).toEqual(['token1', 'token2']);
+    expect(req.tokenGroupRedactions).toEqual(tokenGroupRedactions);
   });
 
-  it('forwards an arbitrary (non-enum) string redaction verbatim', () => {
+  it('ignores element-level tokenGroupName/redaction (no longer a request source)', () => {
     const records = [
-      { token: 'token1', tokenGroupName: 'grp1', redaction: 'CUSTOM_REDACTION' },
+      { token: 'token1', tokenGroupName: 'grp1', redaction: RedactionType.MASKED },
     ];
     const req = constructFlowDBDetokenizeRequest(records, 'vault123');
-    expect(req.tokenGroupRedactions).toEqual([
-      { tokenGroupName: 'grp1', redaction: 'CUSTOM_REDACTION' },
-    ]);
+    expect(req).toEqual({ vaultID: 'vault123', tokens: ['token1'] });
+    expect(req.tokenGroupRedactions).toBeUndefined();
+  });
+
+  it('omits tokenGroupRedactions when options provide an empty array', () => {
+    const records = [{ token: 'token1' }];
+    const req = constructFlowDBDetokenizeRequest(records, 'vault123', { tokenGroupRedactions: [] });
+    expect(req).toEqual({ vaultID: 'vault123', tokens: ['token1'] });
+    expect(req.tokenGroupRedactions).toBeUndefined();
   });
 });
 
@@ -135,6 +140,24 @@ describe('constructFlowDBDetokenizeError', () => {
       data: {
         error: {
           grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+        },
+      },
+      error: { code: 404, description: 'Vault not found.' },
+    };
+    expect(constructFlowDBDetokenizeError(err).error).toEqual({
+      grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+    });
+  });
+
+  it('normalizes a snake_case API error body to camelCase', () => {
+    const err = {
+      data: {
+        error: {
+          grpc_code: 5,
+          http_code: 404,
+          message: 'Vault not found.',
+          http_status: 'Not Found',
+          details: [],
         },
       },
       error: { code: 404, description: 'Vault not found.' },
