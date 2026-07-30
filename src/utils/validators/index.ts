@@ -647,7 +647,7 @@ export const validateUpsertOptions = (upsertOptions) => {
       );
     }
 
-    if (!Object.prototype.hasOwnProperty.call(upsertOption, 'table')) {
+    if (!Object.prototype.hasOwnProperty.call(upsertOption, 'tableName')) {
       throw new SkyflowError(
         SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_UPSERT_OPTION,
         [index],
@@ -657,9 +657,9 @@ export const validateUpsertOptions = (upsertOptions) => {
 
     if (
       !(
-        upsertOption.table
-        && typeof upsertOption.table === 'string'
-        && upsertOption.table.length
+        upsertOption.tableName
+        && typeof upsertOption.tableName === 'string'
+        && upsertOption.tableName.length
       )
     ) {
       throw new SkyflowError(

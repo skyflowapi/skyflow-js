@@ -17,7 +17,6 @@ Skyflow's JavaScript SDK can be used to securely collect, tokenize, and reveal s
 - [**Securely collecting data client-side**](#securely-collecting-data-client-side)
 - [**Securely collecting data client-side using Composable Elements**](#securely-collecting-data-client-side-using-composable-elements)
 - [**Securely revealing data client-side**](#securely-revealing-data-client-side)
-- [**Set Custom Network messages on container**](#set-custom-network-messages-on-container)
 ---
 
 # Including Skyflow.js
@@ -499,7 +498,7 @@ const options = {
   },                                      // Optional
   upsert: [                               // Upsert operations support in the vault
     {
-      table: 'string',                    // Table name
+      tableName: 'string',                // Table name
       uniqueColumns: ['string'],          // Unique columns in the table
       updateType: Skyflow.UpdateType.UPDATE, // Optional, one of 'UPDATE' or 'REPLACE'
     },
@@ -664,7 +663,7 @@ cvvElement.mount('#cvv'); //Assumes there is a div with id='#cvv' in the webpage
  container.collect({
   upsert: [
     {
-      table: 'cards',
+      tableName: 'cards',
       uniqueColumns: ['card_number'],
     }
   ]
@@ -870,7 +869,7 @@ const options = {
  },// Optional
  upsert: [                       // Upsert operations support in the vault
    {
-     table: "string",            // Table name
+     tableName: "string",        // Table name
      uniqueColumns: ["value"],   // Unique columns in the table
      updateType: Skyflow.UpdateType.UPDATE, // Optional, one of 'UPDATE' or 'REPLACE'
    },
@@ -1697,7 +1696,7 @@ const options = {
   },                                      // Optional
   upsert: [                               // Upsert operations support in the vault
     {
-      table: 'string',                    // Table name
+      tableName: 'string',                // Table name
       uniqueColumns: ['string'],          // Unique columns in the table
       updateType: Skyflow.UpdateType.UPDATE, // Optional, one of 'UPDATE' or 'REPLACE'
     },
@@ -2780,13 +2779,11 @@ When the entire reveal request fails, the promise rejects with an error of the f
 
 ```
 {
-  "error": {
-    "grpcCode": 5,
-    "httpCode": 404,
-    "message": "Vault not found.",
-    "httpStatus": "Not Found",
-    "details": []
-  }
+  "grpcCode": 5,
+  "httpCode": 404,
+  "message": "Vault not found.",
+  "httpStatus": "Not Found",
+  "details": []
 }
 ```
 
@@ -2883,73 +2880,6 @@ cardNumberRevealElement.update({
 ```
 
 ---
-
-# Set Custom Network messages on container:
-
-Add custom network error messages to a container with the `setError` method.
-
-`setError(ErrorMessages: Record<ErrorType, string>)` sets the error text for the different network errors types. When this method is triggered, all the errors present in the error response are overridden with the specified custom error message. This error is sent on the collect or upload file call on the same container.
-
-### Sample code snippet for setError on collect container
-```javascript
-const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
-
-const cardNumber = container.create({
-  table: 'pii_fields',
-  column: 'primary_card.card_number',
-  type: Skyflow.ElementType.CARD_NUMBER,
-});
-
-// Set custom error.
-container.setError({
-  [Skyflow.ErrorType.BAD_REQUEST]: "Bad request. Please check the request payload.",
-  [Skyflow.ErrorType.UNAUTHORIZED]: "You are not authorized. Please check your token.",
-  [Skyflow.ErrorType.FORBIDDEN]: "Access denied. You do not have permission to perform this action.",
-  [Skyflow.ErrorType.TOO_MANY_REQUESTS]: "Too many requests. Please try again later.",
-  [Skyflow.ErrorType.INTERNAL_SERVER_ERROR]: "Something went wrong on our end. Please try again later.",
-  [Skyflow.ErrorType.BAD_GATEWAY]: "Received an invalid response from the server. Please try again.",
-  [Skyflow.ErrorType.SERVICE_UNAVAILABLE]: "Service is temporarily unavailable. Please try again later.",
-  [Skyflow.ErrorType.CONNECTION]: "Unable to connect to the server. Please check your network connection.",
-  [Skyflow.ErrorType.NOT_FOUND]: "Table not found with custom message",
-  [Skyflow.ErrorType.OFFLINE]: "You appear to be offline. Please check your internet connection.",
-  [Skyflow.ErrorType.TIMEOUT]: "The request took too long to respond. Please try again.",
-  [Skyflow.ErrorType.ABORT]: "The request was aborted.",
-  [Skyflow.ErrorType.NETWORK_GENERIC]: "A network error occurred. Please try again.",
-});
-
-container
-  .collect()
-  .then(res => console.log(res))
-  .catch(err =>{
-    console.log(err);
-})
-```
-#### Sample Error structure:
-```json
-{ 
-  "error":{
-        "code":0,
-        "description":"You appear to be offline. Please check your internet connection.",
-        "type":"OFFLINE"
-  },
-}
-```
-
-`Skyflow.ErrorType` accepts following values:
-  - `BAD_REQUEST`
-  - `UNAUTHORIZED`
-  - `FORBIDDEN`
-  - `TOO_MANY_REQUESTS`
-  - `INTERNAL_SERVER_ERROR`
-  - `BAD_GATEWAY`
-  - `SERVICE_UNAVAILABLE`
-  - `CONNECTION`
-  - `NOT_FOUND`
-  - `OFFLINE`
-  - `TIMEOUT`
-  - `NETWORK_GENERIC`
-  - `ABORT`
-
 
 ## Reporting a Vulnerability
 
