@@ -18,6 +18,7 @@ import Skyflow, {
   RevealResponse,
   SkyflowConfig,
   ValidationRule,
+  SkyflowError,
 } from "skyflow-js";
 
 try {
@@ -407,13 +408,13 @@ try {
                 .then((res: RevealResponse) => {
                   console.log(res);
                 })
-                .catch((err: RevealResponse) => {
+                .catch((err: SkyflowError) => {
                   console.log(err);
                 });
             });
           }
         })
-        .catch((err: CollectResponse) => {
+        .catch((err: SkyflowError) => {
           const errorElement = document.getElementById(
             "collectResponse"
           ) as HTMLElement;

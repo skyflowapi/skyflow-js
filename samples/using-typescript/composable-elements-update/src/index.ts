@@ -18,6 +18,7 @@ import Skyflow, {
     RevealElement,
     RevealResponse,
     CollectElementUpdateOptions,
+  SkyflowError,
 } from 'skyflow-js';
 
 try {
@@ -343,13 +344,13 @@ try {
                             revealResonse.then((res: RevealResponse) => {
                                 console.log(res);
                             })
-                            .catch((err: RevealResponse) => {
+                            .catch((err: SkyflowError) => {
                                 console.log(err);
                             });
                         });
                     }
                 })
-                .catch((err: CollectResponse) => {
+                .catch((err: SkyflowError) => {
                     console.log(err);
                 });
         });

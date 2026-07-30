@@ -12,6 +12,7 @@ import Skyflow, {
   LabelStyles,
   CollectElementInput,
   ElementState,
+  SkyflowError,
 } from 'skyflow-js';
 
 try {
@@ -168,7 +169,7 @@ try {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
-        .catch((err: CollectResponse) => {
+        .catch((err: SkyflowError) => {
           console.log(err);
           const responseElement = document.getElementById('collectResponse') as HTMLElement;
           if (responseElement) {

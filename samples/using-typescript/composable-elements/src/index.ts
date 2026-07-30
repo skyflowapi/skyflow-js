@@ -16,6 +16,7 @@ import Skyflow, {
 	ContainerOptions,
 	ErrorTextStyles,
 	RevealElementInput,
+  SkyflowError,
 } from 'skyflow-js';
 
 try {
@@ -270,13 +271,13 @@ try {
 							revealResponse.then((res: RevealResponse) => {
 								console.log(res);
 							})
-							.catch((err: RevealResponse) => {
+							.catch((err: SkyflowError) => {
 								console.error(err);
 							});
 						});
 					}
 				})
-				.catch((err: CollectResponse) => {
+				.catch((err: SkyflowError) => {
 					console.log(err);
 					const responseElement = document.getElementById('collectResponse') as HTMLElement;
 					if (responseElement) {
