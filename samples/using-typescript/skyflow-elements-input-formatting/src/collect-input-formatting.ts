@@ -78,7 +78,7 @@ try {
   // Create collect elements.
   const cardNumberInput: CollectElementInput = {
     table: 'pii_fields',
-    column: 'primary_card.card_number',
+    column: 'card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
@@ -110,7 +110,7 @@ try {
 
   const expiryDateInput: CollectElementInput = {
     table: 'pii_fields',
-    column: 'primary_card.expiry_date',
+    column: 'expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',

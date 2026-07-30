@@ -109,7 +109,7 @@ try {
 
   const expiryDateElement = collectContainer.create({
     table: "pii_fields",
-    column: "primary_card.expiry_date",
+    column: "expiry_date",
     ...collectStylesOptions,
     label: "Expiry Date",
     placeholder: "MM/YYYY",
@@ -257,17 +257,17 @@ try {
   };
 
   // Create Reveal Elements With Tokens.
-  const fieldsTokenData = response.records[0].fields;
+  const fieldsTokenData = response.records[0].tokens;
   const revealContainer = skyflow.container(Skyflow.ContainerType.REVEAL);
   const revealCardNumberElement = revealContainer.create({
-    token: fieldsTokenData.card_number,
+    token: fieldsTokenData.card_number[0].token,
     label: "Card Number",
     ...revealStyleOptions,
   });
   revealCardNumberElement.mount("#revealCardNumber");
 
   const revealCardCvvElement = revealContainer.create({
-    token: fieldsTokenData.cvv,
+    token: fieldsTokenData.cvv[0].token,
     label: "CVV",
     ...revealStyleOptions,
     altText: "###",
@@ -275,14 +275,14 @@ try {
   revealCardCvvElement.mount("#revealCvv");
 
   const revealCardExpiryElement = revealContainer.create({
-    token: fieldsTokenData.expiration_date,
+    token: fieldsTokenData.expiration_date[0].token,
     label: "Card Expiry Date",
     ...revealStyleOptions,
   });
   revealCardExpiryElement.mount("#revealExpiryDate");
 
   const revealCardholderNameElement = revealContainer.create({
-    token: fieldsTokenData.name,
+    token: fieldsTokenData.name[0].token,
     label: "Card Holder Name",
     ...revealStyleOptions,
   });
@@ -316,9 +316,8 @@ try {
         },
       });
 
-      // update redaction,inputStyles on expiry date
+      // update inputStyles on expiry date
       revealCardExpiryElement.update({
-        redaction: Skyflow.RedactionType.REDACTED,
         inputStyles: {
           base: {
             backgroundColor: "#000",

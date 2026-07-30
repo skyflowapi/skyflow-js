@@ -103,7 +103,7 @@
           ...collectStylesOptions,
           placeholder: "card number",
           label: "Card Number",
-          skyflowID: "",    
+          skyflowId: "",
           type: Skyflow.ElementType.CARD_NUMBER,
         });
 
@@ -114,7 +114,7 @@
           label: "Cvv",
           placeholder: "cvv",
           type: Skyflow.ElementType.CVV,
-          skyflowID: "",
+          skyflowId: "",
         });
 
         const expiryDateElement = collectContainer.create({
@@ -124,7 +124,7 @@
           label: "Expiry Date",
           placeholder: "MM/YYYY",
           type: Skyflow.ElementType.EXPIRATION_DATE,
-          skyflowID: "",
+          skyflowId: "",
         });
 
         const cardHolderNameElement = collectContainer.create({
@@ -145,19 +145,18 @@
         // Collect all elements data.
         const collectButton = document.getElementById("collectPCIData");
         const records = {
-          tokens: true,
           additionalFields: {
             records: [
               {
-                table: "table1",
-                fields: {
-                  skyflowID: "",
+                tableName: "table1",
+                data: {
                   gender: "MALE",
                 },
+                skyflowId: "",
               },
               {
-                table: "table2",
-                fields: {
+                tableName: "table2",
+                data: {
                   gender: "MALE",
                 }
 

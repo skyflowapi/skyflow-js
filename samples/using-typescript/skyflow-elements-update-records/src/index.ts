@@ -8,8 +8,8 @@ import Skyflow, {
   CollectResponse,
   ErrorTextStyles,
   CollectOptions,
-  InsertRequest,
-  InsertRecord,
+  AdditionalFields,
+  AdditionalFieldsRecord,
   InputStyles,
   LabelStyles,
   SkyflowConfig,
@@ -82,7 +82,7 @@ try {
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
-    skyflowID: '',
+    skyflowId: '',
     type: Skyflow.ElementType.CARD_NUMBER,
   };
   const cardNumberElement: CollectElement = collectContainer.create(cardNumberInput);
@@ -94,7 +94,7 @@ try {
     label: 'Cvv',
     placeholder: 'cvv',
     type: Skyflow.ElementType.CVV,
-    skyflowID: '',
+    skyflowId: '',
   };
   const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
@@ -105,7 +105,7 @@ try {
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
     type: Skyflow.ElementType.EXPIRATION_DATE,
-    skyflowID: '',
+    skyflowId: '',
   };
   const expiryDateElement: CollectElement = collectContainer.create(expiryDateInput);
 
@@ -127,26 +127,25 @@ try {
 
   // Collect all elements data.
   const collectButton = document.getElementById('collectPCIData') as HTMLButtonElement;
-  const records: Array<InsertRecord> = [
+  const records: Array<AdditionalFieldsRecord> = [
     {
-      table: 'table1',
-      fields: {
-        skyflowID: '',
+      tableName: 'table1',
+      data: {
         gender: 'MALE',
       },
+      skyflowId: '',
     },
     {
-      table: 'table2',
-      fields: {
+      tableName: 'table2',
+      data: {
         gender: 'MALE',
       },
     },
   ];
-  const additionalFields: InsertRequest = {
+  const additionalFields: AdditionalFields = {
     records: records,
   };
   const collectOptions: CollectOptions = {
-    tokens: true,
     additionalFields: additionalFields,
   };
   if (collectButton) {
