@@ -20,7 +20,6 @@ import {
   CollectElementInput,
   CollectElementOptions,
   ICollectOptions,
-  CollectResponse,
   InputStyles,
   ErrorTextStyles,
   ContainerOptions,
@@ -45,7 +44,7 @@ import Container from '../common/container';
 import CollectElement from './collect-element';
 import ComposableElement from './compose-collect-element';
 import { ElementGroup, ElementGroupItem } from './collect-container';
-import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
+import { CollectResponse, Metadata, SkyflowElementProps } from '../../internal/internal-types';
 import Client from '../../../client';
 
 export interface ComposableElementGroup extends ElementGroup {

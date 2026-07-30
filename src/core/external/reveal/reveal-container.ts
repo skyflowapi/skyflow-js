@@ -11,7 +11,6 @@ import { ContainerType } from '../../../skyflow';
 import {
   ContainerOptions,
   Context, ErrorType, MessageType,
-  RevealResponse,
 } from '../../../utils/common';
 import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import logs from '../../../utils/logs';
@@ -30,7 +29,7 @@ import {
 import Container from '../common/container';
 import RevealElement from './reveal-element';
 import properties from '../../../properties';
-import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
+import { RevealResponse, Metadata, SkyflowElementProps } from '../../internal/internal-types';
 
 export interface IRevealElementInput {
   token?: string;

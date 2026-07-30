@@ -15,7 +15,6 @@ import {
   Context, MessageType,
   CollectElementInput,
   CollectElementOptions,
-  CollectResponse,
   ICollectOptions,
   UploadFilesResponse,
   ContainerOptions,
@@ -40,7 +39,7 @@ import Container from '../common/container';
 import CollectElement from './collect-element';
 import EventEmitter from '../../../event-emitter';
 import properties from '../../../properties';
-import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
+import { CollectResponse, Metadata, SkyflowElementProps } from '../../internal/internal-types';
 
 export interface ICollectElement {
   elementType: ElementType;
