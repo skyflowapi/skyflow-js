@@ -12,6 +12,7 @@ import Skyflow, {
   LabelStyles,
   CollectElementInput,
   ElementState,
+  SkyflowError,
 } from 'skyflow-js';
 
 try {
@@ -81,7 +82,7 @@ try {
   // Create collect elements
   const cardNumberInput : CollectElementInput = {
     table: 'pii_fields',
-    column: 'primary_card.card_number',
+    column: 'card_number',
     inputStyles: inputStyles,
     labelStyles: labelStyles,
     errorTextStyles: errorTextStyles,
@@ -93,7 +94,7 @@ try {
 
   const cvvInput: CollectElementInput = {
     table: 'pii_fields',
-    column: 'primary_card.cvv',
+    column: 'cvv',
     inputStyles: inputStyles,
     labelStyles: labelStyles,
     errorTextStyles: errorTextStyles,
@@ -168,7 +169,7 @@ try {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
-        .catch((err: CollectResponse) => {
+        .catch((err: SkyflowError) => {
           console.log(err);
           const responseElement = document.getElementById('collectResponse') as HTMLElement;
           if (responseElement) {

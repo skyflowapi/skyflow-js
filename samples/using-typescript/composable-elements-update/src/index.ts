@@ -18,6 +18,7 @@ import Skyflow, {
     RevealElement,
     RevealResponse,
     CollectElementUpdateOptions,
+  SkyflowError,
 } from 'skyflow-js';
 
 try {
@@ -155,7 +156,7 @@ try {
 
     const cardNumberInput: CollectElementInput = {
         table: 'pii_fields',
-        column: 'primary_card.card_number',
+        column: 'card_number',
         ...cardNumberStyles,
         type: Skyflow.ElementType.CARD_NUMBER,
         placeholder: 'XXXX XXXX XXXX XXXX'
@@ -173,7 +174,7 @@ try {
 
     const cvvInput: CollectElementInput = {
         table: 'pii_fields',
-        column: 'primary_card.cvv',
+        column: 'cvv',
         ...cvvStyles,
         placeholder: 'CVC',
         type: Skyflow.ElementType.CVV,
@@ -251,7 +252,7 @@ try {
             // update table,coloumn on expiry date
             expiryDateElement.update({
                 table: 'pii_fields',
-                column: 'primary_card.expiry_date',
+                column: 'expiry_date',
             } as CollectElementUpdateOptions);
 
         });
@@ -299,12 +300,12 @@ try {
                     };
 
                     // Create Reveal Elements With Tokens.
-                    const fieldsTokenData = response.records![0].fields;
+                    const fieldsTokenData = response.records![0].tokens!;
                     const revealContainer = skyflowClient.container(
                         Skyflow.ContainerType.REVEAL
                     ) as RevealContainer;
                     const revealCardNumberInput: RevealElementInput = {
-                        token: fieldsTokenData.primary_card.card_number,
+                        token: fieldsTokenData.card_number[0].token,
                         label: 'Card Number',
                         ...revealStyleOptions,
                     };
@@ -312,7 +313,7 @@ try {
                     revealCardNumberElement.mount('#revealCardNumber');
 
                     const revealCardCvvInput: RevealElementInput = {
-                        token: fieldsTokenData.primary_card.cvv,
+                        token: fieldsTokenData.cvv[0].token,
                         label: 'Cvv',
                         ...revealStyleOptions,
                     };
@@ -320,7 +321,7 @@ try {
                     revealCardCvvElement.mount('#revealCvv');
 
                     const revealCardExpiryInput: RevealElementInput = {
-                        token: fieldsTokenData.primary_card.expiry_date,
+                        token: fieldsTokenData.expiry_date[0].token,
                         label: 'Card Expiry Date',
                         ...revealStyleOptions,
                     };
@@ -328,7 +329,7 @@ try {
                     revealCardExpiryElement.mount('#revealExpiryDate');
 
                     const revealCardholderNameInput: RevealElementInput = {
-                        token: fieldsTokenData.first_name,
+                        token: fieldsTokenData.first_name[0].token,
                         label: 'Card Holder Name',
                         ...revealStyleOptions,
                     };
@@ -343,13 +344,13 @@ try {
                             revealResonse.then((res: RevealResponse) => {
                                 console.log(res);
                             })
-                            .catch((err: RevealResponse) => {
+                            .catch((err: SkyflowError) => {
                                 console.log(err);
                             });
                         });
                     }
                 })
-                .catch((err: CollectResponse) => {
+                .catch((err: SkyflowError) => {
                     console.log(err);
                 });
         });

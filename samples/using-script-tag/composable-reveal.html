@@ -118,7 +118,6 @@
           const revealCardNumberInput = {
             token: "<TOKEN1>",
             label: 'Card Number',
-            redaction: Skyflow.RedactionType.MASKED,
             ...revealStyleOptions,
           }
           const revealCardNumberElement = revealContainer.create(revealCardNumberInput);
@@ -126,7 +125,6 @@
           const revealCardCvvInput = {
             token: "<TOKEN2>",
             label: 'CVV',
-            redaction: Skyflow.RedactionType.REDACTED,
             ...revealStyleOptions,
             altText: '###',
           }
@@ -152,7 +150,18 @@
 
           if (revealButton) {
             revealButton.addEventListener('click', () => {
-              const revealResponse = revealContainer.reveal()
+              const revealResponse = revealContainer.reveal({
+                tokenGroupRedactions: [
+                  {
+                    tokenGroupName: 'deterministic',
+                    redaction: 'redacted',
+                  },
+                  {
+                    tokenGroupName: 'non_deterministic',
+                    redaction: 'mask1', // custom redaction mask
+                  },
+                ],
+              })
               revealResponse.then((res) => {
                 console.log(res);
               }).catch((err) => {

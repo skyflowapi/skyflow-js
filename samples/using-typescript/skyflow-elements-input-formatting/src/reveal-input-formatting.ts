@@ -11,6 +11,7 @@ import Skyflow, {
   RevealContainer, 
   RevealElement,
   RevealResponse,
+  SkyflowError,
 } from "skyflow-js";
 
 try {
@@ -130,7 +131,7 @@ try {
       const revealResponse: Promise<RevealResponse> = revealContainer.reveal();
       revealResponse.then((res: RevealResponse) => {
         console.log(res);
-      }).catch((err: RevealResponse) => {
+      }).catch((err: SkyflowError) => {
         console.log(err);
       });
     });

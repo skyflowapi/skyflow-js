@@ -33,7 +33,7 @@ export interface IUpsertOptions{
 }
 
 export interface IFlowDBUpsertOptions {
-  table: string,
+  tableName: string,
   uniqueColumns: string[],
   updateType?: UpdateType,
 }
@@ -56,7 +56,7 @@ export const getFlowDBUpsertForTable = (
   options: Array<IFlowDBUpsertOptions> | undefined,
 ): FlowDBUpsert | undefined => {
   if (!options) return undefined;
-  const match = options.find((upsertOption) => upsertOption.table === tableName);
+  const match = options.find((upsertOption) => upsertOption.tableName === tableName);
   if (!match) return undefined;
   return {
     uniqueColumns: match.uniqueColumns,

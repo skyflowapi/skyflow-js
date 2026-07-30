@@ -11,6 +11,7 @@ import Skyflow, {
   InputStyles,
   SkyflowConfig,  
   LabelStyles,
+  SkyflowError,
 } from "skyflow-js";
 
 try {
@@ -78,7 +79,7 @@ try {
   // Create collect elements.
   const cardNumberInput: CollectElementInput = {
     table: 'pii_fields',
-    column: 'primary_card.card_number',
+    column: 'card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
@@ -110,7 +111,7 @@ try {
 
   const expiryDateInput: CollectElementInput = {
     table: 'pii_fields',
-    column: 'primary_card.expiry_date',
+    column: 'expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
@@ -165,7 +166,7 @@ try {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
-        .catch((err: CollectResponse) => {
+        .catch((err: SkyflowError) => {
           const errorElement = document.getElementById('collectResponse') as HTMLElement;
           if (errorElement){
             errorElement.innerHTML = JSON.stringify(err, null, 2);

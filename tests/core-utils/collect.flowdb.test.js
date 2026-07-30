@@ -35,7 +35,7 @@ describe('constructFlowDBInsertRequest', () => {
   });
 
   test('adds upsert uniqueColumns when upsert option matches table', () => {
-    const options = { tokens: true, upsert: [{ table: 'table1', uniqueColumns: ['card_number'] }] };
+    const options = { tokens: true, upsert: [{ tableName: 'table1', uniqueColumns: ['card_number'] }] };
     const req = constructFlowDBInsertRequest(finalInsertRecords, options, 'vault123');
     expect(req.records[0].upsert).toEqual({ uniqueColumns: ['card_number'] });
     expect(req.records[1].upsert).toBeUndefined();
@@ -44,7 +44,7 @@ describe('constructFlowDBInsertRequest', () => {
   test('supports multiple uniqueColumns per table', () => {
     const options = {
       tokens: true,
-      upsert: [{ table: 'table1', uniqueColumns: ['card_number', 'cvv'] }],
+      upsert: [{ tableName: 'table1', uniqueColumns: ['card_number', 'cvv'] }],
     };
     const req = constructFlowDBInsertRequest(finalInsertRecords, options, 'vault123');
     expect(req.records[0].upsert).toEqual({ uniqueColumns: ['card_number', 'cvv'] });
@@ -54,8 +54,8 @@ describe('constructFlowDBInsertRequest', () => {
     const options = {
       tokens: true,
       upsert: [
-        { table: 'table1', uniqueColumns: ['card_number'], updateType: 'REPLACE' },
-        { table: 'table2', uniqueColumns: ['ssn'] },
+        { tableName: 'table1', uniqueColumns: ['card_number'], updateType: 'REPLACE' },
+        { tableName: 'table2', uniqueColumns: ['ssn'] },
       ],
     };
     const req = constructFlowDBInsertRequest(finalInsertRecords, options, 'vault123');

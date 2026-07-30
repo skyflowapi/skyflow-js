@@ -68,7 +68,7 @@ try {
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
-    skyflowID: '',
+    skyflowId: '',
     type: Skyflow.ElementType.CARD_NUMBER,
   });
 
@@ -79,7 +79,7 @@ try {
     label: 'Cvv',
     placeholder: 'cvv',
     type: Skyflow.ElementType.CVV,
-    skyflowID: '',
+    skyflowId: '',
   });
 
   const expiryDateElement = collectContainer.create({
@@ -89,7 +89,7 @@ try {
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
     type: Skyflow.ElementType.EXPIRATION_DATE,
-    skyflowID: '',
+    skyflowId: '',
   });
 
   const cardHolderNameElement = collectContainer.create({
@@ -109,20 +109,19 @@ try {
 
   // Collect all elements data.
   const collectButton = document.getElementById('collectPCIData');
-  const records = {
-    tokens: true,
+  const collectOptions = {
     additionalFields: {
       records: [
         {
-          table: 'table1',
-          fields: {
-            skyflowID: '',
+          tableName: 'table1',
+          data: {
+            skyflowId: '',
             gender: 'MALE',
           },
         },
         {
-          table: 'table2',
-          fields: {
+          tableName: 'table2',
+          data: {
             gender: 'MALE',
           },
         },
@@ -131,7 +130,7 @@ try {
   };
   if (collectButton) {
     collectButton.addEventListener('click', () => {
-      const collectResponse = collectContainer.collect(records);
+      const collectResponse = collectContainer.collect(collectOptions);
       collectResponse
         .then((response) => {
           console.log(response);
