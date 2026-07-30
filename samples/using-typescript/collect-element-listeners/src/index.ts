@@ -81,7 +81,7 @@ try {
   // Create collect elements
   const cardNumberInput : CollectElementInput = {
     table: 'pii_fields',
-    column: 'primary_card.card_number',
+    column: 'card_number',
     inputStyles: inputStyles,
     labelStyles: labelStyles,
     errorTextStyles: errorTextStyles,
@@ -93,7 +93,7 @@ try {
 
   const cvvInput: CollectElementInput = {
     table: 'pii_fields',
-    column: 'primary_card.cvv',
+    column: 'cvv',
     inputStyles: inputStyles,
     labelStyles: labelStyles,
     errorTextStyles: errorTextStyles,

@@ -130,7 +130,7 @@ try {
 
 	const cardNumberElement = composableContainer.create({
 		table: 'pii_fields',
-		column: 'primary_card.card_number',
+		column: 'card_number',
 		...cardNumberStyles,
 		type: Skyflow.ElementType.CARD_NUMBER,
 		placeholder: 'XXXX XXXX XXXX XXXX'
@@ -138,7 +138,7 @@ try {
 
 	const expiryDateElement = composableContainer.create({
 		table: 'pii_fields',
-		column: 'primary_card.expiry_date',
+		column: 'expiry_date',
 		...expiryDateStyles,
 		placeholder: 'MM/YY',
 		type: Skyflow.ElementType.EXPIRATION_DATE,
@@ -147,7 +147,7 @@ try {
 
 	const cvvElement = composableContainer.create({
 		table: 'pii_fields',
-		column: 'primary_card.cvv',
+		column: 'cvv',
 		...cvvStyles,
 		placeholder: 'CVC',
 		type: Skyflow.ElementType.CVV,
@@ -198,12 +198,12 @@ try {
 					};
 
 					// Create Reveal Elements With Tokens.
-					const fieldsTokenData = response.records[0].fields;
+					const fieldsTokenData = response.records[0].tokens;
 					const revealContainer = skyflow.container(
 						Skyflow.ContainerType.REVEAL
 					);
 					const revealCardNumberElement = revealContainer.create({
-						token: fieldsTokenData.primary_card.card_number,
+						token: fieldsTokenData.card_number[0].token,
 						label: 'Card Number',
 						...revealStyleOptions,
 
@@ -211,7 +211,7 @@ try {
 					revealCardNumberElement.mount('#revealCardNumber');
 
 					const revealCardCvvElement = revealContainer.create({
-						token: fieldsTokenData.primary_card.cvv,
+						token: fieldsTokenData.cvv[0].token,
 						label: 'Cvv',
 						...revealStyleOptions,
 
@@ -219,14 +219,14 @@ try {
 					revealCardCvvElement.mount('#revealCvv');
 
 					const revealCardExpiryElement = revealContainer.create({
-						token: fieldsTokenData.primary_card.expiry_date,
+						token: fieldsTokenData.expiry_date[0].token,
 						label: 'Card Expiry Date',
 						...revealStyleOptions,
 					});
 					revealCardExpiryElement.mount('#revealExpiryDate');
 
 					const revealCardholderNameElement = revealContainer.create({
-						token: fieldsTokenData.first_name,
+						token: fieldsTokenData.first_name[0].token,
 						label: 'Card Holder Name',
 						...revealStyleOptions,
 					});
