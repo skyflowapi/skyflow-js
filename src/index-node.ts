@@ -31,15 +31,12 @@ export {
   ICollectOptions as CollectOptions,
   AdditionalFields,
   AdditionalFieldsRecord,
-  CollectResponse,
   // UploadFilesResponse,
   CardMetadata,
   InputStyles,
   LabelStyles,
   ErrorTextStyles,
   RedactionType,
-  IRevealRecord as RevealRecord,
-  RevealResponse,
   RenderFileResponse,
   IValidationRule as ValidationRule,
   ValidationRuleType,
@@ -55,6 +52,13 @@ export {
 export {
   IFlowDBUpsertOptions as UpsertOptions,
 } from './core-utils/collect';
+
+export {
+  CollectResponse,
+  CollectRecord,
+  RevealResponse,
+  RevealRecord,
+} from './core/internal/internal-types';
 
 export {
   IFlowDBRevealElementInput as RevealElementInput,
