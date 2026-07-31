@@ -141,7 +141,7 @@ jobs:
             curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
             npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
             npm config set unsafe-perm true
-            npm publish --tag beta-v${{  env.RELEASE_VERSION }}
+            npm publish --tag v${{  env.RELEASE_VERSION }}
           else
             npm publish
           fi
