@@ -7,19 +7,49 @@ Skyflow's JavaScript SDK can be used to securely collect, tokenize, and reveal s
 [![GitHub release](https://img.shields.io/github/v/release/skyflowapi/skyflow-js.svg)](https://www.npmjs.com/package/skyflow-js)
 [![License](https://img.shields.io/github/license/skyflowapi/skyflow-android)](https://github.com/skyflowapi/skyflow-js/blob/main/LICENSE)
 
-## Browsers support
+# Table of Contents
+- [**Installation**](#installation)
+  - [Requirements](#requirements)
+  - [Configuration (script tag vs. npm)](#configuration-script-tag-vs-npm)
+- [**Quick Start**](#quick-start)
+- [**Initializing Skyflow.js**](#initializing-skyflowjs)
+- [**Securely collecting data client-side**](#securely-collecting-data-client-side)
+  - [Using Skyflow Elements to collect data](#using-skyflow-elements-to-collect-data)
+  - [Using Skyflow Elements to update data](#using-skyflow-elements-to-update-data)
+  - [BIN Lookup](#bin-lookup)
+  - [Validations](#validations)
+  - [Event Listener on Collect Elements](#event-listener-on-collect-elements)
+  - [UI Error for Collect Elements](#ui-error-for-collect-elements)
+  - [Override default error messages](#override-default-error-messages)
+  - [Set and Clear value for Collect Elements (DEV ENV ONLY)](#set-and-clear-value-for-collect-elements-dev-env-only)
+  - [Update Collect Elements](#update-collect-elements)
+- [**Securely collecting data client-side using Composable Elements**](#securely-collecting-data-client-side-using-composable-elements)
+  - [Using Skyflow Composable Elements to collect data](#using-skyflow-composable-elements-to-collect-data)
+  - [Event Listener on Composable Elements](#set-an-event-listener-on-composable-elements)
+  - [Update Composable Elements](#update-composable-elements)
+  - [Event Listener on Composable Container](#set-an-event-listener-on-a-composable-container)
+- [**Securely revealing data client-side**](#securely-revealing-data-client-side)
+  - [Using Skyflow Elements to reveal data](#using-skyflow-elements-to-reveal-data)
+  - [UI Error for Reveal Elements](#ui-error-for-reveal-elements)
+  - [Override default error messages](#override-default-error-messages-1)
+  - [Set token for Reveal Elements](#set-token-for-reveal-elements)
+  - [Set and Clear altText for Reveal Elements](#set-and-clear-alttext-for-reveal-elements)
+  - [Update Reveal Elements](#update-reveal-elements)
+- [**Securely revealing data client-side using Composable Elements**](#securely-revealing-data-client-side-using-composable-elements)
+  - [Using Composable Reveal Elements to reveal data](#using-composable-reveal-elements-to-reveal-data)
+  - [Update Reveal Composable Elements](#update-reveal-composable-elements)
+- [**Reporting a Vulnerability**](#reporting-a-vulnerability)
+---
+
+# Installation
+
+## Requirements
 
 | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="34px" height="34px" /><br/> IE / Edge | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="34px" height="34px" /><br/>Firefox | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="34px" height="34px" /><br/>Chrome | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="34px" height="34px" /><br/>Safari
 |--------------------------------------------------------------------------------------------------------------------------------------------------------------| --------- | --------- |-------------------------------------------------------------------------------------------------------------------------------------------------------|
-# Table of Contents
-- [**Including Skyflow.js**](#including-skyflowjs) 
-- [**Initializing Skyflow.js**](#initializing-skyflowjs)
-- [**Securely collecting data client-side**](#securely-collecting-data-client-side)
-- [**Securely collecting data client-side using Composable Elements**](#securely-collecting-data-client-side-using-composable-elements)
-- [**Securely revealing data client-side**](#securely-revealing-data-client-side)
----
 
-# Including Skyflow.js
+## Configuration (script tag vs. npm)
+
 Using script tag
 
 ```html
@@ -32,6 +62,41 @@ Using npm
 ```
 npm install skyflow-js
 ```
+
+---
+
+# Quick Start
+
+The minimum code needed to collect a card number and get back a token:
+
+```javascript
+import Skyflow from 'skyflow-js';
+
+const skyflowClient = Skyflow.init({
+  vaultID: 'VAULT_ID',
+  vaultURL: 'VAULT_URL',
+  getBearerToken: myGetBearerTokenFunction,
+});
+
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
+
+const cardNumberElement = container.create({
+  table: 'cards',
+  column: 'cardNumber',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+cardNumberElement.mount('#cardNumber');
+// Assumes a <div id="cardNumber"></div> exists on the page
+
+document.getElementById('submit').addEventListener('click', () => {
+  container.collect()
+    .then((response) => console.log(response.records))
+    .catch((error) => console.log(error));
+});
+```
+
+Everything below expands on each step: styling, validation, upsert, composable layouts, and reveal.
 
 ---
 
@@ -157,19 +222,18 @@ A Skyflow collect Element is defined as shown below:
 
 ```javascript
 const collectElement = {
-  tableName: 'string',             // Required, the table this data belongs to.
-  column: 'string',            // Required, the column into which this data should be inserted.
+  tableName: 'string',             // Optional, the table this data belongs to.
+  column: 'string',            // Optional, the column into which this data should be inserted.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional, styles that should be applied to the form element.
   labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
   errorTextStyles: {},         // Optional, styles that will be applied to the errorText of the collect element.
   label: 'string',             // Optional, label for the form element.
   placeholder: 'string',       // Optional, placeholder for the form element.
-  altText: 'string',           // (DEPRECATED) string that acts as an initial value for the collect element.
   validations: [],             // Optional, array of validation rules.
 }
 ```
-The `table` and `column` fields indicate which table and column in the vault the Element corresponds to. 
+The `tableName` and `column` fields indicate which table and column in the vault the Element corresponds to. 
 
 **Note**: 
 -  Use dot delimited strings to specify columns nested inside JSON fields (e.g. `address.street.line1`)
@@ -270,7 +334,6 @@ Finally, the `type` field takes a Skyflow ElementType. Each type applies the app
 - `CVV`
 - `INPUT_FIELD`
 - `PIN`
-- `FILE_INPUT`
   
 
 The `INPUT_FIELD` type is a custom UI element without any built-in validations. For information on validations, see [validations](#validations).
@@ -424,8 +487,8 @@ Once the Element object and options has been defined, add it to the container us
 
 ```javascript
 const collectElement = {
-  tableName: 'string',             // Required, the table this data belongs to.
-  column: 'string',            // Required, the column into which this data should be inserted.
+  tableName: 'string',             // Optional, the table this data belongs to.
+  column: 'string',            // Optional, the column into which this data should be inserted.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional, styles that should be applied to the form element.
   labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
@@ -697,7 +760,7 @@ Skyflow supports BIN (Bank Identification Number) lookup to help identify co-bad
 **What is BIN Lookup?**
 A Bank Identification Number (BIN) represents the first 8 digits of a card number and identifies the issuing bank, card scheme, and country.
 For co-badged cards, merchants are required to offer consumers a choice of which network to process the payment through.
-You can use Skyflow’s BIN Lookup API to detect such cards and provide the appropriate options to users.
+You can use Skyflow's BIN Lookup API to detect such cards and provide the appropriate options to users.
 
 ### Example: Calling the BIN Lookup API
 ```javascript
@@ -806,7 +869,7 @@ const collectElement = {
  placeholder: "string",       // Optional, placeholder for the form element.
  altText: "string",           // (DEPRECATED) string that acts as an initial value for the collect element.
  validations: [],             // Optional, array of validation rules.
- skyflowId: "string",         // The skyflow_id of the record to be updated.
+ skyflowId: "string",         // The skyflowId of the record to be updated.
 };
 const options = {
  required: false,             // Optional, indicates whether the field is marked as required. Defaults to 'false'.
@@ -1259,7 +1322,7 @@ cardNumber.setError('custom error');
 cardNumber.resetError();
 ```
 
-### Override default error Messages
+### Override default error messages
 
 You can override the default error messages with custom ones by using `setErrorOverride`. This is especially useful to override default error messages in non-English languages.
 
@@ -1444,9 +1507,6 @@ cardNumberElement.update({
 - [**Event listener on Composable Element**](#set-an-event-listener-on-composable-elements)
 - [**Event listener on Composable Container**](#set-an-event-listener-on-a-composable-container)
 - [**Update Composable Elements**](#update-composable-elements)
-- [**Using Skyflow File Element to upload a file**](#using-skyflow-composable-file-element-to-upload-a-file)
-- [**Using Skyflow File Element to upload multiple files**](#using-skyflow-composable-file-element-to-upload-multiple-files)
-
 
 ## Using Skyflow Composable Elements to collect data
 Composable Elements combine multiple Skyflow Elements in a single iframe, letting you create multiple Skyflow Elements in a single row. The following steps create a composable element and securely collect data through it.
@@ -1497,8 +1557,8 @@ Composable Elements use the following schema:
 
 ```javascript
 const composableElement = {
-  tableName: 'string',             // Required. The table this data belongs to.
-  column: 'string',            // Required. The column this data belongs to.
+  tableName: 'string',             // Optional. The table this data belongs to.
+  column: 'string',            // Optional. The column this data belongs to.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional. Styles applied to the form element.
   labelStyles: {},             // Optional. Styles for the label of the collect element.
@@ -1633,8 +1693,8 @@ Once you define the Element object and options, add it to the container using th
 
 ```javascript
 const composableElement = {
-  tableName: 'string',             // Required, the table this data belongs to.
-  column: 'string',            // Required, the column into which this data should be inserted.
+  tableName: 'string',             // Optional, the table this data belongs to.
+  column: 'string',            // Optional, the column into which this data should be inserted.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional, styles that should be applied to the form element.
   labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
@@ -2133,7 +2193,7 @@ const options = {
 
 `format`: A string value that indicates how the reveal element should display the value, including placeholder characters that map to keys `translation` If `translation` isn't specified to any character in the `format` value is considered as a string literal.
 
-`translation`: An object of key value pairs, where the key is a character that appears in `format` and the value is a simple regex pattern of acceptable inputs for that character. Each key can only appear once. Defaults to `{ ‘X’: ‘[0-9]’ }`.
+`translation`: An object of key value pairs, where the key is a character that appears in `format` and the value is a simple regex pattern of acceptable inputs for that character. Each key can only appear once. Defaults to `{ 'X': '[0-9]' }`.
 
 **Reveal Element Options examples:**
 Example 1
@@ -2488,6 +2548,7 @@ cardNumberRevealElement.update({
 
 ---
 
+# Securely revealing data client-side using Composable Elements
 
 ## Using Composable Reveal Elements to reveal data
 
@@ -2607,7 +2668,7 @@ const options = {
 
 `format`: A string value that indicates how the reveal element should display the value, including placeholder characters that map to keys `translation` If `translation` isn't specified to any character in the `format` value is considered as a string literal.
 
-`translation`: An object of key value pairs, where the key is a character that appears in `format` and the value is a simple regex pattern of acceptable inputs for that character. Each key can only appear once. Defaults to `{ ‘X’: ‘[0-9]’ }`.
+`translation`: An object of key value pairs, where the key is a character that appears in `format` and the value is a simple regex pattern of acceptable inputs for that character. Each key can only appear once. Defaults to `{ 'X': '[0-9]' }`.
 
 **Reveal Element Options examples:**
 Example 1
@@ -2881,7 +2942,7 @@ cardNumberRevealElement.update({
 
 ---
 
-## Reporting a Vulnerability
+# Reporting a Vulnerability
 
 If you discover a potential security issue in this project, please reach out to us at security@skyflow.com. Please do not create public GitHub issues or Pull Requests, as malicious actors could potentially view them.
 
