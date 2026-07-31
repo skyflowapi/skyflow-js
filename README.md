@@ -7,12 +7,17 @@ Skyflow's JavaScript SDK can be used to securely collect, tokenize, and reveal s
 [![GitHub release](https://img.shields.io/github/v/release/skyflowapi/skyflow-js.svg)](https://www.npmjs.com/package/skyflow-js)
 [![License](https://img.shields.io/github/license/skyflowapi/skyflow-android)](https://github.com/skyflowapi/skyflow-js/blob/main/LICENSE)
 
+
+## Browsers support
+
+| <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="34px" height="34px" /><br/> IE / Edge | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="34px" height="34px" /><br/>Firefox | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="34px" height="34px" /><br/>Chrome | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="34px" height="34px" /><br/>Safari
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------| --------- | --------- |-------------------------------------------------------------------------------------------------------------------------------------------------------|
+
 # Table of Contents
 - [**Installation**](#installation)
-  - [Requirements](#requirements)
   - [Configuration (script tag vs. npm)](#configuration-script-tag-vs-npm)
-- [**Quick Start**](#quick-start)
 - [**Initializing Skyflow.js**](#initializing-skyflowjs)
+- [**Quick Start**](#quick-start)
 - [**Securely collecting data client-side**](#securely-collecting-data-client-side)
   - [Using Skyflow Elements to collect data](#using-skyflow-elements-to-collect-data)
   - [Using Skyflow Elements to update data](#using-skyflow-elements-to-update-data)
@@ -43,11 +48,6 @@ Skyflow's JavaScript SDK can be used to securely collect, tokenize, and reveal s
 
 # Installation
 
-## Requirements
-
-| <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="34px" height="34px" /><br/> IE / Edge | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="34px" height="34px" /><br/>Firefox | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="34px" height="34px" /><br/>Chrome | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="34px" height="34px" /><br/>Safari
-|--------------------------------------------------------------------------------------------------------------------------------------------------------------| --------- | --------- |-------------------------------------------------------------------------------------------------------------------------------------------------------|
-
 ## Configuration (script tag vs. npm)
 
 Using script tag
@@ -62,41 +62,6 @@ Using npm
 ```
 npm install skyflow-js
 ```
-
----
-
-# Quick Start
-
-The minimum code needed to collect a card number and get back a token:
-
-```javascript
-import Skyflow from 'skyflow-js';
-
-const skyflowClient = Skyflow.init({
-  vaultID: 'VAULT_ID',
-  vaultURL: 'VAULT_URL',
-  getBearerToken: myGetBearerTokenFunction,
-});
-
-const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
-
-const cardNumberElement = container.create({
-  table: 'cards',
-  column: 'cardNumber',
-  type: Skyflow.ElementType.CARD_NUMBER,
-});
-
-cardNumberElement.mount('#cardNumber');
-// Assumes a <div id="cardNumber"></div> exists on the page
-
-document.getElementById('submit').addEventListener('click', () => {
-  container.collect()
-    .then((response) => console.log(response.records))
-    .catch((error) => console.log(error));
-});
-```
-
-Everything below expands on each step: styling, validation, upsert, composable layouts, and reveal.
 
 ---
 
@@ -190,6 +155,40 @@ For `env` parameter, there are 2 accepted values in Skyflow.Env
 `Note`:
   - since `env` is optional, by default the env will be  `PROD`.
   - Use `env` option with caution, make sure the env is set to `PROD` when using `skyflow-js` in production. 
+
+---
+# Quick Start
+
+The minimum code needed to collect a card number and get back a token:
+
+```javascript
+import Skyflow from 'skyflow-js';
+
+const skyflowClient = Skyflow.init({
+  vaultID: 'VAULT_ID',
+  vaultURL: 'VAULT_URL',
+  getBearerToken: myGetBearerTokenFunction,
+});
+
+const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
+
+const cardNumberElement = container.create({
+  tableName: 'cards',
+  column: 'cardNumber',
+  type: Skyflow.ElementType.CARD_NUMBER,
+});
+
+cardNumberElement.mount('#cardNumber');
+// Assumes a <div id="cardNumber"></div> exists on the page
+
+document.getElementById('submit').addEventListener('click', () => {
+  container.collect()
+    .then((response) => console.log(response.records))
+    .catch((error) => console.log(error));
+});
+```
+
+Everything below expands on each step: styling, validation, upsert, composable layouts, and reveal.
 
 ---
 
