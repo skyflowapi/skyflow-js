@@ -18,6 +18,7 @@ import Skyflow, {
   RevealResponse,
   SkyflowConfig,
   ValidationRule,
+  SkyflowError,
 } from "skyflow-js";
 
 try {
@@ -25,7 +26,7 @@ try {
   if (revealView) {
     revealView.style.visibility = "hidden";
   }
-  let collectResponseData: CollectResponse = {};
+  let collectResponseData: CollectResponse = { records: [] };
   const config: SkyflowConfig = {
     vaultID: "<VAULT_ID>",
     vaultURL: "<VAULT_URL>",
@@ -108,7 +109,7 @@ try {
 
   // Create collect elements.
   const cardNumberInput: CollectElementInput = {
-    table: "pii_fields",
+    tableName: "pii_fields",
     column: "card_number",
     ...collectStylesOptions,
     placeholder: "card number",
@@ -124,7 +125,7 @@ try {
   );
 
   const cvvInput: CollectElementInput = {
-    table: "pii_fields",
+    tableName: "pii_fields",
     column: "cvv",
     ...collectStylesOptions,
     label: "Cvv",
@@ -134,8 +135,8 @@ try {
   const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
   const expiryDateInput: CollectElementInput = {
-    table: "pii_fields",
-    column: "primary_card.expiry_date",
+    tableName: "pii_fields",
+    column: "expiry_date",
     ...collectStylesOptions,
     label: "Expiry Date",
     placeholder: "MM/YYYY",
@@ -145,7 +146,7 @@ try {
     collectContainer.create(expiryDateInput);
 
   const cardholderNameInput: CollectElementInput = {
-    table: "pii_fields",
+    tableName: "pii_fields",
     column: "name",
     ...collectStylesOptions,
     label: "Card Holder Name",
@@ -226,7 +227,7 @@ try {
 
       // update table,coloumn on expiry date
       expiryDateElement.update({
-        table: "pii_fields",
+        tableName: "pii_fields",
         column: "expiration_date",
       } as CollectElementUpdateOptions);
     });
@@ -293,13 +294,13 @@ try {
           };
 
           // Create Reveal Elements With Tokens.
-          const fieldsTokenData = collectResponseData.records![0].fields;
+          const fieldsTokenData = collectResponseData.records![0].tokens!;
           const revealContainer = skyflowClient.container(
             Skyflow.ContainerType.REVEAL
           ) as RevealContainer;
 
           const revealCardNumberInput: RevealElementInput = {
-            token: fieldsTokenData.card_number,
+            token: fieldsTokenData.card_number[0].token,
             label: "Card Number",
             ...revealStyleOptions,
           };
@@ -309,7 +310,7 @@ try {
           revealCardNumberElement.mount("#revealCardNumber");
 
           const revealCardCvvInput: RevealElementInput = {
-            token: fieldsTokenData.cvv,
+            token: fieldsTokenData.cvv[0].token,
             label: "CVV",
             ...revealStyleOptions,
             altText: "###",
@@ -319,7 +320,7 @@ try {
           revealCardCvvElement.mount("#revealCvv");
 
           const revealCardExpiryInput: RevealElementInput = {
-            token: fieldsTokenData.expiration_date,
+            token: fieldsTokenData.expiration_date[0].token,
             label: "Card Expiry Date",
             ...revealStyleOptions,
           };
@@ -329,7 +330,7 @@ try {
           revealCardExpiryElement.mount("#revealExpiryDate");
 
           const revealCardholderNameInput: RevealElementInput = {
-            token: fieldsTokenData.name,
+            token: fieldsTokenData.name[0].token,
             label: "Card Holder Name",
             ...revealStyleOptions,
           };
@@ -367,9 +368,8 @@ try {
                 },
               } as RevealElementInput);
 
-              // update redaction,inputStyles on expiry date
+              // update inputStyles on expiry date
               revealCardExpiryElement.update({
-                redaction: Skyflow.RedactionType.REDACTED,
                 inputStyles: {
                   base: {
                     backgroundColor: "#000",
@@ -408,13 +408,13 @@ try {
                 .then((res: RevealResponse) => {
                   console.log(res);
                 })
-                .catch((err: RevealResponse) => {
+                .catch((err: SkyflowError) => {
                   console.log(err);
                 });
             });
           }
         })
-        .catch((err: CollectResponse) => {
+        .catch((err: SkyflowError) => {
           const errorElement = document.getElementById(
             "collectResponse"
           ) as HTMLElement;

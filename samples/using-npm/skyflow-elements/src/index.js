@@ -82,8 +82,8 @@ try {
 
   // Create collect elements.
   const cardNumberElement = collectContainer.create({
-    table: 'pii_fields',
-    column: 'primary_card.card_number',
+    tableName: 'pii_fields',
+    column: 'card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
@@ -93,8 +93,8 @@ try {
   });
 
   const cvvElement = collectContainer.create({
-    table: 'pii_fields',
-    column: 'primary_card.cvv',
+    tableName: 'pii_fields',
+    column: 'cvv',
     ...collectStylesOptions,
     label: 'Cvv',
     placeholder: 'cvv',
@@ -102,8 +102,8 @@ try {
   });
 
   const expiryDateElement = collectContainer.create({
-    table: 'pii_fields',
-    column: 'primary_card.expiry_date',
+    tableName: 'pii_fields',
+    column: 'expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
@@ -111,7 +111,7 @@ try {
   });
 
   const cardHolderNameElement = collectContainer.create({
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'first_name',
     ...collectStylesOptions,
     label: 'Card Holder Name',
@@ -173,36 +173,34 @@ try {
           };
 
           // Create Reveal Elements With Tokens.
-          const fieldsTokenData = response.records[0].fields;
+          const fieldsTokenData = response.records[0].tokens;
           const revealContainer = skyflow.container(
             Skyflow.ContainerType.REVEAL
           );
           const revealCardNumberElement = revealContainer.create({
-            token: fieldsTokenData.primary_card.card_number,
+            token: fieldsTokenData.card_number[0].token,
             label: 'Card Number',
-            redaction: Skyflow.RedactionType.MASKED,
             ...revealStyleOptions,
           });
           revealCardNumberElement.mount('#revealCardNumber');
 
           const revealCardCvvElement = revealContainer.create({
-            token: fieldsTokenData.primary_card.cvv,
+            token: fieldsTokenData.cvv[0].token,
             label: 'CVV',
-            redaction: Skyflow.RedactionType.REDACTED,
             ...revealStyleOptions,
             altText: '###',
           });
           revealCardCvvElement.mount('#revealCvv');
 
           const revealCardExpiryElement = revealContainer.create({
-            token: fieldsTokenData.primary_card.expiry_date,
+            token: fieldsTokenData.expiry_date[0].token,
             label: 'Card Expiry Date',
             ...revealStyleOptions,
           });
           revealCardExpiryElement.mount('#revealExpiryDate');
 
           const revealCardholderNameElement = revealContainer.create({
-            token: fieldsTokenData.first_name,
+            token: fieldsTokenData.first_name[0].token,
             label: 'Card Holder Name',
             ...revealStyleOptions,
           });
@@ -212,7 +210,14 @@ try {
 
           if (revealButton) {
             revealButton.addEventListener('click', () => {
-              revealContainer.reveal().then((res) => {
+              revealContainer.reveal({
+                tokenGroupRedactions: [
+                  {
+                    tokenGroupName: 'deterministic',
+                    redaction: 'redacted',
+                  },
+                ],
+              }).then((res) => {
                 console.log(res);
               }).catch((err) => {
                 console.log(err);

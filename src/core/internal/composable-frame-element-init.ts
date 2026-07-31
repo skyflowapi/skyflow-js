@@ -19,7 +19,7 @@ import FrameElement from '.';
 import Client from '../../client';
 import RevealFrame from './reveal/reveal-frame';
 import {
-  fetchRecordsByTokenIdComposable, formatRecordsForClientComposable,
+  fetchRecordsByTokenIdComposableFlowDB, formatRecordsForClientComposableFlowDB,
 } from '../../core-utils/reveal';
 
 export default class RevealComposableFrameElementInit {
@@ -86,7 +86,6 @@ export default class RevealComposableFrameElementInit {
                 if (data2 && !data2?.skyflowID) {
                   const revealRecord: IRevealRecordComposable = {
                     token: data2?.token ?? '',
-                    redaction: data2?.redaction,
                     iframeName: data2?.name ?? '',
                   };
                   revealDataInput?.push(revealRecord);
@@ -95,10 +94,15 @@ export default class RevealComposableFrameElementInit {
             });
           });
 
-          this.revealData(revealDataInput, this.containerId, event?.data?.clientConfig?.authToken)
+          this.revealData(
+            revealDataInput,
+            this.containerId,
+            event?.data?.clientConfig?.authToken,
+            data?.options,
+          )
             ?.then((revealResponse: any) => {
               if (revealResponse?.records?.length > 0) {
-                const formattedRecord = formatRecordsForClientComposable(revealResponse);
+                const formattedRecord = formatRecordsForClientComposableFlowDB(revealResponse);
                 window?.parent?.postMessage(
                   {
                     type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
@@ -128,7 +132,7 @@ export default class RevealComposableFrameElementInit {
               );
             })
             ?.catch((error) => {
-              const formattedRecord = formatRecordsForClientComposable(error);
+              const formattedRecord = formatRecordsForClientComposableFlowDB(error);
               window?.parent?.postMessage(
                 {
                   type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
@@ -195,9 +199,14 @@ export default class RevealComposableFrameElementInit {
     RevealComposableFrameElementInit.frameEle = new RevealComposableFrameElementInit();
   };
 
-  revealData(revealRecords: IRevealRecordComposable[], containerId: string, authToken: string) {
+  revealData(
+    revealRecords: IRevealRecordComposable[],
+    containerId: string,
+    authToken: string,
+    options?: Record<string, any>,
+  ) {
     return new Promise((resolve, reject) => {
-      fetchRecordsByTokenIdComposable(revealRecords, this.#client, authToken)?.then(
+      fetchRecordsByTokenIdComposableFlowDB(revealRecords, this.#client, authToken, options)?.then(
         (resolvedResult) => {
           resolve(resolvedResult);
         },

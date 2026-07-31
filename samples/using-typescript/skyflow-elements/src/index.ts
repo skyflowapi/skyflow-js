@@ -13,8 +13,10 @@ import Skyflow, {
   RevealContainer,
   RevealElement,
   RevealElementInput,
+  RevealOptions,
   RevealResponse,
   SkyflowConfig,
+  SkyflowError,
 } from 'skyflow-js';
 
 try {
@@ -99,8 +101,8 @@ try {
 
   // Create collect elements.
   const cardNumberInput: CollectElementInput = {
-    table: 'pii_fields',
-    column: 'primary_card.card_number',
+    tableName: 'pii_fields',
+    column: 'card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
@@ -112,8 +114,8 @@ try {
   const cardNumberElement: CollectElement = collectContainer.create(cardNumberInput, cardNumberOptions);
 
   const cvvInput: CollectElementInput = {
-    table: 'pii_fields',
-    column: 'primary_card.cvv',
+    tableName: 'pii_fields',
+    column: 'cvv',
     ...collectStylesOptions,
     label: 'Cvv',
     placeholder: 'cvv',
@@ -122,8 +124,8 @@ try {
   const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
   const expiryDateInput: CollectElementInput = {
-    table: 'pii_fields',
-    column: 'primary_card.expiry_date',
+    tableName: 'pii_fields',
+    column: 'expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
@@ -132,7 +134,7 @@ try {
   const expiryDateElement: CollectElement = collectContainer.create(expiryDateInput);
 
   const cardholderNameInput: CollectElementInput = {
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'first_name',
     ...collectStylesOptions,
     label: 'Card Holder Name',
@@ -201,24 +203,22 @@ try {
           };
 
           // Create Reveal Elements With Tokens.
-          const fieldsTokenData = response.records![0].fields;
+          const fieldsTokenData = response.records![0].tokens!;
           const revealContainer = skyflowClient.container(
             Skyflow.ContainerType.REVEAL
           ) as RevealContainer;
-          
+
           const revealCardNumberInput: RevealElementInput = {
-            token: fieldsTokenData.primary_card.card_number,
+            token: fieldsTokenData.card_number[0].token,
             label: 'Card Number',
-            redaction: Skyflow.RedactionType.MASKED,
             ...revealStyleOptions,
           }
           const revealCardNumberElement: RevealElement = revealContainer.create(revealCardNumberInput);
           revealCardNumberElement.mount('#revealCardNumber');
 
           const revealCardCvvInput: RevealElementInput = {
-            token: fieldsTokenData.primary_card.cvv,
+            token: fieldsTokenData.cvv[0].token,
             label: 'CVV',
-            redaction: Skyflow.RedactionType.REDACTED,
             ...revealStyleOptions,
             altText: '###',
           }
@@ -226,7 +226,7 @@ try {
           revealCardCvvElement.mount('#revealCvv');
 
           const revealCardExpiryInput: RevealElementInput = {
-            token: fieldsTokenData.primary_card.expiry_date,
+            token: fieldsTokenData.expiry_date[0].token,
             label: 'Card Expiry Date',
             ...revealStyleOptions,
           }
@@ -234,7 +234,7 @@ try {
           revealCardExpiryElement.mount('#revealExpiryDate');
 
           const revealCardholderNameInput: RevealElementInput = {
-            token: fieldsTokenData.first_name,
+            token: fieldsTokenData.first_name[0].token,
             label: 'Card Holder Name',
             ...revealStyleOptions,
           }
@@ -245,16 +245,25 @@ try {
 
           if (revealButton) {
             revealButton.addEventListener('click', () => {
-              const revealResponse: Promise<RevealResponse> = revealContainer.reveal()
+              // Redaction is applied per token group via reveal options.
+              const revealOptions: RevealOptions = {
+                tokenGroupRedactions: [
+                  {
+                    tokenGroupName: 'deterministic',
+                    redaction: 'redacted',
+                  },
+                ],
+              };
+              const revealResponse: Promise<RevealResponse> = revealContainer.reveal(revealOptions)
               revealResponse.then((res: RevealResponse) => {
                 console.log(res);
-              }).catch((err: RevealResponse) => {
+              }).catch((err: SkyflowError) => {
                 console.log(err);
               });
             });
           }
         })
-        .catch((err: CollectResponse) => {
+        .catch((err: SkyflowError) => {
           console.log(err);
         });
     });

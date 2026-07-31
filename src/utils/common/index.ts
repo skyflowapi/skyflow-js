@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2025 Skyflow, Inc.
 */
-import { IUpsertOptions } from '../../core-utils/collect';
+import { IFlowDBUpsertOptions } from '../../core-utils/collect';
 import { CardType, ElementType } from '../../core/constants';
 
 declare global {
@@ -37,6 +37,11 @@ export enum RedactionType {
   PLAIN_TEXT = 'PLAIN_TEXT',
   MASKED = 'MASKED',
   REDACTED = 'REDACTED',
+}
+
+export enum UpdateType {
+  UPDATE = 'UPDATE',
+  REPLACE = 'REPLACE',
 }
 
 export enum RequestMethod {
@@ -125,7 +130,7 @@ export interface IInsertResponseReocrds {
   skyflowID?: string;
 }
 export interface IRevealResponseType {
-  records?: Record<string, string>[];
+  records?: Record<string, any>[];
   errors?: Record<string, any>[];
 }
 export interface IRenderResponseType {
@@ -339,7 +344,7 @@ export interface CardMetadata {
 }
 
 interface CollectElementCommonProps {
-  table?: string,
+  tableName?: string,
   column?: string,
   label?: string,
   inputStyles?: InputStyles,
@@ -348,7 +353,7 @@ interface CollectElementCommonProps {
   placeholder?: string,
   altText?: string,
   validations?: IValidationRule[],
-  skyflowID?: string,
+  skyflowId?: string,
 }
 
 export interface CollectElementUpdateOptions extends CollectElementCommonProps {
@@ -359,10 +364,19 @@ export interface CollectElementInput extends CollectElementCommonProps {
   type: ElementType,
 }
 
+export interface AdditionalFieldsRecord {
+  tableName: string;
+  data: Record<string, any>;
+  skyflowId?: string;
+}
+
+export interface AdditionalFields {
+  records: AdditionalFieldsRecord[];
+}
+
 export interface ICollectOptions {
-  tokens?: boolean,
-  additionalFields?: IInsertRecordInput,
-  upsert?: Array<IUpsertOptions>,
+  additionalFields?: AdditionalFields,
+  upsert?: Array<IFlowDBUpsertOptions>,
 }
 export interface MetaData {
   [key: string]: any,

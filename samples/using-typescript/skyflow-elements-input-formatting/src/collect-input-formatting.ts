@@ -11,6 +11,7 @@ import Skyflow, {
   InputStyles,
   SkyflowConfig,  
   LabelStyles,
+  SkyflowError,
 } from "skyflow-js";
 
 try {
@@ -77,8 +78,8 @@ try {
 
   // Create collect elements.
   const cardNumberInput: CollectElementInput = {
-    table: 'pii_fields',
-    column: 'primary_card.card_number',
+    tableName: 'pii_fields',
+    column: 'card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
@@ -94,7 +95,7 @@ try {
   );
 
   const ssnInput: CollectElementInput = {
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'ssn',
     ...collectStylesOptions,
     label: 'SSN',
@@ -109,8 +110,8 @@ try {
   const ssnElement: CollectElement = collectContainer.create(ssnInput, ssnOptions);
 
   const expiryDateInput: CollectElementInput = {
-    table: 'pii_fields',
-    column: 'primary_card.expiry_date',
+    tableName: 'pii_fields',
+    column: 'expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
@@ -126,7 +127,7 @@ try {
   );
 
   const passportNumberInput: CollectElementInput = {
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'passport_number',
     ...collectStylesOptions,
     label: 'Passport Number',
@@ -165,7 +166,7 @@ try {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
-        .catch((err: CollectResponse) => {
+        .catch((err: SkyflowError) => {
           const errorElement = document.getElementById('collectResponse') as HTMLElement;
           if (errorElement){
             errorElement.innerHTML = JSON.stringify(err, null, 2);

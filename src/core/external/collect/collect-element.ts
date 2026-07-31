@@ -369,6 +369,18 @@ class CollectElement extends SkyflowElement {
 
   update = (options: CollectElementUpdateOptions) => {
     this.#isUpdateCalled = true;
+    // Map the user-facing `skyflowId` key onto the internal `skyflowID` name that
+    // the SET_VALUE handler (core/internal/index.ts) consumes.
+    if (Object.prototype.hasOwnProperty.call(options, 'skyflowId')) {
+      (options as any).skyflowID = (options as any).skyflowId;
+      delete (options as any).skyflowId;
+    }
+    // Map the client-facing `tableName` key onto the internal `table` name that
+    // the SET_VALUE handler (core/internal/index.ts) consumes.
+    if (Object.prototype.hasOwnProperty.call(options, 'tableName')) {
+      (options as any).table = (options as any).tableName;
+      delete (options as any).tableName;
+    }
     if (this.#mounted) {
       options.validations = formatValidations(options.validations);
       this.updateElement({ elementName: this.#group.elementName, ...options });
@@ -709,7 +721,7 @@ class CollectElement extends SkyflowElement {
       if (!(typeof this.#elements[i].column === 'string' || this.#elements[i].column instanceof String)) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_COLLECT, [], true);
       }
-      if (this.#elements[i].skyflowID !== undefined && !this.#elements[i].skyflowID) {
+      if (this.#elements[i].skyflowId !== undefined && !this.#elements[i].skyflowId) {
         throw new SkyflowError(
           SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_COLLECT, [], true,
         );

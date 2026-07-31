@@ -8,11 +8,12 @@ import Skyflow, {
   CollectResponse,
   ErrorTextStyles,
   CollectOptions,
-  InsertRequest,
-  InsertRecord,
+  AdditionalFields,
+  AdditionalFieldsRecord,
   InputStyles,
   LabelStyles,
   SkyflowConfig,
+  SkyflowError,
 } from 'skyflow-js';
 
 try {
@@ -77,40 +78,40 @@ try {
 
   // Create collect elements.
   const cardNumberInput: CollectElementInput = {
-    table: 'table1',
+    tableName: 'table1',
     column: 'card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
-    skyflowID: '',
+    skyflowId: '',
     type: Skyflow.ElementType.CARD_NUMBER,
   };
   const cardNumberElement: CollectElement = collectContainer.create(cardNumberInput);
 
   const cvvInput: CollectElementInput = {
-    table: 'table1',
+    tableName: 'table1',
     column: 'cvv',
     ...collectStylesOptions,
     label: 'Cvv',
     placeholder: 'cvv',
     type: Skyflow.ElementType.CVV,
-    skyflowID: '',
+    skyflowId: '',
   };
   const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
   const expiryDateInput: CollectElementInput = {
-    table: 'table1',
+    tableName: 'table1',
     column: 'expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
     type: Skyflow.ElementType.EXPIRATION_DATE,
-    skyflowID: '',
+    skyflowId: '',
   };
   const expiryDateElement: CollectElement = collectContainer.create(expiryDateInput);
 
   const cardHolderNameInput: CollectElementInput = {
-    table: 'table2',
+    tableName: 'table2',
     column: 'name',
     ...collectStylesOptions,
     label: 'Card Holder Name',
@@ -127,26 +128,25 @@ try {
 
   // Collect all elements data.
   const collectButton = document.getElementById('collectPCIData') as HTMLButtonElement;
-  const records: Array<InsertRecord> = [
+  const records: Array<AdditionalFieldsRecord> = [
     {
-      table: 'table1',
-      fields: {
-        skyflowID: '',
+      tableName: 'table1',
+      data: {
         gender: 'MALE',
       },
+      skyflowId: '',
     },
     {
-      table: 'table2',
-      fields: {
+      tableName: 'table2',
+      data: {
         gender: 'MALE',
       },
     },
   ];
-  const additionalFields: InsertRequest = {
+  const additionalFields: AdditionalFields = {
     records: records,
   };
   const collectOptions: CollectOptions = {
-    tokens: true,
     additionalFields: additionalFields,
   };
   if (collectButton) {
@@ -160,7 +160,7 @@ try {
             responseElement.innerHTML = JSON.stringify(response, null, 2);
           }
         })
-        .catch((err: CollectResponse) => {
+        .catch((err: SkyflowError) => {
           const errorElement = document.getElementById('collectResponse') as HTMLElement;
           if (errorElement){
             errorElement.innerHTML = JSON.stringify(err, null, 2);

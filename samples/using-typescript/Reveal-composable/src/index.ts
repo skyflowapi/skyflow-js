@@ -7,9 +7,11 @@ import Skyflow, {
   InputStyles,
   LabelStyles,
   RevealElementInput,
+  RevealOptions,
   RevealResponse,
   SkyflowConfig,
   ComposableRevealElement
+  SkyflowError,
 } from 'skyflow-js';
 
 try {
@@ -102,7 +104,6 @@ try {
           const revealCardNumberInput: RevealElementInput = {
             token: "<TOKEN1>",
             label: 'Card Number',
-            redaction: Skyflow.RedactionType.MASKED,
             ...revealStyleOptions,
           }
           const revealCardNumberElement: ComposableRevealElement = revealContainer.create(revealCardNumberInput);
@@ -110,7 +111,6 @@ try {
           const revealCardCvvInput: RevealElementInput = {
             token: "<TOKEN2>",
             label: 'CVV',
-            redaction: Skyflow.RedactionType.REDACTED,
             ...revealStyleOptions,
             altText: '###',
           }
@@ -136,10 +136,23 @@ try {
 
           if (revealButton) {
             revealButton.addEventListener('click', () => {
-              const revealResponse: Promise<RevealResponse> = revealContainer.reveal()
+              // Redaction is applied per token group via reveal options.
+              const revealOptions: RevealOptions = {
+                tokenGroupRedactions: [
+                  {
+                    tokenGroupName: 'deterministic',
+                    redaction: 'redacted',
+                  },
+                  {
+                    tokenGroupName: 'non_deterministic',
+                    redaction: 'mask1', // custom redaction mask
+                  },
+                ],
+              };
+              const revealResponse: Promise<RevealResponse> = revealContainer.reveal(revealOptions)
               revealResponse.then((res: RevealResponse) => {
                 console.log(res);
-              }).catch((err: RevealResponse) => {
+              }).catch((err: SkyflowError) => {
                 console.log(err);
               });
             });

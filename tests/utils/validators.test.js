@@ -16,6 +16,7 @@ import {
   validateInitConfig,
   validateCollectElementInput,
   validateRevealElementRecords,
+  validateRevealOptions,
   isValidExpiryYearFormat,
   validateCardNumberLengthCheck,
   validateUpsertOptions,
@@ -373,7 +374,7 @@ describe('insert additional records validation', () => {
 
   test('empty table', () => {
     try {
-      validateAdditionalFieldsInCollect({ records: [{ table: null }] })
+      validateAdditionalFieldsInCollect({ records: [{ tableName: null }] })
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_TABLE_IN_ADDITIONAL_FIELDS.description, 0))
     }
@@ -381,28 +382,33 @@ describe('insert additional records validation', () => {
 
   test('invalid table type', () => {
     try {
-      validateAdditionalFieldsInCollect({ records: [{ table: {} }] })
+      validateAdditionalFieldsInCollect({ records: [{ tableName: {} }] })
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_ADDITIONAL_FIELDS.description, 0))
     }
   })
   test('empty skyflow id', () => {
     try {
-      validateAdditionalFieldsInCollect({ records: [{ table: 'abc', fields: { 'columnName' : 'value',  skyflowID: ''} }] })
+      validateAdditionalFieldsInCollect({ records: [{ tableName: 'abc', data: { 'columnName' : 'value' }, skyflowId: '' }] })
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_IN_ADDITIONAL_FIELDS.description, 0,true ))
     }
   })
   test('invalid skyflow id', () => {
     try {
-      validateAdditionalFieldsInCollect({ records: [{ table: 'abc', fields: { 'columnName' : 'value', skyflowID: []} }] })
+      validateAdditionalFieldsInCollect({ records: [{ tableName: 'abc', data: { 'columnName' : 'value' }, skyflowId: [] }] })
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOW_ID_IN_ADDITIONAL_FIELDS.description, 0, true))
     }
   })
+  test('valid record with top-level skyflowId', () => {
+    expect(() => validateAdditionalFieldsInCollect(
+      { records: [{ tableName: 'abc', data: { columnName: 'value' }, skyflowId: 'id123' }] },
+    )).not.toThrow()
+  })
   test('missing fields', () => {
     try {
-      validateAdditionalFieldsInCollect({ records: [{ table: 'abc' }] })
+      validateAdditionalFieldsInCollect({ records: [{ tableName: 'abc' }] })
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_FIELDS_IN_ADDITIONAL_FIELDS.description, 0))
     }
@@ -410,7 +416,15 @@ describe('insert additional records validation', () => {
 
   test('empty fields', () => {
     try {
-      validateAdditionalFieldsInCollect({ records: [{ table: 'abc', fields: null }] })
+      validateAdditionalFieldsInCollect({ records: [{ tableName: 'abc', data: null }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_FIELDS_IN_ADDITIONAL_FIELDS.description, 0))
+    }
+  })
+
+  test('empty data object', () => {
+    try {
+      validateAdditionalFieldsInCollect({ records: [{ tableName: 'abc', data: {} }] })
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.EMPTY_FIELDS_IN_ADDITIONAL_FIELDS.description, 0))
     }
@@ -418,7 +432,7 @@ describe('insert additional records validation', () => {
 
   test('invalid fields', () => {
     try {
-      validateAdditionalFieldsInCollect({ records: [{ table: 'abc', fields: [] }] })
+      validateAdditionalFieldsInCollect({ records: [{ tableName: 'abc', data: [] }] })
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FIELDS_IN_ADDITIONAL_FIELDS.description, 0))
     }
@@ -935,14 +949,14 @@ describe("validate collect element input", () => {
 })
 test("invalid skyflow id", () => {
   try {
-    validateCollectElementInput({type: 'CARD_NUMBER', skyflowID: undefined })
+    validateCollectElementInput({type: 'CARD_NUMBER', skyflowId: undefined })
   } catch (err) {
     expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT.description))
   }
 })
 test("invalid skyflow id", () => {
   try {
-    validateCollectElementInput({type: 'FILE_INPUT', skyflowID: undefined, altText: 'text' })
+    validateCollectElementInput({type: 'FILE_INPUT', skyflowId: undefined, altText: 'text' })
   } catch (err) {
     expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT.description))
   }
@@ -995,11 +1009,42 @@ describe("validate reveal element input", () => {
     }
   })
 
-  test("invalid redaction type", () => {
+  // flowDB: redaction/tokenGroupName are no longer element-level fields; they move to reveal options.
+  test("ignores element-level redaction/tokenGroupName (flowDB)", () => {
+    expect(() => validateRevealElementRecords([{ token: '123', redaction: 'CUSTOM_GROUP', tokenGroupName: 'grp1' }]))
+      .not.toThrow()
+  })
+
+})
+
+describe("validate reveal options (tokenGroupRedactions)", () => {
+  test("passes when options is undefined", () => {
+    expect(() => validateRevealOptions(undefined)).not.toThrow()
+  })
+
+  test("passes when tokenGroupRedactions is absent", () => {
+    expect(() => validateRevealOptions({})).not.toThrow()
+  })
+
+  test("passes for a valid tokenGroupRedactions array", () => {
+    expect(() => validateRevealOptions({
+      tokenGroupRedactions: [{ tokenGroupName: 'grp1', redaction: 'PLAIN_TEXT' }],
+    })).not.toThrow()
+  })
+
+  test("throws when tokenGroupRedactions is not an array", () => {
     try {
-      validateRevealElementRecords([{ token: '123', redaction: 'invalid' }])
+      validateRevealOptions({ tokenGroupRedactions: 'nope' })
     } catch (err) {
-      expect(err?.errors[0]?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_REDACTION_TYPE_REVEAL.description))
+      expect(err?.errors[0]?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_TOKEN_GROUP_REDACTIONS_REVEAL.description)
+    }
+  })
+
+  test("throws when an entry is missing tokenGroupName or redaction", () => {
+    try {
+      validateRevealOptions({ tokenGroupRedactions: [{ tokenGroupName: 'grp1' }] })
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TOKEN_GROUP_REDACTION_ENTRY_REVEAL.description, '0'))
     }
   })
 
@@ -1141,16 +1186,19 @@ describe("validate upsert options in collect", () => {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UPSERT_OPTION_OBJECT_TYPE.description,0))
     }
   })
-  test('missing table key', () => {
+  test('missing tableName key', () => {
     try {
       validateUpsertOptions([{
-        column: 'column'
+        uniqueColumns: ['email']
       }])
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_TABLE_IN_UPSERT_OPTION.description, 0))
     }
   })
-  test('missing column key', () => {
+  // NOTE: privacyDB (v1) upsert used a single 'column' string. flowDB switches the
+  // public upsert option to 'uniqueColumns' (array) + optional 'updateType'. This v1
+  // 'column' test is skipped in favour of the 'missing uniqueColumns key' flowDB test below.
+  test.skip('missing column key', () => {
     try {
       validateUpsertOptions([{
         table: 'table'
@@ -1159,17 +1207,19 @@ describe("validate upsert options in collect", () => {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_COLUMN_IN_UPSERT_OPTION.description, 0))
     }
   })
-  test('invalid table key type', () => {
+  test('invalid tableName key type', () => {
     try {
       validateUpsertOptions([{
-        table: true,
-        column: 'column'
+        tableName: true,
+        uniqueColumns: ['email']
       }])
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_TABLE_IN_UPSERT_OPTION.description, 0))
     }
   })
-  test('invalid column key type', () => {
+  // NOTE: v1 'column' string validation. Replaced by the 'invalid uniqueColumns key'
+  // flowDB test below.
+  test.skip('invalid column key type', () => {
     try {
       validateUpsertOptions([{
         table: 'table',
@@ -1178,6 +1228,49 @@ describe("validate upsert options in collect", () => {
     } catch (err) {
       expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_UPSERT_OPTION.description, 0))
     }
+  })
+
+  // flowDB upsert option shape: { tableName, uniqueColumns: string[], updateType?: 'UPDATE'|'REPLACE' }
+  test('missing uniqueColumns key', () => {
+    try {
+      validateUpsertOptions([{ tableName: 'table' }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.MISSING_UNIQUE_COLUMNS_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('invalid uniqueColumns key type (not an array)', () => {
+    try {
+      validateUpsertOptions([{ tableName: 'table', uniqueColumns: 'email' }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('empty uniqueColumns array', () => {
+    try {
+      validateUpsertOptions([{ tableName: 'table', uniqueColumns: [] }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('non-string entry in uniqueColumns array', () => {
+    try {
+      validateUpsertOptions([{ tableName: 'table', uniqueColumns: ['email', 123] }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UNIQUE_COLUMNS_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('invalid updateType value', () => {
+    try {
+      validateUpsertOptions([{ tableName: 'table', uniqueColumns: ['email'], updateType: 'MERGE' }])
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_UPDATE_TYPE_IN_UPSERT_OPTION.description, 0))
+    }
+  })
+  test('valid upsert option with uniqueColumns and updateType does not throw', () => {
+    expect(() => validateUpsertOptions([
+      { tableName: 'table', uniqueColumns: ['email', 'phone_number'], updateType: 'REPLACE' },
+      { tableName: 'table2', uniqueColumns: ['ssn'] },
+    ])).not.toThrow()
   })
 
 })

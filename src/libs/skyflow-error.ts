@@ -15,8 +15,10 @@ export default class SkyflowError extends Error {
 
   errors?: ISkyflowError[];
 
+  data?: any;
+
   constructor(errorCode: ISkyflowError,
-    args?: any[], isSingularError: boolean = false) {
+    args?: any[], isSingularError: boolean = false, rawResponse?: any) {
     const formattedError = {
       code: errorCode.code,
       description: (args && args?.length > 0)
@@ -29,6 +31,9 @@ export default class SkyflowError extends Error {
       this.error = formattedError;
     } else {
       this.errors = [formattedError];
+    }
+    if (rawResponse !== undefined) {
+      this.data = rawResponse;
     }
   }
 }

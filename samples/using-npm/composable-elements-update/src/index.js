@@ -121,7 +121,7 @@ try {
     const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
     const cardHolderNameElement = composableContainer.create({
-        table: 'pii_fields',
+        tableName: 'pii_fields',
         column: 'first_name',
         ...cardholderStyles,
         label: 'Cardholder Name',
@@ -130,15 +130,15 @@ try {
     });
 
     const cardNumberElement = composableContainer.create({
-        table: 'pii_fields',
-        column: 'primary_card.card_number',
+        tableName: 'pii_fields',
+        column: 'card_number',
         ...cardNumberStyles,
         type: Skyflow.ElementType.CARD_NUMBER,
         placeholder: 'XXXX XXXX XXXX XXXX'
     });
 
     const expiryDateElement = composableContainer.create({
-        table: 'cards',
+        tableName: 'cards',
         column: 'expiry_date',
         ...expiryDateStyles,
         placeholder: 'MM/YY',
@@ -147,8 +147,8 @@ try {
 
 
     const cvvElement = composableContainer.create({
-        table: 'pii_fields',
-        column: 'primary_card.cvv',
+        tableName: 'pii_fields',
+        column: 'cvv',
         ...cvvStyles,
         placeholder: 'CVC',
         type: Skyflow.ElementType.CVV,
@@ -223,8 +223,8 @@ try {
 
             // update table,coloumn on expiry date
             expiryDateElement.update({
-                table: 'pii_fields',
-                column: 'primary_card.expiry_date',
+                tableName: 'pii_fields',
+                column: 'expiry_date',
             });
 
         });
@@ -268,12 +268,12 @@ try {
                     };
 
                     // Create Reveal Elements With Tokens.
-                    const fieldsTokenData = response.records[0].fields;
+                    const fieldsTokenData = response.records[0].tokens;
                     const revealContainer = skyflow.container(
                         Skyflow.ContainerType.REVEAL
                     );
                     const revealCardNumberElement = revealContainer.create({
-                        token: fieldsTokenData.primary_card.card_number,
+                        token: fieldsTokenData.card_number[0].token,
                         label: 'Card Number',
                         ...revealStyleOptions,
 
@@ -281,7 +281,7 @@ try {
                     revealCardNumberElement.mount('#revealCardNumber');
 
                     const revealCardCvvElement = revealContainer.create({
-                        token: fieldsTokenData.primary_card.cvv,
+                        token: fieldsTokenData.cvv[0].token,
                         label: 'Cvv',
                         ...revealStyleOptions,
 
@@ -289,14 +289,14 @@ try {
                     revealCardCvvElement.mount('#revealCvv');
 
                     const revealCardExpiryElement = revealContainer.create({
-                        token: fieldsTokenData.primary_card.expiry_date,
+                        token: fieldsTokenData.expiry_date[0].token,
                         label: 'Card Expiry Date',
                         ...revealStyleOptions,
                     });
                     revealCardExpiryElement.mount('#revealExpiryDate');
 
                     const revealCardholderNameElement = revealContainer.create({
-                        token: fieldsTokenData.first_name,
+                        token: fieldsTokenData.first_name[0].token,
                         label: 'Card Holder Name',
                         ...revealStyleOptions,
                     });

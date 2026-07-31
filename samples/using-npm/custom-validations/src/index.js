@@ -92,7 +92,7 @@ try{
       }
       
       const userNameElement = collectContainer.create({
-        table: 'pii_fields',
+        tableName: 'pii_fields',
         column: 'first_name',
         ...collectStylesOptions,
         placeholder: 'Enter User Name',

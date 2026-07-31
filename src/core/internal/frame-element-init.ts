@@ -21,8 +21,13 @@ import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-st
 import FrameElement from '.';
 import {
   checkForElementMatchRule, checkForValueMatch, constructElementsInsertReq,
-  constructInsertRecordRequest, insertDataInCollect,
-  updateRecordsBySkyflowIDComposable,
+  constructFlowDBInsertRequest,
+  constructFlowDBUpdateRequest,
+  // constructInsertRecordRequest, insertDataInCollect,
+  insertDataInCollectFlowDB,
+  updateDataInCollectFlowDB,
+  replaceCVVTokensInResponse,
+  CVVMap,
 } from '../../core-utils/collect';
 import SkyflowError from '../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../utils/constants';
@@ -295,6 +300,7 @@ export default class FrameElementInit {
     let errorMessage = '';
     const insertRequestObject: any = {};
     const updateRequestObject: any = {};
+    const cvvMap: CVVMap = { insert: {}, update: {} };
 
     for (let i = 0; i < this.iframeFormList.length; i += 1) {
       const inputElement = this.iframeFormList[i];
@@ -345,6 +351,7 @@ export default class FrameElementInit {
         !== ELEMENTS.FILE_INPUT.name && inputElement.fieldType
         !== ELEMENTS.MULTI_FILE_INPUT.name
           ) {
+            const isCVV = inputElement.fieldType === ELEMENTS.CVV.name;
             if (
               inputElement.fieldType
           === ELEMENTS.checkbox.name
@@ -366,6 +373,12 @@ export default class FrameElementInit {
                 state.name,
                 inputElement.getUnformattedValue(),
               );
+              if (isCVV) {
+                cvvMap.insert[tableName] = {
+                  ...(cvvMap.insert[tableName] || {}),
+                  [state.name]: inputElement.getUnformattedValue(),
+                };
+              }
             } else if (skyflowID || skyflowID === '') {
               if (skyflowID === '' || skyflowID === null) {
                 return Promise.reject(new SkyflowError(
@@ -391,6 +404,12 @@ export default class FrameElementInit {
                   tableName,
                 );
               }
+              if (isCVV) {
+                cvvMap.update[skyflowID] = {
+                  ...(cvvMap.update[skyflowID] || {}),
+                  [state.name]: inputElement.getUnformattedValue(),
+                };
+              }
             } else {
               insertRequestObject[tableName] = {};
               set(
@@ -398,6 +417,12 @@ export default class FrameElementInit {
                 state.name,
                 inputElement.getUnformattedValue(),
               );
+              if (isCVV) {
+                cvvMap.insert[tableName] = {
+                  ...(cvvMap.insert[tableName] || {}),
+                  [state.name]: inputElement.getUnformattedValue(),
+                };
+              }
             }
           }
         }
@@ -406,11 +431,17 @@ export default class FrameElementInit {
     let finalInsertRequest;
     let finalInsertRecords;
     let finalUpdateRecords;
+    let finalUpdateRequest;
     try {
       [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
         insertRequestObject, updateRequestObject, options,
       );
-      finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
+      finalInsertRequest = constructFlowDBInsertRequest(
+        finalInsertRecords, options, clientConfig.vaultID,
+      );
+      finalUpdateRequest = constructFlowDBUpdateRequest(
+        finalUpdateRecords, options, clientConfig.vaultID,
+      );
     } catch (error:any) {
       return Promise.reject({
         error: error?.message,
@@ -429,54 +460,33 @@ export default class FrameElementInit {
 
       // const clientId = client.toJSON()?.metaData?.uuid || '';
       // getAccessToken(clientId).then((authToken) => {
-      if (finalInsertRequest.length !== 0) {
+      if (finalInsertRecords.records.length !== 0) {
         insertPromiseSet.push(
-          insertDataInCollect(finalInsertRequest,
+          insertDataInCollectFlowDB(finalInsertRequest,
             client, options, finalInsertRecords, clientConfig.authToken as string),
         );
       }
       if (finalUpdateRecords.updateRecords.length !== 0) {
         insertPromiseSet.push(
-          updateRecordsBySkyflowIDComposable(
-            finalUpdateRecords, client, options, clientConfig.authToken as string,
+          updateDataInCollectFlowDB(
+            finalUpdateRequest, client, options, finalUpdateRecords,
+            clientConfig.authToken as string,
           ),
         );
       }
       if (insertPromiseSet.length !== 0) {
-        Promise.allSettled(insertPromiseSet).then((resultSet: any) => {
-          const recordsResponse: any[] = [];
-          const errorsResponse: any[] = [];
-
-          resultSet.forEach((result:
-          { status: string; value: any; reason?: any; }) => {
-            if (result.status === 'fulfilled') {
-              if (result.value.records !== undefined && Array.isArray(result.value.records)) {
-                result.value.records.forEach((record) => {
-                  recordsResponse.push(record);
-                });
-              }
-              if (result.value.errors !== undefined && Array.isArray(result.value.errors)) {
-                result.value.errors.forEach((error) => {
-                  errorsResponse.push(error);
-                });
-              }
-            } else {
-              if (result.reason?.records !== undefined && Array.isArray(result.reason?.records)) {
-                result.reason.records.forEach((record) => {
-                  recordsResponse.push(record);
-                });
-              }
-              if (result.reason?.errors !== undefined && Array.isArray(result.reason?.errors)) {
-                result.reason.errors.forEach((error) => {
-                  errorsResponse.push(error);
-                });
-              }
-            }
-          });
-          if (errorsResponse.length === 0) {
-            rootResolve({ records: recordsResponse });
-          } else if (recordsResponse.length === 0) rootReject({ errors: errorsResponse });
-          else rootReject({ records: recordsResponse, errors: errorsResponse });
+        Promise.all(insertPromiseSet).then((responses: any[]) => {
+          const failure = responses.find((response) => response?.error !== undefined);
+          if (failure) {
+            rootReject(failure);
+            return;
+          }
+          const records = responses.reduce(
+            (acc, response) => acc.concat(response?.records || []),
+            [] as any[],
+          );
+          replaceCVVTokensInResponse(records, cvvMap);
+          rootResolve({ records });
         });
       }
       // }).catch((err) => {

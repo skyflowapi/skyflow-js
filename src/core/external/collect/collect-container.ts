@@ -8,13 +8,13 @@ import {
   formatValidations, formatOptions, validateElementOptions,
 } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
+import SkyflowFlowDBError from '../../../libs/skyflow-flowdb-error';
 import uuid from '../../../libs/uuid';
 import { ContainerType } from '../../../skyflow';
 import {
   Context, MessageType,
   CollectElementInput,
   CollectElementOptions,
-  CollectResponse,
   ICollectOptions,
   UploadFilesResponse,
   ContainerOptions,
@@ -27,7 +27,6 @@ import {
   validateCollectElementInput, validateInitConfig,
   validateAdditionalFieldsInCollect,
   validateUpsertOptions,
-  validateBooleanOptions,
 } from '../../../utils/validators';
 import {
   COLLECT_FRAME_CONTROLLER,
@@ -40,7 +39,7 @@ import Container from '../common/container';
 import CollectElement from './collect-element';
 import EventEmitter from '../../../event-emitter';
 import properties from '../../../properties';
-import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
+import { CollectResponse, Metadata, SkyflowElementProps } from '../../internal/internal-types';
 
 export interface ICollectElement {
   elementType: ElementType;
@@ -61,6 +60,8 @@ export interface ElementGroupItem extends CollectElementInput, CollectElementOpt
   name?: string;
   accept?: string[];
   elementName?: string;
+  // Internal key the collect pipeline consumes; mapped from client-facing `tableName`.
+  table?: string;
 }
 
 export interface ElementGroup {
@@ -147,6 +148,9 @@ class CollectContainer extends Container {
           name: input.column,
           accept: options.allowedFileType,
           ...input,
+          // Map the client-facing `tableName` key onto the internal `table` name
+          // that the rest of the collect pipeline consumes.
+          table: input.tableName,
           ...formattedOptions,
           validations,
         }],
@@ -193,7 +197,7 @@ class CollectContainer extends Container {
 
         options.elementName = `${FRAME_ELEMENT}:${options.elementType}:${btoa(uuid())}`;
         options.label = element.label;
-        options.skyflowID = element.skyflowID;
+        options.skyflowID = element.skyflowId;
 
         elements.push(options);
       });
@@ -282,7 +286,7 @@ class CollectContainer extends Container {
     return false;
   };
 
-  collect = (options: ICollectOptions = { tokens: true }): Promise<CollectResponse> => {
+  collect = (options: ICollectOptions = {}): Promise<CollectResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -302,9 +306,6 @@ class CollectContainer extends Container {
             }
             element.isValidElement();
           });
-          if (Object.prototype.hasOwnProperty.call(options, 'tokens') && !validateBooleanOptions(options.tokens)) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
-          }
           if (options?.additionalFields) {
             validateAdditionalFieldsInCollect(options.additionalFields);
           }
@@ -318,7 +319,7 @@ class CollectContainer extends Container {
               {
                 type: COLLECT_TYPES.COLLECT,
                 ...options,
-                tokens: options?.tokens !== undefined ? options.tokens : true,
+                tokens: true,
                 elementIds,
                 containerId: this.#containerId,
                 errorMessages: this.#customErrorMessages,
@@ -326,7 +327,7 @@ class CollectContainer extends Container {
               (data: any) => {
                 if (!data || data?.error) {
                   printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                  reject(data?.error);
+                  reject(data?.error ? new SkyflowFlowDBError(data.error) : data?.error);
                 } else {
                   printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
@@ -360,9 +361,6 @@ class CollectContainer extends Container {
           }
           element.isValidElement();
         });
-        if (Object.prototype.hasOwnProperty.call(options, 'tokens') && !validateBooleanOptions(options.tokens)) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
-        }
         if (options?.additionalFields) {
           validateAdditionalFieldsInCollect(options.additionalFields);
         }
@@ -379,7 +377,7 @@ class CollectContainer extends Container {
                 {
                   type: COLLECT_TYPES.COLLECT,
                   ...options,
-                  tokens: options?.tokens !== undefined ? options.tokens : true,
+                  tokens: true,
                   elementIds,
                   containerId: this.#containerId,
                   errorMessages: this.#customErrorMessages,
@@ -387,7 +385,7 @@ class CollectContainer extends Container {
                 (data: any) => {
                   if (!data || data?.error) {
                     printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
-                    reject(data?.error);
+                    reject(data?.error ? new SkyflowFlowDBError(data.error) : data?.error);
                   } else {
                     printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                       MessageType.LOG,
@@ -405,7 +403,7 @@ class CollectContainer extends Container {
     });
   };
 
-  uploadFiles = (options?: ICollectOptions): Promise<UploadFilesResponse> => {
+  #uploadFiles = (options?: ICollectOptions): Promise<UploadFilesResponse> => {
     this.#isSkyflowFrameReady = this.#metaData.skyflowContainer.isControllerFrameReady;
     if (this.#isSkyflowFrameReady) {
       return new Promise((resolve, reject) => {
