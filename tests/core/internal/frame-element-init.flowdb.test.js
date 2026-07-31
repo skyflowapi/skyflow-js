@@ -14,6 +14,8 @@ jest.mock('../../../src/core-utils/collect', () => {
   const constructFlowDBUpdateRequest = jest.fn(() => ({ vaultID: 'vault123', records: [] }));
   const insertDataInCollectFlowDB = jest.fn(() => Promise.resolve({ records: [{ id: 'insert1' }], errors: [] }));
   const updateDataInCollectFlowDB = jest.fn(() => Promise.resolve({ records: [{ id: 'update1' }], errors: [] }));
+  // Use the real implementation so CVV substitution behavior can be asserted.
+  const { replaceCVVTokensInResponse } = jest.requireActual('../../../src/core-utils/collect');
   return {
     __esModule: true,
     constructElementsInsertReq,
@@ -21,6 +23,7 @@ jest.mock('../../../src/core-utils/collect', () => {
     constructFlowDBUpdateRequest,
     insertDataInCollectFlowDB,
     updateDataInCollectFlowDB,
+    replaceCVVTokensInResponse,
   };
 });
 import FrameElementInit from '../../../src/core/internal/frame-element-init';
@@ -31,6 +34,12 @@ import {
   insertDataInCollectFlowDB,
   updateDataInCollectFlowDB,
 } from '../../../src/core-utils/collect';
+
+const nodeCrypto = require('crypto');
+Object.defineProperty(window, 'crypto', {
+  configurable: true,
+  value: { getRandomValues: (arr) => nodeCrypto.randomFillSync(arr) },
+});
 
 const makeTextElement = ({ name = 'field1', tableName = 'patients', value = 'abc', isValid = true, isComplete = true, skyflowID } = {}) => ({
   state: { name, value, isValid, isComplete, isRequired: false },
@@ -98,6 +107,34 @@ describe('FrameElementInit tokenize (flowDB variant)', () => {
     const res = await instance['tokenize']({ options: {} }, config);
     expect(res.records[0].id).toBe('ins1');
     expect(updateDataInCollectFlowDB).not.toHaveBeenCalled();
+  });
+
+  test('replaces the CVV element token with a 3-digit mock that differs from the entered value, leaving sibling tokens intact', async () => {
+    const instance = new FrameElementInit();
+    const cvv = { ...makeTextElement({ name: 'cvv', tableName: 'cards', value: '123' }), fieldType: ELEMENTS.CVV.name };
+    const cardNumber = makeTextElement({ name: 'card_number', tableName: 'cards', value: '4111111111111111' });
+    instance.iframeFormList = [cvv, cardNumber];
+    constructElementsInsertReq.mockImplementation(() => [
+      { records: [{ table: 'cards', fields: { cvv: '123', card_number: '4111111111111111' } }] },
+      { updateRecords: [] },
+    ]);
+    insertDataInCollectFlowDB.mockResolvedValue({
+      records: [{
+        tableName: 'cards',
+        tokens: {
+          cvv: [{ token: 'real-cvv-token', tokenGroupName: 'det' }],
+          card_number: [{ token: 'real-card-token', tokenGroupName: 'det' }],
+        },
+        httpCode: 200,
+      }],
+    });
+    const res = await instance['tokenize']({ options: {} }, config);
+    const cvvToken = res.records[0].tokens.cvv[0].token;
+    expect(cvvToken).toHaveLength(3);
+    expect(/^[0-9]+$/.test(cvvToken)).toBe(true);
+    expect(cvvToken).not.toEqual('123');
+    expect(cvvToken).not.toEqual('real-cvv-token');
+    expect(res.records[0].tokens.card_number[0].token).toEqual('real-card-token');
   });
 
   // SKIPPED (flowDB): assert V1/privacyDB aggregated {records,errors} reject contract; flowDB inlines per-record errors within records / uses {error} for full failure. TODO: re-enable/rewrite for flowDB.

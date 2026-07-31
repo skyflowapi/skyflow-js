@@ -432,6 +432,29 @@ export const generateUploadFileName = (fileName:string) => {
   return `${uuid()}${fileExtentsion && `.${fileExtentsion}`}`;
 };
 
+/**
+ * Generates a mock CVV placeholder of the given length that is guaranteed to differ from
+ * the value the user actually entered. Uses crypto.getRandomValues (matching the repo
+ * convention in libs/uuid.ts) rather than Math.random. Leading zeros are allowed since the
+ * result is a display placeholder, not a number.
+ */
+export const generateMockCVV = (length: number, actualValue: string): string => {
+  if (length <= 0) return '';
+  const buildCandidate = () => {
+    const bytes = crypto.getRandomValues(new Uint8Array(length));
+    let candidate = '';
+    for (let i = 0; i < length; i += 1) {
+      candidate += (bytes[i] % 10).toString();
+    }
+    return candidate;
+  };
+  let mock = buildCandidate();
+  while (mock === actualValue) {
+    mock = buildCandidate();
+  }
+  return mock;
+};
+
 export const getValueFromName = (name: string, index: number) => {
   const names = name.split(':');
   const value = names.length > index ? names[index] : '';

@@ -26,6 +26,7 @@ import {
   vaildateFileName,
   generateUploadFileName,
   getSDKNameAndVersion,
+  generateMockCVV,
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -839,5 +840,47 @@ describe('getSDKNameAndVersion', () => {
     };
     const result = getSDKNameAndVersion(`skyflow-react-js@1.2.3`);
     expect(result).toEqual(sdkData);
+  });
+});
+
+describe('generateMockCVV', () => {
+  const nodeCrypto = require('crypto');
+  beforeAll(() => {
+    Object.defineProperty(window, 'crypto', {
+      configurable: true,
+      value: {
+        getRandomValues: (arr) => nodeCrypto.randomFillSync(arr),
+      },
+    });
+  });
+
+  it('returns a string of the requested length made only of digits', () => {
+    [3, 4].forEach((length) => {
+      for (let i = 0; i < 100; i += 1) {
+        const mock = generateMockCVV(length, '123');
+        expect(mock).toHaveLength(length);
+        expect(/^[0-9]+$/.test(mock)).toBe(true);
+      }
+    });
+  });
+
+  it('never returns a value equal to the entered CVV', () => {
+    const actual = '321';
+    for (let i = 0; i < 1000; i += 1) {
+      expect(generateMockCVV(actual.length, actual)).not.toEqual(actual);
+    }
+  });
+
+  it('handles 4 digit CVV and never equals the entered value', () => {
+    const actual = '7890';
+    for (let i = 0; i < 1000; i += 1) {
+      const mock = generateMockCVV(actual.length, actual);
+      expect(mock).toHaveLength(4);
+      expect(mock).not.toEqual(actual);
+    }
+  });
+
+  it('returns an empty string for length 0 without looping (backstop)', () => {
+    expect(generateMockCVV(0, '')).toEqual('');
   });
 });

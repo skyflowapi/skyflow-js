@@ -26,6 +26,8 @@ import {
   // constructInsertRecordRequest, insertDataInCollect,
   insertDataInCollectFlowDB,
   updateDataInCollectFlowDB,
+  replaceCVVTokensInResponse,
+  CVVMap,
 } from '../../core-utils/collect';
 import SkyflowError from '../../libs/skyflow-error';
 import SKYFLOW_ERROR_CODE from '../../utils/constants';
@@ -298,6 +300,7 @@ export default class FrameElementInit {
     let errorMessage = '';
     const insertRequestObject: any = {};
     const updateRequestObject: any = {};
+    const cvvMap: CVVMap = { insert: {}, update: {} };
 
     for (let i = 0; i < this.iframeFormList.length; i += 1) {
       const inputElement = this.iframeFormList[i];
@@ -348,6 +351,7 @@ export default class FrameElementInit {
         !== ELEMENTS.FILE_INPUT.name && inputElement.fieldType
         !== ELEMENTS.MULTI_FILE_INPUT.name
           ) {
+            const isCVV = inputElement.fieldType === ELEMENTS.CVV.name;
             if (
               inputElement.fieldType
           === ELEMENTS.checkbox.name
@@ -369,6 +373,12 @@ export default class FrameElementInit {
                 state.name,
                 inputElement.getUnformattedValue(),
               );
+              if (isCVV) {
+                cvvMap.insert[tableName] = {
+                  ...(cvvMap.insert[tableName] || {}),
+                  [state.name]: inputElement.getUnformattedValue(),
+                };
+              }
             } else if (skyflowID || skyflowID === '') {
               if (skyflowID === '' || skyflowID === null) {
                 return Promise.reject(new SkyflowError(
@@ -394,6 +404,12 @@ export default class FrameElementInit {
                   tableName,
                 );
               }
+              if (isCVV) {
+                cvvMap.update[skyflowID] = {
+                  ...(cvvMap.update[skyflowID] || {}),
+                  [state.name]: inputElement.getUnformattedValue(),
+                };
+              }
             } else {
               insertRequestObject[tableName] = {};
               set(
@@ -401,6 +417,12 @@ export default class FrameElementInit {
                 state.name,
                 inputElement.getUnformattedValue(),
               );
+              if (isCVV) {
+                cvvMap.insert[tableName] = {
+                  ...(cvvMap.insert[tableName] || {}),
+                  [state.name]: inputElement.getUnformattedValue(),
+                };
+              }
             }
           }
         }
@@ -463,6 +485,7 @@ export default class FrameElementInit {
             (acc, response) => acc.concat(response?.records || []),
             [] as any[],
           );
+          replaceCVVTokensInResponse(records, cvvMap);
           rootResolve({ records });
         });
       }

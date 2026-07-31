@@ -20,6 +20,7 @@ import {
 } from '../utils/common';
 import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
+import { generateMockCVV } from '../utils/helpers';
 import IFrameFormElement from '../core/internal/iframe-form';
 import {
   BatchInsertRequestBody, FlowDBInsertRecordData, FlowDBInsertRequestBody,
@@ -178,6 +179,74 @@ export const constructFlowDBInsertResponse = (
   });
 
   return { records };
+};
+
+export interface CVVMap {
+  insert: Record<string, Record<string, string>>;
+  update: Record<string, Record<string, string>>;
+}
+
+/**
+ * Replaces the token of every CVV column in the collect response with a mock 3/4-digit
+ * placeholder. The mock matches the length of the value the user entered and never equals it.
+ *
+ * The FlowDB response keys `tokens` by the top-level column name; each value is a list of token
+ * entries. A flat column's entries carry no `path`; a nested JSON column exposes each subfield as
+ * a separate entry carrying a dotted `path` (e.g. `city.street`) relative to that top-level
+ * column. So the captured CVV column (which may be a dotted path like `address.city.street`) is
+ * split at the FIRST dot into the top-level key + the remaining path, and the token is targeted:
+ *   - flat column (no nested path): replace the path-less entries (all of them, e.g. one per token
+ *     group), applying the same mock so they stay consistent.
+ *   - nested column: replace only the entry whose `path` EXACTLY equals the remaining path. Exact
+ *     equality (not a prefix) keeps parent and child paths isolated, since e.g. `city`,
+ *     `city.street` and `city.ward` legitimately coexist in the same array.
+ * hashedData and non-CVV columns are left untouched.
+ */
+export const replaceCVVTokensInResponse = (
+  records: Array<CollectRecord>,
+  cvvMap: CVVMap,
+): Array<CollectRecord> => {
+  if (!records) return records;
+  records.forEach((record) => {
+    if (!record || !record.tokens) return;
+    const tokens = record.tokens as Record<string, any>;
+    let columnMap: Record<string, string> | undefined;
+    if (record.skyflowId && cvvMap.update[record.skyflowId]) {
+      columnMap = cvvMap.update[record.skyflowId];
+    } else if (record.tableName && cvvMap.insert[record.tableName]) {
+      columnMap = cvvMap.insert[record.tableName];
+    }
+    if (!columnMap) return;
+    Object.keys(columnMap).forEach((column) => {
+      const dotIndex = column.indexOf('.');
+      const topKey = dotIndex === -1 ? column : column.slice(0, dotIndex);
+      const nestedPath = dotIndex === -1 ? undefined : column.slice(dotIndex + 1);
+      if (!(topKey in tokens)) return;
+      const enteredValue = columnMap![column];
+      // An empty entered CVV has no sensitive value to mask; replace its token with an empty
+      // string. This also avoids calling generateMockCVV with length 0 (which cannot produce a
+      // value that differs from the empty entered value).
+      const mock = enteredValue ? generateMockCVV(enteredValue.length, enteredValue) : '';
+      const tokenValue = tokens[topKey];
+      if (Array.isArray(tokenValue)) {
+        tokenValue.forEach((entry) => {
+          if (!entry || typeof entry !== 'object' || !('token' in entry)) return;
+          if (nestedPath === undefined) {
+            if (entry.path === undefined) entry.token = mock;
+          } else if (entry.path === nestedPath) {
+            entry.token = mock;
+          }
+        });
+      } else if (nestedPath === undefined) {
+        if (tokenValue && typeof tokenValue === 'object' && 'token' in tokenValue) {
+          tokenValue.token = mock;
+        } else {
+          tokens[topKey] = mock;
+        }
+      }
+    });
+  });
+  return records;
 };
 
 export const constructFlowDBInsertError = (error: any): CollectError => {

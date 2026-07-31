@@ -29,6 +29,13 @@ jest.mock("../../../../src/libs/uuid", () => ({
   default: jest.fn(() => mockUuid),
 }));
 
+// Real randomness for generateMockCVV (used by the CVV token substitution).
+const nodeCrypto = require("crypto");
+Object.defineProperty(window, "crypto", {
+  configurable: true,
+  value: { getRandomValues: (arr: Uint8Array) => nodeCrypto.randomFillSync(arr) },
+});
+
 const mockUuid = "1244";
 const skyflowConfig: ISkyflow = {
   vaultID: "e20afc3ae1b54f0199f24130e51e0c11",
@@ -645,6 +652,84 @@ describe("SkyflowFrameController - tokenize function", () => {
       console.log("=======================>>>", cb2.mock.calls);
       expect(cb2.mock.calls[0][0].records).toBeDefined();
     }, 1000);
+  });
+
+  test("replaces the CVV element token with a 3-digit mock that differs from the entered value", (done) => {
+    const cvvElement = {
+      iFrameFormElement: {
+        fieldType: "CVV",
+        state: {
+          value: "123",
+          isFocused: false,
+          isValid: true,
+          isEmpty: false,
+          isComplete: true,
+          name: "cvv",
+          isRequired: false,
+          isTouched: false,
+          selectedCardScheme: "",
+        },
+        tableName: "cards",
+        onFocusChange: jest.fn(),
+        getUnformattedValue: jest.fn(() => "123"),
+      },
+    };
+
+    windowSpy.mockImplementation(() => ({
+      frames: {
+        "frameId:containerId:ERROR:": {
+          document: {
+            getElementById: jest.fn(() => cvvElement),
+          },
+        },
+      },
+    }));
+
+    const flowDBResponse = {
+      records: [
+        {
+          tableName: "cards",
+          tokens: { cvv: [{ token: "real-cvv-token", tokenGroupName: "det" }] },
+          httpCode: 200,
+        },
+      ],
+    };
+    const clientReq = jest.fn(() => Promise.resolve(flowDBResponse));
+    jest.spyOn(clientModule, "fromJSON").mockImplementation(
+      () =>
+        ({
+          ...clientData.client,
+          request: clientReq,
+          toJSON: toJson,
+        } as unknown as Client)
+    );
+
+    SkyflowFrameController.init(mockUuid);
+    const emitCb = emitSpy.mock.calls[1][2];
+    emitCb(clientData);
+    const onCb = on.mock.calls[1][1];
+
+    const data: TokenizeDataInput = {
+      containerId: "containerId",
+      tokens: true,
+      type: "COLLECT",
+      elementIds: [{ frameId: "frameId", elementId: "elementId" }],
+    };
+
+    const cb2 = jest.fn((res: any) => {
+      try {
+        const cvvToken = res.records[0].tokens.cvv[0].token;
+        expect(cvvToken).toHaveLength(3);
+        expect(/^[0-9]+$/.test(cvvToken)).toBe(true);
+        expect(cvvToken).not.toEqual("123");
+        expect(cvvToken).not.toEqual("real-cvv-token");
+        done();
+      } catch (err) {
+        done(err);
+      }
+    });
+
+    onCb(data, cb2);
   });
 
   test("should tokenize data successfully case 2", async () => {
