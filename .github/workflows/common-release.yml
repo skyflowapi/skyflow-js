@@ -110,16 +110,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Set Latest Tag
-        run: |
-          mkdir tags
-          echo "v${{ env.RELEASE_VERSION }}" > tags/latest
+      # - name: Set Latest Tag
+      #   run: |
+      #     mkdir tags
+      #     echo "v${{ env.RELEASE_VERSION }}" > tags/latest
 
-      - name: Deploy Latest Tag to S3
-        run: aws s3 cp --recursive tags s3://${{ secrets.AWS_BUCKET_NAME }}/
+      # - name: Deploy Latest Tag to S3
+      #   run: aws s3 cp --recursive tags s3://${{ secrets.AWS_BUCKET_NAME }}/
 
-      - name: Remove Latest Tag
-        run: rm -rf tags
+      # - name: Remove Latest Tag
+      #   run: rm -rf tags
 
       - name: Deploy to S3
         run: |
@@ -141,7 +141,7 @@ jobs:
             curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
             npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
             npm config set unsafe-perm true
-            npm publish
+            npm publish --tag beta
           else
             npm publish
           fi
