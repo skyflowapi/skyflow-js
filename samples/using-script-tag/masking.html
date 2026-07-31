@@ -103,7 +103,7 @@
       
         // Create collect elements.
         const cardNumberElement = collectContainer.create({
-          table: 'cards',
+          tableName: 'cards',
           column: 'card_number',
           ...collectStylesOptions,
           placeholder: 'card number',
@@ -115,7 +115,7 @@
         });
       
         const cvvElement = collectContainer.create({
-          table: 'cards',
+          tableName: 'cards',
           column: 'card_cvv',
           ...collectStylesOptions,
           label: 'Cvv',
@@ -127,7 +127,7 @@
         });
       
         const expiryDateElement = collectContainer.create({
-          table: 'cards',
+          tableName: 'cards',
           column: 'expiration_date',
           ...collectStylesOptions,
           label: 'Expiry Date',
@@ -139,7 +139,7 @@
         });
       
         const cardHolderNameElement = collectContainer.create({
-          table: 'cards',
+          tableName: 'cards',
           column: 'cardholder_name',
           ...collectStylesOptions,
           label: 'Card Holder Name',

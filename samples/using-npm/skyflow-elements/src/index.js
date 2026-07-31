@@ -82,7 +82,7 @@ try {
 
   // Create collect elements.
   const cardNumberElement = collectContainer.create({
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
@@ -93,7 +93,7 @@ try {
   });
 
   const cvvElement = collectContainer.create({
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'cvv',
     ...collectStylesOptions,
     label: 'Cvv',
@@ -102,7 +102,7 @@ try {
   });
 
   const expiryDateElement = collectContainer.create({
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
@@ -111,7 +111,7 @@ try {
   });
 
   const cardHolderNameElement = collectContainer.create({
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'first_name',
     ...collectStylesOptions,
     label: 'Card Holder Name',

@@ -113,7 +113,7 @@
   
       // Create collect elements.
       const cardNumberElement = collectContainer.create({
-        table: 'pii_fields',
+        tableName: 'pii_fields',
         column: 'card_number',
         ...collectStylesOptions,
         placeholder: 'card number',
@@ -122,7 +122,7 @@
       });
   
       const cvvElement = collectContainer.create({
-        table: 'pii_fields',
+        tableName: 'pii_fields',
         column: 'cvv',
         ...collectStylesOptions,
         label: 'Cvv',

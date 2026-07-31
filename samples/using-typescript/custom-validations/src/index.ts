@@ -101,7 +101,7 @@ try{
     }
       
     const userNameInput: CollectElementInput = {
-      table: 'pii_fields',
+      tableName: 'pii_fields',
       column: 'first_name',
       ...collectStylesOptions,
       placeholder: 'Enter User Name',
