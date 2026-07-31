@@ -128,7 +128,7 @@ const collectStylesOptions = {
 };
 
 const cvvElementInput: CollectElementInput = {
-  table: "pii_fields",
+  tableName: "pii_fields",
   column: "primary_card.cvv",
   placeholder: "cvv",
   label: "cvv",
@@ -147,7 +147,7 @@ const cvvElementInput: CollectElementInput = {
 };
 
 const cardNumberElement: CollectElementInput = {
-  table: "pii_fields",
+  tableName: "pii_fields",
   column: "primary_card.card_number",
   type: ElementType.CARD_NUMBER,
   ...collectStylesOptions,

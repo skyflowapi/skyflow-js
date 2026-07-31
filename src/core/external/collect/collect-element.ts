@@ -375,6 +375,12 @@ class CollectElement extends SkyflowElement {
       (options as any).skyflowID = (options as any).skyflowId;
       delete (options as any).skyflowId;
     }
+    // Map the client-facing `tableName` key onto the internal `table` name that
+    // the SET_VALUE handler (core/internal/index.ts) consumes.
+    if (Object.prototype.hasOwnProperty.call(options, 'tableName')) {
+      (options as any).table = (options as any).tableName;
+      delete (options as any).tableName;
+    }
     if (this.#mounted) {
       options.validations = formatValidations(options.validations);
       this.updateElement({ elementName: this.#group.elementName, ...options });

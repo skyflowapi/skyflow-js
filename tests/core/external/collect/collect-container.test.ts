@@ -84,7 +84,7 @@ const collectStylesOptions = {
 };
 
 const cvvInput: CollectElementInput = {
-  table: "pii_fields",
+  tableName: "pii_fields",
   column: "primary_card.cvv",
   placeholder: "cvv",
   label: "cvv",
@@ -93,20 +93,20 @@ const cvvInput: CollectElementInput = {
 };
 
 const cardNumberInput: CollectElementInput = {
-  table: "pii_fields",
+  tableName: "pii_fields",
   column: "primary_card.card_number",
   type: ElementType.CARD_NUMBER,
   ...collectStylesOptions,
 };
 
 const ExpirationDateInput: CollectElementInput = {
-  table: "pii_fields",
+  tableName: "pii_fields",
   column: "primary_card.expiry",
   type: ElementType.EXPIRATION_DATE,
 };
 
 const fileInput: CollectElementInput = {
-  table: "pii_fields",
+  tableName: "pii_fields",
   column: "primary_card.file",
   type: ElementType.FILE_INPUT,
   skyflowId: "abc-def",

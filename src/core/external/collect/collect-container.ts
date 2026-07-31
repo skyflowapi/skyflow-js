@@ -60,6 +60,8 @@ export interface ElementGroupItem extends CollectElementInput, CollectElementOpt
   name?: string;
   accept?: string[];
   elementName?: string;
+  // Internal key the collect pipeline consumes; mapped from client-facing `tableName`.
+  table?: string;
 }
 
 export interface ElementGroup {
@@ -146,6 +148,9 @@ class CollectContainer extends Container {
           name: input.column,
           accept: options.allowedFileType,
           ...input,
+          // Map the client-facing `tableName` key onto the internal `table` name
+          // that the rest of the collect pipeline consumes.
+          table: input.tableName,
           ...formattedOptions,
           validations,
         }],

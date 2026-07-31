@@ -81,7 +81,7 @@ const metaData2 = {
 };
 
 const cvvElement = {
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.cvv',
   styles: {
     base: {
@@ -93,7 +93,7 @@ const cvvElement = {
   type: 'CVV',
 };
 const cvvElement2 = {
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.cvv',
   styles: {
     base: {
@@ -118,7 +118,7 @@ const collectStylesOptions = {
 };
 
 const cardNumberElement = {
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.card_number',
   type: 'CARD_NUMBER',
   ...collectStylesOptions,
@@ -126,26 +126,26 @@ const cardNumberElement = {
 };
 
 const ExpirationDateElement = {
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.expiry',
   type: 'EXPIRATION_DATE',
 };
 
 const ExpirationYearElement = {
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.expiry',
   type: 'EXPIRATION_YEAR',
 };
 
 const FileElement = {
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.file',
   type: 'FILE_INPUT',
   skyflowId: "abc-def"
 };
 
 const cvvFileElementElement = {
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.cvv',
   styles: {
     base: {
@@ -849,7 +849,7 @@ describe('Collect container', () => {
     const div2 = document.createElement('div');
 
     const element1 = container.create({
-      table: 'pii_fields',
+      tableName: 'pii_fields',
       column: 'primary_card.cvv',
       styles: {
         base: {
@@ -861,7 +861,7 @@ describe('Collect container', () => {
       value: 'check-box'
     });
     const element2 = container.create({
-      table: 'pii_fields',
+      tableName: 'pii_fields',
       column: 'primary_card.card_number',
       styles: {
         base: {
@@ -1159,7 +1159,7 @@ describe('Collect container', () => {
     try {
       const cvv = container.create({
         ...cvvElement,
-        table: undefined,
+        tableName: undefined,
       });
     } catch (err) {
       expect(err).toBeDefined();
@@ -1376,7 +1376,7 @@ describe('Collect container', () => {
   it("container create options", () => {
     let container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryDate = container.create({
-      table: 'pii_fields',
+      tableName: 'pii_fields',
       column: 'primary_card.cvv',
       styles: {
         base: {
@@ -1393,7 +1393,7 @@ describe('Collect container', () => {
   it("container create options 2", () => {
     let container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryDate = container.create({
-      table: 'pii_fields',
+      tableName: 'pii_fields',
       column: 'primary_card.cvv',
       styles: {
         base: {
@@ -1450,7 +1450,7 @@ describe('Collect container', () => {
       const file = container.create({
         column: 'col',
         type: 'CARD_NUMBER',
-        table: null
+        tableName: null
       });
       file.isValidElement()
     } catch (err) {
@@ -1463,7 +1463,7 @@ describe('Collect container', () => {
       const file = container.create({
         column: 'col',
         type: 'CARD_NUMBER',
-        table: []
+        tableName: []
       });
       file.isValidElement()
     } catch (err) {
@@ -1475,7 +1475,7 @@ describe('Collect container', () => {
     try {
       const file = container.create({
         type: 'CARD_NUMBER',
-        table: 'table'
+        tableName: 'table'
       });
       file.isValidElement()
     } catch (err) {
@@ -1487,7 +1487,7 @@ describe('Collect container', () => {
     try {
       const file = container.create({
         type: 'CARD_NUMBER',
-        table: 'table',
+        tableName: 'table',
         column: null
       });
       file.isValidElement()
@@ -1500,7 +1500,7 @@ describe('Collect container', () => {
     try {
       const file = container.create({
         type: 'CARD_NUMBER',
-        table: 'table',
+        tableName: 'table',
         column: []
       });
       file.isValidElement()
@@ -1513,7 +1513,7 @@ describe('Collect container', () => {
     try {
       const file = container.create({
         type: 'CARD_NUMBER',
-        table: 'table',
+        tableName: 'table',
         column: 'col'
       });
       file.isValidElement().toBeTruthy();
