@@ -145,7 +145,7 @@ try {
     const composableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions) as ComposableContainer;
 
     const cardHolderNameInput: CollectElementInput = {
-        table: 'pii_fields',
+        tableName: 'pii_fields',
         column: 'first_name',
         ...cardholderStyles,
         label: 'Cardholder Name',
@@ -155,7 +155,7 @@ try {
     const cardHolderNameElement: ComposableElement = composableContainer.create(cardHolderNameInput);
 
     const cardNumberInput: CollectElementInput = {
-        table: 'pii_fields',
+        tableName: 'pii_fields',
         column: 'card_number',
         ...cardNumberStyles,
         type: Skyflow.ElementType.CARD_NUMBER,
@@ -164,7 +164,7 @@ try {
     const cardNumberElement: ComposableElement = composableContainer.create(cardNumberInput);
 
     const expiryDateInput: CollectElementInput = {
-        table: 'cards',
+        tableName: 'cards',
         column: 'expiry_date',
         ...expiryDateStyles,
         placeholder: 'MM/YY',
@@ -173,7 +173,7 @@ try {
     const expiryDateElement: ComposableElement = composableContainer.create(expiryDateInput);
 
     const cvvInput: CollectElementInput = {
-        table: 'pii_fields',
+        tableName: 'pii_fields',
         column: 'cvv',
         ...cvvStyles,
         placeholder: 'CVC',
@@ -251,7 +251,7 @@ try {
 
             // update table,coloumn on expiry date
             expiryDateElement.update({
-                table: 'pii_fields',
+                tableName: 'pii_fields',
                 column: 'expiry_date',
             } as CollectElementUpdateOptions);
 

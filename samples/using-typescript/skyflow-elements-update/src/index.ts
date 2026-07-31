@@ -109,7 +109,7 @@ try {
 
   // Create collect elements.
   const cardNumberInput: CollectElementInput = {
-    table: "pii_fields",
+    tableName: "pii_fields",
     column: "card_number",
     ...collectStylesOptions,
     placeholder: "card number",
@@ -125,7 +125,7 @@ try {
   );
 
   const cvvInput: CollectElementInput = {
-    table: "pii_fields",
+    tableName: "pii_fields",
     column: "cvv",
     ...collectStylesOptions,
     label: "Cvv",
@@ -135,7 +135,7 @@ try {
   const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
   const expiryDateInput: CollectElementInput = {
-    table: "pii_fields",
+    tableName: "pii_fields",
     column: "expiry_date",
     ...collectStylesOptions,
     label: "Expiry Date",
@@ -146,7 +146,7 @@ try {
     collectContainer.create(expiryDateInput);
 
   const cardholderNameInput: CollectElementInput = {
-    table: "pii_fields",
+    tableName: "pii_fields",
     column: "name",
     ...collectStylesOptions,
     label: "Card Holder Name",
@@ -227,7 +227,7 @@ try {
 
       // update table,coloumn on expiry date
       expiryDateElement.update({
-        table: "pii_fields",
+        tableName: "pii_fields",
         column: "expiration_date",
       } as CollectElementUpdateOptions);
     });

@@ -121,7 +121,7 @@ try {
 	const composableContainer = skyflow.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 	const cardHolderNameElement = composableContainer.create({
-		table: 'pii_fields',
+		tableName: 'pii_fields',
 		column: 'first_name',
 		...cardholderStyles,
 		placeholder: 'Cardholder Name',
@@ -129,7 +129,7 @@ try {
 	});
 
 	const cardNumberElement = composableContainer.create({
-		table: 'pii_fields',
+		tableName: 'pii_fields',
 		column: 'card_number',
 		...cardNumberStyles,
 		type: Skyflow.ElementType.CARD_NUMBER,
@@ -137,7 +137,7 @@ try {
 	});
 
 	const expiryDateElement = composableContainer.create({
-		table: 'pii_fields',
+		tableName: 'pii_fields',
 		column: 'expiry_date',
 		...expiryDateStyles,
 		placeholder: 'MM/YY',
@@ -146,7 +146,7 @@ try {
 
 
 	const cvvElement = composableContainer.create({
-		table: 'pii_fields',
+		tableName: 'pii_fields',
 		column: 'cvv',
 		...cvvStyles,
 		placeholder: 'CVC',

@@ -167,6 +167,9 @@ class ComposableContainer extends Container {
       elementType: input.type,
       name: input.column,
       ...input,
+      // Map the client-facing `tableName` key onto the internal `table` name
+      // that the rest of the collect pipeline consumes.
+      table: input.tableName,
       ...formattedOptions,
       validations,
       elementName,

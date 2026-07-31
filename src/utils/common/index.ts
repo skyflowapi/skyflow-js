@@ -344,7 +344,7 @@ export interface CardMetadata {
 }
 
 interface CollectElementCommonProps {
-  table?: string,
+  tableName?: string,
   column?: string,
   label?: string,
   inputStyles?: InputStyles,

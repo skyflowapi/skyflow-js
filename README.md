@@ -157,7 +157,7 @@ A Skyflow collect Element is defined as shown below:
 
 ```javascript
 const collectElement = {
-  table: 'string',             // Required, the table this data belongs to.
+  tableName: 'string',             // Required, the table this data belongs to.
   column: 'string',            // Required, the column into which this data should be inserted.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional, styles that should be applied to the form element.
@@ -424,7 +424,7 @@ Once the Element object and options has been defined, add it to the container us
 
 ```javascript
 const collectElement = {
-  table: 'string',             // Required, the table this data belongs to.
+  tableName: 'string',             // Required, the table this data belongs to.
   column: 'string',            // Required, the column into which this data should be inserted.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional, styles that should be applied to the form element.
@@ -518,7 +518,7 @@ const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 //Step 2
 const element = container.create({
-  table: 'cards',
+  tableName: 'cards',
   column: 'cardNumber',
   inputstyles: {
     base: {
@@ -597,7 +597,7 @@ const container = skyflowClient.container(Skyflow.ContainerType.COLLECT)
  
 //Step 2
 const cardNumberElement = container.create({           
-  table: 'cards',
+  tableName: 'cards',
   column: 'card_number',
   inputStyles: {
       base: {
@@ -627,7 +627,7 @@ const cardNumberElement = container.create({
 
 
 const cvvElement = container.create({           
-  table: 'cards',
+  tableName: 'cards',
   column: 'cvv',
   inputStyles: {
       base: {
@@ -796,7 +796,7 @@ Create a collect element. Collect Elements are defined as follows:
 
 ```javascript
 const collectElement = {
- table: "string",             // Required, the table this data belongs to.
+ tableName: "string",             // Required, the table this data belongs to.
  column: "string",            // Required, the column into which this data should be updated.
  type: Skyflow.ElementType,   // Skyflow.ElementType enum.
  inputStyles: {},             // Optional, styles that should be applied to the form element.
@@ -889,7 +889,7 @@ const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 //Step 2
 const cardNumberElement = container.create({
- table: 'cards',
+ tableName: 'cards',
  column: 'cardNumber',
  inputStyles: {
    base: {
@@ -918,7 +918,7 @@ const cardNumberElement = container.create({
  skyflowId:  '431eaa6c-5c15-4513-aa15-29f50babe882',
 });
 const cardHolderNameElement = container.create({
- table: 'cards',
+ tableName: 'cards',
  column: 'first_name',
  inputStyles: {
    base: {
@@ -1073,7 +1073,7 @@ const lengthRule = {
 };
 
 const cardHolderNameElement = collectContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'first_name',
   ...collectStylesOptions,
   label: 'Card Holder Name',
@@ -1169,12 +1169,12 @@ const skyflowClient = Skyflow.init({
 const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 const cardHolderName = container.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'first_name',
   type: Skyflow.ElementType.CARDHOLDER_NAME,
 });
 const cardNumber = container.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.card_number',
   type: Skyflow.ElementType.CARD_NUMBER,
 });
@@ -1247,7 +1247,7 @@ Helps to display custom error messages on the Skyflow Elements through the metho
 const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 const cardNumber = container.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.card_number',
   type: Skyflow.ElementType.CARD_NUMBER,
 });
@@ -1273,7 +1273,7 @@ You can override the default error messages with custom ones by using `setErrorO
 const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 const cardNumber = container.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.card_number',
   type: Skyflow.ElementType.CARD_NUMBER,
 });
@@ -1315,7 +1315,7 @@ cardHolderNameElement.on(Skyflow.EventName.BLUR, state=>{
 const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 
 const cardNumber = container.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.card_number',
   type: Skyflow.ElementType.CARD_NUMBER,
 });
@@ -1336,7 +1336,7 @@ The `update` interface takes the below object:
 
 ```javascript
 const updateElement = {
-  table: 'string',       // Optional. The table this data belongs to.
+  tableName: 'string',       // Optional. The table this data belongs to.
   column: 'string',      // Optional. The column this data belongs to.
   inputStyles: {},       // Optional. Styles applied to the form element.
   labelStyles: {},       // Optional. Styles for the label of the element.
@@ -1378,7 +1378,7 @@ const stylesOptions = {
 
 // Create collect elements
 const cardHolderNameElement = collectContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'first_name',
   ...stylesOptions,
   placeholder: 'Cardholder Name',
@@ -1386,7 +1386,7 @@ const cardHolderNameElement = collectContainer.create({
 });
 
 const cardNumberElement = collectContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'card_number',
   ...stylesOptions,
   placeholder: 'Card Number',
@@ -1394,7 +1394,7 @@ const cardNumberElement = collectContainer.create({
 });
 
 const cvvElement = collectContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'cvv',
   ...stylesOptions,
   placeholder: 'CVV',
@@ -1427,7 +1427,7 @@ cardHolderNameElement.update({
 
 // Update table, column, inputStyles properties on cardNumberElement.
 cardNumberElement.update({
-  table:'cards',
+  tableName:'cards',
   column:'card_number',
   inputStyles:{
     base:{
@@ -1497,7 +1497,7 @@ Composable Elements use the following schema:
 
 ```javascript
 const composableElement = {
-  table: 'string',             // Required. The table this data belongs to.
+  tableName: 'string',             // Required. The table this data belongs to.
   column: 'string',            // Required. The column this data belongs to.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional. Styles applied to the form element.
@@ -1633,7 +1633,7 @@ Once you define the Element object and options, add it to the container using th
 
 ```javascript
 const composableElement = {
-  table: 'string',             // Required, the table this data belongs to.
+  tableName: 'string',             // Required, the table this data belongs to.
   column: 'string',            // Required, the column into which this data should be inserted.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional, styles that should be applied to the form element.
@@ -1750,7 +1750,7 @@ const collectStylesOptions = {
 };
 
 const cardHolderNameElement = composableContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'first_name',
   ...collectStylesOptions,
   placeholder: 'Cardholder Name',
@@ -1758,7 +1758,7 @@ const cardHolderNameElement = composableContainer.create({
 });
 
 const cardNumberElement = composableContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'card_number',
   ...collectStylesOptions,
   placeholder: 'Card Number',
@@ -1766,7 +1766,7 @@ const cardNumberElement = composableContainer.create({
 });
 
 const cvvElement = composableContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'cvv',
   ...collectStylesOptions,
   placeholder: 'CVV',
@@ -1857,7 +1857,7 @@ const containerOptions = {
 const composableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABLE, containerOptions);
 
 const cvv = composableContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.cvv',
   type: Skyflow.ElementType.CVV,
 });
@@ -1902,7 +1902,7 @@ You can update composable element properties with the `update` interface.
 The `update` interface takes the below object:
 ```javascript
 const updateElement = {
-  table: 'string',       // Optional. The table this data belongs to.
+  tableName: 'string',       // Optional. The table this data belongs to.
   column: 'string',      // Optional. The column this data belongs to.
   inputStyles: {},       // Optional. Styles applied to the form element.
   labelStyles: {},       // Optional. Styles for the label of the element.
@@ -1948,7 +1948,7 @@ const stylesOptions = {
 
 // Create composable elements.
 const cardHolderNameElement = composableContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'first_name',
   ...stylesOptions,
   placeholder: 'Cardholder Name',
@@ -1957,7 +1957,7 @@ const cardHolderNameElement = composableContainer.create({
 
 
 const cardNumberElement = composableContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'card_number',
   ...stylesOptions,
   placeholder: 'Card Number',
@@ -1965,7 +1965,7 @@ const cardNumberElement = composableContainer.create({
 });
 
 const cvvElement = composableContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'cvv',
   ...stylesOptions,
   placeholder: 'CVV',
@@ -1996,7 +1996,7 @@ cardHolderNameElement.update({
 
 // Update table, column, inputStyles properties on cardNumberElement.
 cardNumberElement.update({
-  table:'cards',
+  tableName:'cards',
   column:'card_number',
   inputStyles:{
     base:{
@@ -2022,7 +2022,7 @@ const composableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOS
 
 // Creating the element.
 const cvv = composableContainer.create({
-  table: 'pii_fields',
+  tableName: 'pii_fields',
   column: 'primary_card.cvv',
   type: Skyflow.ElementType.CVV,
 });

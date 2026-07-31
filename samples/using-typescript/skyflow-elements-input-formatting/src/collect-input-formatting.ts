@@ -78,7 +78,7 @@ try {
 
   // Create collect elements.
   const cardNumberInput: CollectElementInput = {
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
@@ -95,7 +95,7 @@ try {
   );
 
   const ssnInput: CollectElementInput = {
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'ssn',
     ...collectStylesOptions,
     label: 'SSN',
@@ -110,7 +110,7 @@ try {
   const ssnElement: CollectElement = collectContainer.create(ssnInput, ssnOptions);
 
   const expiryDateInput: CollectElementInput = {
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
@@ -127,7 +127,7 @@ try {
   );
 
   const passportNumberInput: CollectElementInput = {
-    table: 'pii_fields',
+    tableName: 'pii_fields',
     column: 'passport_number',
     ...collectStylesOptions,
     label: 'Passport Number',

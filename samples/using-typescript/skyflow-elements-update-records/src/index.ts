@@ -78,7 +78,7 @@ try {
 
   // Create collect elements.
   const cardNumberInput: CollectElementInput = {
-    table: 'table1',
+    tableName: 'table1',
     column: 'card_number',
     ...collectStylesOptions,
     placeholder: 'card number',
@@ -89,7 +89,7 @@ try {
   const cardNumberElement: CollectElement = collectContainer.create(cardNumberInput);
 
   const cvvInput: CollectElementInput = {
-    table: 'table1',
+    tableName: 'table1',
     column: 'cvv',
     ...collectStylesOptions,
     label: 'Cvv',
@@ -100,7 +100,7 @@ try {
   const cvvElement: CollectElement = collectContainer.create(cvvInput);
 
   const expiryDateInput: CollectElementInput = {
-    table: 'table1',
+    tableName: 'table1',
     column: 'expiry_date',
     ...collectStylesOptions,
     label: 'Expiry Date',
@@ -111,7 +111,7 @@ try {
   const expiryDateElement: CollectElement = collectContainer.create(expiryDateInput);
 
   const cardHolderNameInput: CollectElementInput = {
-    table: 'table2',
+    tableName: 'table2',
     column: 'name',
     ...collectStylesOptions,
     label: 'Card Holder Name',
