@@ -2333,7 +2333,9 @@ describe("Reveal Frame Class - Additional Tests", () => {
         imgElement.onload(new Event('load'));
       }
       
-      // Verify dimensions were set
+      // SK-2958 backward-compat: overflow is not set on this record, so the natural
+      // dimensions must NOT be force-applied to the img — existing customers who
+      // never used overflow keep their prior (unset inline width/height) sizing.
       expect(imgElement?.style?.width).toBe('');
       expect(imgElement?.style?.height).toBe('');
       
@@ -2402,10 +2404,10 @@ describe("Reveal Frame Class - Additional Tests", () => {
         imgElement.onload(new Event('load'));
       }
       
-      // Verify dimensions were set
-      expect(imgElement?.style?.width).toBe('');
-      expect(imgElement?.style?.height).toBe('');
-      
+      // SK-2958: guard removed — dimensions always set unconditionally, even when naturalWidth/naturalHeight = 0
+      expect(imgElement?.style?.width).toBe('0px');
+      expect(imgElement?.style?.height).toBe('0px');
+
       // Verify height callback was posted
       const windowCalls = window.postMessage.mock.calls;
       const heightCall = windowCalls.find(c => c[0]?.type?.includes('HEIGHT_CALLBACK_COMPOSABLE'));
@@ -2658,5 +2660,396 @@ describe("Reveal Frame Class - Additional Tests", () => {
     
     const dataElement = document.getElementById(uniqueElementName);
     expect(dataElement?.innerText).toBe('****-****-****-4444');
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Tests for SK-2958 changes in addFileRender / image onload
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const IMAGE_URL = 'https://shorthand.com/the-craft/types-of-image-file-formats/assets/UPhtO6IIvn/sh-unsplash_4qgbmezb56c-4096x2731.jpeg?response-content-disposition=logo.png';
+
+  const triggerRenderFile = async (elementNameToUse, record, fileUrl = IMAGE_URL) => {
+    setFileURLResolve({ fields: { primary_card_file: fileUrl } });
+    window.postMessage = jest.fn();
+    const data = {
+      record: { skyflowID: '1815-6223-1073-1425', table: 'pii_fields', column: 'primary_card_file', ...record },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    // Set window.name AFTER defineUrl so it isn't overridden by defineUrl's side effect
+    Object.defineProperty(window, 'name', { value: elementNameToUse, writable: true });
+    RevealFrame.init();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementNameToUse,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementNameToUse },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' },
+      },
+      origin: 'http://localhost',
+    }));
+    await new Promise(r => setTimeout(r, 0));
+  };
+
+  test("addFileRender: overflow applies to non-composable container (composableContainer gate removed)", async () => {
+    // Old code required #composableContainer === true for overflow path.
+    // New code: overflow applies whenever inputStyles.base.overflow is set, regardless of container type.
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red', overflow: 'scroll' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    // Container should receive the div-container class (overflow branch taken)
+    const container = imgElement?.parentElement;
+    expect(container?.className).toContain('SkyflowElement-div-container-base');
+    expect(container?.style?.overflow).toBe('scroll');
+  });
+
+  test("addFileRender: non-composable container without overflow uses default image styles path", async () => {
+    // When no overflow is set, the else branch applies default image styles.
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'blue' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    const container = imgElement?.parentElement;
+    // Should NOT have div-container class — default image styles branch
+    expect(container?.className).not.toContain('SkyflowElement-div-container-base');
+  });
+
+  test("image onload fires for non-composable container (composableContainer gate removed)", async () => {
+    // Old code: onload was only set when #composableContainer === true.
+    // New code: onload is set for any HTMLImageElement regardless of container type.
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+    // onload handler should be attached even for non-composable container
+    expect(typeof imgElement?.onload).toBe('function');
+  });
+
+  test("HAPPY PATH: image onload forces natural width/height on the img element when overflow is set", async () => {
+    // When overflow is set, the image is rendered at full natural size so the
+    // (explicitly sized) container can scroll to it.
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red', overflow: 'auto' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    Object.defineProperty(imgElement, 'naturalWidth', { value: 4096, writable: true });
+    Object.defineProperty(imgElement, 'naturalHeight', { value: 2731, writable: true });
+
+    imgElement.onload(new Event('load'));
+
+    expect(imgElement.style.width).toBe('4096px');
+    expect(imgElement.style.height).toBe('2731px');
+  });
+
+  test("BACKWARD COMPAT: image onload does NOT force natural width/height on the img element when overflow is absent (existing customers)", async () => {
+    // SK-2958 regression: existing customers who never set `overflow` must keep
+    // their prior sizing (CSS class / max-width:100% / any custom width they set)
+    // — the img's own inline width/height must not be force-overwritten to its
+    // natural pixel size on load.
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    Object.defineProperty(imgElement, 'naturalWidth', { value: 4096, writable: true });
+    Object.defineProperty(imgElement, 'naturalHeight', { value: 2731, writable: true });
+
+    imgElement.onload(new Event('load'));
+
+    expect(imgElement.style.width).toBe('');
+    expect(imgElement.style.height).toBe('');
+  });
+
+  test("BACKWARD COMPAT: existing customer's explicit width/height on inputStyles.base is preserved (not overridden by natural size) when overflow is absent", async () => {
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { width: '150px', height: '100px' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+    // Width/height are applied via the CSS class (RENDER_ELEMENT_IMAGE_STYLES merge), not inline
+    expect(imgElement.className).toContain('SkyflowElement-img-base');
+
+    Object.defineProperty(imgElement, 'naturalWidth', { value: 4096, writable: true });
+    Object.defineProperty(imgElement, 'naturalHeight', { value: 2731, writable: true });
+
+    imgElement.onload(new Event('load'));
+
+    // Inline style must remain untouched so the CSS-class-based width/height still applies
+    expect(imgElement.style.width).toBe('');
+    expect(imgElement.style.height).toBe('');
+  });
+
+  test("NEGATIVE: image onload does not throw when record has no inputStyles at all (existing customers without inputStyles)", async () => {
+    await triggerRenderFile(elementName, {});
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    Object.defineProperty(imgElement, 'naturalWidth', { value: 400, writable: true });
+    Object.defineProperty(imgElement, 'naturalHeight', { value: 300, writable: true });
+
+    expect(() => imgElement.onload(new Event('load'))).not.toThrow();
+    expect(imgElement.style.width).toBe('');
+    expect(imgElement.style.height).toBe('');
+  });
+
+  test("NEGATIVE: image onload does not throw when inputStyles.base is an empty object", async () => {
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: {} },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    Object.defineProperty(imgElement, 'naturalWidth', { value: 400, writable: true });
+    Object.defineProperty(imgElement, 'naturalHeight', { value: 300, writable: true });
+
+    expect(() => imgElement.onload(new Event('load'))).not.toThrow();
+  });
+
+  test("image onload still posts HEIGHT_CALLBACK_COMPOSABLE even when overflow is absent (existing customers keep height sync)", async () => {
+    await triggerRenderFile(elementName, {});
+    window.postMessage.mockClear();
+
+    const imgElement = document.querySelector('img');
+    Object.defineProperty(imgElement, 'naturalWidth', { value: 400, writable: true });
+    Object.defineProperty(imgElement, 'naturalHeight', { value: 300, writable: true });
+
+    imgElement.onload(new Event('load'));
+
+    const heightCall = window.postMessage.mock.calls.find(
+      (c) => c[0]?.type?.includes('HEIGHT_CALLBACK_COMPOSABLE'),
+    );
+    expect(heightCall).toBeTruthy();
+  });
+
+  test("image onload sets overflow on container when defined in inputStyles", async () => {
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red', overflow: 'hidden' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    if (imgElement) {
+      Object.defineProperty(imgElement, 'naturalWidth', { value: 400, writable: true });
+      Object.defineProperty(imgElement, 'naturalHeight', { value: 300, writable: true });
+
+      const container = imgElement.parentElement;
+      if (imgElement.onload) imgElement.onload(new Event('load'));
+
+      expect(container?.style?.overflow).toBe('hidden');
+    }
+  });
+
+  test("image onload does NOT set overflow on container when overflow is absent from inputStyles", async () => {
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    if (imgElement) {
+      Object.defineProperty(imgElement, 'naturalWidth', { value: 400, writable: true });
+      Object.defineProperty(imgElement, 'naturalHeight', { value: 300, writable: true });
+
+      const container = imgElement.parentElement;
+      if (imgElement.onload) imgElement.onload(new Event('load'));
+
+      // overflow should remain unset (empty string)
+      expect(container?.style?.overflow).toBe('');
+    }
+  });
+
+  test("image onload sets container width from inputStyles when defined", async () => {
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red', width: '500px', overflow: 'auto' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    if (imgElement) {
+      Object.defineProperty(imgElement, 'naturalWidth', { value: 800, writable: true });
+      Object.defineProperty(imgElement, 'naturalHeight', { value: 600, writable: true });
+
+      const container = imgElement.parentElement;
+      if (imgElement.onload) imgElement.onload(new Event('load'));
+
+      expect(container?.style?.width).toBe('500px');
+    }
+  });
+
+  test("image onload sets container height from inputStyles when defined", async () => {
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red', height: '250px', overflow: 'auto' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    if (imgElement) {
+      Object.defineProperty(imgElement, 'naturalWidth', { value: 800, writable: true });
+      Object.defineProperty(imgElement, 'naturalHeight', { value: 600, writable: true });
+
+      const container = imgElement.parentElement;
+      if (imgElement.onload) imgElement.onload(new Event('load'));
+
+      expect(container?.style?.height).toBe('250px');
+    }
+  });
+
+  test("image onload posts HEIGHT_CALLBACK_COMPOSABLE after dimensions are set", async () => {
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    if (imgElement) {
+      Object.defineProperty(imgElement, 'naturalWidth', { value: 400, writable: true });
+      Object.defineProperty(imgElement, 'naturalHeight', { value: 300, writable: true });
+
+      if (imgElement.onload) imgElement.onload(new Event('load'));
+
+      const windowCalls = window.postMessage.mock.calls;
+      const heightCall = windowCalls.find(c => c[0]?.type?.includes('HEIGHT_CALLBACK_COMPOSABLE'));
+      expect(heightCall).toBeTruthy();
+    }
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Tests for SK-2958 addEventListener('load') HEIGHT bus.emit gating
+  // (`if (!overflow && tag !== 'img')`) in addFileRender.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const EMBED_URL = 'https://example.com/doc?response-content-disposition=inline%3B%20filename%3Ddummylicence.pdf&X-Amz-Signature=abc';
+
+  test("embed 'load' event emits HEIGHT via bus.emit when overflow is not set", async () => {
+    // Force embed tag: primary_card_file mocked with a non-image (pdf) URL
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red' } },
+    }, EMBED_URL);
+
+    const embedElement = document.querySelector('embed');
+    expect(embedElement).toBeTruthy();
+
+    emitSpy.mockClear();
+    embedElement.dispatchEvent(new Event('load'));
+
+    const heightEmit = emitSpy.mock.calls.find(
+      (c) => c[0] === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + elementName,
+    );
+    expect(heightEmit).toBeTruthy();
+  });
+
+  test("embed 'load' event does NOT emit HEIGHT via bus.emit when overflow is set", async () => {
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red', overflow: 'auto' } },
+    }, EMBED_URL);
+
+    const embedElement = document.querySelector('embed');
+    expect(embedElement).toBeTruthy();
+
+    emitSpy.mockClear();
+    embedElement.dispatchEvent(new Event('load'));
+
+    const heightEmit = emitSpy.mock.calls.find(
+      (c) => c[0] === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + elementName,
+    );
+    expect(heightEmit).toBeFalsy();
+  });
+
+  test("img 'load' event does NOT emit HEIGHT via bus.emit (img dimensions handled by onload instead)", async () => {
+    await triggerRenderFile(elementName, {
+      inputStyles: { base: { color: 'red' } },
+    });
+
+    const imgElement = document.querySelector('img');
+    expect(imgElement).toBeTruthy();
+
+    emitSpy.mockClear();
+    imgElement.dispatchEvent(new Event('load'));
+
+    const heightEmit = emitSpy.mock.calls.find(
+      (c) => c[0] === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + elementName,
+    );
+    expect(heightEmit).toBeFalsy();
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Tests for the HEIGHT-type postMessage handler now nested inside the
+  // `data.name === REVEAL_CALL_REQUESTS + name` check in the window 'message'
+  // listener (previously handled as a sibling condition).
+  // ─────────────────────────────────────────────────────────────────────────
+
+  test("HEIGHT-type message is answered when data.name matches REVEAL_CALL_REQUESTS for this element", async () => {
+    const data = {
+      record: { skyflowID: '1815-6223-1073-1425', table: 'pii_fields', column: 'primary_card_file' },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, 'name', { value: elementName, writable: true });
+    RevealFrame.init();
+
+    window.parent.postMessage.mockClear();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementName,
+        type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + elementName,
+        data: { height: 123 },
+      },
+      origin: 'http://localhost',
+    }));
+
+    const heightResponse = window.parent.postMessage.mock.calls.find(
+      (c) => c[0]?.type === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + elementName,
+    );
+    expect(heightResponse).toBeTruthy();
+    expect(heightResponse[0].data.name).toBe(elementName);
+  });
+
+  test("HEIGHT-type message is ignored when data.name does not match REVEAL_CALL_REQUESTS for this element (current nested behavior)", async () => {
+    const data = {
+      record: { skyflowID: '1815-6223-1073-1425', table: 'pii_fields', column: 'primary_card_file' },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    Object.defineProperty(window, 'name', { value: elementName, writable: true });
+    RevealFrame.init();
+
+    window.parent.postMessage.mockClear();
+    window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        name: 'some-other-name',
+        type: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + elementName,
+        data: { height: 123 },
+      },
+      origin: 'http://localhost',
+    }));
+
+    const heightResponse = window.parent.postMessage.mock.calls.find(
+      (c) => c[0]?.type === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + elementName,
+    );
+    expect(heightResponse).toBeFalsy();
   });
 });

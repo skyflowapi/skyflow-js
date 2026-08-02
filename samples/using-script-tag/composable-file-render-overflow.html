@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skyflow Elements - Composable File Render Overflow</title>
+    <script src="https://js.skyflow.com/v2/index.js"></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .render-view {
+        margin-top: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Composable Render File Elements - Overflow</h3>
+
+    <!-- Note: each composable File Element is mounted via its own container's
+         `.mount()` — the element returned by `.create()` has no `.mount()` of
+         its own, unlike the plain (non-composable) REVEAL container's elements. -->
+
+    <h4>With overflow (image shown at full size, container scrolls)</h4>
+    <div id="renderFileElementOverflow" class="render-view"></div>
+
+    <h4>Without overflow (default responsive sizing, unchanged for existing customers)</h4>
+    <div id="renderFileElementNoOverflow" class="render-view"></div>
+
+    <button id="renderFiles" style="height: 30px; width: 200px">
+      Render Files
+    </button>
+    <pre id="renderFileResponse"></pre>
+
+    <script>
+      try {
+        const config = {
+          vaultID: "<VAULT_ID>",
+          vaultURL: "<VAULT_URL>",
+          getBearerToken: () => {
+            return new Promise((resolve, reject) => {
+              const Http = new XMLHttpRequest();
+
+              Http.onreadystatechange = () => {
+                if (Http.readyState === 4 && Http.status === 200) {
+                  const response = JSON.parse(Http.responseText);
+                  resolve(response.accessToken);
+                }
+              };
+              const url = "<TOKEN_END_POINT_URL>";
+              Http.open("GET", url);
+              Http.send();
+            });
+          },
+          options: {
+            logLevel: Skyflow.LogLevel.ERROR,
+            env: Skyflow.Env.PROD,
+          },
+        };
+        const skyflowClient = Skyflow.init(config);
+
+        // `overflow` renders the image at its full/natural size and makes the
+        // fixed-size container scrollable, instead of scaling the image to fit.
+        const renderStyleOptionsWithOverflow = {
+          inputStyles: {
+            base: {
+              border: "2px solid #eae8ee",
+              padding: "10px",
+              borderRadius: "10px",
+              marginTop: "2px",
+              height: "250px",
+              width: "400px",
+              overflow: "auto",
+            },
+          },
+          errorTextStyles: {
+            base: {
+              color: "#f44336",
+            },
+          },
+        };
+
+        // Same height/width, `overflow` omitted — default responsive sizing,
+        // exactly as before this feature existed.
+        const renderStyleOptionsNoOverflow = {
+          inputStyles: {
+            base: {
+              border: "2px solid #eae8ee",
+              padding: "10px",
+              borderRadius: "10px",
+              marginTop: "2px",
+              height: "250px",
+              width: "400px",
+            },
+          },
+          errorTextStyles: {
+            base: {
+              color: "#f44336",
+            },
+          },
+        };
+
+        // REPLACE with your custom implementation to fetch skyflow_id from backend service.
+
+        // Sample implementation
+        fetch("<BACKEND_URL>")
+          .then((response) => {
+            // on successful fetch skyflow_id
+            const skyflowID = response.skyflow_id;
+
+            // step 1: one composable container per File Element.
+            const renderContainerOverflow = skyflowClient.container(
+              Skyflow.ContainerType.COMPOSE_REVEAL
+            );
+            const renderFileElementOverflow = renderContainerOverflow.create({
+              ...renderStyleOptionsWithOverflow,
+              skyflowID: skyflowID,
+              column: "<COLUMN_NAME1>",
+              table: "<TABLE1>",
+              altText: "Driving License",
+            });
+
+            const renderContainerNoOverflow = skyflowClient.container(
+              Skyflow.ContainerType.COMPOSE_REVEAL
+            );
+            const renderFileElementNoOverflow = renderContainerNoOverflow.create({
+              ...renderStyleOptionsNoOverflow,
+              skyflowID: skyflowID,
+              column: "<COLUMN_NAME1>",
+              table: "<TABLE1>",
+              altText: "Driving License",
+            });
+
+            // step 2: mount the container (not the element).
+            renderContainerOverflow.mount("#renderFileElementOverflow");
+            renderContainerNoOverflow.mount("#renderFileElementNoOverflow");
+
+            const renderButton = document.getElementById("renderFiles");
+
+            if (renderButton) {
+              renderButton.addEventListener("click", () => {
+                // step 3: call render file
+                renderFileElementOverflow
+                  .renderFile()
+                  .then((res) => {
+                    document.getElementById("renderFileResponse").innerHTML =
+                      JSON.stringify(res, null, 2);
+                  })
+                  .catch((err) => {
+                    console.log("With overflow error", err);
+                  });
+
+                renderFileElementNoOverflow
+                  .renderFile()
+                  .then((res) => {
+                    console.log("Without overflow response", res);
+                  })
+                  .catch((err) => {
+                    console.log("Without overflow error", err);
+                  });
+              });
+            }
+          })
+          .catch((err) => {
+            // failed to fetch skyflow_id
+            console.log(err);
+          });
+      } catch (err) {
+        console.log(err);
+      }
+    </script>
+  </body>
+</html>
