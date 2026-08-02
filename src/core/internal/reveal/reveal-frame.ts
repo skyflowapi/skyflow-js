@@ -1,7 +1,8 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import bus from 'framebus';
+import mime from 'mime';
+import { framebusInstance as bus } from '../../../libs/bus';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
@@ -37,7 +38,7 @@ import { formatForRenderClient, getFileURLFromVaultBySkyflowIDComposable } from 
 import Client from '../../../client';
 import properties from '../../../properties';
 
-const { getType } = require('mime');
+const getType = (path: string) => mime.getType(path);
 
 const CLASS_NAME = 'RevealFrame';
 class RevealFrame {
@@ -85,8 +86,11 @@ class RevealFrame {
     const encodedString = configIndex !== -1 ? decodeURIComponent(url.substring(configIndex + 1)) : '';
     const parsedRecord = encodedString ? JSON.parse(atob(encodedString)) : {};
     const skyflowContainerId = parsedRecord.clientJSON.metaData.uuid;
-    RevealFrame.revealFrame = new RevealFrame(parsedRecord.record,
-      parsedRecord.context, skyflowContainerId);
+    RevealFrame.revealFrame = new RevealFrame(
+      parsedRecord.record,
+      parsedRecord.context,
+      skyflowContainerId,
+    );
   }
 
   constructor(record, context: Context, id: string, rootDiv?: HTMLDivElement) {
@@ -218,7 +222,8 @@ class RevealFrame {
               ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
               {
                 height: this.#elementContainer.scrollHeight,
-              }, () => {
+              },
+              () => {
               },
             );
         } else {
@@ -228,7 +233,7 @@ class RevealFrame {
       }
     };
     bus
-      .target(window.location.origin)
+      .target({ origin: window.location.origin })
       .on(
         ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.#name,
         sub2,
@@ -253,13 +258,18 @@ class RevealFrame {
         this.isRevealCalled = true;
         this.#dataElememt.innerText = responseValue;
         if (this.#record.mask) {
-          const { formattedOutput } = getMaskedOutput(this.#dataElememt.innerText,
+          const { formattedOutput } = getMaskedOutput(
+            this.#dataElememt.innerText,
             this.#record.mask[0],
-            constructMaskTranslation(this.#record.mask));
+            constructMaskTranslation(this.#record.mask),
+          );
           this.#dataElememt.innerText = formattedOutput;
         }
-        printLog(parameterizedString(logs.infoLogs.ELEMENT_REVEALED,
-          CLASS_NAME, tokenToMatch), MessageType.LOG, this.#context?.logLevel);
+        printLog(parameterizedString(
+          logs.infoLogs.ELEMENT_REVEALED,
+          CLASS_NAME,
+          tokenToMatch,
+        ), MessageType.LOG, this.#context?.logLevel);
 
         // bus
         //   .target(window.location.origin)
@@ -277,35 +287,36 @@ class RevealFrame {
     };
 
     bus
-      .target(window.location.origin)
+      .target({ origin: window.location.origin })
       .on(
         ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.#containerId,
         sub,
       );
 
     bus
-      .target(this.#clientDomain)
+      .target({ origin: this.#clientDomain })
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_SET_ERROR + this.#name, (data) => {
         if (this.#name === data.name) {
           if (data.isTriggerError) { this.setRevealError(data.clientErrorText as string); } else { this.setRevealError(''); }
         }
       });
-    window.parent.postMessage(
-      {
-        type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + this.#name,
-        data: {
-          name: window.name,
-        },
-      }, this.#clientDomain,
-    );
+    window.parent.postMessage({
+      type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + this.#name,
+      data: {
+        name: window.name,
+      },
+    }, this.#clientDomain);
     this.updateRevealElementOptions();
     window.addEventListener('message', (event) => {
       if (event?.origin === this.#clientDomain) {
         if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#name) {
           if (event?.data?.data?.iframeName === this.#name
           && event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
-            this.renderFile(this.#record, event?.data?.clientConfig,
-              event?.data?.errorMessages)?.then((resolvedResult) => {
+            this.renderFile(
+              this.#record,
+              event?.data?.clientConfig,
+              event?.data?.errorMessages,
+            )?.then((resolvedResult) => {
               const result = formatForRenderClient(
                 resolvedResult as IRenderResponseType,
                 this.#record?.column,
@@ -319,7 +330,7 @@ class RevealFrame {
               }, this.#clientDomain);
 
               window?.postMessage({
-                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name,
               }, properties?.IFRAME_SECURE_ORIGIN);
             })?.catch((error) => {
               window?.parent?.postMessage({
@@ -333,7 +344,7 @@ class RevealFrame {
               }, this.#clientDomain);
 
               window?.postMessage({
-                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name,
               }, properties?.IFRAME_SECURE_ORIGIN);
             });
           }
@@ -451,7 +462,8 @@ class RevealFrame {
             ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
             {
               height: this.#elementContainer.scrollHeight,
-            }, () => {
+            },
+            () => {
             },
           );
       } else {
@@ -471,24 +483,26 @@ class RevealFrame {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowIDComposable(data, this.#client, clientConfig.authToken)
-          .then((resolvedResult) => {
-            let url = '';
-            if (resolvedResult.fields && data.column) {
-              url = resolvedResult.fields[data.column];
-            }
-            this.sub2({
-              url,
-              iframeName: this.#name,
-            });
-            resolve(resolvedResult);
-          },
-          (rejectedResult) => {
-            this.sub2({
-              error: DEFAULT_FILE_RENDER_ERROR,
-              iframeName: this.#name,
-            });
-            reject(rejectedResult);
-          });
+          .then(
+            (resolvedResult) => {
+              let url = '';
+              if (resolvedResult.fields && data.column) {
+                url = resolvedResult.fields[data.column];
+              }
+              this.sub2({
+                url,
+                iframeName: this.#name,
+              });
+              resolve(resolvedResult);
+            },
+            (rejectedResult) => {
+              this.sub2({
+                error: DEFAULT_FILE_RENDER_ERROR,
+                iframeName: this.#name,
+              });
+              reject(rejectedResult);
+            },
+          );
       } catch (err) {
         reject(err);
       }
@@ -502,7 +516,7 @@ class RevealFrame {
       const name = params.get('response-content-disposition');
       if (name) {
         const ext = getType(name);
-        return ext;
+        return ext ?? '';
       }
       return '';
     } catch {
@@ -524,7 +538,8 @@ class RevealFrame {
           ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#name,
           {
             height: this.#elementContainer.scrollHeight,
-          }, () => {
+          },
+          () => {
           },
         );
     });
@@ -596,7 +611,7 @@ class RevealFrame {
           .inputStyles[STYLE_TYPE.BASE].overflow as string;
 
         window?.postMessage({
-          type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+          type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name,
         }, properties?.IFRAME_SECURE_ORIGIN);
       };
     }
@@ -634,7 +649,7 @@ class RevealFrame {
       }
     });
     bus
-      .target(this.#clientDomain)
+      .target({ origin: this.#clientDomain })
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS + this.#name, (data) => {
         if (data.name === this.#name) {
           if (data.updateType === REVEAL_ELEMENT_OPTIONS_TYPES.ALT_TEXT) {

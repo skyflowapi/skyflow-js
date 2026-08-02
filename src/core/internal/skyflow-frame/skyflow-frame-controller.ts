@@ -1,8 +1,9 @@
+/* eslint-disable max-len */
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import bus from 'framebus';
 import get from 'lodash/get';
+import { framebusInstance as bus } from '../../../libs/bus';
 import Client from '../../../client';
 import {
   checkForElementMatchRule,
@@ -111,18 +112,26 @@ class SkyflowFrameController {
           if (data && data.event && window?.CoralogixRum) {
             try {
               window.CoralogixRum.info(SDK_IFRAME_EVENT, data.event);
-              printLog(parameterizedString(logs.infoLogs.METRIC_CAPTURE_EVENT),
-                MessageType.LOG, this.#context?.logLevel);
+              printLog(
+                parameterizedString(logs.infoLogs.METRIC_CAPTURE_EVENT),
+                MessageType.LOG,
+                this.#context?.logLevel,
+              );
             } catch (err: any) {
-              printLog(parameterizedString(logs.infoLogs.UNKNOWN_METRIC_CAPTURE_EVENT,
-                err.toString()),
-              MessageType.LOG, this.#context?.logLevel);
+              printLog(
+                parameterizedString(
+                  logs.infoLogs.UNKNOWN_METRIC_CAPTURE_EVENT,
+                  err.toString(),
+                ),
+                MessageType.LOG,
+                this.#context?.logLevel,
+              );
             }
           }
         },
       );
     bus
-      .target(this.#clientDomain)
+      .target({ origin: this.#clientDomain })
       .on(
         ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.#clientId,
         (data, callback) => {
@@ -206,9 +215,8 @@ class SkyflowFrameController {
                 callback({ error });
               });
           } else if (data.type === PUREJS_TYPES.GET) {
-            fetchRecordsGET(
-              data.records as IGetRecord[], this.#client, data.options as IGetOptions,
-            ).then(
+            // eslint-disable-next-line max-len
+            fetchRecordsGET(data.records as IGetRecord[], this.#client, data.options as IGetOptions).then(
               (resolvedResult: GetResponse) => {
                 printLog(
                   parameterizedString(logs.infoLogs.GET_RESOLVED, CLASS_NAME),
@@ -219,11 +227,13 @@ class SkyflowFrameController {
                 callback(resolvedResult);
               },
               (rejectedResult: GetResponse) => {
-                printLog(parameterizedString(
-                  logs.errorLogs.GET_REJECTED,
-                ),
-                MessageType.ERROR,
-                this.#context.logLevel);
+                printLog(
+                  parameterizedString(
+                    logs.errorLogs.GET_REJECTED,
+                  ),
+                  MessageType.ERROR,
+                  this.#context.logLevel,
+                );
 
                 callback({ error: rejectedResult });
               },
@@ -288,7 +298,7 @@ class SkyflowFrameController {
         },
       );
     bus
-      .target(this.#clientDomain)
+      .target({ origin: this.#clientDomain })
       .emit(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.#clientId, {}, (data: any) => {
         this.#context = data.context;
         data.client.config = {
@@ -296,12 +306,15 @@ class SkyflowFrameController {
         };
         this.#client = Client.fromJSON(data.client) as any;
         Object.keys(PUREJS_TYPES).forEach((key) => {
-          printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-            CLASS_NAME, PUREJS_TYPES[key]), MessageType.LOG, this.#context.logLevel);
+          printLog(parameterizedString(
+            logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+            CLASS_NAME,
+            PUREJS_TYPES[key],
+          ), MessageType.LOG, this.#context.logLevel);
         });
       });
     bus
-      .target(this.#clientDomain)
+      .target({ origin: this.#clientDomain })
       .on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.#clientId, (data, callback) => {
         if (this.#client && data?.errorMessages) {
           const errorMessages: Partial<Record<ErrorType, string>> = data?.errorMessages;
@@ -318,8 +331,11 @@ class SkyflowFrameController {
         );
         if (data.type === COLLECT_TYPES.COLLECT) {
           printLog(
-            parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
+            parameterizedString(
+              logs.infoLogs.CAPTURE_EVENT,
+              CLASS_NAME,
+              ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST,
+            ),
             MessageType.LOG,
             this.#context.logLevel,
           );
@@ -337,9 +353,15 @@ class SkyflowFrameController {
               callback({ error });
             });
         } else if (data.type === COLLECT_TYPES.FILE_UPLOAD) {
-          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.CAPTURE_EVENT,
+              CLASS_NAME,
+              ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
           const uploadFilesDataInput = {
             ...data,
             type: data.type,
@@ -356,25 +378,34 @@ class SkyflowFrameController {
         }
       });
     bus
-      .target(this.#clientDomain)
-      .emit(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#clientId,
-        {}, (data: any) => {
+      .target({ origin: this.#clientDomain })
+      .emit(
+        ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#clientId,
+        {},
+        (data: any) => {
           this.#context = data.context;
           data.client.config = {
             ...data.client.config,
           };
           this.#client = Client.fromJSON(data.client) as any;
           Object.keys(COLLECT_TYPES).forEach((key) => {
-            printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-              CLASS_NAME, COLLECT_TYPES[key]), MessageType.LOG, this.#context.logLevel);
+            printLog(parameterizedString(
+              logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+              CLASS_NAME,
+              COLLECT_TYPES[key],
+            ), MessageType.LOG, this.#context.logLevel);
           });
           Object.keys(REVEAL_TYPES).forEach((key) => {
-            printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-              CLASS_NAME, REVEAL_TYPES[key]), MessageType.LOG, this.#context.logLevel);
+            printLog(parameterizedString(
+              logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+              CLASS_NAME,
+              REVEAL_TYPES[key],
+            ), MessageType.LOG, this.#context.logLevel);
           });
-        });
+        },
+      );
     bus
-      .target(this.#clientDomain)
+      .target({ origin: this.#clientDomain })
       .on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#clientId, (data, callback) => {
         printLog(
           parameterizedString(
@@ -391,9 +422,15 @@ class SkyflowFrameController {
         }
 
         if (data.type === REVEAL_TYPES.REVEAL) {
-          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.CAPTURE_EVENT,
+              CLASS_NAME,
+              ELEMENT_EVENTS_TO_IFRAME.REVEAL_REQUEST,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
           this.revealData(data.records as IRevealRecord[], data.containerId as string).then(
             (resolvedResult) => {
               callback(resolvedResult);
@@ -403,9 +440,15 @@ class SkyflowFrameController {
             },
           );
         } else if (data.type === REVEAL_TYPES.RENDER_FILE) {
-          printLog(parameterizedString(logs.infoLogs.CAPTURE_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.CAPTURE_EVENT,
+              CLASS_NAME,
+              ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
           this.renderFile(data.records as IRevealRecord, data.iframeName as string).then(
             (resolvedResult) => {
               callback(
@@ -437,7 +480,7 @@ class SkyflowFrameController {
         (resolvedResult) => {
           const formattedResult = formatRecordsForIframe(resolvedResult);
           bus
-            .target(properties.IFRAME_SECURE_SITE)
+            .target({ origin: properties.IFRAME_SECURE_SITE })
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
                 + id,
@@ -448,7 +491,7 @@ class SkyflowFrameController {
         (rejectedResult) => {
           const formattedResult = formatRecordsForIframe(rejectedResult);
           bus
-            .target(properties.IFRAME_SECURE_SITE)
+            .target({ origin: properties.IFRAME_SECURE_SITE })
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY
                 + id,
@@ -461,9 +504,7 @@ class SkyflowFrameController {
   }
 
   insertData(records: IInsertRecordInput, options: IInsertOptions): Promise<InsertResponse> {
-    const requestBody: Array<BatchInsertRequestBody> = constructInsertRecordRequest(
-      records, options,
-    );
+    const requestBody: Array<BatchInsertRequestBody> = constructInsertRecordRequest(records, options);
     return new Promise((rootResolve, rootReject) => {
       getAccessToken(this.#clientId).then((authToken) => {
         this.#client
@@ -505,9 +546,7 @@ class SkyflowFrameController {
   }
 
   updateData(updateData: IUpdateRequest, options?: IUpdateOptions): Promise<UpdateResponse> {
-    const requestBody = constructUpdateRecordRequest(
-      updateData, options,
-    );
+    const requestBody = constructUpdateRecordRequest(updateData, options);
     return new Promise((rootResolve, rootReject) => {
       getAccessToken(this.#clientId).then((authToken) => {
         const { table, skyflowID } = updateData;
@@ -539,37 +578,39 @@ class SkyflowFrameController {
     return new Promise((resolve, reject) => {
       try {
         getFileURLFromVaultBySkyflowID(data, this.#client)
-          .then((resolvedResult) => {
-            let url = '';
-            if (resolvedResult.fields && data.column) {
-              url = resolvedResult.fields[data.column];
-            }
-            bus
-              .target(properties.IFRAME_SECURE_SITE)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
+          .then(
+            (resolvedResult) => {
+              let url = '';
+              if (resolvedResult.fields && data.column) {
+                url = resolvedResult.fields[data.column];
+              }
+              bus
+                .target({ origin: properties.IFRAME_SECURE_SITE })
+                .emit(
+                  ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
                 + iframeName,
-                {
-                  url,
-                  iframeName,
-                },
-              );
+                  {
+                    url,
+                    iframeName,
+                  },
+                );
 
-            resolve(resolvedResult);
-          },
-          (rejectedResult) => {
-            bus
-              .target(properties.IFRAME_SECURE_SITE)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
+              resolve(resolvedResult);
+            },
+            (rejectedResult) => {
+              bus
+                .target({ origin: properties.IFRAME_SECURE_SITE })
+                .emit(
+                  ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY
                 + iframeName,
-                {
-                  error: DEFAULT_FILE_RENDER_ERROR,
-                  iframeName,
-                },
-              );
-            reject(rejectedResult);
-          });
+                  {
+                    error: DEFAULT_FILE_RENDER_ERROR,
+                    iframeName,
+                  },
+                );
+              reject(rejectedResult);
+            },
+          );
       } catch (err) {
         reject(err);
       }
@@ -645,8 +686,11 @@ class SkyflowFrameController {
             } else if (insertResponseObject[tableName] && !(skyflowID === '') && skyflowID === undefined) {
               if (get(insertResponseObject[tableName], state.name)
             && !(validations && checkForElementMatchRule(validations))) {
-                return Promise.reject(new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
-                  [state.name, tableName], true));
+                return Promise.reject(new SkyflowError(
+                  SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT,
+                  [state.name, tableName],
+                  true,
+                ));
               }
               set(
                 insertResponseObject[tableName],
@@ -700,9 +744,7 @@ class SkyflowFrameController {
     let insertDone = false;
     let updateDone = false;
     try {
-      [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(
-        insertResponseObject, updateResponseObject, options,
-      );
+      [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(insertResponseObject, updateResponseObject, options);
       finalInsertRequest = constructInsertRecordRequest(finalInsertRecords, options);
     } catch (error:any) {
       return Promise.reject({

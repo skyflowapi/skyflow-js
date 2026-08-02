@@ -101,6 +101,7 @@ class CollectElement extends SkyflowElement {
     elementGroup: any,
     metaData: Metadata,
     container: ContainerProps,
+    // eslint-disable-next-line @typescript-eslint/default-param-last
     isSingleElementAPI: boolean = false,
     destroyCallback: Function,
     updateCallback: Function,
@@ -159,9 +160,15 @@ class CollectElement extends SkyflowElement {
 
     this.#onDestroy(destroyCallback);
     this.#onUpdate(updateCallback);
-    printLog(parameterizedString(logs.infoLogs.CREATED_ELEMENT,
-      CLASS_NAME, getElementName(this.#iframe.name)), MessageType.LOG,
-    this.#context.logLevel);
+    printLog(
+      parameterizedString(
+        logs.infoLogs.CREATED_ELEMENT,
+        CLASS_NAME,
+        getElementName(this.#iframe.name),
+      ),
+      MessageType.LOG,
+      this.#context.logLevel,
+    );
 
     this.#readyToMount = container.isMounted;
 
@@ -190,10 +197,13 @@ class CollectElement extends SkyflowElement {
         updateMetricObjectValue(this.#elementId, METRIC_TYPES.EVENTS_KEY, EVENT_TYPES.MOUNTED);
         this.#elements[0].isMounted = true;
         this.#mounted = true;
-        this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-          {}, (payload:any) => {
+        this.#bus.emit(
+          ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+          {},
+          (payload:any) => {
             this.#iframe.setIframeHeight(payload.height);
-          });
+          },
+        );
       }
     });
   }
@@ -229,10 +239,13 @@ class CollectElement extends SkyflowElement {
       });
     } else if (typeof domElement === 'string') {
       this.resizeObserver = new ResizeObserver(() => {
-        this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
-          {}, (payload:any) => {
+        this.#bus.emit(
+          ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.#iframe.name,
+          {},
+          (payload:any) => {
             this.#iframe.setIframeHeight(payload.height);
-          });
+          },
+        );
       });
     }
 
@@ -395,8 +408,11 @@ class CollectElement extends SkyflowElement {
         this.#state.selectedCardScheme = '';
         const key = this.#elements[index].elementName;
         const value = elementState.value
-          && getReturnValue(elementState.value, elementState.elementType,
-            this.#doesReturnValue);
+          && getReturnValue(
+            elementState.value,
+            elementState.elementType,
+            this.#doesReturnValue,
+          );
         if (this.#isSingleElementAPI) {
           this.#state.value = value;
         } else this.#state.value[key] = value;
@@ -547,11 +563,14 @@ class CollectElement extends SkyflowElement {
                     else this.#states[index].value = undefined;
 
                     emitEvent = isComposableContainer ? `${emitEvent}:${data.name}` : emitEvent;
-                    this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
+                    this.#bus.emit(
+                      ELEMENT_EVENTS_TO_CLIENT.HEIGHT
                 + this.#iframe.name,
-                    {}, (payload:any) => {
-                      this.#iframe.setIframeHeight(payload.height);
-                    });
+                      {},
+                      (payload:any) => {
+                        this.#iframe.setIframeHeight(payload.height);
+                      },
+                    );
 
                     this.#updateState();
                     const emitData = {
@@ -632,11 +651,14 @@ class CollectElement extends SkyflowElement {
                 else this.#states[index].value = undefined;
 
                 emitEvent = isComposable ? `${emitEvent}:${data.name}` : emitEvent;
-                this.#bus.emit(ELEMENT_EVENTS_TO_CLIENT.HEIGHT
+                this.#bus.emit(
+                  ELEMENT_EVENTS_TO_CLIENT.HEIGHT
                 + this.#iframe.name,
-                {}, (payload:any) => {
-                  this.#iframe.setIframeHeight(payload.height);
-                });
+                  {},
+                  (payload:any) => {
+                    this.#iframe.setIframeHeight(payload.height);
+                  },
+                );
 
                 this.#updateState();
                 const emitData = {
@@ -710,47 +732,56 @@ class CollectElement extends SkyflowElement {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_COLLECT, [], true);
       }
       if (this.#elements[i].skyflowID !== undefined && !this.#elements[i].skyflowID) {
-        throw new SkyflowError(
-          SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_COLLECT, [], true,
-        );
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_COLLECT, [], true);
       }
     }
     return true;
   }
 
   setErrorOverride(customErrorText: string) {
-    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE
+    this.#bus.emit(
+      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR_OVERRIDE
       + formatFrameNameToId(this.#iframe.name),
-    {
-      name: formatFrameNameToId(this.#iframe.name),
-      customErrorText,
-    });
+      {
+        name: formatFrameNameToId(this.#iframe.name),
+        customErrorText,
+      },
+    );
   }
 
   setError(clientErrorText:string) {
-    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR
+    this.#bus.emit(
+      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR
       + formatFrameNameToId(this.#iframe.name),
-    {
-      name: formatFrameNameToId(this.#iframe.name),
-      isTriggerError: true,
-      clientErrorText,
-    });
+      {
+        name: formatFrameNameToId(this.#iframe.name),
+        isTriggerError: true,
+        clientErrorText,
+      },
+    );
   }
 
   resetError() {
-    this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR
+    this.#bus.emit(
+      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_SET_ERROR
       + formatFrameNameToId(this.#iframe.name),
-    {
-      name: formatFrameNameToId(this.#iframe.name),
-      isTriggerError: false,
-    });
+      {
+        name: formatFrameNameToId(this.#iframe.name),
+        isTriggerError: false,
+      },
+    );
   }
 
   setValue(elementValue:string) {
     if (this.#context.env === Env.PROD) {
-      printLog(parameterizedString(logs.warnLogs.UNABLE_TO_SET_VALUE_IN_PROD_ENV,
-        this.#elements[0].elementType),
-      MessageType.WARN, this.#context.logLevel);
+      printLog(
+        parameterizedString(
+          logs.warnLogs.UNABLE_TO_SET_VALUE_IN_PROD_ENV,
+          this.#elements[0].elementType,
+        ),
+        MessageType.WARN,
+        this.#context.logLevel,
+      );
       return;
     }
     if (this.#isSingleElementAPI) {
@@ -768,9 +799,14 @@ class CollectElement extends SkyflowElement {
 
   clearValue() {
     if (this.#context.env === Env.PROD) {
-      printLog(parameterizedString(logs.warnLogs.UNABLE_TO_CLEAR_VALUE_IN_PROD_ENV,
-        this.#elements[0].elementType),
-      MessageType.WARN, this.#context.logLevel);
+      printLog(
+        parameterizedString(
+          logs.warnLogs.UNABLE_TO_CLEAR_VALUE_IN_PROD_ENV,
+          this.#elements[0].elementType,
+        ),
+        MessageType.WARN,
+        this.#context.logLevel,
+      );
       return;
     }
     if (this.#isSingleElementAPI) {

@@ -73,7 +73,7 @@ const element = {
               token: 'skyflow-id-1',
               elementId: 'element-id-1',
               ...stylesOptions
-          }, 
+          },
       ]
   }],
   errorTextStyles:{
@@ -100,7 +100,7 @@ const element2 = {
               token: 'skyflow-id-1',
               elementId: 'element-id-1',
               ...stylesOptions
-          }, 
+          },
           {
               elementType: 'REVEAL',
               elementName: `reveal-composable:124`,
@@ -128,11 +128,13 @@ const on = jest.fn();
 const emit = jest.fn();
 describe('composableFrameElementInit Additional Test Cases', () => {
     let emitSpy;
-    let windowSpy;
     let targetSpy;
+    let origName;
+    let origPostMessage;
 
     beforeEach(() => {
-        windowSpy = jest.spyOn(global, 'window', 'get');
+        origName = window.name;
+        origPostMessage = window.parent.postMessage;
         jest.clearAllMocks()
         emitSpy = jest.spyOn(bus, 'emit');
         targetSpy = jest.spyOn(bus, 'target');
@@ -140,7 +142,7 @@ describe('composableFrameElementInit Additional Test Cases', () => {
             on,
             emit
         });
-        
+
         // Set default successful response for fetchRecordsByTokenIdComposable
         mockFetchRecordsByTokenIdComposable.mockResolvedValue({
             records: [{
@@ -153,16 +155,18 @@ describe('composableFrameElementInit Additional Test Cases', () => {
     });
 
     afterEach(() => {
+        window.name = origName;
+        window.parent.postMessage = origPostMessage;
         jest.restoreAllMocks();
     });
-    
+
     test('height event window listener triggers callbacks via real dispatch', () => {
       const containerId = 'height-listener-cover';
       const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
-      // Configure real window (JSDOM) rather than full mock so dispatchEvent works
-      Object.defineProperty(window, 'name', { value: id, configurable: true });
+      // Set window.name directly (jsdom 26: window.name is writable)
+      window.name = id;
       const encoded = btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' } }, containerId }));
-      window.history.pushState({}, '', `http://localhost/?${encoded}`);
+      window.history.pushState({}, '', `/?${encoded}`);
       const postMessageSpy = jest.spyOn(window.parent, 'postMessage').mockImplementation(() => {});
 
       RevealComposableFrameElementInit.startFrameElement();
@@ -183,56 +187,27 @@ describe('composableFrameElementInit Additional Test Cases', () => {
     });
 
     test('should handle missing window name gracefully', () => {
-        windowSpy = jest.spyOn(global, 'window', 'get');
-        windowSpy.mockImplementation(() => ({
-          name: ``,
-          location: {
-            href: `http://localhost/?${btoa(JSON.stringify({record:element, clientJSON: {metaData: {clientDomain: 'http://localhost.com'}}}))}`,
-          },
-          parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-              }
-            },
-            addEventListener: jest.fn(),
-        }))
-          const frameElement = new RevealComposableFrameElementInit()
-          expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
+        window.name = '';
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({record:element, clientJSON: {metaData: {clientDomain: 'http://localhost.com'}}}))}`);
+        window.parent.postMessage = jest.fn();
+        expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
 
     test('should handle invalid base64 encoded URL data', () => {
-        windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:123:ERROR:`,
-          location: { href: 'http://localhost/?invalid_base64_data' },
-          parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-              }
-            },
-            addEventListener: jest.fn(),
-        }));
+        window.name = `${COMPOSABLE_REVEAL}:123:ERROR:`;
+        window.history.pushState({}, '', '/?invalid_base64_data');
+        window.parent.postMessage = jest.fn();
 
-        expect(() => RevealComposableFrameElementInit.startFrameElement()).toThrowError({'message':'The string to be decoded contains invalid characters.'});
+        expect(() => RevealComposableFrameElementInit.startFrameElement()).toThrow({'message':'The string to be decoded contains invalid characters.'});
     });
 
     test('should correctly bind multiple event listeners', () => {
       const onSpy = jest.spyOn(bus, 'on');
-      windowSpy = jest.spyOn(global, 'window', 'get');
-      const id = `${COMPOSABLE_REVEAL}:123:ERROR:`
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`,
-          },
-          parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-              }
-            },
-            addEventListener: jest.fn(),
-            dispatchEvent: jest.fn(),
-      }));
-  
+      const id = `${COMPOSABLE_REVEAL}:123:ERROR:`;
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`);
+      window.parent.postMessage = jest.fn();
+
       RevealComposableFrameElementInit.startFrameElement();
       window.dispatchEvent(new MessageEvent('message', {
         data: {
@@ -243,28 +218,18 @@ describe('composableFrameElementInit Additional Test Cases', () => {
         },
         origin: 'http://localhost.com',
       }));
-  
+
       expect(onSpy).toHaveBeenCalledWith(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + id, expect.any(Function)
       )
       expect(onSpy).toHaveBeenCalledWith(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + id, expect.any(Function));
-   });  
+   });
 
   test('should correctly extract record and metadata from URL', () => {
       const onSpy = jest.spyOn(bus, 'on');
-      windowSpy = jest.spyOn(global, 'window', 'get');
-      const id = `${COMPOSABLE_REVEAL}:123:ERROR:`
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`,
-          },
-          parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-              }
-            },
-            addEventListener: jest.fn(),
-      }));
+      const id = `${COMPOSABLE_REVEAL}:123:ERROR:`;
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`);
+      window.parent.postMessage = jest.fn();
 
       expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
@@ -272,69 +237,48 @@ describe('composableFrameElementInit Additional Test Cases', () => {
     test('should correctly initialize composable frame elements', () => {
         RevealComposableFrameElementInit.group = [];
 
-        windowSpy.mockImplementation(() => ({
-            name: `${COMPOSABLE_REVEAL}:group:123:ERROR:`,
-            location: {
-                href: `http://localhost/?${btoa(
-                    JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } })
-                )}`
-            },
-            parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-              }
-            },
-            addEventListener: jest.fn(),
-        }));
+        window.name = `${COMPOSABLE_REVEAL}:group:123:ERROR:`;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`);
+        window.parent.postMessage = jest.fn();
 
         expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
 
     test('should throw error for incorrect element type', () => {
-        windowSpy.mockImplementation(() => ({
-            name: `${COMPOSABLE_REVEAL}:UNKNOWN_TYPE:123:ERROR:`,
-            location: { href: `http://localhost/?${btoa(JSON.stringify({ record: {}, metaData: {} }))}` }
-        }));
+        window.name = `${COMPOSABLE_REVEAL}:UNKNOWN_TYPE:123:ERROR:`;
+        // Use record: null so that createContainerDiv(null) throws TypeError
+        // when it tries to set null.spacing = ...
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: null, metaData: {} }))}`);
+        window.parent.postMessage = jest.fn();
+
         expect(() => RevealComposableFrameElementInit.startFrameElement()).toThrow(TypeError);
       });
 
     test('should handle malformed window name', () => {
-        windowSpy.mockImplementation(() => ({
-            name: 'INVALID_NAME_FORMAT',
-            location: { href: 'http://localhost/' }
-        }));
+        window.name = 'INVALID_NAME_FORMAT';
+        window.history.pushState({}, '', '/');
+        window.parent.postMessage = jest.fn();
 
         expect(() => RevealComposableFrameElementInit.startFrameElement()).toThrow(TypeError);
     });
 
     test('should not crash on undefined window object', () => {
-        windowSpy.mockImplementation(() => undefined);
-
+        // Empty name + no URL params causes TypeError when group parsing fails
+        window.name = '';
+        window.history.pushState({}, '', '/');
         expect(() => RevealComposableFrameElementInit.startFrameElement('')).toThrow(TypeError);
     });
-    
+
     test('composable reveal frame element init reveal events', () => {
       const onSpy = jest.spyOn(bus, 'on');
-      windowSpy = jest.spyOn(global, 'window', 'get');
-      const id = `${COMPOSABLE_REVEAL}:123:ERROR:`
+      const id = `${COMPOSABLE_REVEAL}:123:ERROR:`;
       const containerId = '123';
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' }, containerId:containerId }))}`,
-          },
-          parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-              },
-          },
-          addEventListener: jest.fn(),
-          dispatchEvent: jest.fn(),
-          postMessage: jest.fn(),
-      }));
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' }, containerId: containerId }))}`);
+      window.parent.postMessage = jest.fn();
 
-     RevealComposableFrameElementInit.startFrameElement();
-     window.dispatchEvent(new MessageEvent('message', {
+      RevealComposableFrameElementInit.startFrameElement();
+      window.dispatchEvent(new MessageEvent('message', {
         data:{
             name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
             context:{
@@ -355,23 +299,13 @@ describe('composableFrameElementInit Additional Test Cases', () => {
 
     test('should handle HEIGHT_CALLBACK_COMPOSABLE event', () => {
       const onSpy = jest.spyOn(bus, 'on');
-      windowSpy = jest.spyOn(global, 'window', 'get');
-      const id = `${COMPOSABLE_REVEAL}:123:ERROR:`
+      const id = `${COMPOSABLE_REVEAL}:123:ERROR:`;
       const containerId = '123';
       const postMessageSpy = jest.fn();
-      
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId:containerId }))}`,
-          },
-          parent: {
-              postMessage: postMessageSpy,
-          },
-          addEventListener: jest.fn(),
-          dispatchEvent: jest.fn(),
-          postMessage: jest.fn(),
-      }));
+
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId: containerId }))}`);
+      window.parent.postMessage = postMessageSpy;
 
       RevealComposableFrameElementInit.startFrameElement();
 
@@ -388,26 +322,16 @@ describe('composableFrameElementInit Additional Test Cases', () => {
 
     test('should handle HEIGHT_CALLBACK_COMPOSABLE message event', () => {
       const onSpy = jest.spyOn(bus, 'on');
-      windowSpy = jest.spyOn(global, 'window', 'get');
-      const id = `${COMPOSABLE_REVEAL}:456:ERROR:`
+      const id = `${COMPOSABLE_REVEAL}:456:ERROR:`;
       const containerId = '456';
       const postMessageSpy = jest.fn();
-      
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId:containerId }))}`,
-          },
-          parent: {
-              postMessage: postMessageSpy,
-          },
-          addEventListener: jest.fn(),
-          dispatchEvent: jest.fn(),
-          postMessage: jest.fn(),
-      }));
+
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId: containerId }))}`);
+      window.parent.postMessage = postMessageSpy;
 
       RevealComposableFrameElementInit.startFrameElement();
-      
+
       // Trigger HEIGHT_CALLBACK_COMPOSABLE event
       window.dispatchEvent(new MessageEvent('message', {
         data:{
@@ -461,16 +385,9 @@ describe('composableFrameElementInit Additional Test Cases', () => {
         ]
       };
 
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:multi-row:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: multiRowElement, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'multi-row' }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: jest.fn(),
-      }));
+      window.name = `${COMPOSABLE_REVEAL}:multi-row:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: multiRowElement, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'multi-row' }))}`);
+      window.parent.postMessage = jest.fn();
 
       expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
@@ -496,16 +413,9 @@ describe('composableFrameElementInit Additional Test Cases', () => {
         }]
       };
 
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:spacing-test:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: elementWithSpacing, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'spacing-test' }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: jest.fn(),
-      }));
+      window.name = `${COMPOSABLE_REVEAL}:spacing-test:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: elementWithSpacing, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'spacing-test' }))}`);
+      window.parent.postMessage = jest.fn();
 
       expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
@@ -533,16 +443,9 @@ describe('composableFrameElementInit Additional Test Cases', () => {
         }]
       };
 
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:alignment-test:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: elementWithAlignment, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'alignment-test' }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: jest.fn(),
-      }));
+      window.name = `${COMPOSABLE_REVEAL}:alignment-test:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: elementWithAlignment, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'alignment-test' }))}`);
+      window.parent.postMessage = jest.fn();
 
       expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
@@ -550,21 +453,13 @@ describe('composableFrameElementInit Additional Test Cases', () => {
     test('should emit MOUNTED event on initialization', () => {
       const containerId = '123';
       const postMessageSpy = jest.fn();
-      const addEventListenerSpy = jest.fn();
-      
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:123:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId: containerId }))}`,
-          },
-          parent: {
-              postMessage: postMessageSpy,
-          },
-          addEventListener: addEventListenerSpy,
-      }));
+
+      window.name = `${COMPOSABLE_REVEAL}:123:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId: containerId }))}`);
+      window.parent.postMessage = postMessageSpy;
 
       RevealComposableFrameElementInit.startFrameElement();
-      
+
       expect(postMessageSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + containerId,
@@ -575,26 +470,16 @@ describe('composableFrameElementInit Additional Test Cases', () => {
 
     test('should handle RENDER_FILE type reveal calls', () => {
       const onSpy = jest.spyOn(bus, 'on');
-      windowSpy = jest.spyOn(global, 'window', 'get');
-      const id = `${COMPOSABLE_REVEAL}:file-render:ERROR:`
+      const id = `${COMPOSABLE_REVEAL}:file-render:ERROR:`;
       const containerId = 'file-render';
-      const addEventListenerSpy = jest.fn();
-      
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId: containerId }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: addEventListenerSpy,
-          dispatchEvent: jest.fn(),
-          postMessage: jest.fn(),
-      }));
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId: containerId }))}`);
+      window.parent.postMessage = jest.fn();
 
       RevealComposableFrameElementInit.startFrameElement();
-      
+
       window.dispatchEvent(new MessageEvent('message', {
         data:{
             name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
@@ -648,20 +533,11 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       };
 
       const containerId = 'multi-elem';
-      const addEventListenerSpy = jest.fn();
-      
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: multiElementRecord, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId: containerId }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: addEventListenerSpy,
-          dispatchEvent: jest.fn(),
-          postMessage: jest.fn(),
-      }));
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+
+      window.name = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: multiElementRecord, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId: containerId }))}`);
+      window.parent.postMessage = jest.fn();
 
       RevealComposableFrameElementInit.startFrameElement();
 
@@ -692,16 +568,9 @@ describe('composableFrameElementInit Additional Test Cases', () => {
         rows: []
       };
 
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:empty-rows:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: emptyRowsElement, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'empty-rows' }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: jest.fn(),
-      }));
+      window.name = `${COMPOSABLE_REVEAL}:empty-rows:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: emptyRowsElement, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'empty-rows' }))}`);
+      window.parent.postMessage = jest.fn();
 
       expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
@@ -724,16 +593,9 @@ describe('composableFrameElementInit Additional Test Cases', () => {
         }]
       };
 
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:no-styles:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: noStylesElement, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'no-styles' }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: jest.fn(),
-      }));
+      window.name = `${COMPOSABLE_REVEAL}:no-styles:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: noStylesElement, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'no-styles' }))}`);
+      window.parent.postMessage = jest.fn();
 
       expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
@@ -751,16 +613,9 @@ describe('composableFrameElementInit Additional Test Cases', () => {
         }
       };
 
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:global-styles:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: globalStylesElement, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'global-styles' }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: jest.fn(),
-      }));
+      window.name = `${COMPOSABLE_REVEAL}:global-styles:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: globalStylesElement, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'global-styles' }))}`);
+      window.parent.postMessage = jest.fn();
 
       expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
@@ -768,20 +623,13 @@ describe('composableFrameElementInit Additional Test Cases', () => {
     test('should listen to HEIGHT event and respond with height data', () => {
       const onSpy = jest.spyOn(bus, 'on');
       const containerId = 'height-test';
-      
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' }, containerId: containerId }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: jest.fn(),
-      }));
+
+      window.name = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' }, containerId: containerId }))}`);
+      window.parent.postMessage = jest.fn();
 
       RevealComposableFrameElementInit.startFrameElement();
-      
+
       expect(onSpy).toHaveBeenCalledWith(
         ELEMENT_EVENTS_TO_CLIENT.HEIGHT + `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`,
         expect.any(Function)
@@ -790,20 +638,11 @@ describe('composableFrameElementInit Additional Test Cases', () => {
 
     test('should handle reveal call with empty elementIds', () => {
       const containerId = 'empty-ids';
-      const addEventListenerSpy = jest.fn();
-      
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId: containerId }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: addEventListenerSpy,
-          dispatchEvent: jest.fn(),
-          postMessage: jest.fn(),
-      }));
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+
+      window.name = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, containerId: containerId }))}`);
+      window.parent.postMessage = jest.fn();
 
       RevealComposableFrameElementInit.startFrameElement();
 
@@ -867,46 +706,25 @@ describe('composableFrameElementInit Additional Test Cases', () => {
         }]
       };
 
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:multi-elem-row:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: multiElementRowElement, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'multi-elem-row' }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: jest.fn(),
-      }));
+      window.name = `${COMPOSABLE_REVEAL}:multi-elem-row:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: multiElementRowElement, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'multi-elem-row' }))}`);
+      window.parent.postMessage = jest.fn();
 
       expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
 
     test('should handle missing containerId in URL params', () => {
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:missing-container:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: jest.fn(),
-      }));
+      window.name = `${COMPOSABLE_REVEAL}:missing-container:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`);
+      window.parent.postMessage = jest.fn();
 
       expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
 
     test('should handle missing context in URL params', () => {
-      windowSpy.mockImplementation(() => ({
-          name: `${COMPOSABLE_REVEAL}:missing-context:ERROR:`,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'missing-context' }))}`,
-          },
-          parent: {
-              postMessage: jest.fn(),
-          },
-          addEventListener: jest.fn(),
-      }));
+      window.name = `${COMPOSABLE_REVEAL}:missing-context:ERROR:`;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' }, containerId: 'missing-context' }))}`);
+      window.parent.postMessage = jest.fn();
 
       expect(() => RevealComposableFrameElementInit.startFrameElement()).not.toThrow();
     });
@@ -914,33 +732,30 @@ describe('composableFrameElementInit Additional Test Cases', () => {
     test('reveal success call', async () => {
       const containerId = 'unrelated-msg-test';
       const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
-      const postMessageSpy = jest.fn().mockImplementation(() => {
-      });
-      let messageHandler;
+      const postMessageSpy = jest.fn();
 
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ 
-                record: element, 
-                clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, 
-                containerId: containerId, 
-              }))}`,
-          },
-          parent: {
-              postMessage: postMessageSpy,
-          },
-          addEventListener: (event, handler) => {
-              if (event === 'message') {
-                  messageHandler = handler;
-              }
-          },
-      }));
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+        record: element,
+        clientJSON: { metaData: { clientDomain: 'http://localhost.com' }},
+        containerId: containerId,
+      }))}`);
+      window.parent.postMessage = postMessageSpy;
+
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
       RevealComposableFrameElementInit.startFrameElement();
-      
+
       postMessageSpy.mockClear();
-      
+
+      // The COMPOSABLE_REVEAL handler is the last message listener registered.
+      // Calling it directly (not via dispatchEvent) keeps the check synchronous:
+      // the promise hasn't resolved yet, so postMessage hasn't been called.
+      const messageHandlerCalls = addEventListenerSpy.mock.calls.filter(c => c[0] === 'message');
+      const messageHandler = messageHandlerCalls.length > 0
+        ? messageHandlerCalls[messageHandlerCalls.length - 1][1]
+        : null;
+
       if (messageHandler) {
           messageHandler({
         data:{
@@ -962,12 +777,11 @@ describe('composableFrameElementInit Additional Test Cases', () => {
           expect(postMessageSpy).not.toHaveBeenCalled();
       }
     });
-    
+
     test('should handle reveal success response with records', async () => {
       const containerId = 'reveal-success-test';
       const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
       const postMessageSpy = jest.fn();
-      let messageHandler;
 
       mockFetchRecordsByTokenIdComposable.mockResolvedValue({
         records: [{
@@ -978,107 +792,64 @@ describe('composableFrameElementInit Additional Test Cases', () => {
         }]
       });
 
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ 
-                record: element, 
-                clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, 
-                containerId: containerId, 
-              }))}`,
-          },
-          parent: {
-              postMessage: postMessageSpy,
-          },
-          addEventListener: (event, handler) => {
-              if (event === 'message') {
-                  messageHandler = handler;
-              }
-          },
-      }));
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+        record: element,
+        clientJSON: { metaData: { clientDomain: 'http://localhost.com' }},
+        containerId: containerId,
+      }))}`);
+      window.parent.postMessage = postMessageSpy;
 
       RevealComposableFrameElementInit.startFrameElement();
-      
       postMessageSpy.mockClear();
-      
-      if (messageHandler) {
-          messageHandler({
-            origin: 'http://localhost.com',
+
+      // Use dispatchEvent so the real registered message handler fires.
+      // The COMPOSABLE_REVEAL handler checks event.origin === clientDomain.
+      window.dispatchEvent(new MessageEvent('message', {
+        origin: 'http://localhost.com',
+        data:{
+            name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
+            context:{
+                vaultId: 'vault-id-1',
+            },
             data:{
+                elementIds: [{frameId:'reveal-composable:123'}],
+                type: REVEAL_TYPES.REVEAL,
                 name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
-                context:{
-                    vaultId: 'vault-id-1',
-                },
-                data:{
-                    elementIds: [{frameId:'reveal-composable:123'}],
-                    type: REVEAL_TYPES.REVEAL,
-                    name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
-                },
-                clientConfig:{
-                    clientDomain: 'http://localhost.com',
-                    uuid: 'uuid-1',
-                    authToken: 'test-token',
-                }
+            },
+            clientConfig:{
+                clientDomain: 'http://localhost.com',
+                uuid: 'uuid-1',
+                authToken: 'test-token',
             }
-          });
+        }
+      }));
 
-          await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-          expect(postMessageSpy).toHaveBeenCalledWith(
-              expect.objectContaining({
-                  type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + containerId,
-              }),
-              'http://localhost.com'
-          );
-      }
+      expect(postMessageSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+              type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + containerId,
+          }),
+          'http://localhost.com'
+      );
     });
 
     test('should handle reveal error response', async () => {
       const containerId = 'reveal-error-test';
       const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
-      const postMessageSpy= jest.fn().mockImplementation((data) => {
-        if (data.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + containerId) {
-            expect(data).toMatchObject({
-                type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + containerId,
-                data: {
-                    errors: [{
-                            error: {
-                                code: '404',
-                                description: 'Token not found',
-                            },
-                        }
-                    ],
-                    success: [{
-                            token: '',
-                            valueType: '',
-                        }]
-                },
-            });
-        }
-      });
-      let messageHandler;
+      const postMessageSpy = jest.fn();
 
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ 
-                record: element2, 
-                clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, 
-                containerId: containerId, 
-              }))}`,
-          },
-          parent: {
-              postMessage: postMessageSpy,
-          },
-          addEventListener: (event, handler) => {
-              if (event === 'message') {
-                  messageHandler = handler;
-              }
-          },
-      }));
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+        record: element2,
+        clientJSON: { metaData: { clientDomain: 'http://localhost.com' }},
+        containerId: containerId,
+      }))}`);
+      window.parent.postMessage = postMessageSpy;
 
       RevealComposableFrameElementInit.startFrameElement();
-      
+
       postMessageSpy.mockClear();
       mockFetchRecordsByTokenIdComposable.mockRejectedValue({
         errors: [{
@@ -1096,68 +867,65 @@ describe('composableFrameElementInit Additional Test Cases', () => {
             frameId: 'reveal-composable:123',
         }]
       });
-      if (messageHandler) {
-          messageHandler({
-            origin: 'http://localhost.com',
-            data:{
-                name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
-                context:{
-                    vaultId: 'vault-id-1',
-                },
-                data:{
-                    elementIds: [{frameId:'reveal-composable:123'}, {frameId:'reveal-composable:124'}],
-                    type: REVEAL_TYPES.REVEAL,
-                    name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
-                },
-                clientConfig:{
-                    clientDomain: 'http://localhost.com',
-                    uuid: 'uuid-1',
-                    authToken: 'test-token',
-                }
-            }
-          });
 
-          await new Promise(resolve => setTimeout(resolve, 100));
-          await new Promise(reject => setTimeout(reject, 100));
-          expect(postMessageSpy).toHaveBeenCalledWith(
-              expect.objectContaining({
-                  type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + containerId,
-              }),
-              'http://localhost.com'
-          );
-      }
+      // Use dispatchEvent so the real registered COMPOSABLE_REVEAL handler fires.
+      window.dispatchEvent(new MessageEvent('message', {
+        origin: 'http://localhost.com',
+        data:{
+            name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
+            context:{
+                vaultId: 'vault-id-1',
+            },
+            data:{
+                elementIds: [{frameId:'reveal-composable:123'}, {frameId:'reveal-composable:124'}],
+                type: REVEAL_TYPES.REVEAL,
+                name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
+            },
+            clientConfig:{
+                clientDomain: 'http://localhost.com',
+                uuid: 'uuid-1',
+                authToken: 'test-token',
+            }
+        }
+      }));
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      expect(postMessageSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+              type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + containerId,
+          }),
+          'http://localhost.com'
+      );
     });
-    
+
     test('reveal call - ignore unrelated messages', async () => {
       const containerId = 'unrelated-msg-test';
       const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
-      const postMessageSpy = jest.fn().mockImplementation(() => {
-      });
-      let messageHandler;
+      const postMessageSpy = jest.fn();
 
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ 
-                record: element, 
-                clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, 
-                containerId: containerId, 
-              }))}`,
-          },
-          parent: {
-              postMessage: postMessageSpy,
-          },
-          addEventListener: (event, handler) => {
-              if (event === 'message') {
-                  messageHandler = handler;
-              }
-          },
-      }));
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+        record: element,
+        clientJSON: { metaData: { clientDomain: 'http://localhost.com' }},
+        containerId: containerId,
+      }))}`);
+      window.parent.postMessage = postMessageSpy;
+
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
       RevealComposableFrameElementInit.startFrameElement();
-      
+
       postMessageSpy.mockClear();
-      
+
+      // The COMPOSABLE_REVEAL handler is the last message listener registered.
+      // Call it directly and synchronously — the promise chain hasn't resolved yet
+      // so postMessage hasn't been called at check time.
+      const messageHandlerCalls = addEventListenerSpy.mock.calls.filter(c => c[0] === 'message');
+      const messageHandler = messageHandlerCalls.length > 0
+        ? messageHandlerCalls[messageHandlerCalls.length - 1][1]
+        : null;
+
       if (messageHandler) {
           messageHandler({
         data:{
@@ -1184,26 +952,27 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       const containerId = 'no-client-domain';
       const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
       const postMessageSpy = jest.fn();
-      let messageHandler;
 
-      windowSpy.mockImplementation(() => ({
-        name: id,
-        location: {
-          href: `http://localhost/?${btoa(JSON.stringify({
-            record: element,
-            clientJSON: { metaData: {} }, // clientDomain intentionally absent
-            containerId: containerId,
-          }))}`,
-        },
-        parent: { postMessage: postMessageSpy },
-        addEventListener: (event, handler) => {
-          if (event === 'message') messageHandler = handler;
-        },
-      }));
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+        record: element,
+        clientJSON: { metaData: {} }, // clientDomain intentionally absent
+        containerId: containerId,
+      }))}`);
+      window.parent.postMessage = postMessageSpy;
+
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
       RevealComposableFrameElementInit.startFrameElement();
       postMessageSpy.mockClear();
       mockFetchRecordsByTokenIdComposable.mockClear();
+
+      // The COMPOSABLE_REVEAL handler is the last message listener registered.
+      // With no clientDomain set, the handler returns early.
+      const messageHandlerCalls = addEventListenerSpy.mock.calls.filter(c => c[0] === 'message');
+      const messageHandler = messageHandlerCalls.length > 0
+        ? messageHandlerCalls[messageHandlerCalls.length - 1][1]
+        : null;
 
       if (messageHandler) {
         messageHandler({
@@ -1227,31 +996,27 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       const containerId = 'missing-data-test';
       const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
       const postMessageSpy = jest.fn();
-      let messageHandler;
 
-      windowSpy.mockImplementation(() => ({
-          name: id,
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ 
-                record: element, 
-                clientJSON: { metaData: { clientDomain: 'http://localhost.com' }}, 
-                containerId: containerId 
-              }))}`,
-          },
-          parent: {
-              postMessage: postMessageSpy,
-          },
-          addEventListener: (event, handler) => {
-              if (event === 'message') {
-                  messageHandler = handler;
-              }
-          },
-      }));
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+        record: element,
+        clientJSON: { metaData: { clientDomain: 'http://localhost.com' }},
+        containerId: containerId
+      }))}`);
+      window.parent.postMessage = postMessageSpy;
+
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
       RevealComposableFrameElementInit.startFrameElement();
-      
+
       postMessageSpy.mockClear();
-      
+
+      // The COMPOSABLE_REVEAL handler is the last message listener registered.
+      const messageHandlerCalls = addEventListenerSpy.mock.calls.filter(c => c[0] === 'message');
+      const messageHandler = messageHandlerCalls.length > 0
+        ? messageHandlerCalls[messageHandlerCalls.length - 1][1]
+        : null;
+
       if (messageHandler) {
           expect(() => {
               messageHandler({

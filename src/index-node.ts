@@ -3,7 +3,7 @@ Copyright (c) 2025 Skyflow, Inc.
 */
 import Skyflow from './skyflow';
 
-export {
+export type {
   IInsertRecordInput as InsertRequest,
   IInsertRecord as InsertRecord,
   IInsertOptions as InsertOptions,
@@ -35,36 +35,37 @@ export {
   InputStyles,
   LabelStyles,
   ErrorTextStyles,
-  RedactionType,
   IRevealRecord as RevealRecord,
   RevealResponse,
   RenderFileResponse,
   IValidationRule as ValidationRule,
-  ValidationRuleType,
-  EventName,
-  LogLevel,
-  Env,
   ElementState,
-  ErrorType,
   ErrorMessages,
 } from './utils/common';
 
 export {
+  RedactionType,
+  ValidationRuleType,
+  EventName,
+  LogLevel,
+  Env,
+  ErrorType,
+} from './utils/common';
+
+export type {
   IRevealElementInput as RevealElementInput,
   IRevealElementOptions as RevealElementOptions,
 } from './core/external/reveal/reveal-container';
 
-export { ThreeDSBrowserDetails } from './core/external/threeds/threeds';
+export type { ThreeDSBrowserDetails } from './core/external/threeds/threeds';
 
 export {
   CardType,
   ElementType,
 } from './core/constants';
 
-export {
-  ContainerType,
-  ISkyflow as SkyflowConfig,
-} from './skyflow';
+export { ContainerType } from './skyflow';
+export type { ISkyflow as SkyflowConfig } from './skyflow';
 
 export { default as CollectElement } from './core/external/collect/collect-element';
 export { default as CollectContainer } from './core/external/collect/collect-container';

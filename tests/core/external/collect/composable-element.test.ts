@@ -75,13 +75,13 @@ describe("test composable element", () => {
   it("tests valid CHANGE listener on composable element", () => {
     expect(testElement.type).toBe(ContainerType.COMPOSABLE);
     testElement.on("CHANGE", handler);
-    expect(handler).toBeCalledWith({ value: "", isValid: true });
+    expect(handler).toHaveBeenCalledWith({ value: "", isValid: true });
   });
 
   it("tests valid FOCUS listener on composable element", () => {
     expect(testElement.type).toBe(ContainerType.COMPOSABLE);
     testElement.on("FOCUS", handler);
-    expect(handler).toBeCalledWith({ value: "", isValid: true });
+    expect(handler).toHaveBeenCalledWith({ value: "", isValid: true });
   });
 
   it("tests invalid listener on composable element", () => {
@@ -111,7 +111,7 @@ describe("test composable element", () => {
   it("should update element propeties when element is mounted", () => {
     const testUpdateOptions = { table: "table" };
     testElement.update(testUpdateOptions);
-    expect(emitter).toBeCalledWith("COMPOSABLE_UPDATE_OPTIONS", {
+    expect(emitter).toHaveBeenCalledWith("COMPOSABLE_UPDATE_OPTIONS", {
       elementName: "testce1",
       elementOptions: testUpdateOptions,
     });
@@ -120,12 +120,12 @@ describe("test composable element", () => {
   it("should update element propeties when element is not mounted", () => {
     const testUpdateOptions = { table: "table" };
     testElement2.update(testUpdateOptions);
-    expect(emitter).not.toBeCalledWith("COMPOSABLE_UPDATE_OPTIONS", {
+    expect(emitter).not.toHaveBeenCalledWith("COMPOSABLE_UPDATE_OPTIONS", {
       elementName: "testce2",
       elementOptions: testUpdateOptions,
     });
     emitSpy();
-    expect(emitter).toBeCalledWith("COMPOSABLE_UPDATE_OPTIONS", {
+    expect(emitter).toHaveBeenCalledWith("COMPOSABLE_UPDATE_OPTIONS", {
       elementName: "testce2",
       elementOptions: testUpdateOptions,
     });

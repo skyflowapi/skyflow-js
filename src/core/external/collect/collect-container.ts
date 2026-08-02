@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import bus from 'framebus';
+import { framebusInstance as bus } from '../../../libs/bus';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
 import deepClone from '../../../libs/deep-clone';
 import {
@@ -126,9 +126,11 @@ class CollectContainer extends Container {
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-    printLog(parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
+    printLog(
+      parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, CLASS_NAME),
       MessageType.LOG,
-      this.#context.logLevel);
+      this.#context.logLevel,
+    );
 
     this.#isMounted = true;
   }
@@ -328,16 +330,24 @@ class CollectContainer extends Container {
                   printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
                   reject(data?.error);
                 } else {
-                  printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                  printLog(
+                    parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
-                    this.#context.logLevel);
+                    this.#context.logLevel,
+                  );
                   resolve(data);
                 }
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EMIT_EVENT,
+              CLASS_NAME,
+              ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
         } catch (err: any) {
           printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
           reject(err);
@@ -370,7 +380,7 @@ class CollectContainer extends Container {
           validateUpsertOptions(options?.upsert);
         }
         bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
+          .target({ origin: properties.IFRAME_SECURE_ORIGIN })
           .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
             bus
             // .target(properties.IFRAME_SECURE_ORIGIN)
@@ -389,9 +399,11 @@ class CollectContainer extends Container {
                     printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
                     reject(data?.error);
                   } else {
-                    printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                    printLog(
+                      parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                       MessageType.LOG,
-                      this.#context.logLevel);
+                      this.#context.logLevel,
+                    );
 
                     resolve(data);
                   }
@@ -439,17 +451,25 @@ class CollectContainer extends Container {
                   printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
                   reject(data?.error);
                 } else {
-                  printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                  printLog(
+                    parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                     MessageType.LOG,
-                    this.#context.logLevel);
+                    this.#context.logLevel,
+                  );
 
                   resolve(data);
                 }
               },
             );
-          printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-            CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
-          MessageType.LOG, this.#context.logLevel);
+          printLog(
+            parameterizedString(
+              logs.infoLogs.EMIT_EVENT,
+              CLASS_NAME,
+              ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD,
+            ),
+            MessageType.LOG,
+            this.#context.logLevel,
+          );
         } catch (err:any) {
           printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
           reject(err);
@@ -458,7 +478,7 @@ class CollectContainer extends Container {
     }
     return new Promise((resolve, reject) => {
       bus
-        .target(properties.IFRAME_SECURE_ORIGIN)
+        .target({ origin: properties.IFRAME_SECURE_ORIGIN })
         .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.#containerId, () => {
           try {
             validateInitConfig(this.#metaData.clientJSON.config);
@@ -490,17 +510,25 @@ class CollectContainer extends Container {
                     printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.#context.logLevel);
                     reject(data?.error);
                   } else {
-                    printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
+                    printLog(
+                      parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
                       MessageType.LOG,
-                      this.#context.logLevel);
+                      this.#context.logLevel,
+                    );
 
                     resolve(data);
                   }
                 },
               );
-            printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
-              CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD),
-            MessageType.LOG, this.#context.logLevel);
+            printLog(
+              parameterizedString(
+                logs.infoLogs.EMIT_EVENT,
+                CLASS_NAME,
+                ELEMENT_EVENTS_TO_IFRAME.FILE_UPLOAD,
+              ),
+              MessageType.LOG,
+              this.#context.logLevel,
+            );
           } catch (err:any) {
             printLog(`${err.message}`, MessageType.ERROR, this.#context.logLevel);
             reject(err);
@@ -524,6 +552,7 @@ class CollectContainer extends Container {
 
   #hasNoElements = (): boolean => Object.keys(this.#elements).length === 0;
 
+  // eslint-disable-next-line class-methods-use-this
   #getMountedIframeIds = (): string[] => {
     const body = document?.body;
     if (!body) return [];
@@ -542,6 +571,7 @@ class CollectContainer extends Container {
     });
   };
 
+  // eslint-disable-next-line class-methods-use-this
   #shouldRemoveElement = (
     element: CollectElement,
     mountedIframeIds: string[],

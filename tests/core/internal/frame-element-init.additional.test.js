@@ -124,6 +124,8 @@ describe('FrameElementInit extended unit tests', () => {
   let originalValidateFileName;
   // use exported mockClientRequest instead of spying prototype
 
+  let origName;
+  let origPostMessage;
   beforeEach(() => {
     const payload = {
       record: { rows: [] },
@@ -131,22 +133,22 @@ describe('FrameElementInit extended unit tests', () => {
       containerId: 'group',
     };
     const encoded = btoa(JSON.stringify(payload));
-    // Mock global window (avoid setting location.href directly to prevent jsdom navigation error)
-    jest.spyOn(global, 'window', 'get').mockReturnValue({
-      name: 'FRAME_ELEMENT:group:123:ERROR:',
-      location: { href: `http://localhost/?${encoded}` },
-      parent: { postMessage: jest.fn() },
-      addEventListener: jest.fn(),
-    });
+    origName = window.name;
+    origPostMessage = window.parent.postMessage;
+    window.name = 'FRAME_ELEMENT:group:123:ERROR:';
+    window.history.pushState({}, '', `/?${encoded}`);
+    window.parent.postMessage = jest.fn();
     originalFileValidation = helpers.fileValidation;
     originalValidateFileName = helpers.vaildateFileName;
   });
 
 
   afterEach(() => {
+    window.name = origName;
+    window.parent.postMessage = origPostMessage;
     helpers.fileValidation = originalFileValidation;
     helpers.vaildateFileName = originalValidateFileName;
-  mockClientRequest.mockReset();
+    mockClientRequest.mockReset();
     jest.clearAllMocks();
   });
 

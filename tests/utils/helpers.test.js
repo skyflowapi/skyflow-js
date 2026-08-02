@@ -243,7 +243,7 @@ describe('test file validation', () => {
     }
     expect(() => {
       fileValidation(file, false, {blockEmptyFiles: true});
-    }).toThrowError(expect.objectContaining({
+    }).toThrow(expect.objectContaining({
       error: expect.objectContaining({
         description: parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description)
       })
@@ -342,7 +342,7 @@ describe('test file validation', () => {
     }
     expect(() => {
       fileValidation(file, false, { maxFileSize: 4000000 });
-    }).toThrowError(expect.objectContaining({
+    }).toThrow(expect.objectContaining({
       error: expect.objectContaining({
         description: parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description)
       })
@@ -375,7 +375,7 @@ describe('test file validation', () => {
     }
     expect(() => {
       fileValidation(file, false, {});
-    }).toThrowError(expect.objectContaining({
+    }).toThrow(expect.objectContaining({
       error: expect.objectContaining({
         description: parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE.description)
       })
@@ -775,7 +775,7 @@ describe('test domReady function', () => {
     pagestate="loading";
     domReady(testSpyFunction);
     jest.runAllTimers();
-    expect(testSpyFunction).not.toBeCalled()
+    expect(testSpyFunction).not.toHaveBeenCalled()
   })
   
   test('should call function directly if readyState is not loading', () => {
@@ -783,7 +783,7 @@ describe('test domReady function', () => {
     pagestate="complete";
     domReady(testSpyFunction);
     jest.runAllTimers();
-    expect(testSpyFunction).toBeCalled()
+    expect(testSpyFunction).toHaveBeenCalled()
   })
 
   test('should call multiple functions in sequence when page is loading',()=>{
@@ -792,16 +792,16 @@ describe('test domReady function', () => {
     domReady(testSpyFunction1);
     domReady(testSpyFunction2);
     pagestate="loading";
-    expect(testSpyFunction1).not.toBeCalled()
-    expect(testSpyFunction2).not.toBeCalled()
+    expect(testSpyFunction1).not.toHaveBeenCalled()
+    expect(testSpyFunction2).not.toHaveBeenCalled()
     pagestate='complete'
     window.document.dispatchEvent(new Event("DOMContentLoaded", {
       bubbles: true,
       cancelable: true
     }));
     jest.runAllTimers();
-    expect(testSpyFunction1).toBeCalled()
-    expect(testSpyFunction2).toBeCalled()
+    expect(testSpyFunction1).toHaveBeenCalled()
+    expect(testSpyFunction2).toHaveBeenCalled()
   })
 })
 

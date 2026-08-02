@@ -1666,7 +1666,7 @@ describe('Get BearerToken Listener', () => {
     const onCb = onCbEvent[0][1];
     onCb({}, emitterCb);
     setTimeout(() => {
-      expect(emitterCb).toBeCalledTimes(1);
+      expect(emitterCb).toHaveBeenCalledTimes(1);
       done();
     }, 1000);
   });
@@ -1692,8 +1692,8 @@ describe('Get BearerToken Listener', () => {
     const onCb = onCbEvent[0][1];
     onCb({}, emitterCb);
     setTimeout(() => {
-      expect(emitterCb).toBeCalledTimes(1);
-      expect(emitterCb).toBeCalledWith({ error: 'Error in userFunction' });
+      expect(emitterCb).toHaveBeenCalledTimes(1);
+      expect(emitterCb).toHaveBeenCalledWith({ error: 'Error in userFunction' });
       done();
     }, 1000);
   });

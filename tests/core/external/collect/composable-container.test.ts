@@ -464,7 +464,7 @@ describe("test composable container class", () => {
     setTimeout(() => {
       container.mount("#composable");
       container.unmount();
-      expect(mockUnmount).toBeCalled();
+      expect(mockUnmount).toHaveBeenCalled();
     }, 0);
   });
 });

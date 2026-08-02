@@ -5,7 +5,8 @@
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "./tsconfig.json"
+        "project": "./tsconfig.json",
+        "warnOnUnsupportedTypeScriptVersion": false
     },
     "plugins": [
         "@typescript-eslint"
@@ -31,6 +32,8 @@
         ],
         "no-param-reassign": "off",
         "prefer-destructuring": "off",
-        "@typescript-eslint/no-implied-eval": "off"
+        "@typescript-eslint/no-implied-eval": "off",
+        "@typescript-eslint/space-before-blocks": "off",
+        "space-before-blocks": ["error", "always"]
     }
 }

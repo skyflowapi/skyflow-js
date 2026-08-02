@@ -42,9 +42,9 @@ describe("Client Class",()=>{
                     "key":"value"
                 }
             });
-            expect(xhrMock.open).toBeCalledWith('GET', 'https://example-test.com');
-            expect(xhrMock.setRequestHeader).toBeCalledWith("Auth","eyde.ed.ewe");
-            expect(xhrMock.send).toBeCalledWith(JSON.stringify({
+            expect(xhrMock.open).toHaveBeenCalledWith('GET', 'https://example-test.com');
+            expect(xhrMock.setRequestHeader).toHaveBeenCalledWith("Auth","eyde.ed.ewe");
+            expect(xhrMock.send).toHaveBeenCalledWith(JSON.stringify({
                 "key":"value"
             }));
             xhrMock.onload();
@@ -78,7 +78,7 @@ describe("Client Class",()=>{
                     "key":"value"
                 }
             });
-            expect(xhrMock.setRequestHeader).toBeCalledWith("content-type","application/x-www-form-urlencoded");
+            expect(xhrMock.setRequestHeader).toHaveBeenCalledWith("content-type","application/x-www-form-urlencoded");
             xhrMock.onload();
         }catch(err){
             console.log(err);
@@ -113,7 +113,7 @@ describe("Client Class",()=>{
                 }
             });
             xhrMock.onload();
-            expect(xhrMock.setRequestHeader).toBeCalledWith("Auth","eyde.ed.ewe");
+            expect(xhrMock.setRequestHeader).toHaveBeenCalledWith("Auth","eyde.ed.ewe");
         }catch(err){
             console.log(err);
         }
@@ -157,7 +157,7 @@ describe("Client Class",()=>{
                     "key":"value"
                 }
             });
-            expect(xhrMock.setRequestHeader).toBeCalledWith("content-type","application/x-www-form-urlencoded");
+            expect(xhrMock.setRequestHeader).toHaveBeenCalledWith("content-type","application/x-www-form-urlencoded");
             xhrMock.onload();
         }catch(err){
             console.log(err);
@@ -192,9 +192,9 @@ describe("Client Class",()=>{
             }).catch(err=>{
                 expect(err).toBeDefined();
             });
-            expect(xhrMock.open).toBeCalledWith('GET', 'https://example-test.com');
-            expect(xhrMock.setRequestHeader).toBeCalledWith("Auth","eyde.ed.ewe");
-            expect(xhrMock.send).toBeCalledWith(JSON.stringify({
+            expect(xhrMock.open).toHaveBeenCalledWith('GET', 'https://example-test.com');
+            expect(xhrMock.setRequestHeader).toHaveBeenCalledWith("Auth","eyde.ed.ewe");
+            expect(xhrMock.send).toHaveBeenCalledWith(JSON.stringify({
                 "key":"value"
             }));
             xhrMock.onload();
@@ -229,9 +229,9 @@ describe("Client Class",()=>{
             }).catch(err=>{
                 expect(err).toBeDefined();
             });
-            expect(xhrMock.open).toBeCalledWith('GET', 'https://example-test.com');
-            expect(xhrMock.setRequestHeader).toBeCalledWith("Auth","eyde.ed.ewe");
-            expect(xhrMock.send).toBeCalledWith(JSON.stringify({
+            expect(xhrMock.open).toHaveBeenCalledWith('GET', 'https://example-test.com');
+            expect(xhrMock.setRequestHeader).toHaveBeenCalledWith("Auth","eyde.ed.ewe");
+            expect(xhrMock.send).toHaveBeenCalledWith(JSON.stringify({
                 "key":"value"
             }));
             xhrMock.onload();

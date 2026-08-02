@@ -1,6 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+import mime from 'mime';
 import { SdkInfo } from '../../client';
 import {
   ALLOWED_NAME_FOR_FILE,
@@ -16,7 +17,7 @@ import properties from '../../properties';
 import uuid from '../../libs/uuid';
 import SDKDetails from '../../../package.json';
 
-const { getType } = require('mime');
+const getType = (path: string) => mime.getType(path);
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
@@ -75,6 +76,7 @@ export const getReturnValue = (value: string | Blob, element: string, doesReturn
         const cardType = detectCardType(value);
         const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
         if (value.length > threshold) {
+          // eslint-disable-next-line no-unsafe-optional-chaining
           return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
         }
         return value;
@@ -186,6 +188,7 @@ export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
 
 const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-package', 'application/vnd.microsoft.portable-executable', 'application/vnd.rar'];
 // Check file type and file size in KB
+// eslint-disable-next-line @typescript-eslint/default-param-last
 export const fileValidation = (value, required: Boolean = false, fileElement) => {
   if (required && (value === undefined || value === '')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED, [], true);

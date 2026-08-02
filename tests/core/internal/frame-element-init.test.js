@@ -24,37 +24,9 @@ jest.mock('../../../src/utils/helpers', () => {
     generateUploadFileName: (name) => `generated_${name}`,
   };
 });
-const mockFile1 = new File(['file content 1'], 'test-file-1.txt', { type: 'text/plain' });      
+const mockFile1 = new File(['file content 1'], 'test-file-1.txt', { type: 'text/plain' });
 // Create a mock FileList
 const mockFileList = mockFile1;
-// {
-//             0: mockFile1,
-//             length: 1,
-//             item: function(index) { return this[index] || null; },
-//             [Symbol.iterator]: function* () {
-//                 for (let i = 0; i < this.length; i++) {
-//                     yield this[i];
-//                 }
-//   }
-// };
-// jest.mock('../../../src/core/internal/iframe-form', () => {
-//     const actual = jest.requireActual('../../../src/core/internal/iframe-form');
-    
-//     return {
-//         __esModule: true,
-//         default: class MockIFrameFormElement extends actual.default {
-//             constructor(...args) {
-//                 super(...args);
-//                 // Override state after construction
-//                 this.state = {
-//                     value: mockFileList, // This would still have scope issues
-//                     name: 'file_upload',
-//                     // ... rest of state
-//                 };
-//             }
-//         }
-//     };
-// });
 
 const stylesOptions = {
   inputStyles: {
@@ -132,12 +104,14 @@ const on = jest.fn();
 const emit = jest.fn();
 describe('FrameElementInit Additional Test Cases', () => {
     let emitSpy;
-    let windowSpy;
     let targetSpy;
+    let origName;
+    let origPostMessage;
 
     beforeEach(() => {
-        windowSpy = jest.spyOn(global, 'window', 'get');
-        jest.clearAllMocks()
+        origName = window.name;
+        origPostMessage = window.parent.postMessage;
+        jest.clearAllMocks();
         emitSpy = jest.spyOn(bus, 'emit');
         targetSpy = jest.spyOn(bus, 'target');
         targetSpy.mockReturnValue({
@@ -147,65 +121,36 @@ describe('FrameElementInit Additional Test Cases', () => {
     });
 
     afterEach(() => {
+        window.name = origName;
+        window.parent.postMessage = origPostMessage;
         jest.restoreAllMocks();
     });
 
     test('should handle missing window name gracefully', () => {
-        windowSpy = jest.spyOn(global, 'window', 'get');
-        windowSpy.mockImplementation(() => ({
-          name: ``,
-          location: {
-            href: `http://localhost/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'http://localhost.com'}}))}`,
-          },
-          parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
-              }
-            },
-            addEventListener: jest.fn(),
-        }))
-          const onSpy = jest.spyOn(bus, 'on');
-          const frameElement = new FrameElementInit('CARD_NUMBER')
-          expect(() => FrameElementInit.startFrameElement('CARD_NUMBER')).not.toThrow();
+        window.name = '';
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({record:element, metaData: {clientDomain: 'http://localhost.com'}}))}`);
+        window.parent.postMessage = jest.fn();
+        const onSpy = jest.spyOn(bus, 'on');
+        expect(() => FrameElementInit.startFrameElement('CARD_NUMBER')).not.toThrow();
     });
 
     test('should handle invalid base64 encoded URL data', () => {
-        windowSpy.mockImplementation(() => ({
-          name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
-          location: { href: 'http://localhost/?invalid_base64_data' },
-          parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
-              }
-            },
-            addEventListener: jest.fn(),
-        }));
+        window.name = `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`;
+        window.history.pushState({}, '', '/?invalid_base64_data');
+        window.parent.postMessage = jest.fn();
 
-        expect(() => FrameElementInit.startFrameElement()).toThrowError({'message':'The string to be decoded contains invalid characters.'});
+        expect(() => FrameElementInit.startFrameElement()).toThrow({'message':'The string to be decoded contains invalid characters.'});
     });
 
     test('should correctly bind multiple event listeners', () => {
       const onSpy = jest.spyOn(bus, 'on');
-      windowSpy = jest.spyOn(global, 'window', 'get');
-      const id = `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`
-      windowSpy.mockImplementation(() => ({
-          name: id, // Fix constant reference
-          location: {
-              href: `http://localhost/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`,
-          },
-          parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
-              }
-            },
-            addEventListener: jest.fn(),
-      }));
-  
+      const id = `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`;
+      window.name = id;
+      window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`);
+      window.parent.postMessage = jest.fn();
+
       FrameElementInit.startFrameElement();
-  
+
       expect(onSpy).toHaveBeenCalledWith(ELEMENT_EVENTS_TO_CLIENT.HEIGHT + id, expect.any(Function));
 
       bus.emit(ELEMENT_EVENTS_TO_IFRAME.FOCUS);
@@ -213,7 +158,7 @@ describe('FrameElementInit Additional Test Cases', () => {
 
       bus.emit(ELEMENT_EVENTS_TO_IFRAME.BLUR);
       expect(emitSpy).toHaveBeenCalledWith(ELEMENT_EVENTS_TO_IFRAME.BLUR);
-  });  
+    });
 
     test('should correctly extract record and metadata from URL', () => {
         const mockData = {
@@ -221,17 +166,9 @@ describe('FrameElementInit Additional Test Cases', () => {
             metaData: { clientDomain: 'http://localhost.com' }
         };
 
-        windowSpy.mockImplementation(() => ({
-            name: `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`,
-            location: { href: `http://localhost/?${btoa(JSON.stringify(mockData))}` },
-            parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
-              }
-            },
-            addEventListener: jest.fn(),
-        }));
+        window.name = `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify(mockData))}`);
+        window.parent.postMessage = jest.fn();
 
         expect(() => FrameElementInit.startFrameElement()).not.toThrow();
     });
@@ -239,49 +176,26 @@ describe('FrameElementInit Additional Test Cases', () => {
     test('should correctly initialize composable frame elements', () => {
         FrameElementInit.group = [];
 
-        windowSpy.mockImplementation(() => ({
-            name: `${FRAME_ELEMENT}:group:123:ERROR:`,
-            location: {
-                href: `http://localhost/?${btoa(
-                    JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } })
-                )}`
-            },
-            parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
-              }
-            },
-            addEventListener: jest.fn(),
-        }));
+        window.name = `${FRAME_ELEMENT}:group:123:ERROR:`;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`);
+        window.parent.postMessage = jest.fn();
 
         expect(() => FrameElementInit.startFrameElement()).not.toThrow();
     });
 
     test('should throw error for incorrect element type', () => {
-        windowSpy.mockImplementation(() => ({
-            name: `${FRAME_ELEMENT}:UNKNOWN_TYPE:123:ERROR:`,
-            location: { href: `http://localhost/?${btoa(JSON.stringify({ record: {}, metaData: {} }))}` }
-        }));
+        window.name = `${FRAME_ELEMENT}:UNKNOWN_TYPE:123:ERROR:`;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: {}, metaData: {} }))}`);
+        window.parent.postMessage = jest.fn();
+
         expect(() => FrameElementInit.startFrameElement()).toThrow(TypeError);
-      });
+    });
 
     test('should emit events correctly on focus and blur', () => {
-        windowSpy.mockImplementation(() => ({
-          name: `${FRAME_ELEMENT}:group:123:ERROR:`,
-          location: {
-            href: `http://localhost/?${btoa(
-                JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } })
-            )}`
-          },
-          parent: {
-              postMessage: (message, targetOrigin, ...args) => {
-                if (!targetOrigin) targetOrigin = "*";
-                // Optionally, call a jest mock here
-              }
-            },
-            addEventListener: jest.fn(),
-        }));
+        window.name = `${FRAME_ELEMENT}:group:123:ERROR:`;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({ record: element, metaData: { clientDomain: 'http://localhost.com' } }))}`);
+        window.parent.postMessage = jest.fn();
+
         FrameElementInit.startFrameElement();
 
         bus.emit(ELEMENT_EVENTS_TO_IFRAME.FOCUS);
@@ -292,16 +206,18 @@ describe('FrameElementInit Additional Test Cases', () => {
     });
 
     test('should handle malformed window name', () => {
-        windowSpy.mockImplementation(() => ({
-            name: 'INVALID_NAME_FORMAT',
-            location: { href: 'http://localhost/' }
-        }));
+        window.name = 'INVALID_NAME_FORMAT';
+        window.history.pushState({}, '', '/');
+        window.parent.postMessage = jest.fn();
 
         expect(() => FrameElementInit.startFrameElement()).toThrow(TypeError);
     });
 
     test('should not crash on undefined window object', () => {
-        windowSpy.mockImplementation(() => undefined);
+        // Cannot make window undefined in jsdom; test that empty name + no URL params causes TypeError
+        window.name = '';
+        window.history.pushState({}, '', '/');
+        window.parent.postMessage = jest.fn();
 
         expect(() => FrameElementInit.startFrameElement('')).toThrow(TypeError);
     });
@@ -309,20 +225,13 @@ describe('FrameElementInit Additional Test Cases', () => {
     test('should call window.parent.postMessage on HEIGHT_CALLBACK event', () => {
         const id = `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`;
         const postMessageSpy = jest.fn();
-        
-        windowSpy.mockImplementation(() => ({
-            name: id,
-            location: {
-                href: `http://localhost/?${btoa(JSON.stringify({ 
-                    record: element, 
-                    metaData: { clientDomain: 'http://localhost.com' } 
-                }))}`,
-            },
-            parent: {
-                postMessage: postMessageSpy,
-            },
-            addEventListener: jest.fn(),
-        }));
+
+        window.name = id;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+            record: element,
+            metaData: { clientDomain: 'http://localhost.com' }
+        }))}`);
+        window.parent.postMessage = postMessageSpy;
 
         FrameElementInit.startFrameElement();
 
@@ -341,21 +250,15 @@ describe('FrameElementInit Additional Test Cases', () => {
 
     test('should add window message event listener', () => {
         const id = `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`;
-        const addEventListenerSpy = jest.fn();
-        
-        windowSpy.mockImplementation(() => ({
-            name: id,
-            location: {
-                href: `http://localhost/?${btoa(JSON.stringify({ 
-                    record: element, 
-                    metaData: { clientDomain: 'http://localhost.com' } 
-                }))}`,
-            },
-            parent: {
-                postMessage: jest.fn(),
-            },
-            addEventListener: addEventListenerSpy,
-        }));
+
+        window.name = id;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+            record: element,
+            metaData: { clientDomain: 'http://localhost.com' }
+        }))}`);
+        window.parent.postMessage = jest.fn();
+
+        const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
         FrameElementInit.startFrameElement();
 
@@ -363,81 +266,16 @@ describe('FrameElementInit Additional Test Cases', () => {
         expect(addEventListenerSpy).toHaveBeenCalledWith('message', expect.any(Function));
     });
 
-    // test('should handle HEIGHT message event and post HEIGHT_CALLBACK', () => {
-    //     const id = `${FRAME_ELEMENT}:CARD_NUMBER:height-test:ERROR:`;
-    //     const postMessageSpy = jest.fn();
-    //     let messageHandler;
-    //     let windowMock;
-    //     const addEventListenerSpy = jest.fn((event, handler) => {
-    //         if (event === 'message') {
-    //             messageHandler = handler;
-    //         }
-    //     });
-        
-    //     windowSpy.mockImplementation(() => {
-    //         windowMock = {
-    //             name: id,
-    //             location: {
-    //                 href: `http://localhost/?${btoa(JSON.stringify({ 
-    //                     record: element, 
-    //                     metaData: { clientDomain: 'http://localhost.com' } 
-    //                 }))}`,
-    //             },
-    //             parent: {
-    //                 postMessage: postMessageSpy,
-    //             },
-    //             addEventListener: addEventListenerSpy,
-    //         };
-    //         return windowMock;
-    //     });
-
-    //     FrameElementInit.startFrameElement();
-
-    //     // Clear initial postMessage calls
-    //     postMessageSpy.mockClear();
-
-    //     // Simulate HEIGHT message event
-    //     if (messageHandler) {
-    //         // Ensure window mock is still available when handler executes
-    //         windowSpy.mockImplementation(() => windowMock);
-            
-    //         messageHandler({
-    //             data: {
-    //                 name: ELEMENT_EVENTS_TO_CLIENT.HEIGHT + id,
-    //             }
-    //         });
-
-    //         // Verify postMessage was called in response to HEIGHT event
-    //         expect(postMessageSpy).toHaveBeenCalledWith(
-    //             expect.objectContaining({
-    //                 type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + id,
-    //                 data: expect.objectContaining({
-    //                     name: id,
-    //                     height: expect.any(Number),
-    //                 }),
-    //             }),
-    //             'http://localhost.com'
-    //         );
-    //     }
-    // });
-
     test('should register HEIGHT bus event listener', () => {
         const id = `${FRAME_ELEMENT}:CARD_NUMBER:123:ERROR:`;
         const onSpy = jest.spyOn(bus, 'on');
-        
-        windowSpy.mockImplementation(() => ({
-            name: id,
-            location: {
-                href: `http://localhost/?${btoa(JSON.stringify({ 
-                    record: element, 
-                    metaData: { clientDomain: 'http://localhost.com' } 
-                }))}`,
-            },
-            parent: {
-                postMessage: jest.fn(),
-            },
-            addEventListener: jest.fn(),
-        }));
+
+        window.name = id;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+            record: element,
+            metaData: { clientDomain: 'http://localhost.com' }
+        }))}`);
+        window.parent.postMessage = jest.fn();
 
         FrameElementInit.startFrameElement();
 
@@ -451,30 +289,24 @@ describe('FrameElementInit Additional Test Cases', () => {
     test('should ignore unrelated window messages', () => {
         const id = `${FRAME_ELEMENT}:CARD_NUMBER:unrelated-test:ERROR:`;
         const postMessageSpy = jest.fn();
-        let messageHandler;
-        
-        windowSpy.mockImplementation(() => ({
-            name: id,
-            location: {
-                href: `http://localhost/?${btoa(JSON.stringify({ 
-                    record: element, 
-                    metaData: { clientDomain: 'http://localhost.com' } 
-                }))}`,
-            },
-            parent: {
-                postMessage: postMessageSpy,
-            },
-            addEventListener: (event, handler) => {
-                if (event === 'message') {
-                    messageHandler = handler;
-                }
-            },
-        }));
+
+        window.name = id;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+            record: element,
+            metaData: { clientDomain: 'http://localhost.com' }
+        }))}`);
+        window.parent.postMessage = postMessageSpy;
+
+        const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
         FrameElementInit.startFrameElement();
         postMessageSpy.mockClear();
 
-        // Send unrelated message
+        // Get the message handler that was registered
+        const messageCall = addEventListenerSpy.mock.calls.find(c => c[0] === 'message');
+        const messageHandler = messageCall ? messageCall[1] : null;
+
+        // Send unrelated message via the captured handler
         if (messageHandler) {
             messageHandler({
                 data: {
@@ -491,28 +323,22 @@ describe('FrameElementInit Additional Test Cases', () => {
     test('should handle window message with missing data gracefully', () => {
         const id = `${FRAME_ELEMENT}:CARD_NUMBER:missing-data:ERROR:`;
         const postMessageSpy = jest.fn();
-        let messageHandler;
-        
-        windowSpy.mockImplementation(() => ({
-            name: id,
-            location: {
-                href: `http://localhost/?${btoa(JSON.stringify({ 
-                    record: element, 
-                    metaData: { clientDomain: 'http://localhost.com' } 
-                }))}`,
-            },
-            parent: {
-                postMessage: postMessageSpy,
-            },
-            addEventListener: (event, handler) => {
-                if (event === 'message') {
-                    messageHandler = handler;
-                }
-            },
-        }));
+
+        window.name = id;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+            record: element,
+            metaData: { clientDomain: 'http://localhost.com' }
+        }))}`);
+        window.parent.postMessage = postMessageSpy;
+
+        const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
         FrameElementInit.startFrameElement();
         postMessageSpy.mockClear();
+
+        // Get the message handler that was registered (the one from createContainerDiv)
+        const messageCall = addEventListenerSpy.mock.calls.find(c => c[0] === 'message');
+        const messageHandler = messageCall ? messageCall[1] : null;
 
         // Send message with missing data
         if (messageHandler) {
@@ -532,25 +358,18 @@ describe('FrameElementInit Additional Test Cases', () => {
     test('should respond to HEIGHT bus event with callback', () => {
         const id = `${FRAME_ELEMENT}:CARD_NUMBER:bus-height:ERROR:`;
         const callbackSpy = jest.fn();
-        
-        windowSpy.mockImplementation(() => ({
-            name: id,
-            location: {
-                href: `http://localhost/?${btoa(JSON.stringify({ 
-                    record: element, 
-                    metaData: { clientDomain: 'http://localhost.com' } 
-                }))}`,
-            },
-            parent: {
-                postMessage: jest.fn(),
-            },
-            addEventListener: jest.fn(),
-        }));
+
+        window.name = id;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+            record: element,
+            metaData: { clientDomain: 'http://localhost.com' }
+        }))}`);
+        window.parent.postMessage = jest.fn();
 
         FrameElementInit.startFrameElement();
 
         // Get the HEIGHT event listener callback
-        const heightCallback = on.mock.calls.find(call => 
+        const heightCallback = on.mock.calls.find(call =>
             call[0] === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + id
         )?.[1];
 
@@ -581,23 +400,16 @@ describe('FrameElementInit Additional Test Cases', () => {
                 }]
             }]
         };
-        
+
         const id = `${FRAME_ELEMENT}:group:composable-blur:ERROR:`;
         const postMessageSpy = jest.fn();
-        
-        windowSpy.mockImplementation(() => ({
-            name: id,
-            location: {
-                href: `http://localhost/?${btoa(JSON.stringify({ 
-                    record: composableElement, 
-                    metaData: { clientDomain: 'http://localhost.com' } 
-                }))}`,
-            },
-            parent: {
-                postMessage: postMessageSpy,
-            },
-            addEventListener: jest.fn(),
-        }));
+
+        window.name = id;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+            record: composableElement,
+            metaData: { clientDomain: 'http://localhost.com' }
+        }))}`);
+        window.parent.postMessage = postMessageSpy;
 
         FrameElementInit.startFrameElement();
 
@@ -609,6 +421,7 @@ describe('FrameElementInit Additional Test Cases', () => {
             'http://localhost.com'
         );
     });
+
     test('should handle multi file upload message event error case', async () => {
         const composableElement = {
             ...element,
@@ -629,78 +442,55 @@ describe('FrameElementInit Additional Test Cases', () => {
                 }]
             }]
         };
-        
+
         const id = `${FRAME_ELEMENT}:group:123:ERROR:`;
         const postMessageSpy = jest.fn();
-        let messageHandler;
-        let windowMock;
-        
-        windowSpy.mockImplementation(() => {
-            windowMock = {
-                name: id,
-                location: {
-                    href: `http://localhost/?${btoa(JSON.stringify({ 
-                        record: composableElement, 
-                        metaData: { clientDomain: 'http://localhost.com' } 
-                    }))}`,
-                },
-                parent: {
-                    postMessage: postMessageSpy,
-                    addEventListener: jest.fn(),
-                },
-                addEventListener: (event, handler) => {
-                    if (event === 'message') {
-                        messageHandler = handler;
-                    }
-                },
-                dispatchEvent: jest.fn(),
-            };
-            return windowMock;
-        });
+
+        window.name = id;
+        window.history.pushState({}, '', `/?${btoa(JSON.stringify({
+            record: composableElement,
+            metaData: { clientDomain: 'http://localhost.com' }
+        }))}`);
+        window.parent.postMessage = postMessageSpy;
 
         FrameElementInit.startFrameElement();
 
         // Clear initialization postMessage calls
         postMessageSpy.mockClear();
 
-        // Ensure window mock is available when handler executes
-        windowSpy.mockImplementation(() => windowMock);
-
         // Simulate multi file upload message event
-        if (messageHandler) {
-            messageHandler(new MessageEvent('message', {
-                origin: 'http://localhost.com',
-                data: {
-                    name: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:element:MULTI_FILE_INPUT:123`,
-                    clientConfig: {
-                        vaultId: 'vault123',
-                        vaultURL: 'https://vaulturl.com',
-                        authToken: 'token123',
-                        uuid: 'uuid123',
-                    },
-                    options: {
-                        // Additional metadata for file upload
-                    }, 
-                    errorMessages: {
-                        [ErrorType.ABORT]: 'File upload aborted by user',
-                    },
-                    data:{
-                        type: COLLECT_TYPES.FILE_UPLOAD
-                    }
+        window.dispatchEvent(new MessageEvent('message', {
+            origin: 'http://localhost.com',
+            data: {
+                name: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES}:element:MULTI_FILE_INPUT:123`,
+                clientConfig: {
+                    vaultId: 'vault123',
+                    vaultURL: 'https://vaulturl.com',
+                    authToken: 'token123',
+                    uuid: 'uuid123',
+                },
+                options: {
+                    // Additional metadata for file upload
+                },
+                errorMessages: {
+                    [ErrorType.ABORT]: 'File upload aborted by user',
+                },
+                data:{
+                    type: COLLECT_TYPES.FILE_UPLOAD
                 }
-            }));
+            }
+        }));
 
-            // Wait for async operations
-            await new Promise(resolve => setTimeout(resolve, 100));
+        // Wait for async operations
+        await new Promise(resolve => setTimeout(resolve, 100));
 
-            // Verify window.parent.postMessage was called with MULTIPLE_UPLOAD_FILES_RESPONSE
-            expect(postMessageSpy).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:element:MULTI_FILE_INPUT:123`,
-                    data: {"error": "No files selected"}, // Response data (success or error)
-                }),
-                'http://localhost.com'
-            );
-        }
+        // Verify window.parent.postMessage was called with MULTIPLE_UPLOAD_FILES_RESPONSE
+        expect(postMessageSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:element:MULTI_FILE_INPUT:123`,
+                data: {"error": "No files selected"}, // Response data (success or error)
+            }),
+            'http://localhost.com'
+        );
     });
-  });
+});
