@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skyflow Elements</title>
+    <script src="https://js.skyflow.com/v2/index.js"></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .empty-div {
+      }
+      .reveal-view {
+        margin-top: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Reveal Part-->
+    <div id="revealView" class="reveal-view">
+      <h3>Reveal Elements</h3>
+      <div id="revealComposableContainer" class="empty-div"></div>
+        <button id="revealPCIData">Reveal PCI Data</button>
+        <button id="downloadFileButton">Download Rendered File</button>
+      </div>
+    </div>
+    
+    <script>
+        try {
+                     const skyflowClient = Skyflow.init({
+         		           vaultID: '<VAULT_ID>',
+                       vaultURL: '<VAULT_URL>',
+                       getBearerToken: () =>{
+                           return new Promise((resolve, reject) => {
+            const Http = new XMLHttpRequest();
+    
+            Http.onreadystatechange = () => {
+              if (Http.readyState === 4 && Http.status === 200) {
+                const response = JSON.parse(Http.responseText);
+                resolve(response.accessToken);
+              }
+            };
+            const url = '<TOKEN_END_POINT_URL>';
+            Http.open('GET', url);
+            Http.send();                        });
+                       },
+                     options: {
+                   logLevel: Skyflow.LogLevel.DEBUG,
+                   env: Skyflow.Env.PROD,
+                 },
+            }) 
+
+    const revealContainerOptions = {
+				layout: [1],
+				styles: {
+					base: {
+					}
+				},
+				errorTextStyles: {
+					base: {
+						color: 'red',
+						fontFamily: '"Roboto", sans-serif'
+					},
+					global: {
+						'@import' :'url("https://fonts.googleapis.com/css2?family=Roboto&display=swap")',
+					}
+				}
+    }
+
+    const revealContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, revealContainerOptions);;
+    const renderStyleOptions = {
+        inputStyles: {            // styled for overall container where zip file is rendered
+          base: {
+           borderRadius: "3px",
+            border: '2px solid #eae8ee',
+            height: "400px",
+            width: "100%",
+            overflow: 'auto',
+          },
+        },
+        zipNavStyles: {    // styles for zip navigation panel
+          base: {
+            borderRight: '4px solid #eae8ee',
+          },
+          focus: {
+           // boxShadow: 'red',
+           // borderColor: 'red',
+          },
+        },
+        zipNavListItemStyles: {  // styles for file name list items on zip nav
+          base: {
+            margin: '0px',
+            border: 'none',
+            borderRadius: '0px',
+            backgroundColor: 'none',
+           // height: '10px',
+          //  width: '500px',
+           // borderRadius: '4px',
+           // backgroundColor: '#f5f5f5',
+           // font: '16px Arial, sans-serif',
+          //  color: '#1d1d1d',
+          //  padding: '10px',
+          //  margin: '5px',
+          },
+          focus: {               // styles for file name list item on focus
+           border: 'none',
+           backgroundColor: '#d0f0c0', //light green on focus
+          },
+        },
+        zipPanelStyles: {    // styles for right panel where file content is rendered
+          base: {
+           // backgroundColor: '#ffffff',
+          //  border: '10px solid #eae8ee',
+           // overflow: 'none',
+           // padding: '16px',
+          }
+        }
+    };
+   
+
+          const renderZipFileInput = {
+            skyflowID: "<SKYFLOW_ID>", //  zip
+            column: "<COLUMN_NAME>",
+            table: "<TABLE_NAME>",
+            altText: "Driving License",
+            ...renderStyleOptions,
+          }
+          const options = {
+              zipRender: true,
+            }
+          const renderZipFileElement = revealContainer.create(renderZipFileInput, options);
+
+          revealContainer.mount(document.getElementById('revealComposableContainer'));
+
+          const revealButton = document.getElementById('revealPCIData');
+
+          if (revealButton) {
+            revealButton.addEventListener('click', () => {
+              const revealResponse = renderZipFileElement.renderFile()
+              revealResponse.then((res) => {
+                console.log(res);
+                const downloadFileButton = document.getElementById('downloadFileButton');
+                    if(downloadFileButton) {
+                      downloadFileButton.onclick = function() {
+                        renderZipFileElement.downloadCurrentFile(); // download current file rendered in right panel
+                      }
+                    }
+              }).catch((err) => {
+                console.log(err);
+              });
+            });
+          }
+        } catch (err) {
+            console.log(err);
+        }
+    </script>
+  </body>
+</html>
