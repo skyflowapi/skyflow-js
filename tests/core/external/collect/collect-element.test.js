@@ -9,7 +9,7 @@ import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from 
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
 import { checkForElementMatchRule } from '../../../../src/core-utils/collect';
 import { ContainerType } from '../../../../src/skyflow';
-import EventEmitter from '../../../../src/event-emitter';
+import EventEmitter from '@core/event-emitter';
 
 global.ResizeObserver = jest.fn(() => ({
   observe: jest.fn(),
@@ -118,7 +118,7 @@ const groupEmiitter = {
   })
 }
 
-jest.mock('../../../../src/event-emitter');
+jest.mock('@core/event-emitter');
 let emitterSpy;
 EventEmitter.mockImplementation(() => ({
   on: jest.fn().mockImplementation((name, cb) => {emitterSpy = cb}),

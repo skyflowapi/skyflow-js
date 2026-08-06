@@ -11,7 +11,7 @@ import SkyflowError from '../../../../src/libs/skyflow-error';
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();
 const emit = jest.fn();
-jest.mock('../../../../src/libs/uuid', () => ({
+jest.mock('@core/libs/uuid', () => ({
   __esModule: true,
   default: jest.fn(() => (mockUuid)),
 }));

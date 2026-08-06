@@ -38,7 +38,7 @@ jest
 const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve());
 
 const mockUuid = "1234";
-jest.mock("../../../../src/libs/uuid", () => ({
+jest.mock("@core/libs/uuid", () => ({
   __esModule: true,
   default: jest.fn(() => mockUuid),
 }));

@@ -1,5 +1,6 @@
 import injectStylesheet from 'inject-stylesheet';
 import bus from 'framebus';
+import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
 import { getValueAndItsUnit } from '../../libs/element-options';
 import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
@@ -14,7 +15,6 @@ import {
   ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ERROR_TEXT_STYLES, REVEAL_TYPES, STYLE_TYPE,
 } from '../constants';
 import IFrameFormElement from './iframe-form';
-import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-styles';
 import FrameElement from '.';
 import Client from '../../client';
 import RevealFrame from './reveal/reveal-frame';

@@ -35,11 +35,11 @@ import {
   UpdateResponse,
 } from "../src/utils/common";
 
-jest.mock("../src/utils/jwt-utils", () => ({
+jest.mock("@core/utils/jwt-utils", () => ({
   __esModule: true,
   default: jest.fn(() => true),
 }));
-jest.mock("../src/libs/uuid", () => ({
+jest.mock("@core/libs/uuid", () => ({
   __esModule: true,
   default: jest.fn(() => "b5cbf425-6578-4d40-be88-82a748c36c60"),
 }));

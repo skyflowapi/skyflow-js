@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import EventEmitter from '../../src/event-emitter/index';
+import EventEmitter from '@core/event-emitter';
 
 describe('Event emitter test', () => {
   const eventObj = new EventEmitter();

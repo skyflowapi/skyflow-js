@@ -2,6 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   STYLE_TYPE,
@@ -18,7 +19,6 @@ import {
   REVEAL_TYPES,
   SIGNED_TOKEN_PREFIX,
 } from '../../constants';
-import getCssClassesFromJss, { generateCssWithoutClass } from '../../../libs/jss-styles';
 import {
   printLog, parameterizedString,
 } from '../../../utils/logs-helper';

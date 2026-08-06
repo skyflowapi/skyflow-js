@@ -3,6 +3,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
 import { setAttributes } from '../../iframe-libs/iframer';
 import { validateElementOptions } from '../../libs/element-options';
 import {
@@ -32,7 +33,6 @@ import {
   CardTypeValues,
 } from '../constants';
 import IFrameFormElement from './iframe-form';
-import getCssClassesFromJss, { generateCssWithoutClass } from '../../libs/jss-styles';
 import { parameterizedString, printLog } from '../../utils/logs-helper';
 import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';

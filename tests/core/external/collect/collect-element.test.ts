@@ -20,7 +20,7 @@ import {
 } from "../../../../src/core/constants";
 import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
 import { ContainerType } from "../../../../src/skyflow";
-import EventEmitter from "../../../../src/event-emitter";
+import EventEmitter from "@core/event-emitter";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
 import { Metadata } from "../../../../src/core/internal/internal-types";
 
@@ -157,7 +157,7 @@ const metaData: Metadata = {
   } as unknown as SkyflowContainer,
 };
 
-jest.mock("../../../../src/event-emitter");
+jest.mock("@core/event-emitter");
 let emitterSpy: Function;
 
 (EventEmitter as unknown as jest.Mock).mockImplementation(() => ({

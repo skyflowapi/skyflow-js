@@ -22,7 +22,7 @@ import { JSDOM } from "jsdom";
 import { Metadata } from "../../../../src/core/internal/internal-types";
 import { ContainerType, ISkyflow } from "../../../../src/skyflow";
 import { IRevealElementInput } from "../../../../src/core/external/reveal/reveal-container";
-import EventEmitter from "../../../../src/event-emitter";
+import EventEmitter from "@core/event-emitter";
 import { ErrorType, RevealElementInput } from "../../../../src/index-node";
 
 jest
@@ -31,7 +31,7 @@ jest
 
 const mockUuid = "1234";
 const elementId = "id";
-jest.mock("../../../../src/libs/uuid", () => ({
+jest.mock("@core/libs/uuid", () => ({
   __esModule: true,
   default: jest.fn(() => mockUuid),
 }));
@@ -54,7 +54,7 @@ const groupEmiitter: EventEmitter = {
   resetEvents: jest.fn(),
 };
 
-jest.mock("../../../../src/libs/jss-styles", () => {
+jest.mock("@core/libs/jss-styles", () => {
   return {
     __esModule: true,
     default: jest.fn(),

@@ -1,8 +1,8 @@
 import Skyflow, { ContainerType, LogLevel } from '../src/skyflow';
-import isTokenValid from '../src/utils/jwt-utils';
+import isTokenValid from '@core/utils/jwt-utils';
 
 // Mock uuid to keep deterministic
-jest.mock('../src/libs/uuid', () => ({
+jest.mock('@core/libs/uuid', () => ({
   __esModule: true,
   default: jest.fn(() => 'test-uuid'),
 }));
@@ -19,7 +19,7 @@ jest.mock('../src/core/external/collect/collect-container', () => ({
 
 // Keep reveal/composable containers real (not used here)
 
-jest.mock('../src/utils/jwt-utils', () => ({
+jest.mock('@core/utils/jwt-utils', () => ({
   __esModule: true,
   default: jest.fn(() => true), // override per-test for validity scenarios
 }));

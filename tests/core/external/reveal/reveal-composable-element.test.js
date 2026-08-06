@@ -5,7 +5,7 @@ import { LogLevel,Env } from "../../../../src/utils/common";
 import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES, CUSTOM_ERROR_MESSAGES} from "../../../../src/core/constants";
 import SkyflowContainer from '../../../../src/core/external/skyflow-container';
 import Client from '../../../../src/client';
-import EventEmitter from "../../../../src/event-emitter";
+import EventEmitter from "@core/event-emitter";
 import * as busEvents from '../../../../src/utils/bus-events';
 import ComposableRevealInternalElement from "../../../../src/core/external/reveal/composable-reveal-internal";
 
@@ -16,7 +16,7 @@ import { ComposableRevealElement, ErrorType, EventName, RedactionType } from "..
 busEvents.getAccessToken = jest.fn(() => Promise.reject('access token'));
 
 const mockUuid = '1234'; 
-jest.mock('../../../../src/libs/uuid',()=>({
+jest.mock('@core/libs/uuid',()=>({
   __esModule: true,
   default:jest.fn(()=>(mockUuid)),
 }));
@@ -27,7 +27,7 @@ const getBearerToken = jest.fn();
 
 const groupEmittFn = jest.fn();
 let groupOnCb;
-jest.mock('../../../../src/libs/jss-styles', () => {
+jest.mock('@core/libs/jss-styles', () => {
   return {
     __esModule: true,
     default: jest.fn(),

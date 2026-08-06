@@ -3,7 +3,7 @@
 */
 import { ELEMENT_EVENTS_TO_IFRAME, ElementType } from "../../../../src/core/constants";
 import ComposableElement from "../../../../src/core/external/collect/compose-collect-element";
-import EventEmitter from "../../../../src/event-emitter";
+import EventEmitter from "@core/event-emitter";
 import { ContainerType } from "../../../../src/skyflow";
 import { ElementState } from "../../../../src/utils/common";
 import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";

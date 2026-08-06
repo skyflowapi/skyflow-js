@@ -2,8 +2,9 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import uuid from '@core/libs/uuid';
+import EventEmitter from '@core/event-emitter';
 import SkyflowError from '../../../libs/skyflow-error';
-import uuid from '../../../libs/uuid';
 import {
   Context, ErrorType, MessageType, RenderFileResponse,
 } from '../../../utils/common';
@@ -30,7 +31,6 @@ import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import properties from '../../../properties';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
-import EventEmitter from '../../../event-emitter';
 import { formatRevealElementOptions } from '../../../utils/helpers';
 import { Metadata, RevealContainerProps } from '../../internal/internal-types';
 

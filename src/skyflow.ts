@@ -2,7 +2,8 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import uuid from './libs/uuid';
+import uuid from '@core/libs/uuid';
+import isTokenValid from '@core/utils/jwt-utils';
 import {
   ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
@@ -14,7 +15,6 @@ import Client from './client';
 import RevealContainer from './core/external/reveal/reveal-container';
 import CollectContainer from './core/external/collect/collect-container';
 import properties from './properties';
-import isTokenValid from './utils/jwt-utils';
 import SkyflowContainer from './core/external/skyflow-container';
 import { parameterizedString, printLog } from './utils/logs-helper';
 import SkyflowError from './libs/skyflow-error';

@@ -8,7 +8,7 @@ import * as busEvents from '../../../../src/utils/bus-events';
 import { LogLevel, Env, RedactionType } from '../../../../src/utils/common';
 import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
 import RevealFrame from '../../../../src/core/internal/reveal/reveal-frame';
-import uuid from '../../../../src/libs/uuid';
+import uuid from '@core/libs/uuid';
 // import IFrame from '../../../../src/core/external/common/iframe';
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
 // import CollectElement from '../../../../src/core/external/collect/collect-element';
@@ -16,7 +16,7 @@ import CollectContainer from '../../../../src/core/external/collect/collect-cont
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();
 const emit = jest.fn();
-jest.mock('../../../../src/libs/uuid', () => ({
+jest.mock('@core/libs/uuid', () => ({
   __esModule: true,
   default: jest.fn(() => (mockUuid)),
 }));

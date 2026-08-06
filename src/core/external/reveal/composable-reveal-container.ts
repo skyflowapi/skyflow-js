@@ -5,11 +5,11 @@ Copyright (c) 2023 Skyflow, Inc.
 */
 import bus from 'framebus';
 import sum from 'lodash/sum';
-import EventEmitter from '../../../event-emitter';
+import EventEmitter from '@core/event-emitter';
+import deepClone from '@core/libs/deep-clone';
+import uuid from '@core/libs/uuid';
 import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
-import deepClone from '../../../libs/deep-clone';
 import SkyflowError from '../../../libs/skyflow-error';
-import uuid from '../../../libs/uuid';
 import properties from '../../../properties';
 import { ContainerType } from '../../../skyflow';
 import {

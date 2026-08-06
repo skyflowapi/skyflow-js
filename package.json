@@ -7,7 +7,7 @@
   "description": "Skyflow JavaScript SDK",
   "homepage": "https://github.com/skyflowapi/skyflow-js",
   "main": "./dist/sdkNodeBuild/index.js",
-  "types": "./types/index-node.d.ts",
+  "types": "./types/src/index-node.d.ts",
   "files": [
     "dist/sdkNodeBuild",
     "types"
@@ -21,7 +21,7 @@
   "scripts": {
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
-    "build:types": "tsc --emitDeclarationOnly",
+    "build:types": "tsc --emitDeclarationOnly && tsc-alias -p tsconfig.json",
     "dev": "webpack serve --config=webpack.dev.js --open --hot ",
     "build-browser-sdk": "webpack --config=webpack.skyflow-browser.js",
     "build-node-sdk": "webpack --config=webpack.skyflow-node.js",
@@ -76,6 +76,7 @@
     "html-webpack-plugin": "5.6.3",
     "jest": "27.5.1",
     "node-polyfill-webpack-plugin": "2.0.1",
+    "tsc-alias": "1.9.1",
     "typescript": "4.9.5",
     "webpack": "5.100.2",
     "webpack-bundle-analyzer": "4.10.2",

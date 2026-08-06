@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import  regExFromString  from '../../src/libs/regex';
+import  regExFromString  from '@core/libs/regex';
 
 describe('construct regex', () => {
   it('construct regex', () => {

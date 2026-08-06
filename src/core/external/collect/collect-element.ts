@@ -2,6 +2,9 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 /* eslint-disable no-underscore-dangle */
+import EventEmitter from '@core/event-emitter';
+import Bus from '@core/libs/bus';
+import deepClone from '@core/libs/deep-clone';
 import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
@@ -11,9 +14,6 @@ import {
   ELEMENT_TYPES,
   ElementType,
 } from '../../constants';
-import EventEmitter from '../../../event-emitter';
-import Bus from '../../../libs/bus';
-import deepClone from '../../../libs/deep-clone';
 import {
   formatValidations,
   getElements,

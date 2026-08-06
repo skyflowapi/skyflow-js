@@ -1,6 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+import uuid from '@core/libs/uuid';
 import { SdkInfo } from '../../client';
 import {
   ALLOWED_NAME_FOR_FILE,
@@ -13,7 +14,6 @@ import { ContainerType, ISkyflow } from '../../skyflow';
 import SKYFLOW_ERROR_CODE from '../constants';
 import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
 import properties from '../../properties';
-import uuid from '../../libs/uuid';
 import SDKDetails from '../../../package.json';
 
 const { getType } = require('mime');

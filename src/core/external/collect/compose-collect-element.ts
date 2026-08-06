@@ -1,5 +1,5 @@
 import { Context } from 'vm';
-import EventEmitter from '../../../event-emitter';
+import EventEmitter from '@core/event-emitter';
 import { formatValidations } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';

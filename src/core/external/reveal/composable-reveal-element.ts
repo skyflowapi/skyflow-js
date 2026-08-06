@@ -1,4 +1,4 @@
-import EventEmitter from '../../../event-emitter';
+import EventEmitter from '@core/event-emitter';
 import { ContainerType } from '../../../skyflow';
 import { EventName, RenderFileResponse } from '../../../utils/common';
 import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from '../../constants';

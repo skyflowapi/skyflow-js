@@ -2,10 +2,10 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import EventEmitter from '../../../event-emitter';
+import EventEmitter from '@core/event-emitter';
+import uuid from '@core/libs/uuid';
 import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe-libs/iframer';
 import SkyflowError from '../../../libs/skyflow-error';
-import uuid from '../../../libs/uuid';
 import { ContainerType } from '../../../skyflow';
 import {
   ContainerOptions,

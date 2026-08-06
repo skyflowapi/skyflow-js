@@ -2,8 +2,9 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
+import uuid from '@core/libs/uuid';
+import EventEmitter from '@core/event-emitter';
 import SkyflowError from '../../../libs/skyflow-error';
-import uuid from '../../../libs/uuid';
 import {
   Context, ErrorType, MessageType, RenderFileResponse,
 } from '../../../utils/common';
@@ -36,7 +37,6 @@ import { formatForRenderClient } from '../../../core-utils/reveal';
 import properties from '../../../properties';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
 import { Metadata, RevealContainerProps } from '../../internal/internal-types';
-import EventEmitter from '../../../event-emitter';
 
 const CLASS_NAME = 'RevealElement';
 

@@ -24,7 +24,7 @@ jest
 const on = jest.fn();
 const emit = jest.fn();
 
-jest.mock("../../../../src/libs/uuid", () => ({
+jest.mock("@core/libs/uuid", () => ({
   __esModule: true,
   default: jest.fn(() => mockUuid),
 }));

@@ -4,6 +4,8 @@ Copyright (c) 2022 Skyflow, Inc.
 /* eslint-disable no-underscore-dangle */
 import bus from 'framebus';
 
+import EventEmitter from '@core/event-emitter';
+import regExFromString from '@core/libs/regex';
 import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
@@ -15,8 +17,6 @@ import {
   CardType,
   ELEMENT_TYPES,
 } from '../../constants';
-import EventEmitter from '../../../event-emitter';
-import regExFromString from '../../../libs/regex';
 import {
   validateCardNumberLengthCheck,
   validateCreditCardNumber,

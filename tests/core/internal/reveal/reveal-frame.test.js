@@ -5,7 +5,7 @@ import bus from "framebus";
 import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
 import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_ERROR_TEXT, REVEAL_ELEMENT_OPTIONS_TYPES, REVEAL_TYPES } from "../../../../src/core/constants";
 import { Env, LogLevel, RedactionType } from "../../../../src/utils/common";
-import getCssClassesFromJss from "../../../../src/libs/jss-styles";
+import getCssClassesFromJss from "@core/libs/jss-styles";
 import { getFileURLFromVaultBySkyflowIDComposable } from "../../../../src/core-utils/reveal";
 import properties from "../../../../src/properties";
 

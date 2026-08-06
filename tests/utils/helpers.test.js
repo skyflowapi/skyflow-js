@@ -39,7 +39,7 @@ import { isValidURL } from '../../src/utils/validators/index';
 
 const mockUUID = '1234'
 
-jest.mock('../../src/libs/uuid',()=>({
+jest.mock('@core/libs/uuid',()=>({
   __esModule: true,
   default:jest.fn(()=>(mockUUID)),
 }));

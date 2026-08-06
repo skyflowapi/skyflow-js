@@ -11,7 +11,7 @@ import ComposableContainer from "../../../../src/core/external/collect/compose-c
 import ComposableElement from '../../../../src/core/external/collect/compose-collect-element';
 import CollectElement from '../../../../src/core/external/collect/collect-element';
 import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
-import EventEmitter from '../../../../src/event-emitter';
+import EventEmitter from '@core/event-emitter';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
 import { SKYFLOW_FRAME_CONTROLLER_READY } from '../../../../src/core/constants';
 import SkyflowError from '../../../../src/libs/skyflow-error';
@@ -24,7 +24,7 @@ iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve('token'));
 
 const mockUuid = '1234';
-jest.mock('../../../../src/libs/uuid', () => ({
+jest.mock('@core/libs/uuid', () => ({
   __esModule: true,
   default: jest.fn(() => (mockUuid)),
 }));
@@ -44,7 +44,7 @@ CollectElement.mockImplementation((_,tempElements)=>{
   updateElement:updateMock
 }})
 
-jest.mock('../../../../src/event-emitter');
+jest.mock('@core/event-emitter');
 const emitMock = jest.fn();
 let emitterSpy;
 let composableUpdateSpy;
