@@ -5,7 +5,7 @@
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "./tsconfig.json"
+        "project": "./tsconfig.eslint.json"
     },
     "plugins": [
         "@typescript-eslint"
@@ -23,6 +23,18 @@
         }
     },
     "rules": {
+        "import/no-restricted-paths": [
+            "warn",
+            {
+                "zones": [
+                    {
+                        "target": "./core",
+                        "from": "./src",
+                        "message": "core/ must not import from src/ — the @core boundary points downward only. Move shared code into core/ instead of importing up."
+                    }
+                ]
+            }
+        ],
         "import/no-cycle": "off",
         "prefer-promise-reject-errors": "off",
         "max-classes-per-file": [

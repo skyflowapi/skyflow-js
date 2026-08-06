@@ -1,6 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+const path = require('path');
 const webpack = require('webpack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
@@ -9,6 +10,12 @@ module.exports = {
   target: 'web',
   resolve: {
     extensions: ['.ts', '.js', '.json'],
+    // `@core` — mirror of the tsconfig.base.json path alias (single source of
+    // truth). Keep this in sync with tsconfig.base.json `paths` and
+    // jest.config.json `moduleNameMapper`.
+    alias: {
+      '@core': path.resolve(__dirname, 'core'),
+    },
   },
   module: {
     rules: [

@@ -4,6 +4,7 @@
   "testEnvironment": "jsdom",
   "testTimeout": 30000,
   "moduleNameMapper":{
+    "^@core/(.*)$": "<rootDir>/core/$1",
     "^.+\\.svg$": "<rootDir>/tests/__mocks__/file-mock.js"
   },
   "transformIgnorePatterns": ["/node_modules/(?!mime)"]
