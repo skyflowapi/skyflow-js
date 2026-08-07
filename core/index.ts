@@ -38,3 +38,7 @@ export {
   iframeDefaultAttributes, setAttributes, getIframeSrc, setStyles,
 } from './iframe-libs/iframer';
 export { getAccessToken, updateElementState } from './utils/bus-events';
+
+// Task 1.4 — variant-neutral type surface + base interfaces (privacyDB uses
+// these directly; flowDB extends them in its own package).
+export * from './types';

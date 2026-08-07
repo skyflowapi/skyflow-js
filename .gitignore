@@ -8,4 +8,6 @@ dist
 testing
 coverage
 
-types
+# Generated declaration output only (tsc outDir). Anchored to repo root so it
+# does not also ignore the core/types/ source folder.
+/types
