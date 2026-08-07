@@ -14,9 +14,14 @@ import { IRevealElementOptions } from '../../core/external/reveal/reveal-contain
 import SkyflowError from '../../libs/skyflow-error';
 import { ContainerType, ISkyflow } from '../../skyflow';
 import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
-import SDKDetails from '../../../package.json';
 
 const { getType } = require('mime');
+
+// SDK telemetry identity, injected at build time (webpack DefinePlugin) / tests
+// (jest setupFiles) from this package's own package.json. Replaces the former
+// `import SDKDetails from '../../../package.json'`, which under the shared-core
+// layout would resolve to the workspace root, not the package.
+export const SDK_DETAILS = { name: SDK_NAME, version: SDK_VERSION };
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
@@ -309,8 +314,8 @@ export function getSdkVersionName(metaDataVersion: string, sdkData: SdkInfo): st
 }
 export function getSDKNameAndVersion(metaData?: string): SdkInfo {
   const nameAndVersion: SdkInfo = {
-    sdkName: SDKDetails.name,
-    sdkVersion: SDKDetails.version,
+    sdkName: SDK_NAME,
+    sdkVersion: SDK_VERSION,
   };
   if (metaData && metaData !== '' && metaData.split('@').length > 1) {
     nameAndVersion.sdkName = metaData.split('@')[0];
@@ -450,7 +455,10 @@ export const getAtobValue = (encodedValue: string) => {
 export const getSDKLanguageAndVersion = () => {
   const metaData = localStorage.getItem('sdk_version') || '';
   const sdkDetails = getSDKNameAndVersion(metaData);
-  const sdkName = sdkDetails.sdkName === 'skyflow-js' ? 'JS' : 'React';
+  // Injection-ready: compare against this package's injected identity rather
+  // than a hard-coded 'skyflow-js'. Preserves 'JS' for the base SDK and 'React'
+  // for the skyflow-react wrapper (which overrides sdkName via metaData).
+  const sdkName = sdkDetails.sdkName === SDK_NAME ? 'JS' : 'React';
   return {
     sdkLanguageAndVersion: `${sdkName} SDK v${sdkDetails.sdkVersion}`,
     sdkOwner: 'Skyflow',

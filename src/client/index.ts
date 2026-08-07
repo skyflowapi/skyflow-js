@@ -6,9 +6,9 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
 import SkyflowError from '../libs/skyflow-error';
 import { ISkyflow } from '../skyflow';
-import sdkDetails from '../../package.json';
 import {
   getMetaObject,
+  SDK_DETAILS,
 } from '../utils/helpers';
 import { ClientMetadata } from '../core/internal/internal-types';
 import { ErrorMessages, ErrorType } from '../utils/common';
@@ -85,7 +85,7 @@ class Client {
     httpRequest.open(request.requestMethod, request.url);
 
     if (request.headers) {
-      const metaDataObject = getMetaObject(sdkDetails, this.#metaData, navigator);
+      const metaDataObject = getMetaObject(SDK_DETAILS, this.#metaData, navigator);
       request.headers[SKY_METADATA_HEADER] = JSON.stringify(metaDataObject);
       const headers = request.headers;
       Object.keys(request.headers).forEach((key) => {
