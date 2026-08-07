@@ -59,7 +59,7 @@ export { ThreeDSBrowserDetails } from './core/external/threeds/threeds';
 export {
   CardType,
   ElementType,
-} from './core/constants';
+} from '@core/constants';
 
 export {
   ContainerType,

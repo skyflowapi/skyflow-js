@@ -1,8 +1,8 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { CardType, SDK_VERSION } from '../../src/core/constants';
-import SKYFLOW_ERROR_CODE from '../../src/utils/constants';
+import { CardType, SDK_VERSION } from '@core/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import {
   detectCardType,
   isValidRegExp,

@@ -8,23 +8,23 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
   REVEAL_FRAME_CONTROLLER,
   REVEAL_TYPES,
-} from "../../../../src/core/constants";
+} from "@core/constants";
 import bus from "framebus";
 import { LogLevel, Env } from "../../../../src/utils/common";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
-import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
+import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
 import SkyflowError from "../../../../src/libs/skyflow-error";
-import logs from "../../../../src/utils/logs";
+import logs from "@core/utils/logs";
 import { Metadata } from "../../../../src/core/internal/internal-types";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
 import { ContainerType, RevealResponse } from "../../../../src/index-node";
 import { ISkyflow } from "../../../../src/skyflow";
 import assert, { AssertionError, fail } from "assert";
 
-jest.mock("../../../../src/iframe-libs/iframer", () => {
+jest.mock("@core/iframe-libs/iframer", () => {
   const actualModule = jest.requireActual(
-    "../../../../src/iframe-libs/iframer"
+    "@core/iframe-libs/iframer"
   );
   const mockedModule = { ...actualModule };
   mockedModule.__esModule = true;

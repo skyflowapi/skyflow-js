@@ -1,11 +1,11 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { getAccessToken } from "../../src/utils/bus-events";
-import { updateElementState } from "../../src/utils/bus-events";
+import { getAccessToken } from "@core/utils/bus-events";
+import { updateElementState } from "@core/utils/bus-events";
 import bus from 'framebus';
-import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT } from "../../src/core/constants";
-import logs from "../../src/utils/logs";
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT } from "@core/constants";
+import logs from "@core/utils/logs";
 const on = jest.fn();
 const emit = jest.fn()
 describe("Utils/Bus Events",()=>{

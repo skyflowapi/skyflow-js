@@ -4,9 +4,10 @@ Copyright (c) 2022 Skyflow, Inc.
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
 import get from 'lodash/get';
+import { getAccessToken } from '@core/utils/bus-events';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import Client from '../client';
 import SkyflowError from '../libs/skyflow-error';
-import { getAccessToken } from '../utils/bus-events';
 import {
   IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
   MessageType, LogLevel,
@@ -16,7 +17,6 @@ import {
   UpdateResponse,
   UpdateResponseType,
 } from '../utils/common';
-import SKYFLOW_ERROR_CODE from '../utils/constants';
 import { printLog } from '../utils/logs-helper';
 import IFrameFormElement from '../core/internal/iframe-form';
 import { BatchInsertRequestBody } from '../core/internal/internal-types';

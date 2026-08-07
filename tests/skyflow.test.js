@@ -5,13 +5,13 @@ import bus from 'framebus';
 import Skyflow, { ContainerType } from '../src/skyflow';
 import CollectContainer from '../src/core/external/collect/collect-container';
 import RevealContainer from '../src/core/external/reveal/reveal-container';
-import * as iframerUtils from '../src/iframe-libs/iframer';
-import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '../src/core/constants';
+import * as iframerUtils from '@core/iframe-libs/iframer';
+import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '@core/constants';
 import { Env, EventName, LogLevel, RedactionType, RequestMethod, ValidationRuleType } from '../src/utils/common';
 import ComposableContainer from '../src/core/external/collect/compose-collect-container';
 import SkyflowContainer from '../src/core/external/skyflow-container';
 import Client from '../src/client'
-import logs from '../src/utils/logs';
+import logs from '@core/utils/logs';
 import { ComposableRevealContainer } from '../src/index-node';
 
 jest.mock('@core/utils/jwt-utils', () => ({

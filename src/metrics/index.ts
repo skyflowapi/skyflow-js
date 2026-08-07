@@ -1,12 +1,12 @@
 import bus from 'framebus';
-import { MeticsObjectType, SharedMeticsObjectType } from '../utils/common';
-import sdkDetails from '../../package.json';
-import { getMetaObject } from '../utils/helpers';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   EVENT_TYPES,
   METRIC_TYPES,
-} from '../core/constants';
+} from '@core/constants';
+import { MeticsObjectType, SharedMeticsObjectType } from '../utils/common';
+import sdkDetails from '../../package.json';
+import { getMetaObject } from '../utils/helpers';
 
 export const METRIC_OBJECT: SharedMeticsObjectType = { records: [] };
 

@@ -2,9 +2,9 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import { COLLECT_TYPES, ELEMENT_EVENTS_TO_IFRAME } from '../../../../src/core/constants';
+import { COLLECT_TYPES, ELEMENT_EVENTS_TO_IFRAME } from '@core/constants';
 import clientModule from '../../../../src/client';
-import * as busEvents from '../../../../src/utils/bus-events';
+import * as busEvents from '@core/utils/bus-events';
 import { LogLevel, Env } from '../../../../src/utils/common';
 import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
 import SkyflowError from '../../../../src/libs/skyflow-error';

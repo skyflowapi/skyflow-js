@@ -13,7 +13,10 @@ import {
   METRIC_TYPES,
   ELEMENT_TYPES,
   ElementType,
-} from '../../constants';
+} from '@core/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import logs from '@core/utils/logs';
+import properties from '@core/properties';
 import {
   formatValidations,
   getElements,
@@ -24,8 +27,6 @@ import {
   printLog, getElementName, parameterizedString, EnvOptions,
 } from '../../../utils/logs-helper';
 import SkyflowError from '../../../libs/skyflow-error';
-import SKYFLOW_ERROR_CODE from '../../../utils/constants';
-import logs from '../../../utils/logs';
 import {
   CollectElementUpdateOptions,
   Context, Env, EventName, MessageType,
@@ -42,7 +43,6 @@ import {
   updateMetricObjectValue,
 } from '../../../metrics';
 import { Metadata, ContainerProps, InternalState } from '../../internal/internal-types';
-import properties from '../../../properties';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {

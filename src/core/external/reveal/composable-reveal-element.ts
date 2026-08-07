@@ -1,7 +1,7 @@
 import EventEmitter from '@core/event-emitter';
+import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from '@core/constants';
 import { ContainerType } from '../../../skyflow';
 import { EventName, RenderFileResponse } from '../../../utils/common';
-import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from '../../constants';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 
 class ComposableRevealElement {

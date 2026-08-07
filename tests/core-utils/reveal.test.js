@@ -4,7 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import Skyflow from '../../src/skyflow';
 import {formatRecordsForClient, formatRecordsForClientComposable, formatRecordsForIframe, formatRecordsForRender, formatForRenderClient, getFileURLFromVaultBySkyflowID, getFileURLForRender, getFileURLFromVaultBySkyflowIDComposable, fetchRecordsByTokenIdComposable} from "../../src/core-utils/reveal";
 import { Env, LogLevel } from '../../src/utils/common';
-import { getAccessToken } from '../../src/utils/bus-events';
+import { getAccessToken } from '@core/utils/bus-events';
 import Client from '../../src/client';
 import { url } from 'inspector';
 
@@ -59,7 +59,7 @@ const skyflow = Skyflow.init({
 });
 
 jest.setTimeout(15000);
-jest.mock('../../src/utils/bus-events', () => ({
+jest.mock('@core/utils/bus-events', () => ({
   getAccessToken: jest.fn(
     () => Promise.resolve('mockAccessToken')
   ),

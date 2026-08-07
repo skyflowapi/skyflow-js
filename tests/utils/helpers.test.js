@@ -1,8 +1,8 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { CardType, ElementType,COPY_UTILS, CARD_NUMBER_MASK, DEFAULT_CARD_NUMBER_SEPERATOR, CARD_NUMBER_HYPEN_SEPERATOR } from '../../src/core/constants';
-import SKYFLOW_ERROR_CODE from '../../src/utils/constants';
+import { CardType, ElementType,COPY_UTILS, CARD_NUMBER_MASK, DEFAULT_CARD_NUMBER_SEPERATOR, CARD_NUMBER_HYPEN_SEPERATOR } from '@core/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import {
   replaceIdInResponseXml,
   appendZeroToOne,

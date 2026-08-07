@@ -4,12 +4,12 @@ Copyright (c) 2025 Skyflow, Inc.
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   ElementType,
-} from "../../../../src/core/constants";
+} from "@core/constants";
 import CollectContainer from "../../../../src/core/external/collect/collect-container";
 import CollectElement from "../../../../src/core/external/collect/collect-element";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
 import { Metadata } from "../../../../src/core/internal/internal-types";
-import * as iframerUtils from "../../../../src/iframe-libs/iframer";
+import * as iframerUtils from "@core/iframe-libs/iframer";
 import { ContainerType } from "../../../../src/skyflow";
 import {
   LogLevel,

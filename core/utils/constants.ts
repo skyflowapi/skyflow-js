@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import logs from './logs';
+import logs from '@core/utils/logs';
 
 const SKYFLOW_ERROR_CODE = {
   MULTI_FILE_NOT_SUPPORTED: {

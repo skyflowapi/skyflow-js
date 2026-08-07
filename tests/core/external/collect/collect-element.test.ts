@@ -17,8 +17,8 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
   ElementType,
-} from "../../../../src/core/constants";
-import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
+} from "@core/constants";
+import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { ContainerType } from "../../../../src/skyflow";
 import EventEmitter from "@core/event-emitter";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";

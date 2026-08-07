@@ -3,6 +3,16 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
 import get from 'lodash/get';
+import { getAccessToken } from '@core/utils/bus-events';
+import {
+  COLLECT_TYPES,
+  CORALOGIX_DOMAIN,
+  DEFAULT_FILE_RENDER_ERROR, DOMAIN,
+  ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, PUREJS_TYPES, REVEAL_TYPES, SDK_IFRAME_EVENT,
+} from '@core/constants';
+import logs from '@core/utils/logs';
+import properties from '@core/properties';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import Client from '../../../client';
 import {
   checkForElementMatchRule,
@@ -23,15 +33,7 @@ import {
   formatRecordsForClient,
   formatRecordsForIframe,
 } from '../../../core-utils/reveal';
-import { getAccessToken } from '../../../utils/bus-events';
-import {
-  COLLECT_TYPES,
-  CORALOGIX_DOMAIN,
-  DEFAULT_FILE_RENDER_ERROR, DOMAIN,
-  ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, PUREJS_TYPES, REVEAL_TYPES, SDK_IFRAME_EVENT,
-} from '../../constants';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
-import logs from '../../../utils/logs';
 import {
   IRevealRecord,
   IGetRecord,
@@ -57,13 +59,11 @@ import {
   ErrorType,
 } from '../../../utils/common';
 import { deleteData } from '../../../core-utils/delete';
-import properties from '../../../properties';
 import {
   fileValidation, generateUploadFileName,
   getAtobValue, getSDKNameAndVersion, getValueFromName, vaildateFileName,
 } from '../../../utils/helpers';
 import SkyflowError from '../../../libs/skyflow-error';
-import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import {
   BatchInsertRequestBody, ElementInfo, TokenizeDataInput, UploadFileDataInput,
 } from '../internal-types';

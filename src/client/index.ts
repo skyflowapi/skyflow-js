@@ -1,11 +1,11 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { ContentType, SKY_METADATA_HEADER } from '../core/constants';
+import { ContentType, SKY_METADATA_HEADER } from '@core/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import logs from '@core/utils/logs';
 import SkyflowError from '../libs/skyflow-error';
 import { ISkyflow } from '../skyflow';
-import SKYFLOW_ERROR_CODE from '../utils/constants';
-import logs from '../utils/logs';
 import sdkDetails from '../../package.json';
 import {
   getMetaObject,

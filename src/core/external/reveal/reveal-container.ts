@@ -4,7 +4,15 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import EventEmitter from '@core/event-emitter';
 import uuid from '@core/libs/uuid';
-import iframer, { getIframeSrc, setAttributes, setStyles } from '../../../iframe-libs/iframer';
+import iframer, { getIframeSrc, setAttributes, setStyles } from '@core/iframe-libs/iframer';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import logs from '@core/utils/logs';
+import {
+  CONTROLLER_STYLES, CUSTOM_ERROR_MESSAGES,
+  ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
+  REVEAL_TYPES,
+} from '@core/constants';
+import properties from '@core/properties';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
 import {
@@ -12,18 +20,10 @@ import {
   Context, ErrorType, MessageType,
   RedactionType, RevealResponse,
 } from '../../../utils/common';
-import SKYFLOW_ERROR_CODE from '../../../utils/constants';
-import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateInputFormatOptions, validateRevealElementRecords } from '../../../utils/validators';
-import {
-  CONTROLLER_STYLES, CUSTOM_ERROR_MESSAGES,
-  ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
-  REVEAL_TYPES,
-} from '../../constants';
 import Container from '../common/container';
 import RevealElement from './reveal-element';
-import properties from '../../../properties';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
 
 export interface IRevealElementInput {

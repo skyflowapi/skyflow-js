@@ -8,12 +8,20 @@ import sum from 'lodash/sum';
 import EventEmitter from '@core/event-emitter';
 import deepClone from '@core/libs/deep-clone';
 import uuid from '@core/libs/uuid';
-import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
+import iframer, { setAttributes, getIframeSrc, setStyles } from '@core/iframe-libs/iframer';
+import properties from '@core/properties';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import logs from '@core/utils/logs';
+import {
+  COLLECT_FRAME_CONTROLLER,
+  CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
+  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
+  COLLECT_TYPES,
+} from '@core/constants';
 import {
   formatValidations, formatOptions, validateElementOptions, getElements,
 } from '../../../libs/element-options';
 import SkyflowError from '../../../libs/skyflow-error';
-import properties from '../../../properties';
 import { ContainerType } from '../../../skyflow';
 import {
   Context, MessageType,
@@ -28,19 +36,11 @@ import {
   ErrorMessages,
   ErrorType,
 } from '../../../utils/common';
-import SKYFLOW_ERROR_CODE from '../../../utils/constants';
-import logs from '../../../utils/logs';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import {
   validateCollectElementInput, validateInitConfig, validateAdditionalFieldsInCollect,
   validateUpsertOptions,
 } from '../../../utils/validators';
-import {
-  COLLECT_FRAME_CONTROLLER,
-  CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
-  COLLECT_TYPES,
-} from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
 import ComposableElement from './compose-collect-element';

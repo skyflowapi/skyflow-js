@@ -9,14 +9,14 @@ import {
   SKYFLOW_FRAME_CONTROLLER_READY,
   ELEMENTS,
   ELEMENT_EVENTS_TO_CLIENT
-} from '../../../../src/core/constants';
+} from '@core/constants';
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
-import * as iframerUtils from '../../../../src/iframe-libs/iframer';
+import * as iframerUtils from '@core/iframe-libs/iframer';
 import SkyflowError from '../../../../src/libs/skyflow-error';
 import Skyflow from '../../../../src/skyflow';
 import { LogLevel, Env, ValidationRuleType, ErrorType } from '../../../../src/utils/common';
-import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
-import logs from '../../../../src/utils/logs';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import logs from '@core/utils/logs';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
 
 global.ResizeObserver = jest.fn(() => ({

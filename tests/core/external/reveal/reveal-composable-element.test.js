@@ -2,11 +2,11 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import { LogLevel,Env } from "../../../../src/utils/common";
-import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES, CUSTOM_ERROR_MESSAGES} from "../../../../src/core/constants";
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES, CUSTOM_ERROR_MESSAGES} from "@core/constants";
 import SkyflowContainer from '../../../../src/core/external/skyflow-container';
 import Client from '../../../../src/client';
 import EventEmitter from "@core/event-emitter";
-import * as busEvents from '../../../../src/utils/bus-events';
+import * as busEvents from '@core/utils/bus-events';
 import ComposableRevealInternalElement from "../../../../src/core/external/reveal/composable-reveal-internal";
 
 import bus from "framebus";

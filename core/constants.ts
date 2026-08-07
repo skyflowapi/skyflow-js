@@ -1,22 +1,21 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import defaultCardIcon from '../../assets/default.svg';
-import amexIcon from '../../assets/amex.svg';
-import dinnersClubIcon from '../../assets/diners-club.svg';
-import discoverIcon from '../../assets/discover.svg';
-import hipperCardIcon from '../../assets/hipercard.svg';
-import jcbIcon from '../../assets/jcb.svg';
-import maestroIcon from '../../assets/maestro.svg';
-import maseterCardIcon from '../../assets/mastercard.svg';
-import unionPayIcon from '../../assets/unionpay.svg';
-import visaCardIcon from '../../assets/visa.svg';
-import copyIcon from '../../assets/copyIcon.svg';
-import successIcon from '../../assets/path.svg';
-import dropDownIcon from '../../assets/drop-down.svg';
-import cartesBancairesIcon from '../../assets/carter-banceris.svg';
-
-import logs from '../utils/logs';
+import logs from '@core/utils/logs';
+import defaultCardIcon from '../assets/default.svg';
+import amexIcon from '../assets/amex.svg';
+import dinnersClubIcon from '../assets/diners-club.svg';
+import discoverIcon from '../assets/discover.svg';
+import hipperCardIcon from '../assets/hipercard.svg';
+import jcbIcon from '../assets/jcb.svg';
+import maestroIcon from '../assets/maestro.svg';
+import maseterCardIcon from '../assets/mastercard.svg';
+import unionPayIcon from '../assets/unionpay.svg';
+import visaCardIcon from '../assets/visa.svg';
+import copyIcon from '../assets/copyIcon.svg';
+import successIcon from '../assets/path.svg';
+import dropDownIcon from '../assets/drop-down.svg';
+import cartesBancairesIcon from '../assets/carter-banceris.svg';
 
 export const SESSION_ID = 'session_id';
 export const SKY_METADATA_HEADER = 'sky-metadata';

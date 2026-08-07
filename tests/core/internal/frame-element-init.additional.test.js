@@ -38,12 +38,12 @@ jest.mock('../../../src/core-utils/collect', () => {
 });
 import FrameElementInit from '../../../src/core/internal/frame-element-init';
 import SkyflowError from '../../../src/libs/skyflow-error';
-import { ELEMENTS } from '../../../src/core/constants';
-import logs from '../../../src/utils/logs';
+import { ELEMENTS } from '@core/constants';
+import logs from '@core/utils/logs';
 import { parameterizedString } from '../../../src/utils/logs-helper';
 import * as helpers from '../../../src/utils/helpers';
 import Client, { mockClientRequest } from '../../../src/client';
-import { ELEMENT_EVENTS_TO_IFRAME, COLLECT_TYPES } from '../../../src/core/constants';
+import { ELEMENT_EVENTS_TO_IFRAME, COLLECT_TYPES } from '@core/constants';
 import {
   constructElementsInsertReq,
   constructInsertRecordRequest,

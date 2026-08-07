@@ -27,3 +27,14 @@ export { default as getCssClassesFromJss, generateCssWithoutClass } from './libs
 export { default as Bus } from './libs/bus';
 export { default as isTokenValid } from './utils/jwt-utils';
 export { default as EventEmitter } from './event-emitter';
+
+// Task 1.2 — logging, error-codes, DOM/iframe & element constants.
+export { default as logs } from './utils/logs';
+export { default as SKYFLOW_ERROR_CODE } from './utils/constants';
+export * from './constants';
+export { default as properties } from './properties';
+export { default as iframer } from './iframe-libs/iframer';
+export {
+  iframeDefaultAttributes, setAttributes, getIframeSrc, setStyles,
+} from './iframe-libs/iframer';
+export { getAccessToken, updateElementState } from './utils/bus-events';

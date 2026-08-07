@@ -7,7 +7,9 @@ import {
   ALLOWED_EXPIRY_YEAR_FORMATS,
   CardType, CARD_TYPE_REGEX,
   DEFAULT_CARD_LENGTH_RANGE,
-} from '../../core/constants';
+} from '@core/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import logs from '@core/utils/logs';
 import { IRevealElementInput } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
 import { ISkyflow } from '../../skyflow';
@@ -26,9 +28,7 @@ import {
   IUpdateRequest,
   IUpdateOptions,
 } from '../common';
-import SKYFLOW_ERROR_CODE from '../constants';
 import { appendZeroToOne } from '../helpers';
-import logs from '../logs';
 import { printLog } from '../logs-helper';
 
 export const validateCreditCardNumber = (cardNumber: string) => {

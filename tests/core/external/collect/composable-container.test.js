@@ -3,19 +3,19 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENT_EVENTS_TO_CLIENT,
   ElementType
-} from '../../../../src/core/constants';
-import * as iframerUtils from '../../../../src/iframe-libs/iframer';
+} from '@core/constants';
+import * as iframerUtils from '@core/iframe-libs/iframer';
 import { LogLevel, Env, ValidationRuleType, ErrorType } from '../../../../src/utils/common';
-import logs from '../../../../src/utils/logs';
+import logs from '@core/utils/logs';
 import ComposableContainer from "../../../../src/core/external/collect/compose-collect-container";
 import ComposableElement from '../../../../src/core/external/collect/compose-collect-element';
 import CollectElement from '../../../../src/core/external/collect/collect-element';
-import SKYFLOW_ERROR_CODE from '../../../../src/utils/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import EventEmitter from '@core/event-emitter';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
-import { SKYFLOW_FRAME_CONTROLLER_READY } from '../../../../src/core/constants';
+import { SKYFLOW_FRAME_CONTROLLER_READY } from '@core/constants';
 import SkyflowError from '../../../../src/libs/skyflow-error';
-import properties from '../../../../src/properties';
+import properties from '@core/properties';
 
 const bus = require('framebus');
 

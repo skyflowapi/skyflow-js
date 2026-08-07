@@ -3,15 +3,15 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import RevealContainer from "../../../../src/core/external/reveal/reveal-container";
 import { ComposableRevealContainer, ComposableRevealElement } from "../../../../src/index-node";
-import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER, REVEAL_TYPES } from "../../../../src/core/constants";
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER, REVEAL_TYPES } from "@core/constants";
 import bus from "framebus";
 import { LogLevel,Env } from "../../../../src/utils/common";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
-import * as iframerUtils from '../../../../src/iframe-libs/iframer';
-import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
+import * as iframerUtils from '@core/iframe-libs/iframer';
+import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
 import SkyflowError from "../../../../src/libs/skyflow-error";
-import logs from "../../../../src/utils/logs";
+import logs from "@core/utils/logs";
 // Mock internal element to intercept constructor arguments for mount coverage
 jest.mock('../../../../src/core/external/reveal/composable-reveal-internal', () => {
   return {
@@ -30,7 +30,7 @@ jest.mock('../../../../src/core/external/reveal/composable-reveal-internal', () 
   };
 });
 import ComposableRevealInternalElement from '../../../../src/core/external/reveal/composable-reveal-internal';
-import properties from "../../../../src/properties";
+import properties from "@core/properties";
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
 const mockUuid = '1234'; 

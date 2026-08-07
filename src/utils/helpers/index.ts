@@ -2,18 +2,18 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import uuid from '@core/libs/uuid';
-import { SdkInfo } from '../../client';
 import {
   ALLOWED_NAME_FOR_FILE,
   CardType,
   COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType,
-} from '../../core/constants';
+} from '@core/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import properties from '@core/properties';
+import { SdkInfo } from '../../client';
 import { IRevealElementOptions } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
 import { ContainerType, ISkyflow } from '../../skyflow';
-import SKYFLOW_ERROR_CODE from '../constants';
 import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
-import properties from '../../properties';
 import SDKDetails from '../../../package.json';
 
 const { getType } = require('mime');

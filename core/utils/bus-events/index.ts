@@ -2,8 +2,8 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT } from '../../core/constants';
-import properties from '../../properties';
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT } from '@core/constants';
+import properties from '@core/properties';
 
 export function getAccessToken(clientId: string) {
   return new Promise((resolve, reject) => {

@@ -5,7 +5,17 @@ import bus from 'framebus';
 import deepClone from '@core/libs/deep-clone';
 import uuid from '@core/libs/uuid';
 import EventEmitter from '@core/event-emitter';
-import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
+import iframer, { setAttributes, getIframeSrc, setStyles } from '@core/iframe-libs/iframer';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import logs from '@core/utils/logs';
+import {
+  COLLECT_FRAME_CONTROLLER,
+  CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
+  ELEMENTS, FRAME_ELEMENT,
+  COLLECT_TYPES,
+  ElementType,
+} from '@core/constants';
+import properties from '@core/properties';
 import {
   formatValidations, formatOptions, validateElementOptions,
 } from '../../../libs/element-options';
@@ -21,8 +31,6 @@ import {
   ContainerOptions,
   ErrorType,
 } from '../../../utils/common';
-import SKYFLOW_ERROR_CODE from '../../../utils/constants';
-import logs from '../../../utils/logs';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import {
   validateCollectElementInput, validateInitConfig,
@@ -30,16 +38,8 @@ import {
   validateUpsertOptions,
   validateBooleanOptions,
 } from '../../../utils/validators';
-import {
-  COLLECT_FRAME_CONTROLLER,
-  CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
-  ELEMENTS, FRAME_ELEMENT,
-  COLLECT_TYPES,
-  ElementType,
-} from '../../constants';
 import Container from '../common/container';
 import CollectElement from './collect-element';
-import properties from '../../../properties';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
 
 export interface ICollectElement {

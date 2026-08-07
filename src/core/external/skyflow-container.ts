@@ -2,13 +2,19 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import Client from '../../client';
 import iframer, {
   getIframeSrc,
   setAttributes,
   setStyles,
-} from '../../iframe-libs/iframer';
-import properties from '../../properties';
+} from '@core/iframe-libs/iframer';
+import properties from '@core/properties';
+import {
+  CONTROLLER_STYLES,
+  ELEMENT_EVENTS_TO_IFRAME,
+  SKYFLOW_FRAME_CONTROLLER,
+  PUREJS_TYPES,
+} from '@core/constants';
+import logs from '@core/utils/logs';
 import {
   validateInsertRecords,
   validateDetokenizeInput,
@@ -20,16 +26,10 @@ import {
   validateUpdateRecord,
 } from '../../utils/validators';
 import {
-  CONTROLLER_STYLES,
-  ELEMENT_EVENTS_TO_IFRAME,
-  SKYFLOW_FRAME_CONTROLLER,
-  PUREJS_TYPES,
-} from '../constants';
-import {
   printLog,
   parameterizedString,
 } from '../../utils/logs-helper';
-import logs from '../../utils/logs';
+import Client from '../../client';
 import {
   IDetokenizeInput,
   IGetInput,

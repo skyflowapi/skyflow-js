@@ -1,10 +1,10 @@
 // import FrameElementInit from '../../../src/core/internal/frame-element-init';
 import RevealComposableFrameElementInit from '../../../src/core/internal/composable-frame-element-init';
-import { ELEMENT_EVENTS_TO_IFRAME, COMPOSABLE_REVEAL, ELEMENT_EVENTS_TO_CLIENT, FRAME_REVEAL, REVEAL_TYPES } from '../../../src/core/constants';
+import { ELEMENT_EVENTS_TO_IFRAME, COMPOSABLE_REVEAL, ELEMENT_EVENTS_TO_CLIENT, FRAME_REVEAL, REVEAL_TYPES } from '@core/constants';
 import bus from 'framebus';
 import SkyflowError from '../../../src/libs/skyflow-error';
 import { fetchRecordsByTokenIdComposable, formatRecordsForClientComposable } from '../../../src/core-utils/reveal';
-import properties from '../../../src/properties';
+import properties from '@core/properties';
 
 // Create a mock function that can be controlled per test
 const mockFetchRecordsByTokenIdComposable = jest.fn();

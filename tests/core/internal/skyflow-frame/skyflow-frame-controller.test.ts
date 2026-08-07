@@ -8,9 +8,9 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
   PUREJS_TYPES,
   REVEAL_TYPES,
-} from "../../../../src/core/constants";
+} from "@core/constants";
 import clientModule from "../../../../src/client";
-import * as busEvents from "../../../../src/utils/bus-events";
+import * as busEvents from "@core/utils/bus-events";
 import {
   LogLevel,
   Env,
@@ -26,8 +26,8 @@ import { ISkyflow } from "../../../../src/skyflow";
 import Client from "../../../../src/client";
 import { set } from "core-js/core/dict";
 
-jest.mock("../../../../src/utils/bus-events", () => ({
-  ...jest.requireActual("../../../../src/utils/bus-events"),
+jest.mock("@core/utils/bus-events", () => ({
+  ...jest.requireActual("@core/utils/bus-events"),
   getAccessToken: jest.fn(() => Promise.resolve("access token")),
 }));
 

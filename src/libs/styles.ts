@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { STYLE_TYPE } from '../core/constants';
+import { STYLE_TYPE } from '@core/constants';
 import { getValueAndItsUnit } from './element-options';
 
 export function buildStylesFromClassesAndStyles(classes, styles) {

@@ -10,7 +10,7 @@ import {
     FRAME_ELEMENT,
     FRAME_REVEAL,
     SKYFLOW_FRAME_CONTROLLER,
-  } from './../src/core/constants';
+  } from '@core/constants';
 
 jest.mock('framebus')
 jest.mock('jquery-mask-plugin/dist/jquery.mask.min')

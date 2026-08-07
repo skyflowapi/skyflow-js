@@ -3,8 +3,8 @@ Copyright (c) 2025 Skyflow, Inc.
 */
 import bus from "framebus";
 import Skyflow, { ISkyflow } from "../src/skyflow";
-import * as iframerUtils from "../src/iframe-libs/iframer";
-import { ELEMENT_EVENTS_TO_IFRAME } from "../src/core/constants";
+import * as iframerUtils from "@core/iframe-libs/iframer";
+import { ELEMENT_EVENTS_TO_IFRAME } from "@core/constants";
 import {
   DeleteResponse,
   DeleteResponseRecord,

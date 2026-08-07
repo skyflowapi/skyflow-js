@@ -4,8 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
 import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
-import { setAttributes } from '../../iframe-libs/iframer';
-import { validateElementOptions } from '../../libs/element-options';
+import { setAttributes } from '@core/iframe-libs/iframer';
 import {
   ELEMENTS,
   ELEMENT_EVENTS_TO_CLIENT,
@@ -31,10 +30,11 @@ import {
   DROP_DOWN_ICON,
   DROPDOWN_ICON_STYLES,
   CardTypeValues,
-} from '../constants';
+} from '@core/constants';
+import logs from '@core/utils/logs';
+import { validateElementOptions } from '../../libs/element-options';
 import IFrameFormElement from './iframe-form';
 import { parameterizedString, printLog } from '../../utils/logs-helper';
-import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
 import {

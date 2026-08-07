@@ -1,5 +1,5 @@
 import FrameElementInit from '../../../src/core/internal/frame-element-init';
-import { ELEMENTS } from '../../../src/core/constants';
+import { ELEMENTS } from '@core/constants';
 import SkyflowError from '../../../src/libs/skyflow-error';
 import * as helpers from '../../../src/utils/helpers';
 import { constructElementsInsertReq, constructInsertRecordRequest, insertDataInCollect, updateRecordsBySkyflowIDComposable } from '../../../src/core-utils/collect';

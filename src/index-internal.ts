@@ -2,15 +2,15 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import 'core-js/stable';
-import RevealFrame from './core/internal/reveal/reveal-frame';
 import {
   COMPOSABLE_REVEAL,
   FRAME_ELEMENT,
   FRAME_REVEAL,
   SKYFLOW_FRAME_CONTROLLER,
-} from './core/constants';
+} from '@core/constants';
+import logs from '@core/utils/logs';
+import RevealFrame from './core/internal/reveal/reveal-frame';
 import SkyflowFrameController from './core/internal/skyflow-frame/skyflow-frame-controller';
-import logs from './utils/logs';
 import { MessageType, LogLevel } from './utils/common';
 import {
   printLog,

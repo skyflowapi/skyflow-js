@@ -2,8 +2,9 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+import { getAccessToken } from '@core/utils/bus-events';
+import { FILE_DOWNLOAD_URL_PARAM } from '@core/constants';
 import Client from '../client';
-import { getAccessToken } from '../utils/bus-events';
 import SkyflowError from '../libs/skyflow-error';
 import {
   IRevealRecord, IRevealResponseType, MessageType, LogLevel, IGetRecord, ISkyflowIdRecord,
@@ -19,7 +20,6 @@ import {
   IRevealRecordComposable,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
-import { FILE_DOWNLOAD_URL_PARAM } from '../core/constants';
 
 interface IApiSuccessResponse {
   records: [

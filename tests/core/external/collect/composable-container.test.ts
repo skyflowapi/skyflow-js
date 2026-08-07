@@ -4,7 +4,7 @@
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   ElementType,
-} from "../../../../src/core/constants";
+} from "@core/constants";
 import {
   LogLevel,
   Env,
@@ -17,7 +17,7 @@ import {
 import ComposableContainer from "../../../../src/core/external/collect/compose-collect-container";
 import ComposableElement from "../../../../src/core/external/collect/compose-collect-element";
 import CollectElement from "../../../../src/core/external/collect/collect-element";
-import SKYFLOW_ERROR_CODE from "../../../../src/utils/constants";
+import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import EventEmitter from "@core/event-emitter";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
 import SkyflowError from "../../../../src/libs/skyflow-error";
@@ -25,7 +25,7 @@ import SkyflowContainer from "../../../../src/core/external/skyflow-container";
 import { ContainerType } from "../../../../src/skyflow";
 import { Metadata } from "../../../../src/core/internal/internal-types";
 import IFrame from "../../../../src/core/external/common/iframe";
-import properties from "../../../../src/properties";
+import properties from "@core/properties";
 
 global.ResizeObserver = jest.fn(() => ({
   observe: jest.fn(),
@@ -35,9 +35,9 @@ global.ResizeObserver = jest.fn(() => ({
 
 const bus = require("framebus");
 
-jest.mock("../../../../src/iframe-libs/iframer", () => {
+jest.mock("@core/iframe-libs/iframer", () => {
   const actualModule = jest.requireActual(
-    "../../../../src/iframe-libs/iframer"
+    "@core/iframe-libs/iframer"
   );
   const mockedModule = { ...actualModule };
   mockedModule.__esModule = true;

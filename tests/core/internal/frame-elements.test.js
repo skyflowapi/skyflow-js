@@ -6,7 +6,7 @@ import FrameElementInit from './../../../src/core/internal/frame-element-init';
 import {
     FRAME_ELEMENT,
     ELEMENT_EVENTS_TO_IFRAME
-} from '../../../src/core/constants';
+} from '@core/constants';
 
 const stylesOptions = {
     inputStyles: {

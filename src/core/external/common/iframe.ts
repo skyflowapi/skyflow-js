@@ -4,11 +4,11 @@ Copyright (c) 2022 Skyflow, Inc.
 import iframer, {
   setAttributes,
   getIframeSrc,
-} from '../../../iframe-libs/iframer';
+} from '@core/iframe-libs/iframer';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import { METRIC_TYPES } from '@core/constants';
 import SkyflowError from '../../../libs/skyflow-error';
-import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { updateMetricObjectValue } from '../../../metrics/index';
-import { METRIC_TYPES } from '../../constants';
 import { LogLevel } from '../../../index-node';
 import { Metadata } from '../../internal/internal-types';
 

@@ -4,11 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import uuid from '@core/libs/uuid';
 import EventEmitter from '@core/event-emitter';
-import SkyflowError from '../../../libs/skyflow-error';
-import {
-  Context, ErrorType, MessageType, RenderFileResponse,
-} from '../../../utils/common';
-import SKYFLOW_ERROR_CODE from '../../../utils/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import {
   // eslint-disable-next-line max-len
   FRAME_REVEAL,
@@ -21,7 +17,13 @@ import {
   EVENT_TYPES,
   REVEAL_TYPES,
   CUSTOM_ERROR_MESSAGES,
-} from '../../constants';
+} from '@core/constants';
+import logs from '@core/utils/logs';
+import properties from '@core/properties';
+import SkyflowError from '../../../libs/skyflow-error';
+import {
+  Context, ErrorType, MessageType, RenderFileResponse,
+} from '../../../utils/common';
 import IFrame from '../common/iframe';
 import SkyflowElement from '../common/skyflow-element';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
@@ -31,10 +33,8 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
-import logs from '../../../utils/logs';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { formatForRenderClient } from '../../../core-utils/reveal';
-import properties from '../../../properties';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
 import { Metadata, RevealContainerProps } from '../../internal/internal-types';
 

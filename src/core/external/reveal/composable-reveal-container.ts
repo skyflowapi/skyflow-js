@@ -8,21 +8,10 @@ import sum from 'lodash/sum';
 import EventEmitter from '@core/event-emitter';
 import deepClone from '@core/libs/deep-clone';
 import uuid from '@core/libs/uuid';
-import iframer, { setAttributes, getIframeSrc, setStyles } from '../../../iframe-libs/iframer';
-import SkyflowError from '../../../libs/skyflow-error';
-import properties from '../../../properties';
-import { ContainerType } from '../../../skyflow';
-import {
-  Context, MessageType,
-} from '../../../utils/common';
-import SKYFLOW_ERROR_CODE from '../../../utils/constants';
-import logs from '../../../utils/logs';
-import { printLog, parameterizedString } from '../../../utils/logs-helper';
-import {
-  validateInitConfig,
-  validateInputFormatOptions,
-  validateRevealElementRecords,
-} from '../../../utils/validators';
+import iframer, { setAttributes, getIframeSrc, setStyles } from '@core/iframe-libs/iframer';
+import properties from '@core/properties';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import logs from '@core/utils/logs';
 import {
   COLLECT_FRAME_CONTROLLER,
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
@@ -30,7 +19,18 @@ import {
   COMPOSABLE_REVEAL,
   REVEAL_TYPES,
   CUSTOM_ERROR_MESSAGES,
-} from '../../constants';
+} from '@core/constants';
+import SkyflowError from '../../../libs/skyflow-error';
+import { ContainerType } from '../../../skyflow';
+import {
+  Context, MessageType,
+} from '../../../utils/common';
+import { printLog, parameterizedString } from '../../../utils/logs-helper';
+import {
+  validateInitConfig,
+  validateInputFormatOptions,
+  validateRevealElementRecords,
+} from '../../../utils/validators';
 import Container from '../common/container';
 
 import ComposableRevealElement from './composable-reveal-element';

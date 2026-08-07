@@ -14,7 +14,7 @@ import {
   IValidationRule,
   ValidationRuleType,
 } from "../../src/utils/common";
-import SKYFLOW_ERROR_CODE from "../../src/utils/constants";
+import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { parameterizedString } from "../../src/utils/logs-helper";
 
 describe("Testing getUpsertColumn method", () => {

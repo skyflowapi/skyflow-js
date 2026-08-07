@@ -1,9 +1,9 @@
 import EventEmitter from '@core/event-emitter';
+import { ElementType } from '@core/constants';
 import { ClientToJSON } from '../../../client';
 import { CollectContainer, ComposableContainer, RevealContainer } from '../../../index-node';
 import { ContainerType } from '../../../skyflow';
 import { CollectElementOptions, ICollectOptions } from '../../../utils/common';
-import { ElementType } from '../../constants';
 import SkyflowContainer from '../../external/skyflow-container';
 
 export interface ElementInfo {

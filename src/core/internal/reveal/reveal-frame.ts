@@ -18,11 +18,12 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   REVEAL_TYPES,
   SIGNED_TOKEN_PREFIX,
-} from '../../constants';
+} from '@core/constants';
+import logs from '@core/utils/logs';
+import properties from '@core/properties';
 import {
   printLog, parameterizedString,
 } from '../../../utils/logs-helper';
-import logs from '../../../utils/logs';
 import {
   Context, IRenderResponseType, IRevealRecord, MessageType, RedactionType,
 } from '../../../utils/common';
@@ -35,7 +36,6 @@ import {
 } from '../../../utils/helpers';
 import { formatForRenderClient, getFileURLFromVaultBySkyflowIDComposable } from '../../../core-utils/reveal';
 import Client from '../../../client';
-import properties from '../../../properties';
 
 const { getType } = require('mime');
 

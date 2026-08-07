@@ -1,5 +1,5 @@
 import FrameElementInit from '../../../src/core/internal/frame-element-init';
-import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ElementType, COLLECT_TYPES } from '../../../src/core/constants';
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ElementType, COLLECT_TYPES } from '@core/constants';
 import bus from 'framebus';
 import SkyflowError from '../../../src/libs/skyflow-error';
 import * as helpers from '../../../src/utils/helpers';

@@ -1,11 +1,11 @@
-import { CARDNUMBER_INPUT_FORMAT, CardType, ElementType } from "../../src/core/constants";
+import { CARDNUMBER_INPUT_FORMAT, CardType, ElementType } from "@core/constants";
 import { formatOptions, formatValidations } from "../../src/libs/element-options";
 import { LogLevel } from "../../src/utils/common";
-import SKYFLOW_ERROR_CODE from "../../src/utils/constants";
+import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { parameterizedString } from "../../src/utils/logs-helper";
-import logs from "../../src/utils/logs";
+import logs from "@core/utils/logs";
 import { validateInputFormatOptions } from "../../src/utils/validators";
-import { DEFAULT_CARD_NUMBER_SEPERATOR } from "../../src/core/constants";
+import { DEFAULT_CARD_NUMBER_SEPERATOR } from "@core/constants";
 import ComposableElement from "../../src/core/external/collect/compose-collect-element";
 
 jest.mock('../../src/utils/validators',()=>{

@@ -14,7 +14,9 @@ import {
   ElementType,
   INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES,
   INPUT_STYLES,
-} from '../core/constants';
+} from '@core/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import logs from '@core/utils/logs';
 import CollectElement from '../core/external/collect/collect-element';
 import ComposableElement from '../core/external/collect/compose-collect-element';
 import { FormattedCollectElementOptions } from '../core/internal/internal-types';
@@ -22,8 +24,6 @@ import {
   CollectElementOptions,
   IValidationRule, LogLevel, MessageType, ValidationRuleType,
 } from '../utils/common';
-import SKYFLOW_ERROR_CODE from '../utils/constants';
-import logs from '../utils/logs';
 import { parameterizedString, printLog } from '../utils/logs-helper';
 import {
   isValidExpiryDateFormat, isValidExpiryYearFormat, isValidRegExp, validateBooleanOptions,

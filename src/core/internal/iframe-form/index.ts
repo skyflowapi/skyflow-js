@@ -16,7 +16,9 @@ import {
   DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES,
   CardType,
   ELEMENT_TYPES,
-} from '../../constants';
+} from '@core/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import logs from '@core/utils/logs';
 import {
   validateCardNumberLengthCheck,
   validateCreditCardNumber,
@@ -33,8 +35,6 @@ import {
   EnvOptions,
 } from '../../../utils/logs-helper';
 import SkyflowError from '../../../libs/skyflow-error';
-import SKYFLOW_ERROR_CODE from '../../../utils/constants';
-import logs from '../../../utils/logs';
 import {
   Context,
   IValidationRule,

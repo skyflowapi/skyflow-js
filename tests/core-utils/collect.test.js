@@ -1,11 +1,11 @@
 import Client from "../../src/client";
 import { getUpsertColumn, updateRecordsBySkyflowID, constructElementsInsertReq, insertDataInMultipleFiles, insertDataInCollect, updateRecordsBySkyflowIDComposable, checkForElementMatchRule, checkForValueMatch, constructUpdateRecordRequest, constructUpdateRecordResponse } from "../../src/core-utils/collect";
 import { ValidationRuleType } from "../../src/utils/common";
-import SKYFLOW_ERROR_CODE from "../../src/utils/constants";
+import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { parameterizedString } from "../../src/utils/logs-helper";
-import { getAccessToken } from "../../src/utils/bus-events";
+import { getAccessToken } from "@core/utils/bus-events";
 
-jest.mock('../../src/utils/bus-events', () => ({
+jest.mock('@core/utils/bus-events', () => ({
     getAccessToken: jest.fn().mockResolvedValue('auth-token'),
   }));
 describe("getUpsertColumn fn test", () => {

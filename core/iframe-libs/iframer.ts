@@ -3,8 +3,8 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import {
   IFRAME_DEFAULT_STYLES,
-} from '../core/constants';
-import properties from '../properties';
+} from '@core/constants';
+import properties from '@core/properties';
 
 export const iframeDefaultAttributes = {
   src: 'about:blank',

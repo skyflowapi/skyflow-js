@@ -10,16 +10,16 @@ import {
   SDK_VERSION,
   SESSION_ID,
   CardType,
-} from './core/constants';
+} from '@core/constants';
+import properties from '@core/properties';
+import logs from '@core/utils/logs';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import Client from './client';
 import RevealContainer from './core/external/reveal/reveal-container';
 import CollectContainer from './core/external/collect/collect-container';
-import properties from './properties';
 import SkyflowContainer from './core/external/skyflow-container';
 import { parameterizedString, printLog } from './utils/logs-helper';
 import SkyflowError from './libs/skyflow-error';
-import logs from './utils/logs';
-import SKYFLOW_ERROR_CODE from './utils/constants';
 import {
   RequestMethod,
   IInsertRecordInput,
