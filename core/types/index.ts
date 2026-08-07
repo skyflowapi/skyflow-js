@@ -2,6 +2,7 @@
 Copyright (c) 2025 Skyflow, Inc.
 */
 import { CardType, ElementType } from '@core/constants';
+import EventEmitter from '@core/event-emitter';
 
 declare global {
   interface Window {
@@ -433,4 +434,60 @@ export interface IRevealElementOptions {
   enableCopy?: boolean;
   format?: string;
   translation?:Record<string, string>
+}
+
+// Internal element/frame types — variant-neutral. Relocated from
+// core/internal/internal-types (which re-exports them and keeps the
+// privacyDB-coupled internal types that reference container classes / client).
+export interface ElementInfo {
+  frameId: string;
+  elementId: string;
+}
+
+export interface ContainerProps {
+  containerId: string;
+  isMounted: boolean;
+  type: string;
+}
+
+export interface RevealContainerProps {
+  containerId: string;
+  isMounted: boolean;
+  eventEmitter: EventEmitter;
+  type: string;
+}
+
+export interface InternalState {
+  metaData: any;
+  isEmpty: boolean,
+  isValid: boolean,
+  isFocused: boolean,
+  isRequired: boolean,
+  name: string;
+  elementType: ElementType;
+  isComplete: boolean;
+  value: string | Blob | undefined;
+  selectedCardScheme: string;
+}
+
+export interface BatchInsertRequestBody {
+  method: string;
+  quorum?: boolean;
+  tableName: string;
+  fields?: Record<string, any>;
+  upsert?: string;
+  ID?: string;
+  tokenization?: boolean;
+  [key: string]: any;
+}
+
+export interface FormattedCollectElementOptions extends CollectElementOptions {
+  [key: string]: any;
+}
+
+export interface ClientMetadata {
+  uuid: string,
+  clientDomain: string,
+  sdkVersion?: string;
+  sessionId?: string;
 }

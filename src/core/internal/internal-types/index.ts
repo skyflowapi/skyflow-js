@@ -1,15 +1,25 @@
-import EventEmitter from '@core/event-emitter';
+import { ContainerType, ElementInfo, ClientMetadata } from '@core/types';
 import { ElementType } from '@core/constants';
 import { ClientToJSON } from '../../../client';
-import { CollectContainer, ComposableContainer, RevealContainer } from '../../../index-node';
-import { ContainerType } from '../../../skyflow';
-import { CollectElementOptions, ICollectOptions } from '../../../utils/common';
+import CollectContainer from '../../external/collect/collect-container';
+import ComposableContainer from '../../external/collect/compose-collect-container';
+import RevealContainer from '../../external/reveal/reveal-container';
+import { ICollectOptions } from '../../../utils/common';
 import SkyflowContainer from '../../external/skyflow-container';
 
-export interface ElementInfo {
-  frameId: string;
-  elementId: string;
-}
+// The variant-neutral internal types now live in `@core/types`; re-exported here
+// so the existing `internal-types` importers keep resolving them. The types
+// below stay in the package because they reference privacyDB container classes,
+// the client, or the privacyDB `ICollectOptions`.
+export {
+  ElementInfo,
+  ContainerProps,
+  RevealContainerProps,
+  InternalState,
+  BatchInsertRequestBody,
+  FormattedCollectElementOptions,
+  ClientMetadata,
+} from '@core/types';
 
 export interface TokenizeDataInput extends ICollectOptions{
   type: string;
@@ -23,59 +33,11 @@ export interface UploadFileDataInput extends ICollectOptions {
   containerId: string;
 }
 
-export interface BatchInsertRequestBody {
-  method: string;
-  quorum?: boolean;
-  tableName: string;
-  fields?: Record<string, any>;
-  upsert?: string;
-  ID?: string;
-  tokenization?: boolean;
-  [key: string]: any;
-}
-
-export interface ContainerProps {
-  containerId: string;
-  isMounted: boolean;
-  type: string;
-}
-
-export interface RevealContainerProps {
-  containerId: string;
-  isMounted: boolean;
-  eventEmitter: EventEmitter;
-  type: string;
-}
-
-export interface InternalState {
-  metaData: any;
-  isEmpty: boolean,
-  isValid: boolean,
-  isFocused: boolean,
-  isRequired: boolean,
-  name: string;
-  elementType: ElementType;
-  isComplete: boolean;
-  value: string | Blob | undefined;
-  selectedCardScheme: string;
-}
-
-export interface FormattedCollectElementOptions extends CollectElementOptions {
-  [key: string]: any;
-}
-
 export interface SkyflowElementProps {
   id: string;
   type: ElementType;
   element: HTMLElement;
   container: CollectContainer | RevealContainer | ComposableContainer;
-}
-
-export interface ClientMetadata {
-  uuid: string,
-  clientDomain: string,
-  sdkVersion?: string;
-  sessionId?: string;
 }
 
 export interface Metadata extends ClientMetadata {
