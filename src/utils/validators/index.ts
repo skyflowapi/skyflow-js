@@ -2,12 +2,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import {
-  ALLOWED_EXPIRY_DATE_FORMATS,
-  ALLOWED_EXPIRY_YEAR_FORMATS,
-  CardType, CARD_TYPE_REGEX,
-  DEFAULT_CARD_LENGTH_RANGE,
-} from '@core/constants';
+import * as coreValidators from '@core/validators';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
 import { IRevealElementInput } from '../../core/external/reveal/reveal-container';
@@ -31,36 +26,20 @@ import {
 import { appendZeroToOne } from '../helpers';
 import { printLog } from '../logs-helper';
 
-export const validateCreditCardNumber = (cardNumber: string) => {
-  const value = cardNumber.replace(/[\s-]/g, '');
-  let sum = 0;
-  let shouldDouble = false;
-
-  for (let i = value.length - 1; i >= 0; i -= 1) {
-    let digit = parseInt(value.charAt(i), 10);
-
-    if (shouldDouble) {
-      digit *= 2;
-      if (digit > 9) digit -= 9;
-    }
-
-    sum += digit;
-    shouldDouble = !shouldDouble;
-  }
-  return sum % 10 === 0;
-};
-
-export const detectCardType = (cardNumber: string = '') => {
-  const value = cardNumber.replace(/[\s-]/g, '');
-
-  let detectedType = CardType.DEFAULT;
-  Object.entries(CARD_TYPE_REGEX).forEach(([key, type]) => {
-    if (type.regex.test(value)) {
-      detectedType = key as CardType;
-    }
-  });
-  return detectedType;
-};
+// Re-export the pure validators now living in @core so the existing
+// `../utils/validators` importers keep resolving the full set. Bound as local
+// consts (not `export *`) so jest.spyOn(validators, ...) hooks still work —
+// star/named re-exports compile to non-configurable getters that can't be spied.
+export const validateCreditCardNumber = coreValidators.validateCreditCardNumber;
+export const detectCardType = coreValidators.detectCardType;
+export const validateExpiryYear = coreValidators.validateExpiryYear;
+export const validateExpiryMonth = coreValidators.validateExpiryMonth;
+export const isValidExpiryDateFormat = coreValidators.isValidExpiryDateFormat;
+export const isValidExpiryYearFormat = coreValidators.isValidExpiryYearFormat;
+export const isValidURL = coreValidators.isValidURL;
+export const isValidRegExp = coreValidators.isValidRegExp;
+export const validateCardNumberLengthCheck = coreValidators.validateCardNumberLengthCheck;
+export const validateBooleanOptions = coreValidators.validateBooleanOptions;
 
 const getYearAndMonthBasedOnFormat = (cardDate: string, format: string) => {
   const [part1, part2] = cardDate.split('/');
@@ -88,41 +67,6 @@ export const validateExpiryDate = (date: string, format: string) => {
   maxDate.setFullYear(today.getFullYear() + 50);
   maxDate.setMonth(today.getMonth() + 1);
   return expiryDate >= today && expiryDate <= maxDate;
-};
-
-export const validateExpiryYear = (year: string, format: string) => {
-  if (year.trim().length === 0) return true;
-  let expiryYear = Number(year);
-  if (format === 'YY') {
-    expiryYear = 2000 + Number(year);
-  }
-  const currentYear = new Date().getFullYear();
-  const maxYear = currentYear + 50;
-
-  return expiryYear >= currentYear && expiryYear <= maxYear;
-};
-
-export const validateExpiryMonth = (month: string) => {
-  if (month.trim().length === 0) return true;
-  const tempMonth = Number(month);
-  if (tempMonth > 0 && tempMonth <= 12) {
-    return true;
-  }
-  return false;
-};
-
-export const isValidExpiryDateFormat = (format: string): boolean => {
-  if (format) {
-    return ALLOWED_EXPIRY_DATE_FORMATS.includes(format);
-  }
-  return false;
-};
-
-export const isValidExpiryYearFormat = (format: string): boolean => {
-  if (format) {
-    return ALLOWED_EXPIRY_YEAR_FORMATS.includes(format);
-  }
-  return false;
 };
 
 export const validateInsertRecords = (recordObj: IInsertRecordInput, options: any) => {
@@ -536,40 +480,6 @@ export const validateRenderElementRecord = (record: IRevealElementInput) => {
   }
 };
 
-export const isValidURL = (url: string) => {
-  if (!url || url.substring(0, 5).toLowerCase() !== 'https') {
-    return false;
-  }
-  try {
-    const tempUrl = new URL(url);
-    if (tempUrl) return true;
-  } catch (err) {
-    return false;
-  }
-
-  return true;
-};
-
-export const isValidRegExp = (input) => {
-  let isValid = true;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const reg = new RegExp(input);
-  } catch (err) {
-    isValid = false;
-  }
-
-  return isValid;
-};
-
-export const validateCardNumberLengthCheck = (cardNumber: string = ''): boolean => {
-  const cardType: CardType = detectCardType(cardNumber);
-  const cardLength = cardNumber.replace(/[\s-]/g, '').length;
-  const validLengths: number[] = CARD_TYPE_REGEX[cardType]?.cardLengthRange
-    || DEFAULT_CARD_LENGTH_RANGE;
-  return validLengths.includes(cardLength);
-};
-
 export const validateInitConfig = (initConfig: ISkyflow) => {
   if (!Object.prototype.hasOwnProperty.call(initConfig, 'vaultID')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.VAULTID_IS_REQUIRED, [], true);
@@ -708,12 +618,6 @@ export const validateComposableContainerOptions = (options: ContainerOptions) =>
       throw new SkyflowError(SKYFLOW_ERROR_CODE.NEGATIVE_VALUES_COMPOSABLE_LAYOUT, [], true);
     }
   });
-};
-
-export const validateBooleanOptions = (option) => {
-  if (typeof option !== 'boolean') { return false; }
-
-  return true;
 };
 
 export const validateInputFormatOptions = (options) => {

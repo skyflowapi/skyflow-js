@@ -42,3 +42,6 @@ export { getAccessToken, updateElementState } from './utils/bus-events';
 // Task 1.4 — variant-neutral type surface + base interfaces (privacyDB uses
 // these directly; flowDB extends them in its own package).
 export * from './types';
+
+// Task 1.5 — pure, variant-neutral validators (card / Luhn / expiry / URL).
+export * from './validators';
