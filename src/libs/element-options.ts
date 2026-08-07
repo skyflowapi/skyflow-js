@@ -201,23 +201,9 @@ export const getElements = (group: any) => {
   return elements;
 };
 
-export const getValueAndItsUnit = (
-  string = '',
-  defaultValue: string = '0',
-  defaultUnit: string = 'px',
-) => {
-  const index = string.search(/[^0-9]/gi);
-  if (index === 0) {
-    return [defaultValue, defaultUnit];
-  }
-  if (index === -1) {
-    if (string.length === 0) {
-      return [defaultValue, defaultUnit];
-    }
-    return [string, defaultUnit];
-  }
-  return [string.slice(0, index), string.slice(index)];
-};
+// Relocated to @core/libs/styles; re-exported here so importers that pull it
+// from `../libs/element-options` keep working.
+export { getValueAndItsUnit } from '@core/libs/styles';
 
 export const formatValidations = (validations?: IValidationRule[]):
 IValidationRule[] | undefined => {

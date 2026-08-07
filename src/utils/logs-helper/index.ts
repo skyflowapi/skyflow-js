@@ -1,32 +1,16 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+import { LogLevelOptions } from '@core/utils/logs-helper';
 import { LogLevel, MessageType } from '../common';
 import { getSDKLanguageAndVersion } from '../helpers';
 
-export const LogLevelOptions = {
-  DEBUG: {
-    showDebugLogs: true, showInfoLogs: true, showWarnLogs: true, showErrorLogs: true,
-  },
-  INFO: {
-    showDebugLogs: false, showInfoLogs: true, showWarnLogs: true, showErrorLogs: true,
-  },
-  WARN: {
-    showDebugLogs: false, showInfoLogs: false, showWarnLogs: true, showErrorLogs: true,
-  },
-  ERROR: {
-    showDebugLogs: false, showInfoLogs: false, showWarnLogs: false, showErrorLogs: true,
-  },
-};
-
-export const EnvOptions = {
-  PROD: {
-    doesReturnValue: false,
-  },
-  DEV: {
-    doesReturnValue: true,
-  },
-};
+// The variant-neutral helpers now live in @core/utils/logs-helper; re-exported
+// here so existing `../logs-helper` importers keep resolving them. `printLog`
+// stays because it reads the package's SDK-language/version.
+export {
+  LogLevelOptions, EnvOptions, parameterizedString, getElementName,
+} from '@core/utils/logs-helper';
 
 const SDK_OWNER = '[Skyflow]';
 
@@ -50,26 +34,4 @@ export const printLog = (message: string, messageType:MessageType, logLevel:LogL
       console.error(`${LogLevel.ERROR}: ${sdkOwner} ${sdkLanguageAndVersion} ${message}`);
     }
   }
-};
-
-export const parameterizedString = (...args: any[]) => {
-  const str = args[0];
-  const params = args.filter((arg, index) => index !== 0);
-  if (!str) return '';
-  return str.replace(/%s[0-9]+/g, (matchedStr: any) => {
-    const variableIndex = matchedStr.replace('%s', '') - 1;
-    return params[variableIndex];
-  });
-};
-
-export const getElementName = (name:string = '') => {
-  const nameParts = name.split(':');
-  if (nameParts[1] === 'group') {
-    return 'composable container';
-  }
-  let tempName = atob(nameParts[2]);
-  if (tempName.indexOf(':') !== -1) {
-    tempName = tempName.substring(0, tempName.indexOf(':'));
-  }
-  return tempName;
 };

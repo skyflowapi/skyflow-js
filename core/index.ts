@@ -45,3 +45,9 @@ export * from './types';
 
 // Task 1.5 — pure, variant-neutral validators (card / Luhn / expiry / URL).
 export * from './validators';
+
+// Task 1.8 — SkyflowError base, style helpers, neutral logging helpers.
+export { default as SkyflowError } from './errors';
+export * from './errors';
+export * from './libs/styles';
+export * from './utils/logs-helper';
