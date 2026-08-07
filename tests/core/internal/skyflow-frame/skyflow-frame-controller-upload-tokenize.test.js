@@ -1153,7 +1153,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     jest.spyOn(require('@core/helpers'), 'checkForElementMatchRule').mockReturnValue(true);
     jest.spyOn(require('@core/helpers'), 'checkForValueMatch').mockReturnValue(true);
 
-    jest.spyOn(require('../../../../src/core-utils/collect'), 'constructElementsInsertReq').mockImplementation(() => {
+    jest.spyOn(require('@core/core-utils/collect'), 'constructElementsInsertReq').mockImplementation(() => {
         return [
           { records: [] }, 
           { updateRecords: [{ table: 'testTable', fields: { key: 'value' }, skyflowID: '123' }] },

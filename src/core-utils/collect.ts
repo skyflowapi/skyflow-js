@@ -1,13 +1,9 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import merge from 'lodash/merge';
 import omit from 'lodash/omit';
-import get from 'lodash/get';
 import { getAccessToken } from '@core/utils/bus-events';
-import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import Client from '../client';
-import SkyflowError from '../libs/skyflow-error';
 import {
   IInsertRecordInput, IInsertRecord,
   MessageType, LogLevel,
@@ -165,78 +161,9 @@ export const constructUploadResponse = (response) => {
   return JSON.stringify({ skyflow_id: data.skyflowID }) as any;
 };
 
-const keyify = (obj, prefix = '') => Object.keys(obj).reduce((res: any, el) => {
-  if (Array.isArray(obj[el])) {
-    return [...res, prefix + el];
-  } if (typeof obj[el] === 'object' && obj[el] !== null) {
-    return [...res, ...keyify(obj[el], `${prefix + el}.`)];
-  }
-  return [...res, prefix + el];
-}, []);
+// keyify / checkDuplicateColumns / constructElementsInsertReq moved to
+// @core/core-utils/collect (variant-neutral request assembly).
 
-const checkDuplicateColumns = (additionalColumns, columns, table) => {
-  const keys = keyify(additionalColumns);
-  keys.forEach((key) => {
-    const value = get(columns, key);
-    if (value) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT, [`${key}`, `${table}`], true);
-    }
-  });
-};
-
-export const constructElementsInsertReq = (req, update, options) => {
-  let tables = Object.keys(req);
-  let ids = Object.keys(update);
-  const additionalFields = options?.additionalFields;
-  if (additionalFields) {
-    // merge additionalFields in req
-    additionalFields.records.forEach((record) => {
-      if (record.fields.skyflowID) {
-        if (ids.includes(record.fields.skyflowID)) {
-          checkDuplicateColumns(
-            record.fields, update[record.fields.skyflowID], record.table,
-          );
-          const temp = record.fields;
-          merge(temp, update[record.fields.skyflowID]);
-          update[record.fields.skyflowID] = temp;
-        } else {
-          update[record.fields.skyflowID] = {
-            ...record.fields,
-            table: record.table,
-          };
-        }
-      } else if (!record.fields.skyflowID) {
-        if (tables.includes(record.table)) {
-          checkDuplicateColumns(record.fields, req[record.table], record.table);
-          const temp = record.fields;
-          merge(temp, req[record.table]);
-          req[record.table] = temp;
-        } else {
-          req[record.table] = record.fields;
-        }
-      }
-    });
-  }
-  const records: IInsertRecord[] = [];
-  const updateRecords: IInsertRecord[] = [];
-
-  tables = Object.keys(req);
-  tables.forEach((table) => {
-    records.push({
-      table,
-      fields: req[table],
-    });
-  });
-  ids = Object.keys(update);
-  ids.forEach((id) => {
-    updateRecords.push({
-      table: update[id].table,
-      fields: update[id],
-      skyflowID: id,
-    });
-  });
-  return [{ records }, { updateRecords }];
-};
 const updateRecordsInVault = (
   skyflowIdRecord: IInsertRecord,
   client: Client,

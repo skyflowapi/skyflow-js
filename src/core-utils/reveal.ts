@@ -337,29 +337,7 @@ export const fetchRecordsByTokenIdComposable = (
   });
 });
 
-export const formatRecordsForIframe = (response: IRevealResponseType) => {
-  const result: Record<string, any> = {};
-  if (response.records) {
-    response.records.forEach((record) => {
-      const key = record.token;
-      const recordData = {
-        value: record.value,
-        redaction: record.redaction,
-      };
-
-      if (result[key]) {
-        if (Array.isArray(result[key])) {
-          result[key].push(recordData);
-        } else {
-          result[key] = [result[key], recordData];
-        }
-      } else {
-        result[key] = recordData;
-      }
-    });
-  }
-  return result;
-};
+// formatRecordsForIframe moved to @core/core-utils/reveal (variant-neutral).
 export const formatRecordsForRender = (response : IRenderResponseType, column, skyflowID) => {
   let url = '';
   if (response.fields) {

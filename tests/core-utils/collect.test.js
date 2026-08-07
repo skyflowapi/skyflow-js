@@ -1,6 +1,7 @@
 import Client from "../../src/client";
 import { checkForElementMatchRule, checkForValueMatch } from "@core/helpers";
-import { getUpsertColumn, updateRecordsBySkyflowID, constructElementsInsertReq, insertDataInMultipleFiles, insertDataInCollect, updateRecordsBySkyflowIDComposable, constructUpdateRecordRequest, constructUpdateRecordResponse } from "../../src/core-utils/collect";
+import { constructElementsInsertReq } from "@core/core-utils/collect";
+import { getUpsertColumn, updateRecordsBySkyflowID, insertDataInMultipleFiles, insertDataInCollect, updateRecordsBySkyflowIDComposable, constructUpdateRecordRequest, constructUpdateRecordResponse } from "../../src/core-utils/collect";
 import { ValidationRuleType } from "../../src/utils/common";
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { parameterizedString } from "../../src/utils/logs-helper";

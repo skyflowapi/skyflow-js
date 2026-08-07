@@ -9,6 +9,7 @@ import {
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { checkForElementMatchRule, checkForValueMatch } from '@core/helpers';
+import { constructElementsInsertReq } from '@core/core-utils/collect';
 import { getValueAndItsUnit, validateAndSetupGroupOptions } from '../../libs/element-options';
 import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
@@ -22,7 +23,6 @@ import {
 import IFrameFormElement from './iframe-form';
 import FrameElement from '.';
 import {
-  constructElementsInsertReq,
   constructInsertRecordRequest, insertDataInCollect,
   updateRecordsBySkyflowIDComposable,
 } from '../../core-utils/collect';

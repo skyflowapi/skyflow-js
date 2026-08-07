@@ -1164,7 +1164,7 @@ describe("SkyflowFrameController - tokenize function", () => {
 
     jest
       .spyOn(
-        require("../../../../src/core-utils/collect"),
+        require("@core/core-utils/collect"),
         "constructElementsInsertReq"
       )
       .mockImplementation(() => {

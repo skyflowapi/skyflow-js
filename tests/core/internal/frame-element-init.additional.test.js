@@ -14,12 +14,16 @@ jest.mock('../../../src/client', () => {
   }
   return { __esModule: true, default: Client, mockClientRequest };
 });
-// Mock collect helpers BEFORE importing FrameElementInit so internal references use mocks
-jest.mock('../../../src/core-utils/collect', () => {
-  const constructElementsInsertReq = jest.fn((insertObj, updateObj) => [
+// Mock collect helpers BEFORE importing FrameElementInit so internal references use mocks.
+// constructElementsInsertReq now lives in @core/core-utils/collect, so mock it there.
+jest.mock('@core/core-utils/collect', () => ({
+  __esModule: true,
+  constructElementsInsertReq: jest.fn((insertObj, updateObj) => [
     { insertRecords: insertObj },
     { updateRecords: Object.entries(updateObj).map(([skyflowID, record]) => ({ skyflowID, ...record })) },
-  ]);
+  ]),
+}));
+jest.mock('../../../src/core-utils/collect', () => {
   const constructInsertRecordRequest = jest.fn((finalInsertRecords) => {
     if (finalInsertRecords && typeof finalInsertRecords === 'object' && !Array.isArray(finalInsertRecords)) {
       return Object.entries(finalInsertRecords).map(([table, fields]) => ({ table, fields }));
@@ -30,7 +34,6 @@ jest.mock('../../../src/core-utils/collect', () => {
   const updateRecordsBySkyflowIDComposable = jest.fn(() => Promise.resolve({ records: [{ id: 'update1' }] }));
   return {
     __esModule: true,
-    constructElementsInsertReq,
     constructInsertRecordRequest,
     insertDataInCollect,
     updateRecordsBySkyflowIDComposable,
@@ -44,8 +47,8 @@ import { parameterizedString } from '../../../src/utils/logs-helper';
 import * as helpers from '../../../src/utils/helpers';
 import Client, { mockClientRequest } from '../../../src/client';
 import { ELEMENT_EVENTS_TO_IFRAME, COLLECT_TYPES } from '@core/constants';
+import { constructElementsInsertReq } from '@core/core-utils/collect';
 import {
-  constructElementsInsertReq,
   constructInsertRecordRequest,
   insertDataInCollect,
   updateRecordsBySkyflowIDComposable,

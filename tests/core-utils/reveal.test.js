@@ -2,7 +2,8 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import Skyflow from '../../src/skyflow';
-import {formatRecordsForClient, formatRecordsForClientComposable, formatRecordsForIframe, formatRecordsForRender, formatForRenderClient, getFileURLFromVaultBySkyflowID, getFileURLForRender, getFileURLFromVaultBySkyflowIDComposable, fetchRecordsByTokenIdComposable} from "../../src/core-utils/reveal";
+import { formatRecordsForIframe } from "@core/core-utils/reveal";
+import {formatRecordsForClient, formatRecordsForClientComposable, formatRecordsForRender, formatForRenderClient, getFileURLFromVaultBySkyflowID, getFileURLForRender, getFileURLFromVaultBySkyflowIDComposable, fetchRecordsByTokenIdComposable} from "../../src/core-utils/reveal";
 import { Env, LogLevel } from '../../src/utils/common';
 import { getAccessToken } from '@core/utils/bus-events';
 import Client from '../../src/client';

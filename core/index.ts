@@ -54,3 +54,7 @@ export * from './utils/logs-helper';
 
 // Task 1.9 — variant-neutral frame/element leaf helpers.
 export * from './helpers';
+
+// Task 1.10 — variant-neutral request-assembly helpers.
+export { constructElementsInsertReq } from './core-utils/collect';
+export { formatRecordsForIframe } from './core-utils/reveal';

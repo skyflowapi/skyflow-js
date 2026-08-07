@@ -14,9 +14,10 @@ import logs from '@core/utils/logs';
 import properties from '@core/properties';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { checkForElementMatchRule, checkForValueMatch } from '@core/helpers';
+import { constructElementsInsertReq } from '@core/core-utils/collect';
+import { formatRecordsForIframe } from '@core/core-utils/reveal';
 import Client from '../../../client';
 import {
-  constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,
   constructUpdateRecordRequest,
@@ -30,7 +31,6 @@ import {
   fetchRecordsBySkyflowID,
   getFileURLFromVaultBySkyflowID,
   formatRecordsForClient,
-  formatRecordsForIframe,
 } from '../../../core-utils/reveal';
 import { printLog, parameterizedString } from '../../../utils/logs-helper';
 import {

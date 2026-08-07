@@ -2,14 +2,18 @@ import FrameElementInit from '../../../src/core/internal/frame-element-init';
 import { ELEMENTS } from '@core/constants';
 import SkyflowError from '../../../src/libs/skyflow-error';
 import * as helpers from '../../../src/utils/helpers';
-import { constructElementsInsertReq, constructInsertRecordRequest, insertDataInCollect, updateRecordsBySkyflowIDComposable } from '../../../src/core-utils/collect';
+import { constructElementsInsertReq } from '@core/core-utils/collect';
+import { constructInsertRecordRequest, insertDataInCollect, updateRecordsBySkyflowIDComposable } from '../../../src/core-utils/collect';
 
-// Reuse existing mocks from additional test by mocking modules again (Jest will hoist mocks)
-jest.mock('../../../src/core-utils/collect', () => {
-  const constructElementsInsertReq = jest.fn((insertObj, updateObj) => [
+// constructElementsInsertReq now lives in @core/core-utils/collect; mock it there.
+jest.mock('@core/core-utils/collect', () => ({
+  __esModule: true,
+  constructElementsInsertReq: jest.fn((insertObj, updateObj) => [
     { insertRecords: insertObj },
     { updateRecords: Object.entries(updateObj).map(([skyflowID, record]) => ({ skyflowID, ...record })) },
-  ]);
+  ]),
+}));
+jest.mock('../../../src/core-utils/collect', () => {
   const constructInsertRecordRequest = jest.fn((finalInsertRecords) => {
     if (finalInsertRecords && typeof finalInsertRecords === 'object' && !Array.isArray(finalInsertRecords)) {
       return Object.entries(finalInsertRecords).map(([table, fields]) => ({ table, fields }));
@@ -20,7 +24,6 @@ jest.mock('../../../src/core-utils/collect', () => {
   const updateRecordsBySkyflowIDComposable = jest.fn(() => Promise.resolve({ records: [{ id: 'update1' }] }));
   return {
     __esModule: true,
-    constructElementsInsertReq,
     constructInsertRecordRequest,
     insertDataInCollect,
     updateRecordsBySkyflowIDComposable,
