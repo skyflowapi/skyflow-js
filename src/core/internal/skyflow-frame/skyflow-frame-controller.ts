@@ -13,10 +13,9 @@ import {
 import logs from '@core/utils/logs';
 import properties from '@core/properties';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import { checkForElementMatchRule, checkForValueMatch } from '@core/helpers';
 import Client from '../../../client';
 import {
-  checkForElementMatchRule,
-  checkForValueMatch,
   constructElementsInsertReq,
   constructInsertRecordRequest,
   constructInsertRecordResponse,

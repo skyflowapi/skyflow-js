@@ -8,6 +8,7 @@ import {
   ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, ERROR_TEXT_STYLES, STYLE_TYPE,
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import { checkForElementMatchRule, checkForValueMatch } from '@core/helpers';
 import { getValueAndItsUnit, validateAndSetupGroupOptions } from '../../libs/element-options';
 import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
@@ -21,7 +22,7 @@ import {
 import IFrameFormElement from './iframe-form';
 import FrameElement from '.';
 import {
-  checkForElementMatchRule, checkForValueMatch, constructElementsInsertReq,
+  constructElementsInsertReq,
   constructInsertRecordRequest, insertDataInCollect,
   updateRecordsBySkyflowIDComposable,
 } from '../../core-utils/collect';

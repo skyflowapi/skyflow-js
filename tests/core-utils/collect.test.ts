@@ -1,7 +1,7 @@
+import { checkForValueMatch } from "@core/helpers";
 import {
   getUpsertColumn,
   constructElementsInsertReq,
-  checkForValueMatch,
   constructUpdateRecordResponse,
   constructUpdateRecordRequest,
 } from "../../src/core-utils/collect";

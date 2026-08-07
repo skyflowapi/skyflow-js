@@ -9,7 +9,7 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import Client from '../client';
 import SkyflowError from '../libs/skyflow-error';
 import {
-  IInsertRecordInput, IInsertRecord, IValidationRule, ValidationRuleType,
+  IInsertRecordInput, IInsertRecord,
   MessageType, LogLevel,
   InsertResponse,
   IUpdateRequest,
@@ -18,7 +18,6 @@ import {
   UpdateResponseType,
 } from '../utils/common';
 import { printLog } from '../utils/logs-helper';
-import IFrameFormElement from '../core/internal/iframe-form';
 import { BatchInsertRequestBody } from '../core/internal/internal-types';
 
 export interface IUpsertOptions{
@@ -468,24 +467,5 @@ export const insertDataInMultipleFiles = async (
     });
 });
 
-export const checkForElementMatchRule = (validations: IValidationRule[]) => {
-  if (!validations) return false;
-  for (let i = 0; i < validations.length; i += 1) {
-    if (validations[i].type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {
-      return true;
-    }
-  }
-  return false;
-};
-
-export const checkForValueMatch = (validations: IValidationRule[], element: IFrameFormElement) => {
-  if (!validations) return false;
-  for (let i = 0; i < validations.length; i += 1) {
-    if (validations[i].type === ValidationRuleType.ELEMENT_VALUE_MATCH_RULE) {
-      if (element && !element.isMatchEqual(i, element.state.value, validations[i])) {
-        return true;
-      }
-    }
-  }
-  return false;
-};
+// checkForElementMatchRule / checkForValueMatch moved to @core/helpers
+// (variant-neutral frame leaf-helpers). Frame code imports them from @core.

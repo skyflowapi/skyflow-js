@@ -1150,8 +1150,8 @@ describe('SkyflowFrameController - tokenize function', () => {
       },
     }));
   
-    jest.spyOn(require('../../../../src/core-utils/collect'), 'checkForElementMatchRule').mockReturnValue(true);
-    jest.spyOn(require('../../../../src/core-utils/collect'), 'checkForValueMatch').mockReturnValue(true);
+    jest.spyOn(require('@core/helpers'), 'checkForElementMatchRule').mockReturnValue(true);
+    jest.spyOn(require('@core/helpers'), 'checkForValueMatch').mockReturnValue(true);
 
     jest.spyOn(require('../../../../src/core-utils/collect'), 'constructElementsInsertReq').mockImplementation(() => {
         return [

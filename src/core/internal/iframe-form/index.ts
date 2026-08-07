@@ -19,6 +19,7 @@ import {
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
+import { checkForElementMatchRule } from '@core/helpers';
 import {
   validateCardNumberLengthCheck,
   validateCreditCardNumber,
@@ -26,9 +27,6 @@ import {
   validateExpiryMonth,
   validateExpiryYear,
 } from '../../../utils/validators';
-import {
-  checkForElementMatchRule,
-} from '../../../core-utils/collect';
 import {
   printLog,
   parameterizedString,

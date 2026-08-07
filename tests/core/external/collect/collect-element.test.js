@@ -7,7 +7,7 @@ import SkyflowError from '../../../../src/libs/skyflow-error';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
-import { checkForElementMatchRule } from '../../../../src/core-utils/collect';
+import { checkForElementMatchRule } from '@core/helpers';
 import { ContainerType } from '../../../../src/skyflow';
 import EventEmitter from '@core/event-emitter';
 

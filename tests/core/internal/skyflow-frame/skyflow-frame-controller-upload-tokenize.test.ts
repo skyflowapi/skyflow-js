@@ -1151,13 +1151,13 @@ describe("SkyflowFrameController - tokenize function", () => {
 
     jest
       .spyOn(
-        require("../../../../src/core-utils/collect"),
+        require("@core/helpers"),
         "checkForElementMatchRule"
       )
       .mockReturnValue(true);
     jest
       .spyOn(
-        require("../../../../src/core-utils/collect"),
+        require("@core/helpers"),
         "checkForValueMatch"
       )
       .mockReturnValue(true);
