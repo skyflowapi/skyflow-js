@@ -403,3 +403,34 @@ export interface ElementState {
   isRequired: boolean,
   selectedCardScheme?: string,
 }
+
+// Container / config / reveal-option types — variant-neutral. Relocated here so
+// shared code depends on them downward instead of importing up into skyflow.ts
+// / reveal-container.ts (which now re-export these under the same public names).
+export enum ContainerType {
+  COLLECT = 'COLLECT',
+  REVEAL = 'REVEAL',
+  COMPOSABLE = 'COMPOSABLE',
+  COMPOSE_REVEAL = 'COMPOSABLE_REVEAL',
+}
+
+export interface SkyflowConfigOptions {
+  logLevel?: LogLevel;
+  env?: Env;
+  trackingKey?: string;
+  trackMetrics?: boolean;
+  customElementsURL?: string;
+}
+
+export interface ISkyflow {
+  vaultID?: string;
+  vaultURL?: string;
+  getBearerToken: () => Promise<string>;
+  options?: SkyflowConfigOptions;
+}
+
+export interface IRevealElementOptions {
+  enableCopy?: boolean;
+  format?: string;
+  translation?:Record<string, string>
+}

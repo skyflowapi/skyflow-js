@@ -13,8 +13,8 @@ import {
   REVEAL_TYPES,
 } from '@core/constants';
 import properties from '@core/properties';
+import { ContainerType, IRevealElementOptions } from '@core/types';
 import SkyflowError from '../../../libs/skyflow-error';
-import { ContainerType } from '../../../skyflow';
 import {
   ContainerOptions,
   Context, ErrorType, MessageType,
@@ -39,11 +39,8 @@ export interface IRevealElementInput {
   errorTextStyles?: object;
 }
 
-export interface IRevealElementOptions {
-  enableCopy?: boolean;
-  format?: string;
-  translation?:Record<string, string>
-}
+// Relocated to @core/types; re-exported here under the same public name.
+export { IRevealElementOptions };
 
 const CLASS_NAME = 'RevealContainer';
 class RevealContainer extends Container {

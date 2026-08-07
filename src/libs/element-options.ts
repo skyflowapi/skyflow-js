@@ -17,8 +17,6 @@ import {
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
-import CollectElement from '../core/external/collect/collect-element';
-import ComposableElement from '../core/external/collect/compose-collect-element';
 import { FormattedCollectElementOptions } from '../core/internal/internal-types';
 import {
   CollectElementOptions,
@@ -238,7 +236,11 @@ IValidationRule[] | undefined => {
         }
 
         const { element } = params;
-        if (!element || !(element instanceof CollectElement || ComposableElement)) {
+        // Drops the former `element instanceof CollectElement || ComposableElement`
+        // concrete-class dependency. That expression was always truthy (the
+        // `|| ComposableElement` class ref), so the guard only ever depended on
+        // `!element` — preserved here without importing the element classes.
+        if (!element) {
           throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ELEMENT_IN_ELEMENT_MATCH_RULE, [`${index}`], true);
         }
 

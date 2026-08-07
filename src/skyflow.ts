@@ -14,6 +14,7 @@ import {
 import properties from '@core/properties';
 import logs from '@core/utils/logs';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import { ContainerType, ISkyflow, SkyflowConfigOptions } from '@core/types';
 import Client from './client';
 import RevealContainer from './core/external/reveal/reveal-container';
 import CollectContainer from './core/external/collect/collect-container';
@@ -54,25 +55,9 @@ import ThreeDS from './core/external/threeds/threeds';
 import { ClientMetadata, SkyflowElementProps } from './core/internal/internal-types';
 import ComposableRevealContainer from './core/external/reveal/composable-reveal-container';
 
-export enum ContainerType {
-  COLLECT = 'COLLECT',
-  REVEAL = 'REVEAL',
-  COMPOSABLE = 'COMPOSABLE',
-  COMPOSE_REVEAL = 'COMPOSABLE_REVEAL',
-}
-export interface SkyflowConfigOptions {
-  logLevel?: LogLevel;
-  env?: Env;
-  trackingKey?: string;
-  trackMetrics?: boolean;
-  customElementsURL?: string;
-}
-export interface ISkyflow {
-  vaultID?: string;
-  vaultURL?: string;
-  getBearerToken: () => Promise<string>;
-  options?: SkyflowConfigOptions;
-}
+// Relocated to @core/types (variant-neutral); re-exported here under the same
+// names so `./skyflow` importers and the public surface are unchanged.
+export { ContainerType, ISkyflow, SkyflowConfigOptions };
 
 const CLASS_NAME = 'Skyflow';
 class Skyflow {

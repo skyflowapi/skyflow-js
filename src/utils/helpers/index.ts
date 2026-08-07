@@ -9,10 +9,9 @@ import {
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import properties from '@core/properties';
+import { ContainerType, ISkyflow, IRevealElementOptions } from '@core/types';
 import { SdkInfo } from '../../client';
-import { IRevealElementOptions } from '../../core/external/reveal/reveal-container';
 import SkyflowError from '../../libs/skyflow-error';
-import { ContainerType, ISkyflow } from '../../skyflow';
 import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
 
 const { getType } = require('mime');
