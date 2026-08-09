@@ -7,7 +7,7 @@
   "description": "Skyflow FlowVault JavaScript SDK",
   "homepage": "https://github.com/skyflowapi/skyflow-js",
   "main": "./dist/sdkNodeBuild/index.js",
-  "types": "./types/index-node.d.ts",
+  "types": "./types/packages/skyflow-flowvault-js/src/index-node.d.ts",
   "files": [
     "dist/sdkNodeBuild",
     "types"
