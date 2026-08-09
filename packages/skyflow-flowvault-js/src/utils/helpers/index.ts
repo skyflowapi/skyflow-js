@@ -28,6 +28,30 @@ export function getSdkVersionName(metaDataVersion: string, sdkData: SdkInfo): st
   return `${sdkData.sdkName}@${sdkData.sdkVersion}`;
 }
 
+export function getSDKNameAndVersion(metaData?: string): SdkInfo {
+  const nameAndVersion: SdkInfo = {
+    sdkName: SDK_NAME,
+    sdkVersion: SDK_VERSION,
+  };
+  if (metaData && metaData !== '' && metaData.split('@').length > 1) {
+    nameAndVersion.sdkName = metaData.split('@')[0];
+    nameAndVersion.sdkVersion = metaData.split('@')[1];
+  }
+  return nameAndVersion;
+}
+
+export const getSDKLanguageAndVersion = () => {
+  const metaData = localStorage.getItem('sdk_version') || '';
+  const sdkDetails = getSDKNameAndVersion(metaData);
+  // Compare against this package's injected identity (skyflow-flowvault-js → JS).
+  // Preserves 'React' for the wrapper case (which overrides sdkName via metaData).
+  const sdkName = sdkDetails.sdkName === SDK_NAME ? 'JS' : 'React';
+  return {
+    sdkLanguageAndVersion: `${sdkName} SDK v${sdkDetails.sdkVersion}`,
+    sdkOwner: 'Skyflow',
+  };
+};
+
 export function getOSDetails(userAgentString: string): OSInfo {
   let os: string | null = null;
   let version: string | null = null;
