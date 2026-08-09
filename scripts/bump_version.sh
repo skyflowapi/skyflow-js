@@ -6,6 +6,7 @@ then
 	echo "Bumping package version to $1"
 
 	sed -E "s/\"version\": .+/\"version\": \"$SEMVER\",/g" package.json > tempfile && cat tempfile > package.json && rm -f tempfile
+	./scripts/toggle_beta_banner.sh README.md "$SEMVER"
 	echo --------------------------
 	echo "Done, Package now at $1"
 
