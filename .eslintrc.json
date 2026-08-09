@@ -31,6 +31,11 @@
                         "target": "./core",
                         "from": "./packages",
                         "message": "core/ must not import from packages/ — the @core boundary points downward only. Move shared code into core/ instead of importing up."
+                    },
+                    {
+                        "target": "./packages/skyflow-flowvault-js",
+                        "from": "./packages/skyflow-js",
+                        "message": "skyflow-flowvault-js must not import from skyflow-js — the two SDK packages are independent. Share code via @core only."
                     }
                 ]
             }
