@@ -344,6 +344,7 @@ const logs = {
     GET_BY_ID_DEPRECATED: 'getById is deprecated, use new get method',
     INPUT_FORMATTING_NOT_SUPPROTED: 'format or translation are not supported on %s1 element type.',
     INVALID_INPUT_TRANSLATION: 'invalid or unsupported translation provided for %s1 element type.',
+    BETA_BUILD_WARNING: '%s1 - This is a beta/pre-release build of the Skyflow SDK (v%s2). Beta builds are intended for acceptance testing only - you appear to be connecting to a Production vault. Contact your Skyflow representative before using this build in Production.',
 
   },
 };
