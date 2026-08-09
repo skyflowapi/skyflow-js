@@ -15,8 +15,9 @@ Copyright (c) 2022 Skyflow, Inc.
  * `packages/*`). Dependencies point downward only — packages depend on core,
  * never the reverse. Enforced by the ESLint `import/no-restricted-paths` zone.
  *
- * Entries are added to this barrel as code is moved in, task by task, during
- * the package-split migration (see docs/phase-1-execution-plan.md).
+ * This barrel is the variant-neutral surface that a second package (flowDB /
+ * skyflow-flowvault-js) will consume in Phase 2. Phase 1 populated it task by
+ * task; see docs/phase-1-execution-plan.md. Add new neutral exports here.
  */
 
 // Task 1.1 — zero-import neutral leaves.
