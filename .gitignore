@@ -8,6 +8,7 @@ dist
 testing
 coverage
 
-# Generated declaration output only (tsc outDir). Anchored to repo root so it
-# does not also ignore the core/types/ source folder.
+# Generated declaration output only (tsc outDir). Anchored so it does not also
+# ignore the core/types/ source folder. Each package emits into its own types/.
 /types
+packages/*/types

@@ -1,6 +1,7 @@
 
 dist
 /types
+packages/*/types
 coverage
 tests
 

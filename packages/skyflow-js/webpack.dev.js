@@ -51,14 +51,14 @@ module.exports = () => merge(common, {
   plugins: [
     new BundleAnalyser({ analyzerPort: 8881 }),
     new HtmlWebpackPlugin({
-      template: 'assets/index.html',
+      template: path.resolve(__dirname, '../../assets/index.html'),
       chunks: ['skyflow'],
       inject: 'head',
       minify,
     }),
     new HtmlWebpackPlugin({
       filename: 'iframe.html',
-      template: 'assets/iframe.html',
+      template: path.resolve(__dirname, '../../assets/iframe.html'),
       chunks: ['iframe'],
       inject: 'head',
       minify,

@@ -47,7 +47,7 @@ module.exports = () => merge(common, {
   plugins: [
     new HtmlWebPackPlugin({
       filename: 'index.html',
-      template: 'assets/iframe.html',
+      template: path.resolve(__dirname, '../../assets/iframe.html'),
       chunks: ['index'],
       inject: 'head',
       minify,

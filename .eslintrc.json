@@ -29,8 +29,8 @@
                 "zones": [
                     {
                         "target": "./core",
-                        "from": "./src",
-                        "message": "core/ must not import from src/ — the @core boundary points downward only. Move shared code into core/ instead of importing up."
+                        "from": "./packages",
+                        "message": "core/ must not import from packages/ — the @core boundary points downward only. Move shared code into core/ instead of importing up."
                     }
                 ]
             }
@@ -44,5 +44,16 @@
         "no-param-reassign": "off",
         "prefer-destructuring": "off",
         "@typescript-eslint/no-implied-eval": "off"
-    }
+    },
+    "overrides": [
+        {
+            "files": ["core/**/*.ts", "core/**/*.js"],
+            "rules": {
+                "import/no-extraneous-dependencies": [
+                    "error",
+                    { "packageDir": ["./", "./packages/skyflow-js"] }
+                ]
+            }
+        }
+    ]
 }

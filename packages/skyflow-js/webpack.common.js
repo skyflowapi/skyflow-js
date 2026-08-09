@@ -15,14 +15,22 @@ module.exports = {
     extensions: ['.ts', '.js', '.json'],
     // `@core` — mirror of the tsconfig.base.json path alias (single source of
     // truth). Keep this in sync with tsconfig.base.json `paths` and
-    // jest.config.json `moduleNameMapper`.
+    // jest.config.json `moduleNameMapper`. core/ lives at the monorepo root,
+    // two levels up from this package.
     alias: {
-      '@core': path.resolve(__dirname, 'core'),
+      '@core': path.resolve(__dirname, '../../core'),
     },
   },
   module: {
     rules: [
-      { test: /\.(ts|js)x?$/, loader: 'babel-loader', exclude: /node_modules/ },
+      // rootMode:'upward' so files under core/ (above this package) resolve the
+      // single shared babel.config.js at the monorepo root.
+      {
+        test: /\.(ts|js)x?$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/,
+        options: { rootMode: 'upward' },
+      },
       {
         test:/\.svg$/,
         type:'asset/resource'

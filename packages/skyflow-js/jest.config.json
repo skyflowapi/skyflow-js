@@ -5,8 +5,11 @@
   "testTimeout": 30000,
   "setupFiles": ["<rootDir>/tests/jest.setup.js"],
   "moduleNameMapper":{
-    "^@core/(.*)$": "<rootDir>/core/$1",
+    "^@core/(.*)$": "<rootDir>/../../core/$1",
     "^.+\\.svg$": "<rootDir>/tests/__mocks__/file-mock.js"
+  },
+  "transform": {
+    "^.+\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]
   },
   "transformIgnorePatterns": ["/node_modules/(?!mime)"]
 }

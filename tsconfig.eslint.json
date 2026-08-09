@@ -3,5 +3,10 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src", "core", "src/custom.d.ts", "typings.d.ts"]
+  "include": [
+    "core",
+    "packages/skyflow-js/src",
+    "packages/skyflow-js/src/custom.d.ts",
+    "packages/skyflow-js/typings.d.ts"
+  ]
 }
