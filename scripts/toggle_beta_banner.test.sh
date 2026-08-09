@@ -19,12 +19,15 @@ EOF
 
 "$TOGGLE" "$FIXTURE" "2.9.0-beta.1"
 [ "$(grep -c -F "$MARKER_START" "$FIXTURE")" -eq 1 ] || fail "banner not inserted for beta version"
+grep -qF "not for production use" "$FIXTURE" || fail "banner content missing correct text"
 
 "$TOGGLE" "$FIXTURE" "2.9.0-beta.1"
 [ "$(grep -c -F "$MARKER_START" "$FIXTURE")" -eq 1 ] || fail "banner duplicated on repeat run"
+grep -qF "not for production use" "$FIXTURE" || fail "banner content lost after repeat call"
 
 "$TOGGLE" "$FIXTURE" "2.9.0"
 [ "$(grep -c -F "$MARKER_START" "$FIXTURE")" -eq 0 ] || fail "banner not removed for GA version"
+! grep -qF "not for production use" "$FIXTURE" || fail "banner content not removed for GA version"
 
 grep -qF "JavaScript SDK intro text." "$FIXTURE" || fail "original README content lost"
 
