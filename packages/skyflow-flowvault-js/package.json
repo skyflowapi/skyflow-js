@@ -21,7 +21,8 @@
   "scripts": {
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
-    "build:types": "tsc --emitDeclarationOnly && tsc-alias -p tsconfig.json"
+    "build:types": "tsc --emitDeclarationOnly && tsc-alias -p tsconfig.json",
+    "test": "jest --config=jest.config.json"
   },
   "repository": {
     "type": "git",
