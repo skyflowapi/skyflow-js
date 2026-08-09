@@ -38,6 +38,22 @@ export function formatVaultURL(vaultURL?: string) {
   return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
 }
 
+// Beta/dev builds are published as <major>.<minor>.<patch>-beta.<n> or
+// -dev.<sha>; a plain public release has no suffix.
+export function isNonGaVersion(version?: string): boolean {
+  return !version || !/^\d+\.\d+\.\d+$/.test(version);
+}
+
+// env has no effect on which domain this SDK talks to (unlike the server SDKs), so it
+// can't be trusted to tell us whether a vault is Production. vaultURL is the one thing
+// the customer sets that actually points at their real vault - if it doesn't carry one of
+// the non-prod domain markers, treat it as pointed at Production, same conservative
+// "default to prod" every server SDK's own Env-to-domain mapping already uses.
+export function isNonProdVaultUrl(vaultURL?: string): boolean {
+  if (!vaultURL) return false;
+  return /(-preview|\.dev|\.tech)/.test(vaultURL);
+}
+
 export function checkIfDuplicateExists(arr) {
   return new Set(arr).size !== arr.length;
 }

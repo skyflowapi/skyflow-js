@@ -26,6 +26,8 @@ import {
   vaildateFileName,
   generateUploadFileName,
   getSDKNameAndVersion,
+  isNonGaVersion,
+  isNonProdVaultUrl,
 } from '../../src/utils/helpers/index';
 import {
   parameterizedString
@@ -839,5 +841,47 @@ describe('getSDKNameAndVersion', () => {
     };
     const result = getSDKNameAndVersion(`skyflow-react-js@1.2.3`);
     expect(result).toEqual(sdkData);
+  });
+});
+
+// SK-2963: beta-build-in-prod warning
+describe('isNonGaVersion', () => {
+  it('treats a plain semver release as GA', () => {
+    expect(isNonGaVersion('2.7.9')).toBe(false);
+    expect(isNonGaVersion('11.0.3')).toBe(false);
+  });
+  it('treats a beta suffix as non-GA', () => {
+    expect(isNonGaVersion('2.8.0-beta.3')).toBe(true);
+  });
+  it('treats a dev suffix as non-GA', () => {
+    expect(isNonGaVersion('2.8.0-dev.abc1234')).toBe(true);
+  });
+  it('treats an empty or missing version as non-GA', () => {
+    expect(isNonGaVersion('')).toBe(true);
+    expect(isNonGaVersion(undefined)).toBe(true);
+  });
+  it('treats a garbage string as non-GA', () => {
+    expect(isNonGaVersion('not-a-version')).toBe(true);
+  });
+});
+
+describe('isNonProdVaultUrl', () => {
+  it('returns false (looks like prod) for a plain vault domain', () => {
+    expect(isNonProdVaultUrl('https://abc123.vault.skyflowapis.com')).toBe(false);
+  });
+  it('returns false (looks like prod) for an empty/missing vaultURL', () => {
+    // Nothing to key off of - conservative default, same as every server SDK's own
+    // Env-to-domain mapping defaulting an unrecognized/unset value to PROD.
+    expect(isNonProdVaultUrl('')).toBe(false);
+    expect(isNonProdVaultUrl(undefined)).toBe(false);
+  });
+  it('returns true (non-prod) for a sandbox/preview vault URL', () => {
+    expect(isNonProdVaultUrl('https://abc123.vault.skyflowapis-preview.com')).toBe(true);
+  });
+  it('returns true (non-prod) for a dev vault URL', () => {
+    expect(isNonProdVaultUrl('https://abc123.vault.skyflowapis.dev')).toBe(true);
+  });
+  it('returns true (non-prod) for a stage vault URL', () => {
+    expect(isNonProdVaultUrl('https://abc123.vault.skyflowapis.tech')).toBe(true);
   });
 });

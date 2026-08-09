@@ -47,7 +47,10 @@ import {
   IUpdateOptions,
   ErrorType,
 } from './utils/common';
-import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
+import {
+  formatVaultURL, checkAndSetForCustomUrl, isNonGaVersion, isNonProdVaultUrl,
+} from './utils/helpers';
+import SDKDetails from '../package.json';
 import ComposableContainer from './core/external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
 import ThreeDS from './core/external/threeds/threeds';
@@ -173,6 +176,10 @@ class Skyflow {
 
     const tempConfig = config;
     tempConfig.vaultURL = formatVaultURL(config.vaultURL);
+    if (isNonGaVersion(SDKDetails.version) && !isNonProdVaultUrl(tempConfig.vaultURL)) {
+      printLog(parameterizedString(logs.warnLogs.BETA_BUILD_WARNING, CLASS_NAME,
+        SDKDetails.version), MessageType.WARN, logLevel);
+    }
     const skyflow = new Skyflow(tempConfig);
     printLog(parameterizedString(logs.infoLogs.CLIENT_INITIALIZED, CLASS_NAME),
       MessageType.LOG, logLevel);

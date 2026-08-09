@@ -69,6 +69,21 @@ describe('Skyflow initialization', () => {
       expect(error).toBeDefined();
     }
   });
+
+  // SK-2963: the real published version in this checkout is GA, so this must never warn -
+  // the beta-vs-prod detection logic itself, and the true "warns" positive path (via a
+  // mocked package.json), are covered in tests/skyflow-beta-warning.test.js.
+  test('does not emit the beta-build warning for the real GA version', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    Skyflow.init({
+      vaultID: 'vault_id',
+      vaultURL: 'https://vault.test.com',
+      getBearerToken: jest.fn(),
+      options: { logLevel: LogLevel.WARN },
+    });
+    expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('beta/pre-release build'));
+    warnSpy.mockRestore();
+  });
 });
 
 describe('Create container', () => {
