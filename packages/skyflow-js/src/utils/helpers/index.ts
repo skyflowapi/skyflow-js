@@ -2,6 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import uuid from '@core/libs/uuid';
+import * as coreHelpers from '@core/helpers';
 import {
   ALLOWED_NAME_FOR_FILE,
   CardType,
@@ -46,15 +47,10 @@ export function checkIfDuplicateExists(arr) {
   return new Set(arr).size !== arr.length;
 }
 
-export const appendZeroToOne = (value: string) => {
-  if (value.length === 1 && Number(value) === 1) {
-    return {
-      isAppended: true,
-      value: `0${value}`,
-    };
-  }
-  return { isAppended: false, value };
-};
+// Re-bound from @core/helpers (definition moved there so @core/validators and
+// core's internal frame layer can reach it). Bound as a local const — not
+// `export … from` — so jest.spyOn(helpers, 'appendZeroToOne') still hooks it.
+export const appendZeroToOne = coreHelpers.appendZeroToOne;
 
 export const appendMonthFourDigitYears = (value: string) => {
   if (value.length === 6 && Number(value.charAt(5)) === 1) {

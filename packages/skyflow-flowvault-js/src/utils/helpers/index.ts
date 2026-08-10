@@ -13,6 +13,7 @@ import {
   DEFAULT_INPUT_FORMAT_TRANSLATION,
   ElementType,
 } from '@core/constants';
+import * as coreHelpers from '@core/helpers';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { ContainerType, IRevealElementOptions, ISkyflow } from '@core/types';
 import properties from '@core/properties';
@@ -196,15 +197,10 @@ export function removeSpaces(inputString:string) {
   return inputString.trim().replace(/[\s-]/g, '');
 }
 
-export const appendZeroToOne = (value: string) => {
-  if (value.length === 1 && Number(value) === 1) {
-    return {
-      isAppended: true,
-      value: `0${value}`,
-    };
-  }
-  return { isAppended: false, value };
-};
+// Re-bound from @core/helpers (definition moved there so @core/validators and
+// core's internal frame layer can reach it). Bound as a local const — not
+// `export … from` — so jest.spyOn(helpers, 'appendZeroToOne') still hooks it.
+export const appendZeroToOne = coreHelpers.appendZeroToOne;
 
 export const appendMonthFourDigitYears = (value: string) => {
   if (value.length === 6 && Number(value.charAt(5)) === 1) {

@@ -37,3 +37,16 @@ export const checkForValueMatch = (
   }
   return false;
 };
+
+// Pure expiry-date helper. Lives here (not in the package's Tier-E utils/helpers,
+// which carries build-time SDK identity) so the variant-neutral validateExpiryDate
+// in @core/validators — and core's internal frame layer — can reach it.
+export const appendZeroToOne = (value: string) => {
+  if (value.length === 1 && Number(value) === 1) {
+    return {
+      isAppended: true,
+      value: `0${value}`,
+    };
+  }
+  return { isAppended: false, value };
+};
