@@ -14,10 +14,11 @@ import {
   ElementType,
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
-import { ContainerType, IRevealElementOptions } from '@core/types';
+import { ContainerType, IRevealElementOptions, ISkyflow } from '@core/types';
+import properties from '@core/properties';
 import { SdkInfo } from '../../client';
 import SkyflowError from '../../libs/skyflow-error';
-import { detectCardType, validateBooleanOptions } from '../validators';
+import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
 
 const { getType } = require('mime');
 
@@ -404,6 +405,30 @@ export const addSeperatorToCardNumberMask = (
   }
   return cardNumberMask;
 };
+
+// Trim a trailing slash off the configured vault URL (parity with the beta's
+// Skyflow.init normalization).
+export function formatVaultURL(vaultURL?: string) {
+  if (typeof vaultURL !== 'string') return vaultURL;
+  return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
+}
+
+// When a valid `customElementsURL` is supplied, point the iframe secure origin
+// at it (used for self-hosted element frames).
+export function checkAndSetForCustomUrl(config: ISkyflow) {
+  if (
+    config?.options?.customElementsURL
+    && isValidURL(config?.options?.customElementsURL)
+  ) {
+    const urlString = config?.options?.customElementsURL;
+    const url = new URL(urlString);
+    const protocol = url.protocol;
+    const domain = url.hostname;
+    const fullDomain = `${protocol}//${domain}`;
+    properties.IFRAME_SECURE_ORIGIN = fullDomain;
+    properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
+  }
+}
 
 export const getValueFromName = (name: string, index: number) => {
   const names = name.split(':');
