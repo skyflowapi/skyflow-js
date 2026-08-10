@@ -1,4 +1,4 @@
-import Client from "../../src/client";
+import Client from "@core/client";
 import { checkForElementMatchRule, checkForValueMatch } from "@core/helpers";
 import { constructElementsInsertReq } from "@core/core-utils/collect";
 import { getUpsertColumn, updateRecordsBySkyflowID, insertDataInMultipleFiles, insertDataInCollect, updateRecordsBySkyflowIDComposable, constructUpdateRecordRequest, constructUpdateRecordResponse } from "../../src/core-utils/collect";

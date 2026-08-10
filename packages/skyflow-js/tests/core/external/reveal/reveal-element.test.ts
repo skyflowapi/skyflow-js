@@ -13,7 +13,7 @@ import {
 } from "@core/constants";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
-import Client from "../../../../src/client";
+import Client from "@core/client";
 
 import * as busEvents from "@core/utils/bus-events";
 

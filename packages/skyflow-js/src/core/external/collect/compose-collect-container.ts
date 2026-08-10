@@ -23,6 +23,7 @@ import SkyflowError from '@core/errors';
 import {
   formatValidations, formatOptions, validateElementOptions, getElements,
 } from '@core/libs/element-options';
+import Client from '@core/client';
 import { ContainerType } from '../../../skyflow';
 import {
   Context, MessageType,
@@ -46,7 +47,6 @@ import CollectElement from './collect-element';
 import ComposableElement from './compose-collect-element';
 import { ElementGroup, ElementGroupItem } from './collect-container';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
-import Client from '../../../client';
 
 export interface ComposableElementGroup extends ElementGroup {
   styles: InputStyles;

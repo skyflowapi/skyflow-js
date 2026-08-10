@@ -15,6 +15,7 @@ import SkyflowError from '@core/errors';
 import { getValueAndItsUnit, validateAndSetupGroupOptions } from '@core/libs/element-options';
 import IFrameFormElement from '@core/internal/iframe-form';
 import FrameElement from '@core/internal';
+import Client from '@core/client';
 import { ContainerType } from '../../skyflow';
 import {
   Context, Env, ErrorType, LogLevel,
@@ -27,7 +28,6 @@ import {
   constructInsertRecordRequest, insertDataInCollect,
   updateRecordsBySkyflowIDComposable,
 } from '../../core-utils/collect';
-import Client from '../../client';
 import { printLog } from '../../utils/logs-helper';
 
 const set = require('set-value');

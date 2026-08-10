@@ -15,7 +15,7 @@ import {
   MessageType,
   LogLevel,
 } from '@core/types';
-import Client from '../client';
+import Client from '@core/client';
 import { printLog } from '../utils/logs-helper';
 import { normalizeFlowDBError } from '../libs/skyflow-flowdb-error';
 import {

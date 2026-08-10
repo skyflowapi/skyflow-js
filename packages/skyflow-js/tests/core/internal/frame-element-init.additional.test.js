@@ -1,5 +1,5 @@
 // Mock Client so internal FrameElementInit imports use a controllable request fn.
-jest.mock('../../../src/client', () => {
+jest.mock('@core/client', () => {
   const mockClientRequest = jest.fn().mockResolvedValue({ upload: 'ok' });
   class Client {
     constructor(config, meta) {
@@ -45,7 +45,7 @@ import { ELEMENTS } from '@core/constants';
 import logs from '@core/utils/logs';
 import { parameterizedString } from '../../../src/utils/logs-helper';
 import * as helpers from '../../../src/utils/helpers';
-import Client, { mockClientRequest } from '../../../src/client';
+import Client, { mockClientRequest } from '@core/client';
 import { ELEMENT_EVENTS_TO_IFRAME, COLLECT_TYPES } from '@core/constants';
 import { constructElementsInsertReq } from '@core/core-utils/collect';
 import {

@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import Client from "../src/client";
+import Client from "@core/client";
 describe("Client Class",()=>{
     beforeEach(()=>{
         jest.clearAllMocks();

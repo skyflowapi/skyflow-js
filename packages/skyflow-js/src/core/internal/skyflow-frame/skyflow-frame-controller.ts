@@ -18,7 +18,7 @@ import { constructElementsInsertReq } from '@core/core-utils/collect';
 import { formatRecordsForIframe } from '@core/core-utils/reveal';
 import SkyflowError from '@core/errors';
 import IFrameFormElement from '@core/internal/iframe-form';
-import Client from '../../../client';
+import Client from '@core/client';
 import {
   constructInsertRecordRequest,
   constructInsertRecordResponse,

@@ -11,7 +11,7 @@ import {
   fetchRecordsByTokenIdComposableFlowDB,
 } from '../../src/core-utils/reveal';
 import { Env, LogLevel, RedactionType } from '../../src/utils/common';
-import Client from '../../src/client';
+import Client from '@core/client';
 
 // flowvault's reveal data layer imports getAccessToken from @core/utils/bus-events
 // (jest applies moduleNameMapper to jest.mock paths, so mock the @core path).

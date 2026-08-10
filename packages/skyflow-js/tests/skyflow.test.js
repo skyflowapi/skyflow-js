@@ -10,7 +10,7 @@ import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '@core/constants';
 import { Env, EventName, LogLevel, RedactionType, RequestMethod, ValidationRuleType } from '../src/utils/common';
 import ComposableContainer from '../src/core/external/collect/compose-collect-container';
 import SkyflowContainer from '../src/core/external/skyflow-container';
-import Client from '../src/client'
+import Client from '@core/client'
 import logs from '@core/utils/logs';
 import { ComposableRevealContainer } from '../src/index-node';
 

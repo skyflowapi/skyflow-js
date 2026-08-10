@@ -21,6 +21,7 @@ import {
 } from '@core/constants';
 import logs from '@core/utils/logs';
 import properties from '@core/properties';
+import Client from '@core/client';
 import {
   printLog, parameterizedString,
 } from '../../../utils/logs-helper';
@@ -35,7 +36,6 @@ import {
   getMaskedOutput, getValueFromName, handleCopyIconClick, styleToString,
 } from '../../../utils/helpers';
 import { formatForRenderClient, getFileURLFromVaultBySkyflowIDComposable } from '../../../core-utils/reveal';
-import Client from '../../../client';
 
 const { getType } = require('mime');
 

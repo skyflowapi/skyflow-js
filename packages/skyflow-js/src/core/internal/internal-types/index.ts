@@ -1,6 +1,6 @@
 import { ContainerType, ElementInfo, ClientMetadata } from '@core/types';
 import { ElementType } from '@core/constants';
-import { ClientToJSON } from '../../../client';
+import { ClientToJSON } from '@core/client';
 import CollectContainer from '../../external/collect/collect-container';
 import ComposableContainer from '../../external/collect/compose-collect-container';
 import RevealContainer from '../../external/reveal/reveal-container';

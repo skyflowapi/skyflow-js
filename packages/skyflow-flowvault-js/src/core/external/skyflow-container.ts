@@ -20,8 +20,8 @@ import {
   SKYFLOW_FRAME_CONTROLLER,
 } from '@core/constants';
 import logs from '@core/utils/logs';
+import Client from '@core/client';
 import { printLog, parameterizedString } from '../../utils/logs-helper';
-import Client from '../../client';
 import { Context, MessageType } from '../../utils/common';
 
 const CLASS_NAME = 'SkyflowContainer';

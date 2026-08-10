@@ -3,7 +3,7 @@ import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, Elem
 import bus from 'framebus';
 import SkyflowError from '@core/errors';
 import * as helpers from '../../../src/utils/helpers';
-import Client from '../../../src/client';
+import Client from '@core/client';
 import IFrameFormElement from '@core/internal/iframe-form';
 import { ErrorType } from '../../../src/index-node';
 

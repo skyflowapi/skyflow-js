@@ -15,6 +15,7 @@ import {
   PUREJS_TYPES,
 } from '@core/constants';
 import logs from '@core/utils/logs';
+import Client from '@core/client';
 import {
   validateInsertRecords,
   validateDetokenizeInput,
@@ -29,7 +30,6 @@ import {
   printLog,
   parameterizedString,
 } from '../../utils/logs-helper';
-import Client from '../../client';
 import {
   IDetokenizeInput,
   IGetInput,

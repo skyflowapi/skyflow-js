@@ -11,7 +11,7 @@ import omit from 'lodash/omit';
 import { IInsertRecordInput, IInsertRecord } from '@core/types';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import SkyflowError from '@core/errors';
-import Client from '../client';
+import Client from '@core/client';
 import { normalizeFlowDBError } from '../libs/skyflow-flowdb-error';
 import { generateMockCVV } from '../utils/helpers';
 import { IFlowDBUpsertOptions } from '../utils/common';

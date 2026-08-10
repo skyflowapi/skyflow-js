@@ -21,7 +21,7 @@ import logs from '@core/utils/logs';
 import properties from '@core/properties';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import SkyflowError from '@core/errors';
-import Client from '../../../client';
+import Client from '@core/client';
 import {
   constructElementsInsertReq,
   constructFlowDBInsertRequest,

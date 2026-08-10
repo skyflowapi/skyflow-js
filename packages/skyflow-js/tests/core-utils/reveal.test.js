@@ -6,7 +6,7 @@ import { formatRecordsForIframe } from "@core/core-utils/reveal";
 import {formatRecordsForClient, formatRecordsForClientComposable, formatRecordsForRender, formatForRenderClient, getFileURLFromVaultBySkyflowID, getFileURLForRender, getFileURLFromVaultBySkyflowIDComposable, fetchRecordsByTokenIdComposable} from "../../src/core-utils/reveal";
 import { Env, LogLevel } from '../../src/utils/common';
 import { getAccessToken } from '@core/utils/bus-events';
-import Client from '../../src/client';
+import Client from '@core/client';
 import { url } from 'inspector';
 
 const testTokenId = '1677f7bd-c087-4645-b7da-80a6fd1a81a4';

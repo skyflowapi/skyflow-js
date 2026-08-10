@@ -6,11 +6,11 @@ import {
   COLLECT_TYPES,
   ELEMENT_EVENTS_TO_IFRAME,
 } from "@core/constants";
-import clientModule from "../../../../src/client";
+import clientModule from "@core/client";
 import * as busEvents from "@core/utils/bus-events";
 import { LogLevel, Env, InsertResponse } from "../../../../src/utils/common";
 import SkyflowFrameController from "../../../../src/core/internal/skyflow-frame/skyflow-frame-controller";
-import Client from "../../../../src/client";
+import Client from "@core/client";
 import { ISkyflow } from "../../../../src/skyflow";
 import {
   TokenizeDataInput,

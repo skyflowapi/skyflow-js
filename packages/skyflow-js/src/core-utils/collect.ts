@@ -3,7 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import omit from 'lodash/omit';
 import { getAccessToken } from '@core/utils/bus-events';
-import Client from '../client';
+import Client from '@core/client';
 import {
   IInsertRecordInput, IInsertRecord,
   MessageType, LogLevel,

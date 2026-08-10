@@ -14,7 +14,7 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { ContainerType, IRevealElementOptions, ISkyflow } from '@core/types';
 import properties from '@core/properties';
 import SkyflowError from '@core/errors';
-import { SdkInfo } from '../../client';
+import { SdkInfo } from '@core/client';
 import { isValidURL, validateBooleanOptions } from '../validators';
 
 // SDK telemetry identity, injected at build time (webpack DefinePlugin) / tests

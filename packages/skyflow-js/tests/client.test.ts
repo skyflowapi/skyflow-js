@@ -2,7 +2,7 @@
 Copyright (c) 2025 Skyflow, Inc.
 */
 import assert from "assert";
-import Client, { IClientRequest } from "../src/client";
+import Client, { IClientRequest } from "@core/client";
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import logs from "@core/utils/logs";
 import { ClientMetadata } from "../src/core/internal/internal-types";

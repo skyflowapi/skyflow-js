@@ -16,12 +16,12 @@ import logs from '@core/utils/logs';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { ContainerType, ISkyflow, SkyflowConfigOptions } from '@core/types';
 import { setVariantAdapter } from '@core/adapters';
-import Client from './client';
+import Client from '@core/client';
+import SkyflowError from '@core/errors';
 import RevealContainer from './core/external/reveal/reveal-container';
 import CollectContainer from './core/external/collect/collect-container';
 import SkyflowContainer from './core/external/skyflow-container';
 import { parameterizedString, printLog } from './utils/logs-helper';
-import SkyflowError from '@core/errors';
 import {
   RequestMethod,
   IInsertRecordInput,

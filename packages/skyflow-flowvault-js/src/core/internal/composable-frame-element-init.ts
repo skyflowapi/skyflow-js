@@ -9,6 +9,7 @@ import { getFlexGridStyles } from '@core/libs/styles';
 import { getValueAndItsUnit } from '@core/libs/element-options';
 import IFrameFormElement from '@core/internal/iframe-form';
 import FrameElement from '@core/internal';
+import Client from '@core/client';
 import { ContainerType } from '../../skyflow';
 import {
   Context, IRevealRecordComposable,
@@ -16,7 +17,6 @@ import {
 import {
   getContainerType,
 } from '../../utils/helpers';
-import Client from '../../client';
 import RevealFrame from './reveal/reveal-frame';
 import {
   fetchRecordsByTokenIdComposableFlowDB, formatRecordsForClientComposableFlowDB,

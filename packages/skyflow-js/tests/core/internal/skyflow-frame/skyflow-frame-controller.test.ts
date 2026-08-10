@@ -9,7 +9,7 @@ import {
   PUREJS_TYPES,
   REVEAL_TYPES,
 } from "@core/constants";
-import clientModule from "../../../../src/client";
+import clientModule from "@core/client";
 import * as busEvents from "@core/utils/bus-events";
 import {
   LogLevel,
@@ -23,7 +23,7 @@ import {
 import SkyflowFrameController from "../../../../src/core/internal/skyflow-frame/skyflow-frame-controller";
 import { ErrorType, InsertOptions } from "../../../../src/index-node";
 import { ISkyflow } from "../../../../src/skyflow";
-import Client from "../../../../src/client";
+import Client from "@core/client";
 import { set } from "core-js/core/dict";
 
 jest.mock("@core/utils/bus-events", () => ({
