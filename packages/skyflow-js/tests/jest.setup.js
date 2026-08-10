@@ -28,6 +28,7 @@ setVariantAdapter({
     return realAdapter().sdkDetails;
   },
   getMetaObject: (metaData, nav) => realAdapter().getMetaObject(metaData, nav),
+  printLog: (message, messageType, logLevel) => realAdapter().printLog(message, messageType, logLevel),
   reveal: {
     fetchRecordsByTokenIdComposable: (...args) => realAdapter().reveal.fetchRecordsByTokenIdComposable(...args),
     formatRecordsForClientComposable: (response) => realAdapter().reveal.formatRecordsForClientComposable(response),

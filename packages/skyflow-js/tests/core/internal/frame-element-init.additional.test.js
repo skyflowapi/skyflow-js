@@ -55,7 +55,7 @@ import {
 } from '../../../src/core-utils/collect';
 import { ErrorType } from '../../../src/index-node';
 // Mock element-options to bypass complex row merging logic that expects prior group structure
-jest.mock('../../../src/libs/element-options', () => ({
+jest.mock('@core/libs/element-options', () => ({
   validateAndSetupGroupOptions: (oldGroup, newGroup) => newGroup || oldGroup || { rows: [] },
   getValueAndItsUnit: (v) => [v || ''],
 }));

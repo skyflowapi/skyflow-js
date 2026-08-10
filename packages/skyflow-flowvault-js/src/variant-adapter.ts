@@ -13,10 +13,12 @@ import {
   formatRecordsForClientComposableFlowDB,
 } from './core-utils/reveal';
 import { getMetaObject, SDK_DETAILS } from './utils/helpers';
+import { printLog } from './utils/logs-helper';
 
 const flowVaultVariantAdapter: VariantAdapter = {
   sdkDetails: SDK_DETAILS,
   getMetaObject: (metaData, navigator) => getMetaObject(SDK_DETAILS, metaData, navigator),
+  printLog,
   reveal: {
     fetchRecordsByTokenIdComposable: fetchRecordsByTokenIdComposableFlowDB,
     formatRecordsForClientComposable: formatRecordsForClientComposableFlowDB,

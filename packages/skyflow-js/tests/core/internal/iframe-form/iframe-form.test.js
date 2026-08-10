@@ -9,7 +9,7 @@ import * as busEvents from '@core/utils/bus-events';
 import SkyflowError from '@core/errors';
 import logs from '@core/utils/logs';
 import { ContainerType } from '../../../../src/skyflow';
-import { formatOptions } from '../../../../src/libs/element-options';
+import { formatOptions } from '@core/libs/element-options';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
 import FrameElementInit from '../../../../src/core/internal/frame-element-init';
 

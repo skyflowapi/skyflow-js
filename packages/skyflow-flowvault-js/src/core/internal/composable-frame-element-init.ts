@@ -6,7 +6,7 @@ import {
 } from '@core/constants';
 import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
 import { getFlexGridStyles } from '@core/libs/styles';
-import { getValueAndItsUnit } from '../../libs/element-options';
+import { getValueAndItsUnit } from '@core/libs/element-options';
 import { ContainerType } from '../../skyflow';
 import {
   Context, IRevealRecordComposable,

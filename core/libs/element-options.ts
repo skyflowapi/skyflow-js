@@ -24,11 +24,12 @@ import {
   CollectElementOptions,
   IValidationRule, LogLevel, MessageType, ValidationRuleType,
 } from '@core/types';
-import { parameterizedString, printLog } from '../utils/logs-helper';
+import { parameterizedString } from '@core/utils/logs-helper';
 import {
   isValidExpiryDateFormat, isValidExpiryYearFormat, isValidRegExp, validateBooleanOptions,
   validateInputFormatOptions,
-} from '../utils/validators';
+} from '@core/validators';
+import { getVariantAdapter } from '@core/adapters';
 
 export function validateElementOptions(
   elementType: string,
@@ -281,7 +282,7 @@ export const formatOptions = (
   if (Object.prototype.hasOwnProperty.call(formattedOptions, 'format')
   || Object.prototype.hasOwnProperty.call(formattedOptions, 'translation')) {
     if (INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES.includes(elementType)) {
-      printLog(
+      getVariantAdapter().printLog(
         parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED, elementType),
         MessageType.WARN, logLevel,
       );
@@ -338,8 +339,14 @@ export const formatOptions = (
       if (formattedOptions.format) {
         isvalidFormat = isValidExpiryDateFormat(formattedOptions.format.toUpperCase());
         if (!isvalidFormat) {
-          printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
-            ALLOWED_EXPIRY_DATE_FORMATS.toString()), MessageType.WARN, logLevel);
+          getVariantAdapter().printLog(
+            parameterizedString(
+              logs.warnLogs.INVALID_EXPIRATION_DATE_FORMAT,
+              ALLOWED_EXPIRY_DATE_FORMATS.toString(),
+            ),
+            MessageType.WARN,
+            logLevel,
+          );
         }
       }
       formattedOptions = {
@@ -355,8 +362,14 @@ export const formatOptions = (
       if (formattedOptions.format) {
         isvalidFormat = isValidExpiryYearFormat(formattedOptions.format.toUpperCase());
         if (!isvalidFormat) {
-          printLog(parameterizedString(logs.warnLogs.INVALID_EXPIRATION_YEAR_FORMAT,
-            ALLOWED_EXPIRY_YEAR_FORMATS.toString()), MessageType.WARN, logLevel);
+          getVariantAdapter().printLog(
+            parameterizedString(
+              logs.warnLogs.INVALID_EXPIRATION_YEAR_FORMAT,
+              ALLOWED_EXPIRY_YEAR_FORMATS.toString(),
+            ),
+            MessageType.WARN,
+            logLevel,
+          );
         }
       }
       formattedOptions = {

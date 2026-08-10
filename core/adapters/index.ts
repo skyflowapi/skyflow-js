@@ -16,7 +16,9 @@ Copyright (c) 2022 Skyflow, Inc.
 // variant collect/error surface lives in Tier-D/Tier-E files that are not
 // lifted in 4.6/4.7).
 
-import { IRevealRecordComposable, IRevealResponseType } from '../types';
+import {
+  IRevealRecordComposable, IRevealResponseType, LogLevel, MessageType,
+} from '../types';
 
 /** Telemetry identity for a package (privacyDB vs flowDB SDK name/version). */
 export interface SdkDetails {
@@ -52,6 +54,14 @@ export interface VariantAdapter {
 
   /** Build the telemetry meta object using this package's identity. */
   getMetaObject(metaData: any, navigator: any): Record<string, any>;
+
+  /**
+   * Emit a log line using this package's SDK-identity-aware `printLog`. Lives on
+   * the adapter because `printLog` reads the package's SDK-language/version
+   * label. Shared `@core` code only invokes this from main-thread (external)
+   * paths where an adapter is registered — never inside the iframe bundle.
+   */
+  printLog(message: string, messageType: MessageType, logLevel: LogLevel): void;
 
   /** Composable reveal mappers from this package's `core-utils/reveal`. */
   reveal: VariantRevealAdapter;

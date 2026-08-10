@@ -22,7 +22,7 @@ import Container from '@core/external/common/container';
 import SkyflowError from '@core/errors';
 import {
   formatValidations, formatOptions, validateElementOptions, getElements,
-} from '../../../libs/element-options';
+} from '@core/libs/element-options';
 import { ContainerType } from '../../../skyflow';
 import {
   Context, MessageType,

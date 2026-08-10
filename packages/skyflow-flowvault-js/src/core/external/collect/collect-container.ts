@@ -20,7 +20,7 @@ import Container from '@core/external/common/container';
 import SkyflowError from '@core/errors';
 import {
   formatValidations, formatOptions, validateElementOptions,
-} from '../../../libs/element-options';
+} from '@core/libs/element-options';
 import SkyflowFlowDBError from '../../../libs/skyflow-flowdb-error';
 import { ContainerType } from '../../../skyflow';
 import {

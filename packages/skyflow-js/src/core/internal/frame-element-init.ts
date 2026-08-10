@@ -12,7 +12,7 @@ import { checkForElementMatchRule, checkForValueMatch } from '@core/helpers';
 import { constructElementsInsertReq } from '@core/core-utils/collect';
 import { getFlexGridStyles } from '@core/libs/styles';
 import SkyflowError from '@core/errors';
-import { getValueAndItsUnit, validateAndSetupGroupOptions } from '../../libs/element-options';
+import { getValueAndItsUnit, validateAndSetupGroupOptions } from '@core/libs/element-options';
 import { ContainerType } from '../../skyflow';
 import {
   Context, Env, ErrorType, LogLevel,

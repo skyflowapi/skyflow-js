@@ -28,7 +28,7 @@ import {
   formatValidations,
   getElements,
   validateAndSetupGroupOptions,
-} from '../../../libs/element-options';
+} from '@core/libs/element-options';
 import IFrame from '../common/iframe';
 import {
   printLog, getElementName, parameterizedString, EnvOptions,

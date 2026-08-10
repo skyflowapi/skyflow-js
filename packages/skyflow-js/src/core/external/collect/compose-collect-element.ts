@@ -5,7 +5,7 @@ import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from 
 import logs from '@core/utils/logs';
 import properties from '@core/properties';
 import SkyflowError from '@core/errors';
-import { formatValidations } from '../../../libs/element-options';
+import { formatValidations } from '@core/libs/element-options';
 import { ContainerType } from '../../../skyflow';
 import {
   CollectElementUpdateOptions, EventName, MessageType, MetaData,
