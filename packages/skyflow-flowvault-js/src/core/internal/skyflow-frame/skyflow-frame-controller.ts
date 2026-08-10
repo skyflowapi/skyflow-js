@@ -20,6 +20,7 @@ import {
 import logs from '@core/utils/logs';
 import properties from '@core/properties';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import SkyflowError from '@core/errors';
 import Client from '../../../client';
 import {
   constructElementsInsertReq,
@@ -45,7 +46,6 @@ import {
 import {
   getAtobValue, getSDKNameAndVersion, getValueFromName,
 } from '../../../utils/helpers';
-import SkyflowError from '../../../libs/skyflow-error';
 import {
   ElementInfo, FlowDBInsertRequestBody, FlowDBUpdateRequestBody,
   TokenizeDataInput, CollectResponse, RevealResponse, RevealError,

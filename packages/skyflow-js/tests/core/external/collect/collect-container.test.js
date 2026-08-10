@@ -12,7 +12,7 @@ import {
 } from '@core/constants';
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
 import * as iframerUtils from '@core/iframe-libs/iframer';
-import SkyflowError from '../../../../src/libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import Skyflow from '../../../../src/skyflow';
 import { LogLevel, Env, ValidationRuleType, ErrorType } from '../../../../src/utils/common';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';

@@ -3,7 +3,7 @@
 */
 import bus from "framebus";
 import CollectElement from "../../../../src/core/external/collect/collect-element";
-import SkyflowError from "../../../../src/libs/skyflow-error";
+import SkyflowError from "@core/errors";
 import {
   LogLevel,
   Env,

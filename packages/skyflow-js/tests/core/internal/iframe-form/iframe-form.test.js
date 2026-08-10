@@ -6,7 +6,7 @@ import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_I
 import { Env, LogLevel, ValidationRuleType } from '../../../../src/utils/common';
 import IFrameFormElement from '../../../../src/core/internal/iframe-form'
 import * as busEvents from '@core/utils/bus-events';
-import SkyflowError from '../../../../src/libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import logs from '@core/utils/logs';
 import { ContainerType } from '../../../../src/skyflow';
 import { formatOptions } from '../../../../src/libs/element-options';

@@ -14,7 +14,7 @@ import {
 } from '@core/constants';
 import properties from '@core/properties';
 import Container from '@core/external/common/container';
-import SkyflowError from '../../../libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import SkyflowFlowDBError from '../../../libs/skyflow-flowdb-error';
 import { ContainerType } from '../../../skyflow';
 import {

@@ -40,7 +40,7 @@ jest.mock('../../../src/core-utils/collect', () => {
   };
 });
 import FrameElementInit from '../../../src/core/internal/frame-element-init';
-import SkyflowError from '../../../src/libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import { ELEMENTS } from '@core/constants';
 import logs from '@core/utils/logs';
 import { parameterizedString } from '../../../src/utils/logs-helper';

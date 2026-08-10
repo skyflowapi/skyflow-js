@@ -17,6 +17,8 @@ import {
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
+import SkyflowError from '@core/errors';
+import { buildStylesFromClassesAndStyles } from '@core/libs/styles';
 import { FormattedCollectElementOptions } from '../core/internal/internal-types';
 import {
   CollectElementOptions,
@@ -27,8 +29,6 @@ import {
   isValidExpiryDateFormat, isValidExpiryYearFormat, isValidRegExp, validateBooleanOptions,
   validateInputFormatOptions,
 } from '../utils/validators';
-import SkyflowError from './skyflow-error';
-import { buildStylesFromClassesAndStyles } from './styles';
 
 export function validateElementOptions(
   elementType: string,

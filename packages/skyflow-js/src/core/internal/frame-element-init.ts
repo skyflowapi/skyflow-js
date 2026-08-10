@@ -10,8 +10,9 @@ import {
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { checkForElementMatchRule, checkForValueMatch } from '@core/helpers';
 import { constructElementsInsertReq } from '@core/core-utils/collect';
+import { getFlexGridStyles } from '@core/libs/styles';
+import SkyflowError from '@core/errors';
 import { getValueAndItsUnit, validateAndSetupGroupOptions } from '../../libs/element-options';
-import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
 import {
   Context, Env, ErrorType, LogLevel,
@@ -26,7 +27,6 @@ import {
   constructInsertRecordRequest, insertDataInCollect,
   updateRecordsBySkyflowIDComposable,
 } from '../../core-utils/collect';
-import SkyflowError from '../../libs/skyflow-error';
 import Client from '../../client';
 import { printLog } from '../../utils/logs-helper';
 

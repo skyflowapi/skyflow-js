@@ -5,8 +5,8 @@ import {
   ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ERROR_TEXT_STYLES, REVEAL_TYPES, STYLE_TYPE,
 } from '@core/constants';
 import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
+import { getFlexGridStyles } from '@core/libs/styles';
 import { getValueAndItsUnit } from '../../libs/element-options';
-import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
 import {
   Context, IRevealRecordComposable,

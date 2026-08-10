@@ -4,8 +4,8 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '@core/constants';
 import logs from '@core/utils/logs';
 import properties from '@core/properties';
+import SkyflowError from '@core/errors';
 import { formatValidations } from '../../../libs/element-options';
-import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
 import {
   CollectElementUpdateOptions, EventName, MessageType, MetaData,

@@ -3,7 +3,7 @@
 */
 import bus from 'framebus';
 import CollectElement from '../../../../src/core/external/collect/collect-element';
-import SkyflowError from '../../../../src/libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';

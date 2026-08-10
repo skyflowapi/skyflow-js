@@ -1,5 +1,5 @@
 import ThreeDS from '../../../../src/core/external/threeds/threeds';
-import SkyflowError from '../../../../src/libs/skyflow-error';
+import SkyflowError from '@core/errors';
 
 describe('test 3DS helperFunction', ()=>{
     let originalCreateElement;

@@ -5,6 +5,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import * as coreValidators from '@core/validators';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
+import SkyflowError from '@core/errors';
 import {
   IFlowDBRevealElementInput as IRevealElementInput,
   IInsertRecordInput,
@@ -21,7 +22,6 @@ import {
   IUpdateRequest,
   IUpdateOptions,
 } from '../common';
-import SkyflowError from '../../libs/skyflow-error';
 import { ISkyflow } from '../../skyflow';
 import { appendZeroToOne } from '../helpers';
 import { printLog } from '../logs-helper';

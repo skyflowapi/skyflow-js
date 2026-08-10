@@ -17,10 +17,10 @@ import {
 } from '@core/constants';
 import properties from '@core/properties';
 import Container from '@core/external/common/container';
+import SkyflowError from '@core/errors';
 import {
   formatValidations, formatOptions, validateElementOptions,
 } from '../../../libs/element-options';
-import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
 import {
   Context, MessageType,

@@ -9,8 +9,9 @@ import {
 import { checkForElementMatchRule, checkForValueMatch } from '@core/helpers';
 import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import { getFlexGridStyles } from '@core/libs/styles';
+import SkyflowError from '@core/errors';
 import { getValueAndItsUnit, validateAndSetupGroupOptions } from '../../libs/element-options';
-import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
 import {
   Context, Env, ErrorType, LogLevel,
@@ -27,7 +28,6 @@ import {
   replaceCVVTokensInResponse,
   CVVMap,
 } from '../../core-utils/collect';
-import SkyflowError from '../../libs/skyflow-error';
 import Client from '../../client';
 
 const set = require('set-value');

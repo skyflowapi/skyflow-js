@@ -20,7 +20,7 @@ import CollectElement from "../../../../src/core/external/collect/collect-elemen
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import EventEmitter from "@core/event-emitter";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
-import SkyflowError from "../../../../src/libs/skyflow-error";
+import SkyflowError from "@core/errors";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
 import { ContainerType } from "../../../../src/skyflow";
 import { Metadata } from "../../../../src/core/internal/internal-types";

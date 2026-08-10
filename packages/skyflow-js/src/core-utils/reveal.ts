@@ -4,8 +4,8 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import { getAccessToken } from '@core/utils/bus-events';
 import { FILE_DOWNLOAD_URL_PARAM } from '@core/constants';
+import SkyflowError from '@core/errors';
 import Client from '../client';
-import SkyflowError from '../libs/skyflow-error';
 import {
   IRevealRecord, IRevealResponseType, MessageType, LogLevel, IGetRecord, ISkyflowIdRecord,
   RedactionType,

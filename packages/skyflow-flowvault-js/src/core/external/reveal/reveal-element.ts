@@ -19,7 +19,7 @@ import {
 import properties from '@core/properties';
 import EventEmitter from '@core/event-emitter';
 import SkyflowElement from '@core/external/common/skyflow-element';
-import SkyflowError from '../../../libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import {
   Context, ErrorType,
 } from '../../../utils/common';

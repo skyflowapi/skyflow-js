@@ -15,7 +15,7 @@ import {
 import properties from '@core/properties';
 import { ContainerType, IRevealElementOptions } from '@core/types';
 import Container from '@core/external/common/container';
-import SkyflowError from '../../../libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import {
   ContainerOptions,
   Context, ErrorType, MessageType,

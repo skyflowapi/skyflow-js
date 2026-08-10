@@ -28,7 +28,7 @@ import CollectContainer from './core/external/collect/collect-container';
 import ComposableRevealContainer from './core/external/reveal/composable-reveal-container';
 import SkyflowContainer from './core/external/skyflow-container';
 import { parameterizedString, printLog } from './utils/logs-helper';
-import SkyflowError from './libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import SkyflowFlowDBError from './libs/skyflow-flowdb-error';
 import {
   RequestMethod,

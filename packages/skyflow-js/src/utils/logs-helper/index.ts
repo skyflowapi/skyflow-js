@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import { LogLevelOptions } from '@core/utils/logs-helper';
-import { LogLevel, MessageType } from '../common';
+import { LogLevel, MessageType } from '@core/types';
 import { getSDKLanguageAndVersion } from '../helpers';
 
 // The variant-neutral helpers now live in @core/utils/logs-helper; re-exported

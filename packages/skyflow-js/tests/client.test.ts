@@ -7,7 +7,7 @@ import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import logs from "@core/utils/logs";
 import { ClientMetadata } from "../src/core/internal/internal-types";
 import { ISkyflow } from "../src/skyflow";
-import SkyflowError from "../src/libs/skyflow-error";
+import SkyflowError from "@core/errors";
 
 const skyflowConfig: ISkyflow = {
   vaultID: "e20afc3ae1b54f0199f24130e51e0c11",

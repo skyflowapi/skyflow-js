@@ -1,6 +1,6 @@
 import { getAccessToken } from '@core/utils/bus-events';
+import SkyflowError from '@core/errors';
 import Client from '../client';
-import SkyflowError from '../libs/skyflow-error';
 import {
   IDeleteOptions,
   IDeleteRecord,

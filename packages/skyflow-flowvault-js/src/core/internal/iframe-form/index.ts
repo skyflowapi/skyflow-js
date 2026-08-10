@@ -20,6 +20,7 @@ import {
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
 import { checkForElementMatchRule } from '@core/helpers';
+import SkyflowError from '@core/errors';
 import {
   validateCardNumberLengthCheck,
   validateCreditCardNumber,
@@ -32,7 +33,6 @@ import {
   parameterizedString,
   EnvOptions,
 } from '../../../utils/logs-helper';
-import SkyflowError from '../../../libs/skyflow-error';
 import {
   Context,
   IValidationRule,

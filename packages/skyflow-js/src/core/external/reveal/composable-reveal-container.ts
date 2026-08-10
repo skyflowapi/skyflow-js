@@ -21,7 +21,7 @@ import {
   CUSTOM_ERROR_MESSAGES,
 } from '@core/constants';
 import Container from '@core/external/common/container';
-import SkyflowError from '../../../libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import { ContainerType } from '../../../skyflow';
 import {
   Context, MessageType,

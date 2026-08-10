@@ -5,8 +5,8 @@ import {
   ALLOWED_MULTIPLE_FIELDS_STYLES,
   ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ERROR_TEXT_STYLES, REVEAL_TYPES, STYLE_TYPE,
 } from '@core/constants';
+import { getFlexGridStyles } from '@core/libs/styles';
 import { getValueAndItsUnit } from '../../libs/element-options';
-import { getFlexGridStyles } from '../../libs/styles';
 import { ContainerType } from '../../skyflow';
 import {
   Context, IRevealRecordComposable,

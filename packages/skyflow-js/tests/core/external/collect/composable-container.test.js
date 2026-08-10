@@ -14,7 +14,7 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import EventEmitter from '@core/event-emitter';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
 import { SKYFLOW_FRAME_CONTROLLER_READY } from '@core/constants';
-import SkyflowError from '../../../../src/libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import properties from '@core/properties';
 
 const bus = require('framebus');

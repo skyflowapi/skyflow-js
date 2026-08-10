@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { buildStylesFromClassesAndStyles, getFlexGridStyles } from '../../src/libs/styles';
+import { buildStylesFromClassesAndStyles, getFlexGridStyles } from '@core/libs/styles';
 
 const styles = {
   base: {

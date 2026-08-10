@@ -16,6 +16,7 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { checkForElementMatchRule, checkForValueMatch } from '@core/helpers';
 import { constructElementsInsertReq } from '@core/core-utils/collect';
 import { formatRecordsForIframe } from '@core/core-utils/reveal';
+import SkyflowError from '@core/errors';
 import Client from '../../../client';
 import {
   constructInsertRecordRequest,
@@ -62,7 +63,6 @@ import {
   fileValidation, generateUploadFileName,
   getAtobValue, getSDKNameAndVersion, getValueFromName, vaildateFileName,
 } from '../../../utils/helpers';
-import SkyflowError from '../../../libs/skyflow-error';
 import {
   BatchInsertRequestBody, ElementInfo, TokenizeDataInput, UploadFileDataInput,
 } from '../internal-types';

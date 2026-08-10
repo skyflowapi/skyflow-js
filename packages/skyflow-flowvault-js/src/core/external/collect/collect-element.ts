@@ -18,6 +18,7 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
 import properties from '@core/properties';
 import SkyflowElement from '@core/external/common/skyflow-element';
+import SkyflowError from '@core/errors';
 import {
   formatValidations,
   getElements,
@@ -27,7 +28,6 @@ import IFrame from '../common/iframe';
 import {
   printLog, getElementName, parameterizedString, EnvOptions,
 } from '../../../utils/logs-helper';
-import SkyflowError from '../../../libs/skyflow-error';
 import {
   CollectElementUpdateOptions,
   Context, Env, EventName, MessageType,

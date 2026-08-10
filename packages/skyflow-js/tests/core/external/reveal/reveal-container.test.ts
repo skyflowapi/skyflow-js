@@ -14,7 +14,7 @@ import { LogLevel, Env } from "../../../../src/utils/common";
 import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
-import SkyflowError from "../../../../src/libs/skyflow-error";
+import SkyflowError from "@core/errors";
 import logs from "@core/utils/logs";
 import { Metadata } from "../../../../src/core/internal/internal-types";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";

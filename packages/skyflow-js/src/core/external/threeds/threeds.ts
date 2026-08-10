@@ -1,5 +1,5 @@
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
-import SkyflowError from '../../../libs/skyflow-error';
+import SkyflowError from '@core/errors';
 
 /*
 Copyright (c) 2022 Skyflow, Inc.

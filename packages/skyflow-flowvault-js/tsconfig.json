@@ -3,6 +3,6 @@
   "compilerOptions": {
     "outDir": "types"
   },
-  "include": ["src", "src/custom.d.ts", "typings.d.ts"],
+  "include": ["src", "../../core/custom.d.ts", "typings.d.ts"],
   "exclude": ["node_modules", "dist", "tests/*.test.*"]
 }

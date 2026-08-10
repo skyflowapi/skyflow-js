@@ -9,7 +9,7 @@ import RevealElement from "../../../../src/core/external/reveal/reveal-element";
 import * as iframerUtils from '@core/iframe-libs/iframer';
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
-import SkyflowError from "../../../../src/libs/skyflow-error";
+import SkyflowError from "@core/errors";
 import logs from "@core/utils/logs";
 
 iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));

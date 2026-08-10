@@ -21,7 +21,7 @@ import {
 import logs from '@core/utils/logs';
 import properties from '@core/properties';
 import SkyflowElement from '@core/external/common/skyflow-element';
-import SkyflowError from '../../../libs/skyflow-error';
+import SkyflowError from '@core/errors';
 import {
   Context, ErrorType, MessageType, RenderFileResponse,
 } from '../../../utils/common';
