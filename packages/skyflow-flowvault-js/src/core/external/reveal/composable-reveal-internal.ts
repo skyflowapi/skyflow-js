@@ -19,14 +19,14 @@ import EventEmitter from '@core/event-emitter';
 import SkyflowElement from '@core/external/common/skyflow-element';
 import SkyflowError from '@core/errors';
 import {
+  pushElementEventWithTimeout,
+  updateMetricObjectValue,
+} from '@core/metrics';
+import {
   Context, ErrorType,
 } from '../../../utils/common';
 import IFrame from '../common/iframe';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
-import {
-  pushElementEventWithTimeout,
-  updateMetricObjectValue,
-} from '../../../metrics';
 import { formatRevealElementOptions } from '../../../utils/helpers';
 import { Metadata, RevealContainerProps } from '../../internal/internal-types';
 

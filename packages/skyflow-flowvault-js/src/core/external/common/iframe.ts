@@ -9,7 +9,7 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { METRIC_TYPES } from '@core/constants';
 import SkyflowError from '@core/errors';
 import { LogLevel } from '@core/types';
-import { updateMetricObjectValue } from '../../../metrics/index';
+import { updateMetricObjectValue } from '@core/metrics';
 import { Metadata } from '../../internal/internal-types';
 
 export default class IFrame {

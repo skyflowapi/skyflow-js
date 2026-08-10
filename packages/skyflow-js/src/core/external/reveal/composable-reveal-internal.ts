@@ -21,14 +21,14 @@ import properties from '@core/properties';
 import SkyflowElement from '@core/external/common/skyflow-element';
 import SkyflowError from '@core/errors';
 import {
+  pushElementEventWithTimeout,
+  updateMetricObjectValue,
+} from '@core/metrics';
+import {
   Context, ErrorType, MessageType, RenderFileResponse,
 } from '../../../utils/common';
 import IFrame from '../common/iframe';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
-import {
-  pushElementEventWithTimeout,
-  updateMetricObjectValue,
-} from '../../../metrics';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';
 import { formatRevealElementOptions } from '../../../utils/helpers';

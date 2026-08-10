@@ -56,3 +56,28 @@ export interface VariantAdapter {
   /** Composable reveal mappers from this package's `core-utils/reveal`. */
   reveal: VariantRevealAdapter;
 }
+
+// Registry — the single active adapter for the running bundle. Each package
+// registers its own implementation once at startup (from `src/skyflow.ts`, and
+// from `tests/jest.setup.js` for the test runtime); shared `@core` code reads it
+// lazily via `getVariantAdapter()`. Reads only happen inside function bodies at
+// runtime (never at module load), so a module that imports the getter but whose
+// code never runs in a given bundle — e.g. the iframe bundle — never trips the
+// guard.
+let activeAdapter: VariantAdapter | undefined;
+
+/** Register the package's `VariantAdapter`. Called once per bundle at startup. */
+export function setVariantAdapter(adapter: VariantAdapter): void {
+  activeAdapter = adapter;
+}
+
+/**
+ * Return the registered `VariantAdapter`. Throws if none was registered — a
+ * programming error (an entry point that failed to call `setVariantAdapter`).
+ */
+export function getVariantAdapter(): VariantAdapter {
+  if (!activeAdapter) {
+    throw new Error('Skyflow: VariantAdapter has not been registered.');
+  }
+  return activeAdapter;
+}

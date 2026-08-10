@@ -20,6 +20,11 @@ import properties from '@core/properties';
 import SkyflowElement from '@core/external/common/skyflow-element';
 import SkyflowError from '@core/errors';
 import {
+  initalizeMetricObject,
+  pushElementEventWithTimeout,
+  updateMetricObjectValue,
+} from '@core/metrics';
+import {
   formatValidations,
   getElements,
   validateAndSetupGroupOptions,
@@ -37,11 +42,6 @@ import {
   getReturnValue,
 } from '../../../utils/helpers';
 import { ContainerType } from '../../../skyflow';
-import {
-  initalizeMetricObject,
-  pushElementEventWithTimeout,
-  updateMetricObjectValue,
-} from '../../../metrics';
 import { Metadata, ContainerProps, InternalState } from '../../internal/internal-types';
 
 const CLASS_NAME = 'Element';

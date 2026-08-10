@@ -5,7 +5,7 @@ import {
   initalizeMetricObject,
   getEventStatus,
   METRIC_OBJECT,
-} from '../../src/metrics/index';
+} from '@core/metrics';
 
 describe('metric object test', () => {
   describe('METRIC_OBJECT', () => {

@@ -21,16 +21,16 @@ import EventEmitter from '@core/event-emitter';
 import SkyflowElement from '@core/external/common/skyflow-element';
 import SkyflowError from '@core/errors';
 import {
+  initalizeMetricObject,
+  pushElementEventWithTimeout,
+  updateMetricObjectValue,
+} from '@core/metrics';
+import {
   Context, ErrorType,
 } from '../../../utils/common';
 import IFrame from '../common/iframe';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import { formatRevealElementOptions } from '../../../utils/helpers';
-import {
-  initalizeMetricObject,
-  pushElementEventWithTimeout,
-  updateMetricObjectValue,
-} from '../../../metrics';
 import { Metadata, RevealContainerProps } from '../../internal/internal-types';
 
 class RevealElement extends SkyflowElement {

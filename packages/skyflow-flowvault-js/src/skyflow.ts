@@ -22,6 +22,7 @@ import properties from '@core/properties';
 import logs from '@core/utils/logs';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { ContainerType, ISkyflow, SkyflowConfigOptions } from '@core/types';
+import { setVariantAdapter } from '@core/adapters';
 import Client from './client';
 import RevealContainer from './core/external/reveal/reveal-container';
 import CollectContainer from './core/external/collect/collect-container';
@@ -45,6 +46,13 @@ import {
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import { validateComposableContainerOptions } from './utils/validators';
 import { ClientMetadata, SkyflowElementProps } from './core/internal/internal-types';
+import flowVaultVariantAdapter from './variant-adapter';
+
+// Register this package's variant behaviour with the shared @core layer once,
+// at module load. The main-thread SDK entry points (index.ts, index-node.ts,
+// index-internal.ts) all import this module, so the adapter is registered
+// before any @core code that reads it (e.g. @core/metrics) runs.
+setVariantAdapter(flowVaultVariantAdapter);
 
 // Relocated to @core/types (variant-neutral); re-exported here under the same
 // names so `./skyflow` importers and the public surface are unchanged.

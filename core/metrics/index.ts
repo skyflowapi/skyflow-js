@@ -5,12 +5,12 @@ import {
   METRIC_TYPES,
 } from '@core/constants';
 import { MeticsObjectType, SharedMeticsObjectType } from '@core/types';
-import { getMetaObject, SDK_DETAILS } from '../utils/helpers';
+import { getVariantAdapter } from '@core/adapters';
 
 export const METRIC_OBJECT: SharedMeticsObjectType = { records: [] };
 
 export function initalizeMetricObject(metadata: any, elementId: string) {
-  const metaDataObject = getMetaObject(SDK_DETAILS, metadata, navigator);
+  const metaDataObject = getVariantAdapter().getMetaObject(metadata, navigator);
   const elementMetricObject = {
     element_id: elementId,
     element_type: [],
