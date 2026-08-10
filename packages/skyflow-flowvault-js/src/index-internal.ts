@@ -9,6 +9,8 @@ import {
   SKYFLOW_FRAME_CONTROLLER,
 } from '@core/constants';
 import logs from '@core/utils/logs';
+import { setVariantAdapter } from '@core/adapters';
+import flowVaultVariantAdapter from './variant-adapter';
 import RevealFrame from './core/internal/reveal/reveal-frame';
 import SkyflowFrameController from './core/internal/skyflow-frame/skyflow-frame-controller';
 import { MessageType, LogLevel } from './utils/common';
@@ -25,6 +27,15 @@ import RevealComposableFrameElementInit from './core/internal/composable-frame-e
 // index-internal over the same @core skeleton, wired to flowvault's own frame
 // controllers (collect tokenize / reveal detokenize). Elements-only: no file
 // upload/render frame paths.
+
+// Register this package's VariantAdapter for the iframe bundle. The shared
+// @core element/frame layer lifted in Tasks 4.6/4.7 (client transport, the
+// composable reveal frame) reads it via getVariantAdapter() while running
+// in-iframe. Done explicitly here so registration no longer depends on an
+// incidental `../../skyflow` import edge pulling skyflow.ts (and its own
+// setVariantAdapter side-effect) into this bundle.
+setVariantAdapter(flowVaultVariantAdapter);
+
 (function init(root: any) {
   try {
     const frameName = root.name;
