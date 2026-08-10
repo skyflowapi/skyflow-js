@@ -34,7 +34,7 @@ import {
 import logs from '@core/utils/logs';
 import { LogLevel, MessageType } from '@core/types';
 import { validateElementOptions } from '@core/libs/element-options';
-import IFrameFormElement from './iframe-form';
+import IFrameFormElement from '@core/internal/iframe-form';
 import { parameterizedString, printLog } from '../../utils/logs-helper';
 import { detectCardType } from '../../utils/validators';
 import {

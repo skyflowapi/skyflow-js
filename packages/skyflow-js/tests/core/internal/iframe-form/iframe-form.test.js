@@ -4,7 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import bus from 'framebus';
 import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, ElementType, FRAME_ELEMENT } from '@core/constants';
 import { Env, LogLevel, ValidationRuleType } from '../../../../src/utils/common';
-import IFrameFormElement from '../../../../src/core/internal/iframe-form'
+import IFrameFormElement from '@core/internal/iframe-form'
 import * as busEvents from '@core/utils/bus-events';
 import SkyflowError from '@core/errors';
 import logs from '@core/utils/logs';

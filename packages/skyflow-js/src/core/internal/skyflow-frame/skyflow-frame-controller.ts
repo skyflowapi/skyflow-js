@@ -17,6 +17,7 @@ import { checkForElementMatchRule, checkForValueMatch } from '@core/helpers';
 import { constructElementsInsertReq } from '@core/core-utils/collect';
 import { formatRecordsForIframe } from '@core/core-utils/reveal';
 import SkyflowError from '@core/errors';
+import IFrameFormElement from '@core/internal/iframe-form';
 import Client from '../../../client';
 import {
   constructInsertRecordRequest,
@@ -66,7 +67,6 @@ import {
 import {
   BatchInsertRequestBody, ElementInfo, TokenizeDataInput, UploadFileDataInput,
 } from '../internal-types';
-import IFrameFormElement from '../iframe-form';
 
 const set = require('set-value');
 

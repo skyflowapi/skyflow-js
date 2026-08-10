@@ -12,12 +12,12 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { getFlexGridStyles } from '@core/libs/styles';
 import SkyflowError from '@core/errors';
 import { getValueAndItsUnit, validateAndSetupGroupOptions } from '@core/libs/element-options';
+import IFrameFormElement from '@core/internal/iframe-form';
 import { ContainerType } from '../../skyflow';
 import {
   Context, Env, ErrorType, LogLevel,
 } from '../../utils/common';
 import { getContainerType } from '../../utils/helpers';
-import IFrameFormElement from './iframe-form';
 import FrameElement from '.';
 import {
   constructElementsInsertReq,

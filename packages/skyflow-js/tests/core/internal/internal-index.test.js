@@ -4,7 +4,7 @@ import * as validators from '../../../src/utils/validators';
 import * as helpers from '../../../src/utils/helpers';
 import { getMaskedOutput, domReady } from '../../../src/utils/helpers';
 import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, CARD_ENCODED_ICONS, INPUT_KEYBOARD_EVENTS, ELEMENT_EVENTS_TO_CLIENT, ElementType, STYLE_TYPE } from '@core/constants';
-import IFrameFormElement from '../../../src/core/internal/iframe-form';
+import IFrameFormElement from '@core/internal/iframe-form';
 import { ValidationRuleType } from '../../../src/utils/common';
 import { get } from 'lodash';
 

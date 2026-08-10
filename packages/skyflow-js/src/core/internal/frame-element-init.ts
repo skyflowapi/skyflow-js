@@ -13,6 +13,7 @@ import { constructElementsInsertReq } from '@core/core-utils/collect';
 import { getFlexGridStyles } from '@core/libs/styles';
 import SkyflowError from '@core/errors';
 import { getValueAndItsUnit, validateAndSetupGroupOptions } from '@core/libs/element-options';
+import IFrameFormElement from '@core/internal/iframe-form';
 import { ContainerType } from '../../skyflow';
 import {
   Context, Env, ErrorType, LogLevel,
@@ -21,7 +22,6 @@ import {
 import {
   fileValidation, generateUploadFileName, getContainerType, vaildateFileName,
 } from '../../utils/helpers';
-import IFrameFormElement from './iframe-form';
 import FrameElement from '.';
 import {
   constructInsertRecordRequest, insertDataInCollect,

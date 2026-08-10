@@ -19,10 +19,18 @@ import {
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
-import { checkForElementMatchRule } from '@core/helpers';
+import {
+  checkForElementMatchRule,
+  fileValidation,
+  formatFrameNameToId,
+  getReturnValue,
+  removeSpaces,
+  vaildateFileName,
+} from '@core/helpers';
 import SkyflowError from '@core/errors';
 import {
   Context,
+  ContainerType,
   IValidationRule,
   LogLevel,
   MessageType,
@@ -34,20 +42,12 @@ import {
   validateExpiryDate,
   validateExpiryMonth,
   validateExpiryYear,
-} from '../../../utils/validators';
+} from '@core/validators';
 import {
   printLog,
   parameterizedString,
   EnvOptions,
-} from '../../../utils/logs-helper';
-import {
-  fileValidation,
-  formatFrameNameToId,
-  getReturnValue,
-  removeSpaces,
-  vaildateFileName,
-} from '../../../utils/helpers';
-import { ContainerType } from '../../../skyflow';
+} from '@core/utils/logs-helper';
 
 const RegexParser = require('regex-parser');
 

@@ -4,18 +4,14 @@ Copyright (c) 2022 Skyflow, Inc.
 import uuid from '@core/libs/uuid';
 import * as coreHelpers from '@core/helpers';
 import {
-  ALLOWED_NAME_FOR_FILE,
-  CardType,
-  COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION, ElementType,
+  COPY_UTILS, DEFAULT_INPUT_FORMAT_TRANSLATION,
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import properties from '@core/properties';
 import { ContainerType, ISkyflow, IRevealElementOptions } from '@core/types';
 import SkyflowError from '@core/errors';
 import { SdkInfo } from '../../client';
-import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
-
-const { getType } = require('mime');
+import { isValidURL, validateBooleanOptions } from '../validators';
 
 // SDK telemetry identity, injected at build time (webpack DefinePlugin) / tests
 // (jest setupFiles) from this package's own package.json. Replaces the former
@@ -25,18 +21,13 @@ export const SDK_DETAILS = { name: SDK_NAME, version: SDK_VERSION };
 
 export const flattenObject = (obj, roots = [] as any, sep = '.') => Object.keys(obj).reduce((memo, prop: any) => ({ ...memo, ...(Object.prototype.toString.call(obj[prop]) === '[object Object]' ? flattenObject(obj[prop], roots.concat([prop])) : { [roots.concat([prop]).join(sep)]: obj[prop] }) }), {});
 
-export function formatFrameNameToId(name: string) {
-  const arr = name?.split(':');
-  if (arr && arr.length > 2) {
-    const id = `${arr[0]}:${arr[1]}:${arr[2]}`;
-    return id;
-  }
-  return '';
-}
+// Re-bound from @core/helpers (definitions moved there so the shared
+// @core/internal/iframe-form + collect element layer can reach them). Bound as
+// local consts — not `export … from` — so jest.spyOn(helpers, …) still hooks
+// them.
+export const formatFrameNameToId = coreHelpers.formatFrameNameToId;
 
-export function removeSpaces(inputString:string) {
-  return inputString.trim().replace(/[\s-]/g, '');
-}
+export const removeSpaces = coreHelpers.removeSpaces;
 
 export function formatVaultURL(vaultURL?: string) {
   if (typeof vaultURL !== 'string') return vaultURL;
@@ -67,27 +58,7 @@ export const appendMonthTwoDigitYears = (value: string) => {
   return { isAppended: false, value };
 };
 
-export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {
-  if (typeof value === 'string') {
-    if (element === ElementType.CARD_NUMBER) {
-      value = value && value.replace(/[\s-]/g, '');
-      if (!doesReturnValue) {
-        const cardType = detectCardType(value);
-        const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
-        if (value.length > threshold) {
-          return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
-        }
-        return value;
-      }
-      return value;
-    } if (doesReturnValue) {
-      return value;
-    }
-  } else {
-    return value;
-  }
-  return undefined;
-};
+export const getReturnValue = coreHelpers.getReturnValue;
 
 const fns : Function[] = [];
 export function domReady(fn) {
@@ -184,49 +155,9 @@ export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
   }
 };
 
-const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-package', 'application/vnd.microsoft.portable-executable', 'application/vnd.rar'];
-// Check file type and file size in KB
-export const fileValidation = (value, required: Boolean = false, fileElement) => {
-  if (required && (value === undefined || value === '')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED, [], true);
-  }
+export const fileValidation = coreHelpers.fileValidation;
 
-  if (DANGEROUS_FILE_TYPE.includes(value.type)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
-  }
-
-  if (Object.prototype.hasOwnProperty.call(fileElement, 'allowedFileType') && (value !== undefined && value !== '')) {
-    let isValidType = false;
-
-    if (fileElement.allowedFileType !== null && fileElement.allowedFileType !== undefined) {
-      fileElement.allowedFileType.forEach((type) => {
-        const allowedType = getType(type);
-        // eslint-disable-next-line max-len
-        if (value.type.includes(allowedType) || value.type.includes(type) || value.type.includes(type.substring(1)) || value.type.includes(type)) {
-          isValidType = true;
-        }
-      });
-      if (!isValidType) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
-      }
-    }
-  }
-  const sizeLimit = (Object.prototype.hasOwnProperty.call(fileElement, 'maxFileSize') && typeof fileElement.maxFileSize === 'number')
-    ? fileElement.maxFileSize
-    : 32_000_000;
-  if (value.size > sizeLimit) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
-  }
-  if (Object.prototype.hasOwnProperty.call(fileElement, 'blockEmptyFiles') && fileElement.blockEmptyFiles) {
-    if (value.size === 0) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
-    }
-  }
-
-  return true;
-};
-
-export const vaildateFileName = (name: string) => ALLOWED_NAME_FOR_FILE.test(name);
+export const vaildateFileName = coreHelpers.vaildateFileName;
 
 export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
   `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`
@@ -445,17 +376,4 @@ export const getAtobValue = (encodedValue: string) => {
   } catch (err) {
     return '';
   }
-};
-
-export const getSDKLanguageAndVersion = () => {
-  const metaData = localStorage.getItem('sdk_version') || '';
-  const sdkDetails = getSDKNameAndVersion(metaData);
-  // Injection-ready: compare against this package's injected identity rather
-  // than a hard-coded 'skyflow-js'. Preserves 'JS' for the base SDK and 'React'
-  // for the skyflow-react wrapper (which overrides sdkName via metaData).
-  const sdkName = sdkDetails.sdkName === SDK_NAME ? 'JS' : 'React';
-  return {
-    sdkLanguageAndVersion: `${sdkName} SDK v${sdkDetails.sdkVersion}`,
-    sdkOwner: 'Skyflow',
-  };
 };

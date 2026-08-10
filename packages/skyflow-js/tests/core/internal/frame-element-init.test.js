@@ -4,7 +4,7 @@ import bus from 'framebus';
 import SkyflowError from '@core/errors';
 import * as helpers from '../../../src/utils/helpers';
 import Client from '../../../src/client';
-import IFrameFormElement from '../../../src/core/internal/iframe-form';
+import IFrameFormElement from '@core/internal/iframe-form';
 import { ErrorType } from '../../../src/index-node';
 
 // Helper to flush pending microtasks (Promise.allSettled resolution) deterministically
@@ -37,8 +37,8 @@ const mockFileList = mockFile1;
 //                 }
 //   }
 // };
-// jest.mock('../../../src/core/internal/iframe-form', () => {
-//     const actual = jest.requireActual('../../../src/core/internal/iframe-form');
+// jest.mock('@core/internal/iframe-form', () => {
+//     const actual = jest.requireActual('@core/internal/iframe-form');
     
 //     return {
 //         __esModule: true,

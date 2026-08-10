@@ -5,7 +5,7 @@ import {
   constructUpdateRecordResponse,
   constructUpdateRecordRequest,
 } from "../../src/core-utils/collect";
-import IFrameFormElement from "../../src/core/internal/iframe-form";
+import IFrameFormElement from "@core/internal/iframe-form";
 import {
   ICollectOptions,
   IUpdateOptions,

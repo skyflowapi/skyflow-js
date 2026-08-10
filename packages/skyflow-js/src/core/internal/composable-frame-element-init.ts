@@ -7,6 +7,7 @@ import {
 } from '@core/constants';
 import { getFlexGridStyles } from '@core/libs/styles';
 import { getValueAndItsUnit } from '@core/libs/element-options';
+import IFrameFormElement from '@core/internal/iframe-form';
 import { ContainerType } from '../../skyflow';
 import {
   Context, IRevealRecordComposable,
@@ -14,7 +15,6 @@ import {
 import {
   getContainerType,
 } from '../../utils/helpers';
-import IFrameFormElement from './iframe-form';
 import FrameElement from '.';
 import Client from '../../client';
 import RevealFrame from './reveal/reveal-frame';

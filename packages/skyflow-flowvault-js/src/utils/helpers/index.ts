@@ -7,11 +7,8 @@ Copyright (c) 2025 Skyflow, Inc.
 // telemetry). `generateMockCVV` is flowDB-only (mock-CVV masking) and has no
 // skyflow-js counterpart.
 import {
-  ALLOWED_NAME_FOR_FILE,
-  CardType,
   COPY_UTILS,
   DEFAULT_INPUT_FORMAT_TRANSLATION,
-  ElementType,
 } from '@core/constants';
 import * as coreHelpers from '@core/helpers';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
@@ -19,9 +16,7 @@ import { ContainerType, IRevealElementOptions, ISkyflow } from '@core/types';
 import properties from '@core/properties';
 import SkyflowError from '@core/errors';
 import { SdkInfo } from '../../client';
-import { detectCardType, isValidURL, validateBooleanOptions } from '../validators';
-
-const { getType } = require('mime');
+import { isValidURL, validateBooleanOptions } from '../validators';
 
 // SDK telemetry identity, injected at build time (webpack DefinePlugin) / tests
 // (jest setupFiles) from this package's own package.json.
@@ -54,18 +49,6 @@ export function getSDKNameAndVersion(metaData?: string): SdkInfo {
   }
   return nameAndVersion;
 }
-
-export const getSDKLanguageAndVersion = () => {
-  const metaData = localStorage.getItem('sdk_version') || '';
-  const sdkDetails = getSDKNameAndVersion(metaData);
-  // Compare against this package's injected identity (skyflow-flowvault-js → JS).
-  // Preserves 'React' for the wrapper case (which overrides sdkName via metaData).
-  const sdkName = sdkDetails.sdkName === SDK_NAME ? 'JS' : 'React';
-  return {
-    sdkLanguageAndVersion: `${sdkName} SDK v${sdkDetails.sdkVersion}`,
-    sdkOwner: 'Skyflow',
-  };
-};
 
 export function getOSDetails(userAgentString: string): OSInfo {
   let os: string | null = null;
@@ -184,18 +167,13 @@ export const generateMockCVV = (length: number, actualValue: string): string => 
 // the deliberate loose-coupling duplication — each package owns its element DOM
 // helpers). Used by the collect element/rendering module graph. ---
 
-export function formatFrameNameToId(name: string) {
-  const arr = name?.split(':');
-  if (arr && arr.length > 2) {
-    const id = `${arr[0]}:${arr[1]}:${arr[2]}`;
-    return id;
-  }
-  return '';
-}
+// Re-bound from @core/helpers (definitions moved there so the shared
+// @core/internal/iframe-form + collect element layer can reach them). Bound as
+// local consts — not `export … from` — so jest.spyOn(helpers, …) still hooks
+// them.
+export const formatFrameNameToId = coreHelpers.formatFrameNameToId;
 
-export function removeSpaces(inputString:string) {
-  return inputString.trim().replace(/[\s-]/g, '');
-}
+export const removeSpaces = coreHelpers.removeSpaces;
 
 // Re-bound from @core/helpers (definition moved there so @core/validators and
 // core's internal frame layer can reach it). Bound as a local const — not
@@ -217,27 +195,7 @@ export const appendMonthTwoDigitYears = (value: string) => {
   return { isAppended: false, value };
 };
 
-export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {
-  if (typeof value === 'string') {
-    if (element === ElementType.CARD_NUMBER) {
-      value = value && value.replace(/[\s-]/g, '');
-      if (!doesReturnValue) {
-        const cardType = detectCardType(value);
-        const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
-        if (value.length > threshold) {
-          return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
-        }
-        return value;
-      }
-      return value;
-    } if (doesReturnValue) {
-      return value;
-    }
-  } else {
-    return value;
-  }
-  return undefined;
-};
+export const getReturnValue = coreHelpers.getReturnValue;
 
 const fns : Function[] = [];
 export function domReady(fn) {
@@ -334,49 +292,9 @@ export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
   }
 };
 
-const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-package', 'application/vnd.microsoft.portable-executable', 'application/vnd.rar'];
-// Check file type and file size in KB
-export const fileValidation = (value, required: Boolean = false, fileElement) => {
-  if (required && (value === undefined || value === '')) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED, [], true);
-  }
+export const fileValidation = coreHelpers.fileValidation;
 
-  if (DANGEROUS_FILE_TYPE.includes(value.type)) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
-  }
-
-  if (Object.prototype.hasOwnProperty.call(fileElement, 'allowedFileType') && (value !== undefined && value !== '')) {
-    let isValidType = false;
-
-    if (fileElement.allowedFileType !== null && fileElement.allowedFileType !== undefined) {
-      fileElement.allowedFileType.forEach((type) => {
-        const allowedType = getType(type);
-        // eslint-disable-next-line max-len
-        if (value.type.includes(allowedType) || value.type.includes(type) || value.type.includes(type.substring(1)) || value.type.includes(type)) {
-          isValidType = true;
-        }
-      });
-      if (!isValidType) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
-      }
-    }
-  }
-  const sizeLimit = (Object.prototype.hasOwnProperty.call(fileElement, 'maxFileSize') && typeof fileElement.maxFileSize === 'number')
-    ? fileElement.maxFileSize
-    : 32_000_000;
-  if (value.size > sizeLimit) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
-  }
-  if (Object.prototype.hasOwnProperty.call(fileElement, 'blockEmptyFiles') && fileElement.blockEmptyFiles) {
-    if (value.size === 0) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
-    }
-  }
-
-  return true;
-};
-
-export const vaildateFileName = (name: string) => ALLOWED_NAME_FOR_FILE.test(name);
+export const vaildateFileName = coreHelpers.vaildateFileName;
 
 export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
   `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`
