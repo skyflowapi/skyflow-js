@@ -1,7 +1,7 @@
 import EventEmitter from '@core/event-emitter';
 import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from '@core/constants';
 import { ContainerType } from '../../../skyflow';
-import { EventName, RenderFileResponse } from '../../../utils/common';
+import { EventName } from '../../../utils/common';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 
 class ComposableRevealElement {
@@ -30,25 +30,6 @@ class ComposableRevealElement {
 
   getID(): string {
     return this.#elementName ?? '';
-  }
-
-  renderFile(): Promise<RenderFileResponse> {
-    return new Promise((resolve, reject) => {
-      // eslint-disable-next-line no-underscore-dangle
-      this.#eventEmitter?._emit?.(
-        `${ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST}:${this.#elementName}`,
-        {},
-        (response) => {
-          if (response?.errors) {
-            reject(response);
-          } else if (response?.error) {
-            reject({ errors: response?.error });
-          } else {
-            resolve(response);
-          }
-        },
-      );
-    });
   }
 
   update = (options: IRevealElementInput | IRevealElementOptions) => {

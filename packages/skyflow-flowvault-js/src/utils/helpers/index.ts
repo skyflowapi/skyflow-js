@@ -6,7 +6,6 @@ Copyright (c) 2025 Skyflow, Inc.
 // deliberate loose-coupling duplication (each package owns its transport/
 // telemetry). `generateMockCVV` is flowDB-only (mock-CVV masking) and has no
 // skyflow-js counterpart.
-import uuid from '@core/libs/uuid';
 import {
   ALLOWED_NAME_FOR_FILE,
   CardType,
@@ -404,11 +403,6 @@ export const addSeperatorToCardNumberMask = (
     return [cardNumberMask[0].replace(/[\s]/g, seperator), cardNumberMask[1]];
   }
   return cardNumberMask;
-};
-
-export const generateUploadFileName = (fileName:string) => {
-  const fileExtentsion = fileName?.split('.')?.pop() || '';
-  return `${uuid()}${fileExtentsion && `.${fileExtentsion}`}`;
 };
 
 export const getValueFromName = (name: string, index: number) => {

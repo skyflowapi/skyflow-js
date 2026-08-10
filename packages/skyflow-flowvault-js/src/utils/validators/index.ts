@@ -431,24 +431,6 @@ export const validateRevealElementRecords = (records: IRevealElementInput[]) => 
   });
 };
 
-// Adapted to the flowDB token-only input: validates the token and altText only
-// (the privacyDB skyflowID/column/table render keys are not part of the flowDB
-// reveal input).
-export const validateRenderElementRecord = (record: IRevealElementInput) => {
-  if (!(record && Object.prototype.hasOwnProperty.call(record, 'token'))) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TOKEN_KEY_REVEAL, []);
-  }
-  if (!record.token) {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TOKEN_ID_REVEAL, []);
-  }
-  if (Object.prototype.hasOwnProperty.call(record, 'token') && typeof record.token !== 'string') {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID_REVEAL, []);
-  }
-  if (Object.prototype.hasOwnProperty.call(record, 'altText') && typeof record.altText !== 'string') {
-    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_RENDER, []);
-  }
-};
-
 // flowDB-specific reveal-option error codes. These are not present in the shared
 // @core SKYFLOW_ERROR_CODE map (they describe the flowDB tokenGroupRedactions
 // option, which has no privacyDB counterpart), so they are defined locally here.
