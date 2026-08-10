@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { FrameController } from './../src/core/internal';
+import { FrameController } from '@core/internal';
 import FrameElementInit from './../src/core/internal/frame-element-init';
 import RevealFrame from './../src/core/internal/reveal/reveal-frame';
 import SkyflowFrameController from './../src/core/internal/skyflow-frame/skyflow-frame-controller';

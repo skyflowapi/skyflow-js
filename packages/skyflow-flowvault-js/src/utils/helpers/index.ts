@@ -7,7 +7,6 @@ Copyright (c) 2025 Skyflow, Inc.
 // telemetry). `generateMockCVV` is flowDB-only (mock-CVV masking) and has no
 // skyflow-js counterpart.
 import {
-  COPY_UTILS,
   DEFAULT_INPUT_FORMAT_TRANSLATION,
 } from '@core/constants';
 import * as coreHelpers from '@core/helpers';
@@ -180,125 +179,25 @@ export const removeSpaces = coreHelpers.removeSpaces;
 // `export … from` — so jest.spyOn(helpers, 'appendZeroToOne') still hooks it.
 export const appendZeroToOne = coreHelpers.appendZeroToOne;
 
-export const appendMonthFourDigitYears = (value: string) => {
-  if (value.length === 6 && Number(value.charAt(5)) === 1) {
-    return { isAppended: true, value: `${value.substring(0, 5)}0${value.charAt(5)}` };
-  }
-  return { isAppended: false, value };
-};
+export const appendMonthFourDigitYears = coreHelpers.appendMonthFourDigitYears;
 
-export const appendMonthTwoDigitYears = (value: string) => {
-  const lastChar = (value.length > 0 && value.charAt(value.length - 1)) || '';
-  if (value.length === 4 && Number(lastChar) === 1) {
-    return { isAppended: true, value: `${value.substring(0, 3)}0${lastChar}` };
-  }
-  return { isAppended: false, value };
-};
+export const appendMonthTwoDigitYears = coreHelpers.appendMonthTwoDigitYears;
 
 export const getReturnValue = coreHelpers.getReturnValue;
 
-const fns : Function[] = [];
-export function domReady(fn) {
-  (() => {
-    let listener;
-    const doc = typeof document === 'object' ? document : undefined;
-    const domContentLoaded = 'DOMContentLoaded';
-    let loaded = doc && (/^loaded|^i|^c/).test(doc.readyState);
-    if (!loaded && doc) {
-      doc.addEventListener(domContentLoaded, listener = () => {
-        doc.removeEventListener(domContentLoaded, listener);
-        loaded = true;
-        listener = fns.shift();
-        while (listener) {
-          listener();
-          listener = fns.shift();
-        }
-      });
-    }
-    return (fun): void => {
-      if (loaded) {
-        setTimeout(fun, 0);
-      } else {
-        fns.push(fun);
-      }
-    };
-  })()(fn);
-}
+export const domReady = coreHelpers.domReady;
 
-export const getMaskedOutput = (
-  input: string,
-  format: string,
-  translation: any,
-  maskingChar: string = '',
-) => {
-  if (!input) {
-    return { formattedOutput: '', maskedOutput: '' };
-  }
-  const inputArray = Array.from(input);
-  const formatArray = Array.from(format);
-  let formattedOutput = '';
-  let maskedOutput = '';
-  let j = 0;
+export const getMaskedOutput = coreHelpers.getMaskedOutput;
 
-  for (let i = 0; i < inputArray.length; i += 1) {
-    if (j < i) { j = i; }
-    const character = inputArray[i];
-    if (j < formatArray.length) {
-      let formatChar = formatArray[j];
-      if (!translation[formatChar] || character === formatChar) {
-        formattedOutput += formatChar;
-        maskedOutput += formatChar;
-        j += 1;
-      }
-      formatChar = formatArray[j];
-      if (translation[formatChar]) {
-        const translationPattern = translation[formatChar].pattern;
-        const regex = new RegExp(translationPattern);
-        const characterString = character.toString();
-        if (regex.test(characterString)) {
-          formattedOutput += characterString;
-          // eslint-disable-next-line no-unneeded-ternary
-          maskedOutput += maskingChar ? maskingChar : '*';
-          j += 1;
-        }
-      }
-    } else {
-      break;
-    }
-  }
+export const copyToClipboard = coreHelpers.copyToClipboard;
 
-  return {
-    formattedOutput,
-    maskedOutput,
-  };
-};
-
-export const copyToClipboard = (text:string) => {
-  navigator.clipboard
-    .writeText(text);
-};
-
-export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
-  copyToClipboard(textToCopy);
-  if (domCopy) {
-    domCopy.src = COPY_UTILS.successIcon;
-    domCopy.title = COPY_UTILS.copied;
-    setTimeout(() => {
-      if (domCopy) {
-        domCopy.src = COPY_UTILS.copyIcon;
-        domCopy.title = COPY_UTILS.toCopy;
-      }
-    }, 1500);
-  }
-};
+export const handleCopyIconClick = coreHelpers.handleCopyIconClick;
 
 export const fileValidation = coreHelpers.fileValidation;
 
 export const vaildateFileName = coreHelpers.vaildateFileName;
 
-export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
-  `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`
-), '');
+export const styleToString = coreHelpers.styleToString;
 
 export const getContainerType = (frameName:string):ContainerType => {
   const frameNameParts = frameName.split(':');
@@ -310,15 +209,7 @@ export const getContainerType = (frameName:string):ContainerType => {
     : ContainerType.COLLECT;
 };
 
-export const addSeperatorToCardNumberMask = (
-  cardNumberMask: any,
-  seperator?: string,
-) => {
-  if (seperator) {
-    return [cardNumberMask[0].replace(/[\s]/g, seperator), cardNumberMask[1]];
-  }
-  return cardNumberMask;
-};
+export const addSeperatorToCardNumberMask = coreHelpers.addSeperatorToCardNumberMask;
 
 // Trim a trailing slash off the configured vault URL (parity with the beta's
 // Skyflow.init normalization).

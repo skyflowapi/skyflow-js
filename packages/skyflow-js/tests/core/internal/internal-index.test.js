@@ -1,8 +1,8 @@
 import bus from 'framebus';
-import FrameElement from '../../../src/core/internal/index';
-import * as validators from '../../../src/utils/validators';
-import * as helpers from '../../../src/utils/helpers';
-import { getMaskedOutput, domReady } from '../../../src/utils/helpers';
+import FrameElement from '@core/internal';
+import * as validators from '@core/validators';
+import * as helpers from '@core/helpers';
+import { getMaskedOutput, domReady } from '@core/helpers';
 import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, CARD_ENCODED_ICONS, INPUT_KEYBOARD_EVENTS, ELEMENT_EVENTS_TO_CLIENT, ElementType, STYLE_TYPE } from '@core/constants';
 import IFrameFormElement from '@core/internal/iframe-form';
 import { ValidationRuleType } from '../../../src/utils/common';

@@ -7,7 +7,9 @@ Copyright (c) 2022 Skyflow, Inc.
 import { IValidationRule, ValidationRuleType } from '@core/types';
 import SkyflowError from '@core/errors';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
-import { ALLOWED_NAME_FOR_FILE, CardType, ElementType } from '@core/constants';
+import {
+  ALLOWED_NAME_FOR_FILE, CardType, ElementType, COPY_UTILS,
+} from '@core/constants';
 import { detectCardType } from '@core/validators';
 
 const { getType } = require('mime');
@@ -140,3 +142,132 @@ export const fileValidation = (value, required: Boolean = false, fileElement) =>
 };
 
 export const vaildateFileName = (name: string) => ALLOWED_NAME_FOR_FILE.test(name);
+
+// Variant-neutral element DOM / masking helpers shared by both packages' collect
+// element + internal frame layers. Moved here (from each package's Tier-E
+// utils/helpers) so the shared `@core/internal` FrameElement barrel can reach
+// them without relative-importing a package sibling. Each package re-binds this
+// set from its own utils/helpers.
+export const appendMonthFourDigitYears = (value: string) => {
+  if (value.length === 6 && Number(value.charAt(5)) === 1) {
+    return { isAppended: true, value: `${value.substring(0, 5)}0${value.charAt(5)}` };
+  }
+  return { isAppended: false, value };
+};
+
+export const appendMonthTwoDigitYears = (value: string) => {
+  const lastChar = (value.length > 0 && value.charAt(value.length - 1)) || '';
+  if (value.length === 4 && Number(lastChar) === 1) {
+    return { isAppended: true, value: `${value.substring(0, 3)}0${lastChar}` };
+  }
+  return { isAppended: false, value };
+};
+
+const fns : Function[] = [];
+export function domReady(fn) {
+  (() => {
+    let listener;
+    const doc = typeof document === 'object' ? document : undefined;
+    const domContentLoaded = 'DOMContentLoaded';
+    let loaded = doc && (/^loaded|^i|^c/).test(doc.readyState);
+    if (!loaded && doc) {
+      doc.addEventListener(domContentLoaded, listener = () => {
+        doc.removeEventListener(domContentLoaded, listener);
+        loaded = true;
+        listener = fns.shift();
+        while (listener) {
+          listener();
+          listener = fns.shift();
+        }
+      });
+    }
+    return (fun): void => {
+      if (loaded) {
+        setTimeout(fun, 0);
+      } else {
+        fns.push(fun);
+      }
+    };
+  })()(fn);
+}
+export const getMaskedOutput = (
+  input: string,
+  format: string,
+  translation: any,
+  maskingChar: string = '',
+) => {
+  if (!input) {
+    return { formattedOutput: '', maskedOutput: '' };
+  }
+  const inputArray = Array.from(input);
+  const formatArray = Array.from(format);
+  let formattedOutput = '';
+  let maskedOutput = '';
+  let j = 0;
+
+  for (let i = 0; i < inputArray.length; i += 1) {
+    if (j < i) { j = i; }
+    const character = inputArray[i];
+    if (j < formatArray.length) {
+      let formatChar = formatArray[j];
+      if (!translation[formatChar] || character === formatChar) {
+        formattedOutput += formatChar;
+        maskedOutput += formatChar;
+        j += 1;
+      }
+      formatChar = formatArray[j];
+      if (translation[formatChar]) {
+        const translationPattern = translation[formatChar].pattern;
+        const regex = new RegExp(translationPattern);
+        const characterString = character.toString();
+        if (regex.test(characterString)) {
+          formattedOutput += characterString;
+          // Append the maskingChar or the original character if no maskingChar provided
+          // eslint-disable-next-line no-unneeded-ternary
+          maskedOutput += maskingChar ? maskingChar : '*';
+          j += 1;
+        }
+      }
+    } else {
+      break;
+    }
+  }
+
+  return {
+    formattedOutput,
+    maskedOutput,
+  };
+};
+
+export const copyToClipboard = (text:string) => {
+  navigator.clipboard
+    .writeText(text);
+};
+
+export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
+  copyToClipboard(textToCopy);
+  if (domCopy) {
+    domCopy.src = COPY_UTILS.successIcon;
+    domCopy.title = COPY_UTILS.copied;
+    setTimeout(() => {
+      if (domCopy) {
+        domCopy.src = COPY_UTILS.copyIcon;
+        domCopy.title = COPY_UTILS.toCopy;
+      }
+    }, 1500);
+  }
+};
+
+export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
+  `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`
+), '');
+
+export const addSeperatorToCardNumberMask = (
+  cardNumberMask: any,
+  seperator?: string,
+) => {
+  if (seperator) {
+    return [cardNumberMask[0].replace(/[\s]/g, seperator), cardNumberMask[1]];
+  }
+  return cardNumberMask;
+};

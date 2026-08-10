@@ -2,6 +2,11 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+// Variant-neutral FrameElement barrel, shared by both packages. Runs inside the
+// iframe bundle (instantiated via each package's frame-element-init), so it must
+// never reach the variant adapter — it depends only on @core leaves (the element
+// helpers, iframe-form, logs-helper printLog via ambient SDK globals). Each
+// package's frame-element-init imports it from '@core/internal'.
 import bus from 'framebus';
 import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
 import { setAttributes } from '@core/iframe-libs/iframer';
@@ -32,19 +37,18 @@ import {
   CardTypeValues,
 } from '@core/constants';
 import logs from '@core/utils/logs';
-import { LogLevel, MessageType } from '@core/types';
+import { ContainerType, LogLevel, MessageType } from '@core/types';
 import { validateElementOptions } from '@core/libs/element-options';
 import IFrameFormElement from '@core/internal/iframe-form';
-import { parameterizedString, printLog } from '../../utils/logs-helper';
-import { detectCardType } from '../../utils/validators';
+import { parameterizedString, printLog } from '@core/utils/logs-helper';
+import { detectCardType } from '@core/validators';
 import {
   addSeperatorToCardNumberMask,
   appendMonthFourDigitYears,
   appendMonthTwoDigitYears,
   appendZeroToOne,
   domReady, getMaskedOutput, handleCopyIconClick, styleToString,
-} from '../../utils/helpers';
-import { ContainerType } from '../../skyflow';
+} from '@core/helpers';
 
 export default class FrameElement {
   // all html events like focus blur events will be handled here
