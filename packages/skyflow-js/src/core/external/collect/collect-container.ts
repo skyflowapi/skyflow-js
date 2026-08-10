@@ -16,6 +16,7 @@ import {
   ElementType,
 } from '@core/constants';
 import properties from '@core/properties';
+import Container from '@core/external/common/container';
 import {
   formatValidations, formatOptions, validateElementOptions,
 } from '../../../libs/element-options';
@@ -38,7 +39,6 @@ import {
   validateUpsertOptions,
   validateBooleanOptions,
 } from '../../../utils/validators';
-import Container from '../common/container';
 import CollectElement from './collect-element';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
 

@@ -20,6 +20,7 @@ import {
   REVEAL_TYPES,
   CUSTOM_ERROR_MESSAGES,
 } from '@core/constants';
+import Container from '@core/external/common/container';
 import SkyflowError from '../../../libs/skyflow-error';
 import { ContainerType } from '../../../skyflow';
 import {
@@ -31,7 +32,6 @@ import {
   validateInputFormatOptions,
   validateRevealElementRecords,
 } from '../../../utils/validators';
-import Container from '../common/container';
 
 import ComposableRevealElement from './composable-reveal-element';
 import {

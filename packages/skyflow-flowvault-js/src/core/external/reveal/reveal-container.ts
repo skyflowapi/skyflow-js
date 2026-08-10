@@ -13,6 +13,7 @@ import {
   REVEAL_TYPES,
 } from '@core/constants';
 import properties from '@core/properties';
+import Container from '@core/external/common/container';
 import SkyflowError from '../../../libs/skyflow-error';
 import SkyflowFlowDBError from '../../../libs/skyflow-flowdb-error';
 import { ContainerType } from '../../../skyflow';
@@ -31,7 +32,6 @@ import {
   validateRevealElementRecords,
   validateRevealOptions,
 } from '../../../utils/validators';
-import Container from '../common/container';
 import RevealElement from './reveal-element';
 import { RevealResponse, Metadata, SkyflowElementProps } from '../../internal/internal-types';
 

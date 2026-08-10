@@ -16,12 +16,12 @@ import {
 } from '@core/constants';
 import properties from '@core/properties';
 import EventEmitter from '@core/event-emitter';
+import SkyflowElement from '@core/external/common/skyflow-element';
 import SkyflowError from '../../../libs/skyflow-error';
 import {
   Context, ErrorType,
 } from '../../../utils/common';
 import IFrame from '../common/iframe';
-import SkyflowElement from '../common/skyflow-element';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import {
   pushElementEventWithTimeout,

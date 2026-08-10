@@ -18,6 +18,7 @@ import {
   ELEMENTS, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT,
   COLLECT_TYPES,
 } from '@core/constants';
+import Container from '@core/external/common/container';
 import {
   formatValidations, formatOptions, validateElementOptions, getElements,
 } from '../../../libs/element-options';
@@ -41,7 +42,6 @@ import {
   validateCollectElementInput, validateInitConfig, validateAdditionalFieldsInCollect,
   validateUpsertOptions,
 } from '../../../utils/validators';
-import Container from '../common/container';
 import CollectElement from './collect-element';
 import ComposableElement from './compose-collect-element';
 import { ElementGroup, ElementGroupItem } from './collect-container';

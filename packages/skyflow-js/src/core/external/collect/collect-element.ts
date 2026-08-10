@@ -17,6 +17,7 @@ import {
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
 import properties from '@core/properties';
+import SkyflowElement from '@core/external/common/skyflow-element';
 import {
   formatValidations,
   getElements,
@@ -35,7 +36,6 @@ import {
   formatFrameNameToId,
   getReturnValue,
 } from '../../../utils/helpers';
-import SkyflowElement from '../common/skyflow-element';
 import { ContainerType } from '../../../skyflow';
 import {
   initalizeMetricObject,

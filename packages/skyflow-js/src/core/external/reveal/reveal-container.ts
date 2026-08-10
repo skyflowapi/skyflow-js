@@ -14,6 +14,7 @@ import {
 } from '@core/constants';
 import properties from '@core/properties';
 import { ContainerType, IRevealElementOptions } from '@core/types';
+import Container from '@core/external/common/container';
 import SkyflowError from '../../../libs/skyflow-error';
 import {
   ContainerOptions,
@@ -22,7 +23,6 @@ import {
 } from '../../../utils/common';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateInputFormatOptions, validateRevealElementRecords } from '../../../utils/validators';
-import Container from '../common/container';
 import RevealElement from './reveal-element';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
 

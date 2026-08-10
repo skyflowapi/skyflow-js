@@ -16,6 +16,7 @@ import {
 } from '@core/constants';
 import EventEmitter from '@core/event-emitter';
 import properties from '@core/properties';
+import Container from '@core/external/common/container';
 import {
   formatValidations, formatOptions, validateElementOptions,
 } from '../../../libs/element-options';
@@ -36,7 +37,6 @@ import {
   validateAdditionalFieldsInCollect,
   validateUpsertOptions,
 } from '../../../utils/validators';
-import Container from '../common/container';
 import CollectElement from './collect-element';
 import { CollectResponse, Metadata, SkyflowElementProps } from '../../internal/internal-types';
 

@@ -8,13 +8,14 @@
     "packages/*"
   ],
   "scripts": {
-    "type-check": "npm run type-check -w skyflow-js",
-    "build:types": "npm run build:types -w skyflow-js",
+    "type-check": "npm run type-check --workspaces --if-present",
+    "build:types": "npm run build:types --workspaces --if-present",
     "dev": "npm run dev -w skyflow-js",
-    "build-browser-sdk": "npm run build-browser-sdk -w skyflow-js",
-    "build-node-sdk": "npm run build-node-sdk -w skyflow-js",
-    "build-iframe": "npm run build-iframe -w skyflow-js",
-    "test": "npm run test -w skyflow-js"
+    "build-browser-sdk": "npm run build-browser-sdk --workspaces --if-present",
+    "build-node-sdk": "npm run build-node-sdk --workspaces --if-present",
+    "build-iframe": "npm run build-iframe --workspaces --if-present",
+    "build": "npm run build-browser-sdk && npm run build-node-sdk && npm run build-iframe",
+    "test": "npm run test --workspaces --if-present"
   },
   "engines": {
     "node": ">=12.0",
