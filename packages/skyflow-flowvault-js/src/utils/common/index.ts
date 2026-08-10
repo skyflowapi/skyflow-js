@@ -21,9 +21,9 @@ export {
   MessageType,
   ValidationRuleType,
   ContainerType,
-  IRevealElementOptions,
 } from '@core/types';
 export type {
+  IRevealElementOptions,
   ErrorMessages,
   IValidationRule,
   Style,
