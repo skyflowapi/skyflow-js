@@ -4,7 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 // Variant-neutral frame/element leaf helpers, shared by each package's own frame
 // controller (per the loose-coupling boundary — core holds neutral helpers only,
 // each package owns its tokenize()/revealData()).
-import { IValidationRule, ValidationRuleType } from '@core/types';
+import { ContainerType, IValidationRule, ValidationRuleType } from '@core/types';
 import SkyflowError from '@core/errors';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import {
@@ -76,6 +76,18 @@ export function formatFrameNameToId(name: string) {
 export function removeSpaces(inputString:string) {
   return inputString.trim().replace(/[\s-]/g, '');
 }
+
+// Resolve a frame name to the container kind it belongs to. Variant-neutral —
+// keyed off the frame-name prefix conventions shared by both packages.
+export const getContainerType = (frameName:string):ContainerType => {
+  const frameNameParts = frameName.split(':');
+  if (frameNameParts[0] === 'reveal-composable') {
+    return ContainerType.COMPOSE_REVEAL;
+  }
+  return (frameNameParts[1] === 'group')
+    ? ContainerType.COMPOSABLE
+    : ContainerType.COLLECT;
+};
 
 export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {
   if (typeof value === 'string') {

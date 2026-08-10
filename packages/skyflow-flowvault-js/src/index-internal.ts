@@ -10,6 +10,7 @@ import {
 } from '@core/constants';
 import logs from '@core/utils/logs';
 import { setVariantAdapter } from '@core/adapters';
+import RevealComposableFrameElementInit from '@core/internal/composable-frame-element-init';
 import flowVaultVariantAdapter from './variant-adapter';
 import RevealFrame from './core/internal/reveal/reveal-frame';
 import SkyflowFrameController from './core/internal/skyflow-frame/skyflow-frame-controller';
@@ -21,7 +22,6 @@ import {
 } from './utils/logs-helper';
 import { getAtobValue, getValueFromName } from './utils/helpers';
 import FrameElementInit from './core/internal/frame-element-init';
-import RevealComposableFrameElementInit from './core/internal/composable-frame-element-init';
 
 // Iframe entry for skyflow-flowvault-js. Structurally parallel to skyflow-js's
 // index-internal over the same @core skeleton, wired to flowvault's own frame
@@ -34,6 +34,16 @@ import RevealComposableFrameElementInit from './core/internal/composable-frame-e
 // in-iframe. Done explicitly here so registration no longer depends on an
 // incidental `../../skyflow` import edge pulling skyflow.ts (and its own
 // setVariantAdapter side-effect) into this bundle.
+//
+// reveal-frame is iframe-only, so its factory is wired onto the adapter HERE
+// (not in variant-adapter.ts) — this keeps the DOM-heavy class out of the
+// main-thread browser/node bundles that also load variant-adapter.
+flowVaultVariantAdapter.reveal.createRevealFrame = (
+  record,
+  context,
+  containerId,
+  rootDiv,
+) => new RevealFrame(record, context, containerId, rootDiv);
 setVariantAdapter(flowVaultVariantAdapter);
 
 (function init(root: any) {

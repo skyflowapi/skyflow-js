@@ -17,7 +17,7 @@ Copyright (c) 2022 Skyflow, Inc.
 // lifted in 4.6/4.7).
 
 import {
-  IRevealRecordComposable, IRevealResponseType, LogLevel, MessageType,
+  Context, IRevealRecordComposable, IRevealResponseType, LogLevel, MessageType,
 } from '../types';
 
 /** Telemetry identity for a package (privacyDB vs flowDB SDK name/version). */
@@ -40,6 +40,21 @@ export interface VariantRevealAdapter {
   ): Promise<IRevealResponseType>;
 
   formatRecordsForClientComposable(response: any): Record<string, any>;
+
+  /**
+   * Construct this package's composable `RevealFrame`. Optional and registered
+   * ONLY by the iframe entry (`src/index-internal.ts`), not by the base
+   * `src/variant-adapter.ts`, so the DOM-heavy `reveal-frame` class stays out of
+   * the main-thread (browser/node) bundles. The shared
+   * `@core/internal/composable-frame-element-init` — which runs solely in the
+   * iframe bundle where this is registered — invokes it via the adapter.
+   */
+  createRevealFrame?(
+    record: any,
+    context: Context,
+    containerId: string,
+    rootDiv?: HTMLDivElement,
+  ): any;
 }
 
 /**

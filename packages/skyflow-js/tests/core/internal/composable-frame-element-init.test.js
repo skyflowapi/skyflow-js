@@ -1,5 +1,5 @@
 // import FrameElementInit from '../../../src/core/internal/frame-element-init';
-import RevealComposableFrameElementInit from '../../../src/core/internal/composable-frame-element-init';
+import RevealComposableFrameElementInit from '@core/internal/composable-frame-element-init';
 import { ELEMENT_EVENTS_TO_IFRAME, COMPOSABLE_REVEAL, ELEMENT_EVENTS_TO_CLIENT, FRAME_REVEAL, REVEAL_TYPES } from '@core/constants';
 import bus from 'framebus';
 import SkyflowError from '@core/errors';

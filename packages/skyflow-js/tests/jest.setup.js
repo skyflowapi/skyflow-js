@@ -32,6 +32,14 @@ setVariantAdapter({
   reveal: {
     fetchRecordsByTokenIdComposable: (...args) => realAdapter().reveal.fetchRecordsByTokenIdComposable(...args),
     formatRecordsForClientComposable: (response) => realAdapter().reveal.formatRecordsForClientComposable(response),
+    // createRevealFrame is wired onto the adapter by src/index-internal (not by
+    // src/variant-adapter), so it is not on realAdapter(). Provide it here for
+    // the test runtime, lazy-requiring reveal-frame so a test file's jest.mock()
+    // of it still applies.
+    createRevealFrame: (...args) => {
+      const RevealFrame = require('../src/core/internal/reveal/reveal-frame').default;
+      return new RevealFrame(...args);
+    },
   },
   collect: {
     normalizeUpdateOptions: (options) => realAdapter().collect.normalizeUpdateOptions(options),

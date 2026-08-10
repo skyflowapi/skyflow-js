@@ -6,7 +6,7 @@ The composable reveal frame now uses the flowDB variant
 (fetchRecordsByTokenIdComposableFlowDB / formatRecordsForClientComposableFlowDB), whose success
 records carry token only (no valueType) and expose the index-0 shape { 0: {...}, frameId }.
 */
-import RevealComposableFrameElementInit from '../../../src/core/internal/composable-frame-element-init';
+import RevealComposableFrameElementInit from '@core/internal/composable-frame-element-init';
 import { ELEMENT_EVENTS_TO_IFRAME, COMPOSABLE_REVEAL, REVEAL_TYPES } from '@core/constants';
 import bus from 'framebus';
 

@@ -11,7 +11,7 @@ import {
 } from '@core/constants';
 import * as coreHelpers from '@core/helpers';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
-import { ContainerType, IRevealElementOptions, ISkyflow } from '@core/types';
+import { IRevealElementOptions, ISkyflow } from '@core/types';
 import properties from '@core/properties';
 import SkyflowError from '@core/errors';
 import { SdkInfo } from '@core/client';
@@ -199,15 +199,7 @@ export const vaildateFileName = coreHelpers.vaildateFileName;
 
 export const styleToString = coreHelpers.styleToString;
 
-export const getContainerType = (frameName:string):ContainerType => {
-  const frameNameParts = frameName.split(':');
-  if (frameNameParts[0] === 'reveal-composable') {
-    return ContainerType.COMPOSE_REVEAL;
-  }
-  return (frameNameParts[1] === 'group')
-    ? ContainerType.COMPOSABLE
-    : ContainerType.COLLECT;
-};
+export const getContainerType = coreHelpers.getContainerType;
 
 export const addSeperatorToCardNumberMask = coreHelpers.addSeperatorToCardNumberMask;
 

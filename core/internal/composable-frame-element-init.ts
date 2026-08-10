@@ -1,26 +1,27 @@
+// Shared composable reveal-frame init, iframe-only (imported solely by each
+// package's src/index-internal.ts). The two variants differed only at the reveal
+// seam — request/response mappers, an optional `options` passthrough, and the
+// per-package `RevealFrame` class — so those route through the VariantAdapter
+// (registered by index-internal in the iframe bundle) rather than a package
+// sibling. privacyDB's `redaction` field is carried unconditionally: flowDB's
+// reveal reads only token/iframeName, so the extra undefined key is inert there.
 import injectStylesheet from 'inject-stylesheet';
 import bus from 'framebus';
+import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
 import {
   ALLOWED_MULTIPLE_FIELDS_STYLES,
   ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ERROR_TEXT_STYLES, REVEAL_TYPES, STYLE_TYPE,
 } from '@core/constants';
-import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
 import { getFlexGridStyles } from '@core/libs/styles';
 import { getValueAndItsUnit } from '@core/libs/element-options';
 import IFrameFormElement from '@core/internal/iframe-form';
 import FrameElement from '@core/internal';
 import Client from '@core/client';
-import { ContainerType } from '../../skyflow';
+import { getVariantAdapter } from '@core/adapters';
 import {
-  Context, IRevealRecordComposable,
-} from '../../utils/common';
-import {
-  getContainerType,
-} from '../../utils/helpers';
-import RevealFrame from './reveal/reveal-frame';
-import {
-  fetchRecordsByTokenIdComposableFlowDB, formatRecordsForClientComposableFlowDB,
-} from '../../core-utils/reveal';
+  Context, ContainerType, IRevealRecordComposable,
+} from '@core/types';
+import { getContainerType } from '@core/helpers';
 
 export default class RevealComposableFrameElementInit {
   iframeFormElement: IFrameFormElement | undefined;
@@ -86,6 +87,7 @@ export default class RevealComposableFrameElementInit {
                 if (data2 && !data2?.skyflowID) {
                   const revealRecord: IRevealRecordComposable = {
                     token: data2?.token ?? '',
+                    redaction: data2?.redaction,
                     iframeName: data2?.name ?? '',
                   };
                   revealDataInput?.push(revealRecord);
@@ -102,7 +104,8 @@ export default class RevealComposableFrameElementInit {
           )
             ?.then((revealResponse: any) => {
               if (revealResponse?.records?.length > 0) {
-                const formattedRecord = formatRecordsForClientComposableFlowDB(revealResponse);
+                const formattedRecord = getVariantAdapter()
+                  .reveal.formatRecordsForClientComposable(revealResponse);
                 window?.parent?.postMessage(
                   {
                     type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
@@ -132,7 +135,8 @@ export default class RevealComposableFrameElementInit {
               );
             })
             ?.catch((error) => {
-              const formattedRecord = formatRecordsForClientComposableFlowDB(error);
+              const formattedRecord = getVariantAdapter()
+                .reveal.formatRecordsForClientComposable(error);
               window?.parent?.postMessage(
                 {
                   type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
@@ -206,7 +210,12 @@ export default class RevealComposableFrameElementInit {
     options?: Record<string, any>,
   ) {
     return new Promise((resolve, reject) => {
-      fetchRecordsByTokenIdComposableFlowDB(revealRecords, this.#client, authToken, options)?.then(
+      getVariantAdapter().reveal.fetchRecordsByTokenIdComposable(
+        revealRecords,
+        this.#client,
+        authToken,
+        options,
+      )?.then(
         (resolvedResult) => {
           resolve(resolvedResult);
         },
@@ -308,8 +317,12 @@ export default class RevealComposableFrameElementInit {
           ALLOWED_MULTIPLE_FIELDS_STYLES,
         );
 
-        const revealFrame = new RevealFrame(element, this.#context,
-          this.containerId, elementDiv);
+        const revealFrame = getVariantAdapter().reveal.createRevealFrame!(
+          element,
+          this.#context,
+          this.containerId,
+          elementDiv,
+        );
         this.revealFrameList?.push(revealFrame);
         rowDiv?.append(elementDiv);
       });
