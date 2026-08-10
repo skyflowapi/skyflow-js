@@ -19,11 +19,11 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
 import SkyflowError from '@core/errors';
 import { buildStylesFromClassesAndStyles } from '@core/libs/styles';
-import { FormattedCollectElementOptions } from '../core/internal/internal-types';
 import {
+  FormattedCollectElementOptions,
   CollectElementOptions,
   IValidationRule, LogLevel, MessageType, ValidationRuleType,
-} from '../utils/common';
+} from '@core/types';
 import { parameterizedString, printLog } from '../utils/logs-helper';
 import {
   isValidExpiryDateFormat, isValidExpiryYearFormat, isValidRegExp, validateBooleanOptions,

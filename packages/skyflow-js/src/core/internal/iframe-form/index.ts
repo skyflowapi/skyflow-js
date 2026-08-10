@@ -22,6 +22,13 @@ import logs from '@core/utils/logs';
 import { checkForElementMatchRule } from '@core/helpers';
 import SkyflowError from '@core/errors';
 import {
+  Context,
+  IValidationRule,
+  LogLevel,
+  MessageType,
+  ValidationRuleType,
+} from '@core/types';
+import {
   validateCardNumberLengthCheck,
   validateCreditCardNumber,
   validateExpiryDate,
@@ -33,13 +40,6 @@ import {
   parameterizedString,
   EnvOptions,
 } from '../../../utils/logs-helper';
-import {
-  Context,
-  IValidationRule,
-  LogLevel,
-  MessageType,
-  ValidationRuleType,
-} from '../../../utils/common';
 import {
   fileValidation,
   formatFrameNameToId,

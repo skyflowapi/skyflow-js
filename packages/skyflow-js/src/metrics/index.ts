@@ -4,7 +4,7 @@ import {
   EVENT_TYPES,
   METRIC_TYPES,
 } from '@core/constants';
-import { MeticsObjectType, SharedMeticsObjectType } from '../utils/common';
+import { MeticsObjectType, SharedMeticsObjectType } from '@core/types';
 import { getMetaObject, SDK_DETAILS } from '../utils/helpers';
 
 export const METRIC_OBJECT: SharedMeticsObjectType = { records: [] };
