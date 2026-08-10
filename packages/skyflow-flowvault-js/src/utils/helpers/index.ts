@@ -6,7 +6,20 @@ Copyright (c) 2025 Skyflow, Inc.
 // deliberate loose-coupling duplication (each package owns its transport/
 // telemetry). `generateMockCVV` is flowDB-only (mock-CVV masking) and has no
 // skyflow-js counterpart.
+import uuid from '@core/libs/uuid';
+import {
+  ALLOWED_NAME_FOR_FILE,
+  CardType,
+  COPY_UTILS,
+  ElementType,
+} from '@core/constants';
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
+import { ContainerType } from '@core/types';
 import { SdkInfo } from '../../client';
+import SkyflowError from '../../libs/skyflow-error';
+import { detectCardType } from '../validators';
+
+const { getType } = require('mime');
 
 // SDK telemetry identity, injected at build time (webpack DefinePlugin) / tests
 // (jest setupFiles) from this package's own package.json.
@@ -163,4 +176,236 @@ export const generateMockCVV = (length: number, actualValue: string): string => 
     mock = buildCandidate();
   }
   return mock;
+};
+
+// --- Variant-neutral element helpers (copied verbatim from skyflow-js helpers;
+// the deliberate loose-coupling duplication — each package owns its element DOM
+// helpers). Used by the collect element/rendering module graph. ---
+
+export function formatFrameNameToId(name: string) {
+  const arr = name?.split(':');
+  if (arr && arr.length > 2) {
+    const id = `${arr[0]}:${arr[1]}:${arr[2]}`;
+    return id;
+  }
+  return '';
+}
+
+export function removeSpaces(inputString:string) {
+  return inputString.trim().replace(/[\s-]/g, '');
+}
+
+export const appendZeroToOne = (value: string) => {
+  if (value.length === 1 && Number(value) === 1) {
+    return {
+      isAppended: true,
+      value: `0${value}`,
+    };
+  }
+  return { isAppended: false, value };
+};
+
+export const appendMonthFourDigitYears = (value: string) => {
+  if (value.length === 6 && Number(value.charAt(5)) === 1) {
+    return { isAppended: true, value: `${value.substring(0, 5)}0${value.charAt(5)}` };
+  }
+  return { isAppended: false, value };
+};
+
+export const appendMonthTwoDigitYears = (value: string) => {
+  const lastChar = (value.length > 0 && value.charAt(value.length - 1)) || '';
+  if (value.length === 4 && Number(lastChar) === 1) {
+    return { isAppended: true, value: `${value.substring(0, 3)}0${lastChar}` };
+  }
+  return { isAppended: false, value };
+};
+
+export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {
+  if (typeof value === 'string') {
+    if (element === ElementType.CARD_NUMBER) {
+      value = value && value.replace(/[\s-]/g, '');
+      if (!doesReturnValue) {
+        const cardType = detectCardType(value);
+        const threshold = cardType !== CardType.DEFAULT && cardType === CardType.AMEX ? 6 : 8;
+        if (value.length > threshold) {
+          return value.replace(new RegExp(`.(?=.{0,${value?.length - threshold - 1}}$)`, 'g'), 'X');
+        }
+        return value;
+      }
+      return value;
+    } if (doesReturnValue) {
+      return value;
+    }
+  } else {
+    return value;
+  }
+  return undefined;
+};
+
+const fns : Function[] = [];
+export function domReady(fn) {
+  (() => {
+    let listener;
+    const doc = typeof document === 'object' ? document : undefined;
+    const domContentLoaded = 'DOMContentLoaded';
+    let loaded = doc && (/^loaded|^i|^c/).test(doc.readyState);
+    if (!loaded && doc) {
+      doc.addEventListener(domContentLoaded, listener = () => {
+        doc.removeEventListener(domContentLoaded, listener);
+        loaded = true;
+        listener = fns.shift();
+        while (listener) {
+          listener();
+          listener = fns.shift();
+        }
+      });
+    }
+    return (fun): void => {
+      if (loaded) {
+        setTimeout(fun, 0);
+      } else {
+        fns.push(fun);
+      }
+    };
+  })()(fn);
+}
+
+export const getMaskedOutput = (
+  input: string,
+  format: string,
+  translation: any,
+  maskingChar: string = '',
+) => {
+  if (!input) {
+    return { formattedOutput: '', maskedOutput: '' };
+  }
+  const inputArray = Array.from(input);
+  const formatArray = Array.from(format);
+  let formattedOutput = '';
+  let maskedOutput = '';
+  let j = 0;
+
+  for (let i = 0; i < inputArray.length; i += 1) {
+    if (j < i) { j = i; }
+    const character = inputArray[i];
+    if (j < formatArray.length) {
+      let formatChar = formatArray[j];
+      if (!translation[formatChar] || character === formatChar) {
+        formattedOutput += formatChar;
+        maskedOutput += formatChar;
+        j += 1;
+      }
+      formatChar = formatArray[j];
+      if (translation[formatChar]) {
+        const translationPattern = translation[formatChar].pattern;
+        const regex = new RegExp(translationPattern);
+        const characterString = character.toString();
+        if (regex.test(characterString)) {
+          formattedOutput += characterString;
+          // eslint-disable-next-line no-unneeded-ternary
+          maskedOutput += maskingChar ? maskingChar : '*';
+          j += 1;
+        }
+      }
+    } else {
+      break;
+    }
+  }
+
+  return {
+    formattedOutput,
+    maskedOutput,
+  };
+};
+
+export const copyToClipboard = (text:string) => {
+  navigator.clipboard
+    .writeText(text);
+};
+
+export const handleCopyIconClick = (textToCopy: string, domCopy: any) => {
+  copyToClipboard(textToCopy);
+  if (domCopy) {
+    domCopy.src = COPY_UTILS.successIcon;
+    domCopy.title = COPY_UTILS.copied;
+    setTimeout(() => {
+      if (domCopy) {
+        domCopy.src = COPY_UTILS.copyIcon;
+        domCopy.title = COPY_UTILS.toCopy;
+      }
+    }, 1500);
+  }
+};
+
+const DANGEROUS_FILE_TYPE = ['application/zip', 'application/vnd.debian.binary-package', 'application/vnd.microsoft.portable-executable', 'application/vnd.rar'];
+// Check file type and file size in KB
+export const fileValidation = (value, required: Boolean = false, fileElement) => {
+  if (required && (value === undefined || value === '')) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED, [], true);
+  }
+
+  if (DANGEROUS_FILE_TYPE.includes(value.type)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(fileElement, 'allowedFileType') && (value !== undefined && value !== '')) {
+    let isValidType = false;
+
+    if (fileElement.allowedFileType !== null && fileElement.allowedFileType !== undefined) {
+      fileElement.allowedFileType.forEach((type) => {
+        const allowedType = getType(type);
+        // eslint-disable-next-line max-len
+        if (value.type.includes(allowedType) || value.type.includes(type) || value.type.includes(type.substring(1)) || value.type.includes(type)) {
+          isValidType = true;
+        }
+      });
+      if (!isValidType) {
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
+      }
+    }
+  }
+  const sizeLimit = (Object.prototype.hasOwnProperty.call(fileElement, 'maxFileSize') && typeof fileElement.maxFileSize === 'number')
+    ? fileElement.maxFileSize
+    : 32_000_000;
+  if (value.size > sizeLimit) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
+  }
+  if (Object.prototype.hasOwnProperty.call(fileElement, 'blockEmptyFiles') && fileElement.blockEmptyFiles) {
+    if (value.size === 0) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_SIZE, [], true);
+    }
+  }
+
+  return true;
+};
+
+export const vaildateFileName = (name: string) => ALLOWED_NAME_FOR_FILE.test(name);
+
+export const styleToString = (style) => Object.keys(style).reduce((acc, key) => (
+  `${acc + key.split(/(?=[A-Z])/).join('-').toLowerCase()}:${style[key]};`
+), '');
+
+export const getContainerType = (frameName:string):ContainerType => {
+  const frameNameParts = frameName.split(':');
+  if (frameNameParts[0] === 'reveal-composable') {
+    return ContainerType.COMPOSE_REVEAL;
+  }
+  return (frameNameParts[1] === 'group')
+    ? ContainerType.COMPOSABLE
+    : ContainerType.COLLECT;
+};
+
+export const addSeperatorToCardNumberMask = (
+  cardNumberMask: any,
+  seperator?: string,
+) => {
+  if (seperator) {
+    return [cardNumberMask[0].replace(/[\s]/g, seperator), cardNumberMask[1]];
+  }
+  return cardNumberMask;
+};
+
+export const generateUploadFileName = (fileName:string) => {
+  const fileExtentsion = fileName?.split('.')?.pop() || '';
+  return `${uuid()}${fileExtentsion && `.${fileExtentsion}`}`;
 };

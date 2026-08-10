@@ -32,7 +32,6 @@ export type {
   LabelStyles,
   InputStyles,
   CollectElementOptions,
-  CollectElementInput,
   CollectElementUpdateOptions,
   FormattedCollectElementOptions,
   CardMetadata,
@@ -52,7 +51,31 @@ export type {
   SharedMeticsObjectType,
   IRevealRecord,
   IRevealRecordComposable,
+  UploadFilesResponse,
+  IInsertRecordInput,
+  IDetokenizeInput,
+  IGetInput,
+  IGetOptions,
+  IGetByIdInput,
+  IDeleteRecordInput,
+  IUpdateRequest,
+  IUpdateOptions,
 } from '@core/types';
+
+// Type-only imports used by the flowDB definitions below.
+// eslint-disable-next-line import/first
+import type {
+  IInsertRecordInput as IInsertRecordInputType,
+  CollectElementInput as ICoreCollectElementInput,
+} from '@core/types';
+
+// flowDB collect element input. Extends the neutral input with the flowDB
+// client-facing keys `tableName` / `skyflowId` (mapped internally to the
+// pipeline's `table` / `skyflowID`).
+export interface CollectElementInput extends ICoreCollectElementInput {
+  tableName?: string;
+  skyflowId?: string;
+}
 
 // --- flowDB-specific update semantics ---
 export enum UpdateType {
@@ -90,4 +113,14 @@ export interface TokenGroupRedaction {
 
 export interface IRevealOptions {
   tokenGroupRedactions?: TokenGroupRedaction[];
+}
+
+// flowDB collect options. Unlike privacyDB, `upsert` uses the flowDB upsert shape
+// (IFlowDBUpsertOptions) and an optional top-level `updateType` drives the flowDB
+// update variant.
+export interface ICollectOptions {
+  tokens?: boolean;
+  additionalFields?: IInsertRecordInputType;
+  upsert?: Array<IFlowDBUpsertOptions>;
+  updateType?: UpdateType;
 }

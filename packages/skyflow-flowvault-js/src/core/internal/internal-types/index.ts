@@ -6,8 +6,39 @@ Copyright (c) 2025 Skyflow, Inc.
 // iframes and the public response contract. Ported from the 2.9.0-beta.1 tag;
 // RedactionType is reused from @core (not redefined), UpdateType from the
 // flowvault common surface.
-import { RedactionType } from '@core/types';
+import { RedactionType, ContainerType, ClientMetadata } from '@core/types';
+import { ElementType } from '@core/constants';
 import { UpdateType } from '../../../utils/common';
+
+// Variant-neutral internal types re-exported from @core so copied element files'
+// `../../internal/internal-types` imports resolve here. The flowDB wire types
+// below are defined locally.
+export type {
+  ElementInfo,
+  ContainerProps,
+  RevealContainerProps,
+  InternalState,
+  BatchInsertRequestBody,
+  FormattedCollectElementOptions,
+  ClientMetadata,
+} from '@core/types';
+
+// Element metadata surfaced to the collect element/iframe classes. Mirrors the
+// privacyDB `Metadata` but with loosely-typed clientJSON / skyflowContainer
+// (flowvault does not import the privacyDB container classes).
+export interface SkyflowElementProps {
+  id: string;
+  type: ElementType;
+  element: HTMLElement;
+  container: any;
+}
+
+export interface Metadata extends ClientMetadata {
+  clientJSON: any;
+  containerType: ContainerType;
+  skyflowContainer: any;
+  getSkyflowBearerToken: () => Promise<string>;
+}
 
 // --- Collect (insert / update) request bodies ---
 
