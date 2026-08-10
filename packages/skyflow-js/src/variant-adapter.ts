@@ -22,6 +22,11 @@ const skyflowVariantAdapter: VariantAdapter = {
     fetchRecordsByTokenIdComposable,
     formatRecordsForClientComposable,
   },
+  collect: {
+    // privacyDB consumes the internal `skyflowID`/`table` keys directly.
+    normalizeUpdateOptions: () => {},
+    skyflowIdKey: 'skyflowID',
+  },
 };
 
 export default skyflowVariantAdapter;

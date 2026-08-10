@@ -23,6 +23,21 @@ const flowVaultVariantAdapter: VariantAdapter = {
     fetchRecordsByTokenIdComposable: fetchRecordsByTokenIdComposableFlowDB,
     formatRecordsForClientComposable: formatRecordsForClientComposableFlowDB,
   },
+  collect: {
+    // flowDB accepts the client-facing `skyflowId`/`tableName` and remaps them
+    // onto the internal `skyflowID`/`table` the SET_VALUE handler consumes.
+    normalizeUpdateOptions: (options) => {
+      if (Object.prototype.hasOwnProperty.call(options, 'skyflowId')) {
+        options.skyflowID = options.skyflowId;
+        delete options.skyflowId;
+      }
+      if (Object.prototype.hasOwnProperty.call(options, 'tableName')) {
+        options.table = options.tableName;
+        delete options.tableName;
+      }
+    },
+    skyflowIdKey: 'skyflowId',
+  },
 };
 
 export default flowVaultVariantAdapter;

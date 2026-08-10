@@ -66,7 +66,7 @@ export {
   ISkyflow as SkyflowConfig,
 } from './skyflow';
 
-export { default as CollectElement } from './core/external/collect/collect-element';
+export { default as CollectElement } from '@core/external/collect/collect-element';
 export { default as CollectContainer } from './core/external/collect/collect-container';
 export { default as ComposableContainer } from './core/external/collect/compose-collect-container';
 export { default as ComposableElement } from './core/external/collect/compose-collect-element';

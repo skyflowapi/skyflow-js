@@ -43,6 +43,28 @@ export interface VariantRevealAdapter {
 }
 
 /**
+ * Collect-side normalization the shared `@core/external/collect/collect-element`
+ * needs from a package. The two variants disagree on input key naming: flowDB
+ * accepts the client-facing `skyflowId`/`tableName` and remaps them onto the
+ * internal `skyflowID`/`table` the SET_VALUE handler consumes, and it carries the
+ * skyflow id on an element as `skyflowId` (privacyDB uses `skyflowID`).
+ */
+export interface VariantCollectAdapter {
+  /**
+   * Normalize a `CollectElement.update()` options object in place to the internal
+   * key names. privacyDB is a no-op; flowDB maps `skyflowId`->`skyflowID` and
+   * `tableName`->`table`.
+   */
+  normalizeUpdateOptions(options: Record<string, any>): void;
+
+  /**
+   * The key carrying the skyflow id on a stored element options object, used by
+   * container validation (privacyDB `skyflowID` vs flowDB `skyflowId`).
+   */
+  readonly skyflowIdKey: string;
+}
+
+/**
  * The contract the shared (`@core`) element/frame layer needs from a package.
  * Each package implements this once (see `src/variant-adapter.ts`) as a thin
  * wrapper over its existing `core-utils` + `utils/helpers`; core code calls the
@@ -65,6 +87,9 @@ export interface VariantAdapter {
 
   /** Composable reveal mappers from this package's `core-utils/reveal`. */
   reveal: VariantRevealAdapter;
+
+  /** Collect-side key normalization for the shared collect element. */
+  collect: VariantCollectAdapter;
 }
 
 // Registry — the single active adapter for the running bundle. Each package

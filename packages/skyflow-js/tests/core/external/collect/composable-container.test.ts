@@ -16,7 +16,7 @@ import {
 } from "../../../../src/utils/common";
 import ComposableContainer from "../../../../src/core/external/collect/compose-collect-container";
 import ComposableElement from "../../../../src/core/external/collect/compose-collect-element";
-import CollectElement from "../../../../src/core/external/collect/collect-element";
+import CollectElement from "@core/external/collect/collect-element";
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import EventEmitter from "@core/event-emitter";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
@@ -24,7 +24,7 @@ import SkyflowError from "@core/errors";
 import SkyflowContainer from "../../../../src/core/external/skyflow-container";
 import { ContainerType } from "../../../../src/skyflow";
 import { Metadata } from "../../../../src/core/internal/internal-types";
-import IFrame from "../../../../src/core/external/common/iframe";
+import IFrame from "@core/external/common/iframe";
 import properties from "@core/properties";
 
 global.ResizeObserver = jest.fn(() => ({
@@ -55,7 +55,7 @@ jest.mock("@core/libs/uuid", () => ({
 
 const mockUnmount = jest.fn();
 const updateMock = jest.fn();
-jest.mock("../../../../src/core/external/collect/collect-element");
+jest.mock("@core/external/collect/collect-element");
 
 (CollectElement as unknown as jest.Mock).mockImplementation(
   (_, tempElements) => {

@@ -34,4 +34,10 @@ setVariantAdapter({
     fetchRecordsByTokenIdComposable: (...args) => realAdapter().reveal.fetchRecordsByTokenIdComposable(...args),
     formatRecordsForClientComposable: (response) => realAdapter().reveal.formatRecordsForClientComposable(response),
   },
+  collect: {
+    normalizeUpdateOptions: (options) => realAdapter().collect.normalizeUpdateOptions(options),
+    get skyflowIdKey() {
+      return realAdapter().collect.skyflowIdKey;
+    },
+  },
 });

@@ -58,7 +58,7 @@ export {
 } from './skyflow';
 
 // --- element container / element classes ---
-export { default as CollectElement } from './core/external/collect/collect-element';
+export { default as CollectElement } from '@core/external/collect/collect-element';
 export { default as CollectContainer } from './core/external/collect/collect-container';
 export { default as RevealContainer } from './core/external/reveal/reveal-container';
 export { default as RevealElement } from './core/external/reveal/reveal-element';

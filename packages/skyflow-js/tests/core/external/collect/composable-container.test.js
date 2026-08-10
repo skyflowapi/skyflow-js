@@ -9,7 +9,7 @@ import { LogLevel, Env, ValidationRuleType, ErrorType } from '../../../../src/ut
 import logs from '@core/utils/logs';
 import ComposableContainer from "../../../../src/core/external/collect/compose-collect-container";
 import ComposableElement from '../../../../src/core/external/collect/compose-collect-element';
-import CollectElement from '../../../../src/core/external/collect/collect-element';
+import CollectElement from '@core/external/collect/collect-element';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import EventEmitter from '@core/event-emitter';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
@@ -31,7 +31,7 @@ jest.mock('@core/libs/uuid', () => ({
 
 const mockUnmount = jest.fn();
 const updateMock = jest.fn();
-jest.mock('../../../../src/core/external/collect/collect-element');
+jest.mock('@core/external/collect/collect-element');
 CollectElement.mockImplementation((_,tempElements)=>{
   tempElements.rows[0].elements.forEach((element)=>{
     element.isMounted = true;

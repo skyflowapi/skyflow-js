@@ -22,10 +22,10 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '@core/metrics';
+import IFrame from '@core/external/common/iframe';
 import {
   Context, ErrorType,
 } from '../../../utils/common';
-import IFrame from '../common/iframe';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import { formatRevealElementOptions } from '../../../utils/helpers';
 import { Metadata, RevealContainerProps } from '../../internal/internal-types';

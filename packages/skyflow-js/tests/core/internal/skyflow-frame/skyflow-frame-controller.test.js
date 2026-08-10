@@ -9,9 +9,9 @@ import { LogLevel, Env, RedactionType } from '../../../../src/utils/common';
 import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
 import RevealFrame from '../../../../src/core/internal/reveal/reveal-frame';
 import uuid from '@core/libs/uuid';
-// import IFrame from '../../../../src/core/external/common/iframe';
+// import IFrame from '@core/external/common/iframe';
 import CollectContainer from '../../../../src/core/external/collect/collect-container';
-// import CollectElement from '../../../../src/core/external/collect/collect-element';
+// import CollectElement from '@core/external/collect/collect-element';
 
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();

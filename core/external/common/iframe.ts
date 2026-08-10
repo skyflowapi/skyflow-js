@@ -8,20 +8,19 @@ import iframer, {
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { METRIC_TYPES } from '@core/constants';
 import SkyflowError from '@core/errors';
-import { LogLevel } from '@core/types';
+import { LogLevel, ICoreMetadata } from '@core/types';
 import { updateMetricObjectValue } from '@core/metrics';
-import { Metadata } from '../../internal/internal-types';
 
 export default class IFrame {
   name: string;
 
-  metadata: Metadata;
+  metadata: ICoreMetadata;
 
   iframe: HTMLIFrameElement;
 
   container?: Element;
 
-  constructor(name: string, metadata: Metadata, containerId: string, logLevel: LogLevel) {
+  constructor(name: string, metadata: ICoreMetadata, containerId: string, logLevel: LogLevel) {
     const clientDomain = metadata.clientDomain || '';
     this.name = `${name}:${containerId}:${logLevel}:${btoa(clientDomain)}`;
     this.metadata = metadata;

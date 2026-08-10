@@ -2,7 +2,7 @@
   Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import CollectElement from '../../../../src/core/external/collect/collect-element';
+import CollectElement from '@core/external/collect/collect-element';
 import SkyflowError from '@core/errors';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '@core/constants';

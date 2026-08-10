@@ -24,10 +24,10 @@ import {
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '@core/metrics';
+import IFrame from '@core/external/common/iframe';
 import {
   Context, ErrorType, MessageType, RenderFileResponse,
 } from '../../../utils/common';
-import IFrame from '../common/iframe';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import { parameterizedString, printLog } from '../../../utils/logs-helper';
 import { validateInitConfig, validateRenderElementRecord } from '../../../utils/validators';

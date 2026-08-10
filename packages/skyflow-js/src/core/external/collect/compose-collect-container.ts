@@ -24,6 +24,7 @@ import {
   formatValidations, formatOptions, validateElementOptions, getElements,
 } from '@core/libs/element-options';
 import Client from '@core/client';
+import CollectElement from '@core/external/collect/collect-element';
 import { ContainerType } from '../../../skyflow';
 import {
   Context, MessageType,
@@ -43,7 +44,6 @@ import {
   validateCollectElementInput, validateInitConfig, validateAdditionalFieldsInCollect,
   validateUpsertOptions,
 } from '../../../utils/validators';
-import CollectElement from './collect-element';
 import ComposableElement from './compose-collect-element';
 import { ElementGroup, ElementGroupItem } from './collect-container';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';

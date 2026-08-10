@@ -2,7 +2,7 @@
   Copyright (c) 2025 Skyflow, Inc.
 */
 import bus from "framebus";
-import CollectElement from "../../../../src/core/external/collect/collect-element";
+import CollectElement from "@core/external/collect/collect-element";
 import SkyflowError from "@core/errors";
 import {
   LogLevel,

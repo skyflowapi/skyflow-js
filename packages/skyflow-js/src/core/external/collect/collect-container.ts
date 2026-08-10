@@ -21,6 +21,7 @@ import SkyflowError from '@core/errors';
 import {
   formatValidations, formatOptions, validateElementOptions,
 } from '@core/libs/element-options';
+import CollectElement from '@core/external/collect/collect-element';
 import { ContainerType } from '../../../skyflow';
 import {
   Context, MessageType,
@@ -39,7 +40,6 @@ import {
   validateUpsertOptions,
   validateBooleanOptions,
 } from '../../../utils/validators';
-import CollectElement from './collect-element';
 import { Metadata, SkyflowElementProps } from '../../internal/internal-types';
 
 export interface ICollectElement {

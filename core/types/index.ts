@@ -491,3 +491,16 @@ export interface ClientMetadata {
   sdkVersion?: string;
   sessionId?: string;
 }
+
+// Variant-neutral base for the per-package `Metadata` object threaded through
+// the shared element/frame layer (the lifted `@core/external/common/iframe` and
+// `@core/external/collect/collect-element` reference this, not a package type).
+// The two container-typed fields are `any` here because each package narrows
+// them to its own container classes; every package `Metadata` is structurally
+// assignable to this base, so callers keep passing their precise type.
+export interface ICoreMetadata extends ClientMetadata {
+  clientJSON: any;
+  containerType: ContainerType;
+  skyflowContainer: any;
+  getSkyflowBearerToken: () => Promise<string>;
+}

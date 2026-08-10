@@ -1,6 +1,14 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
+// Shared collect element (main-thread), lifted to @core (Task 4.7). The two
+// packages shipped near-identical copies; the only variant behavior is collect
+// key normalization (privacyDB internal `skyflowID`/`table` vs flowDB
+// client-facing `skyflowId`/`tableName`), routed through the registered
+// VariantAdapter's `collect` surface. `getVariantAdapter()` is read lazily at
+// call time; this file never runs in the iframe bundle (main-thread importers
+// only: collect/compose containers + index-node), where an adapter is always
+// registered.
 /* eslint-disable no-underscore-dangle */
 import EventEmitter from '@core/event-emitter';
 import Bus from '@core/libs/bus';
@@ -29,20 +37,21 @@ import {
   getElements,
   validateAndSetupGroupOptions,
 } from '@core/libs/element-options';
-import IFrame from '../common/iframe';
+import { getVariantAdapter } from '@core/adapters';
+import IFrame from '@core/external/common/iframe';
 import {
   printLog, getElementName, parameterizedString, EnvOptions,
-} from '../../../utils/logs-helper';
-import {
-  CollectElementUpdateOptions,
-  Context, Env, EventName, MessageType,
-} from '../../../utils/common';
+} from '@core/utils/logs-helper';
 import {
   formatFrameNameToId,
   getReturnValue,
-} from '../../../utils/helpers';
-import { ContainerType } from '../../../skyflow';
-import { Metadata, ContainerProps, InternalState } from '../../internal/internal-types';
+} from '@core/helpers';
+import {
+  CollectElementUpdateOptions,
+  Context, Env, EventName, MessageType,
+  ContainerType, ContainerProps, InternalState,
+  ICoreMetadata as Metadata,
+} from '@core/types';
 
 const CLASS_NAME = 'Element';
 class CollectElement extends SkyflowElement {
@@ -369,6 +378,10 @@ class CollectElement extends SkyflowElement {
 
   update = (options: CollectElementUpdateOptions) => {
     this.#isUpdateCalled = true;
+    // Normalize client-facing option keys to the internal names the SET_VALUE
+    // handler (core/internal/index.ts) consumes. Variant-specific: privacyDB is
+    // a no-op; flowDB remaps `skyflowId`->`skyflowID` and `tableName`->`table`.
+    getVariantAdapter().collect.normalizeUpdateOptions(options as Record<string, any>);
     if (this.#mounted) {
       options.validations = formatValidations(options.validations);
       this.updateElement({ elementName: this.#group.elementName, ...options });
@@ -709,7 +722,10 @@ class CollectElement extends SkyflowElement {
       if (!(typeof this.#elements[i].column === 'string' || this.#elements[i].column instanceof String)) {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_COLUMN_IN_COLLECT, [], true);
       }
-      if (this.#elements[i].skyflowID !== undefined && !this.#elements[i].skyflowID) {
+      // The key carrying the skyflow id on an element is variant-specific
+      // (privacyDB `skyflowID` vs flowDB `skyflowId`).
+      const skyflowIdKey = getVariantAdapter().collect.skyflowIdKey;
+      if (this.#elements[i][skyflowIdKey] !== undefined && !this.#elements[i][skyflowIdKey]) {
         throw new SkyflowError(
           SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_COLLECT, [], true,
         );
