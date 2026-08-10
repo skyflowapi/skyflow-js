@@ -12,6 +12,8 @@ import {
   IRevealRecord,
   IRevealRecordComposable,
   IRevealResponseType,
+  IRenderResponseType,
+  RenderFileResponse,
   MessageType,
   LogLevel,
 } from '@core/types';
@@ -327,6 +329,29 @@ export const formatRecordsForClientFlowDB = (
     });
   });
   return { records };
+};
+
+// Reshapes a render-file response into the client-facing RenderFileResponse. Pure
+// (no transport); the file-URL fetch itself is a privacyDB concern not wired into
+// flowvault, so this only formats whatever the element render path already holds.
+export const formatForRenderClient = (response: IRenderResponseType, column: string)
+: RenderFileResponse => {
+  const formattedResponse: RenderFileResponse = {};
+  if (response.fields) {
+    const successRecord = {
+      skyflow_id: response.fields.skyflow_id,
+      column,
+      fileMetadata: response.fileMetadata,
+    };
+    formattedResponse.success = successRecord;
+  } else if (response.errors) {
+    formattedResponse.errors = {
+      skyflowId: response.errors.skyflowId,
+      column: response.errors.column,
+      error: response.errors.error,
+    };
+  }
+  return formattedResponse;
 };
 
 export const formatRecordsForClientComposableFlowDB = (response) => {

@@ -5,9 +5,8 @@ Copyright (c) 2022 Skyflow, Inc.
 import * as coreValidators from '@core/validators';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
-import SkyflowError from '../../libs/skyflow-error';
-import { ISkyflow } from '../../skyflow';
 import {
+  IFlowDBRevealElementInput as IRevealElementInput,
   IInsertRecordInput,
   IDetokenizeInput,
   RedactionType,
@@ -22,6 +21,8 @@ import {
   IUpdateRequest,
   IUpdateOptions,
 } from '../common';
+import SkyflowError from '../../libs/skyflow-error';
+import { ISkyflow } from '../../skyflow';
 import { appendZeroToOne } from '../helpers';
 import { printLog } from '../logs-helper';
 
@@ -404,10 +405,80 @@ export const validateDeleteRecords = (recordObj: IDeleteRecordInput, options: an
   });
 };
 
-// NOTE: the reveal-input validators (validateRevealElementRecords /
-// validateRenderElementRecord) are omitted here — they depend on the flowDB
-// reveal element input type (task 2.7) and are not used by the collect path.
-// They will be added when the reveal files land.
+// flowDB reveal-input validators. The flowDB reveal input is token-only
+// (IFlowDBRevealElementInput) — no skyflowID/column/table/redaction-per-record or
+// file-render keys — so these validate only the token-based surface.
+export const validateRevealElementRecords = (records: IRevealElementInput[]) => {
+  if (records.length === 0) throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_RECORDS_REVEAL, []);
+  records.forEach((record: any) => {
+    if (!(record && Object.prototype.hasOwnProperty.call(record, 'token'))) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TOKEN_KEY_REVEAL, []);
+    }
+    if (!record.token) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TOKEN_ID_REVEAL, []);
+    }
+    if (!(typeof record.token === 'string' || record.token instanceof String)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID_REVEAL, []);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(record, 'label') && typeof record.label !== 'string') {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_LABEL_REVEAL, []);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(record, 'altText') && typeof record.altText !== 'string') {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_REVEAL, []);
+    }
+  });
+};
+
+// Adapted to the flowDB token-only input: validates the token and altText only
+// (the privacyDB skyflowID/column/table render keys are not part of the flowDB
+// reveal input).
+export const validateRenderElementRecord = (record: IRevealElementInput) => {
+  if (!(record && Object.prototype.hasOwnProperty.call(record, 'token'))) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.MISSING_TOKEN_KEY_REVEAL, []);
+  }
+  if (!record.token) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.EMPTY_TOKEN_ID_REVEAL, []);
+  }
+  if (Object.prototype.hasOwnProperty.call(record, 'token') && typeof record.token !== 'string') {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKEN_ID_REVEAL, []);
+  }
+  if (Object.prototype.hasOwnProperty.call(record, 'altText') && typeof record.altText !== 'string') {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_ALT_TEXT_RENDER, []);
+  }
+};
+
+// flowDB-specific reveal-option error codes. These are not present in the shared
+// @core SKYFLOW_ERROR_CODE map (they describe the flowDB tokenGroupRedactions
+// option, which has no privacyDB counterpart), so they are defined locally here.
+const FLOWDB_REVEAL_ERROR_CODE = {
+  INVALID_TOKEN_GROUP_REDACTIONS_REVEAL: {
+    code: 400,
+    description: "Validation error. Invalid 'tokenGroupRedactions' key in reveal options. Specify an array of { tokenGroupName, redaction } objects.",
+  },
+  INVALID_TOKEN_GROUP_REDACTION_ENTRY_REVEAL: {
+    code: 400,
+    description: "Validation error. Invalid 'tokenGroupRedactions' entry at index %s1. Specify a non-empty string 'tokenGroupName' and 'redaction'.",
+  },
+};
+
+export const validateRevealOptions = (options?: { tokenGroupRedactions?: any }) => {
+  if (!options || options.tokenGroupRedactions === undefined) return;
+  const { tokenGroupRedactions } = options;
+  if (!Array.isArray(tokenGroupRedactions)) {
+    throw new SkyflowError(FLOWDB_REVEAL_ERROR_CODE.INVALID_TOKEN_GROUP_REDACTIONS_REVEAL, []);
+  }
+  tokenGroupRedactions.forEach((entry: any, index: number) => {
+    const hasValidName = entry && typeof entry.tokenGroupName === 'string' && entry.tokenGroupName !== '';
+    const hasValidRedaction = entry && typeof entry.redaction === 'string' && entry.redaction !== '';
+    if (!hasValidName || !hasValidRedaction) {
+      throw new SkyflowError(
+        FLOWDB_REVEAL_ERROR_CODE.INVALID_TOKEN_GROUP_REDACTION_ENTRY_REVEAL, [`${index}`], true,
+      );
+    }
+  });
+};
 
 export const validateInitConfig = (initConfig: ISkyflow) => {
   if (!Object.prototype.hasOwnProperty.call(initConfig, 'vaultID')) {

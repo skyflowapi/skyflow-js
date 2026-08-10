@@ -6,9 +6,19 @@ Copyright (c) 2025 Skyflow, Inc.
 // iframes and the public response contract. Ported from the 2.9.0-beta.1 tag;
 // RedactionType is reused from @core (not redefined), UpdateType from the
 // flowvault common surface.
-import { RedactionType, ContainerType, ClientMetadata } from '@core/types';
+import {
+  RedactionType, ContainerType, ClientMetadata, ElementInfo,
+} from '@core/types';
 import { ElementType } from '@core/constants';
-import { UpdateType } from '../../../utils/common';
+import { UpdateType, ICollectOptions } from '../../../utils/common';
+
+// COLLECT tokenize input consumed by the skyflow-frame-controller. Mirrors the
+// privacyDB shape but over flowDB's ICollectOptions.
+export interface TokenizeDataInput extends ICollectOptions {
+  type: string;
+  elementIds: Array<ElementInfo>;
+  containerId: string;
+}
 
 // Variant-neutral internal types re-exported from @core so copied element files'
 // `../../internal/internal-types` imports resolve here. The flowDB wire types

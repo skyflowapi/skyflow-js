@@ -11,13 +11,14 @@ import {
   ALLOWED_NAME_FOR_FILE,
   CardType,
   COPY_UTILS,
+  DEFAULT_INPUT_FORMAT_TRANSLATION,
   ElementType,
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
-import { ContainerType } from '@core/types';
+import { ContainerType, IRevealElementOptions } from '@core/types';
 import { SdkInfo } from '../../client';
 import SkyflowError from '../../libs/skyflow-error';
-import { detectCardType } from '../validators';
+import { detectCardType, validateBooleanOptions } from '../validators';
 
 const { getType } = require('mime');
 
@@ -408,4 +409,61 @@ export const addSeperatorToCardNumberMask = (
 export const generateUploadFileName = (fileName:string) => {
   const fileExtentsion = fileName?.split('.')?.pop() || '';
   return `${uuid()}${fileExtentsion && `.${fileExtentsion}`}`;
+};
+
+export const getValueFromName = (name: string, index: number) => {
+  const names = name.split(':');
+  const value = names.length > index ? names[index] : '';
+  return value;
+};
+
+export const getAtobValue = (encodedValue: string) => {
+  try {
+    const decodedValue = atob(encodedValue);
+    return decodedValue;
+  } catch (err) {
+    return '';
+  }
+};
+
+export const constructMaskTranslation = (mask) => {
+  const translation = {};
+  if (mask) {
+    Object.keys(mask[2]).forEach((key) => {
+      translation[key] = { pattern: mask[2][key] };
+    });
+  }
+  return translation;
+};
+
+export const formatRevealElementOptions = (options:IRevealElementOptions) => {
+  let revealOptions:any = {};
+  if (options) {
+    revealOptions = { ...options };
+    if (Object.prototype.hasOwnProperty.call(revealOptions, 'enableCopy') && !validateBooleanOptions(revealOptions.enableCopy)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['enableCopy'], true);
+    }
+    if (Object.prototype.hasOwnProperty.call(revealOptions, 'format')
+    || Object.prototype.hasOwnProperty.call(revealOptions, 'translation')) {
+      const revealElementMask:any[] = [];
+      if (revealOptions.format) {
+        revealElementMask.push(revealOptions.format);
+      }
+
+      revealElementMask.push(null); // for replacer
+
+      if (revealOptions.translation) {
+        revealElementMask.push(revealOptions.translation);
+      } else if (revealOptions.format) {
+        revealElementMask.push(DEFAULT_INPUT_FORMAT_TRANSLATION);
+      }
+      revealOptions = {
+        ...revealOptions,
+        ...((revealElementMask.length === 3) ? { mask: revealElementMask } : {}),
+      };
+      delete revealOptions?.format;
+      delete revealOptions?.translation;
+    }
+  }
+  return revealOptions;
 };
