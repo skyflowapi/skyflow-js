@@ -22,7 +22,10 @@ const keyify = (obj, prefix = '') => Object.keys(obj).reduce((res: any, el) => {
   return [...res, prefix + el];
 }, []);
 
-const checkDuplicateColumns = (additionalColumns, columns, table) => {
+// Exported so flowDB's variant-specific constructElementsInsertReq can reuse the
+// same duplicate-column guard (its additionalFields shape differs, but this check
+// is identical). `keyify` stays private — only this helper consumes it.
+export const checkDuplicateColumns = (additionalColumns, columns, table) => {
   const keys = keyify(additionalColumns);
   keys.forEach((key) => {
     const value = get(columns, key);

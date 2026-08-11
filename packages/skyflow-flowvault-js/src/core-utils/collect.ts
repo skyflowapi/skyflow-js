@@ -6,12 +6,10 @@ Copyright (c) 2025 Skyflow, Inc.
 // (`constructElementsInsertReq`) is reused from @core — not redefined — and
 // re-exported here so consumers import it from the flowvault collect surface.
 import merge from 'lodash/merge';
-import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { IInsertRecordInput, IInsertRecord } from '@core/types';
-import SKYFLOW_ERROR_CODE from '@core/utils/constants';
-import SkyflowError from '@core/errors';
 import Client from '@core/client';
+import { checkDuplicateColumns } from '@core/core-utils/collect';
 import { normalizeFlowDBError } from '../libs/skyflow-flowdb-error';
 import { generateMockCVV } from '../utils/helpers';
 import { IFlowDBUpsertOptions } from '../utils/common';
@@ -26,25 +24,6 @@ import {
   FlowDBUpdateRequestBody,
   FlowDBUpsert,
 } from '../core/internal/internal-types';
-
-const keyify = (obj, prefix = '') => Object.keys(obj).reduce((res: any, el) => {
-  if (Array.isArray(obj[el])) {
-    return [...res, prefix + el];
-  } if (typeof obj[el] === 'object' && obj[el] !== null) {
-    return [...res, ...keyify(obj[el], `${prefix + el}.`)];
-  }
-  return [...res, prefix + el];
-}, []);
-
-const checkDuplicateColumns = (additionalColumns, columns, table) => {
-  const keys = keyify(additionalColumns);
-  keys.forEach((key) => {
-    const value = get(columns, key);
-    if (value) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.DUPLICATE_ELEMENT, [`${key}`, `${table}`], true);
-    }
-  });
-};
 
 // Generic element-collection assembly. NOTE: unlike @core's privacyDB variant,
 // flowDB's AdditionalFields records use the flowDB shape `{ tableName, data,

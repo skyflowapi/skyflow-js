@@ -7,7 +7,7 @@ Copyright (c) 2025 Skyflow, Inc.
 // variant-neutral iframe formatter (`formatRecordsForIframe`) lives in @core and
 // is consumed by the reveal frame, not here.
 import { getAccessToken } from '@core/utils/bus-events';
-import SkyflowError from '@core/errors';
+import { formatForPureJsFailure } from '@core/core-utils/reveal';
 import {
   IRevealRecord,
   IRevealRecordComposable,
@@ -26,26 +26,6 @@ import {
   RevealResponse,
   RevealError,
 } from '../core/internal/internal-types';
-
-const formatForPureJsFailure = (cause, tokenId: string, purejs: boolean) => {
-  if (purejs) {
-    return {
-      token: tokenId,
-      error: {
-        code: cause?.error?.code,
-        description: cause?.error?.description,
-      },
-    };
-  }
-  return ({
-    token: tokenId,
-    ...new SkyflowError({
-      code: cause?.error?.code,
-      description: cause?.error?.description,
-      type: cause?.error?.type,
-    }, [], true),
-  });
-};
 
 export const constructFlowDBDetokenizeRequest = (
   tokenIdRecords: IRevealRecord[] | IRevealRecordComposable[],

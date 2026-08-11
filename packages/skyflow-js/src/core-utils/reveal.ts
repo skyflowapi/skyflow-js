@@ -4,8 +4,8 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import { getAccessToken } from '@core/utils/bus-events';
 import { FILE_DOWNLOAD_URL_PARAM } from '@core/constants';
-import SkyflowError from '@core/errors';
 import Client from '@core/client';
+import { formatForPureJsFailure } from '@core/core-utils/reveal';
 import {
   IRevealRecord, IRevealResponseType, MessageType, LogLevel, IGetRecord, ISkyflowIdRecord,
   RedactionType,
@@ -35,26 +35,6 @@ const formatForPureJsSuccess = (response: IApiSuccessResponse) => {
   const currentResponseRecords = response.records;
   return currentResponseRecords.map((record) => (
     { token: record.token, value: record.value, valueType: record.valueType }));
-};
-
-const formatForPureJsFailure = (cause, tokenId:string, purejs: boolean) => {
-  if (purejs) {
-    return {
-      token: tokenId,
-      error: {
-        code: cause?.error?.code,
-        description: cause?.error?.description,
-      },
-    };
-  }
-  return ({
-    token: tokenId,
-    ...new SkyflowError({
-      code: cause?.error?.code,
-      description: cause?.error?.description,
-      type: cause?.error?.type,
-    }, [], true),
-  });
 };
 
 const formatForRenderFileFailure = (cause, skyflowID:string, column: string) => ({

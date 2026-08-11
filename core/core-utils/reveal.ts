@@ -6,6 +6,30 @@ Copyright (c) 2022 Skyflow, Inc.
 // element iframes. The privacyDB /v1 fetch/parse transport stays in
 // src/core-utils/reveal and consumes this helper.
 import { IRevealResponseType } from '@core/types';
+import SkyflowError from '@core/errors';
+
+// Token-based generic failure formatter. Variant-neutral — moved here from each
+// package's core-utils/reveal so both SDKs share one copy. purejs=true returns a
+// plain { code, description }; otherwise the SkyflowError envelope is spread in.
+export const formatForPureJsFailure = (cause, tokenId: string, purejs: boolean) => {
+  if (purejs) {
+    return {
+      token: tokenId,
+      error: {
+        code: cause?.error?.code,
+        description: cause?.error?.description,
+      },
+    };
+  }
+  return ({
+    token: tokenId,
+    ...new SkyflowError({
+      code: cause?.error?.code,
+      description: cause?.error?.description,
+      type: cause?.error?.type,
+    }, [], true),
+  });
+};
 
 export const formatRecordsForIframe = (response: IRevealResponseType) => {
   const result: Record<string, any> = {};
