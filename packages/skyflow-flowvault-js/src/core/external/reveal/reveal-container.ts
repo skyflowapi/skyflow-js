@@ -1,45 +1,29 @@
 /*
-Copyright (c) 2022 Skyflow, Inc.
+Copyright (c) 2025 Skyflow, Inc.
 */
-import bus from 'framebus';
-import EventEmitter from '@core/event-emitter';
-import iframer, { getIframeSrc, setAttributes, setStyles } from '@core/iframe-libs/iframer';
-import uuid from '@core/libs/uuid';
-import SKYFLOW_ERROR_CODE from '@core/utils/constants';
-import logs from '@core/utils/logs';
+// flowDB reveal container: the shared @core RevealContainer base bound to
+// flowDB's token-only types, plus the injected divergence — the RevealElement
+// factory, the token-only reveal-record validator, reveal-options validation,
+// and SkyflowFlowDBError error mapping. The flowDB reveal input/option TYPE
+// definitions live in `../../../utils/common`; they are re-exported here under
+// the shared public names so the reveal element/composable files that import
+// them from `./reveal-container` keep resolving.
+import CoreRevealContainer from '@core/external/reveal/reveal-container';
 import {
-  CONTROLLER_STYLES, CUSTOM_ERROR_MESSAGES,
-  ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER,
-  REVEAL_TYPES,
-} from '@core/constants';
-import properties from '@core/properties';
-import Container from '@core/external/common/container';
-import SkyflowError from '@core/errors';
+  ICoreMetadata, RevealContainerProps, Context,
+} from '@core/types';
 import SkyflowFlowDBError from '../../../libs/skyflow-flowdb-error';
-import { ContainerType } from '../../../skyflow';
 import {
-  ContainerOptions,
-  Context, ErrorType, MessageType,
   IFlowDBRevealElementInput,
   IRevealElementOptions,
   IRevealOptions,
   TokenGroupRedaction,
 } from '../../../utils/common';
-import { parameterizedString, printLog } from '../../../utils/logs-helper';
-import {
-  validateInitConfig,
-  validateInputFormatOptions,
-  validateRevealElementRecords,
-  validateRevealOptions,
-} from '../../../utils/validators';
+import { validateRevealElementRecords, validateRevealOptions } from '../../../utils/validators';
 import RevealElement from './reveal-element';
-import { RevealResponse, Metadata, SkyflowElementProps } from '../../internal/internal-types';
 
-// The flowDB reveal input/option types live in `../../../utils/common` (defined in
-// an earlier task). Re-exported here so the reveal element/composable files that
-// import them from `./reveal-container` keep resolving. The public reveal input is
-// the flowDB token-only shape; `IRevealElementInput` aliases it (no privacyDB
-// skyflowID/table/column/file-render keys).
+// The flowDB reveal input is the token-only shape; `IRevealElementInput` aliases
+// it (no privacyDB skyflowID/table/column/file-render keys).
 export type IRevealElementInput = IFlowDBRevealElementInput;
 export {
   IFlowDBRevealElementInput,
@@ -48,258 +32,33 @@ export {
   TokenGroupRedaction,
 };
 
-const CLASS_NAME = 'RevealContainer';
-class RevealContainer extends Container {
-  #revealRecords: IRevealElementInput[] = [];
-
-  #revealElements: RevealElement[] = [];
-
-  #mountedRecords: { id: string }[] = [];
-
-  #metaData: Metadata;
-
-  #containerId: string;
-
-  #eventEmmiter: EventEmitter;
-
-  #isRevealCalled: boolean = false;
-
-  #isElementsMounted: boolean = false;
-
-  #context: Context;
-
-  #skyflowElements: Array<SkyflowElementProps>;
-
-  #isMounted: boolean = false;
-
-  type:string = ContainerType.REVEAL;
-
-  #isSkyflowFrameReady: boolean = false;
-
-  #customErrorMessages: Partial<Record<ErrorType, string>> = {};
-
-  constructor(
-    metaData: Metadata,
-    skyflowElements: Array<SkyflowElementProps>,
+class RevealContainer
+  extends CoreRevealContainer<IRevealElementInput, IRevealOptions, RevealElement> {
+  // eslint-disable-next-line class-methods-use-this
+  protected createRevealElement(
+    record: IRevealElementInput,
+    options: IRevealElementOptions | undefined,
+    metaData: ICoreMetadata,
+    container: RevealContainerProps,
+    elementId: string,
     context: Context,
-    options?: ContainerOptions,
-  ) {
-    super();
-    this.#isSkyflowFrameReady = metaData?.skyflowContainer?.isControllerFrameReady;
-    this.#metaData = {
-      ...metaData,
-      clientJSON: {
-        ...metaData.clientJSON,
-        config: {
-          ...metaData.clientJSON?.config,
-          options: {
-            ...metaData.clientJSON?.config?.options,
-            ...options,
-          },
-        },
-      },
-    };
-    this.#skyflowElements = skyflowElements;
-    this.#containerId = uuid();
-    this.#eventEmmiter = new EventEmitter();
-    this.#context = context;
-    const clientDomain = this.#metaData.clientDomain || '';
-    const iframe = iframer({
-      name: `${REVEAL_FRAME_CONTROLLER}:${this.#containerId}:${btoa(clientDomain)}`,
-      referrer: clientDomain,
-    });
-    setAttributes(iframe, {
-      src: getIframeSrc(),
-    });
-    setStyles(iframe, { ...CONTROLLER_STYLES });
-    printLog(parameterizedString(logs.infoLogs.CREATE_REVEAL_CONTAINER, CLASS_NAME),
-      MessageType.LOG,
-      this.#context.logLevel);
-
-    bus
-      .target(window.location.origin)
-      .on(
-        ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED + this.#containerId,
-        (data) => {
-          if (!data.skyflowID) {
-            this.#mountedRecords.push(data as any);
-          }
-          let revealElementLength = 0;
-          this.#revealElements.forEach((currentElement) => {
-            if (!currentElement.getRecordData().skyflowID) {
-              revealElementLength += 1;
-            }
-          });
-
-          this.#isElementsMounted = this.#mountedRecords.length === revealElementLength;
-          // this.#mountedRecords.length === this.#revealElements.length;
-          if (this.#isRevealCalled && this.#isElementsMounted) {
-            // eslint-disable-next-line no-underscore-dangle
-            this.#eventEmmiter._emit(
-              ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED
-                + this.#containerId,
-              {
-                containerId: this.#containerId,
-              },
-            );
-          }
-        },
-      );
+  ): RevealElement {
+    return new RevealElement(record, options, metaData, container, elementId, context);
   }
 
-  create(record: IRevealElementInput, options?: IRevealElementOptions) {
-    // this.#revealRecords.push(record);
-    const elementId = uuid();
-    validateInputFormatOptions(options);
-    const revealElement = new RevealElement(record, options, this.#metaData,
-      {
-        containerId: this.#containerId,
-        isMounted: this.#isMounted,
-        eventEmitter: this.#eventEmmiter,
-        type: ContainerType.REVEAL,
-      }, elementId, this.#context);
-    this.#revealElements.push(revealElement);
-    this.#skyflowElements[elementId] = revealElement;
-    return revealElement;
+  // eslint-disable-next-line class-methods-use-this
+  protected validateRecords(records: IRevealElementInput[]): void {
+    validateRevealElementRecords(records);
   }
 
-  setError(errors: Partial<Record<ErrorType, string>>) {
-    this.#customErrorMessages = errors;
-    // eslint-disable-next-line no-underscore-dangle
-    this.#eventEmmiter._emit(`${CUSTOM_ERROR_MESSAGES}:${this.#containerId}`, {
-      errorMessages: this.#customErrorMessages,
-    });
+  // eslint-disable-next-line class-methods-use-this
+  protected validateOptions(options?: IRevealOptions): void {
+    validateRevealOptions(options);
   }
 
-  reveal(options?: IRevealOptions): Promise<RevealResponse> {
-    this.#isRevealCalled = true;
-    this.#revealRecords = [];
-    if (this.#metaData.skyflowContainer.isControllerFrameReady) {
-      return new Promise((resolve, reject) => {
-        try {
-          validateInitConfig(this.#metaData.clientJSON.config);
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
-            MessageType.LOG,
-            this.#context.logLevel);
-          this.#revealElements.forEach((currentElement) => {
-            if (currentElement.isClientSetError()) {
-              throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
-            }
-            if (!currentElement.getRecordData().skyflowID) {
-              this.#revealRecords.push(currentElement.getRecordData());
-            }
-          });
-          if (this.#revealRecords.length === 0) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_REVEAL, [], true);
-          }
-          validateRevealElementRecords(this.#revealRecords);
-          validateRevealOptions(options);
-          if (!this.#isElementsMounted) {
-            const timeout = setTimeout(() => {
-              printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
-                MessageType.ERROR, this.#context.logLevel);
-              reject(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL));
-            }, 10000);
-
-            this.#eventEmmiter.on(
-              ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
-              () => {
-                clearTimeout(timeout);
-                this.#emitRevealRequest(resolve, reject, options);
-              },
-            );
-          } else {
-            this.#emitRevealRequest(resolve, reject, options);
-          }
-        } catch (err: any) {
-          printLog(`Error: ${err.message}`, MessageType.ERROR, this.#context.logLevel);
-          reject(err);
-        }
-      });
-    }
-    return new Promise((resolve, reject) => {
-      try {
-        validateInitConfig(this.#metaData.clientJSON.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_REVEAL_RECORDS, CLASS_NAME),
-          MessageType.LOG,
-          this.#context.logLevel);
-        this.#revealElements.forEach((currentElement) => {
-          if (currentElement.isClientSetError()) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.REVEAL_ELEMENT_ERROR_STATE);
-          }
-          if (!currentElement.getRecordData().skyflowID) {
-            this.#revealRecords.push(currentElement.getRecordData());
-          }
-        });
-        if (this.#revealRecords.length === 0) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_REVEAL, [], true);
-        }
-        validateRevealElementRecords(this.#revealRecords);
-        validateRevealOptions(options);
-        if (!this.#isElementsMounted) {
-          const timeout = setTimeout(() => {
-            printLog(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL,
-              MessageType.ERROR, this.#context.logLevel);
-            reject(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL));
-          }, 10000);
-
-          this.#eventEmmiter.on(
-            ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
-            () => {
-              clearTimeout(timeout);
-              if (this.#metaData.skyflowContainer.isControllerFrameReady) {
-                this.#emitRevealRequest(resolve, reject, options);
-              } else {
-                bus
-                  .target(properties.IFRAME_SECURE_ORIGIN)
-                  .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
-         + this.#metaData.uuid, () => {
-                    this.#emitRevealRequest(resolve, reject, options);
-                  });
-              }
-            },
-          );
-        } else {
-          bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
-            .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY
-         + this.#metaData.uuid, () => {
-              this.#emitRevealRequest(resolve, reject, options);
-            });
-        }
-      } catch (err: any) {
-        printLog(`Error: ${err.message}`, MessageType.ERROR, this.#context.logLevel);
-        reject(err);
-      }
-    });
-  }
-
-  #emitRevealRequest(resolve, reject, options?: IRevealOptions) {
-    bus
-      .target(properties.IFRAME_SECURE_ORIGIN)
-      .emit(
-        ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#metaData.uuid,
-        {
-          type: REVEAL_TYPES.REVEAL,
-          records: this.#revealRecords,
-          containerId: this.#containerId,
-          errorMessages: this.#customErrorMessages,
-          options,
-        },
-        (revealData: any) => {
-          this.#mountedRecords = [];
-          if (revealData.error) {
-            printLog(parameterizedString(logs.errorLogs.FAILED_REVEAL),
-              MessageType.ERROR, this.#context.logLevel);
-            reject(new SkyflowFlowDBError(revealData.error));
-          } else {
-            printLog(parameterizedString(logs.infoLogs.REVEAL_SUBMIT_SUCCESS, CLASS_NAME),
-              MessageType.LOG,
-              this.#context.logLevel);
-            resolve(revealData);
-          }
-        },
-      );
+  // eslint-disable-next-line class-methods-use-this
+  protected wrapRevealError(err: any): any {
+    return new SkyflowFlowDBError(err);
   }
 }
 export default RevealContainer;
