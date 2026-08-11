@@ -24,10 +24,10 @@ export const formatFrameNameToId = coreHelpers.formatFrameNameToId;
 
 export const removeSpaces = coreHelpers.removeSpaces;
 
-export function formatVaultURL(vaultURL?: string) {
-  if (typeof vaultURL !== 'string') return vaultURL;
-  return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
-}
+// Re-bound from @core/helpers (definition moved there so both SDKs share one
+// copy). Bound as a local const — not `export … from` — so jest.spyOn(helpers,
+// 'formatVaultURL') still hooks it.
+export const formatVaultURL = coreHelpers.formatVaultURL;
 
 export function checkIfDuplicateExists(arr) {
   return new Set(arr).size !== arr.length;

@@ -80,6 +80,14 @@ export function removeSpaces(inputString:string) {
   return inputString.trim().replace(/[\s-]/g, '');
 }
 
+// Trim a trailing slash off the configured vault URL (Skyflow.init URL
+// normalization). Variant-neutral — moved here from each package's Tier-E
+// utils/helpers so both SDKs share one definition; each re-binds it locally.
+export function formatVaultURL(vaultURL?: string) {
+  if (typeof vaultURL !== 'string') return vaultURL;
+  return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
+}
+
 // Resolve a frame name to the container kind it belongs to. Variant-neutral —
 // keyed off the frame-name prefix conventions shared by both packages.
 export const getContainerType = (frameName:string):ContainerType => {

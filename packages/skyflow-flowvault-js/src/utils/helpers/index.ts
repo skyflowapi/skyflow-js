@@ -198,12 +198,10 @@ export const getContainerType = coreHelpers.getContainerType;
 
 export const addSeperatorToCardNumberMask = coreHelpers.addSeperatorToCardNumberMask;
 
-// Trim a trailing slash off the configured vault URL (parity with the beta's
-// Skyflow.init normalization).
-export function formatVaultURL(vaultURL?: string) {
-  if (typeof vaultURL !== 'string') return vaultURL;
-  return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
-}
+// Re-bound from @core/helpers (definition moved there so both SDKs share one
+// copy). Bound as a local const — not `export … from` — so jest.spyOn(helpers,
+// 'formatVaultURL') still hooks it.
+export const formatVaultURL = coreHelpers.formatVaultURL;
 
 // When a valid `customElementsURL` is supplied, point the iframe secure origin
 // at it (used for self-hosted element frames).
