@@ -4,13 +4,16 @@ Copyright (c) 2022 Skyflow, Inc.
 // Variant-neutral frame/element leaf helpers, shared by each package's own frame
 // controller (per the loose-coupling boundary — core holds neutral helpers only,
 // each package owns its tokenize()/revealData()).
-import { ContainerType, IValidationRule, ValidationRuleType } from '@core/types';
+import {
+  ContainerType, IValidationRule, ValidationRuleType, IRevealElementOptions,
+} from '@core/types';
 import SkyflowError from '@core/errors';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import {
   ALLOWED_NAME_FOR_FILE, CardType, ElementType, COPY_UTILS,
+  DEFAULT_INPUT_FORMAT_TRANSLATION,
 } from '@core/constants';
-import { detectCardType } from '@core/validators';
+import { detectCardType, validateBooleanOptions } from '@core/validators';
 
 const { getType } = require('mime');
 
@@ -282,4 +285,66 @@ export const addSeperatorToCardNumberMask = (
     return [cardNumberMask[0].replace(/[\s]/g, seperator), cardNumberMask[1]];
   }
   return cardNumberMask;
+};
+
+// Variant-neutral frame-name / token / reveal-option helpers. Moved here (from
+// each package's utils/helpers) so the shared @core reveal-frame base can reach
+// them under the core ⇏ packages boundary. Each package re-binds them locally as
+// `const x = coreHelpers.x` so existing importers and jest.spyOn(helpers, …) are
+// unchanged.
+export const getValueFromName = (name: string, index: number) => {
+  const names = name.split(':');
+  const value = names.length > index ? names[index] : '';
+  return value;
+};
+
+export const getAtobValue = (encodedValue: string) => {
+  try {
+    const decodedValue = atob(encodedValue);
+    return decodedValue;
+  } catch (err) {
+    return '';
+  }
+};
+
+export const constructMaskTranslation = (mask) => {
+  const translation = {};
+  if (mask) {
+    Object.keys(mask[2]).forEach((key) => {
+      translation[key] = { pattern: mask[2][key] };
+    });
+  }
+  return translation;
+};
+
+export const formatRevealElementOptions = (options:IRevealElementOptions) => {
+  let revealOptions:any = {};
+  if (options) {
+    revealOptions = { ...options };
+    if (Object.prototype.hasOwnProperty.call(revealOptions, 'enableCopy') && !validateBooleanOptions(revealOptions.enableCopy)) {
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['enableCopy'], true);
+    }
+    if (Object.prototype.hasOwnProperty.call(revealOptions, 'format')
+    || Object.prototype.hasOwnProperty.call(revealOptions, 'translation')) {
+      const revealElementMask:any[] = [];
+      if (revealOptions.format) {
+        revealElementMask.push(revealOptions.format);
+      }
+
+      revealElementMask.push(null); // for replacer
+
+      if (revealOptions.translation) {
+        revealElementMask.push(revealOptions.translation);
+      } else if (revealOptions.format) {
+        revealElementMask.push(DEFAULT_INPUT_FORMAT_TRANSLATION);
+      }
+      revealOptions = {
+        ...revealOptions,
+        ...((revealElementMask.length === 3) ? { mask: revealElementMask } : {}),
+      };
+      delete revealOptions?.format;
+      delete revealOptions?.translation;
+    }
+  }
+  return revealOptions;
 };

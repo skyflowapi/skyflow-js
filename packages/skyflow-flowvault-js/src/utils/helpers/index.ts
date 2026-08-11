@@ -6,16 +6,11 @@ Copyright (c) 2025 Skyflow, Inc.
 // deliberate loose-coupling duplication (each package owns its transport/
 // telemetry). `generateMockCVV` is flowDB-only (mock-CVV masking) and has no
 // skyflow-js counterpart.
-import {
-  DEFAULT_INPUT_FORMAT_TRANSLATION,
-} from '@core/constants';
 import * as coreHelpers from '@core/helpers';
-import SKYFLOW_ERROR_CODE from '@core/utils/constants';
-import { IRevealElementOptions, ISkyflow } from '@core/types';
+import { ISkyflow } from '@core/types';
 import properties from '@core/properties';
-import SkyflowError from '@core/errors';
 import { SdkInfo } from '@core/client';
-import { isValidURL, validateBooleanOptions } from '../validators';
+import { isValidURL } from '../validators';
 
 // SDK telemetry identity, injected at build time (webpack DefinePlugin) / tests
 // (jest setupFiles) from this package's own package.json.
@@ -227,59 +222,13 @@ export function checkAndSetForCustomUrl(config: ISkyflow) {
   }
 }
 
-export const getValueFromName = (name: string, index: number) => {
-  const names = name.split(':');
-  const value = names.length > index ? names[index] : '';
-  return value;
-};
+// Re-bound from @core/helpers (definitions moved there so the shared @core
+// reveal-frame base can reach them). Bound as local consts — not `export … from`
+// — so jest.spyOn(helpers, …) still hooks them.
+export const getValueFromName = coreHelpers.getValueFromName;
 
-export const getAtobValue = (encodedValue: string) => {
-  try {
-    const decodedValue = atob(encodedValue);
-    return decodedValue;
-  } catch (err) {
-    return '';
-  }
-};
+export const getAtobValue = coreHelpers.getAtobValue;
 
-export const constructMaskTranslation = (mask) => {
-  const translation = {};
-  if (mask) {
-    Object.keys(mask[2]).forEach((key) => {
-      translation[key] = { pattern: mask[2][key] };
-    });
-  }
-  return translation;
-};
+export const constructMaskTranslation = coreHelpers.constructMaskTranslation;
 
-export const formatRevealElementOptions = (options:IRevealElementOptions) => {
-  let revealOptions:any = {};
-  if (options) {
-    revealOptions = { ...options };
-    if (Object.prototype.hasOwnProperty.call(revealOptions, 'enableCopy') && !validateBooleanOptions(revealOptions.enableCopy)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['enableCopy'], true);
-    }
-    if (Object.prototype.hasOwnProperty.call(revealOptions, 'format')
-    || Object.prototype.hasOwnProperty.call(revealOptions, 'translation')) {
-      const revealElementMask:any[] = [];
-      if (revealOptions.format) {
-        revealElementMask.push(revealOptions.format);
-      }
-
-      revealElementMask.push(null); // for replacer
-
-      if (revealOptions.translation) {
-        revealElementMask.push(revealOptions.translation);
-      } else if (revealOptions.format) {
-        revealElementMask.push(DEFAULT_INPUT_FORMAT_TRANSLATION);
-      }
-      revealOptions = {
-        ...revealOptions,
-        ...((revealElementMask.length === 3) ? { mask: revealElementMask } : {}),
-      };
-      delete revealOptions?.format;
-      delete revealOptions?.translation;
-    }
-  }
-  return revealOptions;
-};
+export const formatRevealElementOptions = coreHelpers.formatRevealElementOptions;

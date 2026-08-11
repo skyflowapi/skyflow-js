@@ -1,42 +1,16 @@
-import EventEmitter from '@core/event-emitter';
-import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from '@core/constants';
-import { ContainerType } from '../../../skyflow';
-import { EventName, RenderFileResponse } from '../../../utils/common';
-import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
+import { ELEMENT_EVENTS_TO_IFRAME } from '@core/constants';
+import CoreComposableRevealElement from '@core/external/reveal/composable-reveal-element';
+import { RenderFileResponse } from '../../../utils/common';
+import { IRevealElementInput } from './reveal-container';
 
-class ComposableRevealElement {
-  #elementName: string;
-
-  #eventEmitter: EventEmitter;
-
-  #iframeName: string;
-
-  type: string = ContainerType.COMPOSABLE;
-
-  #isMounted: boolean = false;
-
-  constructor(name: string, eventEmitter: EventEmitter, iframeName: string) {
-    this.#elementName = name;
-    this.#iframeName = iframeName;
-    this.#eventEmitter = eventEmitter;
-    this.#eventEmitter?.on?.(`${EventName.READY}:${this.#elementName}`, () => {
-      this.#isMounted = true;
-    });
-  }
-
-  iframeName(): string {
-    return this.#iframeName ?? '';
-  }
-
-  getID(): string {
-    return this.#elementName ?? '';
-  }
-
+// privacyDB composable reveal element: the shared @core base bound to privacyDB's
+// reveal-input shape, plus the file-render request (flowDB has no renderFile).
+class ComposableRevealElement extends CoreComposableRevealElement<IRevealElementInput> {
   renderFile(): Promise<RenderFileResponse> {
     return new Promise((resolve, reject) => {
       // eslint-disable-next-line no-underscore-dangle
-      this.#eventEmitter?._emit?.(
-        `${ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST}:${this.#elementName}`,
+      this.eventEmitter?._emit?.(
+        `${ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST}:${this.elementName}`,
         {},
         (response) => {
           if (response?.errors) {
@@ -50,17 +24,6 @@ class ComposableRevealElement {
       );
     });
   }
-
-  update = (options: IRevealElementInput | IRevealElementOptions) => {
-    // eslint-disable-next-line no-underscore-dangle
-    this.#eventEmitter?._emit?.(
-      `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_UPDATE_OPTIONS}:${this.#elementName}`,
-      {
-        options: options as IRevealElementInput | IRevealElementOptions,
-        updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
-      },
-    );
-  };
 }
 
 export default ComposableRevealElement;
