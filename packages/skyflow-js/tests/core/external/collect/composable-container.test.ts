@@ -14,16 +14,16 @@ import {
   Context,
   ICollectOptions,
 } from "../../../../src/utils/common";
-import ComposableContainer from "../../../../src/core/external/collect/compose-collect-container";
-import ComposableElement from "../../../../src/core/external/collect/compose-collect-element";
+import ComposableContainer from "../../../../src/external/collect/compose-collect-container";
+import ComposableElement from "../../../../src/external/collect/compose-collect-element";
 import CollectElement from "@core/external/collect/collect-element";
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import EventEmitter from "@core/event-emitter";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
 import SkyflowError from "@core/errors";
-import SkyflowContainer from "../../../../src/core/external/skyflow-container";
+import SkyflowContainer from "../../../../src/external/skyflow-container";
 import { ContainerType } from "../../../../src/skyflow";
-import { Metadata } from "../../../../src/core/internal/internal-types";
+import { Metadata } from "../../../../src/internal/internal-types";
 import IFrame from "@core/external/common/iframe";
 import properties from "@core/properties";
 

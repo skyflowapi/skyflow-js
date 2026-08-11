@@ -3,13 +3,13 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
 import Skyflow, { ContainerType } from '../src/skyflow';
-import CollectContainer from '../src/core/external/collect/collect-container';
-import RevealContainer from '../src/core/external/reveal/reveal-container';
+import CollectContainer from '../src/external/collect/collect-container';
+import RevealContainer from '../src/external/reveal/reveal-container';
 import * as iframerUtils from '@core/iframe-libs/iframer';
 import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '@core/constants';
 import { Env, EventName, LogLevel, RedactionType, RequestMethod, ValidationRuleType } from '../src/utils/common';
-import ComposableContainer from '../src/core/external/collect/compose-collect-container';
-import SkyflowContainer from '../src/core/external/skyflow-container';
+import ComposableContainer from '../src/external/collect/compose-collect-container';
+import SkyflowContainer from '../src/external/skyflow-container';
 import Client from '@core/client'
 import logs from '@core/utils/logs';
 import { ComposableRevealContainer } from '../src/index-node';

@@ -2,18 +2,18 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from "framebus";
-import RevealFrame from "../../../../src/core/internal/reveal/reveal-frame";
+import RevealFrame from "../../../../src/internal/reveal/reveal-frame";
 import { DEFAULT_FILE_RENDER_ERROR, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_ERROR_TEXT, REVEAL_ELEMENT_OPTIONS_TYPES, REVEAL_TYPES } from "@core/constants";
 import { Env, LogLevel, RedactionType } from "../../../../src/utils/common";
 import getCssClassesFromJss from "@core/libs/jss-styles";
-import { getFileURLFromVaultBySkyflowIDComposable } from "../../../../src/core-utils/reveal";
+import { getFileURLFromVaultBySkyflowIDComposable } from "../../../../src/api-utils/reveal";
 import properties from "@core/properties";
 
 // / mock the getFileURLFromVaultBySkyflowIDComposable function and keep original other things
 // Dynamic mock for getFileURLFromVaultBySkyflowIDComposable allowing per-test resolve/reject setup
 const mockGetFileURLFromVaultBySkyflowIDComposable = jest.fn();
-jest.mock('../../../../src/core-utils/reveal', () => {
-  const original = jest.requireActual('../../../../src/core-utils/reveal');
+jest.mock('../../../../src/api-utils/reveal', () => {
+  const original = jest.requireActual('../../../../src/api-utils/reveal');
   return {
     ...original,
     getFileURLFromVaultBySkyflowIDComposable: (...args) => mockGetFileURLFromVaultBySkyflowIDComposable(...args),

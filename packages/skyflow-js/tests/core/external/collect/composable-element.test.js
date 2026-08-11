@@ -1,4 +1,4 @@
-import ComposableElement from "../../../../src/core/external/collect/compose-collect-element";
+import ComposableElement from "../../../../src/external/collect/compose-collect-element";
 import { ContainerType } from "../../../../src/skyflow";
 
 describe("test composable element", () => {

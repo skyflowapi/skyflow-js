@@ -6,7 +6,7 @@ import { COLLECT_TYPES, ELEMENT_EVENTS_TO_IFRAME } from '@core/constants';
 import clientModule from '@core/client';
 import * as busEvents from '@core/utils/bus-events';
 import { LogLevel, Env } from '../../../../src/utils/common';
-import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
+import SkyflowFrameController from '../../../../src/internal/skyflow-frame/skyflow-frame-controller';
 import SkyflowError from '@core/errors';
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();
@@ -1153,7 +1153,7 @@ describe('SkyflowFrameController - tokenize function', () => {
     jest.spyOn(require('@core/helpers'), 'checkForElementMatchRule').mockReturnValue(true);
     jest.spyOn(require('@core/helpers'), 'checkForValueMatch').mockReturnValue(true);
 
-    jest.spyOn(require('@core/core-utils/collect'), 'constructElementsInsertReq').mockImplementation(() => {
+    jest.spyOn(require('@core/api-utils/collect'), 'constructElementsInsertReq').mockImplementation(() => {
         return [
           { records: [] }, 
           { updateRecords: [{ table: 'testTable', fields: { key: 'value' }, skyflowID: '123' }] },

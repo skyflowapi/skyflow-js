@@ -5,7 +5,7 @@ import assert from "assert";
 import Client, { IClientRequest } from "@core/client";
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import logs from "@core/utils/logs";
-import { ClientMetadata } from "../src/core/internal/internal-types";
+import { ClientMetadata } from "../src/internal/internal-types";
 import { ISkyflow } from "../src/skyflow";
 import SkyflowError from "@core/errors";
 

@@ -6,7 +6,7 @@ import { parameterizedString } from "../../src/utils/logs-helper";
 import logs from "@core/utils/logs";
 import { validateInputFormatOptions } from "@core/validators";
 import { DEFAULT_CARD_NUMBER_SEPERATOR } from "@core/constants";
-import ComposableElement from "../../src/core/external/collect/compose-collect-element";
+import ComposableElement from "../../src/external/collect/compose-collect-element";
 
 jest.mock('@core/validators',()=>{
     const originalModule = jest.requireActual('@core/validators')

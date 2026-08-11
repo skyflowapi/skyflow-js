@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2025 Skyflow, Inc.
 */
-import RevealContainer from "../../../../src/core/external/reveal/reveal-container";
+import RevealContainer from "../../../../src/external/reveal/reveal-container";
 import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_CONTAINER,
@@ -11,13 +11,13 @@ import {
 } from "@core/constants";
 import bus from "framebus";
 import { LogLevel, Env } from "../../../../src/utils/common";
-import RevealElement from "../../../../src/core/external/reveal/reveal-element";
+import RevealElement from "../../../../src/external/reveal/reveal-element";
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { parameterizedString } from "../../../../src/utils/logs-helper";
 import SkyflowError from "@core/errors";
 import logs from "@core/utils/logs";
-import { Metadata } from "../../../../src/core/internal/internal-types";
-import SkyflowContainer from "../../../../src/core/external/skyflow-container";
+import { Metadata } from "../../../../src/internal/internal-types";
+import SkyflowContainer from "../../../../src/external/skyflow-container";
 import { ContainerType, RevealResponse } from "../../../../src/index-node";
 import { ISkyflow } from "../../../../src/skyflow";
 import assert, { AssertionError, fail } from "assert";

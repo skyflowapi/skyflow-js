@@ -45,7 +45,7 @@ export {
   CollectRecord,
   RevealResponse,
   RevealRecord,
-} from './core/internal/internal-types';
+} from './internal/internal-types';
 
 export {
   CardType,
@@ -59,11 +59,11 @@ export {
 
 // --- element container / element classes ---
 export { default as CollectElement } from '@core/external/collect/collect-element';
-export { default as CollectContainer } from './core/external/collect/collect-container';
-export { default as RevealContainer } from './core/external/reveal/reveal-container';
-export { default as RevealElement } from './core/external/reveal/reveal-element';
-export { default as ComposableRevealContainer } from './core/external/reveal/composable-reveal-container';
-export { default as ComposableRevealElement } from './core/external/reveal/composable-reveal-element';
+export { default as CollectContainer } from './external/collect/collect-container';
+export { default as RevealContainer } from './external/reveal/reveal-container';
+export { default as RevealElement } from './external/reveal/reveal-element';
+export { default as ComposableRevealContainer } from './external/reveal/composable-reveal-container';
+export { default as ComposableRevealElement } from './external/reveal/composable-reveal-element';
 
 // Public error surface: the flowDB error IS the package's `SkyflowError`.
 export { default as SkyflowError } from './libs/skyflow-flowdb-error';

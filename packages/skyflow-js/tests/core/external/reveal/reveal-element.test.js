@@ -3,8 +3,8 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import { LogLevel,Env, ErrorType } from "../../../../src/utils/common";
 import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES, CUSTOM_ERROR_MESSAGES} from "@core/constants";
-import RevealElement from "../../../../src/core/external/reveal/reveal-element";
-import SkyflowContainer from '../../../../src/core/external/skyflow-container';
+import RevealElement from "../../../../src/external/reveal/reveal-element";
+import SkyflowContainer from '../../../../src/external/skyflow-container';
 import Client from '@core/client';
 
 import * as busEvents from '@core/utils/bus-events';
@@ -47,7 +47,7 @@ jest.mock('@core/libs/jss-styles', () => {
     })
   };
 });
-jest.mock('../../../../src/core/external/skyflow-container', () => {
+jest.mock('../../../../src/external/skyflow-container', () => {
   return {
     __esModule: true,
     default: jest.fn(),

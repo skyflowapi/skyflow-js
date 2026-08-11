@@ -5,10 +5,10 @@ import {
   ELEMENT_EVENTS_TO_IFRAME,
   ElementType,
 } from "@core/constants";
-import CollectContainer from "../../../../src/core/external/collect/collect-container";
+import CollectContainer from "../../../../src/external/collect/collect-container";
 import CollectElement from "@core/external/collect/collect-element";
-import SkyflowContainer from "../../../../src/core/external/skyflow-container";
-import { Metadata } from "../../../../src/core/internal/internal-types";
+import SkyflowContainer from "../../../../src/external/skyflow-container";
+import { Metadata } from "../../../../src/internal/internal-types";
 import * as iframerUtils from "@core/iframe-libs/iframer";
 import { ContainerType } from "../../../../src/skyflow";
 import {

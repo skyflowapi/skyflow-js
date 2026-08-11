@@ -6,7 +6,7 @@ Copyright (c) 2022 Skyflow, Inc.
 //
 // The shared `@core` element/frame layer (lifted in Tasks 4.6/4.7) must not
 // relative-import a package sibling. Instead each package supplies a
-// `VariantAdapter` — a thin wrapper over its own `core-utils` + `utils/helpers`
+// `VariantAdapter` — a thin wrapper over its own `api-utils` + `utils/helpers`
 // — and core code calls the adapter. This file defines the contract only; no
 // files move here. Membership is driven by what the lifted files actually need
 // from a package: telemetry identity and the composable reveal mappers, whose
@@ -29,7 +29,7 @@ export interface SdkDetails {
 /**
  * Reveal request/response mappers a package supplies to the shared
  * element/frame layer. Names are variant-neutral; each package maps them to
- * its own `core-utils/reveal` implementation.
+ * its own `api-utils/reveal` implementation.
  */
 export interface VariantRevealAdapter {
   fetchRecordsByTokenIdComposable(
@@ -82,7 +82,7 @@ export interface VariantCollectAdapter {
 /**
  * The contract the shared (`@core`) element/frame layer needs from a package.
  * Each package implements this once (see `src/variant-adapter.ts`) as a thin
- * wrapper over its existing `core-utils` + `utils/helpers`; core code calls the
+ * wrapper over its existing `api-utils` + `utils/helpers`; core code calls the
  * adapter instead of relative-importing a variant sibling.
  */
 export interface VariantAdapter {
@@ -100,7 +100,7 @@ export interface VariantAdapter {
    */
   printLog(message: string, messageType: MessageType, logLevel: LogLevel): void;
 
-  /** Composable reveal mappers from this package's `core-utils/reveal`. */
+  /** Composable reveal mappers from this package's `api-utils/reveal`. */
   reveal: VariantRevealAdapter;
 
   /** Collect-side key normalization for the shared collect element. */

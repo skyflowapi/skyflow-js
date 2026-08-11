@@ -1,11 +1,11 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import RevealContainer from "../../../../src/core/external/reveal/reveal-container";
+import RevealContainer from "../../../../src/external/reveal/reveal-container";
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER, REVEAL_TYPES } from "@core/constants";
 import bus from "framebus";
 import { LogLevel,Env } from "../../../../src/utils/common";
-import RevealElement from "../../../../src/core/external/reveal/reveal-element";
+import RevealElement from "../../../../src/external/reveal/reveal-element";
 import * as iframerUtils from '@core/iframe-libs/iframer';
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { parameterizedString } from "../../../../src/utils/logs-helper";

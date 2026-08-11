@@ -1,4 +1,4 @@
-import ThreeDS from '../../../../src/core/external/threeds/threeds';
+import ThreeDS from '../../../../src/external/threeds/threeds';
 import SkyflowError from '@core/errors';
 
 describe('test 3DS helperFunction', ()=>{

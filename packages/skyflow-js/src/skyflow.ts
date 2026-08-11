@@ -18,9 +18,9 @@ import { ContainerType, ISkyflow, SkyflowConfigOptions } from '@core/types';
 import { setVariantAdapter } from '@core/adapters';
 import Client from '@core/client';
 import SkyflowError from '@core/errors';
-import RevealContainer from './core/external/reveal/reveal-container';
-import CollectContainer from './core/external/collect/collect-container';
-import SkyflowContainer from './core/external/skyflow-container';
+import RevealContainer from './external/reveal/reveal-container';
+import CollectContainer from './external/collect/collect-container';
+import SkyflowContainer from './external/skyflow-container';
 import { parameterizedString, printLog } from './utils/logs-helper';
 import {
   RequestMethod,
@@ -50,11 +50,11 @@ import {
   ErrorType,
 } from './utils/common';
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
-import ComposableContainer from './core/external/collect/compose-collect-container';
+import ComposableContainer from './external/collect/compose-collect-container';
 import { validateComposableContainerOptions } from './utils/validators';
-import ThreeDS from './core/external/threeds/threeds';
-import { ClientMetadata, SkyflowElementProps } from './core/internal/internal-types';
-import ComposableRevealContainer from './core/external/reveal/composable-reveal-container';
+import ThreeDS from './external/threeds/threeds';
+import { ClientMetadata, SkyflowElementProps } from './internal/internal-types';
+import ComposableRevealContainer from './external/reveal/composable-reveal-container';
 import skyflowVariantAdapter from './variant-adapter';
 
 // Register this package's variant behaviour with the shared @core layer once,

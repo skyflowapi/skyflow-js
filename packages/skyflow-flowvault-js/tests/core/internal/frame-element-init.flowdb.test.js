@@ -5,7 +5,7 @@
 import { ELEMENTS } from '@core/constants';
 
 // Mock collect helpers BEFORE importing FrameElementInit so internal references use mocks
-jest.mock('../../../src/core-utils/collect', () => {
+jest.mock('../../../src/api-utils/collect', () => {
   const constructElementsInsertReq = jest.fn((insertObj, updateObj) => [
     { records: Object.entries(insertObj).map(([table, fields]) => ({ table, fields })) },
     { updateRecords: Object.entries(updateObj).map(([skyflowID, record]) => ({ skyflowID, ...record })) },
@@ -15,7 +15,7 @@ jest.mock('../../../src/core-utils/collect', () => {
   const insertDataInCollectFlowDB = jest.fn(() => Promise.resolve({ records: [{ id: 'insert1' }], errors: [] }));
   const updateDataInCollectFlowDB = jest.fn(() => Promise.resolve({ records: [{ id: 'update1' }], errors: [] }));
   // Use the real implementation so CVV substitution behavior can be asserted.
-  const { replaceCVVTokensInResponse } = jest.requireActual('../../../src/core-utils/collect');
+  const { replaceCVVTokensInResponse } = jest.requireActual('../../../src/api-utils/collect');
   return {
     __esModule: true,
     constructElementsInsertReq,
@@ -26,14 +26,14 @@ jest.mock('../../../src/core-utils/collect', () => {
     replaceCVVTokensInResponse,
   };
 });
-import FrameElementInit from '../../../src/core/internal/frame-element-init';
+import FrameElementInit from '../../../src/internal/frame-element-init';
 import {
   constructElementsInsertReq,
   constructFlowDBInsertRequest,
   constructFlowDBUpdateRequest,
   insertDataInCollectFlowDB,
   updateDataInCollectFlowDB,
-} from '../../../src/core-utils/collect';
+} from '../../../src/api-utils/collect';
 
 const nodeCrypto = require('crypto');
 Object.defineProperty(window, 'crypto', {

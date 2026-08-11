@@ -6,11 +6,11 @@ import { COLLECT_TYPES, ELEMENT_EVENTS_TO_IFRAME, ELEMENT_TYPES, ElementType, PU
 import clientModule from '@core/client';
 import * as busEvents from '@core/utils/bus-events';
 import { LogLevel, Env, RedactionType } from '../../../../src/utils/common';
-import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
-import RevealFrame from '../../../../src/core/internal/reveal/reveal-frame';
+import SkyflowFrameController from '../../../../src/internal/skyflow-frame/skyflow-frame-controller';
+import RevealFrame from '../../../../src/internal/reveal/reveal-frame';
 import uuid from '@core/libs/uuid';
 // import IFrame from '@core/external/common/iframe';
-import CollectContainer from '../../../../src/core/external/collect/collect-container';
+import CollectContainer from '../../../../src/external/collect/collect-container';
 // import CollectElement from '@core/external/collect/collect-element';
 
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));

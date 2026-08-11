@@ -8,7 +8,7 @@ Copyright (c) 2025 Skyflow, Inc.
 // and skyflow-js stay structurally aligned on the shared pieces. Only the
 // flowDB-specific public input types (upsert / reveal input / reveal options)
 // and the `UpdateType` enum are defined locally; the flowDB request/response
-// bodies live in ../../core/internal/internal-types.
+// bodies live in ../../internal/internal-types.
 
 // --- Reused, variant-neutral @core types (do not redefine) ---
 export {

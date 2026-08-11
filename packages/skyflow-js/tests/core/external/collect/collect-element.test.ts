@@ -21,8 +21,8 @@ import {
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { ContainerType } from "../../../../src/skyflow";
 import EventEmitter from "@core/event-emitter";
-import SkyflowContainer from "../../../../src/core/external/skyflow-container";
-import { Metadata } from "../../../../src/core/internal/internal-types";
+import SkyflowContainer from "../../../../src/external/skyflow-container";
+import { Metadata } from "../../../../src/internal/internal-types";
 
 global.ResizeObserver = jest.fn(() => ({
   observe: jest.fn(),

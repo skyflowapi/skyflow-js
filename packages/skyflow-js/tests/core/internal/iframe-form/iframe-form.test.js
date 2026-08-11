@@ -11,7 +11,7 @@ import logs from '@core/utils/logs';
 import { ContainerType } from '../../../../src/skyflow';
 import { formatOptions } from '@core/libs/element-options';
 import { parameterizedString } from '../../../../src/utils/logs-helper';
-import FrameElementInit from '../../../../src/core/internal/frame-element-init';
+import FrameElementInit from '../../../../src/internal/frame-element-init';
 
 
 const tableCol = btoa('1234')

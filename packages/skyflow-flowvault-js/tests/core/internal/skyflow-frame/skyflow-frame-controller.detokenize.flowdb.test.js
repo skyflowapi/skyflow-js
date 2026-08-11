@@ -6,7 +6,7 @@ import { ELEMENT_EVENTS_TO_IFRAME, PUREJS_TYPES, REVEAL_TYPES } from '@core/cons
 import clientModule from '@core/client';
 import * as busEvents from '@core/utils/bus-events';
 import { LogLevel, Env } from '../../../../src/utils/common';
-import SkyflowFrameController from '../../../../src/core/internal/skyflow-frame/skyflow-frame-controller';
+import SkyflowFrameController from '../../../../src/internal/skyflow-frame/skyflow-frame-controller';
 
 busEvents.getAccessToken = jest.fn(() => Promise.resolve('access token'));
 const on = jest.fn();

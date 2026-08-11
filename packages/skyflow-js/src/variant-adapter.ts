@@ -3,14 +3,14 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 
 // privacyDB implementation of the shared `VariantAdapter` contract (Task 4.5).
-// Thin wrapper over this package's `core-utils` + `utils/helpers`; the shared
+// Thin wrapper over this package's `api-utils` + `utils/helpers`; the shared
 // `@core` element/frame layer consumes it in Tasks 4.6/4.7.
 
 import { VariantAdapter } from '@core/adapters';
 import {
   fetchRecordsByTokenIdComposable,
   formatRecordsForClientComposable,
-} from './core-utils/reveal';
+} from './api-utils/reveal';
 import { getMetaObject, SDK_DETAILS } from './utils/helpers';
 import { printLog } from './utils/logs-helper';
 

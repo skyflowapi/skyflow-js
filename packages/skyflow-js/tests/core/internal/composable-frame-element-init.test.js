@@ -1,17 +1,17 @@
-// import FrameElementInit from '../../../src/core/internal/frame-element-init';
+// import FrameElementInit from '../../../src/internal/frame-element-init';
 import RevealComposableFrameElementInit from '@core/internal/composable-frame-element-init';
 import { ELEMENT_EVENTS_TO_IFRAME, COMPOSABLE_REVEAL, ELEMENT_EVENTS_TO_CLIENT, FRAME_REVEAL, REVEAL_TYPES } from '@core/constants';
 import bus from 'framebus';
 import SkyflowError from '@core/errors';
-import { fetchRecordsByTokenIdComposable, formatRecordsForClientComposable } from '../../../src/core-utils/reveal';
+import { fetchRecordsByTokenIdComposable, formatRecordsForClientComposable } from '../../../src/api-utils/reveal';
 import properties from '@core/properties';
 
 // Create a mock function that can be controlled per test
 const mockFetchRecordsByTokenIdComposable = jest.fn();
 
 // mock fetchRecordsByTokenIdComposable with a jest.fn() so we can control it per test
-jest.mock('../../../src/core-utils/reveal', () => {
-  const actual = jest.requireActual('../../../src/core-utils/reveal');
+jest.mock('../../../src/api-utils/reveal', () => {
+  const actual = jest.requireActual('../../../src/api-utils/reveal');
   return {
     ...actual,
     fetchRecordsByTokenIdComposable: (...args) => mockFetchRecordsByTokenIdComposable(...args),

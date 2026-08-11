@@ -12,8 +12,8 @@ import logs from '@core/utils/logs';
 import { setVariantAdapter } from '@core/adapters';
 import RevealComposableFrameElementInit from '@core/internal/composable-frame-element-init';
 import flowVaultVariantAdapter from './variant-adapter';
-import RevealFrame from './core/internal/reveal/reveal-frame';
-import SkyflowFrameController from './core/internal/skyflow-frame/skyflow-frame-controller';
+import RevealFrame from './internal/reveal/reveal-frame';
+import SkyflowFrameController from './internal/skyflow-frame/skyflow-frame-controller';
 import { MessageType, LogLevel } from './utils/common';
 import {
   printLog,
@@ -21,7 +21,7 @@ import {
   getElementName,
 } from './utils/logs-helper';
 import { getAtobValue, getValueFromName } from './utils/helpers';
-import FrameElementInit from './core/internal/frame-element-init';
+import FrameElementInit from './internal/frame-element-init';
 
 // Iframe entry for skyflow-flowvault-js. Structurally parallel to skyflow-js's
 // index-internal over the same @core skeleton, wired to flowvault's own frame

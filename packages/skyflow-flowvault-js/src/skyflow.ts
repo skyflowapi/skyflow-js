@@ -25,10 +25,10 @@ import { ContainerType, ISkyflow, SkyflowConfigOptions } from '@core/types';
 import { setVariantAdapter } from '@core/adapters';
 import Client from '@core/client';
 import SkyflowError from '@core/errors';
-import RevealContainer from './core/external/reveal/reveal-container';
-import CollectContainer from './core/external/collect/collect-container';
-import ComposableRevealContainer from './core/external/reveal/composable-reveal-container';
-import SkyflowContainer from './core/external/skyflow-container';
+import RevealContainer from './external/reveal/reveal-container';
+import CollectContainer from './external/collect/collect-container';
+import ComposableRevealContainer from './external/reveal/composable-reveal-container';
+import SkyflowContainer from './external/skyflow-container';
 import { parameterizedString, printLog } from './utils/logs-helper';
 import SkyflowFlowDBError from './libs/skyflow-flowdb-error';
 import {
@@ -45,7 +45,7 @@ import {
 } from './utils/common';
 import { formatVaultURL, checkAndSetForCustomUrl } from './utils/helpers';
 import { validateComposableContainerOptions } from './utils/validators';
-import { ClientMetadata, SkyflowElementProps } from './core/internal/internal-types';
+import { ClientMetadata, SkyflowElementProps } from './internal/internal-types';
 import flowVaultVariantAdapter from './variant-adapter';
 
 // Register this package's variant behaviour with the shared @core layer once,

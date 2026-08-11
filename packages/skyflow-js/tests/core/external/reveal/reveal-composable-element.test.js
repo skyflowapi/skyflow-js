@@ -3,11 +3,11 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import { LogLevel,Env } from "../../../../src/utils/common";
 import { ELEMENT_EVENTS_TO_IFRAME, FRAME_REVEAL, ELEMENT_EVENTS_TO_CLIENT, REVEAL_TYPES, REVEAL_ELEMENT_OPTIONS_TYPES, CUSTOM_ERROR_MESSAGES} from "@core/constants";
-import SkyflowContainer from '../../../../src/core/external/skyflow-container';
+import SkyflowContainer from '../../../../src/external/skyflow-container';
 import Client from '@core/client';
 import EventEmitter from "@core/event-emitter";
 import * as busEvents from '@core/utils/bus-events';
-import ComposableRevealInternalElement from "../../../../src/core/external/reveal/composable-reveal-internal";
+import ComposableRevealInternalElement from "../../../../src/external/reveal/composable-reveal-internal";
 
 import bus from "framebus";
 import { JSDOM } from 'jsdom';
@@ -38,14 +38,14 @@ jest.mock('@core/libs/jss-styles', () => {
     })
   };
 });
-jest.mock('../../../../src/core/external/skyflow-container', () => {
+jest.mock('../../../../src/external/skyflow-container', () => {
   return {
     __esModule: true,
     default: jest.fn(),
   }
 })
 
-// jest.mock('../../../../src/core/external/reveal/composable-reveal-internal')
+// jest.mock('../../../../src/external/reveal/composable-reveal-internal')
 
 // bus.on = _on;
 // bus.target = jest.fn().mockReturnValue({

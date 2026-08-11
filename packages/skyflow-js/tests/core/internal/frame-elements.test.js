@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import FrameElementInit from './../../../src/core/internal/frame-element-init';
+import FrameElementInit from './../../../src/internal/frame-element-init';
 import {
     FRAME_ELEMENT,
     ELEMENT_EVENTS_TO_IFRAME

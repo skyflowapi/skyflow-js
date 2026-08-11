@@ -52,9 +52,9 @@ export {
 export {
   IRevealElementInput as RevealElementInput,
   IRevealElementOptions as RevealElementOptions,
-} from './core/external/reveal/reveal-container';
+} from './external/reveal/reveal-container';
 
-export { ThreeDSBrowserDetails } from './core/external/threeds/threeds';
+export { ThreeDSBrowserDetails } from './external/threeds/threeds';
 
 export {
   CardType,
@@ -67,12 +67,12 @@ export {
 } from './skyflow';
 
 export { default as CollectElement } from '@core/external/collect/collect-element';
-export { default as CollectContainer } from './core/external/collect/collect-container';
-export { default as ComposableContainer } from './core/external/collect/compose-collect-container';
-export { default as ComposableElement } from './core/external/collect/compose-collect-element';
-export { default as RevealContainer } from './core/external/reveal/reveal-container';
-export { default as RevealElement } from './core/external/reveal/reveal-element';
-export { default as ThreeDS } from './core/external/threeds/threeds';
-export { default as ComposableRevealContainer } from './core/external/reveal/composable-reveal-container';
-export { default as ComposableRevealElement } from './core/external/reveal/composable-reveal-element';
+export { default as CollectContainer } from './external/collect/collect-container';
+export { default as ComposableContainer } from './external/collect/compose-collect-container';
+export { default as ComposableElement } from './external/collect/compose-collect-element';
+export { default as RevealContainer } from './external/reveal/reveal-container';
+export { default as RevealElement } from './external/reveal/reveal-element';
+export { default as ThreeDS } from './external/threeds/threeds';
+export { default as ComposableRevealContainer } from './external/reveal/composable-reveal-container';
+export { default as ComposableRevealElement } from './external/reveal/composable-reveal-element';
 export default Skyflow;

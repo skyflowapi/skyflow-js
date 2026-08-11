@@ -16,7 +16,7 @@ global.SDK_VERSION = pkg.version;
 //
 // Registration is LAZY: each member requires the real src/variant-adapter only
 // when it is first invoked, never at setup time. Eagerly requiring it here would
-// pull src/core-utils/reveal into the module cache before a test file's
+// pull src/api-utils/reveal into the module cache before a test file's
 // jest.mock() calls take effect (e.g. reveal.flowdb.test mocks
 // @core/utils/bus-events), defeating those mocks. Deferring the require to
 // call-time means the underlying modules load inside a running test, with that
@@ -38,7 +38,7 @@ setVariantAdapter({
     // the test runtime, lazy-requiring reveal-frame so a test file's jest.mock()
     // of it still applies.
     createRevealFrame: (...args) => {
-      const RevealFrame = require('../src/core/internal/reveal/reveal-frame').default;
+      const RevealFrame = require('../src/internal/reveal/reveal-frame').default;
       return new RevealFrame(...args);
     },
   },

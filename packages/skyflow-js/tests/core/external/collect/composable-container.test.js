@@ -7,8 +7,8 @@ import {
 import * as iframerUtils from '@core/iframe-libs/iframer';
 import { LogLevel, Env, ValidationRuleType, ErrorType } from '../../../../src/utils/common';
 import logs from '@core/utils/logs';
-import ComposableContainer from "../../../../src/core/external/collect/compose-collect-container";
-import ComposableElement from '../../../../src/core/external/collect/compose-collect-element';
+import ComposableContainer from "../../../../src/external/collect/compose-collect-container";
+import ComposableElement from '../../../../src/external/collect/compose-collect-element';
 import CollectElement from '@core/external/collect/collect-element';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import EventEmitter from '@core/event-emitter';

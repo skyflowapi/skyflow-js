@@ -2,9 +2,9 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import { FrameController } from '@core/internal';
-import FrameElementInit from './../src/core/internal/frame-element-init';
-import RevealFrame from './../src/core/internal/reveal/reveal-frame';
-import SkyflowFrameController from './../src/core/internal/skyflow-frame/skyflow-frame-controller';
+import FrameElementInit from './../src/internal/frame-element-init';
+import RevealFrame from './../src/internal/reveal/reveal-frame';
+import SkyflowFrameController from './../src/internal/skyflow-frame/skyflow-frame-controller';
 import {
   COMPOSABLE_REVEAL,
     FRAME_ELEMENT,
@@ -32,7 +32,7 @@ describe('test index-internal', () => {
     }));
 
     const mock = jest.fn();
-    jest.mock('./../src/core/internal/skyflow-frame/skyflow-frame-controller', () => ({
+    jest.mock('./../src/internal/skyflow-frame/skyflow-frame-controller', () => ({
       init: mock,
     }));
 
@@ -51,7 +51,7 @@ describe('test index-internal', () => {
     }));
 
     const mock = jest.fn()
-    jest.mock( './../src/core/internal/frame-element-init', () => {
+    jest.mock( './../src/internal/frame-element-init', () => {
         return {
             startFrameElement: mock
         }
@@ -73,7 +73,7 @@ describe('test index-internal', () => {
       }));
 
       const mock = jest.fn()
-      jest.mock( './../src/core/internal/frame-element-init.ts', () => {
+      jest.mock( './../src/internal/frame-element-init.ts', () => {
           return {
               start: mock
           }
@@ -95,7 +95,7 @@ describe('test index-internal', () => {
     }));
 
     const mock = jest.fn();
-    jest.mock('./../src/core/internal/reveal/reveal-frame', () => {
+    jest.mock('./../src/internal/reveal/reveal-frame', () => {
       return {
       init: mock,
     }});
@@ -115,7 +115,7 @@ describe('test index-internal', () => {
     }));
 
     const mock = jest.fn();
-    jest.mock('./../src/core/internal/reveal/reveal-frame', () => {
+    jest.mock('./../src/internal/reveal/reveal-frame', () => {
       return {
       init: mock,
     }});

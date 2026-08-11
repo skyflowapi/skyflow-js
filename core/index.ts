@@ -57,5 +57,5 @@ export * from './utils/logs-helper';
 export * from './helpers';
 
 // Task 1.10 — variant-neutral request-assembly helpers.
-export { constructElementsInsertReq } from './core-utils/collect';
-export { formatRecordsForIframe } from './core-utils/reveal';
+export { constructElementsInsertReq } from './api-utils/collect';
+export { formatRecordsForIframe } from './api-utils/reveal';

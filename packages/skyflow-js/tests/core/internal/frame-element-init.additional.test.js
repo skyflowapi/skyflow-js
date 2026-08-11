@@ -15,15 +15,15 @@ jest.mock('@core/client', () => {
   return { __esModule: true, default: Client, mockClientRequest };
 });
 // Mock collect helpers BEFORE importing FrameElementInit so internal references use mocks.
-// constructElementsInsertReq now lives in @core/core-utils/collect, so mock it there.
-jest.mock('@core/core-utils/collect', () => ({
+// constructElementsInsertReq now lives in @core/api-utils/collect, so mock it there.
+jest.mock('@core/api-utils/collect', () => ({
   __esModule: true,
   constructElementsInsertReq: jest.fn((insertObj, updateObj) => [
     { insertRecords: insertObj },
     { updateRecords: Object.entries(updateObj).map(([skyflowID, record]) => ({ skyflowID, ...record })) },
   ]),
 }));
-jest.mock('../../../src/core-utils/collect', () => {
+jest.mock('../../../src/api-utils/collect', () => {
   const constructInsertRecordRequest = jest.fn((finalInsertRecords) => {
     if (finalInsertRecords && typeof finalInsertRecords === 'object' && !Array.isArray(finalInsertRecords)) {
       return Object.entries(finalInsertRecords).map(([table, fields]) => ({ table, fields }));
@@ -39,7 +39,7 @@ jest.mock('../../../src/core-utils/collect', () => {
     updateRecordsBySkyflowIDComposable,
   };
 });
-import FrameElementInit from '../../../src/core/internal/frame-element-init';
+import FrameElementInit from '../../../src/internal/frame-element-init';
 import SkyflowError from '@core/errors';
 import { ELEMENTS } from '@core/constants';
 import logs from '@core/utils/logs';
@@ -47,12 +47,12 @@ import { parameterizedString } from '../../../src/utils/logs-helper';
 import * as helpers from '../../../src/utils/helpers';
 import Client, { mockClientRequest } from '@core/client';
 import { ELEMENT_EVENTS_TO_IFRAME, COLLECT_TYPES } from '@core/constants';
-import { constructElementsInsertReq } from '@core/core-utils/collect';
+import { constructElementsInsertReq } from '@core/api-utils/collect';
 import {
   constructInsertRecordRequest,
   insertDataInCollect,
   updateRecordsBySkyflowIDComposable,
-} from '../../../src/core-utils/collect';
+} from '../../../src/api-utils/collect';
 import { ErrorType } from '../../../src/index-node';
 // Mock element-options to bypass complex row merging logic that expects prior group structure
 jest.mock('@core/libs/element-options', () => ({

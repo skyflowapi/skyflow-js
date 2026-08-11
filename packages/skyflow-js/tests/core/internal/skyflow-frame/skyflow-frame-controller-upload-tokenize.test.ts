@@ -9,13 +9,13 @@ import {
 import clientModule from "@core/client";
 import * as busEvents from "@core/utils/bus-events";
 import { LogLevel, Env, InsertResponse } from "../../../../src/utils/common";
-import SkyflowFrameController from "../../../../src/core/internal/skyflow-frame/skyflow-frame-controller";
+import SkyflowFrameController from "../../../../src/internal/skyflow-frame/skyflow-frame-controller";
 import Client from "@core/client";
 import { ISkyflow } from "../../../../src/skyflow";
 import {
   TokenizeDataInput,
   UploadFileDataInput,
-} from "../../../../src/core/internal/internal-types";
+} from "../../../../src/internal/internal-types";
 
 jest
   .spyOn(busEvents, "getAccessToken")
@@ -1164,7 +1164,7 @@ describe("SkyflowFrameController - tokenize function", () => {
 
     jest
       .spyOn(
-        require("@core/core-utils/collect"),
+        require("@core/api-utils/collect"),
         "constructElementsInsertReq"
       )
       .mockImplementation(() => {

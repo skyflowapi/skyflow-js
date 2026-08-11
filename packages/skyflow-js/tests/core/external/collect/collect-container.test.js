@@ -10,7 +10,7 @@ import {
   ELEMENTS,
   ELEMENT_EVENTS_TO_CLIENT
 } from '@core/constants';
-import CollectContainer from '../../../../src/core/external/collect/collect-container';
+import CollectContainer from '../../../../src/external/collect/collect-container';
 import * as iframerUtils from '@core/iframe-libs/iframer';
 import SkyflowError from '@core/errors';
 import Skyflow from '../../../../src/skyflow';

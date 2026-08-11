@@ -6,7 +6,7 @@ import * as coreValidators from '@core/validators';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
 import SkyflowError from '@core/errors';
-import { IRevealElementInput } from '../../core/external/reveal/reveal-container';
+import { IRevealElementInput } from '../../external/reveal/reveal-container';
 import {
   RedactionType,
   MessageType,

@@ -9,7 +9,7 @@ jest.mock('@core/libs/uuid', () => ({
 
 // Mock CollectContainer to capture constructor argument
 let capturedConfig; // will hold the config object passed to container
-jest.mock('../src/core/external/collect/collect-container', () => ({
+jest.mock('../src/external/collect/collect-container', () => ({
   __esModule: true,
   default: jest.fn().mockImplementation((config) => {
     capturedConfig = config; // grab config which has getSkyflowBearerToken

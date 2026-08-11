@@ -20,7 +20,7 @@ import {
   IGetOptions,
   IDeleteRecordInput,
 } from "../../../../src/utils/common";
-import SkyflowFrameController from "../../../../src/core/internal/skyflow-frame/skyflow-frame-controller";
+import SkyflowFrameController from "../../../../src/internal/skyflow-frame/skyflow-frame-controller";
 import { ErrorType, InsertOptions } from "../../../../src/index-node";
 import { ISkyflow } from "../../../../src/skyflow";
 import Client from "@core/client";

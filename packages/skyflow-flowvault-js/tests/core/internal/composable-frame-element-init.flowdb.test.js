@@ -12,8 +12,8 @@ import bus from 'framebus';
 
 // Control the flowDB composable fetch per test; keep the real formatter so the posted shape is real.
 const mockFetchRecordsByTokenIdComposableFlowDB = jest.fn();
-jest.mock('../../../src/core-utils/reveal', () => {
-  const actual = jest.requireActual('../../../src/core-utils/reveal');
+jest.mock('../../../src/api-utils/reveal', () => {
+  const actual = jest.requireActual('../../../src/api-utils/reveal');
   return {
     ...actual,
     fetchRecordsByTokenIdComposableFlowDB: (...args) => mockFetchRecordsByTokenIdComposableFlowDB(...args),
