@@ -11,8 +11,57 @@ on:
 
 
 jobs:
-  internal-release:
+  # Classify what this release branch changes relative to main, then fan out to
+  # one or both packages:
+  #   core/ (or any shared root) changed -> publish BOTH
+  #   only packages/skyflow-js changed   -> publish skyflow-js
+  #   only packages/skyflow-flowvault-js -> publish flowvault
+  detect-changes:
+    runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[AUTOMATED] Release')"
+    outputs:
+      js: ${{ steps.filter.outputs.js }}
+      flowvault: ${{ steps.filter.outputs.flowvault }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed scopes
+        id: filter
+        run: |
+          # Diff base = merge-base with main, i.e. "what does this release
+          # branch change relative to where it diverged from main". Consistent
+          # across re-pushes (idempotent) rather than per-push delta.
+          git fetch --no-tags origin main
+          BASE=$(git merge-base FETCH_HEAD HEAD)
+          echo "Merge-base with main: $BASE"
+
+          CHANGED=$(git diff --name-only "$BASE" HEAD)
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          # Shared roots feed BOTH package builds, so treat them like core.
+          SHARED='^(core/|webpack/|scripts/|package-lock\.json|package\.json|\.github/workflows/)'
+          JS='^packages/skyflow-js/'
+          FLOWVAULT='^packages/skyflow-flowvault-js/'
+
+          js=false
+          flowvault=false
+          if echo "$CHANGED" | grep -qE "$SHARED"; then
+            js=true
+            flowvault=true
+          fi
+          if echo "$CHANGED" | grep -qE "$JS"; then js=true; fi
+          if echo "$CHANGED" | grep -qE "$FLOWVAULT"; then flowvault=true; fi
+
+          echo "Resolved: js=$js flowvault=$flowvault"
+          echo "js=$js" >> "$GITHUB_OUTPUT"
+          echo "flowvault=$flowvault" >> "$GITHUB_OUTPUT"
+
+  internal-release-js:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.js == 'true' }}
     uses: ./.github/workflows/common-release.yml
     with:
       TAG: "internal"
@@ -34,3 +83,32 @@ jobs:
       JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
       PAT_ACTIONS: ${{ secrets.PAT_ACTIONS }}
 
+  internal-release-flowvault:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.flowvault == 'true' }}
+    uses: ./.github/workflows/common-release.yml
+    with:
+      TAG: "internal"
+      PACKAGE_DIR: "packages/skyflow-flowvault-js"
+      PACKAGE_NAME: "skyflow-flowvault-js"
+      DIST_DIR: "packages/skyflow-flowvault-js/dist/v1"
+      S3_PREFIX: "flowvault/"
+      TAG_PREFIX: "flowvault-"
+      INVALIDATION_PATH: "/flowvault/*"
+    secrets:
+      # Same internal/BLITZ bucket + distribution + CDN origin as skyflow-js;
+      # flowDB just lands under the flowvault/ key prefix.
+      IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
+      # New secret to provision: the iframe path AFTER the auto-added
+      # "flowvault/v<version>/" segment (workflow prepends S3_PREFIX + version).
+      # Trailing path only (e.g. elements/index.html) — do NOT bake in the
+      # flowvault/ prefix or the version.
+      IFRAME_SECURE_SITE: ${{ secrets.FLOWVAULT_IFRAME_SECURE_SITE }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
+      AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
+      AWS_BUCKET_NAME: ${{ secrets.BLITZ_AWS_BUCKET_NAME }}
+      CF_DISTRIBUTION_ID: ${{ secrets.BLITZ_CF_DISTRIBUTION_ID }}
+      JFROG_USERNAME: ${{ secrets.JFROG_USERNAME }}
+      JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
+      PAT_ACTIONS: ${{ secrets.PAT_ACTIONS }}
