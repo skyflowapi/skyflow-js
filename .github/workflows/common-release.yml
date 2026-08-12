@@ -18,6 +18,13 @@ on:
         required: false
         type: string
         default: skyflow-js
+      # Tag namespace for this package. Empty => bare-semver tags (skyflow-js,
+      # e.g. "2.7.9"); "flowvault-" => "flowvault-v1.0.0". Stripped (along with
+      # an optional leading "v") from the triggering tag to get the version.
+      TAG_PREFIX:
+        required: false
+        type: string
+        default: ''
       DIST_DIR:
         required: false
         type: string
@@ -75,16 +82,29 @@ jobs:
 
       - run: npm install --ignore-scripts
 
-      - name: Get Previous Tag
-        run: |
-          echo "TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
-
       - name: Set RELEASE_VERSION
         run: |
+          PREFIX="${{ inputs.TAG_PREFIX }}"
           if [ "${{ inputs.TAG }}" == "internal" ]; then
-            echo "RELEASE_VERSION=${{ env.TAG }}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
+            # Branch-triggered (release/*): github.ref_name is a branch, not a
+            # version tag. Derive the base version from the latest tag in THIS
+            # package's namespace, then append the -dev.<sha> suffix.
+            if [ -n "$PREFIX" ]; then
+              PREV_TAG=$(git describe --tags --abbrev=0 --match "${PREFIX}*")
+            else
+              PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1))
+            fi
+            BASE_VERSION="${PREV_TAG#$PREFIX}"
+            BASE_VERSION="${BASE_VERSION#v}"
+            echo "RELEASE_VERSION=${BASE_VERSION}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
           else
-            echo "RELEASE_VERSION=${{ env.TAG }}" >> $GITHUB_ENV
+            # Tag-triggered (beta/public): the version IS the triggering tag,
+            # minus the package prefix and an optional leading "v"
+            # (e.g. flowvault-v1.0.0 -> 1.0.0; 2.7.9-beta.1 -> 2.7.9-beta.1).
+            BASE_VERSION="${{ github.ref_name }}"
+            BASE_VERSION="${BASE_VERSION#$PREFIX}"
+            BASE_VERSION="${BASE_VERSION#v}"
+            echo "RELEASE_VERSION=${BASE_VERSION}" >> $GITHUB_ENV
           fi
 
       - name: Bump Version
