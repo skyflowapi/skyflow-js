@@ -11,6 +11,7 @@
     "type-check": "npm run type-check --workspaces --if-present",
     "build:types": "npm run build:types --workspaces --if-present",
     "dev": "npm run dev -w skyflow-js",
+    "dev:flowvault": "npm run dev -w skyflow-flowvault-js",
     "build-browser-sdk": "npm run build-browser-sdk --workspaces --if-present",
     "build-node-sdk": "npm run build-node-sdk --workspaces --if-present",
     "build-iframe": "npm run build-iframe --workspaces --if-present",
