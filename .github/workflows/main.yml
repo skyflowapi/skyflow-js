@@ -16,13 +16,24 @@ jobs:
       - name: install modules
         run: npm ci --ignore-scripts
 
+      - name: Type check
+        run: npm run type-check
+
       - name: Run tests
         run: npm run test
-      
-      - name: Codecov
+
+      - name: Codecov (skyflow-js)
         uses: codecov/codecov-action@v2.1.0
         with:
           token: ${{ secrets.CODECOV_REPO_UPLOAD_TOKEN }}
-          files: coverage/lcov.info
+          files: packages/skyflow-js/coverage/lcov.info
           name: codecov-skyflow-js
+          verbose: true
+
+      - name: Codecov (skyflow-flowvault-js)
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          token: ${{ secrets.CODECOV_REPO_UPLOAD_TOKEN }}
+          files: packages/skyflow-flowvault-js/coverage/lcov.info
+          name: codecov-skyflow-flowvault-js
           verbose: true
