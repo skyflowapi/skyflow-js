@@ -3,11 +3,11 @@ Copyright (c) 2025 Skyflow, Inc.
 */
 // flowvault (flowDB) public Skyflow shell. Structurally parallel to skyflow-js's
 // Skyflow class, but elements-only: it exposes ONLY the element container()
-// factory (COLLECT / REVEAL / COMPOSE_REVEAL) — no pure-JS insert/detokenize/
-// get/delete/update, no 3DS (per package-split §9 decisions). COMPOSABLE collect
-// is deferred (its container classes were not ported from 2.9.0-beta.1). The
-// public error surface is SkyflowFlowDBError; internal container-type validation
-// uses the neutral @core SkyflowError base.
+// factory (COLLECT / REVEAL / COMPOSABLE collect / COMPOSE_REVEAL) — no pure-JS
+// insert/detokenize/get/delete/update, no 3DS (per package-split §9 decisions).
+// COMPOSABLE collect has no file upload (flowDB has none). The public error
+// surface is SkyflowFlowDBError; internal container-type validation uses the
+// neutral @core SkyflowError base.
 import bus from 'framebus';
 import uuid from '@core/libs/uuid';
 import isTokenValid from '@core/utils/jwt-utils';
@@ -27,6 +27,7 @@ import Client from '@core/client';
 import SkyflowError from '@core/errors';
 import RevealContainer from './external/reveal/reveal-container';
 import CollectContainer from './external/collect/collect-container';
+import ComposableContainer from './external/collect/compose-collect-container';
 import ComposableRevealContainer from './external/reveal/composable-reveal-container';
 import SkyflowContainer from './external/skyflow-container';
 import { parameterizedString, printLog } from './utils/logs-helper';
@@ -203,6 +204,7 @@ class Skyflow {
 
   container(type: ContainerType.COLLECT, options?: ContainerOptions): CollectContainer;
   container(type: ContainerType.REVEAL, options?: ContainerOptions): RevealContainer;
+  container(type: ContainerType.COMPOSABLE, options?: ContainerOptions): ComposableContainer;
   container(type: ContainerType.COMPOSE_REVEAL,
     options?: ContainerOptions)
   : ComposableRevealContainer;
@@ -238,6 +240,23 @@ class Skyflow {
           this.#logLevel);
         return revealContainer;
       }
+      case ContainerType.COMPOSABLE: {
+        validateComposableContainerOptions(options!);
+        const composableContainer = new ComposableContainer({
+          ...this.#metadata,
+          clientJSON: this.#client.toJSON(),
+          containerType: type,
+          skyflowContainer: this.#skyflowContainer,
+          getSkyflowBearerToken: this.#getSkyflowBearerToken,
+        },
+        this.#skyflowElements,
+        { logLevel: this.#logLevel, env: this.#env }, options!);
+        printLog(parameterizedString(logs.infoLogs.COLLECT_CONTAINER_CREATED, CLASS_NAME),
+          MessageType.LOG,
+          this.#logLevel);
+        return composableContainer;
+      }
+
       case ContainerType.COMPOSE_REVEAL: {
         validateComposableContainerOptions(options!);
         const revealComposableContainer = new ComposableRevealContainer({

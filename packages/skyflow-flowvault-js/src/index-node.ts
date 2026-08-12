@@ -60,6 +60,8 @@ export {
 // --- element container / element classes ---
 export { default as CollectElement } from '@core/external/collect/collect-element';
 export { default as CollectContainer } from './external/collect/collect-container';
+export { default as ComposableContainer } from './external/collect/compose-collect-container';
+export { default as ComposableElement } from './external/collect/compose-collect-element';
 export { default as RevealContainer } from './external/reveal/reveal-container';
 export { default as RevealElement } from './external/reveal/reveal-element';
 export { default as ComposableRevealContainer } from './external/reveal/composable-reveal-container';
