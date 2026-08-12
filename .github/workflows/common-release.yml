@@ -9,6 +9,32 @@ on:
       REGISTRY_URL:
         required: false
         type: string
+      # --- Package targeting (defaults preserve skyflow-js behavior) ---
+      PACKAGE_DIR:
+        required: false
+        type: string
+        default: packages/skyflow-js
+      PACKAGE_NAME:
+        required: false
+        type: string
+        default: skyflow-js
+      DIST_DIR:
+        required: false
+        type: string
+        default: packages/skyflow-js/dist/v1
+      # S3 key prefix placed BEFORE the version segment (e.g. "flowvault/").
+      # Empty => s3://bucket/v<version>/ (skyflow-js, unchanged).
+      S3_PREFIX:
+        required: false
+        type: string
+        default: ''
+      # CloudFront invalidation path. "/*" preserves current behavior; a
+      # package can scope it (e.g. "/flowvault/*") to avoid churning the
+      # other package's cache.
+      INVALIDATION_PATH:
+        required: false
+        type: string
+        default: '/*'
     secrets:
         PAT_ACTIONS:
             required: true
@@ -42,9 +68,9 @@ jobs:
           token: ${{ secrets.PAT_ACTIONS }}
           fetch-depth: 0
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
-          node-version: 14.17.6
+          node-version: 18
           registry-url: ${{ inputs.REGISTRY_URL }}
 
       - run: npm install --ignore-scripts
@@ -64,7 +90,7 @@ jobs:
       - name: Bump Version
         run: |
           chmod +x ./scripts/bump_version.sh
-          ./scripts/bump_version.sh "${{ env.RELEASE_VERSION }}"
+          ./scripts/bump_version.sh "${{ env.RELEASE_VERSION }}" "${{ inputs.PACKAGE_DIR }}"
 
       - name: Resolve Branch for the Tagged Commit
         id: resolve-branch
@@ -87,21 +113,21 @@ jobs:
           git config user.name ${{ github.actor }}
           git config user.email ${{ github.actor }}@users.noreply.github.com
           git checkout ${{ env.branch_name }}
-          git add package.json
+          git add ${{ inputs.PACKAGE_DIR }}/package.json
           git commit -m "[AUTOMATED] Release - ${{ env.RELEASE_VERSION }}"
           git push origin ${{ env.branch_name }} -f
 
       - name: Build Browser SDK
-        run: npm run build-browser-sdk
+        run: npm run build-browser-sdk -w ${{ inputs.PACKAGE_NAME }}
         env:
           IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+          IFRAME_SECURE_SITE: "${{ inputs.S3_PREFIX }}v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
 
       - name: Build Iframe
-        run: npm run build-iframe
+        run: npm run build-iframe -w ${{ inputs.PACKAGE_NAME }}
         env:
           IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+          IFRAME_SECURE_SITE: "${{ inputs.S3_PREFIX }}v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -123,27 +149,27 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 cp --recursive dist/v1 s3://${{ secrets.AWS_BUCKET_NAME }}/v${{ env.RELEASE_VERSION }}/
+          aws s3 cp --recursive ${{ inputs.DIST_DIR }} s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.S3_PREFIX }}v${{ env.RELEASE_VERSION }}/
 
       - name: Build Node SDK
         run: |
-          npm run build:types 
-          npm run build-node-sdk
+          npm run build:types -w ${{ inputs.PACKAGE_NAME }}
+          npm run build-node-sdk -w ${{ inputs.PACKAGE_NAME }}
         env:
           IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+          IFRAME_SECURE_SITE: "${{ inputs.S3_PREFIX }}v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
 
       - name: Publish SDK
         run: |
           if [ "${{ inputs.TAG }}" == "beta" ]; then
-            npm publish --tag v${{  env.RELEASE_VERSION }}
+            npm publish -w ${{ inputs.PACKAGE_NAME }} --tag v${{  env.RELEASE_VERSION }}
           elif [ "${{ inputs.TAG }}" == "internal" ]; then
             curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
             npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
             npm config set unsafe-perm true
-            npm publish
+            npm publish -w ${{ inputs.PACKAGE_NAME }}
           else
-            npm publish
+            npm publish -w ${{ inputs.PACKAGE_NAME }}
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
@@ -153,6 +179,6 @@ jobs:
           for i in {1..10}; do
             aws cloudfront create-invalidation \
               --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} \
-              --paths "/*"
+              --paths "${{ inputs.INVALIDATION_PATH }}"
             sleep 10
           done
