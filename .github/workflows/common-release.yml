@@ -89,17 +89,30 @@ jobs:
             # Branch-triggered (release/*): github.ref_name is a branch, not a
             # version tag. Derive the base version from the latest tag in THIS
             # package's namespace, then append the -dev.<sha> suffix.
+            # `|| true` so a namespace with no tag yet doesn't abort the step
+            # under `set -e` (GitHub runs `run:` with `bash -eo pipefail`); the
+            # empty result is handled by the package.json fallback below.
             if [ -n "$PREFIX" ]; then
-              PREV_TAG=$(git describe --tags --abbrev=0 --match "${PREFIX}*")
+              PREV_TAG=$(git describe --tags --abbrev=0 --match "${PREFIX}*" 2>/dev/null || true)
             else
               # Bare-semver tags only (skyflow-js). Must EXCLUDE the flowvault-*
               # namespace, otherwise once a flowvault-v* tag is the newest tag
               # in the repo this would resolve the skyflow-js base version to
               # "flowvault-v1.0.0" and produce an invalid -dev.<sha> version.
-              PREV_TAG=$(git describe --tags --abbrev=0 --match '[0-9]*' --exclude 'flowvault-*')
+              PREV_TAG=$(git describe --tags --abbrev=0 --match '[0-9]*' --exclude 'flowvault-*' 2>/dev/null || true)
             fi
-            BASE_VERSION="${PREV_TAG#$PREFIX}"
-            BASE_VERSION="${BASE_VERSION#v}"
+            if [ -z "$PREV_TAG" ]; then
+              # No tag in this package's namespace yet (e.g. flowvault's first
+              # internal build, before any flowvault-* tag exists). Seed the base
+              # from the package's own package.json version so the -dev.<sha>
+              # build still gets a valid semver base instead of failing the run.
+              # Once the package cuts its first real tag, the describe branch
+              # above takes over automatically.
+              BASE_VERSION=$(node -p "require('./${{ inputs.PACKAGE_DIR }}/package.json').version")
+            else
+              BASE_VERSION="${PREV_TAG#$PREFIX}"
+              BASE_VERSION="${BASE_VERSION#v}"
+            fi
             echo "RELEASE_VERSION=${BASE_VERSION}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
           else
             # Tag-triggered (beta/public): the version IS the triggering tag,
