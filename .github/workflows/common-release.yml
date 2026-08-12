@@ -92,7 +92,11 @@ jobs:
             if [ -n "$PREFIX" ]; then
               PREV_TAG=$(git describe --tags --abbrev=0 --match "${PREFIX}*")
             else
-              PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1))
+              # Bare-semver tags only (skyflow-js). Must EXCLUDE the flowvault-*
+              # namespace, otherwise once a flowvault-v* tag is the newest tag
+              # in the repo this would resolve the skyflow-js base version to
+              # "flowvault-v1.0.0" and produce an invalid -dev.<sha> version.
+              PREV_TAG=$(git describe --tags --abbrev=0 --match '[0-9]*' --exclude 'flowvault-*')
             fi
             BASE_VERSION="${PREV_TAG#$PREFIX}"
             BASE_VERSION="${BASE_VERSION#v}"
@@ -129,6 +133,11 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Commit Changes
+        # Only beta/public commit the version bump back to the release branch.
+        # Internal (-dev.<sha>) builds must NOT — branch_name is unset for them
+        # (Resolve Branch is skipped), and with two internal jobs running in
+        # parallel an unguarded commit-back would race on the git push.
+        if: ${{ inputs.tag == 'beta' || inputs.tag == 'public' }}
         run: |
           git config user.name ${{ github.actor }}
           git config user.email ${{ github.actor }}@users.noreply.github.com
