@@ -99,11 +99,13 @@ jobs:
       # Same internal/BLITZ bucket + distribution + CDN origin as skyflow-js;
       # flowDB just lands under the flowvault/ key prefix.
       IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-      # New secret to provision: the iframe path AFTER the auto-added
-      # "flowvault/v<version>/" segment (workflow prepends S3_PREFIX + version).
-      # Trailing path only (e.g. elements/index.html) — do NOT bake in the
-      # flowvault/ prefix or the version.
-      IFRAME_SECURE_SITE: ${{ secrets.FLOWVAULT_IFRAME_SECURE_SITE }}
+      # Reuses skyflow-js's shared trailing-path secret ("elements/index.html").
+      # Both packages build the same dist/v1/elements/index.html artifact via
+      # webpack/iframe.js, and this value is origin-/prefix-independent — the
+      # workflow prepends "flowvault/v<version>/" — so no flowvault-specific
+      # secret is needed. The final src resolves to
+      # <origin>/flowvault/v<version>/elements/index.html.
+      IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
       AWS_ACCESS_KEY_ID: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}
       AWS_REGION: ${{ secrets.BLITZ_AWS_REGION }}
