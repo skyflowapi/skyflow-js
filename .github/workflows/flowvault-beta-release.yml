@@ -1,0 +1,45 @@
+name: FlowVault Public Beta Release
+
+# Release entry point for skyflow-flowvault-js (flowDB). Triggered by a
+# flowvault-namespaced beta tag so it never collides with skyflow-js's bare
+# semver tags. Calls the shared reusable workflow with flowvault's package
+# targeting (S3_PREFIX/TAG_PREFIX/INVALIDATION_PATH), landing in the SAME
+# sandbox bucket + CloudFront distribution under the flowvault/ prefix.
+on:
+  push:
+    tags: 'flowvault-v*.*.*-beta.*'
+    paths-ignore:
+      - "package.json"
+      - "package-lock.json"
+      - "*.md"
+
+
+jobs:
+  flowvault-beta-release:
+    uses: ./.github/workflows/common-release.yml
+    with:
+      REGISTRY_URL: "https://registry.npmjs.org"
+      TAG: "beta"
+      PACKAGE_DIR: "packages/skyflow-flowvault-js"
+      PACKAGE_NAME: "skyflow-flowvault-js"
+      DIST_DIR: "packages/skyflow-flowvault-js/dist/v1"
+      S3_PREFIX: "flowvault/"
+      TAG_PREFIX: "flowvault-"
+      INVALIDATION_PATH: "/flowvault/*"
+    secrets:
+      # Same sandbox bucket / distribution / CDN origin as skyflow-js — flowDB
+      # just lands under the flowvault/ key prefix, so the shared SANDBOX_*
+      # secrets are reused as-is.
+      IFRAME_SECURE_ORIGIN: ${{ secrets.SANDBOX_IFRAME_SECURE_ORIGIN }}
+      # The ONLY flowvault-specific secret: the iframe path AFTER the auto-added
+      # "flowvault/v<version>/" segment (workflow prepends S3_PREFIX + version).
+      # Same value shape as skyflow-js's *_IFRAME_SECURE_SITE — do NOT bake the
+      # flowvault/ prefix or the version into it.
+      IFRAME_SECURE_SITE: ${{ secrets.FLOWVAULT_SANDBOX_IFRAME_SECURE_SITE }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_SECRET }}
+      AWS_REGION: ${{ secrets.SANDBOX_AWS_REGION }}
+      AWS_BUCKET_NAME: ${{ secrets.SANDBOX_AWS_BUCKET_NAME }}
+      CF_DISTRIBUTION_ID: ${{ secrets.SANDBOX_CF_DISTRIBUTION_ID }}
+      PAT_ACTIONS: ${{ secrets.PAT_ACTIONS }}
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -15,6 +15,12 @@ jobs:
     with:
       REGISTRY_URL: "https://registry.npmjs.org"
       TAG: "beta"
+      PACKAGE_DIR: "packages/skyflow-js"
+      PACKAGE_NAME: "skyflow-js"
+      DIST_DIR: "packages/skyflow-js/dist/v1"
+      S3_PREFIX: ""
+      TAG_PREFIX: ""
+      INVALIDATION_PATH: "/*"
     secrets:
       IFRAME_SECURE_ORIGIN: ${{ secrets.SANDBOX_IFRAME_SECURE_ORIGIN }}
       IFRAME_SECURE_SITE: ${{ secrets.SANDBOX_IFRAME_SECURE_SITE }}

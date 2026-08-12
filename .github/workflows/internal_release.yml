@@ -16,6 +16,12 @@ jobs:
     uses: ./.github/workflows/common-release.yml
     with:
       TAG: "internal"
+      PACKAGE_DIR: "packages/skyflow-js"
+      PACKAGE_NAME: "skyflow-js"
+      DIST_DIR: "packages/skyflow-js/dist/v1"
+      S3_PREFIX: ""
+      TAG_PREFIX: ""
+      INVALIDATION_PATH: "/*"
     secrets:
       IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
       IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
