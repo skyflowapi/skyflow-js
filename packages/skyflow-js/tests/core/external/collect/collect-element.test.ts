@@ -261,6 +261,70 @@ describe("testing collect element under various scenarios", () => {
     });
   });
 
+  it("scopes COLLECT_ELEMENT_READY to the element's own iframe (cross-package message isolation)", () => {
+    // Regression guard for SK-3041 Phase 3 Task 3.6: skyflow-js and
+    // skyflow-flowvault-js are served from one shared CDN origin, so a
+    // postMessage origin check cannot distinguish one package's iframe from the
+    // other's. The COLLECT_ELEMENT_READY round-trip must therefore be scoped to
+    // this element's unique iframe name, so a sibling (e.g. flowvault) element's
+    // READY can never resolve this element's READY.
+    const onSpy = jest.spyOn(bus, "on");
+
+    const element = new CollectElement(
+      id,
+      { elementName, rows },
+      metaData,
+      {
+        type: ContainerType.COLLECT,
+        containerId: "containerId",
+        isMounted: false,
+      },
+      true,
+      destroyCallback,
+      updateCallback,
+      { logLevel: LogLevel.ERROR, env: Env.PROD }
+    );
+
+    const iframeName = element.iframeName();
+    expect(iframeName.length).toBeGreaterThan(0);
+
+    // The framebus subscription must carry the instance-unique suffix, never the
+    // bare COLLECT_ELEMENT_READY constant.
+    const readyOnCalls = onSpy.mock.calls.filter(
+      (c) =>
+        typeof c[0] === "string" &&
+        c[0].startsWith(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY)
+    );
+    expect(readyOnCalls.length).toBe(1);
+    const subscribedEvent = readyOnCalls[0][0];
+    expect(subscribedEvent).not.toBe(
+      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY
+    );
+    expect(subscribedEvent).toBe(
+      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY + iframeName
+    );
+
+    // The emit side publishes on the SAME instance-scoped channel.
+    element.on(ELEMENT_EVENTS_TO_CLIENT.READY, jest.fn());
+    const readyEmitCalls = emitSpy.mock.calls.filter(
+      (c) =>
+        typeof c[0] === "string" &&
+        c[0].startsWith(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY)
+    );
+    expect(readyEmitCalls.length).toBeGreaterThan(0);
+    expect(readyEmitCalls[0][0]).toBe(
+      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY + iframeName
+    );
+
+    // A foreign element's READY is a different framebus event string, so it is
+    // never routed to this element's subscription.
+    const foreignChannel =
+      ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY +
+      "element:CARD_NUMBER:" +
+      btoa("foreign-uuid");
+    expect(foreignChannel).not.toBe(subscribedEvent);
+  });
+
   it("tests constructor for collect element with element mounted", () => {
     const onSpy = jest.spyOn(bus, "on");
 

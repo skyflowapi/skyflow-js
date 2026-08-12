@@ -480,7 +480,7 @@ class CollectElement extends SkyflowElement {
       handler(data);
     });
     if (eventName === ELEMENT_EVENTS_TO_CLIENT.READY) {
-      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY, {
+      this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY + this.iframeName(), {
         ready: this.#readyToMount,
         name: this.iframeName(),
       });
@@ -500,7 +500,7 @@ class CollectElement extends SkyflowElement {
   };
 
   #registerIFrameBusListener = () => {
-    this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY, (data) => {
+    this.#bus.on(ELEMENT_EVENTS_TO_IFRAME.COLLECT_ELEMENT_READY + this.iframeName(), (data) => {
       if (data.ready && data.name === this.iframeName()) {
         const { name, ...elementState } = this.#states[0];
         this.#eventEmitter._emit(ELEMENT_EVENTS_TO_CLIENT.READY, {
