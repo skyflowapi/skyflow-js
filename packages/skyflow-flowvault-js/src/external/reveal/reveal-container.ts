@@ -13,7 +13,7 @@ import {
   ICoreMetadata, RevealContainerProps, Context,
 } from '@core/types';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
-import {
+import type {
   IFlowDBRevealElementInput,
   IRevealElementOptions,
   IRevealOptions,
@@ -25,7 +25,7 @@ import RevealElement from './reveal-element';
 // The flowDB reveal input is the token-only shape; `IRevealElementInput` aliases
 // it (no privacyDB skyflowID/table/column/file-render keys).
 export type IRevealElementInput = IFlowDBRevealElementInput;
-export {
+export type {
   IFlowDBRevealElementInput,
   IRevealElementOptions,
   IRevealOptions,
