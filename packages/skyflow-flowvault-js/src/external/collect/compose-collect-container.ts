@@ -12,9 +12,8 @@ Copyright (c) 2025 Skyflow, Inc.
 import uuid from '@core/libs/uuid';
 import { FRAME_ELEMENT } from '@core/constants';
 import { formatValidations, formatOptions } from '@core/libs/element-options';
-import { CollectElementOptions } from '@core/types';
 import CoreComposableCollectContainer from '@core/external/collect/composable-collect-container';
-import { CollectElementInput, ICollectOptions } from '../../utils/common';
+import { CollectElementInput, CollectElementOptions, ICollectOptions } from '../../utils/common';
 import { CollectResponse } from '../../internal/internal-types';
 import { validateCollectElementInput } from '../../utils/validators';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';

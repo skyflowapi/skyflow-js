@@ -228,12 +228,20 @@ export const constructFlowDBUpdateRequest = (
   options: Record<string, any> = { tokens: true },
   vaultID: string | undefined,
 ): FlowDBUpdateRequestBody => {
-  const records: FlowDBUpdateRecordData[] = updateRecords.updateRecords.map((record) => ({
-    skyflowID: record.skyflowID as string,
-    tableName: record.table,
-    data: omit(record.fields, ['table', 'skyflowID']),
-    ...(options?.updateType ? { updateType: options.updateType } : {}),
-  }));
+  // `updateType` is now sourced per-record from the matching table's upsert entry
+  // (there is no top-level options.updateType). If a record's table has no upsert
+  // entry, `updateType` is omitted — same result as the previous no-top-level case.
+  const upsertOptions: IFlowDBUpsertOptions[] = Array.isArray(options?.upsert)
+    ? options.upsert : [];
+  const records: FlowDBUpdateRecordData[] = updateRecords.updateRecords.map((record) => {
+    const upsertMatch = upsertOptions.find((upsert) => upsert.tableName === record.table);
+    return {
+      skyflowID: record.skyflowID as string,
+      tableName: record.table,
+      data: omit(record.fields, ['table', 'skyflowID']),
+      ...(upsertMatch?.updateType ? { updateType: upsertMatch.updateType } : {}),
+    };
+  });
 
   return {
     vaultID,

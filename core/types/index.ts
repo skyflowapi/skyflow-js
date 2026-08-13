@@ -242,7 +242,12 @@ export interface UpdateResponse {
   updatedField: UpdateResponseType
 }
 
-export interface CollectResponse extends InsertResponse {}
+// Variant-neutral collect-response marker; both packages' CollectResponse extend
+// it. The @core collect path never reads a field off the response (it resolves
+// the raw bus payload), so this asserts no structure.
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ICollectResponseBase {}
+export interface CollectResponse extends ICollectResponseBase, InsertResponse {}
 export interface DetokenizeRecord extends IRevealRecord {}
 export interface DetokenizeResponse extends IRevealResponseType {}
 
@@ -318,18 +323,20 @@ export interface InputStyles extends ErrorTextStyles {
   copyIcon?: Record<string, Style>,
 }
 
-export interface CollectElementOptions {
+// Variant-neutral collect-element options: the fields common to both packages
+// (required/format/translation, card options read by the shared `formatOptions`,
+// copy, masking). The privacyDB-only file options (`allowedFileType`,
+// `maxFileSize`, `maxFileCount`, `blockEmptyFiles`, `preserveFileName`) live on
+// each package's own `CollectElementOptions extends ICollectElementOptionsBase`
+// (flowDB has no file API). @core references this base everywhere it handles
+// options; `create()` is per-package and takes the package type.
+export interface ICollectElementOptionsBase {
   required?: boolean,
   format?: string,
   translation?: Record<string, string>,
   enableCardIcon?: boolean,
   enableCopy?: boolean,
   cardMetadata?: CardMetadata,
-  preserveFileName?: boolean,
-  allowedFileType?: string[],
-  blockEmptyFiles?: boolean,
-  maxFileSize?: number,
-  maxFileCount?: number,
   masking?: boolean,
   maskingChar?: string,
 }
@@ -338,8 +345,12 @@ export interface CardMetadata {
   scheme?: CardType[],
 }
 
-interface CollectElementCommonProps {
-  table?: string,
+// Variant-neutral shared props for a collect element's create/update input.
+// Deliberately omits the identity keys that diverge by package — privacyDB
+// `table`/`skyflowID` vs flowDB `tableName`/`skyflowId` — which each package's own
+// `CollectElementInput`/`CollectElementUpdateOptions` add on top. `column` is the
+// shared column key. Note: `type` is NOT here (update options carry no `type`).
+export interface ICollectElementInputBase {
   column?: string,
   label?: string,
   inputStyles?: InputStyles,
@@ -348,14 +359,25 @@ interface CollectElementCommonProps {
   placeholder?: string,
   altText?: string,
   validations?: IValidationRule[],
-  skyflowID?: string,
 }
 
-export interface CollectElementUpdateOptions extends CollectElementCommonProps {
+// Core-level update-options type consumed by the SHARED CollectElement.update()
+// (packages do not subclass CollectElement, so this one signature serves both).
+// It therefore tolerates both packages' identity namings; the active keys are
+// normalized at runtime via getVariantAdapter().collect.normalizeUpdateOptions.
+export interface CollectElementUpdateOptions extends ICollectElementInputBase {
   cardMetadata?: CardMetadata,
+  table?: string,
+  skyflowID?: string,
+  tableName?: string,
+  skyflowId?: string,
 }
 
-export interface CollectElementInput extends CollectElementCommonProps {
+// Core-level, identity-neutral create input: base + `type`. Used for the abstract
+// create() signature and the internal ElementGroupItem. Each package defines its
+// own public CollectElementInput (base + type + its own identity keys) that is
+// structurally assignable to this.
+export interface CollectElementInput extends ICollectElementInputBase {
   type: ElementType,
 }
 
@@ -383,23 +405,25 @@ export interface ISkyflowElement {
   getID(): string;
 }
 
-// Variant-neutral collect-options contract. Pins only the fields the @core
-// collect path itself reads. `additionalFields`/`upsert` carry package-divergent
-// payloads (privacyDB IInsertRecordInput / IUpsertOptions vs flowDB
-// IInsertRecordInputType / IFlowDBUpsertOptions), so the base treats them
-// opaquely and each package's ICollectOptions narrows them.
-export interface ICollectOptionsBase {
-  tokens?: boolean;
-  additionalFields?: any;
-  upsert?: any[];
-}
+// Variant-neutral collect-options marker. Asserts no structure: `tokens`,
+// `additionalFields` and `upsert` are all package-divergent (privacyDB carries
+// `tokens` + IInsertRecordInput / IUpsertOptions; flowDB drops `tokens` and uses
+// IInsertRecordInputType / IFlowDBUpsertOptions), so each package's own
+// `ICollectOptions extends ICollectOptionsBase` owns the full shape. The @core
+// collect path reads these fields only through the `validateCollectOptions`
+// seam via a local structural cast, never through this bound.
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ICollectOptionsBase {}
 
 // Container contracts. Generic so each package's own option/response/element
 // types flow through. `create`'s element is typed to the shared ISkyflowElement
 // surface. BaseSkyflow only ever constructs and returns these, so the contracts
 // are documentary + a bound; they are not called through.
-export interface ICollectContainer<TOptions = ICollectOptionsBase, TResponse = any> {
-  create(input: CollectElementInput, options?: CollectElementOptions): ISkyflowElement;
+export interface ICollectContainer<
+  TOptions extends ICollectOptionsBase = ICollectOptionsBase,
+  TResponse extends ICollectResponseBase = ICollectResponseBase,
+> {
+  create(input: ICollectElementInputBase, options?: ICollectElementOptionsBase): ISkyflowElement;
   collect(options?: TOptions): Promise<TResponse>;
   setError(errors: Partial<Record<ErrorType, string>>): void;
   uploadFiles?(options?: TOptions): Promise<UploadFilesResponse>;
@@ -463,11 +487,14 @@ export interface RenderFileResponse {
   },
 }
 
-export interface ElementState {
+// Variant-neutral element-state base. `value` is omitted here because it diverges:
+// privacyDB includes `Blob` (file elements), flowDB does not (no file API). Each
+// package's own `ElementState extends IElementStateBase` declares `value` with its
+// own type. `selectedCardScheme` is common (cards are supported by both).
+export interface IElementStateBase {
   isEmpty: boolean,
   isValid: boolean,
   isFocused: boolean,
-  value: string | Object | Blob | undefined,
   isRequired: boolean,
   selectedCardScheme?: string,
 }
@@ -548,7 +575,22 @@ export interface BatchInsertRequestBody {
   [key: string]: any;
 }
 
-export interface FormattedCollectElementOptions extends CollectElementOptions {
+// Internal plumbing only: the privacyDB file options the SHARED formatter/pipeline
+// physically processes (for FILE_INPUT / MULTI_FILE_INPUT elements). It is NOT a
+// public contract — each package's public `CollectElementOptions` is
+// `ICollectElementOptionsBase` plus its own additions (privacyDB adds these file
+// fields; flowDB adds none). Kept here so `@core`'s `formatOptions` can stay typed
+// without importing a package symbol; the file branch never runs for flowDB.
+export interface IFileCollectElementOptions {
+  preserveFileName?: boolean,
+  allowedFileType?: string[],
+  blockEmptyFiles?: boolean,
+  maxFileSize?: number,
+  maxFileCount?: number,
+}
+
+export interface FormattedCollectElementOptions
+  extends ICollectElementOptionsBase, IFileCollectElementOptions {
   [key: string]: any;
 }
 

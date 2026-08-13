@@ -22,11 +22,11 @@ import {
   validateElementOptions,
 } from '@core/libs/element-options';
 import CollectElement from '@core/external/collect/collect-element';
-import { getVariantAdapter } from '@core/adapters';
+import { VariantCollectAdapter } from '@core/adapters';
 import {
   ContainerType, Context, MessageType,
   CollectElementInput,
-  CollectElementOptions,
+  ICollectElementOptionsBase,
   ContainerOptions,
   ErrorType,
   ICoreMetadata,
@@ -41,11 +41,14 @@ import {
   validateBooleanOptions,
 } from '@core/validators';
 
-export interface ICollectElement {
+// Variant-neutral collect-element descriptor base. Omits the identity key that
+// diverges by package — privacyDB `table` vs flowDB `tableName` — which each
+// package's own `ICollectElement extends ICollectElementBase` adds. `column` is
+// the shared column key.
+export interface ICollectElementBase {
   elementType: ElementType;
   elementName: string;
   name: string;
-  table?: string;
   column?: string;
   sensitive?: boolean;
   replacePattern?: RegExp;
@@ -55,11 +58,19 @@ export interface ICollectElement {
   [key: string]: unknown;
 }
 
-export interface ElementGroupItem extends CollectElementInput, CollectElementOptions {
+export interface ElementGroupItem extends CollectElementInput, ICollectElementOptionsBase {
   elementType: ElementType;
   name?: string;
   accept?: string[];
   elementName?: string;
+  // Internal identity keys. `table` is canonical (both packages remap to it in
+  // create()); the skyflow-id key is variant (privacyDB `skyflowID` / flowDB
+  // `skyflowId`) and read via getVariantAdapter().collect.skyflowIdKey. `tableName`
+  // may linger from the flowDB input spread before the tableName→table remap.
+  table?: string;
+  skyflowID?: string;
+  skyflowId?: string;
+  tableName?: string;
 }
 
 export interface ElementGroup {
@@ -84,6 +95,13 @@ abstract class CollectContainer<
   TResponse extends object,
 > extends Container {
   protected containerId: string;
+
+  // Package-specific collect key strategy (privacyDB vs flowDB `skyflowId`/`table`
+  // naming). Abstract — each package MUST supply it; there is no default, so a
+  // missing implementation is a compile error, not a silent privacyDB fallback.
+  // Read here (skyflowIdKey) and injected into every CollectElement this container
+  // builds, replacing the former global getVariantAdapter().collect lookup.
+  protected abstract collectVariant: VariantCollectAdapter;
 
   protected elements: Record<string, CollectElement> = {};
 
@@ -148,7 +166,10 @@ abstract class CollectContainer<
   // create() differs per package (flowDB remaps tableName→table and each uses
   // its own collect-input validator), so it lives in the subclass and calls the
   // shared createMultipleElement below.
-  abstract create: (input: CollectElementInput, options?: CollectElementOptions) => CollectElement;
+  abstract create: (
+    input: CollectElementInput,
+    options?: ICollectElementOptionsBase,
+  ) => CollectElement;
 
   setError(errors: Partial<Record<ErrorType, string>>) {
     this.customErrorMessages = errors;
@@ -189,7 +210,7 @@ abstract class CollectContainer<
         options.label = element.label;
         // skyflowID (privacyDB) vs skyflowId (flowDB) is a wire-key contract; the
         // active key comes from the registered VariantAdapter.
-        options.skyflowID = element[getVariantAdapter().collect.skyflowIdKey];
+        options.skyflowID = element[this.collectVariant.skyflowIdKey];
 
         elements.push(options);
       });
@@ -229,6 +250,7 @@ abstract class CollectContainer<
         this.#destroyCallback,
         this.#updateCallback,
         this.context,
+        this.collectVariant,
         this.#eventEmitter,
       );
       this.elements[tempElements.elementName] = element;
@@ -298,23 +320,17 @@ abstract class CollectContainer<
             }
             element.isValidElement();
           });
-          this.validateTokens(options);
-          if (options?.additionalFields) {
-            validateAdditionalFieldsInCollect(options.additionalFields);
-          }
-          if (options?.upsert) {
-            validateUpsertOptions(options?.upsert);
-          }
+          const resolvedOptions = this.validateCollectOptions(options);
           bus
           // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
               ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.metaData.uuid,
               {
                 type: COLLECT_TYPES.COLLECT,
-                // Spread the options bag as an index-signature type so the
-                // framebus payload stays assignable (the emit arg is untyped).
-                ...(options as Record<string, any>),
-                tokens: this.resolveTokens(options),
+                // Spread the normalized options bag as an index-signature type so
+                // the framebus payload stays assignable (the emit arg is untyped).
+                // `tokens` is already resolved inside validateCollectOptions.
+                ...(resolvedOptions as Record<string, any>),
                 elementIds,
                 containerId: this.containerId,
                 errorMessages: this.customErrorMessages,
@@ -356,13 +372,7 @@ abstract class CollectContainer<
           }
           element.isValidElement();
         });
-        this.validateTokens(options);
-        if (options?.additionalFields) {
-          validateAdditionalFieldsInCollect(options.additionalFields);
-        }
-        if (options?.upsert) {
-          validateUpsertOptions(options?.upsert);
-        }
+        const resolvedOptions = this.validateCollectOptions(options);
         bus
           .target(properties.IFRAME_SECURE_ORIGIN)
           .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.containerId, () => {
@@ -372,10 +382,10 @@ abstract class CollectContainer<
                 ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.metaData.uuid,
                 {
                   type: COLLECT_TYPES.COLLECT,
-                  // Spread the options bag as an index-signature type so the
-                  // framebus payload stays assignable (the emit arg is untyped).
-                  ...(options as Record<string, any>),
-                  tokens: this.resolveTokens(options),
+                  // Spread the normalized options bag as an index-signature type so
+                  // the framebus payload stays assignable (the emit arg is untyped).
+                  // `tokens` is already resolved inside validateCollectOptions.
+                  ...(resolvedOptions as Record<string, any>),
                   elementIds,
                   containerId: this.containerId,
                   errorMessages: this.customErrorMessages,
@@ -443,20 +453,26 @@ abstract class CollectContainer<
   );
 
   // ---- Injected divergence (see class doc) --------------------------------
-  // Token-option validation: privacyDB validates a provided `tokens` boolean;
-  // flowDB forces tokens on and does not validate (no-op override).
+  // Single collect-options seam: validates the options AND resolves the emitted
+  // `tokens` value, returning a normalized copy (never mutates the caller's
+  // object). Because `TOptions extends ICollectOptionsBase` (a structural marker),
+  // the divergent fields are read through a local cast, not the bound.
+  // Base default = privacyDB: validate a provided `tokens` boolean, validate
+  // additionalFields/upsert, default tokens to true. flowDB overrides to skip
+  // token validation and force tokens on while keeping field validation.
   // eslint-disable-next-line class-methods-use-this
-  protected validateTokens(options: TOptions): void {
-    if (Object.prototype.hasOwnProperty.call(options, 'tokens') && !validateBooleanOptions(options.tokens)) {
+  protected validateCollectOptions(options: TOptions): TOptions {
+    const opts = options as { tokens?: boolean; additionalFields?: any; upsert?: any[] };
+    if (Object.prototype.hasOwnProperty.call(opts, 'tokens') && !validateBooleanOptions(opts.tokens)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
     }
-  }
-
-  // Resolve the emitted `tokens` value: privacyDB honours options.tokens
-  // (default true); flowDB forces true.
-  // eslint-disable-next-line class-methods-use-this
-  protected resolveTokens(options: TOptions): boolean {
-    return options?.tokens !== undefined ? options.tokens : true;
+    if (opts.additionalFields) {
+      validateAdditionalFieldsInCollect(opts.additionalFields);
+    }
+    if (opts.upsert) {
+      validateUpsertOptions(opts.upsert);
+    }
+    return { ...options, tokens: opts.tokens !== undefined ? opts.tokens : true } as TOptions;
   }
 
   // Error mapping: identity for privacyDB, SkyflowFlowDBError for flowDB.

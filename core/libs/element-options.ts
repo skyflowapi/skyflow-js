@@ -21,7 +21,8 @@ import SkyflowError from '@core/errors';
 import { buildStylesFromClassesAndStyles } from '@core/libs/styles';
 import {
   FormattedCollectElementOptions,
-  CollectElementOptions,
+  ICollectElementOptionsBase,
+  IFileCollectElementOptions,
   IValidationRule, LogLevel, MessageType, ValidationRuleType,
 } from '@core/types';
 import { parameterizedString } from '@core/utils/logs-helper';
@@ -271,7 +272,7 @@ IValidationRule[] | undefined => {
 
 export const formatOptions = (
   elementType: ElementType,
-  options: CollectElementOptions,
+  options: ICollectElementOptionsBase & IFileCollectElementOptions,
   logLevel: LogLevel,
 ) => {
   let formattedOptions: FormattedCollectElementOptions = {

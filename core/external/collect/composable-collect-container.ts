@@ -34,6 +34,7 @@ import SkyflowError from '@core/errors';
 import { getElements, validateElementOptions } from '@core/libs/element-options';
 import Client from '@core/client';
 import CollectElement from '@core/external/collect/collect-element';
+import { getVariantAdapter } from '@core/adapters';
 import {
   ContainerType, MessageType, InputStyles, ErrorTextStyles,
   ICollectOptionsBase,
@@ -120,6 +121,11 @@ abstract class CoreComposableCollectContainer<TResponse extends object>
         this.destroyCallback,
         this.updateCallback,
         this.context,
+        // Transitional: CollectElement now requires an injected collect variant.
+        // The composable container doesn't yet own one, so it supplies the
+        // registered global's collect surface. To be replaced with an abstract
+        // `collectVariant` member in the composable-container revamp pass.
+        getVariantAdapter().collect,
         this.eventEmitter,
       );
       this.elements[this.tempElements.elementName] = element;
@@ -287,16 +293,22 @@ abstract class CoreComposableCollectContainer<TResponse extends object>
   // validating, and wraps a full failure as SkyflowFlowDBError). Mirrors the
   // CoreCollectContainer hooks so both collect paths behave identically.
 
+  // NOTE: `ICollectOptionsBase` is now a structural marker (no `tokens`), so the
+  // divergent field is read through a local cast — same seam pattern as
+  // CoreCollectContainer. Consolidating these into a single validateCollectOptions
+  // is deferred to the composable-container revamp pass.
   // eslint-disable-next-line class-methods-use-this
   protected validateTokens(options: ICollectOptionsBase): void {
-    if (options && options.tokens && typeof options.tokens !== 'boolean') {
+    const opts = options as { tokens?: boolean };
+    if (opts && opts.tokens && typeof opts.tokens !== 'boolean') {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
     }
   }
 
   // eslint-disable-next-line class-methods-use-this
   protected resolveTokens(options: ICollectOptionsBase): boolean {
-    return options?.tokens !== undefined ? options.tokens : true;
+    const opts = options as { tokens?: boolean };
+    return opts?.tokens !== undefined ? opts.tokens : true;
   }
 
   // eslint-disable-next-line class-methods-use-this

@@ -201,9 +201,22 @@ describe('constructFlowDBUpdateRequest', () => {
     });
   });
 
-  test('includes updateType when provided in options', () => {
-    const req = constructFlowDBUpdateRequest(finalUpdateRecords, { updateType: 'REPLACE' }, 'vault123');
+  test('sources updateType per-record from the matching table upsert entry', () => {
+    const req = constructFlowDBUpdateRequest(
+      finalUpdateRecords,
+      { upsert: [{ tableName: 'table1', uniqueColumns: ['name'], updateType: 'REPLACE' }] },
+      'vault123',
+    );
     expect(req.records[0].updateType).toBe('REPLACE');
+  });
+
+  test('omits updateType when the record table has no upsert entry', () => {
+    const req = constructFlowDBUpdateRequest(
+      finalUpdateRecords,
+      { upsert: [{ tableName: 'other', uniqueColumns: ['name'], updateType: 'REPLACE' }] },
+      'vault123',
+    );
+    expect(req.records[0].updateType).toBeUndefined();
   });
 });
 

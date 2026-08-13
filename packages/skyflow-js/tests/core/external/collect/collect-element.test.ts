@@ -30,6 +30,8 @@ global.ResizeObserver = jest.fn(() => ({
   unobserve: jest.fn(),
 }));
 
+// Test stub for the container-injected collect key strategy (Decision 2.2).
+const MOCK_COLLECT_VARIANT = { normalizeUpdateOptions: () => {}, skyflowIdKey: 'skyflowID' };
 const elementName = "element:CVV:cGlpX2ZpZWxkcy5wcmltYXJ5X2NhcmQuY3Z2";
 const id = "id";
 const input: CollectElementInput = {
@@ -198,7 +200,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
 
     const inputEvent = onSpy.mock.calls.filter(
       (data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + elementName
@@ -283,7 +285,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
 
     const iframeName = element.iframeName();
     expect(iframeName.length).toBeGreaterThan(0);
@@ -344,7 +346,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
 
     const inputEvent = onSpy.mock.calls[1][0];
     expect(inputEvent).toBe(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + elementName);
@@ -404,7 +406,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
 
     const inputCb = onSpy.mock.calls[1][1];
     const inputEvent = onSpy.mock.calls[1][0];
@@ -464,6 +466,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,
       groupEmiitter
     );
 
@@ -533,6 +536,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,
       groupEmiitter
     );
 
@@ -595,6 +599,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,
       groupEmiitter
     );
     expect(() => {
@@ -620,6 +625,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,
       groupEmiitter
     );
 
@@ -654,6 +660,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,
       groupEmiitter
     );
 
@@ -696,6 +703,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,
       groupEmiitter
     );
 
@@ -738,6 +746,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,
       groupEmiitter
     );
 
@@ -770,7 +779,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
 
     const inputEvent = onSpy.mock.calls.filter(
       (data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + elementName
@@ -813,7 +822,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
     expect(element.isMounted()).toBe(false);
     expect(element.isUpdateCalled()).toBe(false);
     element.update({ label: "Henry" });
@@ -836,7 +845,7 @@ describe("testing collect element under various scenarios", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
 
     const inputEvent = onSpy.mock.calls.filter(
       (data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT + elementName
@@ -905,7 +914,7 @@ describe("testing collect element validations", () => {
         destroyCallback,
         updateCallback,
         { logLevel: LogLevel.ERROR, env: Env.PROD }
-      );
+      , MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -942,7 +951,7 @@ describe("testing collect element validations", () => {
         destroyCallback,
         updateCallback,
         { logLevel: LogLevel.ERROR, env: Env.PROD }
-      );
+      , MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -979,7 +988,7 @@ describe("testing collect element validations", () => {
         destroyCallback,
         updateCallback,
         { logLevel: LogLevel.ERROR, env: Env.PROD }
-      );
+      , MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -1024,7 +1033,7 @@ describe("testing collect element validations", () => {
         destroyCallback,
         updateCallback,
         { logLevel: LogLevel.ERROR, env: Env.PROD }
-      );
+      , MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -1069,7 +1078,7 @@ describe("testing collect element validations", () => {
         destroyCallback,
         updateCallback,
         { logLevel: LogLevel.ERROR, env: Env.PROD }
-      );
+      , MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -1117,7 +1126,7 @@ describe("testing collect element validations", () => {
         destroyCallback,
         updateCallback,
         { logLevel: LogLevel.ERROR, env: Env.PROD }
-      );
+      , MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -1165,7 +1174,7 @@ describe("testing collect element validations", () => {
         destroyCallback,
         updateCallback,
         { logLevel: LogLevel.ERROR, env: Env.PROD }
-      );
+      , MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -1213,7 +1222,7 @@ describe("testing collect element validations", () => {
         destroyCallback,
         updateCallback,
         { logLevel: LogLevel.ERROR, env: Env.PROD }
-      );
+      , MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -1261,7 +1270,7 @@ describe("testing collect element validations", () => {
         destroyCallback,
         updateCallback,
         { logLevel: LogLevel.ERROR, env: Env.PROD }
-      );
+      , MOCK_COLLECT_VARIANT);
     } catch (err) {
       expect(err).toBeUndefined();
     }
@@ -1287,7 +1296,7 @@ describe("testing collect element methods", () => {
     destroyCallback,
     updateCallback,
     { logLevel: LogLevel.ERROR, env: Env.PROD }
-  );
+  , MOCK_COLLECT_VARIANT);
 
   const testCollectElementDev = new CollectElement(
     id,
@@ -1305,7 +1314,7 @@ describe("testing collect element methods", () => {
     destroyCallback,
     updateCallback,
     { logLevel: LogLevel.ERROR, env: Env.DEV }
-  );
+  , MOCK_COLLECT_VARIANT);
 
   it("tests valid on listener return state in handler for element in DEV env", () => {
     let handlerState;
@@ -1366,7 +1375,7 @@ describe("testing collect element methods", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
     let div = document.createElement("div");
     div.setAttribute("id", "id1");
     testCollectElementProd.mount(div);
@@ -1404,7 +1413,7 @@ describe("testing collect element methods", () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
     let div = document.createElement("div");
     div.setAttribute("id", "id1");
     document.body.appendChild(div);

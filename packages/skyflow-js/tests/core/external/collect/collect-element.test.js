@@ -15,6 +15,8 @@ global.ResizeObserver = jest.fn(() => ({
   observe: jest.fn(),
   disconnect: jest.fn(),
 }));
+// Test stub for the container-injected collect key strategy (Decision 2.2).
+const MOCK_COLLECT_VARIANT = { normalizeUpdateOptions: () => {}, skyflowIdKey: 'skyflowID' };
 const clientDomain = "http://abc.com";
 const elementName = 'element:CVV:cGlpX2ZpZWxkcy5wcmltYXJ5X2NhcmQuY3Z2';
 const id = 'id';
@@ -153,7 +155,7 @@ describe('collect element', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
 
     const inputEvent = onSpy.mock.calls
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
@@ -214,7 +216,7 @@ describe('collect element', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     
     const inputEvent = onSpy.mock.calls[1][0] 
     expect(inputEvent).toBe(ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName); 
@@ -264,7 +266,7 @@ describe('collect element', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
 
     const inputCb = onSpy.mock.calls[1][1];
     const inputEvent = onSpy.mock.calls[1][0]
@@ -313,6 +315,7 @@ describe('collect element', () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,
       groupEmiitter
       );
 
@@ -365,6 +368,7 @@ describe('collect element', () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,
       groupEmiitter
       );
 
@@ -415,7 +419,8 @@ describe('collect element', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+    { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,groupEmiitter);
     // groupOnCb({containerId:'containerId'});
     expect(() => { element.mount('#123'); }).not.toThrow(SkyflowError);
 
@@ -432,7 +437,7 @@ describe('collect element', () => {
       false,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     } catch (err) {
       console.log(err);
       expect(err).toBeDefined();
@@ -451,7 +456,8 @@ describe('collect element', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+    { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,groupEmiitter);
 
     const div = document.createElement('div');
 
@@ -485,7 +491,8 @@ describe('collect element', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+    { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,groupEmiitter);
 
     const div = document.createElement('div');
 
@@ -520,7 +527,8 @@ describe('collect element', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+    { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,groupEmiitter);
 
     const div = document.createElement('div');
 
@@ -555,7 +563,8 @@ describe('collect element', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD },groupEmiitter);
+    { logLevel: LogLevel.ERROR, env: Env.PROD },
+      MOCK_COLLECT_VARIANT,groupEmiitter);
 
     const div = document.createElement('div');
 
@@ -582,7 +591,7 @@ describe('collect element', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
 
     const options = element.getOptions();
     expect(options.name).toBe(input.column);
@@ -598,7 +607,7 @@ describe('collect element', () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
 
     const inputEvent = onSpy.mock.calls
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
@@ -631,7 +640,7 @@ describe('collect element', () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
     expect(element.isMounted()).toBe(false);
     expect(element.isUpdateCalled()).toBe(false);
     element.update({ label :'Henry' });
@@ -649,7 +658,7 @@ describe('collect element', () => {
       destroyCallback,
       updateCallback,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
-    );
+    , MOCK_COLLECT_VARIANT);
 
     const inputEvent = onSpy.mock.calls
       .filter((data) => data[0] === ELEMENT_EVENTS_TO_IFRAME.INPUT_EVENT+ elementName);
@@ -706,7 +715,7 @@ describe('collect element validations', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -736,7 +745,7 @@ describe('collect element validations', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -766,7 +775,7 @@ describe('collect element validations', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -798,7 +807,7 @@ describe('collect element validations', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -830,7 +839,7 @@ describe('collect element validations', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -863,7 +872,7 @@ describe('collect element validations', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -898,7 +907,7 @@ describe('collect element validations', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -933,7 +942,7 @@ describe('collect element validations', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     };
 
     expect(createElement).toThrow(
@@ -967,7 +976,7 @@ describe('collect element validations', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     } catch (err) {
       expect(err).toBeUndefined();
     }
@@ -987,7 +996,7 @@ describe('collect element methods', () => {
     true,
     destroyCallback,
     updateCallback,
-    { logLevel: LogLevel.ERROR, env: Env.PROD });
+    { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
 
   const testCollectElementDev = new CollectElement(id, {
     elementName,
@@ -998,7 +1007,7 @@ describe('collect element methods', () => {
   true,
   destroyCallback,
   updateCallback,
-  { logLevel: LogLevel.ERROR, env: Env.DEV });
+  { logLevel: LogLevel.ERROR, env: Env.DEV }, MOCK_COLLECT_VARIANT);
 
   it('setError method', () => {
     testCollectElementProd.setError('ErrorText');
@@ -1132,7 +1141,7 @@ describe('collect element methods', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     let div = document.createElement('div')
     div.setAttribute('id', 'id1')
     testCollectElementProd.mount(div);
@@ -1162,7 +1171,7 @@ describe('collect element methods', () => {
       true,
       destroyCallback,
       updateCallback,
-      { logLevel: LogLevel.ERROR, env: Env.PROD });
+      { logLevel: LogLevel.ERROR, env: Env.PROD }, MOCK_COLLECT_VARIANT);
     let div = document.createElement('div')
     div.setAttribute('id', 'id1')
     document.body.appendChild(div);
@@ -1186,7 +1195,8 @@ describe('collect element methods', () => {
     ];
     const groupEmitterLocal = { _emit: jest.fn(), on: jest.fn() };
     // isSingleElementAPI must be false for composable container to keep state.value an object
-    const collectEl = new CollectElement(id, { elementName, rows: composableRowsForTest }, { containerType: ContainerType.COMPOSABLE }, { type: ContainerType.COMPOSABLE, containerId: 'containerId', isMounted: true }, false, destroyCallback, updateCallback, { logLevel: LogLevel.INFO, env: Env.DEV }, groupEmitterLocal);
+    const collectEl = new CollectElement(id, { elementName, rows: composableRowsForTest }, { containerType: ContainerType.COMPOSABLE }, { type: ContainerType.COMPOSABLE, containerId: 'containerId', isMounted: true }, false, destroyCallback, updateCallback, { logLevel: LogLevel.INFO, env: Env.DEV },
+      MOCK_COLLECT_VARIANT, groupEmitterLocal);
 
     const dispatchEventFor = (targetElementName, eventType, valueObj = {}) => {
       window.dispatchEvent(new MessageEvent('message', {
@@ -1238,7 +1248,8 @@ describe('collect element methods', () => {
     ];
     const groupEmitterLocal = { _emit: jest.fn(), on: jest.fn() };
     // isSingleElementAPI must be false for composable container to keep state.value an object
-    const collectEl = new CollectElement(id, { elementName, rows: composableRowsForTest }, { containerType: ContainerType.COMPOSABLE }, { type: ContainerType.COMPOSABLE, containerId: 'containerId', isMounted: true }, true, destroyCallback, updateCallback, { logLevel: LogLevel.INFO, env: Env.DEV }, groupEmitterLocal);
+    const collectEl = new CollectElement(id, { elementName, rows: composableRowsForTest }, { containerType: ContainerType.COMPOSABLE }, { type: ContainerType.COMPOSABLE, containerId: 'containerId', isMounted: true }, true, destroyCallback, updateCallback, { logLevel: LogLevel.INFO, env: Env.DEV },
+      MOCK_COLLECT_VARIANT, groupEmitterLocal);
     groupEmiitter.on(ELEMENT_EVENTS_TO_CLIENT.READY + ':' + elementName, (data) => {
       expect(data.name).toBe(elementName);
     });

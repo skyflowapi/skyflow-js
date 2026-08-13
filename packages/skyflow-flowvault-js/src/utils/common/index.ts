@@ -31,11 +31,9 @@ export type {
   ErrorTextStyles,
   LabelStyles,
   InputStyles,
-  CollectElementOptions,
   CollectElementUpdateOptions,
   FormattedCollectElementOptions,
   CardMetadata,
-  ElementState,
   MetaData,
   EventConfig,
   SkyflowConfigOptions,
@@ -65,9 +63,23 @@ export type {
 // Type-only imports used by the flowDB definitions below.
 // eslint-disable-next-line import/first
 import type {
+  ICollectOptionsBase,
+  ICollectElementOptionsBase,
+  IElementStateBase,
   IInsertRecordInput as IInsertRecordInputType,
   CollectElementInput as ICoreCollectElementInput,
 } from '@core/types';
+
+// flowDB collect element options: shared base only — flowDB has no file API, so
+// no file options; declared for symmetry + future flowDB-only options. See 2.3.
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CollectElementOptions extends ICollectElementOptionsBase {}
+
+// flowDB element state: shared base + `value` without `Blob` (no file elements).
+// See Decision 2.5.
+export interface ElementState extends IElementStateBase {
+  value: string | Object | undefined;
+}
 
 // flowDB collect element input. Extends the neutral input with the flowDB
 // client-facing keys `tableName` / `skyflowId` (mapped internally to the
@@ -115,12 +127,11 @@ export interface IRevealOptions {
   tokenGroupRedactions?: TokenGroupRedaction[];
 }
 
-// flowDB collect options. Unlike privacyDB, `upsert` uses the flowDB upsert shape
-// (IFlowDBUpsertOptions) and an optional top-level `updateType` drives the flowDB
-// update variant.
-export interface ICollectOptions {
-  tokens?: boolean;
+// flowDB collect options. Extends the @core marker. No `tokens` (flowDB forces
+// tokens on). `upsert` uses the flowDB upsert shape (IFlowDBUpsertOptions), whose
+// per-table `updateType` drives the update variant — there is no top-level
+// `updateType`.
+export interface ICollectOptions extends ICollectOptionsBase {
   additionalFields?: IInsertRecordInputType;
   upsert?: Array<IFlowDBUpsertOptions>;
-  updateType?: UpdateType;
 }

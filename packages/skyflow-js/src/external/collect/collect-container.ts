@@ -20,22 +20,37 @@ import {
   formatValidations, formatOptions,
 } from '@core/libs/element-options';
 import CollectElement from '@core/external/collect/collect-element';
-import { CollectElementInput, CollectElementOptions, MessageType } from '@core/types';
-import CoreCollectContainer, { ElementGroup } from '@core/external/collect/collect-container';
+import { MessageType } from '@core/types';
+import CoreCollectContainer, {
+  ElementGroup, ICollectElementBase,
+} from '@core/external/collect/collect-container';
+import { VariantCollectAdapter } from '@core/adapters';
+import skyflowVariantAdapter from '../../variant-adapter';
 import { printLog, parameterizedString } from '../../utils/logs-helper';
 import { validateCollectElementInput, validateInitConfig } from '../../utils/validators';
 import {
+  CollectElementInput,
+  CollectElementOptions,
   CollectResponse,
   ICollectOptions,
   UploadFilesResponse,
 } from '../../utils/common';
 
 export type {
-  ICollectElement, ElementGroupItem, ElementGroup,
+  ElementGroupItem, ElementGroup,
 } from '@core/external/collect/collect-container';
+
+// privacyDB collect-element descriptor: shared base + privacyDB `table` key. See 2.4.
+export interface ICollectElement extends ICollectElementBase {
+  table?: string;
+}
 
 const CLASS_NAME = 'CollectContainer';
 class CollectContainer extends CoreCollectContainer<ICollectOptions, CollectResponse> {
+  // privacyDB collect key strategy (internal `skyflowID`/`table`); single source is
+  // this package's VariantAdapter, supplied here and injected into each element.
+  protected collectVariant: VariantCollectAdapter = skyflowVariantAdapter.collect;
+
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
   }): CollectElement => {

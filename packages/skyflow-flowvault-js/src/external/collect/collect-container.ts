@@ -12,18 +12,30 @@ import {
   formatValidations, formatOptions,
 } from '@core/libs/element-options';
 import CollectElement from '@core/external/collect/collect-element';
-import { CollectElementOptions } from '@core/types';
-import CoreCollectContainer, { ElementGroup } from '@core/external/collect/collect-container';
+import CoreCollectContainer, {
+  ElementGroup, ICollectElementBase,
+} from '@core/external/collect/collect-container';
+import { VariantCollectAdapter } from '@core/adapters';
 import { validateCollectElementInput } from '../../utils/validators';
-import { CollectElementInput, ICollectOptions } from '../../utils/common';
+import { CollectElementInput, CollectElementOptions, ICollectOptions } from '../../utils/common';
 import { CollectResponse } from '../../internal/internal-types';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
+import flowVaultVariantAdapter from '../../variant-adapter';
 
 export type {
-  ICollectElement, ElementGroupItem, ElementGroup,
+  ElementGroupItem, ElementGroup,
 } from '@core/external/collect/collect-container';
 
+// flowDB collect-element descriptor: shared base + flowDB `tableName` key. See 2.4.
+export interface ICollectElement extends ICollectElementBase {
+  tableName?: string;
+}
+
 class CollectContainer extends CoreCollectContainer<ICollectOptions, CollectResponse> {
+  // flowDB collect key strategy (client-facing `skyflowId`/`tableName`); single
+  // source is this package's VariantAdapter, injected into each element.
+  protected collectVariant: VariantCollectAdapter = flowVaultVariantAdapter.collect;
+
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
   }): CollectElement => {
@@ -36,7 +48,6 @@ class CollectContainer extends CoreCollectContainer<ICollectOptions, CollectResp
         elements: [{
           elementType: input.type,
           name: input.column,
-          accept: options.allowedFileType,
           ...input,
           // Map the client-facing `tableName` key onto the internal `table` name
           // that the rest of the collect pipeline consumes.
@@ -51,12 +62,11 @@ class CollectContainer extends CoreCollectContainer<ICollectOptions, CollectResp
   };
 
   // flowDB forces tokens on and does not validate a client-supplied value.
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
-  protected validateTokens(options: ICollectOptions): void {}
-
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
-  protected resolveTokens(options: ICollectOptions): boolean {
-    return true;
+  // Reuse the base validation for additionalFields/upsert, then force tokens on
+  // in the emitted options (flowDB has no client-facing `tokens`).
+  protected validateCollectOptions(options: ICollectOptions): ICollectOptions {
+    const validated = super.validateCollectOptions(options);
+    return { ...validated, tokens: true } as ICollectOptions;
   }
 
   // eslint-disable-next-line class-methods-use-this

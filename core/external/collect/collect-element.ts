@@ -37,7 +37,7 @@ import {
   getElements,
   validateAndSetupGroupOptions,
 } from '@core/libs/element-options';
-import { getVariantAdapter } from '@core/adapters';
+import { VariantCollectAdapter } from '@core/adapters';
 import IFrame from '@core/external/common/iframe';
 import {
   printLog, getElementName, parameterizedString, EnvOptions,
@@ -105,6 +105,11 @@ class CollectElement extends SkyflowElement {
 
   #isUpdateCalled = false;
 
+  // Package-specific collect key strategy, injected by the owning CollectContainer
+  // (privacyDB vs flowDB `skyflowId`/`table` naming). Replaces the former global
+  // getVariantAdapter().collect lookup on the element's update/validation path.
+  #collectVariant: VariantCollectAdapter;
+
   constructor(
     elementId: string,
     elementGroup: any,
@@ -114,10 +119,12 @@ class CollectElement extends SkyflowElement {
     destroyCallback: Function,
     updateCallback: Function,
     context: Context,
+    collectVariant: VariantCollectAdapter,
     groupEventEmitter?: EventEmitter,
   ) {
     super();
 
+    this.#collectVariant = collectVariant;
     this.containerId = container.containerId;
     this.#elementId = elementId;
     this.#context = context;
@@ -381,7 +388,7 @@ class CollectElement extends SkyflowElement {
     // Normalize client-facing option keys to the internal names the SET_VALUE
     // handler (core/internal/index.ts) consumes. Variant-specific: privacyDB is
     // a no-op; flowDB remaps `skyflowId`->`skyflowID` and `tableName`->`table`.
-    getVariantAdapter().collect.normalizeUpdateOptions(options as Record<string, any>);
+    this.#collectVariant.normalizeUpdateOptions(options as Record<string, any>);
     if (this.#mounted) {
       options.validations = formatValidations(options.validations);
       this.updateElement({ elementName: this.#group.elementName, ...options });
@@ -724,7 +731,7 @@ class CollectElement extends SkyflowElement {
       }
       // The key carrying the skyflow id on an element is variant-specific
       // (privacyDB `skyflowID` vs flowDB `skyflowId`).
-      const skyflowIdKey = getVariantAdapter().collect.skyflowIdKey;
+      const skyflowIdKey = this.#collectVariant.skyflowIdKey;
       if (this.#elements[i][skyflowIdKey] !== undefined && !this.#elements[i][skyflowIdKey]) {
         throw new SkyflowError(
           SKYFLOW_ERROR_CODE.EMPTY_SKYFLOW_ID_COLLECT, [], true,

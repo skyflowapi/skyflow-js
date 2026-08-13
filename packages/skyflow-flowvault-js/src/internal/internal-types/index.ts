@@ -7,7 +7,7 @@ Copyright (c) 2025 Skyflow, Inc.
 // RedactionType is reused from @core (not redefined), UpdateType from the
 // flowvault common surface.
 import {
-  RedactionType, ContainerType, ClientMetadata, ElementInfo,
+  RedactionType, ContainerType, ClientMetadata, ElementInfo, ICollectResponseBase,
 } from '@core/types';
 import { ElementType } from '@core/constants';
 import { UpdateType, ICollectOptions } from '../../utils/common';
@@ -117,7 +117,7 @@ export interface CollectRecord {
   error?: string;
 }
 
-export interface CollectResponse {
+export interface CollectResponse extends ICollectResponseBase {
   records: Array<CollectRecord>;
 }
 

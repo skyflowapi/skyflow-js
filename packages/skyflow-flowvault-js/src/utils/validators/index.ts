@@ -110,7 +110,7 @@ export const validateCollectElementInput = (input: CollectElementInput, logLevel
   if (Object.prototype.hasOwnProperty.call(input, 'altText')) {
     printLog(logs.warnLogs.COLLECT_ALT_TEXT_DEPERECATED, MessageType.WARN, logLevel);
   }
-  if (Object.prototype.hasOwnProperty.call(input, 'skyflowID') && !(typeof input.skyflowID === 'string')) {
+  if (Object.prototype.hasOwnProperty.call(input, 'skyflowId') && !(typeof input.skyflowId === 'string')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT, [], true);
   }
 };
