@@ -359,6 +359,73 @@ export interface CollectElementInput extends CollectElementCommonProps {
   type: ElementType,
 }
 
+// ---- Behavioral contracts --------------------------------------------------
+// The interfaces above are data-shape DTOs; the ones below are behavioral
+// contracts for the container/element hierarchy. They exist so `@core` can name
+// a contract that BOTH packages implement — and so BaseSkyflow's generics can
+// bind to a contract instead of a concrete class — without `@core` importing any
+// `packages/*` symbol. They are internal: not re-exported from index-node, so the
+// published consumer surface is unchanged.
+
+// The shared element surface. `SkyflowElement` (hence CollectElement /
+// RevealElement) implements it; used to type the cross-container element
+// registry that was previously `any[]`. NOTE: the composable element classes
+// (ComposableElement / ComposableRevealElement) are standalone and do NOT
+// implement this — the composable container contracts below therefore omit
+// `create`.
+export interface ISkyflowElement {
+  mount(domElementSelector: HTMLElement | string): void;
+  unmount(): void;
+  setError(clientErrorText: string): void;
+  resetError(): void;
+  setErrorOverride(customErrorText: string): void;
+  iframeName(): string;
+  getID(): string;
+}
+
+// Variant-neutral collect-options contract. Pins only the fields the @core
+// collect path itself reads. `additionalFields`/`upsert` carry package-divergent
+// payloads (privacyDB IInsertRecordInput / IUpsertOptions vs flowDB
+// IInsertRecordInputType / IFlowDBUpsertOptions), so the base treats them
+// opaquely and each package's ICollectOptions narrows them.
+export interface ICollectOptionsBase {
+  tokens?: boolean;
+  additionalFields?: any;
+  upsert?: any[];
+}
+
+// Container contracts. Generic so each package's own option/response/element
+// types flow through. `create`'s element is typed to the shared ISkyflowElement
+// surface. BaseSkyflow only ever constructs and returns these, so the contracts
+// are documentary + a bound; they are not called through.
+export interface ICollectContainer<TOptions = ICollectOptionsBase, TResponse = any> {
+  create(input: CollectElementInput, options?: CollectElementOptions): ISkyflowElement;
+  collect(options?: TOptions): Promise<TResponse>;
+  setError(errors: Partial<Record<ErrorType, string>>): void;
+  uploadFiles?(options?: TOptions): Promise<UploadFilesResponse>;
+}
+
+export interface IRevealContainer<TInput = any, TRevealOptions = any, TElement = ISkyflowElement> {
+  create(record: TInput, options?: IRevealElementOptions): TElement;
+  reveal(options?: TRevealOptions): Promise<RevealResponse>;
+  setError(errors: Partial<Record<ErrorType, string>>): void;
+}
+
+export interface IComposableCollectContainer<TResponse = any> {
+  collect(options?: ICollectOptionsBase): Promise<TResponse>;
+  on(eventName: string, handler: Function): void;
+  mount(domElement: HTMLElement | string): void;
+  unmount(): void;
+  setError(errors: Partial<Record<ErrorType, string>>): void;
+}
+
+export interface IComposableRevealContainer<TResponse = any> {
+  reveal(options?: any): Promise<TResponse>;
+  mount(domElement: HTMLElement | string): void;
+  unmount(): void;
+  setError(errors: Partial<Record<ErrorType, string>>): void;
+}
+
 export interface MetaData {
   [key: string]: any,
 }

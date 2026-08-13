@@ -30,6 +30,7 @@ import {
   ContainerOptions,
   ErrorType,
   ICoreMetadata,
+  ISkyflowElement,
 } from '@core/types';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
 import {
@@ -86,7 +87,7 @@ abstract class CollectContainer<TOptions = any, TResponse = any> extends Contain
 
   protected context: Context;
 
-  #skyflowElements: any[];
+  #skyflowElements: Record<string, ISkyflowElement>;
 
   type:string = ContainerType.COLLECT;
 
@@ -100,7 +101,7 @@ abstract class CollectContainer<TOptions = any, TResponse = any> extends Contain
 
   constructor(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ) {

@@ -15,7 +15,7 @@ import {
 import properties from '@core/properties';
 import {
   ContainerType, IRevealElementOptions, ContainerOptions, Context, ErrorType,
-  MessageType, RevealResponse, ICoreMetadata, RevealContainerProps,
+  MessageType, RevealResponse, ICoreMetadata, RevealContainerProps, ISkyflowElement,
 } from '@core/types';
 import Container from '@core/external/common/container';
 import SkyflowError from '@core/errors';
@@ -56,7 +56,7 @@ abstract class RevealContainer<
 
   #context: Context;
 
-  #skyflowElements: any[];
+  #skyflowElements: Record<string, ISkyflowElement>;
 
   #isMounted: boolean = false;
 
@@ -68,7 +68,7 @@ abstract class RevealContainer<
 
   constructor(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ) {

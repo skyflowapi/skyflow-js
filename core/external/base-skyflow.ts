@@ -20,7 +20,11 @@ Copyright (c) 2022 Skyflow, Inc.
 // dynamic dispatch on the abstract hooks.
 //
 // Generic parameters exist so `container()`'s overloads — written once here —
-// still return each package's own container classes at the call site.
+// still return each package's own container classes at the call site. Each is
+// bounded to the matching container *contract* interface (ICollectContainer,
+// IRevealContainer, …) rather than to a concrete class, so the base depends on a
+// contract, a subclass can only wire a container of the right family, and no
+// `packages/*` class is named here.
 //
 // What deliberately stays in each package's `skyflow.ts` subclass:
 //   - the five `instantiate*`/`create*Container` hooks
@@ -55,8 +59,13 @@ import {
   Env,
   ErrorType,
   EventName,
+  ICollectContainer,
+  IComposableCollectContainer,
+  IComposableRevealContainer,
   ICoreMetadata,
+  IRevealContainer,
   ISkyflow,
+  ISkyflowElement,
   LogLevel,
   MessageType,
   RedactionType,
@@ -68,10 +77,10 @@ const CLASS_NAME = 'Skyflow';
 
 abstract class BaseSkyflow<
   TSkyflowContainer extends CoreSkyflowContainer,
-  TCollectContainer,
-  TRevealContainer,
-  TComposableContainer,
-  TComposeRevealContainer,
+  TCollectContainer extends ICollectContainer,
+  TRevealContainer extends IRevealContainer,
+  TComposableContainer extends IComposableCollectContainer,
+  TComposeRevealContainer extends IComposableRevealContainer,
 > {
   // `protected` (not `#private`) because the subclasses reach these: privacyDB's
   // pure-JS methods delegate to `skyflowContainer`. `#uuid`/`#bearerToken` are
@@ -93,9 +102,10 @@ abstract class BaseSkyflow<
 
   protected env: Env;
 
-  // Neutral `any[]` — the shared container bases type it the same way; each
-  // package's `SkyflowElementProps` was only ever the declared array type here.
-  protected skyflowElements: any[];
+  // The element registry threaded into every container. It is keyed by element
+  // uuid (never used as a positional array), so the honest shape is a map of the
+  // shared ISkyflowElement contract — the same type the container bases now take.
+  protected skyflowElements: Record<string, ISkyflowElement>;
 
   constructor(config: ISkyflow) {
     const localSDKversion = localStorage.getItem('sdk_version') || '';
@@ -109,7 +119,7 @@ abstract class BaseSkyflow<
     );
     this.logLevel = config?.options?.logLevel || LogLevel.ERROR;
     this.env = config?.options?.env || Env.PROD;
-    this.skyflowElements = [];
+    this.skyflowElements = {};
     // Prototype-method dispatch, so it resolves to the subclass override even
     // though we are still inside the base constructor. The hook must therefore be
     // implemented as a method, never as an arrow-function class field (those
@@ -241,28 +251,28 @@ abstract class BaseSkyflow<
 
   protected abstract createCollectContainer(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): TCollectContainer;
 
   protected abstract createRevealContainer(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): TRevealContainer;
 
   protected abstract createComposableContainer(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options: ContainerOptions,
   ): TComposableContainer;
 
   protected abstract createComposeRevealContainer(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): TComposeRevealContainer;

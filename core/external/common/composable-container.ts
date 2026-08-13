@@ -37,7 +37,7 @@ import {
 import Container from '@core/external/common/container';
 import SkyflowError from '@core/errors';
 import {
-  Context, MessageType, ContainerOptions, ErrorType, ICoreMetadata,
+  Context, MessageType, ContainerOptions, ErrorType, ICoreMetadata, ISkyflowElement,
 } from '@core/types';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
 
@@ -54,7 +54,7 @@ abstract class ComposableContainerBase extends Container {
 
   protected context: Context;
 
-  protected skyflowElements: any[];
+  protected skyflowElements: Record<string, ISkyflowElement>;
 
   protected eventEmitter: EventEmitter;
 
@@ -100,7 +100,7 @@ abstract class ComposableContainerBase extends Container {
 
   constructor(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ) {
