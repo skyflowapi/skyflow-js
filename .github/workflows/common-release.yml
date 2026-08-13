@@ -77,7 +77,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '20.x'
           registry-url: ${{ inputs.REGISTRY_URL }}
 
       - run: npm install --ignore-scripts
@@ -206,14 +206,18 @@ jobs:
           if [ "${{ inputs.TAG }}" == "beta" ]; then
             npm publish -w ${{ inputs.PACKAGE_NAME }} --tag v${{  env.RELEASE_VERSION }}
           elif [ "${{ inputs.TAG }}" == "internal" ]; then
-            curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
+            JFROG_AUTH=$(echo -n "$JFROG_USERNAME:$JFROG_PASSWORD" | base64 -w 0)
+            echo "::add-mask::${JFROG_AUTH}"
             npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
+            npm config set //prekarilabs.jfrog.io/prekarilabs/api/npm/npm/:_auth "$JFROG_AUTH"
             npm publish -w ${{ inputs.PACKAGE_NAME }}
           else
             npm publish -w ${{ inputs.PACKAGE_NAME }}
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+          JFROG_USERNAME: ${{ secrets.JFROG_USERNAME }}
+          JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
 
       - name: Invalidate CloudFront cache 10 times
         run: |
