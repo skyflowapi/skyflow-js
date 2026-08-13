@@ -5,7 +5,7 @@ Copyright (c) 2022 Skyflow, Inc.
 // controller (per the loose-coupling boundary — core holds neutral helpers only,
 // each package owns its tokenize()/revealData()).
 import {
-  ContainerType, IValidationRule, ValidationRuleType, IRevealElementOptions,
+  ContainerType, IValidationRule, ValidationRuleType, IRevealElementOptions, ISkyflow,
 } from '@core/types';
 import SkyflowError from '@core/errors';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
@@ -13,7 +13,8 @@ import {
   ALLOWED_NAME_FOR_FILE, CardType, ElementType, COPY_UTILS,
   DEFAULT_INPUT_FORMAT_TRANSLATION,
 } from '@core/constants';
-import { detectCardType, validateBooleanOptions } from '@core/validators';
+import properties from '@core/properties';
+import { detectCardType, validateBooleanOptions, isValidURL } from '@core/validators';
 
 const { getType } = require('mime');
 
@@ -86,6 +87,26 @@ export function removeSpaces(inputString:string) {
 export function formatVaultURL(vaultURL?: string) {
   if (typeof vaultURL !== 'string') return vaultURL;
   return (vaultURL?.trim().slice(-1) === '/') ? vaultURL.slice(0, -1) : vaultURL.trim();
+}
+
+// When a valid `customElementsURL` is supplied, point the iframe secure origin at
+// it (used for self-hosted element frames). Variant-neutral — moved here from
+// each package's Tier-E utils/helpers, where the two definitions were identical,
+// so the shared @core/external/base-skyflow init path can reach it; each package
+// re-binds it locally.
+export function checkAndSetForCustomUrl(config: ISkyflow) {
+  if (
+    config?.options?.customElementsURL
+    && isValidURL(config?.options?.customElementsURL)
+  ) {
+    const urlString = config?.options?.customElementsURL;
+    const url = new URL(urlString);
+    const protocol = url.protocol;
+    const domain = url.hostname;
+    const fullDomain = `${protocol}//${domain}`;
+    properties.IFRAME_SECURE_ORIGIN = fullDomain;
+    properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
+  }
 }
 
 // Resolve a frame name to the container kind it belongs to. Variant-neutral —

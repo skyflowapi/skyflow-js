@@ -59,3 +59,8 @@ export * from './helpers';
 // Task 1.10 — variant-neutral request-assembly helpers.
 export { constructElementsInsertReq } from './api-utils/collect';
 export { formatRecordsForIframe } from './api-utils/reveal';
+
+// Shared public-entry base for each package's `Skyflow` class. Generic over the
+// package's container classes so the `container()` overloads stay precise while
+// the constructor / init / bearer-token / container-switch logic lives once.
+export { default as BaseSkyflow } from './external/base-skyflow';

@@ -3,10 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import uuid from '@core/libs/uuid';
 import * as coreHelpers from '@core/helpers';
-import properties from '@core/properties';
-import { ISkyflow } from '@core/types';
 import { SdkInfo } from '@core/client';
-import { isValidURL } from '../validators';
 
 // SDK telemetry identity, injected at build time (webpack DefinePlugin) / tests
 // (jest setupFiles) from this package's own package.json. Replaces the former
@@ -187,20 +184,11 @@ export function getMetaObject(sdkDetails: any, metaData: any, navigator: any) {
   return metaObject;
 }
 
-export function checkAndSetForCustomUrl(config: ISkyflow) {
-  if (
-    config?.options?.customElementsURL
-    && isValidURL(config?.options?.customElementsURL)
-  ) {
-    const urlString = config?.options?.customElementsURL;
-    const url = new URL(urlString);
-    const protocol = url.protocol;
-    const domain = url.hostname;
-    const fullDomain = `${protocol}//${domain}`;
-    properties.IFRAME_SECURE_ORIGIN = fullDomain;
-    properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
-  }
-}
+// Re-bound from @core/helpers (definition moved there so the shared
+// @core/external/base-skyflow init path can reach it, and so both SDKs share one
+// copy). Bound as a local const — not `export … from` — so jest.spyOn(helpers,
+// 'checkAndSetForCustomUrl') still hooks it.
+export const checkAndSetForCustomUrl = coreHelpers.checkAndSetForCustomUrl;
 
 export const generateUploadFileName = (fileName:string) => {
   const fileExtentsion = fileName?.split('.')?.pop() || '';

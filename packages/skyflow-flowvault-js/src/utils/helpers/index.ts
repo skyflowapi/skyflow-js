@@ -7,10 +7,7 @@ Copyright (c) 2025 Skyflow, Inc.
 // telemetry). `generateMockCVV` is flowDB-only (mock-CVV masking) and has no
 // skyflow-js counterpart.
 import * as coreHelpers from '@core/helpers';
-import { ISkyflow } from '@core/types';
-import properties from '@core/properties';
 import { SdkInfo } from '@core/client';
-import { isValidURL } from '../validators';
 
 // SDK telemetry identity, injected at build time (webpack DefinePlugin) / tests
 // (jest setupFiles) from this package's own package.json.
@@ -203,22 +200,10 @@ export const addSeperatorToCardNumberMask = coreHelpers.addSeperatorToCardNumber
 // 'formatVaultURL') still hooks it.
 export const formatVaultURL = coreHelpers.formatVaultURL;
 
-// When a valid `customElementsURL` is supplied, point the iframe secure origin
-// at it (used for self-hosted element frames).
-export function checkAndSetForCustomUrl(config: ISkyflow) {
-  if (
-    config?.options?.customElementsURL
-    && isValidURL(config?.options?.customElementsURL)
-  ) {
-    const urlString = config?.options?.customElementsURL;
-    const url = new URL(urlString);
-    const protocol = url.protocol;
-    const domain = url.hostname;
-    const fullDomain = `${protocol}//${domain}`;
-    properties.IFRAME_SECURE_ORIGIN = fullDomain;
-    properties.IFRAME_SECURE_SITE = config?.options?.customElementsURL;
-  }
-}
+// Re-bound from @core/helpers (definition moved there so the shared
+// @core/external/base-skyflow init path can reach it, and so both SDKs share one
+// copy).
+export const checkAndSetForCustomUrl = coreHelpers.checkAndSetForCustomUrl;
 
 // Re-bound from @core/helpers (definitions moved there so the shared @core
 // reveal-frame base can reach them). Bound as local consts — not `export … from`
