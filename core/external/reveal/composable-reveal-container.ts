@@ -29,11 +29,14 @@ import {
 } from '@core/constants';
 import ComposableContainerBase from '@core/external/common/composable-container';
 import SkyflowError from '@core/errors';
-import { ContainerType, MessageType, ErrorType } from '@core/types';
+import {
+  ContainerType, MessageType, ErrorType,
+} from '@core/types';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
 import { validateInitConfig } from '@core/validators';
 
-abstract class CoreComposableRevealContainer<TResponse = any> extends ComposableContainerBase {
+abstract class CoreComposableRevealContainer<TResponse extends object>
+  extends ComposableContainerBase {
   type:string = ContainerType.COMPOSE_REVEAL;
 
   protected revealRecords: any[] = [];
@@ -130,7 +133,7 @@ abstract class CoreComposableRevealContainer<TResponse = any> extends Composable
     });
   }
 
-  reveal(options?: any): Promise<TResponse> {
+  reveal(options?: unknown): Promise<TResponse> {
     this.revealRecords = [];
     if (this.isComposableFrameReady) {
       return new Promise((resolve, reject) => {

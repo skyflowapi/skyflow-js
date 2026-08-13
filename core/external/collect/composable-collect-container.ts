@@ -36,6 +36,7 @@ import Client from '@core/client';
 import CollectElement from '@core/external/collect/collect-element';
 import {
   ContainerType, MessageType, InputStyles, ErrorTextStyles,
+  ICollectOptionsBase,
 } from '@core/types';
 import {
   validateInitConfig, validateAdditionalFieldsInCollect, validateUpsertOptions,
@@ -50,7 +51,8 @@ export interface ComposableElementGroup extends ElementGroup {
 
 const CLASS_NAME = 'CollectContainer';
 
-abstract class CoreComposableCollectContainer<TResponse = any> extends ComposableContainerBase {
+abstract class CoreComposableCollectContainer<TResponse extends object>
+  extends ComposableContainerBase {
   type:string = ContainerType.COMPOSABLE;
 
   protected elementGroup: ComposableElementGroup = { rows: [], styles: {}, errorTextStyles: {} };
@@ -286,14 +288,14 @@ abstract class CoreComposableCollectContainer<TResponse = any> extends Composabl
   // CoreCollectContainer hooks so both collect paths behave identically.
 
   // eslint-disable-next-line class-methods-use-this
-  protected validateTokens(options: any): void {
+  protected validateTokens(options: ICollectOptionsBase): void {
     if (options && options.tokens && typeof options.tokens !== 'boolean') {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
     }
   }
 
   // eslint-disable-next-line class-methods-use-this
-  protected resolveTokens(options: any): boolean {
+  protected resolveTokens(options: ICollectOptionsBase): boolean {
     return options?.tokens !== undefined ? options.tokens : true;
   }
 

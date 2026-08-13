@@ -24,6 +24,7 @@ import {
   Context,
   ICoreMetadata,
   ISkyflow,
+  ISkyflowElement,
   SkyflowConfigOptions,
 } from '@core/types';
 import RevealContainer from './external/reveal/reveal-container';
@@ -65,7 +66,7 @@ ComposableRevealContainer
   // eslint-disable-next-line class-methods-use-this
   protected createCollectContainer(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): CollectContainer {
@@ -75,7 +76,7 @@ ComposableRevealContainer
   // eslint-disable-next-line class-methods-use-this
   protected createRevealContainer(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): RevealContainer {
@@ -85,7 +86,7 @@ ComposableRevealContainer
   // eslint-disable-next-line class-methods-use-this
   protected createComposableContainer(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options: ContainerOptions,
   ): ComposableContainer {
@@ -95,7 +96,7 @@ ComposableRevealContainer
   // eslint-disable-next-line class-methods-use-this
   protected createComposeRevealContainer(
     metaData: ICoreMetadata,
-    skyflowElements: any[],
+    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): ComposableRevealContainer {

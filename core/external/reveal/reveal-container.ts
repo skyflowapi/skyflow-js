@@ -34,7 +34,7 @@ const CLASS_NAME = 'RevealContainer';
 // stay in each package's reveal-container subclass (imported by the element
 // files as `./reveal-container`).
 abstract class RevealContainer<
-  TInput = any,
+  TInput extends object,
   TRevealOptions = void,
   TElement extends CoreRevealElement<TInput> = CoreRevealElement<TInput>,
 > extends Container {

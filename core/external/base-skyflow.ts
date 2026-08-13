@@ -21,10 +21,10 @@ Copyright (c) 2022 Skyflow, Inc.
 //
 // Generic parameters exist so `container()`'s overloads — written once here —
 // still return each package's own container classes at the call site. Each is
-// bounded to the matching container *contract* interface (ICollectContainer,
-// IRevealContainer, …) rather than to a concrete class, so the base depends on a
-// contract, a subclass can only wire a container of the right family, and no
-// `packages/*` class is named here.
+// bounded to the matching `@core` container base class (CoreCollectContainer,
+// CoreRevealContainer, …) — the shared supertype both packages extend — so a
+// subclass can only wire a container of the right family and no `packages/*`
+// class is named here.
 //
 // What deliberately stays in each package's `skyflow.ts` subclass:
 //   - the five `instantiate*`/`create*Container` hooks
@@ -48,6 +48,10 @@ import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import SkyflowError from '@core/errors';
 import Client from '@core/client';
 import CoreSkyflowContainer from '@core/external/skyflow-container';
+import CoreCollectContainer from '@core/external/collect/collect-container';
+import CoreRevealContainer from '@core/external/reveal/reveal-container';
+import CoreComposableCollectContainer from '@core/external/collect/composable-collect-container';
+import CoreComposableRevealContainer from '@core/external/reveal/composable-reveal-container';
 import { checkAndSetForCustomUrl, formatVaultURL } from '@core/helpers';
 import { validateComposableContainerOptions } from '@core/validators';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
@@ -59,11 +63,7 @@ import {
   Env,
   ErrorType,
   EventName,
-  ICollectContainer,
-  IComposableCollectContainer,
-  IComposableRevealContainer,
   ICoreMetadata,
-  IRevealContainer,
   ISkyflow,
   ISkyflowElement,
   LogLevel,
@@ -77,10 +77,10 @@ const CLASS_NAME = 'Skyflow';
 
 abstract class BaseSkyflow<
   TSkyflowContainer extends CoreSkyflowContainer,
-  TCollectContainer extends ICollectContainer,
-  TRevealContainer extends IRevealContainer,
-  TComposableContainer extends IComposableCollectContainer,
-  TComposeRevealContainer extends IComposableRevealContainer,
+  TCollectContainer extends CoreCollectContainer<any, any>,
+  TRevealContainer extends CoreRevealContainer<any, any, any>,
+  TComposableContainer extends CoreComposableCollectContainer<any>,
+  TComposeRevealContainer extends CoreComposableRevealContainer<any>,
 > {
   // `protected` (not `#private`) because the subclasses reach these: privacyDB's
   // pure-JS methods delegate to `skyflowContainer`. `#uuid`/`#bearerToken` are

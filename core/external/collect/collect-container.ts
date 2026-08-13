@@ -31,6 +31,7 @@ import {
   ErrorType,
   ICoreMetadata,
   ISkyflowElement,
+  ICollectOptionsBase,
 } from '@core/types';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
 import {
@@ -78,7 +79,10 @@ const CLASS_NAME = 'CollectContainer';
 // package's own collect-input validator) and the A-only uploadFiles stay in the
 // subclasses. The element interfaces are defined here and re-exported by each
 // package's subclass (imported as './collect-container' by compose-collect).
-abstract class CollectContainer<TOptions = any, TResponse = any> extends Container {
+abstract class CollectContainer<
+  TOptions extends ICollectOptionsBase,
+  TResponse extends object,
+> extends Container {
   protected containerId: string;
 
   protected elements: Record<string, CollectElement> = {};
@@ -295,11 +299,11 @@ abstract class CollectContainer<TOptions = any, TResponse = any> extends Contain
             element.isValidElement();
           });
           this.validateTokens(options);
-          if ((options as any)?.additionalFields) {
-            validateAdditionalFieldsInCollect((options as any).additionalFields);
+          if (options?.additionalFields) {
+            validateAdditionalFieldsInCollect(options.additionalFields);
           }
-          if ((options as any)?.upsert) {
-            validateUpsertOptions((options as any)?.upsert);
+          if (options?.upsert) {
+            validateUpsertOptions(options?.upsert);
           }
           bus
           // .target(properties.IFRAME_SECURE_ORIGIN)
@@ -307,7 +311,9 @@ abstract class CollectContainer<TOptions = any, TResponse = any> extends Contain
               ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.metaData.uuid,
               {
                 type: COLLECT_TYPES.COLLECT,
-                ...options,
+                // Spread the options bag as an index-signature type so the
+                // framebus payload stays assignable (the emit arg is untyped).
+                ...(options as Record<string, any>),
                 tokens: this.resolveTokens(options),
                 elementIds,
                 containerId: this.containerId,
@@ -351,11 +357,11 @@ abstract class CollectContainer<TOptions = any, TResponse = any> extends Contain
           element.isValidElement();
         });
         this.validateTokens(options);
-        if ((options as any)?.additionalFields) {
-          validateAdditionalFieldsInCollect((options as any).additionalFields);
+        if (options?.additionalFields) {
+          validateAdditionalFieldsInCollect(options.additionalFields);
         }
-        if ((options as any)?.upsert) {
-          validateUpsertOptions((options as any)?.upsert);
+        if (options?.upsert) {
+          validateUpsertOptions(options?.upsert);
         }
         bus
           .target(properties.IFRAME_SECURE_ORIGIN)
@@ -366,7 +372,9 @@ abstract class CollectContainer<TOptions = any, TResponse = any> extends Contain
                 ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.metaData.uuid,
                 {
                   type: COLLECT_TYPES.COLLECT,
-                  ...options,
+                  // Spread the options bag as an index-signature type so the
+                  // framebus payload stays assignable (the emit arg is untyped).
+                  ...(options as Record<string, any>),
                   tokens: this.resolveTokens(options),
                   elementIds,
                   containerId: this.containerId,
@@ -439,8 +447,7 @@ abstract class CollectContainer<TOptions = any, TResponse = any> extends Contain
   // flowDB forces tokens on and does not validate (no-op override).
   // eslint-disable-next-line class-methods-use-this
   protected validateTokens(options: TOptions): void {
-    const opts = options as any;
-    if (Object.prototype.hasOwnProperty.call(opts, 'tokens') && !validateBooleanOptions(opts.tokens)) {
+    if (Object.prototype.hasOwnProperty.call(options, 'tokens') && !validateBooleanOptions(options.tokens)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
     }
   }
@@ -449,8 +456,7 @@ abstract class CollectContainer<TOptions = any, TResponse = any> extends Contain
   // (default true); flowDB forces true.
   // eslint-disable-next-line class-methods-use-this
   protected resolveTokens(options: TOptions): boolean {
-    const opts = options as any;
-    return opts?.tokens !== undefined ? opts.tokens : true;
+    return options?.tokens !== undefined ? options.tokens : true;
   }
 
   // Error mapping: identity for privacyDB, SkyflowFlowDBError for flowDB.
