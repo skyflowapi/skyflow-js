@@ -28,7 +28,7 @@ export interface IRevealElementInput {
 }
 
 // Relocated to @core/types; re-exported here under the same public name.
-export { IRevealElementOptions };
+export type { IRevealElementOptions };
 
 class RevealContainer extends CoreRevealContainer<IRevealElementInput, void, RevealElement> {
   // eslint-disable-next-line class-methods-use-this

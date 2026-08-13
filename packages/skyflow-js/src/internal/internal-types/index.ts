@@ -11,7 +11,7 @@ import SkyflowContainer from '../../external/skyflow-container';
 // so the existing `internal-types` importers keep resolving them. The types
 // below stay in the package because they reference privacyDB container classes,
 // the client, or the privacyDB `ICollectOptions`.
-export {
+export type {
   ElementInfo,
   ContainerProps,
   RevealContainerProps,

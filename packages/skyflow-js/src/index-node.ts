@@ -4,6 +4,15 @@ Copyright (c) 2025 Skyflow, Inc.
 import Skyflow from './skyflow';
 
 export {
+  RedactionType,
+  ValidationRuleType,
+  EventName,
+  LogLevel,
+  Env,
+  ErrorType,
+} from './utils/common';
+
+export type {
   IInsertRecordInput as InsertRequest,
   IInsertRecord as InsertRecord,
   IInsertOptions as InsertOptions,
@@ -35,26 +44,20 @@ export {
   InputStyles,
   LabelStyles,
   ErrorTextStyles,
-  RedactionType,
   IRevealRecord as RevealRecord,
   RevealResponse,
   RenderFileResponse,
   IValidationRule as ValidationRule,
-  ValidationRuleType,
-  EventName,
-  LogLevel,
-  Env,
   ElementState,
-  ErrorType,
   ErrorMessages,
 } from './utils/common';
 
-export {
+export type {
   IRevealElementInput as RevealElementInput,
   IRevealElementOptions as RevealElementOptions,
 } from './external/reveal/reveal-container';
 
-export { ThreeDSBrowserDetails } from './external/threeds/threeds';
+export type { ThreeDSBrowserDetails } from './external/threeds/threeds';
 
 export {
   CardType,
@@ -63,6 +66,9 @@ export {
 
 export {
   ContainerType,
+} from './skyflow';
+
+export type {
   ISkyflow as SkyflowConfig,
 } from './skyflow';
 

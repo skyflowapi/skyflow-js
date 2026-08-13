@@ -58,7 +58,8 @@ setVariantAdapter(skyflowVariantAdapter);
 
 // Relocated to @core/types (variant-neutral); re-exported here under the same
 // names so `./skyflow` importers and the public surface are unchanged.
-export { ContainerType, ISkyflow, SkyflowConfigOptions };
+export { ContainerType };
+export type { ISkyflow, SkyflowConfigOptions };
 
 const CLASS_NAME = 'Skyflow';
 class Skyflow extends BaseSkyflow<
