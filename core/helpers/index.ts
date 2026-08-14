@@ -11,7 +11,7 @@ import SkyflowError from '@core/errors';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import {
   ALLOWED_NAME_FOR_FILE, CardType, ElementType, COPY_UTILS,
-  DEFAULT_INPUT_FORMAT_TRANSLATION,
+  DEFAULT_INPUT_FORMAT_TRANSLATION, CORALOGIX_DOMAIN,
 } from '@core/constants';
 import properties from '@core/properties';
 import { detectCardType, validateBooleanOptions, isValidURL } from '@core/validators';
@@ -333,6 +333,18 @@ export const getAtobValue = (encodedValue: string) => {
     return decodedValue;
   } catch (err) {
     return '';
+  }
+};
+
+// Injects the Coralogix RUM <script> when window.name flags tracking on (index
+// 3). Shared by both packages' frame-controller `static init()` — the variant
+// bootstrap is identical, so it lives here rather than being duplicated.
+export const injectCoralogixTrackingScript = (): void => {
+  const trackingStatus = getValueFromName(window.name, 3) === 'true';
+  if (trackingStatus) {
+    const scriptTag = document.createElement('script');
+    scriptTag.src = CORALOGIX_DOMAIN;
+    document.head.append(scriptTag);
   }
 };
 
