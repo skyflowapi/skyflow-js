@@ -66,15 +66,15 @@ export default class FrameElementInit extends CoreFrameElementInit {
 
       if (finalInsertRecords.records.length !== 0) {
         insertPromiseSet.push(
-          insertDataInCollectFlowDB(finalInsertRequest,
-            client, options, finalInsertRecords, clientConfig.authToken as string),
+          insertDataInCollectFlowDB(
+            finalInsertRequest, client, clientConfig.authToken as string,
+          ),
         );
       }
       if (finalUpdateRecords.updateRecords.length !== 0) {
         insertPromiseSet.push(
           updateDataInCollectFlowDB(
-            finalUpdateRequest, client, options, finalUpdateRecords,
-            clientConfig.authToken as string,
+            finalUpdateRequest, client, clientConfig.authToken as string,
           ),
         );
       }

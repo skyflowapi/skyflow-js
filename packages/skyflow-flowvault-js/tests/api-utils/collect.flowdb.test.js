@@ -283,7 +283,7 @@ describe('insertDataInCollectFlowDB', () => {
     jest.spyOn(client, 'request').mockResolvedValue({
       records: [{ skyflowID: 'id1', tableName: 'table1', httpCode: 200, tokens: { ssn: [{ token: 't1', tokenGroupName: 'det' }] } }],
     });
-    const out = await insertDataInCollectFlowDB(undefined, client, { tokens: true }, finalInsertRecords, 'auth-token');
+    const out = await insertDataInCollectFlowDB(finalInsertRecords, client, 'auth-token');
     expect(out).toEqual({
       records: [{
         tableName: 'table1', skyflowId: 'id1', tokens: { ssn: [{ token: 't1', tokenGroupName: 'det' }] }, httpCode: 200,
@@ -294,7 +294,7 @@ describe('insertDataInCollectFlowDB', () => {
   test('always resolves with { error } on request failure', async () => {
     const client = buildClient();
     jest.spyOn(client, 'request').mockRejectedValue({ error: { code: 500, description: 'insert failed' } });
-    const out = await insertDataInCollectFlowDB(undefined, client, { tokens: true }, finalInsertRecords, 'auth-token');
+    const out = await insertDataInCollectFlowDB(finalInsertRecords, client, 'auth-token');
     expect(out).toEqual({
       error: { httpCode: 500, message: 'insert failed' },
     });
@@ -312,7 +312,7 @@ describe('insertDataInCollectFlowDB', () => {
         ],
       },
     });
-    const out = await insertDataInCollectFlowDB(undefined, client, { tokens: true }, finalInsertRecords, 'auth-token');
+    const out = await insertDataInCollectFlowDB(finalInsertRecords, client, 'auth-token');
     expect(out).not.toHaveProperty('error');
     expect(out.records).toEqual([
       {
@@ -333,7 +333,7 @@ describe('updateDataInCollectFlowDB', () => {
     jest.spyOn(client, 'request').mockResolvedValue({
       records: [{ skyflowID: 'id1', tableName: 'table1', httpCode: 200, tokens: { name: [{ token: 't1', tokenGroupName: 'det' }] } }],
     });
-    const out = await updateDataInCollectFlowDB(undefined, client, { tokens: true }, finalUpdateRecords, 'auth-token');
+    const out = await updateDataInCollectFlowDB(finalUpdateRecords, client, 'auth-token');
     expect(out).toEqual({
       records: [{
         tableName: 'table1', skyflowId: 'id1', tokens: { name: [{ token: 't1', tokenGroupName: 'det' }] }, httpCode: 200,
@@ -344,7 +344,7 @@ describe('updateDataInCollectFlowDB', () => {
   test('always resolves with { error } on request failure', async () => {
     const client = buildClient();
     jest.spyOn(client, 'request').mockRejectedValue({ error: { code: 400, description: 'update failed' } });
-    const out = await updateDataInCollectFlowDB(undefined, client, { tokens: true }, finalUpdateRecords, 'auth-token');
+    const out = await updateDataInCollectFlowDB(finalUpdateRecords, client, 'auth-token');
     expect(out).toEqual({
       error: { httpCode: 400, message: 'update failed' },
     });
@@ -360,7 +360,7 @@ describe('updateDataInCollectFlowDB', () => {
         ],
       },
     });
-    const out = await updateDataInCollectFlowDB(undefined, client, { tokens: true }, finalUpdateRecords, 'auth-token');
+    const out = await updateDataInCollectFlowDB(finalUpdateRecords, client, 'auth-token');
     expect(out).not.toHaveProperty('error');
     expect(out.records).toEqual([
       {

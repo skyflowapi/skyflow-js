@@ -70,7 +70,7 @@ class SkyflowFrameController
     revealRecords: IRevealRecord[],
     options?: Record<string, any>,
   ): Promise<any> {
-    return fetchRecordsByTokenIdFlowDB(revealRecords, this.client, false, options);
+    return fetchRecordsByTokenIdFlowDB(revealRecords, this.client, options);
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -113,8 +113,6 @@ class SkyflowFrameController
           requests.push(insertDataInCollectFlowDB(
             finalInsertRequest,
             client,
-            options,
-            finalInsertRecords,
             authToken as string,
           ));
         }
@@ -122,8 +120,6 @@ class SkyflowFrameController
           requests.push(updateDataInCollectFlowDB(
             finalUpdateRequest,
             client,
-            options,
-            finalUpdateRecords,
             authToken as string,
           ));
         }

@@ -155,7 +155,6 @@ const executeDetokenize = (
 export const fetchRecordsByTokenIdFlowDB = (
   tokenIdRecords: IRevealRecord[],
   client: Client,
-  purejs: boolean,
   options?: Record<string, any>,
 ): Promise<IRevealResponseType> => new Promise((rootResolve, rootReject) => {
   const clientId = client.toJSON()?.metaData?.uuid || '';
@@ -164,7 +163,7 @@ export const fetchRecordsByTokenIdFlowDB = (
       flowDBDetokenizeVariant, tokenIdRecords, client, options, authToken as string,
     ).then((result) => {
       // Element contract: a full API failure surfaces the raw body as a top-level { error }.
-      if (!purejs && (result as FlowDBDetokenizeRequestError).error
+      if ((result as FlowDBDetokenizeRequestError).error
         && !(result as FlowDBDetokenizeResponse).records) {
         rootReject({ error: (result as FlowDBDetokenizeRequestError).error });
         return;
@@ -174,28 +173,11 @@ export const fetchRecordsByTokenIdFlowDB = (
         const errorData = formatForPureJsFailure(
           { error: { code: errRecord.error?.code, description: errRecord.error?.description } },
           errRecord.token,
-          purejs,
+          false,
         );
         printLog(errorData.error?.description || '', MessageType.ERROR, LogLevel.ERROR);
         return errorData;
       });
-      if (purejs) {
-        // Keep pure-js detokenize() output unchanged (no per-record httpCode leak).
-        const pureRecords = successRecords.map((record: any) => ({
-          token: record.token,
-          value: record.value,
-          ...(record.tokenGroupName ? { tokenGroupName: record.tokenGroupName } : {}),
-          ...(record.metadata ? { metadata: record.metadata } : {}),
-        }));
-        if (failedRecords.length === 0) {
-          rootResolve({ records: pureRecords });
-        } else if (pureRecords.length === 0) {
-          rootReject({ errors: failedRecords });
-        } else {
-          rootReject({ records: pureRecords, errors: failedRecords });
-        }
-        return;
-      }
       if (failedRecords.length === 0) {
         // flowDB records are richer than @core IRevealResponseType's
         // Record<string,string>[]; the runtime shape is the flowDB contract.

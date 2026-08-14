@@ -278,7 +278,7 @@ describe('fetchRecordsByTokenIdFlowDB', () => {
     });
 
     const result = await fetchRecordsByTokenIdFlowDB(
-      [{ token: 'token1' }, { token: 'token2' }], client, true,
+      [{ token: 'token1' }, { token: 'token2' }], client,
     );
 
     expect(requestSpy).toHaveBeenCalledTimes(1);
@@ -288,8 +288,8 @@ describe('fetchRecordsByTokenIdFlowDB', () => {
     expect(JSON.parse(call.body)).toEqual({ vaultID: 'vault123', tokens: ['token1', 'token2'] });
     expect(result).toEqual({
       records: [
-        { token: 'token1', value: 'val1', tokenGroupName: 'nondet_reg' },
-        { token: 'token2', value: 'val2' },
+        { token: 'token1', value: 'val1', tokenGroupName: 'nondet_reg', httpCode: 200 },
+        { token: 'token2', value: 'val2', httpCode: 200 },
       ],
     });
   });
@@ -300,7 +300,7 @@ describe('fetchRecordsByTokenIdFlowDB', () => {
       response: [{ token: 'token1', value: null, error: 'not found', httpCode: 404 }],
     });
 
-    await expect(fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client, true))
+    await expect(fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client))
       .rejects.toEqual({
         errors: [{ token: 'token1', error: { code: 404, description: 'not found' } }],
       });
@@ -316,36 +316,36 @@ describe('fetchRecordsByTokenIdFlowDB', () => {
     });
 
     await expect(
-      fetchRecordsByTokenIdFlowDB([{ token: 'ok' }, { token: 'bad' }], client, true),
+      fetchRecordsByTokenIdFlowDB([{ token: 'ok' }, { token: 'bad' }], client),
     ).rejects.toEqual({
-      records: [{ token: 'ok', value: 'v' }],
+      records: [{ token: 'ok', value: 'v', httpCode: 200 }],
       errors: [{ token: 'bad', error: { code: 404, description: 'not found' } }],
     });
   });
 
-  it('always resolves the executor and rejects with errors on a request-level failure', async () => {
+  it('rejects a request-level failure (no body) as a top-level { error }', async () => {
     const client = makeClient();
     jest.spyOn(client, 'request').mockRejectedValue({
       error: { code: 500, description: 'network error' },
     });
 
-    await expect(fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client, true))
+    await expect(fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client))
       .rejects.toEqual({
-        errors: [{ token: '', error: { code: 500, description: 'network error' } }],
+        error: { httpCode: 500, message: 'network error' },
       });
   });
 
-  it('element path (purejs=false) keeps httpCode on resolved success records', async () => {
+  it('keeps httpCode on resolved success records', async () => {
     const client = makeClient();
     jest.spyOn(client, 'request').mockResolvedValue({
       response: [{ token: 'token1', value: 'val1', httpCode: 200 }],
     });
 
-    const result = await fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client, false);
+    const result = await fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client);
     expect(result).toEqual({ records: [{ token: 'token1', value: 'val1', httpCode: 200 }] });
   });
 
-  it('element path (purejs=false) rejects a full failure as a top-level { error }', async () => {
+  it('rejects a full failure as a top-level { error }', async () => {
     const client = makeClient();
     jest.spyOn(client, 'request').mockRejectedValue({
       data: {
@@ -356,7 +356,7 @@ describe('fetchRecordsByTokenIdFlowDB', () => {
       error: { code: 404, description: 'Vault not found.' },
     });
 
-    await expect(fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client, false))
+    await expect(fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client))
       .rejects.toEqual({
         error: {
           grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],

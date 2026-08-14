@@ -84,7 +84,7 @@ export const constructElementsInsertReq = (req, update, options) => {
   return [{ records }, { updateRecords }];
 };
 
-export const getFlowDBUpsertForTable = (
+const getFlowDBUpsertForTable = (
   tableName: string,
   options: Array<IFlowDBUpsertOptions> | undefined,
 ): FlowDBUpsert | undefined => {
@@ -250,18 +250,6 @@ export const constructFlowDBUpdateRequest = (
   };
 };
 
-interface IInsertVariant {
-  buildRequest(
-    client: Client,
-    records,
-    options,
-    finalInsertRecords,
-    authToken: string,
-  ): Promise<any> | undefined;
-  parseSuccess(response: any, options, finalInsertRecords): any;
-  parseError(error: any, options?): any;
-}
-
 // When the flowDB API rejects with a non-2xx status it can still return a body
 // carrying a `records` key (partial failure). In that case resolve the request
 // through the success constructor so the per-record results/errors flow to the
@@ -273,67 +261,41 @@ const parseFlowDBError = (error: any) => {
   return constructFlowDBInsertError(error);
 };
 
-const flowDBInsertVariant: IInsertVariant = {
-  buildRequest: (client, records, options, finalInsertRecords, authToken) => client?.request({
-    body: JSON.stringify(
-      constructFlowDBInsertRequest(finalInsertRecords, options, client.config.vaultID),
-    ),
-    requestMethod: 'POST',
-    url: `${client.config.vaultURL}/v2/records/insert`,
-    headers: {
-      authorization: `Bearer ${authToken}`,
-      'content-type': 'application/json',
-    },
-  }),
-  parseSuccess: (response) => constructFlowDBInsertResponse(response),
-  parseError: (error) => parseFlowDBError(error),
-};
-
-const flowDBUpdateVariant: IInsertVariant = {
-  buildRequest: (client, records, options, finalUpdateRecords, authToken) => client?.request({
-    body: JSON.stringify(
-      constructFlowDBUpdateRequest(finalUpdateRecords, options, client.config.vaultID),
-    ),
-    requestMethod: 'POST',
-    url: `${client.config.vaultURL}/v2/records/update`,
-    headers: {
-      authorization: `Bearer ${authToken}`,
-      'content-type': 'application/json',
-    },
-  }),
-  parseSuccess: (response) => constructFlowDBInsertResponse(response),
-  parseError: (error) => parseFlowDBError(error),
-};
-
-const executeInsert = (
-  variant: IInsertVariant,
-  records,
+// Insert and update share the same transport: POST a pre-built flowDB request body,
+// parse the success/partial-failure/full-failure response the same way — they differ
+// only in the endpoint. So there is one writer parameterized by URL, not a per-op
+// variant object.
+const executeFlowDBWrite = (
+  url: string,
+  requestBody: FlowDBInsertRequestBody | FlowDBUpdateRequestBody,
   client: Client,
-  options,
-  finalInsertRecords,
   authToken: string,
 ) => new Promise((resolve) => {
-  variant.buildRequest(client, records, options, finalInsertRecords, authToken)
+  client?.request({
+    body: JSON.stringify(requestBody),
+    requestMethod: 'POST',
+    url,
+    headers: {
+      authorization: `Bearer ${authToken}`,
+      'content-type': 'application/json',
+    },
+  })
     ?.then((response: any) => {
-      resolve(variant.parseSuccess(response, options, finalInsertRecords));
+      resolve(constructFlowDBInsertResponse(response));
     })
     ?.catch((error: any) => {
-      resolve(variant.parseError(error, options));
+      resolve(parseFlowDBError(error));
     });
 });
 
 export const insertDataInCollectFlowDB = async (
-  records,
+  requestBody: FlowDBInsertRequestBody,
   client: Client,
-  options,
-  finalInsertRecords,
   authToken: string,
-) => executeInsert(flowDBInsertVariant, records, client, options, finalInsertRecords, authToken);
+) => executeFlowDBWrite(`${client.config.vaultURL}/v2/records/insert`, requestBody, client, authToken);
 
 export const updateDataInCollectFlowDB = async (
-  records,
+  requestBody: FlowDBUpdateRequestBody,
   client: Client,
-  options,
-  finalUpdateRecords,
   authToken: string,
-) => executeInsert(flowDBUpdateVariant, records, client, options, finalUpdateRecords, authToken);
+) => executeFlowDBWrite(`${client.config.vaultURL}/v2/records/update`, requestBody, client, authToken);
