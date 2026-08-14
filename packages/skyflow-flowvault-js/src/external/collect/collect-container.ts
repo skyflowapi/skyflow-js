@@ -18,7 +18,7 @@ import {
 } from '../../utils/common';
 import { CollectResponse } from '../../internal/internal-types';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
-import collectVariant from '../../collect-variant';
+import collectVariant from './collect-variant';
 
 export type {
   ElementGroupItem, ElementGroup,

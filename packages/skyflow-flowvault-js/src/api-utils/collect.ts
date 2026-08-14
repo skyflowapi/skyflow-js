@@ -7,7 +7,9 @@ Copyright (c) 2025 Skyflow, Inc.
 // re-exported here so consumers import it from the flowvault collect surface.
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
-import { IInsertRecordInput, IInsertRecord } from '@core/types';
+import {
+  IInsertRecordInput, IInsertRecord, CVVMap,
+} from '@core/types';
 import Client from '@core/client';
 import { checkDuplicateColumns } from '@core/api-utils/collect';
 import { normalizeFlowDBError } from '../libs/skyflow-flowdb-error';
@@ -142,10 +144,9 @@ export const constructFlowDBInsertResponse = (
   return { records };
 };
 
-export interface CVVMap {
-  insert: Record<string, Record<string, string>>;
-  update: Record<string, Record<string, string>>;
-}
+// CVVMap now lives in @core/types (variant-neutral). Re-exported here so existing
+// consumers of the flowvault collect surface keep resolving it from this module.
+export type { CVVMap };
 
 /**
  * Replaces the token of every CVV column in the collect response with a mock 3/4-digit

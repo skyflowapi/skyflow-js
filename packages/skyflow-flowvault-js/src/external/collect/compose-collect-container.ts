@@ -15,7 +15,7 @@ import { CollectElementInput, CollectElementOptions, ICollectOptions } from '../
 import { CollectResponse } from '../../internal/internal-types';
 import { validateCollectElementInput } from '../../utils/validators';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
-import collectVariant from '../../collect-variant';
+import collectVariant from './collect-variant';
 
 class ComposableContainer extends CoreComposableCollectContainer<
 ICollectOptions, CollectResponse, CollectElementInput, CollectElementOptions

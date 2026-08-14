@@ -630,6 +630,16 @@ export interface BatchInsertRequestBody {
   [key: string]: any;
 }
 
+// Variant-neutral CVV capture map, built by the shared composable-collect
+// controller (frame-element-init) while it assembles the insert/update request
+// objects: `insert` is keyed by table name, `update` by skyflowID, each mapping a
+// CVV column -> the entered value. Only flowDB consumes it (its dispatch tail
+// feeds it to replaceCVVTokensInResponse); privacyDB builds it and ignores it.
+export interface CVVMap {
+  insert: Record<string, Record<string, string>>;
+  update: Record<string, Record<string, string>>;
+}
+
 // Internal plumbing only: the privacyDB file options the SHARED formatter/pipeline
 // physically processes (for FILE_INPUT / MULTI_FILE_INPUT elements). It is NOT a
 // public contract — each package's public `CollectElementOptions` is

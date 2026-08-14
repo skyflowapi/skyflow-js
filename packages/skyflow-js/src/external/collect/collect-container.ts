@@ -20,7 +20,7 @@ import { MessageType, VariantCollectAdapter } from '@core/types';
 import CoreCollectContainer, {
   ICollectElementBase,
 } from '@core/external/collect/collect-container';
-import collectVariant from '../../collect-variant';
+import collectVariant from './collect-variant';
 import { printLog, parameterizedString } from '../../utils/logs-helper';
 import { validateCollectElementInput, validateInitConfig } from '../../utils/validators';
 import {

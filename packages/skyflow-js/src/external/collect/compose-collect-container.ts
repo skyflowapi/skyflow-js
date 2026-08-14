@@ -19,7 +19,7 @@ import CoreComposableCollectContainer from '@core/external/collect/composable-co
 import SkyflowError from '@core/errors';
 import Client from '@core/client';
 import { VariantCollectAdapter } from '@core/types';
-import collectVariant from '../../collect-variant';
+import collectVariant from './collect-variant';
 import {
   MessageType,
   CollectElementInput,
