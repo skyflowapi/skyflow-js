@@ -31,7 +31,6 @@ export type {
   ErrorTextStyles,
   LabelStyles,
   InputStyles,
-  CollectElementUpdateOptions,
   FormattedCollectElementOptions,
   CardMetadata,
   MetaData,
@@ -65,6 +64,7 @@ export type {
 import type {
   ICollectOptionsBase,
   ICollectElementOptionsBase,
+  ICollectElementUpdateOptionsBase,
   IElementStateBase,
   IInsertRecordInput as IInsertRecordInputType,
   CollectElementInput as ICoreCollectElementInput,
@@ -85,6 +85,14 @@ export interface ElementState extends IElementStateBase {
 // client-facing keys `tableName` / `skyflowId` (mapped internally to the
 // pipeline's `table` / `skyflowID`).
 export interface CollectElementInput extends ICoreCollectElementInput {
+  tableName?: string;
+  skyflowId?: string;
+}
+
+// flowDB collect-element update options: shared base + flowDB client-facing identity
+// keys. Binds `CollectElement`/`CollectContainer`'s `TUpdateOptions` so
+// `element.update()` is typed to flowDB naming (`tableName`/`skyflowId`). See 2.1.
+export interface CollectElementUpdateOptions extends ICollectElementUpdateOptionsBase {
   tableName?: string;
   skyflowId?: string;
 }

@@ -361,16 +361,14 @@ export interface ICollectElementInputBase {
   validations?: IValidationRule[],
 }
 
-// Core-level update-options type consumed by the SHARED CollectElement.update()
-// (packages do not subclass CollectElement, so this one signature serves both).
-// It therefore tolerates both packages' identity namings; the active keys are
-// normalized at runtime via getVariantAdapter().collect.normalizeUpdateOptions.
-export interface CollectElementUpdateOptions extends ICollectElementInputBase {
+// Variant-neutral update-options base: shared input props + cardMetadata, NO identity
+// keys (privacyDB `table`/`skyflowID` vs flowDB `tableName`/`skyflowId` diverge — each
+// package's own `CollectElementUpdateOptions extends ICollectElementUpdateOptionsBase`
+// adds them). `CollectElement` is generic over this so `update()` is typed to the
+// package's naming; the active keys are still normalized at runtime via
+// collectVariant.normalizeUpdateOptions.
+export interface ICollectElementUpdateOptionsBase extends ICollectElementInputBase {
   cardMetadata?: CardMetadata,
-  table?: string,
-  skyflowID?: string,
-  tableName?: string,
-  skyflowId?: string,
 }
 
 // Core-level, identity-neutral create input: base + `type`. Used for the abstract
@@ -429,13 +427,20 @@ export interface ICollectContainer<
   uploadFiles?(options?: TOptions): Promise<UploadFilesResponse>;
 }
 
-export interface IRevealContainer<TInput = any, TRevealOptions = any, TElement = ISkyflowElement> {
+export interface IRevealContainer<
+  TInput = any,
+  TRevealOptions = any,
+  TResponse extends IRevealResponseBase = RevealResponse,
+  TElement = ISkyflowElement,
+> {
   create(record: TInput, options?: IRevealElementOptions): TElement;
-  reveal(options?: TRevealOptions): Promise<RevealResponse>;
+  reveal(options?: TRevealOptions): Promise<TResponse>;
   setError(errors: Partial<Record<ErrorType, string>>): void;
 }
 
-export interface IComposableCollectContainer<TResponse = any> {
+export interface IComposableCollectContainer<
+  TResponse extends ICollectResponseBase = ICollectResponseBase,
+> {
   collect(options?: ICollectOptionsBase): Promise<TResponse>;
   on(eventName: string, handler: Function): void;
   mount(domElement: HTMLElement | string): void;
@@ -443,8 +448,11 @@ export interface IComposableCollectContainer<TResponse = any> {
   setError(errors: Partial<Record<ErrorType, string>>): void;
 }
 
-export interface IComposableRevealContainer<TResponse = any> {
-  reveal(options?: any): Promise<TResponse>;
+export interface IComposableRevealContainer<
+  TRevealOptions = any,
+  TResponse extends IRevealResponseBase = RevealResponse,
+> {
+  reveal(options?: TRevealOptions): Promise<TResponse>;
   mount(domElement: HTMLElement | string): void;
   unmount(): void;
   setError(errors: Partial<Record<ErrorType, string>>): void;
@@ -464,7 +472,13 @@ export interface UploadFilesResponse {
   errorResponse?: Record<string, any>,
 }
 
-export interface RevealResponse {
+// Variant-neutral reveal-response marker; both packages' RevealResponse extend it
+// (privacyDB `{ success?, errors? }` below, flowDB `{ records }` in internal-types).
+// Mirrors ICollectResponseBase — lets RevealContainer be generic over the response.
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IRevealResponseBase {}
+
+export interface RevealResponse extends IRevealResponseBase {
   success?: Array<{
     token: string,
     valueType: string,

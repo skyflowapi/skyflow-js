@@ -10,7 +10,7 @@ import EventEmitter from '@core/event-emitter';
 import { ELEMENT_EVENTS_TO_IFRAME, REVEAL_ELEMENT_OPTIONS_TYPES } from '@core/constants';
 import { ContainerType, EventName, IRevealElementOptions } from '@core/types';
 
-class ComposableRevealElement<TInput = IRevealElementOptions> {
+class ComposableRevealElement<TInput> {
   protected elementName: string;
 
   protected eventEmitter: EventEmitter;

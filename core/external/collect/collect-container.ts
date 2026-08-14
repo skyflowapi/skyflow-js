@@ -32,6 +32,8 @@ import {
   ICoreMetadata,
   ISkyflowElement,
   ICollectOptionsBase,
+  ICollectResponseBase,
+  ICollectElementUpdateOptionsBase,
 } from '@core/types';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
 import {
@@ -92,7 +94,8 @@ const CLASS_NAME = 'CollectContainer';
 // package's subclass (imported as './collect-container' by compose-collect).
 abstract class CollectContainer<
   TOptions extends ICollectOptionsBase,
-  TResponse extends object,
+  TResponse extends ICollectResponseBase,
+  TUpdateOptions extends ICollectElementUpdateOptionsBase = ICollectElementUpdateOptionsBase,
 > extends Container {
   protected containerId: string;
 
@@ -103,7 +106,7 @@ abstract class CollectContainer<
   // builds, replacing the former global getVariantAdapter().collect lookup.
   protected abstract collectVariant: VariantCollectAdapter;
 
-  protected elements: Record<string, CollectElement> = {};
+  protected elements: Record<string, CollectElement<TUpdateOptions>> = {};
 
   protected metaData: ICoreMetadata;
 
@@ -169,7 +172,7 @@ abstract class CollectContainer<
   abstract create: (
     input: CollectElementInput,
     options?: ICollectElementOptionsBase,
-  ) => CollectElement;
+  ) => CollectElement<TUpdateOptions>;
 
   setError(errors: Partial<Record<ErrorType, string>>) {
     this.customErrorMessages = errors;
@@ -178,7 +181,7 @@ abstract class CollectContainer<
   protected createMultipleElement = (
     multipleElements: ElementGroup,
     isSingleElementAPI: boolean = false,
-  ): CollectElement => {
+  ): CollectElement<TUpdateOptions> => {
     const elements: any[] = [];
     const tempElements = deepClone(multipleElements);
 
@@ -237,7 +240,7 @@ abstract class CollectContainer<
       }
     } else {
       const elementId = uuid();
-      element = new CollectElement(
+      element = new CollectElement<TUpdateOptions>(
         elementId,
         tempElements,
         this.metaData,
@@ -445,7 +448,7 @@ abstract class CollectContainer<
   };
 
   #shouldRemoveElement = (
-    element: CollectElement,
+    element: CollectElement<TUpdateOptions>,
     mountedIframeIds: string[],
   ): boolean => (
     element.isMounted()

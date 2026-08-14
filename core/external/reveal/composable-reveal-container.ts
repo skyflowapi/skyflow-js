@@ -28,15 +28,19 @@ import {
   CUSTOM_ERROR_MESSAGES,
 } from '@core/constants';
 import ComposableContainerBase from '@core/external/common/composable-container';
+import ComposableRevealInternalElement from '@core/external/reveal/composable-reveal-internal';
 import SkyflowError from '@core/errors';
 import {
   ContainerType, MessageType, ErrorType,
+  IRevealResponseBase,
 } from '@core/types';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
 import { validateInitConfig } from '@core/validators';
 
-abstract class CoreComposableRevealContainer<TResponse extends object>
-  extends ComposableContainerBase {
+abstract class CoreComposableRevealContainer<
+  TRevealOptions,
+  TResponse extends IRevealResponseBase,
+> extends ComposableContainerBase<ComposableRevealInternalElement<any>> {
   type:string = ContainerType.COMPOSE_REVEAL;
 
   protected revealRecords: any[] = [];
@@ -59,7 +63,7 @@ abstract class CoreComposableRevealContainer<TResponse extends object>
   protected createMultipleElement = (
     multipleElements: any,
     isSingleElementAPI: boolean = false,
-  ): any => {
+  ): ComposableRevealInternalElement<any> => {
     try {
       const elements: any[] = [];
       this.tempElements = deepClone(multipleElements);
@@ -133,7 +137,7 @@ abstract class CoreComposableRevealContainer<TResponse extends object>
     });
   }
 
-  reveal(options?: unknown): Promise<TResponse> {
+  reveal(options?: TRevealOptions): Promise<TResponse> {
     this.revealRecords = [];
     if (this.isComposableFrameReady) {
       return new Promise((resolve, reject) => {
@@ -280,11 +284,11 @@ abstract class CoreComposableRevealContainer<TResponse extends object>
 
   // flowDB validates reveal options; privacyDB has none (no-op default).
   // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-empty-function
-  protected validateOptions(options?: any): void {}
+  protected validateOptions(options?: TRevealOptions): void {}
 
   // flowDB forwards reveal options into the frame payload; privacyDB omits them.
   // eslint-disable-next-line class-methods-use-this
-  protected revealExtraData(options?: any): Record<string, any> {
+  protected revealExtraData(options?: TRevealOptions): Record<string, any> {
     return {};
   }
 

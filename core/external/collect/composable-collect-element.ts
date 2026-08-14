@@ -16,7 +16,7 @@ import properties from '@core/properties';
 import SkyflowError from '@core/errors';
 import { formatValidations } from '@core/libs/element-options';
 import {
-  CollectElementUpdateOptions, EventName, MessageType, MetaData, ContainerType,
+  ICollectElementUpdateOptionsBase, EventName, MessageType, MetaData, ContainerType,
 } from '@core/types';
 import { printLog } from '@core/utils/logs-helper';
 
@@ -99,7 +99,7 @@ class ComposableElement {
     return this.#elementName;
   }
 
-  update = (options: CollectElementUpdateOptions) => {
+  update = (options: ICollectElementUpdateOptionsBase) => {
     this.#isUpdateCalled = true;
     if (this.#isMounted) {
       options.validations = formatValidations(options.validations);

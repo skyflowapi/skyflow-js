@@ -17,7 +17,9 @@ import CoreCollectContainer, {
 } from '@core/external/collect/collect-container';
 import { VariantCollectAdapter } from '@core/adapters';
 import { validateCollectElementInput } from '../../utils/validators';
-import { CollectElementInput, CollectElementOptions, ICollectOptions } from '../../utils/common';
+import {
+  CollectElementInput, CollectElementOptions, CollectElementUpdateOptions, ICollectOptions,
+} from '../../utils/common';
 import { CollectResponse } from '../../internal/internal-types';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
 import flowVaultVariantAdapter from '../../variant-adapter';
@@ -31,14 +33,15 @@ export interface ICollectElement extends ICollectElementBase {
   tableName?: string;
 }
 
-class CollectContainer extends CoreCollectContainer<ICollectOptions, CollectResponse> {
+class CollectContainer extends
+  CoreCollectContainer<ICollectOptions, CollectResponse, CollectElementUpdateOptions> {
   // flowDB collect key strategy (client-facing `skyflowId`/`tableName`); single
   // source is this package's VariantAdapter, injected into each element.
   protected collectVariant: VariantCollectAdapter = flowVaultVariantAdapter.collect;
 
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
-  }): CollectElement => {
+  }): CollectElement<CollectElementUpdateOptions> => {
     validateCollectElementInput(input, this.context.logLevel);
     const validations = formatValidations(input.validations);
     const formattedOptions = formatOptions(input.type, options, this.context.logLevel);

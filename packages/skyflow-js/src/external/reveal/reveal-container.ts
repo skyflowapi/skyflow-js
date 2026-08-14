@@ -10,6 +10,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import CoreRevealContainer from '@core/external/reveal/reveal-container';
 import {
   IRevealElementOptions, RedactionType, ICoreMetadata, RevealContainerProps, Context,
+  RevealResponse,
 } from '@core/types';
 import { validateRevealElementRecords } from '../../utils/validators';
 import RevealElement from './reveal-element';
@@ -30,7 +31,8 @@ export interface IRevealElementInput {
 // Relocated to @core/types; re-exported here under the same public name.
 export type { IRevealElementOptions };
 
-class RevealContainer extends CoreRevealContainer<IRevealElementInput, void, RevealElement> {
+class RevealContainer extends
+  CoreRevealContainer<IRevealElementInput, void, RevealResponse, RevealElement> {
   // eslint-disable-next-line class-methods-use-this
   protected createRevealElement(
     record: IRevealElementInput,

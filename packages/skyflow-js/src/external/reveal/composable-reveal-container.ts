@@ -15,7 +15,7 @@ import { RevealElementInput, RevealResponse } from '../../index-node';
 import { validateInputFormatOptions, validateRevealElementRecords } from '../../utils/validators';
 import { formatRevealElementOptions } from '../../utils/helpers';
 
-class ComposableRevealContainer extends CoreComposableRevealContainer<RevealResponse> {
+class ComposableRevealContainer extends CoreComposableRevealContainer<void, RevealResponse> {
   create = (input: RevealElementInput, options?: IRevealElementOptions) => {
     const elementId = uuid();
     validateInputFormatOptions(options);

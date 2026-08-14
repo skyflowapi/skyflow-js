@@ -41,10 +41,12 @@ import {
 } from '@core/types';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
 
-abstract class ComposableContainerBase extends Container {
+abstract class ComposableContainerBase<
+  TElement extends ISkyflowElement,
+> extends Container {
   protected containerId: string = '';
 
-  protected elements: Record<string, any> = {};
+  protected elements: Record<string, TElement> = {};
 
   protected metaData: ICoreMetadata;
 
@@ -60,9 +62,9 @@ abstract class ComposableContainerBase extends Container {
 
   protected isMounted: boolean = false;
 
-  protected options: any;
+  protected options!: ContainerOptions;
 
-  protected containerElement: any;
+  protected containerElement!: TElement;
 
   protected containerMounted: boolean = false;
 
@@ -96,7 +98,7 @@ abstract class ComposableContainerBase extends Container {
   protected abstract createMultipleElement: (
     multipleElements: any,
     isSingleElementAPI?: boolean,
-  ) => any;
+  ) => TElement;
 
   constructor(
     metaData: ICoreMetadata,
@@ -122,7 +124,9 @@ abstract class ComposableContainerBase extends Container {
     this.getSkyflowBearerToken = metaData?.getSkyflowBearerToken;
     this.skyflowElements = skyflowElements;
     this.context = context;
-    this.options = options;
+    // Composable containers are only ever created via BaseSkyflow's COMPOSABLE /
+    // COMPOSE_REVEAL paths, which validate and pass options — so it is present here.
+    this.options = options as ContainerOptions;
     this.eventEmitter = new EventEmitter();
 
     this.clientDomain = this.metaData.clientDomain || '';

@@ -34,7 +34,7 @@ import { formatRevealElementOptions } from '@core/helpers';
 // `#getSkyflowBearerToken`, which pull in package-only render transport) lives in
 // the skyflow-js subclass and is wired via the `registerRenderFileRequestListener`
 // hook; token-only flowDB leaves that hook empty and adds nothing.
-class ComposableRevealInternalElement<TInput = any> extends SkyflowElement {
+class ComposableRevealInternalElement<TInput> extends SkyflowElement {
   #iframe: IFrame;
 
   protected metaData: ICoreMetadata;

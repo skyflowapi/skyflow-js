@@ -13,13 +13,18 @@ import uuid from '@core/libs/uuid';
 import { FRAME_ELEMENT } from '@core/constants';
 import { formatValidations, formatOptions } from '@core/libs/element-options';
 import CoreComposableCollectContainer from '@core/external/collect/composable-collect-container';
+import { VariantCollectAdapter } from '@core/adapters';
 import { CollectElementInput, CollectElementOptions, ICollectOptions } from '../../utils/common';
 import { CollectResponse } from '../../internal/internal-types';
 import { validateCollectElementInput } from '../../utils/validators';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
+import flowVaultVariantAdapter from '../../variant-adapter';
 import ComposableElement from './compose-collect-element';
 
-class ComposableContainer extends CoreComposableCollectContainer<CollectResponse> {
+class ComposableContainer extends CoreComposableCollectContainer<ICollectOptions, CollectResponse> {
+  // flowDB collect key strategy (`skyflowId`/`tableName`); injected into each element.
+  protected collectVariant: VariantCollectAdapter = flowVaultVariantAdapter.collect;
+
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
   }): ComposableElement => {
@@ -49,12 +54,11 @@ class ComposableContainer extends CoreComposableCollectContainer<CollectResponse
   };
 
   // flowDB forces tokens on and does not validate a client-supplied value.
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
-  protected validateTokens(options: ICollectOptions): void {}
-
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
-  protected resolveTokens(options: ICollectOptions): boolean {
-    return true;
+  // Reuse the base validation for additionalFields/upsert, then force tokens on
+  // in the emitted options (flowDB has no client-facing `tokens`).
+  protected validateCollectOptions(options: ICollectOptions): ICollectOptions {
+    const validated = super.validateCollectOptions(options);
+    return { ...validated, tokens: true } as ICollectOptions;
   }
 
   // eslint-disable-next-line class-methods-use-this

@@ -13,6 +13,7 @@ import {
   ICoreMetadata, RevealContainerProps, Context,
 } from '@core/types';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
+import type { RevealResponse } from '../../internal/internal-types';
 import type {
   IFlowDBRevealElementInput,
   IRevealElementOptions,
@@ -33,7 +34,7 @@ export type {
 };
 
 class RevealContainer
-  extends CoreRevealContainer<IRevealElementInput, IRevealOptions, RevealElement> {
+  extends CoreRevealContainer<IRevealElementInput, IRevealOptions, RevealResponse, RevealElement> {
   // eslint-disable-next-line class-methods-use-this
   protected createRevealElement(
     record: IRevealElementInput,

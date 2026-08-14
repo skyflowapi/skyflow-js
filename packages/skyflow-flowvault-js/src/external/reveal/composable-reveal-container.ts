@@ -15,7 +15,7 @@ import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
 import ComposableRevealElement from './composable-reveal-element';
 import ComposableRevealInternalElement from './composable-reveal-internal';
 import { IRevealElementOptions } from './reveal-container';
-import { IFlowDBRevealElementInput } from '../../utils/common';
+import { IFlowDBRevealElementInput, IRevealOptions } from '../../utils/common';
 import { RevealResponse } from '../../internal/internal-types';
 import {
   validateInputFormatOptions,
@@ -24,7 +24,8 @@ import {
 } from '../../utils/validators';
 import { formatRevealElementOptions } from '../../utils/helpers';
 
-class ComposableRevealContainer extends CoreComposableRevealContainer<RevealResponse> {
+class ComposableRevealContainer
+  extends CoreComposableRevealContainer<IRevealOptions, RevealResponse> {
   create = (input: IFlowDBRevealElementInput, options?: IRevealElementOptions) => {
     const elementId = uuid();
     validateInputFormatOptions(options);
@@ -67,12 +68,12 @@ class ComposableRevealContainer extends CoreComposableRevealContainer<RevealResp
   }
 
   // eslint-disable-next-line class-methods-use-this
-  protected validateOptions(options?: any): void {
+  protected validateOptions(options?: IRevealOptions): void {
     validateRevealOptions(options);
   }
 
   // eslint-disable-next-line class-methods-use-this
-  protected revealExtraData(options?: any): Record<string, any> {
+  protected revealExtraData(options?: IRevealOptions): Record<string, any> {
     return { options };
   }
 

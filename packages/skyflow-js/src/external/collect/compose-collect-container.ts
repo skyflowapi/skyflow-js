@@ -21,6 +21,8 @@ import CoreComposableCollectContainer from '@core/external/collect/composable-co
 import SkyflowError from '@core/errors';
 import { formatValidations, formatOptions } from '@core/libs/element-options';
 import Client from '@core/client';
+import { VariantCollectAdapter } from '@core/adapters';
+import skyflowVariantAdapter from '../../variant-adapter';
 import {
   MessageType,
   CollectElementInput,
@@ -34,7 +36,10 @@ import { validateCollectElementInput, validateInitConfig } from '../../utils/val
 import ComposableElement from './compose-collect-element';
 
 const CLASS_NAME = 'CollectContainer';
-class ComposableContainer extends CoreComposableCollectContainer<CollectResponse> {
+class ComposableContainer extends CoreComposableCollectContainer<ICollectOptions, CollectResponse> {
+  // privacyDB collect key strategy (`skyflowID`/`table`); injected into each element.
+  protected collectVariant: VariantCollectAdapter = skyflowVariantAdapter.collect;
+
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
   }): ComposableElement => {

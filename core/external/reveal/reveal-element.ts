@@ -36,7 +36,7 @@ import { formatRevealElementOptions } from '@core/helpers';
 // since that diverges per package. The privacyDB file-render feature
 // (`renderFile`, which pulls in package-only reveal transport) lives in the
 // skyflow-js subclass; flowDB binds the generic and adds nothing.
-class RevealElement<TInput = any> extends SkyflowElement {
+class RevealElement<TInput> extends SkyflowElement {
   protected iframe: IFrame;
 
   protected metaData: ICoreMetadata;

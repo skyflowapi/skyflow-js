@@ -31,6 +31,7 @@ import { validateCollectElementInput, validateInitConfig } from '../../utils/val
 import {
   CollectElementInput,
   CollectElementOptions,
+  CollectElementUpdateOptions,
   CollectResponse,
   ICollectOptions,
   UploadFilesResponse,
@@ -46,14 +47,15 @@ export interface ICollectElement extends ICollectElementBase {
 }
 
 const CLASS_NAME = 'CollectContainer';
-class CollectContainer extends CoreCollectContainer<ICollectOptions, CollectResponse> {
+class CollectContainer extends
+  CoreCollectContainer<ICollectOptions, CollectResponse, CollectElementUpdateOptions> {
   // privacyDB collect key strategy (internal `skyflowID`/`table`); single source is
   // this package's VariantAdapter, supplied here and injected into each element.
   protected collectVariant: VariantCollectAdapter = skyflowVariantAdapter.collect;
 
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,
-  }): CollectElement => {
+  }): CollectElement<CollectElementUpdateOptions> => {
     validateCollectElementInput(input, this.context.logLevel);
     const validations = formatValidations(input.validations);
     const formattedOptions = formatOptions(input.type, options, this.context.logLevel);

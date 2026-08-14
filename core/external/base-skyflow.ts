@@ -63,7 +63,11 @@ import {
   Env,
   ErrorType,
   EventName,
+  ICollectElementUpdateOptionsBase,
+  ICollectOptionsBase,
+  ICollectResponseBase,
   ICoreMetadata,
+  IRevealResponseBase,
   ISkyflow,
   ISkyflowElement,
   LogLevel,
@@ -75,12 +79,21 @@ import {
 
 const CLASS_NAME = 'Skyflow';
 
+// The container bounds use the shared `@core` marker bases (ICollectOptionsBase /
+// ICollectResponseBase / IRevealResponseBase) rather than `any` wherever a marker
+// exists — so a subclass can only wire a container of the right family AND the
+// right option/response contract. `any` remains ONLY in slots with no shared base
+// (reveal's package-specific TInput / TRevealOptions / TElement). Package option/
+// response types are never named here (that would cross the @core ⇏ packages line);
+// the markers are their common supertype, which is all BaseSkyflow needs.
 abstract class BaseSkyflow<
   TSkyflowContainer extends CoreSkyflowContainer,
-  TCollectContainer extends CoreCollectContainer<any, any>,
-  TRevealContainer extends CoreRevealContainer<any, any, any>,
-  TComposableContainer extends CoreComposableCollectContainer<any>,
-  TComposeRevealContainer extends CoreComposableRevealContainer<any>,
+  // eslint-disable-next-line max-len
+  TCollectContainer extends CoreCollectContainer<ICollectOptionsBase, ICollectResponseBase, ICollectElementUpdateOptionsBase>,
+  TRevealContainer extends CoreRevealContainer<any, any, IRevealResponseBase, any>,
+  // eslint-disable-next-line max-len
+  TComposableContainer extends CoreComposableCollectContainer<ICollectOptionsBase, ICollectResponseBase>,
+  TComposeRevealContainer extends CoreComposableRevealContainer<any, IRevealResponseBase>,
 > {
   // `protected` (not `#private`) because the subclasses reach these: privacyDB's
   // pure-JS methods delegate to `skyflowContainer`. `#uuid`/`#bearerToken` are

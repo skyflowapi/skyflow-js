@@ -47,14 +47,16 @@ import {
   getReturnValue,
 } from '@core/helpers';
 import {
-  CollectElementUpdateOptions,
+  ICollectElementUpdateOptionsBase,
   Context, Env, EventName, MessageType,
   ContainerType, ContainerProps, InternalState,
   ICoreMetadata as Metadata,
 } from '@core/types';
 
 const CLASS_NAME = 'Element';
-class CollectElement extends SkyflowElement {
+class CollectElement<
+  TUpdateOptions extends ICollectElementUpdateOptionsBase = ICollectElementUpdateOptionsBase,
+> extends SkyflowElement {
   elementType: string;
 
   type: string = ContainerType.COLLECT;
@@ -375,7 +377,7 @@ class CollectElement extends SkyflowElement {
     }
   };
 
-  updateElement = (elementOptions: { elementName: string } & CollectElementUpdateOptions) => {
+  updateElement = (elementOptions: { elementName: string } & TUpdateOptions) => {
     this.#bus.emit(ELEMENT_EVENTS_TO_IFRAME.SET_VALUE + elementOptions.elementName, {
       name: elementOptions.elementName,
       options: elementOptions,
@@ -383,7 +385,7 @@ class CollectElement extends SkyflowElement {
     });
   };
 
-  update = (options: CollectElementUpdateOptions) => {
+  update = (options: TUpdateOptions) => {
     this.#isUpdateCalled = true;
     // Normalize client-facing option keys to the internal names the SET_VALUE
     // handler (core/internal/index.ts) consumes. Variant-specific: privacyDB is

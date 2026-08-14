@@ -8,7 +8,7 @@ Copyright (c) 2025 Skyflow, Inc.
 // stays in the package, not in core).
 import {
   ICollectOptionsBase, ICollectElementInputBase, ICollectElementOptionsBase,
-  IElementStateBase, IInsertRecordInput,
+  ICollectElementUpdateOptionsBase, IElementStateBase, IInsertRecordInput,
 } from '@core/types';
 import { ElementType } from '@core/constants';
 import { IUpsertOptions } from '../../api-utils/collect';
@@ -29,6 +29,14 @@ export interface ICollectOptions extends ICollectOptionsBase {
 // over a star re-export), so consumers see the privacyDB naming.
 export interface CollectElementInput extends ICollectElementInputBase {
   type: ElementType,
+  table?: string,
+  skyflowID?: string,
+}
+
+// privacyDB collect-element update options: shared base + privacyDB identity keys.
+// Binds `CollectElement`/`CollectContainer`'s `TUpdateOptions` so `element.update()`
+// is typed to privacyDB naming (`table`/`skyflowID`). See Decision 2.1.
+export interface CollectElementUpdateOptions extends ICollectElementUpdateOptionsBase {
   table?: string,
   skyflowID?: string,
 }

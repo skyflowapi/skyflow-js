@@ -34,13 +34,15 @@ import SkyflowError from '@core/errors';
 import { getElements, validateElementOptions } from '@core/libs/element-options';
 import Client from '@core/client';
 import CollectElement from '@core/external/collect/collect-element';
-import { getVariantAdapter } from '@core/adapters';
+import { VariantCollectAdapter } from '@core/adapters';
 import {
   ContainerType, MessageType, InputStyles, ErrorTextStyles,
   ICollectOptionsBase,
+  ICollectResponseBase,
 } from '@core/types';
 import {
   validateInitConfig, validateAdditionalFieldsInCollect, validateUpsertOptions,
+  validateBooleanOptions,
 } from '@core/validators';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
 import { ElementGroup } from '@core/external/collect/collect-container';
@@ -52,9 +54,17 @@ export interface ComposableElementGroup extends ElementGroup {
 
 const CLASS_NAME = 'CollectContainer';
 
-abstract class CoreComposableCollectContainer<TResponse extends object>
-  extends ComposableContainerBase {
+abstract class CoreComposableCollectContainer<
+  TOptions extends ICollectOptionsBase,
+  TResponse extends ICollectResponseBase,
+> extends ComposableContainerBase<CollectElement> {
   type:string = ContainerType.COMPOSABLE;
+
+  // Package-specific collect key strategy (privacyDB `skyflowID`/`table` vs flowDB
+  // `skyflowId`/`tableName`). Abstract — each package MUST supply it (no default,
+  // so a missing impl is a compile error). Read here (skyflowIdKey) and injected
+  // into every CollectElement this container builds; mirrors CoreCollectContainer.
+  protected abstract collectVariant: VariantCollectAdapter;
 
   protected elementGroup: ComposableElementGroup = { rows: [], styles: {}, errorTextStyles: {} };
 
@@ -66,7 +76,7 @@ abstract class CoreComposableCollectContainer<TResponse extends object>
   protected createMultipleElement = (
     multipleElements: ComposableElementGroup,
     isSingleElementAPI: boolean = false,
-  ): any => {
+  ): CollectElement => {
     const elements: any[] = [];
     this.tempElements = deepClone(multipleElements);
     this.tempElements.rows.forEach((row) => {
@@ -82,7 +92,10 @@ abstract class CoreComposableCollectContainer<TResponse extends object>
         options.isMounted = false;
 
         options.label = element.label;
-        options.skyflowID = element.skyflowID;
+        // skyflowID (privacyDB) vs skyflowId (flowDB) is a wire-key contract; the
+        // active key comes from the injected collect variant (was hardcoded to
+        // `element.skyflowID`, which read `undefined` for flowDB).
+        options.skyflowID = element[this.collectVariant.skyflowIdKey];
 
         elements.push(options);
       });
@@ -121,11 +134,7 @@ abstract class CoreComposableCollectContainer<TResponse extends object>
         this.destroyCallback,
         this.updateCallback,
         this.context,
-        // Transitional: CollectElement now requires an injected collect variant.
-        // The composable container doesn't yet own one, so it supplies the
-        // registered global's collect surface. To be replaced with an abstract
-        // `collectVariant` member in the composable-container revamp pass.
-        getVariantAdapter().collect,
+        this.collectVariant,
         this.eventEmitter,
       );
       this.elements[this.tempElements.elementName] = element;
@@ -200,7 +209,7 @@ abstract class CoreComposableCollectContainer<TResponse extends object>
       });
   }
 
-  collect = (options: any = { tokens: true }) :
+  collect = (options: TOptions = {} as TOptions) :
   Promise<TResponse> => new Promise((resolve, reject) => {
     try {
       validateInitConfig(this.metaData.clientJSON.config);
@@ -221,13 +230,7 @@ abstract class CoreComposableCollectContainer<TResponse extends object>
       collectElements.forEach((element) => {
         element.isValidElement();
       });
-      this.validateTokens(options);
-      if (options?.additionalFields) {
-        validateAdditionalFieldsInCollect(options.additionalFields);
-      }
-      if (options?.upsert) {
-        validateUpsertOptions(options?.upsert);
-      }
+      const resolvedOptions = this.validateCollectOptions(options);
       this.elementsList.forEach((element) => {
         elementIds.push({
           frameId: this.tempElements.elementName,
@@ -243,8 +246,10 @@ abstract class CoreComposableCollectContainer<TResponse extends object>
         this.emitEvent(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_REQUESTS + this.containerId, {
           data: {
             type: COLLECT_TYPES.COLLECT,
-            ...options,
-            tokens: this.resolveTokens(options),
+            // Spread the normalized options bag as an index-signature type so the
+            // payload stays assignable; `tokens` is already resolved inside
+            // validateCollectOptions.
+            ...(resolvedOptions as Record<string, any>),
             elementIds,
             containerId: this.containerId,
           },
@@ -288,29 +293,30 @@ abstract class CoreComposableCollectContainer<TResponse extends object>
     }
   });
 
-  // ---- Injected divergence (token handling + error mapping) ---------------
-  // Defaults are privacyDB; flowDB overrides all three (forces tokens on without
-  // validating, and wraps a full failure as SkyflowFlowDBError). Mirrors the
-  // CoreCollectContainer hooks so both collect paths behave identically.
-
-  // NOTE: `ICollectOptionsBase` is now a structural marker (no `tokens`), so the
-  // divergent field is read through a local cast — same seam pattern as
-  // CoreCollectContainer. Consolidating these into a single validateCollectOptions
-  // is deferred to the composable-container revamp pass.
+  // ---- Injected divergence (see class doc) --------------------------------
+  // Single collect-options seam (mirrors CoreCollectContainer.validateCollectOptions):
+  // validates the options AND resolves the emitted `tokens` value, returning a
+  // normalized copy (never mutates the caller's object). Because `TOptions extends
+  // ICollectOptionsBase` (a structural marker), the divergent fields are read
+  // through a local cast, not the bound. Base default = privacyDB; flowDB overrides
+  // to force tokens on while keeping field validation, and maps errors via
+  // wrapCollectError.
   // eslint-disable-next-line class-methods-use-this
-  protected validateTokens(options: ICollectOptionsBase): void {
-    const opts = options as { tokens?: boolean };
-    if (opts && opts.tokens && typeof opts.tokens !== 'boolean') {
+  protected validateCollectOptions(options: TOptions): TOptions {
+    const opts = options as { tokens?: boolean; additionalFields?: any; upsert?: any[] };
+    if (Object.prototype.hasOwnProperty.call(opts, 'tokens') && !validateBooleanOptions(opts.tokens)) {
       throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_TOKENS_IN_COLLECT, [], true);
     }
+    if (opts.additionalFields) {
+      validateAdditionalFieldsInCollect(opts.additionalFields);
+    }
+    if (opts.upsert) {
+      validateUpsertOptions(opts.upsert);
+    }
+    return { ...options, tokens: opts.tokens !== undefined ? opts.tokens : true } as TOptions;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  protected resolveTokens(options: ICollectOptionsBase): boolean {
-    const opts = options as { tokens?: boolean };
-    return opts?.tokens !== undefined ? opts.tokens : true;
-  }
-
+  // Error mapping: identity for privacyDB, SkyflowFlowDBError for flowDB.
   // eslint-disable-next-line class-methods-use-this
   protected wrapCollectError(err: any): any {
     return err;

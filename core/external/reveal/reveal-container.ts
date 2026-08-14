@@ -15,7 +15,8 @@ import {
 import properties from '@core/properties';
 import {
   ContainerType, IRevealElementOptions, ContainerOptions, Context, ErrorType,
-  MessageType, RevealResponse, ICoreMetadata, RevealContainerProps, ISkyflowElement,
+  MessageType, IRevealResponseBase, ICoreMetadata, RevealContainerProps,
+  ISkyflowElement,
 } from '@core/types';
 import Container from '@core/external/common/container';
 import SkyflowError from '@core/errors';
@@ -35,8 +36,9 @@ const CLASS_NAME = 'RevealContainer';
 // files as `./reveal-container`).
 abstract class RevealContainer<
   TInput extends object,
-  TRevealOptions = void,
-  TElement extends CoreRevealElement<TInput> = CoreRevealElement<TInput>,
+  TRevealOptions,
+  TResponse extends IRevealResponseBase,
+  TElement extends CoreRevealElement<TInput>,
 > extends Container {
   #revealRecords: TInput[] = [];
 
@@ -161,7 +163,7 @@ abstract class RevealContainer<
     });
   }
 
-  reveal(options?: TRevealOptions): Promise<RevealResponse> {
+  reveal(options?: TRevealOptions): Promise<TResponse> {
     this.#isRevealCalled = true;
     this.#revealRecords = [];
     if (this.#metaData.skyflowContainer.isControllerFrameReady) {

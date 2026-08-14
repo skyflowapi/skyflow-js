@@ -8,6 +8,7 @@ Copyright (c) 2025 Skyflow, Inc.
 // flowvault common surface.
 import {
   RedactionType, ContainerType, ClientMetadata, ElementInfo, ICollectResponseBase,
+  IRevealResponseBase,
 } from '@core/types';
 import { ElementType } from '@core/constants';
 import { UpdateType, ICollectOptions } from '../../utils/common';
@@ -193,7 +194,7 @@ export interface RevealRecord {
   error?: string;
 }
 
-export interface RevealResponse {
+export interface RevealResponse extends IRevealResponseBase {
   records: Array<RevealRecord>;
 }
 
