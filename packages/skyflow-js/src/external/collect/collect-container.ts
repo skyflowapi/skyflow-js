@@ -16,13 +16,9 @@ import {
 } from '@core/constants';
 import properties from '@core/properties';
 import SkyflowError from '@core/errors';
-import {
-  formatValidations, formatOptions,
-} from '@core/libs/element-options';
-import CollectElement from '@core/external/collect/collect-element';
 import { MessageType, VariantCollectAdapter } from '@core/types';
 import CoreCollectContainer, {
-  ElementGroup, ICollectElementBase,
+  ICollectElementBase,
 } from '@core/external/collect/collect-container';
 import collectVariant from '../../collect-variant';
 import { printLog, parameterizedString } from '../../utils/logs-helper';
@@ -46,34 +42,26 @@ export interface ICollectElement extends ICollectElementBase {
 }
 
 const CLASS_NAME = 'CollectContainer';
-class CollectContainer extends
-  CoreCollectContainer<ICollectOptions, CollectResponse, CollectElementUpdateOptions> {
+class CollectContainer extends CoreCollectContainer<
+ICollectOptions, CollectResponse, CollectElementUpdateOptions,
+CollectElementInput, CollectElementOptions
+> {
   // privacyDB collect key strategy (internal `skyflowID`/`table`); single source is
   // this package's VariantAdapter, supplied here and injected into each element.
   protected collectVariant: VariantCollectAdapter = collectVariant;
 
-  create = (input: CollectElementInput, options: CollectElementOptions = {
-    required: false,
-  }): CollectElement<CollectElementUpdateOptions> => {
+  protected validateCreateInput(input: CollectElementInput): void {
     validateCollectElementInput(input, this.context.logLevel);
-    const validations = formatValidations(input.validations);
-    const formattedOptions = formatOptions(input.type, options, this.context.logLevel);
+  }
 
-    const elementGroup: ElementGroup = {
-      rows: [{
-        elements: [{
-          elementType: input.type,
-          name: input.column,
-          accept: options.allowedFileType,
-          ...input,
-          ...formattedOptions,
-          validations,
-        }],
-      }],
-    };
-
-    return this.createMultipleElement(elementGroup, true);
-  };
+  // privacyDB carries the file-input `accept` list onto the element descriptor.
+  // eslint-disable-next-line class-methods-use-this
+  protected buildCreateElementFields(
+    _input: CollectElementInput,
+    options: CollectElementOptions,
+  ): Record<string, unknown> {
+    return { accept: options.allowedFileType };
+  }
 
   uploadFiles = (options?: ICollectOptions): Promise<UploadFilesResponse> => {
     this.isSkyflowFrameReady = this.metaData.skyflowContainer.isControllerFrameReady;

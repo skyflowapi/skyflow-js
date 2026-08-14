@@ -20,6 +20,8 @@ import Container from '@core/external/common/container';
 import SkyflowError from '@core/errors';
 import {
   validateElementOptions,
+  formatValidations,
+  formatOptions,
 } from '@core/libs/element-options';
 import CollectElement from '@core/external/collect/collect-element';
 import {
@@ -83,19 +85,25 @@ export interface ElementGroup {
 
 const CLASS_NAME = 'CollectContainer';
 // Shared collect-container base. Owns the controller-frame bootstrap, the
-// element lifecycle (createMultipleElement + stale-element cleanup) and the
-// collect() orchestration common to both SDKs. Generic over the collect()
-// options (TOptions) and response (TResponse). Divergence is injected via hooks:
-// validateTokens / resolveTokens (token handling) and wrapCollectError (error
-// mapping); the skyflowID vs skyflowId wire key is read from the VariantAdapter.
-// create() (which differs only by the flowDB tableName→table remap and uses each
-// package's own collect-input validator) and the A-only uploadFiles stay in the
-// subclasses. The element interfaces are defined here and re-exported by each
-// package's subclass (imported as './collect-container' by compose-collect).
+// element lifecycle (create + createMultipleElement + stale-element cleanup) and
+// the collect() orchestration common to both SDKs. Generic over the collect()
+// options (TOptions) and response (TResponse), plus the public create() input
+// (TCreateInput) and options (TCreateOptions) so each package keeps its own
+// consumer-facing typing (privacyDB table/skyflowID + file options, flowDB
+// tableName/skyflowId). Divergence is injected via hooks: validateCollectOptions
+// (token handling) and wrapCollectError (error mapping); the create() input
+// validator (validateCreateInput) and its one variant identity field
+// (buildCreateElementFields — privacyDB `accept`, flowDB `table`); the
+// skyflowID vs skyflowId wire key is read from the VariantAdapter. Only the
+// privacyDB-only uploadFiles stays in the subclass. The element interfaces are
+// defined here and re-exported by each package's subclass (imported as
+// './collect-container' by compose-collect).
 abstract class CollectContainer<
   TOptions extends ICollectOptionsBase,
   TResponse extends ICollectResponseBase,
   TUpdateOptions extends ICollectElementUpdateOptionsBase,
+  TCreateInput extends CollectElementInput,
+  TCreateOptions extends ICollectElementOptionsBase,
 > extends Container {
   protected containerId: string;
 
@@ -166,13 +174,34 @@ abstract class CollectContainer<
     this.#isMounted = true;
   }
 
-  // create() differs per package (flowDB remaps tableName→table and each uses
-  // its own collect-input validator), so it lives in the subclass and calls the
-  // shared createMultipleElement below.
-  abstract create: (
-    input: CollectElementInput,
-    options?: ICollectElementOptionsBase,
-  ) => CollectElement<TUpdateOptions>;
+  // Shared create() orchestration. The two packages differed only in the input
+  // validator and a single identity field on the element descriptor, both now
+  // injected via hooks (validateCreateInput / buildCreateElementFields), so the
+  // body is single-sourced here. Typed over TCreateInput/TCreateOptions so each
+  // package's public signature keeps its own input/options keys.
+  create = (
+    input: TCreateInput,
+    options: TCreateOptions = { required: false } as TCreateOptions,
+  ): CollectElement<TUpdateOptions> => {
+    this.validateCreateInput(input);
+    const validations = formatValidations(input.validations);
+    const formattedOptions = formatOptions(input.type, options, this.context.logLevel);
+
+    const elementGroup: ElementGroup = {
+      rows: [{
+        elements: [{
+          elementType: input.type,
+          name: input.column,
+          ...input,
+          ...this.buildCreateElementFields(input, options),
+          ...formattedOptions,
+          validations,
+        }],
+      }],
+    };
+
+    return this.createMultipleElement(elementGroup, true);
+  };
 
   setError(errors: Partial<Record<ErrorType, string>>) {
     this.customErrorMessages = errors;
@@ -456,6 +485,18 @@ abstract class CollectContainer<
   );
 
   // ---- Injected divergence (see class doc) --------------------------------
+  // create() input validator: privacyDB validates table/skyflowID, flowDB
+  // validates tableName/skyflowId (each forwards to its own package validator).
+  protected abstract validateCreateInput(input: TCreateInput): void;
+
+  // The one variant identity field folded into the element descriptor from a
+  // create() call: privacyDB `{ accept: options.allowedFileType }` (file API),
+  // flowDB `{ table: input.tableName }` (client tableName → internal table).
+  protected abstract buildCreateElementFields(
+    input: TCreateInput,
+    options: TCreateOptions,
+  ): Record<string, unknown>;
+
   // Single collect-options seam: validates the options AND resolves the emitted
   // `tokens` value, returning a normalized copy (never mutates the caller's
   // object). Because `TOptions extends ICollectOptionsBase` (a structural marker),
