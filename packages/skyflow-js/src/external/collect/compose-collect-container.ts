@@ -8,18 +8,15 @@ Copyright (c) 2023 Skyflow, Inc.
 // package-only surface — create() (its typed CollectElementInput and returned
 // ComposableElement) and the file-upload pieces (registerElementListeners +
 // uploadFiles) that privacyDB supports and flowDB does not.
-import uuid from '@core/libs/uuid';
 import properties from '@core/properties';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
-  FRAME_ELEMENT,
   COLLECT_TYPES,
 } from '@core/constants';
 import CoreComposableCollectContainer from '@core/external/collect/composable-collect-container';
 import SkyflowError from '@core/errors';
-import { formatValidations, formatOptions } from '@core/libs/element-options';
 import Client from '@core/client';
 import { VariantCollectAdapter } from '@core/types';
 import collectVariant from '../../collect-variant';
@@ -33,37 +30,24 @@ import {
 } from '../../utils/common';
 import { printLog, parameterizedString } from '../../utils/logs-helper';
 import { validateCollectElementInput, validateInitConfig } from '../../utils/validators';
-import ComposableElement from './compose-collect-element';
 
 const CLASS_NAME = 'CollectContainer';
-class ComposableContainer extends CoreComposableCollectContainer<ICollectOptions, CollectResponse> {
+class ComposableContainer extends CoreComposableCollectContainer<
+ICollectOptions, CollectResponse, CollectElementInput, CollectElementOptions
+> {
   // privacyDB collect key strategy (`skyflowID`/`table`); injected into each element.
   protected collectVariant: VariantCollectAdapter = collectVariant;
 
-  create = (input: CollectElementInput, options: CollectElementOptions = {
-    required: false,
-  }): ComposableElement => {
+  protected validateCreateInput(input: CollectElementInput): void {
     validateCollectElementInput(input, this.context.logLevel);
-    const validations = formatValidations(input.validations);
-    const formattedOptions = formatOptions(input.type, options, this.context.logLevel);
+  }
 
-    const elementName = `${FRAME_ELEMENT}:${input.type}:${btoa(uuid())}`;
-
-    this.elementsList.push({
-      elementType: input.type,
-      name: input.column,
-      ...input,
-      ...formattedOptions,
-      validations,
-      elementName,
-    });
-    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.tempElements)}:${this.containerId}:${this.context.logLevel}:${btoa(this.clientDomain)}`;
-    this.iframeID = controllerIframeName;
-    return new ComposableElement(
-      elementName, this.eventEmitter, controllerIframeName,
-      { ...this.metaData, type: input.type },
-    );
-  };
+  // privacyDB composable create() adds no variant identity field (the internal
+  // `table`/`skyflowID` keys arrive on the input as-is).
+  // eslint-disable-next-line class-methods-use-this
+  protected buildCreateElementFields(): Record<string, unknown> {
+    return {};
+  }
 
   // Collect-only per-element file-upload wiring, run from the base mount().
   protected registerElementListeners(): void {

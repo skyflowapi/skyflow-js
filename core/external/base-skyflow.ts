@@ -107,7 +107,7 @@ IRevealInputBase, void | IRevealOptionsBase, IRevealResponseBase,
 CoreRevealElement<IRevealInputBase>
 >;
 type ComposableCollectContract = CoreComposableCollectContainer<
-ICollectOptionsBase, ICollectResponseBase
+ICollectOptionsBase, ICollectResponseBase, CollectElementInput, ICollectElementOptionsBase
 >;
 type ComposeRevealContract = CoreComposableRevealContainer<
 void | IRevealOptionsBase, IRevealResponseBase

@@ -10,10 +10,14 @@ Copyright (c) 2023 Skyflow, Inc.
 // on() submit listener and collect() — which just emits COMPOSABLE_CALL_REQUESTS
 // with COLLECT_TYPES.COLLECT and resolves on the unified { records } envelope. The
 // flowDB-vs-privacyDB request/response mapping lives entirely inside the collect
-// frame controller, so nothing here branches on variant. The divergence stays in
-// each package subclass:
-//   - create()                    — its typed CollectElementInput and returned
-//                                   ComposableElement are public API surface.
+// frame controller, so nothing here branches on variant. create() is single-
+// sourced here too (its returned ComposableElement is the shared @core class both
+// packages re-export); it is generic over the public input/options types so each
+// package keeps its own consumer-facing signature. The divergence stays in each
+// package subclass:
+//   - validateCreateInput()       — each package's collect-input validator.
+//   - buildCreateElementFields()  — the one variant identity field on the element
+//                                   descriptor (flowDB `table`; privacyDB none).
 //   - registerElementListeners()  — privacyDB's per-element file-upload wiring;
 //                                   flowDB has no file upload so it inherits the
 //                                   empty ComposableContainerBase default.
@@ -31,13 +35,18 @@ import {
 } from '@core/constants';
 import ComposableContainerBase from '@core/external/common/composable-container';
 import SkyflowError from '@core/errors';
-import { getElements, validateElementOptions } from '@core/libs/element-options';
+import {
+  getElements, validateElementOptions, formatValidations, formatOptions,
+} from '@core/libs/element-options';
 import Client from '@core/client';
 import CollectElement from '@core/external/collect/collect-element';
+import ComposableElement from '@core/external/collect/composable-collect-element';
 import {
   ContainerType, MessageType, InputStyles, ErrorTextStyles,
   ICollectOptionsBase,
   ICollectResponseBase,
+  CollectElementInput,
+  ICollectElementOptionsBase,
   VariantCollectAdapter,
 } from '@core/types';
 import {
@@ -57,6 +66,8 @@ const CLASS_NAME = 'CollectContainer';
 abstract class CoreComposableCollectContainer<
   TOptions extends ICollectOptionsBase,
   TResponse extends ICollectResponseBase,
+  TCreateInput extends CollectElementInput,
+  TCreateOptions extends ICollectElementOptionsBase,
 > extends ComposableContainerBase<CollectElement> {
   type:string = ContainerType.COMPOSABLE;
 
@@ -72,6 +83,39 @@ abstract class CoreComposableCollectContainer<
   protected getClassName(): string {
     return CLASS_NAME;
   }
+
+  // Shared create() orchestration. The two packages differed only in the input
+  // validator and a single identity field on the element descriptor, both now
+  // injected via hooks (validateCreateInput / buildCreateElementFields), so the
+  // body is single-sourced here. The returned ComposableElement is the shared
+  // @core class both packages re-export. Typed over TCreateInput/TCreateOptions
+  // so each package's public signature keeps its own input/options keys.
+  create = (
+    input: TCreateInput,
+    options: TCreateOptions = { required: false } as TCreateOptions,
+  ): ComposableElement => {
+    this.validateCreateInput(input);
+    const validations = formatValidations(input.validations);
+    const formattedOptions = formatOptions(input.type, options, this.context.logLevel);
+
+    const elementName = `${FRAME_ELEMENT}:${input.type}:${btoa(uuid())}`;
+
+    this.elementsList.push({
+      elementType: input.type,
+      name: input.column,
+      ...input,
+      ...this.buildCreateElementFields(input, options),
+      ...formattedOptions,
+      validations,
+      elementName,
+    });
+    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.tempElements)}:${this.containerId}:${this.context.logLevel}:${btoa(this.clientDomain)}`;
+    this.iframeID = controllerIframeName;
+    return new ComposableElement(
+      elementName, this.eventEmitter, controllerIframeName,
+      { ...this.metaData, type: input.type },
+    );
+  };
 
   protected createMultipleElement = (
     multipleElements: ComposableElementGroup,
@@ -294,6 +338,18 @@ abstract class CoreComposableCollectContainer<
   });
 
   // ---- Injected divergence (see class doc) --------------------------------
+  // create() input validator: privacyDB validates table/skyflowID, flowDB
+  // validates tableName/skyflowId (each forwards to its own package validator).
+  protected abstract validateCreateInput(input: TCreateInput): void;
+
+  // The one variant identity field folded into the element descriptor from a
+  // create() call: flowDB `{ table: input.tableName }` (client tableName →
+  // internal table); privacyDB adds none (returns {}).
+  protected abstract buildCreateElementFields(
+    input: TCreateInput,
+    options: TCreateOptions,
+  ): Record<string, unknown>;
+
   // Single collect-options seam (mirrors CoreCollectContainer.validateCollectOptions):
   // validates the options AND resolves the emitted `tokens` value, returning a
   // normalized copy (never mutates the caller's object). Because `TOptions extends

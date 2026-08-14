@@ -9,9 +9,6 @@ Copyright (c) 2025 Skyflow, Inc.
 // token handling (flowDB forces tokens on and does not validate) and
 // SkyflowFlowDBError error mapping. flowDB has no file upload, so there is no
 // uploadFiles and the base's empty registerElementListeners default is inherited.
-import uuid from '@core/libs/uuid';
-import { FRAME_ELEMENT } from '@core/constants';
-import { formatValidations, formatOptions } from '@core/libs/element-options';
 import CoreComposableCollectContainer from '@core/external/collect/composable-collect-container';
 import { VariantCollectAdapter } from '@core/types';
 import { CollectElementInput, CollectElementOptions, ICollectOptions } from '../../utils/common';
@@ -19,39 +16,23 @@ import { CollectResponse } from '../../internal/internal-types';
 import { validateCollectElementInput } from '../../utils/validators';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
 import collectVariant from '../../collect-variant';
-import ComposableElement from './compose-collect-element';
 
-class ComposableContainer extends CoreComposableCollectContainer<ICollectOptions, CollectResponse> {
+class ComposableContainer extends CoreComposableCollectContainer<
+ICollectOptions, CollectResponse, CollectElementInput, CollectElementOptions
+> {
   // flowDB collect key strategy (`skyflowId`/`tableName`); injected into each element.
   protected collectVariant: VariantCollectAdapter = collectVariant;
 
-  create = (input: CollectElementInput, options: CollectElementOptions = {
-    required: false,
-  }): ComposableElement => {
+  protected validateCreateInput(input: CollectElementInput): void {
     validateCollectElementInput(input, this.context.logLevel);
-    const validations = formatValidations(input.validations);
-    const formattedOptions = formatOptions(input.type, options, this.context.logLevel);
+  }
 
-    const elementName = `${FRAME_ELEMENT}:${input.type}:${btoa(uuid())}`;
-
-    this.elementsList.push({
-      elementType: input.type,
-      name: input.column,
-      ...input,
-      // Map the client-facing `tableName` key onto the internal `table` name
-      // that the rest of the collect pipeline consumes.
-      table: input.tableName,
-      ...formattedOptions,
-      validations,
-      elementName,
-    });
-    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.tempElements)}:${this.containerId}:${this.context.logLevel}:${btoa(this.clientDomain)}`;
-    this.iframeID = controllerIframeName;
-    return new ComposableElement(
-      elementName, this.eventEmitter, controllerIframeName,
-      { ...this.metaData, type: input.type },
-    );
-  };
+  // Map the client-facing `tableName` key onto the internal `table` name that the
+  // rest of the collect pipeline consumes.
+  // eslint-disable-next-line class-methods-use-this
+  protected buildCreateElementFields(input: CollectElementInput): Record<string, unknown> {
+    return { table: input.tableName };
+  }
 
   // flowDB forces tokens on and does not validate a client-supplied value.
   // Reuse the base validation for additionalFields/upsert, then force tokens on
