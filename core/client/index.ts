@@ -4,18 +4,15 @@ Copyright (c) 2022 Skyflow, Inc.
 
 // Variant-neutral HTTP client (transport), lifted to @core (Task 4.7). The two
 // packages shipped byte-identical clients apart from import sourcing; the body
-// wires only @core (neutral SkyflowError base, constants, logs, types). SDK
-// telemetry is deliberately package-owned, so the meta object is built through
-// the registered VariantAdapter (getVariantAdapter().getMetaObject) rather than
-// importing a package's utils/helpers. This runs on the main thread AND inside
-// the iframe bundle; the iframe entry (index-internal.ts) registers the adapter
-// explicitly, and getVariantAdapter() is read lazily at request time (never at
-// module load), so the registry is always populated before it is read.
+// wires only @core (neutral SkyflowError base, constants, logs, types). The
+// sky-metadata header's SDK identity comes from this bundle's build-injected
+// SDK_NAME/SDK_VERSION globals (present in every build, including the iframe),
+// passed to the shared @core getMetaObject — no runtime variant registry.
 import { ContentType, SKY_METADATA_HEADER } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
 import SkyflowError from '@core/errors';
-import { getVariantAdapter } from '@core/adapters';
+import { getMetaObject } from '@core/utils/metrics-helper';
 import {
   ISkyflow, ClientMetadata, ErrorMessages, ErrorType,
 } from '@core/types';
@@ -92,7 +89,11 @@ class Client {
     httpRequest.open(request.requestMethod, request.url);
 
     if (request.headers) {
-      const metaDataObject = getVariantAdapter().getMetaObject(this.#metaData, navigator);
+      const metaDataObject = getMetaObject(
+        { name: SDK_NAME, version: SDK_VERSION },
+        this.#metaData,
+        navigator,
+      );
       request.headers[SKY_METADATA_HEADER] = JSON.stringify(metaDataObject);
       const headers = request.headers;
       Object.keys(request.headers).forEach((key) => {

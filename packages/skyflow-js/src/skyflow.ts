@@ -10,7 +10,6 @@ Copyright (c) 2022 Skyflow, Inc.
 //     which flowDB does not have
 //   - `static get Error()` (SkyflowError) and `static get ThreeDS()`
 import Client from '@core/client';
-import { setVariantAdapter } from '@core/adapters';
 import SkyflowError from '@core/errors';
 import BaseSkyflow from '@core/external/base-skyflow';
 import {
@@ -49,13 +48,6 @@ import {
 import ComposableContainer from './external/collect/compose-collect-container';
 import ThreeDS from './external/threeds/threeds';
 import ComposableRevealContainer from './external/reveal/composable-reveal-container';
-import skyflowVariantAdapter from './variant-adapter';
-
-// Register this package's variant behaviour with the shared @core layer once,
-// at module load. The main-thread SDK entry points (index.ts, index-node.ts,
-// index-internal.ts) all import this module, so the adapter is registered
-// before any @core code that reads it (e.g. @core/metrics) runs.
-setVariantAdapter(skyflowVariantAdapter);
 
 // Relocated to @core/types (variant-neutral); re-exported here under the same
 // names so `./skyflow` importers and the public surface are unchanged.

@@ -413,6 +413,28 @@ export interface ISkyflowElement {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ICollectOptionsBase {}
 
+// Collect-side key normalization the shared @core/external/collect layer needs
+// from a package, injected via the abstract `collectVariant` protected field on
+// the collect containers (each package binds its own value). The two variants
+// disagree on input key naming: flowDB accepts the client-facing
+// `skyflowId`/`tableName` and remaps them onto the internal `skyflowID`/`table`
+// the SET_VALUE handler consumes and carries the id as `skyflowId`; privacyDB
+// uses the internal `skyflowID` directly (a no-op normalize).
+export interface VariantCollectAdapter {
+  /**
+   * Normalize a `CollectElement.update()` options object in place to the internal
+   * key names. privacyDB is a no-op; flowDB maps `skyflowId`->`skyflowID` and
+   * `tableName`->`table`.
+   */
+  normalizeUpdateOptions(options: Record<string, any>): void;
+
+  /**
+   * The key carrying the skyflow id on a stored element options object, used by
+   * container validation (privacyDB `skyflowID` vs flowDB `skyflowId`).
+   */
+  readonly skyflowIdKey: string;
+}
+
 // Container contracts. Generic so each package's own option/response/element
 // types flow through. `create`'s element is typed to the shared ISkyflowElement
 // surface. BaseSkyflow only ever constructs and returns these, so the contracts

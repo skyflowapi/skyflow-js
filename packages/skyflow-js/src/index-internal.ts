@@ -9,9 +9,7 @@ import {
   SKYFLOW_FRAME_CONTROLLER,
 } from '@core/constants';
 import logs from '@core/utils/logs';
-import { setVariantAdapter } from '@core/adapters';
-import RevealComposableFrameElementInit from '@core/internal/composable-frame-element-init';
-import skyflowVariantAdapter from './variant-adapter';
+import RevealComposableFrameElementInit from './internal/composable-frame-element-init';
 import RevealFrame from './internal/reveal/reveal-frame';
 import SkyflowFrameController from './internal/skyflow-frame/skyflow-frame-controller';
 import { MessageType, LogLevel } from './utils/common';
@@ -23,23 +21,10 @@ import {
 import { getAtobValue, getValueFromName } from './utils/helpers';
 import FrameElementInit from './internal/frame-element-init';
 
-// Register this package's VariantAdapter for the iframe bundle. The shared
-// @core element/frame layer lifted in Tasks 4.6/4.7 (client transport, the
-// composable reveal frame) reads it via getVariantAdapter() while running
-// in-iframe. Done explicitly here so registration no longer depends on an
-// incidental `../../skyflow` import edge pulling skyflow.ts (and its own
-// setVariantAdapter side-effect) into this bundle.
-//
-// reveal-frame is iframe-only, so its factory is wired onto the adapter HERE
-// (not in variant-adapter.ts) — this keeps the DOM-heavy class out of the
-// main-thread browser/node bundles that also load variant-adapter.
-skyflowVariantAdapter.reveal.createRevealFrame = (
-  record,
-  context,
-  containerId,
-  rootDiv,
-) => new RevealFrame(record, context, containerId, rootDiv);
-setVariantAdapter(skyflowVariantAdapter);
+// The composable reveal frame's variant seam (reveal transport + the DOM-heavy
+// RevealFrame) is bound in the package subclass RevealComposableFrameElementInit
+// above — no runtime variant registry. This entry runs only in the iframe
+// bundle, so RevealFrame stays out of the main-thread browser/node bundles.
 
 (function init(root: any) {
   try {

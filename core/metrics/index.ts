@@ -5,12 +5,15 @@ import {
   METRIC_TYPES,
 } from '@core/constants';
 import { MeticsObjectType, SharedMeticsObjectType } from '@core/types';
-import { getVariantAdapter } from '@core/adapters';
+import { getMetaObject } from '@core/utils/metrics-helper';
 
 export const METRIC_OBJECT: SharedMeticsObjectType = { records: [] };
 
 export function initalizeMetricObject(metadata: any, elementId: string) {
-  const metaDataObject = getVariantAdapter().getMetaObject(metadata, navigator);
+  // SDK identity comes from this bundle's build-injected globals (present in
+  // every build, including the iframe) — no runtime variant registry needed.
+  const sdkDetails = { name: SDK_NAME, version: SDK_VERSION };
+  const metaDataObject = getMetaObject(sdkDetails, metadata, navigator);
   const elementMetricObject = {
     element_id: elementId,
     element_type: [],

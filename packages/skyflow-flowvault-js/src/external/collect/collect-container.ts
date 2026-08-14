@@ -15,14 +15,14 @@ import CollectElement from '@core/external/collect/collect-element';
 import CoreCollectContainer, {
   ElementGroup, ICollectElementBase,
 } from '@core/external/collect/collect-container';
-import { VariantCollectAdapter } from '@core/adapters';
+import { VariantCollectAdapter } from '@core/types';
 import { validateCollectElementInput } from '../../utils/validators';
 import {
   CollectElementInput, CollectElementOptions, CollectElementUpdateOptions, ICollectOptions,
 } from '../../utils/common';
 import { CollectResponse } from '../../internal/internal-types';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
-import flowVaultVariantAdapter from '../../variant-adapter';
+import collectVariant from '../../collect-variant';
 
 export type {
   ElementGroupItem, ElementGroup,
@@ -37,7 +37,7 @@ class CollectContainer extends
   CoreCollectContainer<ICollectOptions, CollectResponse, CollectElementUpdateOptions> {
   // flowDB collect key strategy (client-facing `skyflowId`/`tableName`); single
   // source is this package's VariantAdapter, injected into each element.
-  protected collectVariant: VariantCollectAdapter = flowVaultVariantAdapter.collect;
+  protected collectVariant: VariantCollectAdapter = collectVariant;
 
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,

@@ -13,17 +13,17 @@ import uuid from '@core/libs/uuid';
 import { FRAME_ELEMENT } from '@core/constants';
 import { formatValidations, formatOptions } from '@core/libs/element-options';
 import CoreComposableCollectContainer from '@core/external/collect/composable-collect-container';
-import { VariantCollectAdapter } from '@core/adapters';
+import { VariantCollectAdapter } from '@core/types';
 import { CollectElementInput, CollectElementOptions, ICollectOptions } from '../../utils/common';
 import { CollectResponse } from '../../internal/internal-types';
 import { validateCollectElementInput } from '../../utils/validators';
 import SkyflowFlowDBError from '../../libs/skyflow-flowdb-error';
-import flowVaultVariantAdapter from '../../variant-adapter';
+import collectVariant from '../../collect-variant';
 import ComposableElement from './compose-collect-element';
 
 class ComposableContainer extends CoreComposableCollectContainer<ICollectOptions, CollectResponse> {
   // flowDB collect key strategy (`skyflowId`/`tableName`); injected into each element.
-  protected collectVariant: VariantCollectAdapter = flowVaultVariantAdapter.collect;
+  protected collectVariant: VariantCollectAdapter = collectVariant;
 
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,

@@ -22,7 +22,6 @@ import {
   validateElementOptions,
 } from '@core/libs/element-options';
 import CollectElement from '@core/external/collect/collect-element';
-import { VariantCollectAdapter } from '@core/adapters';
 import {
   ContainerType, Context, MessageType,
   CollectElementInput,
@@ -34,6 +33,7 @@ import {
   ICollectOptionsBase,
   ICollectResponseBase,
   ICollectElementUpdateOptionsBase,
+  VariantCollectAdapter,
 } from '@core/types';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
 import {

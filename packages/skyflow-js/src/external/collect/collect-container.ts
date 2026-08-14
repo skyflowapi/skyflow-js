@@ -20,12 +20,11 @@ import {
   formatValidations, formatOptions,
 } from '@core/libs/element-options';
 import CollectElement from '@core/external/collect/collect-element';
-import { MessageType } from '@core/types';
+import { MessageType, VariantCollectAdapter } from '@core/types';
 import CoreCollectContainer, {
   ElementGroup, ICollectElementBase,
 } from '@core/external/collect/collect-container';
-import { VariantCollectAdapter } from '@core/adapters';
-import skyflowVariantAdapter from '../../variant-adapter';
+import collectVariant from '../../collect-variant';
 import { printLog, parameterizedString } from '../../utils/logs-helper';
 import { validateCollectElementInput, validateInitConfig } from '../../utils/validators';
 import {
@@ -51,7 +50,7 @@ class CollectContainer extends
   CoreCollectContainer<ICollectOptions, CollectResponse, CollectElementUpdateOptions> {
   // privacyDB collect key strategy (internal `skyflowID`/`table`); single source is
   // this package's VariantAdapter, supplied here and injected into each element.
-  protected collectVariant: VariantCollectAdapter = skyflowVariantAdapter.collect;
+  protected collectVariant: VariantCollectAdapter = collectVariant;
 
   create = (input: CollectElementInput, options: CollectElementOptions = {
     required: false,

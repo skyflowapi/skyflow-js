@@ -136,7 +136,7 @@ describe('test index-internal', () => {
     const mock = jest.fn();
     // For composable reveal frames, index-internal calls static startFrameElement()
     // on the default export class. Mock the module with a class exposing that static.
-    jest.mock('@core/internal/composable-frame-element-init', () => ({
+    jest.mock('../src/internal/composable-frame-element-init', () => ({
       __esModule: true,
       default: class MockComposableRevealInit {
         static startFrameElement() { mock(); }

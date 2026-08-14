@@ -1,10 +1,11 @@
 // Shared composable reveal-frame init, iframe-only (imported solely by each
-// package's src/index-internal.ts). The two variants differed only at the reveal
-// seam — request/response mappers, an optional `options` passthrough, and the
-// per-package `RevealFrame` class — so those route through the VariantAdapter
-// (registered by index-internal in the iframe bundle) rather than a package
-// sibling. privacyDB's `redaction` field is carried unconditionally: flowDB's
-// reveal reads only token/iframeName, so the extra undefined key is inert there.
+// package's own subclass, instantiated from src/index-internal.ts). The two
+// variants differ only at the reveal seam — request/response mappers and the
+// per-package `RevealFrame` class — so those are `protected abstract` hooks each
+// package binds in its subclass (see src/internal/composable-frame-element-init),
+// rather than a runtime variant registry. privacyDB's `redaction` field is
+// carried unconditionally: flowDB's reveal reads only token/iframeName, so the
+// extra undefined key is inert there.
 import injectStylesheet from 'inject-stylesheet';
 import bus from 'framebus';
 import getCssClassesFromJss, { generateCssWithoutClass } from '@core/libs/jss-styles';
@@ -17,13 +18,12 @@ import { getValueAndItsUnit } from '@core/libs/element-options';
 import IFrameFormElement from '@core/internal/iframe-form';
 import FrameElement from '@core/internal';
 import Client from '@core/client';
-import { getVariantAdapter } from '@core/adapters';
 import {
-  Context, ContainerType, IRevealRecordComposable,
+  Context, ContainerType, IRevealRecordComposable, IRevealResponseType,
 } from '@core/types';
 import { getContainerType } from '@core/helpers';
 
-export default class RevealComposableFrameElementInit {
+export default abstract class RevealComposableFrameElementInit {
   iframeFormElement: IFrameFormElement | undefined;
 
   clientMetaData: any;
@@ -31,8 +31,6 @@ export default class RevealComposableFrameElementInit {
   #domForm: HTMLFormElement;
 
   frameElement!: FrameElement;
-
-  private static frameEle?: any;
 
   containerId: string;
 
@@ -49,6 +47,29 @@ export default class RevealComposableFrameElementInit {
   revealFrameList: any[] = [];
 
   rootDiv: HTMLDivElement;
+
+  // ---- Injected divergence (bound per package in the subclass) ----
+
+  // Fetch composable reveal records by token id. privacyDB and flowDB map this to
+  // their own api-utils/reveal implementation (`*Composable` vs `*ComposableFlowDB`).
+  protected abstract fetchRecordsByTokenIdComposable(
+    tokenIdRecords: IRevealRecordComposable[],
+    client: Client,
+    authToken: string,
+    options?: Record<string, any>,
+  ): Promise<IRevealResponseType>;
+
+  // Shape a reveal response into the client-facing records payload.
+  protected abstract formatRecordsForClientComposable(response: any): Record<string, any>;
+
+  // Construct this package's composable `RevealFrame`. Kept as a hook (not a
+  // top-level import here) so the DOM-heavy class stays in the iframe bundle only.
+  protected abstract createRevealFrame(
+    record: any,
+    context: Context,
+    containerId: string,
+    rootDiv?: HTMLDivElement,
+  ): any;
 
   constructor() {
     this.containerId = '';
@@ -104,8 +125,7 @@ export default class RevealComposableFrameElementInit {
           )
             ?.then((revealResponse: any) => {
               if (revealResponse?.records?.length > 0) {
-                const formattedRecord = getVariantAdapter()
-                  .reveal.formatRecordsForClientComposable(revealResponse);
+                const formattedRecord = this.formatRecordsForClientComposable(revealResponse);
                 window?.parent?.postMessage(
                   {
                     type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
@@ -135,8 +155,7 @@ export default class RevealComposableFrameElementInit {
               );
             })
             ?.catch((error) => {
-              const formattedRecord = getVariantAdapter()
-                .reveal.formatRecordsForClientComposable(error);
+              const formattedRecord = this.formatRecordsForClientComposable(error);
               window?.parent?.postMessage(
                 {
                   type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + this.containerId,
@@ -199,10 +218,6 @@ export default class RevealComposableFrameElementInit {
     this.#context = parsedRecord?.context;
   };
 
-  static startFrameElement = () => {
-    RevealComposableFrameElementInit.frameEle = new RevealComposableFrameElementInit();
-  };
-
   revealData(
     revealRecords: IRevealRecordComposable[],
     containerId: string,
@@ -210,7 +225,7 @@ export default class RevealComposableFrameElementInit {
     options?: Record<string, any>,
   ) {
     return new Promise((resolve, reject) => {
-      getVariantAdapter().reveal.fetchRecordsByTokenIdComposable(
+      this.fetchRecordsByTokenIdComposable(
         revealRecords,
         this.#client,
         authToken,
@@ -317,7 +332,7 @@ export default class RevealComposableFrameElementInit {
           ALLOWED_MULTIPLE_FIELDS_STYLES,
         );
 
-        const revealFrame = getVariantAdapter().reveal.createRevealFrame!(
+        const revealFrame = this.createRevealFrame(
           element,
           this.#context,
           this.containerId,

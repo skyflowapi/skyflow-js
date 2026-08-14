@@ -37,7 +37,6 @@ import {
   getElements,
   validateAndSetupGroupOptions,
 } from '@core/libs/element-options';
-import { VariantCollectAdapter } from '@core/adapters';
 import IFrame from '@core/external/common/iframe';
 import {
   printLog, getElementName, parameterizedString, EnvOptions,
@@ -51,6 +50,7 @@ import {
   Context, Env, EventName, MessageType,
   ContainerType, ContainerProps, InternalState,
   ICoreMetadata as Metadata,
+  VariantCollectAdapter,
 } from '@core/types';
 
 const CLASS_NAME = 'Element';

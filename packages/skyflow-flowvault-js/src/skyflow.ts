@@ -16,7 +16,6 @@ Copyright (c) 2025 Skyflow, Inc.
 // container is the shared `@core` base as-is, re-exported by
 // ./external/skyflow-container.
 import Client from '@core/client';
-import { setVariantAdapter } from '@core/adapters';
 import BaseSkyflow from '@core/external/base-skyflow';
 import {
   ContainerOptions,
@@ -34,13 +33,6 @@ import ComposableRevealContainer from './external/reveal/composable-reveal-conta
 import SkyflowContainer from './external/skyflow-container';
 import SkyflowFlowDBError from './libs/skyflow-flowdb-error';
 import { UpdateType } from './utils/common';
-import flowVaultVariantAdapter from './variant-adapter';
-
-// Register this package's variant behaviour with the shared @core layer once,
-// at module load. The main-thread SDK entry points (index.ts, index-node.ts,
-// index-internal.ts) all import this module, so the adapter is registered
-// before any @core code that reads it (e.g. @core/metrics) runs.
-setVariantAdapter(flowVaultVariantAdapter);
 
 // Relocated to @core/types (variant-neutral); re-exported here under the same
 // names so `./skyflow` importers and the public surface are unchanged.

@@ -34,11 +34,11 @@ import SkyflowError from '@core/errors';
 import { getElements, validateElementOptions } from '@core/libs/element-options';
 import Client from '@core/client';
 import CollectElement from '@core/external/collect/collect-element';
-import { VariantCollectAdapter } from '@core/adapters';
 import {
   ContainerType, MessageType, InputStyles, ErrorTextStyles,
   ICollectOptionsBase,
   ICollectResponseBase,
+  VariantCollectAdapter,
 } from '@core/types';
 import {
   validateInitConfig, validateAdditionalFieldsInCollect, validateUpsertOptions,
