@@ -52,6 +52,7 @@ import CoreCollectContainer from '@core/external/collect/collect-container';
 import CoreRevealContainer from '@core/external/reveal/reveal-container';
 import CoreComposableCollectContainer from '@core/external/collect/composable-collect-container';
 import CoreComposableRevealContainer from '@core/external/reveal/composable-reveal-container';
+import type CoreRevealElement from '@core/external/reveal/reveal-element';
 import { checkAndSetForCustomUrl, formatVaultURL } from '@core/helpers';
 import { validateComposableContainerOptions } from '@core/validators';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
@@ -67,6 +68,8 @@ import {
   ICollectOptionsBase,
   ICollectResponseBase,
   ICoreMetadata,
+  IRevealInputBase,
+  IRevealOptionsBase,
   IRevealResponseBase,
   ISkyflow,
   ISkyflowElement,
@@ -80,20 +83,26 @@ import {
 const CLASS_NAME = 'Skyflow';
 
 // The container bounds use the shared `@core` marker bases (ICollectOptionsBase /
-// ICollectResponseBase / IRevealResponseBase) rather than `any` wherever a marker
-// exists — so a subclass can only wire a container of the right family AND the
-// right option/response contract. `any` remains ONLY in slots with no shared base
-// (reveal's package-specific TInput / TRevealOptions / TElement). Package option/
-// response types are never named here (that would cross the @core ⇏ packages line);
-// the markers are their common supertype, which is all BaseSkyflow needs.
+// ICollectResponseBase / ICollectElementUpdateOptionsBase / IRevealInputBase /
+// IRevealOptionsBase / IRevealResponseBase) rather than `any` — so a subclass can
+// only wire a container of the right family AND the right input/option/response
+// contract. Package option/response types are never named here (that would cross
+// the @core ⇏ packages line); the markers are their common supertype, which is all
+// BaseSkyflow needs. The reveal options slots read `void | IRevealOptionsBase`
+// because privacyDB binds `TRevealOptions = void` (it has no reveal options) while
+// flowDB binds an object: `void` is not assignable to the empty marker, but the
+// union admits both, and `reveal(options?)` is a method so the type argument is
+// checked bivariantly — no package-side change needed.
 abstract class BaseSkyflow<
   TSkyflowContainer extends CoreSkyflowContainer,
   // eslint-disable-next-line max-len
   TCollectContainer extends CoreCollectContainer<ICollectOptionsBase, ICollectResponseBase, ICollectElementUpdateOptionsBase>,
-  TRevealContainer extends CoreRevealContainer<any, any, IRevealResponseBase, any>,
+  // eslint-disable-next-line max-len
+  TRevealContainer extends CoreRevealContainer<IRevealInputBase, void | IRevealOptionsBase, IRevealResponseBase, CoreRevealElement<IRevealInputBase>>,
   // eslint-disable-next-line max-len
   TComposableContainer extends CoreComposableCollectContainer<ICollectOptionsBase, ICollectResponseBase>,
-  TComposeRevealContainer extends CoreComposableRevealContainer<any, IRevealResponseBase>,
+  // eslint-disable-next-line max-len
+  TComposeRevealContainer extends CoreComposableRevealContainer<void | IRevealOptionsBase, IRevealResponseBase>,
 > {
   // `protected` (not `#private`) because the subclasses reach these: privacyDB's
   // pure-JS methods delegate to `skyflowContainer`. `#uuid`/`#bearerToken` are

@@ -440,8 +440,8 @@ export interface VariantCollectAdapter {
 // surface. BaseSkyflow only ever constructs and returns these, so the contracts
 // are documentary + a bound; they are not called through.
 export interface ICollectContainer<
-  TOptions extends ICollectOptionsBase = ICollectOptionsBase,
-  TResponse extends ICollectResponseBase = ICollectResponseBase,
+  TOptions extends ICollectOptionsBase,
+  TResponse extends ICollectResponseBase,
 > {
   create(input: ICollectElementInputBase, options?: ICollectElementOptionsBase): ISkyflowElement;
   collect(options?: TOptions): Promise<TResponse>;
@@ -450,10 +450,10 @@ export interface ICollectContainer<
 }
 
 export interface IRevealContainer<
-  TInput = any,
-  TRevealOptions = any,
-  TResponse extends IRevealResponseBase = RevealResponse,
-  TElement = ISkyflowElement,
+  TInput,
+  TRevealOptions,
+  TResponse extends IRevealResponseBase,
+  TElement,
 > {
   create(record: TInput, options?: IRevealElementOptions): TElement;
   reveal(options?: TRevealOptions): Promise<TResponse>;
@@ -461,7 +461,7 @@ export interface IRevealContainer<
 }
 
 export interface IComposableCollectContainer<
-  TResponse extends ICollectResponseBase = ICollectResponseBase,
+  TResponse extends ICollectResponseBase,
 > {
   collect(options?: ICollectOptionsBase): Promise<TResponse>;
   on(eventName: string, handler: Function): void;
@@ -471,8 +471,8 @@ export interface IComposableCollectContainer<
 }
 
 export interface IComposableRevealContainer<
-  TRevealOptions = any,
-  TResponse extends IRevealResponseBase = RevealResponse,
+  TRevealOptions,
+  TResponse extends IRevealResponseBase,
 > {
   reveal(options?: TRevealOptions): Promise<TResponse>;
   mount(domElement: HTMLElement | string): void;
@@ -499,6 +499,25 @@ export interface UploadFilesResponse {
 // Mirrors ICollectResponseBase — lets RevealContainer be generic over the response.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IRevealResponseBase {}
+
+// Variant-neutral reveal-input marker. flowDB's token-only shape is the common
+// subset; privacyDB adds skyflowID/table/column/redaction on its own input.
+// NOTE: `redaction` is deliberately NOT here — it is privacyDB-only (flowDB
+// supplies redaction through reveal *options*, `tokenGroupRedactions`), so it
+// stays on privacyDB's own `IRevealElementInput`.
+export interface IRevealInputBase {
+  token?: string;
+  label?: string;
+  altText?: string;
+  inputStyles?: object;
+  labelStyles?: object;
+  errorTextStyles?: object;
+}
+
+// Variant-neutral reveal-options marker (mirrors ICollectOptionsBase). Asserts no
+// structure: privacyDB has no reveal options; flowDB adds `tokenGroupRedactions`.
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IRevealOptionsBase {}
 
 export interface RevealResponse extends IRevealResponseBase {
   success?: Array<{

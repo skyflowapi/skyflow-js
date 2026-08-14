@@ -95,7 +95,7 @@ const CLASS_NAME = 'CollectContainer';
 abstract class CollectContainer<
   TOptions extends ICollectOptionsBase,
   TResponse extends ICollectResponseBase,
-  TUpdateOptions extends ICollectElementUpdateOptionsBase = ICollectElementUpdateOptionsBase,
+  TUpdateOptions extends ICollectElementUpdateOptionsBase,
 > extends Container {
   protected containerId: string;
 
