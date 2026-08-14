@@ -23,6 +23,7 @@ import deepClone from '@core/libs/deep-clone';
 import {
   ELEMENT_EVENTS_TO_IFRAME,
   FRAME_ELEMENT,
+  COMPOSABLE_REVEAL,
   ELEMENT_EVENTS_TO_CLIENT,
   REVEAL_TYPES,
   CUSTOM_ERROR_MESSAGES,
@@ -35,7 +36,8 @@ import {
   IRevealResponseBase,
 } from '@core/types';
 import { printLog, parameterizedString } from '@core/utils/logs-helper';
-import { validateInitConfig } from '@core/validators';
+import { formatRevealElementOptions } from '@core/helpers';
+import { validateInitConfig, validateInputFormatOptions } from '@core/validators';
 
 abstract class CoreComposableRevealContainer<
   TRevealOptions,
@@ -270,6 +272,29 @@ abstract class CoreComposableRevealContainer<
         reject(err);
       }
     });
+  }
+
+  // Shared create() body: registers a composable reveal element (uuid, format-
+  // option validation, elementsList push, controllerIframeName) and returns the
+  // ids the package subclass needs. create() itself stays per-package because its
+  // typed input and the returned (renderFile-bearing) element are public API.
+  protected buildComposableRevealElement(
+    input: any,
+    options?: Record<string, any>,
+  ): { elementName: string; controllerIframeName: string } {
+    const elementId = uuid();
+    validateInputFormatOptions(options);
+
+    const elementName = `${COMPOSABLE_REVEAL}:${btoa(elementId)}`;
+    this.elementsList?.push({
+      name: elementName,
+      ...input,
+      elementName,
+      elementId,
+      ...formatRevealElementOptions(options ?? {}),
+    });
+    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.tempElements ?? {})}:${this.containerId}:${this.context?.logLevel}:${btoa(this.clientDomain ?? '')}`;
+    return { elementName, controllerIframeName };
   }
 
   // ---- Injected divergence (see class doc) --------------------------------

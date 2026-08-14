@@ -5,9 +5,7 @@ Copyright (c) 2023 Skyflow, Inc.
 // flowDB-only surface — create() (its token-only reveal-input and element), the
 // token-only record + options validators, forwarding reveal options into the
 // frame payload, and the SkyflowFlowDBError full-failure mapping.
-import uuid from '@core/libs/uuid';
 import logs from '@core/utils/logs';
-import { COMPOSABLE_REVEAL, FRAME_ELEMENT } from '@core/constants';
 import CoreComposableRevealContainer from '@core/external/reveal/composable-reveal-container';
 import { MessageType } from '@core/types';
 import { printLog, parameterizedString } from '../../utils/logs-helper';
@@ -18,27 +16,14 @@ import { IRevealElementOptions } from './reveal-container';
 import { IFlowDBRevealElementInput, IRevealOptions } from '../../utils/common';
 import { RevealResponse } from '../../internal/internal-types';
 import {
-  validateInputFormatOptions,
   validateRevealElementRecords,
   validateRevealOptions,
 } from '../../utils/validators';
-import { formatRevealElementOptions } from '../../utils/helpers';
 
 class ComposableRevealContainer
   extends CoreComposableRevealContainer<IRevealOptions, RevealResponse> {
   create = (input: IFlowDBRevealElementInput, options?: IRevealElementOptions) => {
-    const elementId = uuid();
-    validateInputFormatOptions(options);
-
-    const elementName = `${COMPOSABLE_REVEAL}:${btoa(elementId)}`;
-    this.elementsList?.push({
-      name: elementName,
-      ...input,
-      elementName,
-      elementId,
-      ...formatRevealElementOptions(options ?? {}),
-    });
-    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.tempElements ?? {})}:${this.containerId}:${this.context?.logLevel}:${btoa(this.clientDomain ?? '')}`;
+    const { elementName, controllerIframeName } = this.buildComposableRevealElement(input, options);
     return new ComposableRevealElement(elementName,
       this.eventEmitter,
       controllerIframeName);

@@ -30,32 +30,14 @@ class RevealFrame extends CoreRevealFrame {
   #client!: Client;
 
   protected registerRenderFileResponseListener(): void {
-    const sub2 = (responseUrl) => {
-      if (responseUrl.iframeName === this.name) {
-        if (Object.prototype.hasOwnProperty.call(responseUrl, 'error') && responseUrl.error === DEFAULT_FILE_RENDER_ERROR) {
-          this.setRevealError(DEFAULT_FILE_RENDER_ERROR);
-          if (Object.prototype.hasOwnProperty.call(this.record, 'altText')) {
-            this.dataElememt.innerText = this.record.altText;
-          }
-          bus
-            .emit(
-              ELEMENT_EVENTS_TO_CLIENT.HEIGHT + this.name,
-              {
-                height: this.elementContainer.scrollHeight,
-              }, () => {
-              },
-            );
-        } else {
-          const ext = this.getExtension(responseUrl.url);
-          this.addFileRender(responseUrl.url, ext);
-        }
-      }
-    };
+    // Deferred wrapper (not `this.sub2` directly): the @core base constructor
+    // calls this during super(), before this subclass's `sub2` arrow-field is
+    // initialized — so the lookup must happen at fire-time, not registration.
     bus
       .target(window.location.origin)
       .on(
         ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_RESPONSE_READY + this.name,
-        sub2,
+        (responseUrl) => this.sub2(responseUrl),
       );
   }
 

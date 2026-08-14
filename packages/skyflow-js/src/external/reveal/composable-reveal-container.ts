@@ -5,30 +5,16 @@ Copyright (c) 2023 Skyflow, Inc.
 // package-only surface — create() (its typed reveal-input and the renderFile-
 // capable ComposableRevealElement) and the element factory / record validator.
 // Error mapping and options handling use the base (privacyDB) defaults.
-import uuid from '@core/libs/uuid';
-import { COMPOSABLE_REVEAL, FRAME_ELEMENT } from '@core/constants';
 import CoreComposableRevealContainer from '@core/external/reveal/composable-reveal-container';
 import ComposableRevealElement from './composable-reveal-element';
 import ComposableRevealInternalElement from './composable-reveal-internal';
 import { IRevealElementOptions } from './reveal-container';
 import { RevealElementInput, RevealResponse } from '../../index-node';
-import { validateInputFormatOptions, validateRevealElementRecords } from '../../utils/validators';
-import { formatRevealElementOptions } from '../../utils/helpers';
+import { validateRevealElementRecords } from '../../utils/validators';
 
 class ComposableRevealContainer extends CoreComposableRevealContainer<void, RevealResponse> {
   create = (input: RevealElementInput, options?: IRevealElementOptions) => {
-    const elementId = uuid();
-    validateInputFormatOptions(options);
-
-    const elementName = `${COMPOSABLE_REVEAL}:${btoa(elementId)}`;
-    this.elementsList?.push({
-      name: elementName,
-      ...input,
-      elementName,
-      elementId,
-      ...formatRevealElementOptions(options ?? {}),
-    });
-    const controllerIframeName = `${FRAME_ELEMENT}:group:${btoa(this.tempElements ?? {})}:${this.containerId}:${this.context?.logLevel}:${btoa(this.clientDomain ?? '')}`;
+    const { elementName, controllerIframeName } = this.buildComposableRevealElement(input, options);
     return new ComposableRevealElement(elementName,
       this.eventEmitter,
       controllerIframeName);
