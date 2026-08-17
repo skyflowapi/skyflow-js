@@ -1,10 +1,16 @@
-# JS SDK samples
+# skyflow-js samples
+
+Runnable samples for [`skyflow-js`](../README.md), Skyflow's **PDB vault** JavaScript SDK.
 
 Test the SDK by adding your `VAULT_ID`, `VAULT_URL`, and `SERVICE-ACCOUNT` details as the corresponding values in each sample.
 
+> Working against a **Flow vault**? Use the [`skyflow-flowvault-js` samples](../../skyflow-flowvault-js/samples/README.md) instead.
+
+Samples come in three flavors — [`using-script-tag/`](using-script-tag) (loads `https://js.skyflow.com/v2/index.js` and uses the `Skyflow` global), [`using-npm/`](using-npm) (JavaScript), and [`using-typescript/`](using-typescript).
 
 ## Prerequisites
 -  A Skyflow account. If you don't have one, register for one on the [Try Skyflow](https://skyflow.com/try-skyflow) page.
+- A **PDB vault**.
 - [Node.js](https://nodejs.org/en/) version 10 or above
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) version 6.x.x
 - [express.js](http://expressjs.com/en/starter/hello-world.html)

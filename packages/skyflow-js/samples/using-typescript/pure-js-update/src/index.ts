@@ -2,7 +2,6 @@
   Copyright (c) 2025 Skyflow, Inc.
 */
 import Skyflow, {
-  updateResponse,
   SkyflowConfig,
   UpdateRequest,
   UpdateResponse,
@@ -72,14 +71,14 @@ try {
               element.innerHTML = JSON.stringify(res, null, 2);
             }
           },
-          (err: updateResponse) => {
+          (err: UpdateResponse) => {
             const element = document.getElementById('updateResponse') as HTMLElement;
             if (element) {
               element.innerHTML = JSON.stringify(err, null, 2);
             }
           }
         )
-        .catch((err: updateResponse) => {
+        .catch((err: UpdateResponse) => {
           const element = document.getElementById('updateResponse') as HTMLElement;
           if (element) {
             element.innerHTML = JSON.stringify(err, null, 2);
