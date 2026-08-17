@@ -24,6 +24,7 @@ import {
   FlowDBDetokenizeResponse,
   FlowDBDetokenizeRequestError,
   RevealResponse,
+  RevealRecordMetadata,
   RevealError,
 } from '../internal/internal-types';
 
@@ -251,7 +252,7 @@ export const fetchRecordsByTokenIdComposableFlowDB = (
     });
 });
 
-const normalizeFlowDBMetadata = (metadata: Record<string, any>): Record<string, any> => {
+const normalizeFlowDBMetadata = (metadata: Record<string, any>): RevealRecordMetadata => {
   const result: Record<string, any> = { ...metadata };
   if (Object.prototype.hasOwnProperty.call(result, 'table')) {
     result.tableName = result.table;

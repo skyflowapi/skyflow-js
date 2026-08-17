@@ -57,10 +57,6 @@ import {
   RevealResponse,
   InsertResponse,
   CollectResponse,
-  IRevealResponseType,
-  GetResponse,
-  GetByIdResponse,
-  IDeleteResponseType,
   IDeleteRecordInput,
   IRenderResponseType,
   IUpdateRequest,
@@ -124,155 +120,75 @@ class SkyflowFrameController
             this.context.logLevel,
           );
 
-          if (data.type === PUREJS_TYPES.DETOKENIZE) {
-            fetchRecordsByTokenId(
-              data.records as IRevealRecord[],
-              this.client,
-              true,
-            ).then(
-              (resolvedResult: IRevealResponseType) => {
-                printLog(
-                  parameterizedString(
-                    logs.infoLogs.FETCH_RECORDS_RESOLVED,
-                    CLASS_NAME,
-                  ),
-                  MessageType.LOG,
-                  this.context.logLevel,
-                );
-                callback(resolvedResult);
-              },
-              (rejectedResult: IRevealResponseType) => {
-                printLog(
-                  parameterizedString(logs.errorLogs.FETCH_RECORDS_REJECTED),
-                  MessageType.ERROR,
-                  this.context.logLevel,
-                );
+          // Every pure-JS op shares one shape: run the request, then log + callback
+          // the result on success and log + callback({ error }) on failure. Only the
+          // request and its two log lines differ per type, so they live in this
+          // table and the single handler below dispatches on data.type.
+          const dispatch: Record<string, {
+            op: () => Promise<any>;
+            successLog: string;
+            errorLog: string;
+          }> = {
+            [PUREJS_TYPES.DETOKENIZE]: {
+              op: () => fetchRecordsByTokenId(data.records as IRevealRecord[], this.client, true),
+              successLog: logs.infoLogs.FETCH_RECORDS_RESOLVED,
+              errorLog: logs.errorLogs.FETCH_RECORDS_REJECTED,
+            },
+            [PUREJS_TYPES.INSERT]: {
+              op: () => this.insertData(
+                data.records as IInsertRecordInput, data.options as IInsertOptions,
+              ),
+              successLog: logs.infoLogs.INSERT_RECORDS_RESOLVED,
+              errorLog: logs.errorLogs.INSERT_RECORDS_REJECTED,
+            },
+            [PUREJS_TYPES.UPDATE]: {
+              op: () => this.updateData(
+                data.record as IUpdateRequest, data.options as IUpdateOptions,
+              ),
+              successLog: logs.infoLogs.UPDATE_RECORD_RESOLVED,
+              errorLog: logs.errorLogs.UPDATE_RECORD_REJECTED,
+            },
+            [PUREJS_TYPES.GET]: {
+              op: () => fetchRecordsGET(
+                data.records as IGetRecord[], this.client, data.options as IGetOptions,
+              ),
+              successLog: logs.infoLogs.GET_RESOLVED,
+              errorLog: logs.errorLogs.GET_REJECTED,
+            },
+            [PUREJS_TYPES.GET_BY_SKYFLOWID]: {
+              op: () => fetchRecordsBySkyflowID(data.records as ISkyflowIdRecord[], this.client),
+              successLog: logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED,
+              errorLog: logs.errorLogs.GET_BY_SKYFLOWID_REJECTED,
+            },
+            [PUREJS_TYPES.DELETE]: {
+              op: () => deleteData(
+                data.records as IDeleteRecordInput, data.options || {}, this.client,
+              ),
+              successLog: logs.infoLogs.DELETE_RESOLVED,
+              errorLog: logs.errorLogs.DELETE_RECORDS_REJECTED,
+            },
+          };
 
-                callback({ error: rejectedResult });
-              },
-            );
-          } else if (data.type === PUREJS_TYPES.INSERT) {
-            this.insertData(data.records as IInsertRecordInput, data.options as IInsertOptions)
-              .then((result: InsertResponse) => {
-                printLog(
-                  parameterizedString(
-                    logs.infoLogs.INSERT_RECORDS_RESOLVED,
-                    CLASS_NAME,
-                  ),
-                  MessageType.LOG,
-                  this.context.logLevel,
-                );
-                callback(result);
-              })
-              .catch((error: InsertResponse) => {
-                printLog(
-                  parameterizedString(logs.errorLogs.INSERT_RECORDS_REJECTED),
-                  MessageType.ERROR,
-                  this.context.logLevel,
-                );
-                callback({ error });
-              });
-          } else if (data.type === PUREJS_TYPES.UPDATE) {
-            this.updateData(data.record as IUpdateRequest, data.options as IUpdateOptions)
-              .then((result: any) => {
-                printLog(
-                  parameterizedString(
-                    logs.infoLogs.UPDATE_RECORD_RESOLVED,
-                    CLASS_NAME,
-                  ),
-                  MessageType.LOG,
-                  this.context.logLevel,
-                );
-                callback(result);
-              })
-              .catch((error: any) => {
-                printLog(
-                  parameterizedString(logs.errorLogs.UPDATE_RECORD_REJECTED),
-                  MessageType.ERROR,
-                  this.context.logLevel,
-                );
-                callback({ error });
-              });
-          } else if (data.type === PUREJS_TYPES.GET) {
-            fetchRecordsGET(
-              data.records as IGetRecord[], this.client, data.options as IGetOptions,
-            ).then(
-              (resolvedResult: GetResponse) => {
-                printLog(
-                  parameterizedString(logs.infoLogs.GET_RESOLVED, CLASS_NAME),
-                  MessageType.LOG,
-                  this.context.logLevel,
-                );
-
-                callback(resolvedResult);
-              },
-              (rejectedResult: GetResponse) => {
-                printLog(parameterizedString(
-                  logs.errorLogs.GET_REJECTED,
-                ),
-                MessageType.ERROR,
-                this.context.logLevel);
-
-                callback({ error: rejectedResult });
-              },
-            );
-          } else if (data.type === PUREJS_TYPES.GET_BY_SKYFLOWID) {
-            fetchRecordsBySkyflowID(
-              data.records as ISkyflowIdRecord[],
-              this.client,
-            ).then(
-              (resolvedResult: GetByIdResponse) => {
-                printLog(
-                  parameterizedString(
-                    logs.infoLogs.GET_BY_SKYFLOWID_RESOLVED,
-                    CLASS_NAME,
-                  ),
-                  MessageType.LOG,
-                  this.context.logLevel,
-                );
-
-                callback(resolvedResult);
-              },
-              (rejectedResult: GetByIdResponse) => {
-                printLog(
-                  parameterizedString(logs.errorLogs.GET_BY_SKYFLOWID_REJECTED),
-                  MessageType.ERROR,
-                  this.context.logLevel,
-                );
-
-                callback({ error: rejectedResult });
-              },
-            );
-          } else if (data.type === PUREJS_TYPES.DELETE) {
-            deleteData(
-              data.records as IDeleteRecordInput,
-              data.options || {},
-              this.client,
-            ).then(
-              (resolvedResult: IDeleteResponseType) => {
-                printLog(
-                  parameterizedString(
-                    logs.infoLogs.DELETE_RESOLVED,
-                    CLASS_NAME,
-                  ),
-                  MessageType.LOG,
-                  this.context.logLevel,
-                );
-
-                callback(resolvedResult);
-              },
-            ).catch((rejectedResult: IDeleteResponseType) => {
+          const entry = dispatch[data.type as string];
+          if (!entry) return;
+          entry.op().then(
+            (resolvedResult: any) => {
               printLog(
-                parameterizedString(
-                  logs.errorLogs.DELETE_RECORDS_REJECTED,
-                ),
+                parameterizedString(entry.successLog, CLASS_NAME),
+                MessageType.LOG,
+                this.context.logLevel,
+              );
+              callback(resolvedResult);
+            },
+            (rejectedResult: any) => {
+              printLog(
+                parameterizedString(entry.errorLog),
                 MessageType.ERROR,
                 this.context.logLevel,
               );
-
               callback({ error: rejectedResult });
-            });
-          }
+            },
+          );
         },
       );
   }
@@ -572,11 +488,7 @@ class SkyflowFrameController
       });
     });
 
-    return new Promise((resolve, reject) => {
-      sendRequest()
-        .then((res) => resolve(res))
-        .catch((err) => reject(err));
-    });
+    return sendRequest();
   }
 
   parallelUploadFiles = (options: UploadFileDataInput):
@@ -699,13 +611,7 @@ class SkyflowFrameController
       });
     });
 
-    return new Promise((resolve, reject) => {
-      sendRequest()
-        .then((res) => resolve(res))
-        .catch((err) => {
-          reject(err);
-        });
-    });
+    return sendRequest();
   };
 }
 export default SkyflowFrameController;

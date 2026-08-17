@@ -48,38 +48,51 @@ const CLASS_NAME = 'SkyflowContainer';
 // (constructor + `isControllerFrameReady`) plus the pure-JS data methods that
 // flowDB does not expose.
 class SkyflowContainer extends CoreSkyflowContainer {
-  detokenize(detokenizeInput: IDetokenizeInput): Promise<DetokenizeResponse> {
+  // Fire a pure-JS request to the controller frame. When the frame is already
+  // ready the request emits immediately; otherwise it is deferred until the
+  // PUREJS_FRAME_READY handshake fires. `logError` mirrors the historical
+  // per-method behaviour: insert/update/delete log the error envelope before
+  // rejecting, the read paths (detokenize/get/getById) do not.
+  private emitPureJsRequest(
+    resolve: (value: any) => void,
+    reject: (reason?: any) => void,
+    type: string,
+    payload: Record<string, any>,
+    logError: boolean = false,
+  ): void {
+    const emit = () => {
+      bus
+        .target(properties.IFRAME_SECURE_ORIGIN)
+        .emit(
+          ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
+          {
+            type,
+            ...payload,
+          },
+          (responseData: any) => {
+            if (responseData.error) {
+              if (logError) {
+                printLog(`${JSON.stringify(responseData.error)}`,
+                  MessageType.ERROR, this.context.logLevel);
+              }
+              reject(responseData.error);
+            } else resolve(responseData);
+          },
+        );
+    };
     if (this.isControllerFrameReady) {
-      return new Promise((resolve, reject) => {
-        try {
-          validateInitConfig(this.client.config);
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_DETOKENIZE_INPUT, CLASS_NAME),
-            MessageType.LOG,
-            this.context.logLevel);
-
-          validateDetokenizeInput(detokenizeInput);
-          bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-              {
-                type: PUREJS_TYPES.DETOKENIZE,
-                records: detokenizeInput.records,
-              },
-              (revealData: any) => {
-                if (revealData.error) reject(revealData.error);
-                else resolve(revealData);
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-            PUREJS_TYPES.DETOKENIZE),
-          MessageType.LOG, this.context.logLevel);
-        } catch (e:any) {
-          printLog(e.message, MessageType.ERROR, this.context.logLevel);
-          reject(e);
-        }
-      });
+      emit();
+    } else {
+      bus
+        .target(properties.IFRAME_SECURE_ORIGIN)
+        .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.containerId, emit);
     }
+    // Emitted synchronously in both branches, preserving the original log timing.
+    printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME, type),
+      MessageType.LOG, this.context.logLevel);
+  }
+
+  detokenize(detokenizeInput: IDetokenizeInput): Promise<DetokenizeResponse> {
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.client.config);
@@ -88,26 +101,9 @@ class SkyflowContainer extends CoreSkyflowContainer {
           this.context.logLevel);
 
         validateDetokenizeInput(detokenizeInput);
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.containerId, () => {
-            bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-                {
-                  type: PUREJS_TYPES.DETOKENIZE,
-                  records: detokenizeInput.records,
-                },
-                (revealData: any) => {
-                  if (revealData.error) reject(revealData.error);
-                  else resolve(revealData);
-                },
-              );
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-          PUREJS_TYPES.DETOKENIZE),
-        MessageType.LOG, this.context.logLevel);
+        this.emitPureJsRequest(resolve, reject, PUREJS_TYPES.DETOKENIZE, {
+          records: detokenizeInput.records,
+        });
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.context.logLevel);
         reject(e);
@@ -116,55 +112,11 @@ class SkyflowContainer extends CoreSkyflowContainer {
   }
 
   insert(records: IInsertRecordInput, options?:IInsertOptions): Promise<InsertResponse> {
-    if (this.isControllerFrameReady) {
-      return new Promise((resolve, reject) => {
-        validateInitConfig(this.client.config);
-        try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
-            this.context.logLevel);
-          if (options) {
-            options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
-          } else {
-            options = {
-              tokens: true,
-            };
-          }
-          if (options?.upsert) {
-            validateUpsertOptions(options.upsert);
-          }
-          validateInsertRecords(records, options);
-          bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-              {
-                type: PUREJS_TYPES.INSERT,
-                records,
-                options,
-              },
-              (insertedData: any) => {
-                if (insertedData.error) {
-                  printLog(`${JSON.stringify(insertedData.error)}`, MessageType.ERROR, this.context.logLevel);
-                  reject(insertedData.error);
-                } else resolve(insertedData);
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-            PUREJS_TYPES.INSERT),
-          MessageType.LOG, this.context.logLevel);
-        } catch (e:any) {
-          printLog(e.message, MessageType.ERROR, this.context.logLevel);
-
-          reject(e);
-        }
-      });
-    }
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.client.config);
         printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
           this.context.logLevel);
-
         if (options) {
           options = { ...options, tokens: options?.tokens !== undefined ? options.tokens : true };
         } else {
@@ -176,29 +128,10 @@ class SkyflowContainer extends CoreSkyflowContainer {
           validateUpsertOptions(options.upsert);
         }
         validateInsertRecords(records, options);
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.containerId, () => {
-            bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-                {
-                  type: PUREJS_TYPES.INSERT,
-                  records,
-                  options,
-                },
-                (insertedData: any) => {
-                  if (insertedData.error) {
-                    printLog(`${JSON.stringify(insertedData.error)}`, MessageType.ERROR, this.context.logLevel);
-                    reject(insertedData.error);
-                  } else resolve(insertedData);
-                },
-              );
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-          PUREJS_TYPES.INSERT),
-        MessageType.LOG, this.context.logLevel);
+        this.emitPureJsRequest(resolve, reject, PUREJS_TYPES.INSERT, {
+          records,
+          options,
+        }, true);
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.context.logLevel);
         reject(e);
@@ -207,40 +140,6 @@ class SkyflowContainer extends CoreSkyflowContainer {
   }
 
   update(record: IUpdateRequest, options?: IUpdateOptions): Promise<UpdateResponse> {
-    if (this.isControllerFrameReady) {
-      return new Promise((resolve, reject) => {
-        validateInitConfig(this.client.config);
-        try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
-            this.context.logLevel);
-
-          validateUpdateRecord(record, options);
-
-          bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-              {
-                type: PUREJS_TYPES.UPDATE,
-                record,
-                options,
-              },
-              (updatedData: any) => {
-                if (updatedData.error) {
-                  printLog(`${JSON.stringify(updatedData.error)}`, MessageType.ERROR, this.context.logLevel);
-                  reject(updatedData.error);
-                } else resolve(updatedData);
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-            PUREJS_TYPES.UPDATE),
-          MessageType.LOG, this.context.logLevel);
-        } catch (e: any) {
-          printLog(e.message, MessageType.ERROR, this.context.logLevel);
-          reject(e);
-        }
-      });
-    }
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.client.config);
@@ -248,30 +147,10 @@ class SkyflowContainer extends CoreSkyflowContainer {
           this.context.logLevel);
 
         validateUpdateRecord(record, options);
-
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.containerId, () => {
-            bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-                {
-                  type: PUREJS_TYPES.UPDATE,
-                  record,
-                  options,
-                },
-                (updatedData: any) => {
-                  if (updatedData.error) {
-                    printLog(`${JSON.stringify(updatedData.error)}`, MessageType.ERROR, this.context.logLevel);
-                    reject(updatedData.error);
-                  } else resolve(updatedData);
-                },
-              );
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-          PUREJS_TYPES.UPDATE),
-        MessageType.LOG, this.context.logLevel);
+        this.emitPureJsRequest(resolve, reject, PUREJS_TYPES.UPDATE, {
+          record,
+          options,
+        }, true);
       } catch (e: any) {
         printLog(e.message, MessageType.ERROR, this.context.logLevel);
         reject(e);
@@ -280,214 +159,58 @@ class SkyflowContainer extends CoreSkyflowContainer {
   }
 
   getById(getByIdInput: IGetByIdInput): Promise<GetByIdResponse> {
-    if (this.isControllerFrameReady) {
-      return new Promise((resolve, reject) => {
-        validateInitConfig(this.client.config);
-        try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT, CLASS_NAME),
-            MessageType.LOG,
-            this.context.logLevel);
-
-          validateGetByIdInput(getByIdInput);
-
-          bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-              {
-                type: PUREJS_TYPES.GET_BY_SKYFLOWID,
-                records: getByIdInput.records,
-              },
-              (revealData: any) => {
-                if (revealData.error) reject(revealData.error);
-                else resolve(revealData);
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-            CLASS_NAME, PUREJS_TYPES.GET_BY_SKYFLOWID),
-          MessageType.LOG, this.context.logLevel);
-        } catch (e:any) {
-          printLog(e.message, MessageType.ERROR, this.context.logLevel);
-
-          reject(e);
-        }
-      });
-    }
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.client.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT,
-          CLASS_NAME), MessageType.LOG,
-        this.context.logLevel);
+        printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_BY_ID_INPUT, CLASS_NAME),
+          MessageType.LOG,
+          this.context.logLevel);
 
         validateGetByIdInput(getByIdInput);
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.containerId, () => {
-            bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-                {
-                  type: PUREJS_TYPES.GET_BY_SKYFLOWID,
-                  records: getByIdInput.records,
-                },
-                (revealData: any) => {
-                  if (revealData.error) reject(revealData.error);
-                  else resolve(revealData);
-                },
-              );
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-          CLASS_NAME, PUREJS_TYPES.GET_BY_SKYFLOWID),
-        MessageType.LOG, this.context.logLevel);
+        this.emitPureJsRequest(resolve, reject, PUREJS_TYPES.GET_BY_SKYFLOWID, {
+          records: getByIdInput.records,
+        });
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.context.logLevel);
-
         reject(e);
       }
     });
   }
 
   get(getInput: IGetInput, options?: IGetOptions): Promise<GetResponse> {
-    if (this.isControllerFrameReady) {
-      return new Promise((resolve, reject) => {
-        validateInitConfig(this.client.config);
-        try {
-          printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_INPUT, CLASS_NAME),
-            MessageType.LOG,
-            this.context.logLevel);
-          validateGetInput(getInput, options);
-          bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-              {
-                type: PUREJS_TYPES.GET,
-                records: getInput.records,
-                options,
-              },
-              (revealData: any) => {
-                if (revealData.error) reject(revealData.error);
-                else resolve(revealData);
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-            CLASS_NAME, PUREJS_TYPES.GET),
-          MessageType.LOG, this.context.logLevel);
-        } catch (e:any) {
-          printLog(e.message, MessageType.ERROR, this.context.logLevel);
-
-          reject(e);
-        }
-      });
-    }
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.client.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_INPUT,
-          CLASS_NAME), MessageType.LOG,
-        this.context.logLevel);
+        printLog(parameterizedString(logs.infoLogs.VALIDATE_GET_INPUT, CLASS_NAME),
+          MessageType.LOG,
+          this.context.logLevel);
 
         validateGetInput(getInput, options);
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.containerId, () => {
-            bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-                {
-                  type: PUREJS_TYPES.GET,
-                  records: getInput.records,
-                  options,
-                },
-                (revealData: any) => {
-                  if (revealData.error) reject(revealData.error);
-                  else resolve(revealData);
-                },
-              );
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST,
-          CLASS_NAME, PUREJS_TYPES.GET),
-        MessageType.LOG, this.context.logLevel);
+        this.emitPureJsRequest(resolve, reject, PUREJS_TYPES.GET, {
+          records: getInput.records,
+          options,
+        });
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.context.logLevel);
-
         reject(e);
       }
     });
   }
 
   delete(records: IDeleteRecordInput, options?: IDeleteOptions): Promise<DeleteResponse> {
-    if (this.isControllerFrameReady) {
-      return new Promise((resolve, reject) => {
-        validateInitConfig(this.client.config);
-        try {
-          printLog(
-            parameterizedString(logs.infoLogs.VALIDATE_DELETE_INPUT, CLASS_NAME), MessageType.LOG,
-            this.context.logLevel,
-          );
-
-          validateDeleteRecords(records, options);
-          bus
-            .target(properties.IFRAME_SECURE_ORIGIN)
-            .emit(
-              ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-              {
-                type: PUREJS_TYPES.DELETE,
-                records,
-                options,
-              },
-              (deletedData: any) => {
-                if (deletedData.error) {
-                  printLog(`${JSON.stringify(deletedData.error)}`, MessageType.ERROR, this.context.logLevel);
-                  reject(deletedData.error);
-                } else {
-                  resolve(deletedData);
-                }
-              },
-            );
-          printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-            PUREJS_TYPES.DELETE),
-          MessageType.LOG, this.context.logLevel);
-        } catch (e:any) {
-          printLog(e.message, MessageType.ERROR, this.context.logLevel);
-
-          reject(e);
-        }
-      });
-    }
     return new Promise((resolve, reject) => {
       try {
         validateInitConfig(this.client.config);
-        printLog(parameterizedString(logs.infoLogs.VALIDATE_RECORDS, CLASS_NAME), MessageType.LOG,
-          this.context.logLevel);
+        printLog(
+          parameterizedString(logs.infoLogs.VALIDATE_DELETE_INPUT, CLASS_NAME), MessageType.LOG,
+          this.context.logLevel,
+        );
 
         validateDeleteRecords(records, options);
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY + this.containerId, () => {
-            bus
-              .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.PUREJS_REQUEST + this.containerId,
-                {
-                  type: PUREJS_TYPES.DELETE,
-                  records,
-                  options,
-                },
-                (deletedData: any) => {
-                  if (deletedData.error) {
-                    printLog(`${JSON.stringify(deletedData.error)}`, MessageType.ERROR, this.context.logLevel);
-                    reject(deletedData.error);
-                  } else resolve(deletedData);
-                },
-              );
-          });
-        printLog(parameterizedString(logs.infoLogs.EMIT_PURE_JS_REQUEST, CLASS_NAME,
-          PUREJS_TYPES.DELETE),
-        MessageType.LOG, this.context.logLevel);
+        this.emitPureJsRequest(resolve, reject, PUREJS_TYPES.DELETE, {
+          records,
+          options,
+        }, true);
       } catch (e:any) {
         printLog(e.message, MessageType.ERROR, this.context.logLevel);
         reject(e);

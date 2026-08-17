@@ -95,10 +95,6 @@ export default class FrameElementInit extends CoreFrameElementInit {
       }
     });
 
-    return new Promise((resolve, reject) => {
-      sendRequest()
-        .then((res) => resolve(res))
-        .catch((err) => reject(err));
-    });
+    return sendRequest();
   }
 }

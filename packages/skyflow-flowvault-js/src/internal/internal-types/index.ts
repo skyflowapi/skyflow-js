@@ -109,11 +109,26 @@ export interface FlowDBError {
 }
 
 // Public flowDB collect record/response (surfaced to the SDK consumer).
+// `tokens` and `hashedData` are keyed by the dynamic column name (e.g.
+// "card_number"); each value is a list of per-token / per-hash entries.
+export interface CollectRecordToken {
+  token: string;
+  tokenGroupName?: string;
+  // Present only for nested JSON columns (dotted/bracketed sub-path, e.g.
+  // "street", "phone_numbers[1].number[0]"); flat columns omit it.
+  path?: string;
+}
+
+export interface CollectRecordHashedData {
+  data: string;
+  hashName: string;
+}
+
 export interface CollectRecord {
   tableName?: string;
   skyflowId?: string;
-  tokens?: Record<string, any>;
-  hashedData?: Record<string, any>;
+  tokens?: Record<string, CollectRecordToken[]>;
+  hashedData?: Record<string, CollectRecordHashedData[]>;
   httpCode: number;
   error?: string;
 }
@@ -186,10 +201,15 @@ export interface FlowDBDetokenizeRequestError {
 }
 
 // Public flowDB reveal record/response (surfaced to the SDK consumer).
+export interface RevealRecordMetadata {
+  skyflowId?: string;
+  tableName?: string;
+}
+
 export interface RevealRecord {
   token: string;
   tokenGroupName?: string;
-  metadata?: Record<string, any>;
+  metadata?: RevealRecordMetadata;
   httpCode: number;
   error?: string;
 }

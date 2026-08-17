@@ -178,20 +178,24 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # - name: Set Latest Tag
-      #   run: |
-      #     mkdir tags
-      #     echo "v${{ env.RELEASE_VERSION }}" > tags/latest
-
-      # - name: Deploy Latest Tag to S3
-      #   run: aws s3 cp --recursive tags s3://${{ secrets.AWS_BUCKET_NAME }}/
-
-      # - name: Remove Latest Tag
-      #   run: rm -rf tags
-
       - name: Deploy to S3
         run: |
           aws s3 cp --recursive ${{ inputs.DIST_DIR }} s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.S3_PREFIX }}v${{ env.RELEASE_VERSION }}/
+
+      # Publish the unversioned "latest" pointer AFTER the versioned artifacts are
+      # uploaded, so a consumer resolving `latest` never gets a version whose files
+      # aren't in the bucket yet. Scoped by S3_PREFIX so skyflow-js -> `latest` and
+      # flowvault -> `flowvault/latest`; without the prefix both packages (which share
+      # a bucket per environment) would clobber the same object. The trailing
+      # CloudFront invalidation (INVALIDATION_PATH) already covers these keys.
+      - name: Update latest pointer in S3
+        run: |
+          printf 'v%s' "${{ env.RELEASE_VERSION }}" > latest
+          aws s3 cp latest \
+            "s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.S3_PREFIX }}latest" \
+            --content-type text/plain \
+            --cache-control no-cache
+          rm -f latest
 
       - name: Build Node SDK
         run: |

@@ -43,8 +43,11 @@ export {
 export {
   CollectResponse,
   CollectRecord,
+  CollectRecordToken,
+  CollectRecordHashedData,
   RevealResponse,
   RevealRecord,
+  RevealRecordMetadata,
 } from './internal/internal-types';
 
 export {

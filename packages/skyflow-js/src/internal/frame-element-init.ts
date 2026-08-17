@@ -123,11 +123,7 @@ export default class FrameElementInit extends CoreFrameElementInit {
       }
     });
 
-    return new Promise((resolve, reject) => {
-      sendRequest()
-        .then((res) => resolve(res))
-        .catch((err) => reject(err));
-    });
+    return sendRequest();
   }
 
   // privacyDB per-element multi-file upload messages (MULTIPLE_UPLOAD_FILES).
@@ -313,13 +309,7 @@ export default class FrameElementInit extends CoreFrameElementInit {
         });
     });
 
-    return new Promise((resolve, reject) => {
-      sendRequest()
-        .then((res) => resolve(res))
-        .catch((err) => {
-          reject(err);
-        });
-    });
+    return sendRequest();
   };
 
   // eslint-disable-next-line consistent-return

@@ -334,25 +334,25 @@ abstract class CollectContainer<
 
   collect = (options: TOptions = {} as TOptions): Promise<TResponse> => {
     this.isSkyflowFrameReady = this.metaData.skyflowContainer.isControllerFrameReady;
-    if (this.isSkyflowFrameReady) {
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      return new Promise((resolve, reject) => {
-        try {
-          validateInitConfig(this.metaData.clientJSON.config);
-          if (Object.keys(this.elements).length === 0) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
+    return new Promise((resolve, reject) => {
+      try {
+        validateInitConfig(this.metaData.clientJSON.config);
+        if (Object.keys(this.elements).length === 0) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
+        }
+        this.removeStaleElements();
+        const collectElements = Object.values(this.elements);
+        const elementIds = Object.keys(this.elements)
+          .map((element) => ({ frameId: element, elementId: element }));
+        collectElements.forEach((element) => {
+          if (!element.isMounted()) {
+            throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
           }
-          this.removeStaleElements();
-          const collectElements = Object.values(this.elements);
-          const elementIds = Object.keys(this.elements)
-            .map((element) => ({ frameId: element, elementId: element }));
-          collectElements.forEach((element) => {
-            if (!element.isMounted()) {
-              throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
-            }
-            element.isValidElement();
-          });
-          const resolvedOptions = this.validateCollectOptions(options);
+          element.isValidElement();
+        });
+        const resolvedOptions = this.validateCollectOptions(options);
+
+        const emit = () => {
           bus
           // .target(properties.IFRAME_SECURE_ORIGIN)
             .emit(
@@ -379,64 +379,21 @@ abstract class CollectContainer<
                 }
               },
             );
+        };
+
+        if (this.isSkyflowFrameReady) {
+          emit();
+          // EMIT_EVENT logged synchronously in the ready path only, preserving the
+          // original log timing (the deferred not-ready path never logged it).
           printLog(parameterizedString(logs.infoLogs.EMIT_EVENT,
             CLASS_NAME, ELEMENT_EVENTS_TO_IFRAME.TOKENIZATION_REQUEST),
           MessageType.LOG, this.context.logLevel);
-        } catch (err: any) {
-          printLog(`${err.message}`, MessageType.ERROR, this.context.logLevel);
-          reject(err);
+        } else {
+          bus
+            .target(properties.IFRAME_SECURE_ORIGIN)
+            .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.containerId, emit);
         }
-      });
-    }
-    return new Promise((resolve, reject) => {
-      try {
-        validateInitConfig(this.metaData.clientJSON.config);
-        if (Object.keys(this.elements).length === 0) {
-          throw new SkyflowError(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COLLECT, [], true);
-        }
-        this.removeStaleElements();
-        const collectElements = Object.values(this.elements);
-        const elementIds = Object.keys(this.elements)
-          .map((element) => ({ frameId: element, elementId: element }));
-        collectElements.forEach((element) => {
-          if (!element.isMounted()) {
-            throw new SkyflowError(SKYFLOW_ERROR_CODE.ELEMENTS_NOT_MOUNTED, [], true);
-          }
-          element.isValidElement();
-        });
-        const resolvedOptions = this.validateCollectOptions(options);
-        bus
-          .target(properties.IFRAME_SECURE_ORIGIN)
-          .on(ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + this.containerId, () => {
-            bus
-            // .target(properties.IFRAME_SECURE_ORIGIN)
-              .emit(
-                ELEMENT_EVENTS_TO_IFRAME.COLLECT_CALL_REQUESTS + this.metaData.uuid,
-                {
-                  type: COLLECT_TYPES.COLLECT,
-                  // Spread the normalized options bag as an index-signature type so
-                  // the framebus payload stays assignable (the emit arg is untyped).
-                  // `tokens` is already resolved inside validateCollectOptions.
-                  ...(resolvedOptions as Record<string, any>),
-                  elementIds,
-                  containerId: this.containerId,
-                  errorMessages: this.customErrorMessages,
-                },
-                (data: any) => {
-                  if (!data || data?.error) {
-                    printLog(`${JSON.stringify(data?.error)}`, MessageType.ERROR, this.context.logLevel);
-                    reject(this.wrapCollectError(data?.error));
-                  } else {
-                    printLog(parameterizedString(logs.infoLogs.COLLECT_SUBMIT_SUCCESS, CLASS_NAME),
-                      MessageType.LOG,
-                      this.context.logLevel);
-
-                    resolve(data);
-                  }
-                },
-              );
-          });
-      } catch (err:any) {
+      } catch (err: any) {
         printLog(`${err.message}`, MessageType.ERROR, this.context.logLevel);
         reject(err);
       }
