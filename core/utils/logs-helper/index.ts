@@ -57,12 +57,28 @@ export const getElementName = (name:string = '') => {
 
 const SDK_OWNER = '[Skyflow]';
 
+// Resolve the optional `name@version` telemetry override kept in localStorage.
+// The un-namespaced `sdk_version` key is written by skyflow-react-js, which wraps
+// skyflow-js only; reading it from any other bundle (e.g. skyflow-flowvault-js)
+// would leak skyflow-js's React identity into that bundle's sky-metadata header
+// and error-log prefix. Prefer a per-package namespaced key first (a future React
+// wrapper writes `sdk_version:<pkg>`), then fall back to the legacy global key
+// ONLY for skyflow-js so its already-shipped React wrapper keeps working.
+export const getStoredSdkVersion = (): string => {
+  const namespaced = localStorage.getItem(`sdk_version:${SDK_NAME}`);
+  if (namespaced) return namespaced;
+  if (SDK_NAME === 'skyflow-js') {
+    return localStorage.getItem('sdk_version') || '';
+  }
+  return '';
+};
+
 // Resolve this bundle's SDK language/version label for the error log line.
 // Mirrors each package's former `getSDKLanguageAndVersion`: reads the injected
 // `SDK_NAME`/`SDK_VERSION` globals, honouring an optional `name@version`
 // override stored in localStorage (used by the React wrapper).
 const getSdkLanguageAndVersion = () => {
-  const metaData = localStorage.getItem('sdk_version') || '';
+  const metaData = getStoredSdkVersion();
   let sdkName = SDK_NAME;
   let sdkVersion = SDK_VERSION;
   if (metaData && metaData !== '' && metaData.split('@').length > 1) {

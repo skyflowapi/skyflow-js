@@ -55,7 +55,7 @@ import CoreComposableRevealContainer from '@core/external/reveal/composable-reve
 import type CoreRevealElement from '@core/external/reveal/reveal-element';
 import { checkAndSetForCustomUrl, formatVaultURL } from '@core/helpers';
 import { validateComposableContainerOptions } from '@core/validators';
-import { printLog, parameterizedString } from '@core/utils/logs-helper';
+import { printLog, parameterizedString, getStoredSdkVersion } from '@core/utils/logs-helper';
 import {
   ClientMetadata,
   CollectElementInput,
@@ -140,7 +140,7 @@ abstract class BaseSkyflow<
   protected env: Env;
 
   constructor(config: ISkyflow) {
-    const localSDKversion = localStorage.getItem('sdk_version') || '';
+    const localSDKversion = getStoredSdkVersion();
     this.metadata[SDK_VERSION_KEY] = localSDKversion;
     this.metadata[SESSION_ID] = uuid();
     this.client = new Client(
