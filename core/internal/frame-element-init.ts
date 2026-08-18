@@ -81,6 +81,11 @@ export default abstract class FrameElementInit {
 
   // ---- Injected divergence (bound per package in the subclass) ----
 
+  // flowDB captures CVV values into `cvvMap` (later used to mask CVV tokens in the
+  // response); privacyDB does not. Mirrors `collectsCVV` on the skyflow-frame
+  // controller base so both collect paths gate CVV capture the same way.
+  protected collectsCVV: boolean = false;
+
   // The variant request tail: build the transport request from the assembled
   // insert/update objects, dispatch it, and shape the response. privacyDB and
   // flowDB implement this against their own api-utils/collect.
@@ -184,7 +189,8 @@ export default abstract class FrameElementInit {
         !== ELEMENTS.FILE_INPUT.name && inputElement.fieldType
         !== ELEMENTS.MULTI_FILE_INPUT.name
           ) {
-            const isCVV = inputElement.fieldType
+            const isCVV = this.collectsCVV
+            && inputElement.fieldType
             === ELEMENTS.CVV.name
             && inputElement.returnMockValue === true;
 

@@ -22,6 +22,9 @@ import {
 export default class FrameElementInit extends CoreFrameElementInit {
   private static frameEle?: FrameElementInit;
 
+  // flowDB captures CVV values into `cvvMap` for response masking (privacyDB does not).
+  protected collectsCVV = true;
+
   static startFrameElement = () => {
     FrameElementInit.frameEle = new FrameElementInit();
   };
