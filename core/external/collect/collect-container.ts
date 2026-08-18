@@ -192,8 +192,11 @@ abstract class CollectContainer<
         elements: [{
           elementType: input.type,
           name: input.column,
-          ...input,
+          // Hook-provided fields (privacyDB `accept`, flowDB `table`) are spread
+          // BEFORE `...input` so an explicit input key takes precedence — matching
+          // the 2.7.9 baseline order.
           ...this.buildCreateElementFields(input, options),
+          ...input,
           ...formattedOptions,
           validations,
         }],

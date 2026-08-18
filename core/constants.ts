@@ -19,7 +19,10 @@ import cartesBancairesIcon from '../assets/carter-banceris.svg';
 
 export const SESSION_ID = 'session_id';
 export const SKY_METADATA_HEADER = 'sky-metadata';
-export const SDK_VERSION = 'sdkVersion';
+// Metadata object KEY under which the SDK version string is stored (serialized into
+// the sky-metadata header). Distinct from the build-injected `SDK_VERSION` DefinePlugin
+// global (the actual package version) — do not conflate the two.
+export const SDK_VERSION_KEY = 'sdkVersion';
 export const COLLECT_FRAME_CONTROLLER = 'collect_controller';
 export const REVEAL_FRAME_CONTROLLER = 'reveal_controller';
 export const SKYFLOW_FRAME_CONTROLLER = 'skyflow_controller';

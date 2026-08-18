@@ -39,7 +39,7 @@ import {
   CardType,
   ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
-  SDK_VERSION,
+  SDK_VERSION_KEY,
   SESSION_ID,
 } from '@core/constants';
 import properties from '@core/properties';
@@ -147,7 +147,7 @@ abstract class BaseSkyflow<
 
   constructor(config: ISkyflow) {
     const localSDKversion = localStorage.getItem('sdk_version') || '';
-    this.metadata[SDK_VERSION] = localSDKversion;
+    this.metadata[SDK_VERSION_KEY] = localSDKversion;
     this.metadata[SESSION_ID] = uuid();
     this.client = new Client(
       {

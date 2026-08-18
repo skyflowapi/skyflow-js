@@ -32,7 +32,6 @@ import SkyflowError from '@core/errors';
 import { getValueAndItsUnit, validateAndSetupGroupOptions } from '@core/libs/element-options';
 import IFrameFormElement from '@core/internal/iframe-form';
 import FrameElement from '@core/internal';
-import Client from '@core/client';
 import {
   ContainerType, Context, CVVMap, Env, ErrorType, LogLevel,
 } from '@core/types';
@@ -58,10 +57,6 @@ export default abstract class FrameElementInit {
 
   iframeFormList: IFrameFormElement[] = [];
 
-  // Set from the COMPOSABLE_CONTAINER handshake only. The request tail builds its
-  // own client from the per-request clientConfig, so this is not read there.
-  #client!: Client;
-
   constructor() {
     // this.createIframeElement(frameName, label, skyflowID, isRequired);
     this.context = { logLevel: LogLevel.INFO, env: Env.PROD }; // client level
@@ -73,14 +68,13 @@ export default abstract class FrameElementInit {
     };
     this.updateGroupData();
     this.createContainerDiv(this.group);
+    // Handshake with the composable controller frame. The emit itself signals the
+    // parent container (which flips isComposableFrameReady); the frame's own client
+    // is built per-request from clientConfig in dispatchCollectRequest, so no reply
+    // is consumed here.
     bus
       .target(this.clientMetaData?.clientDomain)
-      .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {}, (data: any) => {
-        data.client.config = {
-          ...data.client.config,
-        };
-        this.#client = Client.fromJSON(data.client) as any;
-      });
+      .emit(ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId, {});
 
     window.addEventListener('message', this.handleCollectCall);
   }
@@ -131,13 +125,6 @@ export default abstract class FrameElementInit {
         } else {
           this.handleFileUploadRequest(event);
         }
-      }
-      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + this.containerId) {
-        const data = event.data;
-        data.client.config = {
-          ...data.client.config,
-        };
-        this.#client = Client.fromJSON(data.client) as any;
       }
     }
   };

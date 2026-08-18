@@ -276,7 +276,10 @@ abstract class RevealContainer<
           records: this.#revealRecords,
           containerId: this.#containerId,
           errorMessages: this.#customErrorMessages,
-          options,
+          // Only include `options` when present. flowDB passes reveal options here;
+          // privacyDB's value is always undefined and fetchRevealRecords ignores it,
+          // so the key is omitted rather than sent as `undefined`.
+          ...(options ? { options } : {}),
         },
         (revealData: any) => {
           this.#mountedRecords = [];

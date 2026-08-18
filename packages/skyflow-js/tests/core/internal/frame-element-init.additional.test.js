@@ -798,19 +798,22 @@ describe('FrameElementInit extended unit tests', () => {
     );
   });
 
-  test('handleCollectCall: COMPOSABLE_CONTAINER message sets client without error', async () => {
+  test('handleCollectCall: COMPOSABLE_CONTAINER message is a no-op and does not build a client', async () => {
+    // The frame builds its client per-request from clientConfig in
+    // dispatchCollectRequest, so a COMPOSABLE_CONTAINER window message no longer
+    // constructs a client here — it must be handled without error.
     const instance = new FrameElementInit();
     const spyFromJSON = jest.spyOn(Client, 'fromJSON');
     const clientConfigPayload = { config: { vaultURL: 'https://vault.url', vaultID: 'vaultX' } };
-    instance['handleCollectCall']({
+    expect(() => instance['handleCollectCall']({
       origin: 'http://localhost.com',
       data: {
         name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CONTAINER + instance.containerId,
         client: clientConfigPayload,
       },
-    });
+    })).not.toThrow();
     await flushPromises();
-    expect(spyFromJSON).toHaveBeenCalled();
+    expect(spyFromJSON).not.toHaveBeenCalled();
   });
 
   // ===== Additional tokenize branch coverage (lines ~315-469) =====
