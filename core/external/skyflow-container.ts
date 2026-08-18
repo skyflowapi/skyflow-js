@@ -64,5 +64,15 @@ class SkyflowContainer {
       MessageType.LOG,
       this.context.logLevel);
   }
+
+  // Only `isControllerFrameReady` belongs in the serialized metadata that rides
+  // the element iframe `src` URL. `client`/`containerId`/`context` are `protected`
+  // (so subclasses can reach them), which makes them enumerable at runtime and
+  // would otherwise leak the whole config into the URL. Restricting JSON.stringify
+  // here restores the pre-split serialized shape at every mount/serialize path at
+  // once, while leaving the live object client code reads untouched.
+  toJSON() {
+    return { isControllerFrameReady: this.isControllerFrameReady };
+  }
 }
 export default SkyflowContainer;
