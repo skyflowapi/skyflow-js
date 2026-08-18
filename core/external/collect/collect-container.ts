@@ -244,10 +244,6 @@ abstract class CollectContainer<
         // active key comes from the registered VariantAdapter.
         options.skyflowID = element[this.collectVariant.skyflowIdKey];
 
-        options.returnMockValue = element.returnMockValue === true
-          ? element.returnMockValue
-          : false;
-
         elements.push(options);
       });
     });

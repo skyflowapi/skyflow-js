@@ -13,6 +13,7 @@ import SkyflowError from '@core/errors';
 import {
   validateFlowDBUpsertOptions,
   validateFlowDBAdditionalFieldsInCollect,
+  validateCollectElementOptions,
 } from '../../src/utils/validators';
 import { UpdateType } from '../../src/utils/common';
 
@@ -122,5 +123,24 @@ describe('validateFlowDBAdditionalFieldsInCollect', () => {
     expect(() => validateFlowDBAdditionalFieldsInCollect({
       records: [{ table: 'cards', fields: { cvv: '123' } } as any],
     })).toThrow(/tableName/);
+  });
+});
+
+describe('validateCollectElementOptions', () => {
+  test('accepts a boolean returnMockValue', () => {
+    expect(() => validateCollectElementOptions({ returnMockValue: true })).not.toThrow();
+    expect(() => validateCollectElementOptions({ returnMockValue: false })).not.toThrow();
+  });
+
+  test('accepts options without returnMockValue', () => {
+    expect(() => validateCollectElementOptions({ required: true })).not.toThrow();
+    expect(() => validateCollectElementOptions(undefined)).not.toThrow();
+  });
+
+  test('rejects a non-boolean returnMockValue', () => {
+    expect(() => validateCollectElementOptions({ returnMockValue: 'true' as any }))
+      .toThrow(/returnMockValue/);
+    expect(() => validateCollectElementOptions({ returnMockValue: 1 as any }))
+      .toThrow(SkyflowError);
   });
 });

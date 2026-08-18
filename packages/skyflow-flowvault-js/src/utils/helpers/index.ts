@@ -44,28 +44,16 @@ export const MOCK_CVV_THREE_DIGIT = '817';
 
 export const MOCK_CVV_FOUR_DIGIT = '8173';
 
-// Replaces a captured CVV value with a mock of the same length that never equals
-// the entered value. Uses the crypto RNG (leading zeros allowed). flowDB-only.
-export const generateMockCVV = (length: number, actualValue?: string): string => {
+// Returns the fixed mock CVV that masks a captured value of the given length:
+// `817` for a 3-digit CVV, `8173` for a 4-digit CVV, `''` for any other length.
+// The mock is a constant, so it may coincide with a real CVV of `817`/`8173` —
+// that is acceptable for the GA mock behaviour. flowDB-only.
+export const generateMockCVV = (length: number): string => {
   switch (length) {
     case 3: return MOCK_CVV_THREE_DIGIT;
     case 4: return MOCK_CVV_FOUR_DIGIT;
     default: return '';
   }
-  // if (length <= 0) return '';
-  // const buildCandidate = () => {
-  //   const bytes = crypto.getRandomValues(new Uint8Array(length));
-  //   let candidate = '';
-  //   for (let i = 0; i < length; i += 1) {
-  //     candidate += (bytes[i] % 10).toString();
-  //   }
-  //   return candidate;
-  // };
-  // let mock = buildCandidate();
-  // while (mock === actualValue) {
-  //   mock = buildCandidate();
-  // }
-  // return mock;
 };
 
 // --- Variant-neutral element helpers (copied verbatim from skyflow-js helpers;

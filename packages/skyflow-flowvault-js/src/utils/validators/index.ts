@@ -10,6 +10,7 @@ import {
   IFlowDBRevealElementInput as IRevealElementInput,
   MessageType,
   CollectElementInput,
+  CollectElementOptions,
   LogLevel,
   UpdateType,
   IFlowDBUpsertOptions,
@@ -115,6 +116,19 @@ export const validateCollectElementInput = (input: CollectElementInput, logLevel
   }
   if (Object.prototype.hasOwnProperty.call(input, 'skyflowId') && !(typeof input.skyflowId === 'string')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT, [], true);
+  }
+};
+
+// flowDB collect-element options validator. Runs at create() time (via
+// buildCreateElementFields) so the check stays flowDB-local — `returnMockValue`
+// is a flowDB-only option (privacyDB has no equivalent). Only the type is
+// enforced: when present it must be a boolean, otherwise the mock-CVV opt-in
+// would be silently coerced to `false`.
+export const validateCollectElementOptions = (options?: CollectElementOptions) => {
+  if (options
+    && Object.prototype.hasOwnProperty.call(options, 'returnMockValue')
+    && !coreValidators.validateBooleanOptions(options.returnMockValue)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['returnMockValue'], true);
   }
 };
 

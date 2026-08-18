@@ -186,9 +186,8 @@ export const replaceCVVTokensInResponse = (
       if (!(topKey in tokens)) return;
       const enteredValue = columnMap![column];
       // An empty entered CVV has no sensitive value to mask; replace its token with an empty
-      // string. This also avoids calling generateMockCVV with length 0 (which cannot produce a
-      // value that differs from the empty entered value).
-      const mock = enteredValue ? generateMockCVV(enteredValue.length, enteredValue) : '';
+      // string. This also avoids calling generateMockCVV with length 0, which has no mock.
+      const mock = enteredValue ? generateMockCVV(enteredValue.length) : '';
       const tokenValue = tokens[topKey];
       if (Array.isArray(tokenValue)) {
         tokenValue.forEach((entry) => {

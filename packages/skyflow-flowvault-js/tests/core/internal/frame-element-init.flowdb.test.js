@@ -109,7 +109,7 @@ describe('FrameElementInit tokenize (flowDB variant)', () => {
     expect(updateDataInCollectFlowDB).not.toHaveBeenCalled();
   });
 
-  test('replaces the CVV element token with a 3-digit mock that differs from the entered value, leaving sibling tokens intact', async () => {
+  test('replaces the CVV element token with the fixed 3-digit mock (817) when returnMockValue is true, leaving sibling tokens intact', async () => {
     const instance = new FrameElementInit();
     const cvv = { ...makeTextElement({ name: 'cvv', tableName: 'cards', value: '123' }), fieldType: ELEMENTS.CVV.name, returnMockValue: true };
     const cardNumber = makeTextElement({ name: 'card_number', tableName: 'cards', value: '4111111111111111' });
@@ -137,7 +137,7 @@ describe('FrameElementInit tokenize (flowDB variant)', () => {
     expect(res.records[0].tokens.card_number[0].token).toEqual('real-card-token');
   });
 
-    test('replaces the CVV element token with a 4-digit mock that differs from the entered value, leaving sibling tokens intact', async () => {
+  test('replaces the CVV element token with the fixed 4-digit mock (8173) when returnMockValue is true, leaving sibling tokens intact', async () => {
     const instance = new FrameElementInit();
     const cvv = { ...makeTextElement({ name: 'cvv', tableName: 'cards', value: '1234' }), fieldType: ELEMENTS.CVV.name, returnMockValue: true };
     const cardNumber = makeTextElement({ name: 'card_number', tableName: 'cards', value: '4111111111111111' });
@@ -165,7 +165,7 @@ describe('FrameElementInit tokenize (flowDB variant)', () => {
     expect(res.records[0].tokens.card_number[0].token).toEqual('real-card-token');
   });
 
-      test('should not replace CVV element token with a 4-digit mock that differs from the entered value, when returnMockValue is false', async () => {
+  test('does not replace the CVV element token when returnMockValue is false', async () => {
     const instance = new FrameElementInit();
     const cvv = { ...makeTextElement({ name: 'cvv', tableName: 'cards', value: '1234' }), fieldType: ELEMENTS.CVV.name, returnMockValue: false };
     const cardNumber = makeTextElement({ name: 'card_number', tableName: 'cards', value: '4111111111111111' });
@@ -186,10 +186,52 @@ describe('FrameElementInit tokenize (flowDB variant)', () => {
     });
     const res = await instance['tokenize']({ options: {} }, config);
     const cvvToken = res.records[0].tokens.cvv[0].token;
-    expect(cvvToken).not.toHaveLength(4);
-    expect(cvvToken).not.toEqual('8173');
-    expect(cvvToken).not.toEqual('1234');
     expect(cvvToken).toEqual('real-cvv-token');
+    expect(res.records[0].tokens.card_number[0].token).toEqual('real-card-token');
+  });
+
+  test('does not replace the CVV element token when returnMockValue is omitted (defaults to no mock)', async () => {
+    const instance = new FrameElementInit();
+    const cvv = { ...makeTextElement({ name: 'cvv', tableName: 'cards', value: '1234' }), fieldType: ELEMENTS.CVV.name };
+    const cardNumber = makeTextElement({ name: 'card_number', tableName: 'cards', value: '4111111111111111' });
+    instance.iframeFormList = [cvv, cardNumber];
+    constructElementsInsertReq.mockImplementation(() => [
+      { records: [{ table: 'cards', fields: { cvv: '1234', card_number: '4111111111111111' } }] },
+      { updateRecords: [] },
+    ]);
+    insertDataInCollectFlowDB.mockResolvedValue({
+      records: [{
+        tableName: 'cards',
+        tokens: {
+          cvv: [{ token: 'real-cvv-token', tokenGroupName: 'det' }],
+          card_number: [{ token: 'real-card-token', tokenGroupName: 'det' }],
+        },
+        httpCode: 200,
+      }],
+    });
+    const res = await instance['tokenize']({ options: {} }, config);
+    expect(res.records[0].tokens.cvv[0].token).toEqual('real-cvv-token');
+    expect(res.records[0].tokens.card_number[0].token).toEqual('real-card-token');
+  });
+
+  test('does not mock a non-CVV element even when returnMockValue is true (no-op)', async () => {
+    const instance = new FrameElementInit();
+    const cardNumber = { ...makeTextElement({ name: 'card_number', tableName: 'cards', value: '4111111111111111' }), returnMockValue: true };
+    instance.iframeFormList = [cardNumber];
+    constructElementsInsertReq.mockImplementation(() => [
+      { records: [{ table: 'cards', fields: { card_number: '4111111111111111' } }] },
+      { updateRecords: [] },
+    ]);
+    insertDataInCollectFlowDB.mockResolvedValue({
+      records: [{
+        tableName: 'cards',
+        tokens: {
+          card_number: [{ token: 'real-card-token', tokenGroupName: 'det' }],
+        },
+        httpCode: 200,
+      }],
+    });
+    const res = await instance['tokenize']({ options: {} }, config);
     expect(res.records[0].tokens.card_number[0].token).toEqual('real-card-token');
   });
   // SKIPPED (flowDB): assert V1/privacyDB aggregated {records,errors} reject contract; flowDB inlines per-record errors within records / uses {error} for full failure. TODO: re-enable/rewrite for flowDB.

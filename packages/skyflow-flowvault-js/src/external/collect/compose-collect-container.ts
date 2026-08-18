@@ -15,6 +15,7 @@ import { CollectElementInput, CollectElementOptions, ICollectOptions } from '../
 import { CollectResponse } from '../../internal/internal-types';
 import {
   validateCollectElementInput,
+  validateCollectElementOptions,
   validateFlowDBAdditionalFieldsInCollect,
   validateFlowDBUpsertOptions,
 } from '../../utils/validators';
@@ -32,13 +33,16 @@ ICollectOptions, CollectResponse, CollectElementInput, CollectElementOptions
   }
 
   // Map the client-facing `tableName` key onto the internal `table` name that the
-  // rest of the collect pipeline consumes.
+  // rest of the collect pipeline consumes. `returnMockValue` reaches the element
+  // via formatOptions (which spreads all options), so it is validated here — the
+  // one create() seam with flowDB options — rather than folded into the fields.
   // eslint-disable-next-line class-methods-use-this
   protected buildCreateElementFields(
     input: CollectElementInput,
     options: CollectElementOptions,
   ): Record<string, unknown> {
-    return { table: input.tableName, ...options };
+    validateCollectElementOptions(options);
+    return { table: input.tableName };
   }
 
   // flowDB validates additionalFields/upsert against the flowDB key shapes
