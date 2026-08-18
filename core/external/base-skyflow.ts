@@ -321,7 +321,7 @@ abstract class BaseSkyflow<
     ...this.metadata,
     clientJSON: this.client.toJSON(),
     containerType: type,
-    skyflowContainer: this.skyflowContainer,
+    skyflowContainer: { isControllerFrameReady: this.skyflowContainer.isControllerFrameReady },
     getSkyflowBearerToken: this.getSkyflowBearerToken,
   });
 
