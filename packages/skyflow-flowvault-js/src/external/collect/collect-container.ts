@@ -48,8 +48,11 @@ CollectElementInput, CollectElementOptions
   // Map the client-facing `tableName` key onto the internal `table` name that the
   // rest of the collect pipeline consumes.
   // eslint-disable-next-line class-methods-use-this
-  protected buildCreateElementFields(input: CollectElementInput): Record<string, unknown> {
-    return { table: input.tableName };
+  protected buildCreateElementFields(
+    input: CollectElementInput,
+    options: CollectElementOptions,
+  ): Record<string, unknown> {
+    return { table: input.tableName, ...options };
   }
 
   // flowDB validates additionalFields/upsert against the flowDB key shapes

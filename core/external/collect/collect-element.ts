@@ -270,6 +270,13 @@ class CollectElement<
     } else if (domElement instanceof HTMLElement) {
       this.resizeObserver?.observe(domElement);
     }
+
+    this.#metaData = {
+      ...this.#metaData,
+      skyflowContainer: {
+        isControllerFrameReady: this.#metaData.skyflowContainer?.isControllerFrameReady,
+      },
+    };
     const isComposable = this.#elements.length > 1;
     if (isComposable) {
       this.#iframe.mount(domElement, this.#elementId, {

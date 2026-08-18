@@ -131,7 +131,8 @@ export const collectElementsData = (
           inputElement.iFrameFormElement.fieldType !== ELEMENTS.FILE_INPUT.name
           && inputElement.iFrameFormElement.fieldType !== ELEMENTS.MULTI_FILE_INPUT.name
         ) {
-          const isCVV = inputElement.iFrameFormElement.fieldType === ELEMENTS.CVV.name;
+          const isCVV = inputElement.iFrameFormElement.fieldType === ELEMENTS.CVV.name
+              && inputElement.iFrameFormElement.returnMockValue === true;
           if (
             inputElement.iFrameFormElement.fieldType === ELEMENTS.checkbox.name
           ) {

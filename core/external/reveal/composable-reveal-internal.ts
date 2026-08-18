@@ -205,6 +205,12 @@ class ComposableRevealInternalElement<TInput> extends SkyflowElement {
     }
 
     this.#readyToMount = true;
+    this.metaData = {
+      ...this.metaData,
+      skyflowContainer: {
+        isControllerFrameReady: this.metaData.skyflowContainer?.isControllerFrameReady,
+      },
+    };
     if (this.#readyToMount) {
       this.#iframe.mount(domElementSelector, undefined, {
         record: JSON.stringify({

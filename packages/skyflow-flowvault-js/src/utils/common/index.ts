@@ -72,7 +72,9 @@ import type {
 // flowDB collect element options: shared base only — flowDB has no file API, so
 // no file options; declared for symmetry + future flowDB-only options. See 2.3.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CollectElementOptions extends ICollectElementOptionsBase {}
+export interface CollectElementOptions extends ICollectElementOptionsBase {
+  returnMockValue?: boolean;
+}
 
 // flowDB element state: shared base + `value` without `Blob` (no file elements).
 // See Decision 2.5.

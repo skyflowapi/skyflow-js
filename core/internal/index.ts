@@ -126,6 +126,10 @@ export default class FrameElement {
     if (Object.prototype.hasOwnProperty.call(options, 'maxFileCount')) {
       this.iFrameFormElement.maxFileCount = options?.maxFileCount;
     }
+
+    if (Object.prototype.hasOwnProperty.call(options, 'returnMockValue')) {
+      this.iFrameFormElement.returnMockValue = options?.returnMockValue;
+    }
   }
 
   // mount element onto dom

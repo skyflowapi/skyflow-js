@@ -40,23 +40,32 @@ export const getDeviceType = metricsHelper.getDeviceType;
 
 export const getMetaObject = metricsHelper.getMetaObject;
 
+export const MOCK_CVV_THREE_DIGIT = '817';
+
+export const MOCK_CVV_FOUR_DIGIT = '8173';
+
 // Replaces a captured CVV value with a mock of the same length that never equals
 // the entered value. Uses the crypto RNG (leading zeros allowed). flowDB-only.
-export const generateMockCVV = (length: number, actualValue: string): string => {
-  if (length <= 0) return '';
-  const buildCandidate = () => {
-    const bytes = crypto.getRandomValues(new Uint8Array(length));
-    let candidate = '';
-    for (let i = 0; i < length; i += 1) {
-      candidate += (bytes[i] % 10).toString();
-    }
-    return candidate;
-  };
-  let mock = buildCandidate();
-  while (mock === actualValue) {
-    mock = buildCandidate();
+export const generateMockCVV = (length: number, actualValue?: string): string => {
+  switch (length) {
+    case 3: return MOCK_CVV_THREE_DIGIT;
+    case 4: return MOCK_CVV_FOUR_DIGIT;
+    default: return '';
   }
-  return mock;
+  // if (length <= 0) return '';
+  // const buildCandidate = () => {
+  //   const bytes = crypto.getRandomValues(new Uint8Array(length));
+  //   let candidate = '';
+  //   for (let i = 0; i < length; i += 1) {
+  //     candidate += (bytes[i] % 10).toString();
+  //   }
+  //   return candidate;
+  // };
+  // let mock = buildCandidate();
+  // while (mock === actualValue) {
+  //   mock = buildCandidate();
+  // }
+  // return mock;
 };
 
 // --- Variant-neutral element helpers (copied verbatim from skyflow-js helpers;

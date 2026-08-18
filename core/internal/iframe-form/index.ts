@@ -115,6 +115,8 @@ export default class IFrameFormElement extends EventEmitter {
 
   maxFileCount: number = 4;
 
+  returnMockValue: boolean = false;
+
   constructor(name: string, label: string, metaData: any, context: Context, skyflowID?: string) {
     super();
     const frameValues = name.split(':');

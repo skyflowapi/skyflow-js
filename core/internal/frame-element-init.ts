@@ -197,7 +197,10 @@ export default abstract class FrameElementInit {
         !== ELEMENTS.FILE_INPUT.name && inputElement.fieldType
         !== ELEMENTS.MULTI_FILE_INPUT.name
           ) {
-            const isCVV = inputElement.fieldType === ELEMENTS.CVV.name;
+            const isCVV = inputElement.fieldType
+            === ELEMENTS.CVV.name
+            && inputElement.returnMockValue === true;
+
             if (
               inputElement.fieldType
           === ELEMENTS.checkbox.name
