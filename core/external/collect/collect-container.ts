@@ -31,7 +31,6 @@ import {
   ContainerOptions,
   ErrorType,
   ICoreMetadata,
-  ISkyflowElement,
   ICollectOptionsBase,
   ICollectResponseBase,
   ICollectElementUpdateOptionsBase,
@@ -120,8 +119,6 @@ abstract class CollectContainer<
 
   protected context: Context;
 
-  #skyflowElements: Record<string, ISkyflowElement>;
-
   type:string = ContainerType.COLLECT;
 
   #eventEmitter: EventEmitter;
@@ -134,7 +131,6 @@ abstract class CollectContainer<
 
   constructor(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ) {
@@ -154,7 +150,6 @@ abstract class CollectContainer<
         },
       },
     };
-    this.#skyflowElements = skyflowElements;
     this.context = context;
     this.#eventEmitter = new EventEmitter();
 
@@ -289,7 +284,6 @@ abstract class CollectContainer<
         this.#eventEmitter,
       );
       this.elements[tempElements.elementName] = element;
-      this.#skyflowElements[elementId] = element;
     }
 
     if (!isSingleElementAPI) {

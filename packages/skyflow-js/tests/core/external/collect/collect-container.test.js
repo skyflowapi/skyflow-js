@@ -223,7 +223,7 @@ describe('Collect container', () => {
     document.body.innerHTML = '';
   });
   it('should throw error when collect call made with no elements ', () => {
-    const collectContainer = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    const collectContainer = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
     expect(collectContainer).toBeDefined();
     collectContainer.collect().then().catch(err => {
       expect(err).toBeDefined();
@@ -231,7 +231,7 @@ describe('Collect container', () => {
     })
   });
     it('should throw error when collect call made with no elements case2 ', () => {
-    const collectContainer = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    const collectContainer = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
     expect(collectContainer).toBeDefined();
     collectContainer.collect().then().catch(err => {
       expect(err).toBeDefined();
@@ -239,7 +239,7 @@ describe('Collect container', () => {
     })
   });
     it('should throw error when uploadfiles call made with no elements ', () => {
-    const collectContainer = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    const collectContainer = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
     expect(collectContainer).toBeDefined();
     collectContainer.uploadFiles().then().catch(err => {
       expect(err).toBeDefined();
@@ -247,7 +247,7 @@ describe('Collect container', () => {
     })
   });
       it('should throw error when uploadfiles call made with no elements ', () => {
-    const collectContainer = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    const collectContainer = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
     expect(collectContainer).toBeDefined();
     collectContainer.uploadFiles().then().catch(err => {
       expect(err).toBeDefined();
@@ -256,7 +256,7 @@ describe('Collect container', () => {
   });
 
   it("container collect success", () => {
-    let collectContainer = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    let collectContainer = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
     const div1 = document.createElement('div');
     const div2 = document.createElement('div');
 
@@ -300,7 +300,7 @@ describe('Collect container', () => {
   });
 
   // it.only("container collect error case when set error is called", () => {
-  //   let collectContainer = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+  //   let collectContainer = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
   //   const div1 = document.createElement('div');
   //   const div2 = document.createElement('div');
 
@@ -357,7 +357,7 @@ describe('Collect container', () => {
 
 
   it("container collect case when tokens are invalid", () => {
-    let collectContainer = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    let collectContainer = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
     const div1 = document.createElement('div');
     const div2 = document.createElement('div');
 
@@ -384,7 +384,7 @@ describe('Collect container', () => {
   });
 
   it("container collect case when additional fields are invalid", () => {
-    let collectContainer = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    let collectContainer = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
     const div1 = document.createElement('div');
     const div2 = document.createElement('div');
 
@@ -411,7 +411,7 @@ describe('Collect container', () => {
   });
 
     it("container collect case when upsert are invalid", () => {
-    let collectContainer = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    let collectContainer = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
     const div1 = document.createElement('div');
     const div2 = document.createElement('div');
 
@@ -437,7 +437,7 @@ describe('Collect container', () => {
     })
   });
   it("container collect case when elements are invalid", () => {
-    let collectContainer = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    let collectContainer = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
     const div1 = document.createElement('div');
     const div2 = document.createElement('div');
 
@@ -502,7 +502,7 @@ describe('Collect container', () => {
   });
 
   it('should resolve successfully when collect is called and isSkyflowFrameReady is false', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
   
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -570,7 +570,7 @@ describe('Collect container', () => {
     });
   });
   it('should throw error when collect is called and isSkyflowFrameReady is false', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
   
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -639,7 +639,7 @@ describe('Collect container', () => {
     });
   });
   it('should throw error when collect is called and isSkyflowFrameReady is false and tokens is invalid', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
   
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -688,7 +688,7 @@ describe('Collect container', () => {
 
   });
   it('should throw error when collect is called and isSkyflowFrameReady is false and upsert is invalid', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
   
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -737,7 +737,7 @@ describe('Collect container', () => {
 
   });
   it('should throw error when collect is called and isSkyflowFrameReady is false and additionalFields is invalid', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
   
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -786,7 +786,7 @@ describe('Collect container', () => {
 
   });
   it('should throw error when collect is called and isSkyflowFrameReady is false and additionalFields is invalid', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
   
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -838,7 +838,7 @@ describe('Collect container', () => {
   });
 
   it('element type radio or checkox created', async () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const div1 = document.createElement('div');
     const div2 = document.createElement('div');
 
@@ -887,7 +887,7 @@ describe('Collect container', () => {
   });
 
   it('should successfully upload files when elements are mounted', async () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const div = document.createElement('div');
     const fileElement = container.create(FileElement);
 
@@ -930,7 +930,7 @@ describe('Collect container', () => {
     });
   });
   it('should throw error when elements are not created', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD });
 
     const uploadPromise = container.uploadFiles();
 
@@ -941,7 +941,7 @@ describe('Collect container', () => {
     });
   });
     it('should throw error when elements are not created and skyflow frame controller not ready', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD });
 
     const uploadPromise = container.uploadFiles();
 
@@ -952,7 +952,7 @@ describe('Collect container', () => {
     });
   });
     it('should throw error when elements are created but not mounted', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD });
 
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -969,7 +969,7 @@ describe('Collect container', () => {
   });
   
   it('should successfully upload files when elements are mounted', async () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const div = document.createElement('div');
     const fileElement = container.create(FileElement);
 
@@ -993,14 +993,14 @@ describe('Collect container', () => {
   });
 
   it('should throw an error if elements are not mounted', async () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const div = document.createElement('div');
     const fileElement = container.create(FileElement);
 
     await expect(container.uploadFiles()).rejects.toThrow(SkyflowError);
   });
     it('should throw an error if elements are not mounted and skyflow frame not ready', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const div = document.createElement('div');
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -1012,7 +1012,7 @@ describe('Collect container', () => {
     expect(response).rejects.toThrow(SkyflowError);
   });
   it('should throw an error if elements are not mounted when skyflow frame controller is not ready', () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const div = document.createElement('div');
     const fileElement = container.create(FileElement);
     Object.defineProperty(container, '#isSkyflowFrameReady', {
@@ -1032,7 +1032,7 @@ describe('Collect container', () => {
   });
 
   it('should handle errors during file upload', async () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const div = document.createElement('div');
     const fileElement = container.create(FileElement);
 
@@ -1055,7 +1055,7 @@ describe('Collect container', () => {
   });
 
   it('should not emit events when isSkyflowFrameReady is false', async () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -1077,7 +1077,7 @@ describe('Collect container', () => {
   });
 
   it('should resolve successfully when file upload is successful', async () => {
-    const container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD });
 
     Object.defineProperty(container, '#isSkyflowFrameReady', {
       value: false,
@@ -1129,7 +1129,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid element type', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({ ...cvvElement, type: 'abc' });
     } catch (err) {
@@ -1138,7 +1138,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid table', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1150,7 +1150,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid column', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1162,7 +1162,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid validation params, missing element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1178,7 +1178,7 @@ describe('Collect container', () => {
   });
 
   it('Invalid validation params, invalid collect element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1195,7 +1195,7 @@ describe('Collect container', () => {
     }
   });
   it('Invalid validation params, invalid collect element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1212,7 +1212,7 @@ describe('Collect container', () => {
     }
   });
   it('valid validation params, regex match rule', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1232,7 +1232,7 @@ describe('Collect container', () => {
 
 
   it('create valid Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let cvv;
     try {
       cvv = container.create(cvvElement);
@@ -1244,7 +1244,7 @@ describe('Collect container', () => {
   });
 
   it('test default options for card_number', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let card_number;
     try {
       card_number = container.create(cardNumberElement);
@@ -1257,7 +1257,7 @@ describe('Collect container', () => {
 
   it('test invalid option for EXPIRATION_DATE', () => {
 
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
       expiryElement = container.create(ExpirationDateElement, { format: 'invalid' });
@@ -1269,7 +1269,7 @@ describe('Collect container', () => {
 
   it('test valid option for EXPIRATION_DATE', () => {
     const validFormat = 'YYYY/MM'
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
       expiryElement = container.create(ExpirationDateElement, { format: validFormat });
@@ -1280,7 +1280,7 @@ describe('Collect container', () => {
   });
 
   it('test enableCardIcon option is enabled for elements', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
       expiryElement = container.create(ExpirationDateElement, { enableCardIcon: true });
@@ -1292,7 +1292,7 @@ describe('Collect container', () => {
   });
 
   it('test enableCopy option is enabled for elements', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
       expiryElement = container.create(ExpirationDateElement, { enableCopy: true });
@@ -1304,7 +1304,7 @@ describe('Collect container', () => {
   });
 
   it('test enableCardIcon option is disabled for elements', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
       expiryElement = container.create(ExpirationDateElement, { enableCardIcon: false });
@@ -1315,7 +1315,7 @@ describe('Collect container', () => {
   });
 
   it('test enableCopy option is disabled for elements', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
       expiryElement = container.create(ExpirationDateElement, { enableCopy: false });
@@ -1328,7 +1328,7 @@ describe('Collect container', () => {
 
   it('test invalid option for EXPIRATION_YEAR', () => {
 
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
       expiryElement = container.create(ExpirationYearElement, { format: 'invalid' });
@@ -1340,7 +1340,7 @@ describe('Collect container', () => {
 
   it('test valid option for EXPIRATION_YEAR', () => {
     const validFormat = 'YYYY'
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryElement;
     try {
       expiryElement = container.create(ExpirationYearElement, { format: validFormat });
@@ -1351,13 +1351,13 @@ describe('Collect container', () => {
   });
 
   it("container collect", () => {
-    let container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     container.collect().then().catch(err => {
       expect(err).toBeDefined();
     })
   });
   it("container create options", () => {
-    let container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryDate = container.create({
       table: 'pii_fields',
       column: 'primary_card.cvv',
@@ -1374,7 +1374,7 @@ describe('Collect container', () => {
     });
   });
   it("container create options 2", () => {
-    let container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let expiryDate = container.create({
       table: 'pii_fields',
       column: 'primary_card.cvv',
@@ -1392,7 +1392,7 @@ describe('Collect container', () => {
   });
 
   it('create valid file Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     let file;
     try {
       file = container.create(FileElement);
@@ -1404,7 +1404,7 @@ describe('Collect container', () => {
   });
 
   it('skyflowID undefined for file Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         ...cvvFileElementElement,
@@ -1416,7 +1416,7 @@ describe('Collect container', () => {
     }
   });
   it('empty table for Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         column: 'col',
@@ -1428,7 +1428,7 @@ describe('Collect container', () => {
     }
   });
   it('invalid table for Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         column: 'col',
@@ -1441,7 +1441,7 @@ describe('Collect container', () => {
     }
   });
   it('invalid table for Element case 2', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         column: 'col',
@@ -1454,7 +1454,7 @@ describe('Collect container', () => {
     }
   });
   it('missing column for Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         type: 'CARD_NUMBER',
@@ -1466,7 +1466,7 @@ describe('Collect container', () => {
     }
   });
   it('invalid column for Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         type: 'CARD_NUMBER',
@@ -1479,7 +1479,7 @@ describe('Collect container', () => {
     }
   });
   it('invalid column for Element case 2', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         type: 'CARD_NUMBER',
@@ -1492,7 +1492,7 @@ describe('Collect container', () => {
     }
   });
   it('invalid column for Element case 2', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         type: 'CARD_NUMBER',
@@ -1504,7 +1504,7 @@ describe('Collect container', () => {
     }
   });
   it('skyflowID is missing for file Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         ...cvvFileElementElement,
@@ -1514,7 +1514,7 @@ describe('Collect container', () => {
     }
   });
   it('skyflowID empty for file Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         ...cvvFileElementElement,
@@ -1526,7 +1526,7 @@ describe('Collect container', () => {
     }
   });
   it('skyflowID null for file Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         ...cvvFileElementElement,
@@ -1538,7 +1538,7 @@ describe('Collect container', () => {
     }
   });
   it('skyflowID of invalid type for file Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         ...cvvFileElementElement,
@@ -1550,7 +1550,7 @@ describe('Collect container', () => {
     }
   });
   it('skyflowID of invalid type for file Element another case', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const file = container.create({
         ...cvvFileElementElement,
@@ -1562,7 +1562,7 @@ describe('Collect container', () => {
     }
   });
   it('skyflowID undefined for collect Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1574,7 +1574,7 @@ describe('Collect container', () => {
     }
   });
   it('skyflowID empty for collect Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1586,7 +1586,7 @@ describe('Collect container', () => {
     }
   });
   it('skyflowID null for collect Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1598,7 +1598,7 @@ describe('Collect container', () => {
     }
   });
   it('skyflowID of invalid type for collect Element', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1610,7 +1610,7 @@ describe('Collect container', () => {
     }
   });
   it('skyflowID null for collect Element another case', () => {
-    const container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    const container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     try {
       const cvv = container.create({
         ...cvvElement,
@@ -1623,7 +1623,7 @@ describe('Collect container', () => {
   });
 
   it("container collect options", () => {
-    let container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const options = {
       tokens: true,
       additionalFields: {
@@ -1652,7 +1652,7 @@ describe('Collect container', () => {
     })
   });
   it("container collect options error case 2", () => {
-    let container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const element1 = container.create(cvvElement2);
     const options = {
       tokens: true,
@@ -1680,7 +1680,7 @@ describe('Collect container', () => {
     const div1 = document.createElement('div');
     const div2 = document.createElement('div');
 
-    let container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     element1.mount(div1);
@@ -1701,7 +1701,7 @@ describe('Collect container', () => {
   });
 
   it("container collect options error", () => {
-    let container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD });
+    let container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD });
     const options = {
       tokens: true,
       additionalFields: {
@@ -1758,7 +1758,7 @@ describe('iframe cleanup logic', () => {
 
   it('should remove unmounted iframe elements', () => {
     // Create and mount elements
-    container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
 
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
@@ -1789,7 +1789,7 @@ describe('iframe cleanup logic', () => {
   });
 
   it('should handle empty document.body', () => {
-    container = new CollectContainer(metaData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    container = new CollectContainer(metaData, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
 
     const element1 = container.create(cvvElement);
     element1.mount(div1);
@@ -1821,7 +1821,7 @@ describe('iframe cleanup logic', () => {
   });
   
   it('should remove unmounted iframe elements', () => {
-    container = new CollectContainer(metaData2, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
+    container = new CollectContainer(metaData2, { logLevel: LogLevel.ERROR, env: Env.PROD }, {});
 
     // Create and mount elements
     const element1 = container.create(cvvElement);

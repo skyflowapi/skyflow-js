@@ -71,7 +71,7 @@ describe("Reveal Composable Container Class", () => {
       clientDomain: "http://abc.com",
     },
   };
-   const testRevealContainer = new ComposableRevealContainer(testMetaData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+   const testRevealContainer = new ComposableRevealContainer(testMetaData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
 });
   const skyflowConfig = {
@@ -135,7 +135,7 @@ describe("Reveal Composable Container Class", () => {
     },
   };
   test("reveal should throw error with no elements", (done) => {
-    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD });
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
     container.reveal().catch((error) => {
       done();
       expect(error).toBeDefined();
@@ -148,7 +148,7 @@ describe("Reveal Composable Container Class", () => {
   /**************** Mount method lines 246-299 coverage tests ****************/
   test('mount() should throw MISMATCH_ELEMENT_COUNT_LAYOUT_SUM when layout sum differs from elements length', () => {
     const meta = { ...testMetaData };
-    const container = new ComposableRevealContainer(meta, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [2] });
+    const container = new ComposableRevealContainer(meta, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [2] });
     // Add only one element
     container.create({ token: 'token-1' });
     const host = document.createElement('div');
@@ -164,7 +164,7 @@ describe("Reveal Composable Container Class", () => {
     const styles = { base: { color: 'blue' } };
     const errorTextStyles = { base: { color: 'red' } };
     const meta = { ...testMetaData };
-    const container = new ComposableRevealContainer(meta, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [2], styles, errorTextStyles });
+    const container = new ComposableRevealContainer(meta, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [2], styles, errorTextStyles });
     container.create({ token: 'token-1' });
     container.create({ token: 'token-2' });
     const host = document.createElement('div');
@@ -184,7 +184,7 @@ describe("Reveal Composable Container Class", () => {
 
   test('mount() inside shadow DOM should emit HEIGHT event via postMessage', () => {
     const meta = { ...testMetaData };
-    const container = new ComposableRevealContainer(meta, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    const container = new ComposableRevealContainer(meta, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
     container.create({ token: 'token-1' });
     // Shadow host setup
     const shadowHost = document.createElement('div');
@@ -252,7 +252,7 @@ describe("Reveal Composable Container Class", () => {
   });
 
   test("on container mounted call back",()=>{
-    const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
     testRevealContainer.create({
@@ -268,7 +268,7 @@ describe("Reveal Composable Container Class", () => {
     testRevealContainer.mount('#container');
   });
 //   test("on container mounted call back 5",()=>{
-//     const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+//     const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
 //     testRevealContainer.create({
 //       token: "token",
 //     });
@@ -295,7 +295,7 @@ describe("Reveal Composable Container Class", () => {
 //   });
 
 //   test("on container mounted else call back",()=>{
-//     const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+//     const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
 //     testRevealContainer.create({
 //       token: "1815-6223-1073-1425",
 //     });
@@ -326,7 +326,7 @@ describe("Reveal Composable Container Class", () => {
 //     emitCb({error:{code:404,description:"Not Found"}});
 //   });
 //   test("on container mounted else call back 1",()=>{
-//     const testRevealContainer = new RevealContainer(clientData, {}, { logLevel: LogLevel.ERROR,env:Env.PROD });
+//     const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
 //     testRevealContainer.create({
 //       token: "1815-6223-1073-1425",
 //     });
@@ -356,7 +356,7 @@ describe("Reveal Composable Container Class", () => {
 //     emitCb({"success":[{token:"1815-6223-1073-1425"}]});
 //   });
   test("reveal before skyflow frame ready event",async ()=>{
-    const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
      testRevealContainer.create({
@@ -389,7 +389,7 @@ describe("Reveal Composable Container Class", () => {
     await expect(res).resolves.toEqual({"success":[{token:"1815-6223-1073-1425"}]});
   });
   test("reveal before skyflow frame ready event, Error case",async ()=>{
-    const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
      testRevealContainer.create({
@@ -438,7 +438,7 @@ describe("Reveal Composable Container Class", () => {
       getSkyflowBearerToken: getBearerTokenFail,
     };
 
-    const testRevealContainer = new ComposableRevealContainer(clientDataFail, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+    const testRevealContainer = new ComposableRevealContainer(clientDataFail, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
      testRevealContainer.create({
@@ -456,7 +456,7 @@ describe("Reveal Composable Container Class", () => {
 
   /// frame ready event
   test("reveal before skyflow frame ready event",async ()=>{
-    const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
      testRevealContainer.create({
@@ -489,7 +489,7 @@ describe("Reveal Composable Container Class", () => {
     await expect(res).resolves.toEqual({"success":[{token:"1815-6223-1073-1425"}]});
   });
   test("reveal before skyflow frame ready event, Error case",async ()=>{
-    const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
     testRevealContainer.create({
@@ -538,7 +538,7 @@ describe("Reveal Composable Container Class", () => {
       getSkyflowBearerToken: getBearerTokenFail,
     };
     
-    const testRevealContainer = new ComposableRevealContainer(clientDataFail, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+    const testRevealContainer = new ComposableRevealContainer(clientDataFail, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
         window.dispatchEvent(new MessageEvent('message', {
@@ -561,7 +561,7 @@ describe("Reveal Composable Container Class", () => {
   });
 
   test("reveal when elment is empty when skyflow ready",(done)=>{
-    const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
 
@@ -580,7 +580,7 @@ describe("Reveal Composable Container Class", () => {
     })
   });
   test("reveal when elment is empty when skyflow frame not ready",(done)=>{
-    const testRevealContainer = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
     testRevealContainer.reveal().catch((error) => {
@@ -605,7 +605,7 @@ describe("Reveal Composable Container Class", () => {
       getSkyflowBearerToken: getBearerTokenFail,
     };
 
-    const testRevealContainer = new ComposableRevealContainer(clientDataFail, [], { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+    const testRevealContainer = new ComposableRevealContainer(clientDataFail, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
         layout:[1]
     });
      testRevealContainer.create({
@@ -622,7 +622,7 @@ describe("Reveal Composable Container Class", () => {
   });
 
   test("reveal when frame not ready - ignores MOUNTED message from wrong origin", async () => {
-    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
     container.create({ token: "1815-6223-1073-1425" });
 
     const res = container.reveal();
@@ -659,7 +659,7 @@ describe("Reveal Composable Container Class", () => {
   });
 
   test("reveal when frame not ready - inner listener rejects when revealData has errors", async () => {
-    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
     container.create({ token: "1815-6223-1073-1425" });
 
     const res = container.reveal();
@@ -687,7 +687,7 @@ describe("Reveal Composable Container Class", () => {
   });
 
   test("reveal when frame not ready - inner listener ignores REVEAL_RESPONSE_READY from wrong origin", async () => {
-    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
     container.create({ token: "1815-6223-1073-1425" });
 
     const res = container.reveal();
@@ -728,7 +728,7 @@ describe("Reveal Composable Container Class", () => {
   // #isComposableFrameReady is set to true by dispatching MOUNTED before calling reveal()
 
   test("reveal when frame already ready - resolves with success data", async () => {
-    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
     container.create({ token: "1815-6223-1073-1425" });
     // Set #isComposableFrameReady = true before calling reveal()
     window.dispatchEvent(new MessageEvent('message', {
@@ -750,7 +750,7 @@ describe("Reveal Composable Container Class", () => {
   });
 
   test("reveal when frame already ready - rejects with error data", async () => {
-    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
     container.create({ token: "1815-6223-1073-1425" });
     window.dispatchEvent(new MessageEvent('message', {
       data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
@@ -771,7 +771,7 @@ describe("Reveal Composable Container Class", () => {
   });
 
   test("reveal when frame already ready - ignores message from wrong origin", async () => {
-    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
     container.create({ token: "1815-6223-1073-1425" });
     window.dispatchEvent(new MessageEvent('message', {
       data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
@@ -802,7 +802,7 @@ describe("Reveal Composable Container Class", () => {
   });
 
   test("reveal when frame already ready - ignores message with wrong type", async () => {
-    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
     container.create({ token: "1815-6223-1073-1425" });
     window.dispatchEvent(new MessageEvent('message', {
       data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
@@ -838,7 +838,7 @@ describe("Reveal Composable Container Class", () => {
     });
     const clientDataFail = { ...clientData, getSkyflowBearerToken: getBearerTokenFail };
 
-    const container = new ComposableRevealContainer(clientDataFail, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    const container = new ComposableRevealContainer(clientDataFail, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
     container.create({ token: "1815-6223-1073-1425" });
     window.dispatchEvent(new MessageEvent('message', {
       data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
@@ -850,7 +850,7 @@ describe("Reveal Composable Container Class", () => {
   });
 
   test("reveal when frame already ready - throws error when no elements in container", (done) => {
-    const container = new ComposableRevealContainer(clientData, [], { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
     window.dispatchEvent(new MessageEvent('message', {
       data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
     }));

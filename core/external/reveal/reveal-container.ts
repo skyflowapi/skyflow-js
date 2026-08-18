@@ -16,7 +16,6 @@ import properties from '@core/properties';
 import {
   ContainerType, IRevealElementOptions, ContainerOptions, Context, ErrorType,
   MessageType, IRevealResponseBase, ICoreMetadata, RevealContainerProps,
-  ISkyflowElement,
 } from '@core/types';
 import Container from '@core/external/common/container';
 import SkyflowError from '@core/errors';
@@ -58,8 +57,6 @@ abstract class RevealContainer<
 
   #context: Context;
 
-  #skyflowElements: Record<string, ISkyflowElement>;
-
   #isMounted: boolean = false;
 
   type:string = ContainerType.REVEAL;
@@ -70,7 +67,6 @@ abstract class RevealContainer<
 
   constructor(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ) {
@@ -89,7 +85,6 @@ abstract class RevealContainer<
         },
       },
     };
-    this.#skyflowElements = skyflowElements;
     this.#containerId = uuid();
     this.#eventEmmiter = new EventEmitter();
     this.#context = context;
@@ -151,7 +146,6 @@ abstract class RevealContainer<
       }, elementId, this.#context,
     );
     this.#revealElements.push(revealElement);
-    this.#skyflowElements[elementId] = revealElement;
     return revealElement;
   }
 

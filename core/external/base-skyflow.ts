@@ -74,7 +74,6 @@ import {
   IRevealOptionsBase,
   IRevealResponseBase,
   ISkyflow,
-  ISkyflowElement,
   LogLevel,
   MessageType,
   RedactionType,
@@ -140,11 +139,6 @@ abstract class BaseSkyflow<
 
   protected env: Env;
 
-  // The element registry threaded into every container. It is keyed by element
-  // uuid (never used as a positional array), so the honest shape is a map of the
-  // shared ISkyflowElement contract — the same type the container bases now take.
-  protected skyflowElements: Record<string, ISkyflowElement>;
-
   constructor(config: ISkyflow) {
     const localSDKversion = localStorage.getItem('sdk_version') || '';
     this.metadata[SDK_VERSION_KEY] = localSDKversion;
@@ -157,7 +151,6 @@ abstract class BaseSkyflow<
     );
     this.logLevel = config?.options?.logLevel || LogLevel.ERROR;
     this.env = config?.options?.env || Env.PROD;
-    this.skyflowElements = {};
     // Prototype-method dispatch, so it resolves to the subclass override even
     // though we are still inside the base constructor. The hook must therefore be
     // implemented as a method, never as an arrow-function class field (those
@@ -289,28 +282,24 @@ abstract class BaseSkyflow<
 
   protected abstract createCollectContainer(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): TCollectContainer;
 
   protected abstract createRevealContainer(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): TRevealContainer;
 
   protected abstract createComposableContainer(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options: ContainerOptions,
   ): TComposableContainer;
 
   protected abstract createComposeRevealContainer(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): TComposeRevealContainer;
@@ -338,7 +327,6 @@ abstract class BaseSkyflow<
       case ContainerType.COLLECT: {
         const collectContainer = this.createCollectContainer(
           this.#containerProps(type),
-          this.skyflowElements,
           this.#context(),
           options,
         );
@@ -350,7 +338,6 @@ abstract class BaseSkyflow<
       case ContainerType.REVEAL: {
         const revealContainer = this.createRevealContainer(
           this.#containerProps(type),
-          this.skyflowElements,
           this.#context(),
           options,
         );
@@ -363,7 +350,6 @@ abstract class BaseSkyflow<
         validateComposableContainerOptions(options!);
         const composableContainer = this.createComposableContainer(
           this.#containerProps(type),
-          this.skyflowElements,
           this.#context(),
           options!,
         );
@@ -377,7 +363,6 @@ abstract class BaseSkyflow<
         validateComposableContainerOptions(options!);
         const revealComposableContainer = this.createComposeRevealContainer(
           this.#containerProps(type),
-          this.skyflowElements,
           this.#context(),
           options,
         );

@@ -202,17 +202,17 @@ describe('test composable container class',()=>{
   
 
   it('test constructor',  () => {
-    const container = new ComposableContainer(metaData, [], context, {layout:[1]});
+    const container = new ComposableContainer(metaData, context, {layout:[1]});
     expect(container).toBeInstanceOf(ComposableContainer);
   });
 
   it('test create method',()=>{
-    const container = new ComposableContainer(metaData, [], context, {layout:[1]});
+    const container = new ComposableContainer(metaData, context, {layout:[1]});
     const element = container.create(cvvElement);
     expect(element).toBeInstanceOf(ComposableElement);
   });
   it('should throw error when create method is called with no element',(done)=>{
-    const container = new ComposableContainer(metaData, [], context, {layout:[1]});
+    const container = new ComposableContainer(metaData, context, {layout:[1]});
       container.collect().catch((err) => {
         done();
         expect(err).toBeDefined();
@@ -224,7 +224,7 @@ describe('test composable container class',()=>{
   
   })
     it('should throw error when create method is called with no element case 2',(done)=>{
-    const container = new ComposableContainer(metaData2, {}, context, {layout:[1]});
+    const container = new ComposableContainer(metaData2, context, {layout:[1]});
       container.collect().catch((err) => {
         done();
         expect(err).toBeDefined();
@@ -236,7 +236,7 @@ describe('test composable container class',()=>{
   })
 
   it('test create method with callback',()=>{
-    const container = new ComposableContainer(metaData, [], context, {layout:[1]});
+    const container = new ComposableContainer(metaData, context, {layout:[1]});
     const element = container.create(cvvElement);
     // on.mock.calls[0][1]({name : "collect_controller1234"},()=>{});
     // on.mock.calls[1][1]({name : "collect_controller"},()=>{});
@@ -247,7 +247,7 @@ describe('test composable container class',()=>{
     const div = document.createElement('div');
     div.id = 'composable'
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {layout:[2]});
+    const container = new ComposableContainer(metaData, context, {layout:[2]});
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
@@ -262,7 +262,6 @@ describe('test composable container class',()=>{
   
     const container = new ComposableContainer(
       metaData,
-      {},
       context,
       { layout: [2], styles: { base: { width: '100px' } } }
     );
@@ -330,7 +329,6 @@ describe('test composable container class',()=>{
   
     const container = new ComposableContainer(
       metaData,
-      {},
       context,
       { layout: [2], styles: { base: { width: '100px' } } }
     );
@@ -396,7 +394,7 @@ describe('test composable container class',()=>{
     const div = document.createElement('div');
     div.id = 'composable'
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {layout:[2],styles:{base:{width:'100px',}}});
+    const container = new ComposableContainer(metaData, context, {layout:[2],styles:{base:{width:'100px',}}});
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
@@ -420,7 +418,7 @@ describe('test composable container class',()=>{
     const div = document.createElement('div');
     div.id = 'composable'
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {layout:[2],styles:{base:{width:'100px',}}});
+    const container = new ComposableContainer(metaData, context, {layout:[2],styles:{base:{width:'100px',}}});
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
@@ -442,7 +440,7 @@ describe('test composable container class',()=>{
     const div = document.createElement('div');
     div.id = 'composable'
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {layout:[2],styles:{base:{width:'100px',}}});
+    const container = new ComposableContainer(metaData, context, {layout:[2],styles:{base:{width:'100px',}}});
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
@@ -479,7 +477,7 @@ describe('test composable container class',()=>{
     const div = document.createElement('div');
     div.id = 'composable'
     document.body.append(div);
-    const container = new ComposableContainer(metaData2, {}, context, {layout:[2],styles:{base:{width:'100px',}}});
+    const container = new ComposableContainer(metaData2, context, {layout:[2],styles:{base:{width:'100px',}}});
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     emitterSpy();
@@ -501,7 +499,7 @@ describe('test composable container class',()=>{
     div.id = 'composable'
     document.body.append(div);
 
-    const container = new ComposableContainer(metaData2, {}, context, {layout:[2],styles:{base:{width:'100px',}}});
+    const container = new ComposableContainer(metaData2, context, {layout:[2],styles:{base:{width:'100px',}}});
 
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
@@ -521,7 +519,7 @@ describe('test composable container class',()=>{
     const div = document.createElement('div');
     div.id = 'composable'
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {layout:[2],styles:{base:{width:'100px',}}});
+    const container = new ComposableContainer(metaData, context, {layout:[2],styles:{base:{width:'100px',}}});
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
     try{
@@ -539,7 +537,7 @@ describe('test composable container class',()=>{
 
   it("test container collect", () => {
     const containerOptions = {layout:[2],styles:{base:{width:'100px'}},errorTextStyles:{base:{color:'red'}}};
-    let container = new ComposableContainer(metaData, [], context, containerOptions);
+    let container = new ComposableContainer(metaData, context, containerOptions);
     // const div = document.createElement('div');
     // div.id = 'composable'
     // document.body.append(div);
@@ -581,7 +579,7 @@ describe('test composable container class',()=>{
     div.id = 'composable'
     document.body.append(div);
 
-    const container = new ComposableContainer(metaData, [], context, {layout:[2]});
+    const container = new ComposableContainer(metaData, context, {layout:[2]});
     // const frameReadyCb = on.mock.calls[0][1];
     // const cb2 = jest.fn();
     // frameReadyCb({
@@ -599,7 +597,7 @@ describe('test composable container class',()=>{
     
   it('test on method without parameters will throw error',()=>{
     try{
-      const container = new ComposableContainer(metaData, [], context, {layout:[1]},);
+      const container = new ComposableContainer(metaData, context, {layout:[1]},);
       const element = container.create(cvvElement);
       container.on();
       expect(element).toBeInstanceOf(ComposableElement);
@@ -610,7 +608,7 @@ describe('test composable container class',()=>{
 
   it('test on method without event name will throw error',()=>{
     try {
-      const container = new ComposableContainer(metaData, [], context, {layout:[1]});
+      const container = new ComposableContainer(metaData, context, {layout:[1]});
       const element = container.create(cvvElement);
       container.on("CHANGE");
       expect(element).toBeInstanceOf(ComposableElement);
@@ -621,7 +619,7 @@ describe('test composable container class',()=>{
 
   it('test on method passing handler as invalid type will throw error',()=>{
     try {
-      const container = new ComposableContainer(metaData, [], context, {layout:[1]});
+      const container = new ComposableContainer(metaData, context, {layout:[1]});
       const element = container.create(cvvElement);
       container.on("CHANGE","test");
       expect(element).toBeInstanceOf(ComposableElement);
@@ -631,7 +629,7 @@ describe('test composable container class',()=>{
   });
 
   it('test on method without error',()=>{
-    const container = new ComposableContainer(metaData, [], context, {layout:[1]});
+    const container = new ComposableContainer(metaData, context, {layout:[1]});
     const element = container.create(cvvElement);
     container.on("CHANGE",()=>{});
     expect(element).toBeInstanceOf(ComposableElement);
@@ -643,7 +641,6 @@ describe('test composable container class',()=>{
   
     const container = new ComposableContainer(
       metaData,
-      {},
       context,
       { layout: [1], styles: { base: { width: '100px' } } }
     );
@@ -709,7 +706,7 @@ describe('test composable container class',()=>{
   div.id = 'composable2';
   document.body.append(div);
 
-  const container = new ComposableContainer(metaDataFail, {}, context, { layout: [1] });
+  const container = new ComposableContainer(metaDataFail, context, { layout: [1] });
   const element1 = container.create(FileInuptElement);
   container.mount('#composable2');
 
@@ -727,7 +724,7 @@ describe('test composable container class',()=>{
     // Mock getRootNode to return shadowRoot
     shadowDiv.getRootNode = jest.fn(() => shadowRoot);
 
-    const container = new ComposableContainer(metaData, [], context, { layout: [2] });
+    const container = new ComposableContainer(metaData, context, { layout: [2] });
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
 
@@ -765,7 +762,7 @@ describe('test composable container class',()=>{
     // Mock getRootNode to return shadowRoot
     shadowDiv.getRootNode = jest.fn(() => shadowRoot);
 
-    const container = new ComposableContainer(metaData, [], context, { layout: [2] });
+    const container = new ComposableContainer(metaData, context, { layout: [2] });
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
 
@@ -788,7 +785,7 @@ describe('test composable container class',()=>{
     // Mock getRootNode to return document (not a ShadowRoot)
     div.getRootNode = jest.fn(() => document);
 
-    const container = new ComposableContainer(metaData, [], context, { layout: [2] });
+    const container = new ComposableContainer(metaData, context, { layout: [2] });
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
 
@@ -823,7 +820,7 @@ describe('test composable container class',()=>{
 
     shadowDiv.getRootNode = jest.fn(() => shadowRoot);
 
-    const container = new ComposableContainer(metaData, [], context, { layout: [2] });
+    const container = new ComposableContainer(metaData, context, { layout: [2] });
     const element1 = container.create(cvvElement);
     const element2 = container.create(cardNumberElement);
 

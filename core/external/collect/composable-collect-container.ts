@@ -182,7 +182,6 @@ abstract class CoreComposableCollectContainer<
         this.eventEmitter,
       );
       this.elements[this.tempElements.elementName] = element;
-      this.skyflowElements[elementId] = element;
     }
     return element;
   };

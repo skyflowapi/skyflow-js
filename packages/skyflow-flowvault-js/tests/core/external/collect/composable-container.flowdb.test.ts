@@ -168,18 +168,18 @@ describe('flowDB composable collect container', () => {
   });
 
   it('constructs a ComposableContainer', () => {
-    const container = new ComposableContainer(metaData, [], context, { layout: [1] });
+    const container = new ComposableContainer(metaData, context, { layout: [1] });
     expect(container).toBeInstanceOf(ComposableContainer);
   });
 
   it('create() returns a ComposableElement for a flowDB (tableName) input', () => {
-    const container = new ComposableContainer(metaData, [], context, { layout: [1] });
+    const container = new ComposableContainer(metaData, context, { layout: [1] });
     const element = container.create(cvvElementInput);
     expect(element).toBeInstanceOf(ComposableElement);
   });
 
   it('collect() rejects a @core SkyflowError when no elements are added', (done) => {
-    const container = new ComposableContainer(metaData, [], context, { layout: [1] });
+    const container = new ComposableContainer(metaData, context, { layout: [1] });
     container.collect().catch((err) => {
       expect(err).toBeInstanceOf(SkyflowError);
       expect(err.error.code).toBe(SKYFLOW_ERROR_CODE.NO_ELEMENTS_IN_COMPOSABLE.code);
@@ -188,7 +188,7 @@ describe('flowDB composable collect container', () => {
   });
 
   it('collect() rejects COMPOSABLE_CONTAINER_NOT_MOUNTED before mount', (done) => {
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [2], styles: { base: { width: '100px' } },
     });
     container.create(cvvElementInput);
@@ -203,7 +203,7 @@ describe('flowDB composable collect container', () => {
     const div = document.createElement('div');
     div.id = 'composable';
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [2], styles: { base: { width: '100px' } },
     });
     container.create(cvvElementInput);
@@ -226,7 +226,7 @@ describe('flowDB composable collect container', () => {
     const div = document.createElement('div');
     div.id = 'composable';
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [2], styles: { base: { width: '100px' } },
     });
     container.create(cvvElementInput);
@@ -248,7 +248,7 @@ describe('flowDB composable collect container', () => {
     const div = document.createElement('div');
     div.id = 'composable';
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, { layout: [2] });
+    const container = new ComposableContainer(metaData, context, { layout: [2] });
     container.create(cvvElementInput);
     container.create(cardNumberElement);
     container.mount('#composable');
@@ -261,7 +261,7 @@ describe('flowDB composable collect container', () => {
   // the flowDB shapes (and forces tokens on) — proving the B1/B2 wiring, not just
   // the standalone validators.
   describe('validateCollectOptions (flowDB shapes)', () => {
-    const container = new ComposableContainer(metaData, [], context, { layout: [1] });
+    const container = new ComposableContainer(metaData, context, { layout: [1] });
     const validate = (options: any) => (container as any).validateCollectOptions(options);
 
     it('B1: accepts a flowDB upsert ({ tableName, uniqueColumns }) and forces tokens on', () => {

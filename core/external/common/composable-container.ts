@@ -56,8 +56,6 @@ abstract class ComposableContainerBase<
 
   protected context: Context;
 
-  protected skyflowElements: Record<string, ISkyflowElement>;
-
   protected eventEmitter: EventEmitter;
 
   protected isMounted: boolean = false;
@@ -102,7 +100,6 @@ abstract class ComposableContainerBase<
 
   constructor(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ) {
@@ -122,7 +119,6 @@ abstract class ComposableContainerBase<
       },
     };
     this.getSkyflowBearerToken = metaData?.getSkyflowBearerToken;
-    this.skyflowElements = skyflowElements;
     this.context = context;
     // Composable containers are only ever created via BaseSkyflow's COMPOSABLE /
     // COMPOSE_REVEAL paths, which validate and pass options — so it is present here.

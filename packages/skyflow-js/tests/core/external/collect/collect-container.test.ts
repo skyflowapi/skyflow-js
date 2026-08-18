@@ -150,7 +150,7 @@ describe("Collect container", () => {
   });
 
   it("should successfully collect data from elements", () => {
-    const collectContainer = new CollectContainer(metaData, [], {
+    const collectContainer = new CollectContainer(metaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -191,7 +191,7 @@ describe("Collect container", () => {
   });
 
   it("tests different collect element options for elements", () => {
-    const collectContainer = new CollectContainer(metaData, [], {
+    const collectContainer = new CollectContainer(metaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -210,7 +210,7 @@ describe("Collect container", () => {
     expect(options.enableCopy).toBe(true);
   });
   it("should successfully collect data from elements, call set error", () => {
-    const collectContainer = new CollectContainer(metaData, [], {
+    const collectContainer = new CollectContainer(metaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -252,7 +252,7 @@ describe("Collect container", () => {
     });
   });
   it("should successfully upload files when elements are mounted", async () => {
-    const collectContainer = new CollectContainer(metaData, [], {
+    const collectContainer = new CollectContainer(metaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -319,7 +319,7 @@ describe("iframe cleanup logic", () => {
 
   it("should remove unmounted iframe elements", () => {
     // Create and mount elements
-    collectContainer = new CollectContainer(metaData, [], {
+    collectContainer = new CollectContainer(metaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -352,7 +352,7 @@ describe("iframe cleanup logic", () => {
   });
 
   it("should handle empty document.body", () => {
-    collectContainer = new CollectContainer(metaData, [], {
+    collectContainer = new CollectContainer(metaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -387,7 +387,7 @@ describe("iframe cleanup logic", () => {
   });
 
   it("should remove unmounted iframe elements", () => {
-    collectContainer = new CollectContainer(metaData2, [], {
+    collectContainer = new CollectContainer(metaData2, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });

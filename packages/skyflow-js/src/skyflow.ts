@@ -18,7 +18,6 @@ import {
   Context,
   ICoreMetadata,
   ISkyflow,
-  ISkyflowElement,
   SkyflowConfigOptions,
 } from '@core/types';
 import logs from '@core/utils/logs';
@@ -74,41 +73,37 @@ ComposableRevealContainer
   // eslint-disable-next-line class-methods-use-this
   protected createCollectContainer(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): CollectContainer {
-    return new CollectContainer(metaData, skyflowElements, context, options);
+    return new CollectContainer(metaData, context, options);
   }
 
   // eslint-disable-next-line class-methods-use-this
   protected createRevealContainer(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): RevealContainer {
-    return new RevealContainer(metaData, skyflowElements, context, options);
+    return new RevealContainer(metaData, context, options);
   }
 
   // eslint-disable-next-line class-methods-use-this
   protected createComposableContainer(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options: ContainerOptions,
   ): ComposableContainer {
-    return new ComposableContainer(metaData, skyflowElements, context, options);
+    return new ComposableContainer(metaData, context, options);
   }
 
   // eslint-disable-next-line class-methods-use-this
   protected createComposeRevealContainer(
     metaData: ICoreMetadata,
-    skyflowElements: Record<string, ISkyflowElement>,
     context: Context,
     options?: ContainerOptions,
   ): ComposableRevealContainer {
-    return new ComposableRevealContainer(metaData, skyflowElements, context, options);
+    return new ComposableRevealContainer(metaData, context, options);
   }
 
   // ---- privacyDB-only pure-JS API -------------------------------------------

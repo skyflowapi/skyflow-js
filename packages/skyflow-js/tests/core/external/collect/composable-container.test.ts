@@ -190,14 +190,14 @@ describe("test composable container class", () => {
   });
 
   it("tests constructor", () => {
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [1],
     });
     expect(container).toBeInstanceOf(ComposableContainer);
   });
 
   it("tests create method", () => {
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [1],
     });
     const element = container.create(cvvElementInput);
@@ -205,7 +205,7 @@ describe("test composable container class", () => {
   });
 
   it("should throw error when create method is called with no element", (done) => {
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [1],
     });
     container.collect().catch((err) => {
@@ -224,7 +224,7 @@ describe("test composable container class", () => {
   });
 
   it("should throw error when create method is called with no element case 2", (done) => {
-    const container = new ComposableContainer(metaData2, [], context, {
+    const container = new ComposableContainer(metaData2, context, {
       layout: [1],
     });
     container.collect().catch((err) => {
@@ -243,7 +243,7 @@ describe("test composable container class", () => {
   });
 
   it("test create method with callback", () => {
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [1],
     });
     const element = container.create(cvvElementInput);
@@ -254,7 +254,7 @@ describe("test composable container class", () => {
     const div = document.createElement("div");
     div.id = "composable";
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [2],
     });
     const element1 = container.create(cvvElementInput);
@@ -267,7 +267,7 @@ describe("test composable container class", () => {
     const div = document.createElement("div");
     div.id = "composable";
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [2],
       styles: { base: { width: "100px" } },
     });
@@ -330,7 +330,7 @@ describe("test composable container class", () => {
     const div = document.createElement("div");
     div.id = "composable";
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [2],
       styles: { base: { width: "100px" } },
     });
@@ -360,7 +360,7 @@ describe("test composable container class", () => {
     div.id = "composable";
     document.body.append(div);
 
-    const container = new ComposableContainer(metaData2, [], context, {
+    const container = new ComposableContainer(metaData2, context, {
       layout: [2],
       styles: { base: { width: "100px" } },
     });
@@ -382,7 +382,7 @@ describe("test composable container class", () => {
     const div = document.createElement("div");
     div.id = "composable";
     document.body.append(div);
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [2],
       styles: { base: { width: "100px" } },
     });
@@ -415,7 +415,6 @@ describe("test composable container class", () => {
     };
     let container = new ComposableContainer(
       metaData,
-      [],
       context,
       containerOptions
     );
@@ -456,7 +455,7 @@ describe("test composable container class", () => {
     div.id = "composable";
     document.body.append(div);
 
-    const container = new ComposableContainer(metaData, [], context, {
+    const container = new ComposableContainer(metaData, context, {
       layout: [2],
     });
     const element1 = container.create(cvvElementInput);

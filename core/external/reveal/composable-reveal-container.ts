@@ -105,7 +105,6 @@ abstract class CoreComposableRevealContainer<
         try {
           element = this.instantiateInternalElement(elementId, this.tempElements);
           this.elements[this.tempElements.elementName] = element;
-          this.skyflowElements[elementId] = element;
         } catch (error: any) {
           printLog(logs.errorLogs.INVALID_REVEAL_COMPOSABLE_INPUT,
             MessageType.ERROR,

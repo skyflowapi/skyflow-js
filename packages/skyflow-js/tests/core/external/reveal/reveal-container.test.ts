@@ -83,12 +83,12 @@ const testRecord = {
   },
 };
 
-const testRevealContainer1 = new RevealContainer(testMetaData, [], {
+const testRevealContainer1 = new RevealContainer(testMetaData, {
   logLevel: LogLevel.ERROR,
   env: Env.PROD,
 });
 
-const testRevealContainer2 = new RevealContainer(testMetaData2, [], {
+const testRevealContainer2 = new RevealContainer(testMetaData2, {
   logLevel: LogLevel.ERROR,
   env: Env.PROD,
 });
@@ -115,7 +115,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("reveal should throw error with no elements", (done) => {
-    const container = new RevealContainer(testMetaData, [], {
+    const container = new RevealContainer(testMetaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -183,7 +183,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("handle reveal errors with 404 response", async () => {
-    const testRevealContainer = new RevealContainer(testMetaData, [], {
+    const testRevealContainer = new RevealContainer(testMetaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -214,7 +214,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("handle successful reveal when called before mounting", async () => {
-    const testRevealContainer = new RevealContainer(testMetaData, [], {
+    const testRevealContainer = new RevealContainer(testMetaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -245,7 +245,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("frame controller ready event correctly", async () => {
-    const testRevealContainer = new RevealContainer(testMetaData, [], {
+    const testRevealContainer = new RevealContainer(testMetaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -273,7 +273,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("on container mounted else call back", async () => {
-    const testRevealContainer = new RevealContainer(testMetaData, [], {
+    const testRevealContainer = new RevealContainer(testMetaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -302,7 +302,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("on container mounted else call back 1", async () => {
-    const testRevealContainer = new RevealContainer(testMetaData, [], {
+    const testRevealContainer = new RevealContainer(testMetaData, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
@@ -330,7 +330,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("reveal before skyflow frame ready event", async () => {
-    const testRevealContainer = new RevealContainer(testMetaData2, [], {
+    const testRevealContainer = new RevealContainer(testMetaData2, {
       logLevel: LogLevel.ERROR,
       env: Env.PROD,
     });
