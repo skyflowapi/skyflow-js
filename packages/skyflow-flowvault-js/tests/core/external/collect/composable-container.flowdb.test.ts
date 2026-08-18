@@ -255,4 +255,35 @@ describe('flowDB composable collect container', () => {
     container.unmount();
     expect(mockUnmount).toBeCalled();
   });
+
+  // validateCollectOptions is the seam that previously delegated to @core's
+  // privacyDB-shaped validators. These assert the container now validates against
+  // the flowDB shapes (and forces tokens on) — proving the B1/B2 wiring, not just
+  // the standalone validators.
+  describe('validateCollectOptions (flowDB shapes)', () => {
+    const container = new ComposableContainer(metaData, [], context, { layout: [1] });
+    const validate = (options: any) => (container as any).validateCollectOptions(options);
+
+    it('B1: accepts a flowDB upsert ({ tableName, uniqueColumns }) and forces tokens on', () => {
+      const options = { upsert: [{ tableName: 'cards', uniqueColumns: ['card_number'] }] };
+      expect(() => validate(options)).not.toThrow();
+      expect(validate(options)).toEqual({ ...options, tokens: true });
+    });
+
+    it('B2: accepts a flowDB additionalFields ({ tableName, data })', () => {
+      const options = { additionalFields: { records: [{ tableName: 'cards', data: { cvv: '123' } }] } };
+      expect(() => validate(options)).not.toThrow();
+      expect(validate(options).tokens).toBe(true);
+    });
+
+    it('rejects the privacyDB upsert shape ({ table, column })', () => {
+      expect(() => validate({ upsert: [{ table: 'cards', column: 'card_number' }] }))
+        .toThrow(SkyflowError);
+    });
+
+    it('rejects the privacyDB additionalFields shape ({ table, fields })', () => {
+      expect(() => validate({ additionalFields: { records: [{ table: 'cards', fields: { cvv: '1' } }] } }))
+        .toThrow(SkyflowError);
+    });
+  });
 });

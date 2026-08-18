@@ -7,4 +7,5 @@ tests
 
 babel.config.js
 webpack.*
+jest.config.js
 samples

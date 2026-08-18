@@ -11,6 +11,9 @@ import {
   MessageType,
   CollectElementInput,
   LogLevel,
+  UpdateType,
+  IFlowDBUpsertOptions,
+  AdditionalFields,
 } from '../common';
 import { printLog } from '../logs-helper';
 
@@ -113,4 +116,104 @@ export const validateCollectElementInput = (input: CollectElementInput, logLevel
   if (Object.prototype.hasOwnProperty.call(input, 'skyflowId') && !(typeof input.skyflowId === 'string')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT, [], true);
   }
+};
+
+// flowDB collect-option error codes. flowDB's upsert / additionalFields inputs use
+// flowDB naming (`tableName` / `uniqueColumns` / `data`), NOT privacyDB's
+// `table` / `column` / `fields`, so the shared @core SKYFLOW_ERROR_CODE messages
+// (which name the privacyDB keys) would be misleading here. Defined locally,
+// mirroring the FLOWDB_REVEAL_ERROR_CODE block above.
+const FLOWDB_COLLECT_ERROR_CODE = {
+  INVALID_UPSERT_OPTIONS_TYPE: {
+    code: 400,
+    description: "Validation error. Invalid 'upsert' options. Specify a non-empty array of { tableName, uniqueColumns } objects.",
+  },
+  INVALID_UPSERT_OPTION_ENTRY: {
+    code: 400,
+    description: "Validation error. Invalid 'upsert' entry at index %s1. Specify an object with 'tableName' and 'uniqueColumns'.",
+  },
+  MISSING_TABLE_NAME_IN_UPSERT: {
+    code: 400,
+    description: "Validation error. Missing or empty 'tableName' in upsert entry at index %s1. Provide a valid 'tableName'.",
+  },
+  INVALID_UNIQUE_COLUMNS_IN_UPSERT: {
+    code: 400,
+    description: "Validation error. Invalid 'uniqueColumns' in upsert entry at index %s1. Provide a non-empty array of column-name strings.",
+  },
+  INVALID_UPDATE_TYPE_IN_UPSERT: {
+    code: 400,
+    description: "Validation error. Invalid 'updateType' in upsert entry at index %s1. Use one of 'UPDATE' or 'REPLACE'.",
+  },
+  MISSING_RECORDS_IN_ADDITIONAL_FIELDS: {
+    code: 400,
+    description: "Validation error. Missing 'records' key in additionalFields. Specify a non-empty array of { tableName, data } records.",
+  },
+  INVALID_RECORDS_IN_ADDITIONAL_FIELDS: {
+    code: 400,
+    description: "Validation error. Invalid 'records' in additionalFields. Specify a non-empty array of { tableName, data } records.",
+  },
+  MISSING_TABLE_NAME_IN_ADDITIONAL_FIELDS: {
+    code: 400,
+    description: "Validation error. Missing or empty 'tableName' in additionalFields record at index %s1. Provide a valid 'tableName'.",
+  },
+  INVALID_DATA_IN_ADDITIONAL_FIELDS: {
+    code: 400,
+    description: "Validation error. Invalid 'data' in additionalFields record at index %s1. Provide a non-null object of column values.",
+  },
+  INVALID_SKYFLOW_ID_IN_ADDITIONAL_FIELDS: {
+    code: 400,
+    description: "Validation error. Invalid 'skyflowId' in additionalFields record at index %s1. Provide a string skyflowId.",
+  },
+};
+
+// flowDB upsert validator: validates the flowDB upsert shape
+// ({ tableName, uniqueColumns, updateType? }). Distinct from @core's
+// validateUpsertOptions (privacyDB { table, column }).
+export const validateFlowDBUpsertOptions = (upsertOptions?: Array<IFlowDBUpsertOptions>) => {
+  if (!(upsertOptions && Array.isArray(upsertOptions) && upsertOptions.length > 0)) {
+    throw new SkyflowError(FLOWDB_COLLECT_ERROR_CODE.INVALID_UPSERT_OPTIONS_TYPE, [], true);
+  }
+  upsertOptions.forEach((option: any, index: number) => {
+    if (!(option && typeof option === 'object' && !Array.isArray(option))) {
+      throw new SkyflowError(FLOWDB_COLLECT_ERROR_CODE.INVALID_UPSERT_OPTION_ENTRY, [`${index}`], true);
+    }
+    if (!(typeof option.tableName === 'string' && option.tableName.length > 0)) {
+      throw new SkyflowError(FLOWDB_COLLECT_ERROR_CODE.MISSING_TABLE_NAME_IN_UPSERT, [`${index}`], true);
+    }
+    const { uniqueColumns } = option;
+    const hasValidColumns = Array.isArray(uniqueColumns)
+      && uniqueColumns.length > 0
+      && uniqueColumns.every((column: any) => typeof column === 'string' && column.length > 0);
+    if (!hasValidColumns) {
+      throw new SkyflowError(FLOWDB_COLLECT_ERROR_CODE.INVALID_UNIQUE_COLUMNS_IN_UPSERT, [`${index}`], true);
+    }
+    if (option.updateType !== undefined && !Object.values(UpdateType).includes(option.updateType)) {
+      throw new SkyflowError(FLOWDB_COLLECT_ERROR_CODE.INVALID_UPDATE_TYPE_IN_UPSERT, [`${index}`], true);
+    }
+  });
+};
+
+// flowDB additionalFields validator: validates the flowDB record shape
+// ({ tableName, data, skyflowId? }). Distinct from @core's
+// validateAdditionalFieldsInCollect (privacyDB { table, fields }). An empty-string
+// skyflowId is accepted (the insert path treats it as "not provided").
+export const validateFlowDBAdditionalFieldsInCollect = (recordObj?: AdditionalFields) => {
+  if (!(recordObj && Object.prototype.hasOwnProperty.call(recordObj, 'records'))) {
+    throw new SkyflowError(FLOWDB_COLLECT_ERROR_CODE.MISSING_RECORDS_IN_ADDITIONAL_FIELDS, [], true);
+  }
+  const { records } = recordObj;
+  if (!(records && Array.isArray(records) && records.length > 0)) {
+    throw new SkyflowError(FLOWDB_COLLECT_ERROR_CODE.INVALID_RECORDS_IN_ADDITIONAL_FIELDS, [], true);
+  }
+  records.forEach((record: any, index: number) => {
+    if (!(record && typeof record.tableName === 'string' && record.tableName.length > 0)) {
+      throw new SkyflowError(FLOWDB_COLLECT_ERROR_CODE.MISSING_TABLE_NAME_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+    }
+    if (!(record.data && typeof record.data === 'object' && !Array.isArray(record.data))) {
+      throw new SkyflowError(FLOWDB_COLLECT_ERROR_CODE.INVALID_DATA_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+    }
+    if (record.skyflowId !== undefined && typeof record.skyflowId !== 'string') {
+      throw new SkyflowError(FLOWDB_COLLECT_ERROR_CODE.INVALID_SKYFLOW_ID_IN_ADDITIONAL_FIELDS, [`${index}`], true);
+    }
+  });
 };

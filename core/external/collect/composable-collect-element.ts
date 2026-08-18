@@ -20,7 +20,13 @@ import {
 } from '@core/types';
 import { printLog } from '@core/utils/logs-helper';
 
-class ComposableElement {
+// Generic over the update-options type so each package binds its own identity
+// keys (privacyDB `table`/`skyflowID` vs flowDB `tableName`/`skyflowId`) onto
+// update(). Defaults to the identity-neutral @core base, so any unparameterized
+// use (and the @core internals) are unchanged.
+class ComposableElement<
+  TUpdateOptions extends ICollectElementUpdateOptionsBase = ICollectElementUpdateOptionsBase,
+> {
   #elementName: string;
 
   #eventEmitter: EventEmitter;
@@ -99,7 +105,7 @@ class ComposableElement {
     return this.#elementName;
   }
 
-  update = (options: ICollectElementUpdateOptionsBase) => {
+  update = (options: TUpdateOptions) => {
     this.#isUpdateCalled = true;
     if (this.#isMounted) {
       options.validations = formatValidations(options.validations);

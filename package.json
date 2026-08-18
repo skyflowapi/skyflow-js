@@ -16,7 +16,8 @@
     "build-node-sdk": "npm run build-node-sdk --workspaces --if-present",
     "build-iframe": "npm run build-iframe --workspaces --if-present",
     "build": "npm run build-browser-sdk && npm run build-node-sdk && npm run build-iframe",
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run test --workspaces --if-present",
+    "test:coverage": "jest --config jest.config.js"
   },
   "engines": {
     "node": ">=12.0",

@@ -12,7 +12,11 @@ import CoreCollectContainer, {
   ICollectElementBase,
 } from '@core/external/collect/collect-container';
 import { VariantCollectAdapter } from '@core/types';
-import { validateCollectElementInput } from '../../utils/validators';
+import {
+  validateCollectElementInput,
+  validateFlowDBAdditionalFieldsInCollect,
+  validateFlowDBUpsertOptions,
+} from '../../utils/validators';
 import {
   CollectElementInput, CollectElementOptions, CollectElementUpdateOptions, ICollectOptions,
 } from '../../utils/common';
@@ -48,12 +52,19 @@ CollectElementInput, CollectElementOptions
     return { table: input.tableName };
   }
 
-  // flowDB forces tokens on and does not validate a client-supplied value.
-  // Reuse the base validation for additionalFields/upsert, then force tokens on
-  // in the emitted options (flowDB has no client-facing `tokens`).
+  // flowDB validates additionalFields/upsert against the flowDB key shapes
+  // (tableName/uniqueColumns/data), then forces tokens on (flowDB has no
+  // client-facing `tokens`). It does NOT delegate to the @core base validator,
+  // whose upsert/additionalFields checks are privacyDB-shaped (table/column/fields).
+  // eslint-disable-next-line class-methods-use-this
   protected validateCollectOptions(options: ICollectOptions): ICollectOptions {
-    const validated = super.validateCollectOptions(options);
-    return { ...validated, tokens: true } as ICollectOptions;
+    if (options?.additionalFields) {
+      validateFlowDBAdditionalFieldsInCollect(options.additionalFields);
+    }
+    if (options?.upsert) {
+      validateFlowDBUpsertOptions(options.upsert);
+    }
+    return { ...options, tokens: true } as ICollectOptions;
   }
 
   // eslint-disable-next-line class-methods-use-this

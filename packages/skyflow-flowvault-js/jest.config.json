@@ -1,6 +1,14 @@
 {
   "verbose": true,
   "collectCoverage": true,
+  "collectCoverageFrom": [
+    "<rootDir>/src/**/*.{ts,tsx}",
+    "<rootDir>/../../core/**/*.{ts,tsx}",
+    "!**/*.d.ts",
+    "!<rootDir>/src/index.ts",
+    "!<rootDir>/src/index-node.ts",
+    "!<rootDir>/src/index-internal.ts"
+  ],
   "testEnvironment": "jsdom",
   "testTimeout": 30000,
   "setupFiles": ["<rootDir>/tests/jest.setup.js"],

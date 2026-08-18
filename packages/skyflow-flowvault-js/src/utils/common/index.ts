@@ -66,7 +66,6 @@ import type {
   ICollectElementOptionsBase,
   ICollectElementUpdateOptionsBase,
   IElementStateBase,
-  IInsertRecordInput as IInsertRecordInputType,
   CollectElementInput as ICoreCollectElementInput,
 } from '@core/types';
 
@@ -114,6 +113,20 @@ export interface IFlowDBUpsertOptions {
   updateType?: UpdateType;
 }
 
+// flowDB additionalFields input. Non-PCI data inserted/updated alongside the
+// collected elements, in flowDB naming (`tableName`/`data`/`skyflowId`) —
+// intentionally distinct from privacyDB's `{ table, fields }` record shape.
+// `skyflowId` targets an existing record for update; omit it to insert.
+export interface AdditionalFieldsRecord {
+  tableName: string;
+  data: Record<string, any>;
+  skyflowId?: string;
+}
+
+export interface AdditionalFields {
+  records: AdditionalFieldsRecord[];
+}
+
 // flowDB reveal element input — token-based only (no redaction / skyflowID /
 // table / column / file-render keys). Redaction is supplied via reveal options.
 export interface IFlowDBRevealElementInput {
@@ -140,6 +153,6 @@ export interface IRevealOptions {
 // per-table `updateType` drives the update variant — there is no top-level
 // `updateType`.
 export interface ICollectOptions extends ICollectOptionsBase {
-  additionalFields?: IInsertRecordInputType;
+  additionalFields?: AdditionalFields;
   upsert?: Array<IFlowDBUpsertOptions>;
 }
