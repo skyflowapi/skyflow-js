@@ -94,7 +94,7 @@ jobs:
       DIST_DIR: "packages/skyflow-flowvault-js/dist/v1"
       S3_PREFIX: "flowvault/"
       TAG_PREFIX: "flowvault-"
-      INVALIDATION_PATH: "/flowvault/*"
+      INVALIDATION_PATH: "/*"
     secrets:
       # Same internal/BLITZ bucket + distribution + CDN origin as skyflow-js;
       # flowDB just lands under the flowvault/ key prefix.
