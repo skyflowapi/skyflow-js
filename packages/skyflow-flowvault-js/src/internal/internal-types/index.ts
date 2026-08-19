@@ -95,7 +95,9 @@ export interface FlowDBRecordResponse {
   data?: Record<string, any>;
   hashedData?: Record<string, any>;
   error?: string | null;
-  httpCode?: number;
+  // Insert/update responses (RecordResponseObject) always carry httpCode — the
+  // flowdb.proto marks it `required` — so it is non-optional here and needs no cast.
+  httpCode: number;
   tableName: string;
 }
 
@@ -210,7 +212,10 @@ export interface RevealRecord {
   token: string;
   tokenGroupName?: string;
   metadata?: RevealRecordMetadata;
-  httpCode: number;
+  // Detokenize responses (FlowDetokenizeResponseObject) do NOT mark httpCode
+  // `required` in flowdb.proto, and the error path sources it from `error?.code`,
+  // so it can be absent — optional to keep the public contract honest.
+  httpCode?: number;
   error?: string;
 }
 

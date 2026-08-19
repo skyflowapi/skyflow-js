@@ -127,7 +127,7 @@ export const constructFlowDBInsertResponse = (
       records.push({
         error: res.error,
         tableName: res.tableName,
-        httpCode: res.httpCode as number,
+        httpCode: res.httpCode,
       });
       return;
     }
@@ -137,7 +137,7 @@ export const constructFlowDBInsertResponse = (
       ...(res.skyflowID ? { skyflowId: res.skyflowID } : {}),
       tokens: res.tokens ?? {},
       ...(hasHashedData ? { hashedData: res.hashedData } : {}),
-      httpCode: res.httpCode as number,
+      httpCode: res.httpCode,
     });
   });
 
