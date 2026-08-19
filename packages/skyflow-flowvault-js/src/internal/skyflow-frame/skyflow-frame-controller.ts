@@ -21,7 +21,7 @@ import {
   constructFlowDBUpdateRequest,
   insertDataInCollectFlowDB,
   updateDataInCollectFlowDB,
-  replaceCVVTokensInResponse,
+  mergeFlowDBCollectResponses,
 } from '../../api-utils/collect';
 import {
   fetchRecordsByTokenIdFlowDB,
@@ -128,17 +128,15 @@ class SkyflowFrameController
           return;
         }
         Promise.all(requests).then((responses: any[]) => {
-          const failure = responses.find((response) => response?.error !== undefined);
-          if (failure) {
-            rootReject(failure);
-            return;
+          // A mixed outcome (one endpoint fully fails, the other returns records)
+          // resolves with the surviving records + an inline error record; only a
+          // total failure (nothing landed) rejects. See mergeFlowDBCollectResponses.
+          const merged = mergeFlowDBCollectResponses(responses, cvvMap);
+          if ('records' in merged) {
+            rootResolve(merged);
+          } else {
+            rootReject(merged);
           }
-          const records = responses.reduce(
-            (acc, response) => acc.concat(response?.records || []),
-            [] as any[],
-          );
-          replaceCVVTokensInResponse(records, cvvMap);
-          rootResolve({ records });
         });
       }).catch((err) => {
         rootReject(err);

@@ -7,6 +7,7 @@ import {
   constructFlowDBUpdateRequest,
   insertDataInCollectFlowDB,
   updateDataInCollectFlowDB,
+  mergeFlowDBCollectResponses,
 } from '../../src/api-utils/collect';
 
 // Note: the flowvault collect data layer receives the auth token as a parameter
@@ -367,5 +368,87 @@ describe('updateDataInCollectFlowDB', () => {
         tableName: 'table1', skyflowId: 'id1', tokens: { name: [{ token: 't1', tokenGroupName: 'det' }] }, httpCode: 200,
       },
     ]);
+  });
+});
+
+describe('mergeFlowDBCollectResponses (mixed insert/update outcomes)', () => {
+  const emptyCvvMap = { insert: {}, update: {} };
+
+  const successRecord = {
+    tableName: 'table1',
+    skyflowId: 'id1',
+    tokens: { card_number: [{ token: 't1', tokenGroupName: 'det' }] },
+    httpCode: 200,
+  };
+
+  test('both endpoints succeed → resolve shape merges all records, no error record', () => {
+    const insertOk = { records: [{ tableName: 'table2', tokens: {}, httpCode: 200 }] };
+    const updateOk = { records: [successRecord] };
+    const out = mergeFlowDBCollectResponses([insertOk, updateOk], emptyCvvMap);
+    expect(out).toEqual({
+      records: [
+        { tableName: 'table2', tokens: {}, httpCode: 200 },
+        successRecord,
+      ],
+    });
+    expect(out).not.toHaveProperty('error');
+  });
+
+  test('one endpoint fully fails, sibling returns records → resolve with surviving records + inline error record', () => {
+    const insertFail = { error: { httpCode: 401, message: 'invalid token' } };
+    const updateOk = { records: [successRecord] };
+    const out = mergeFlowDBCollectResponses([insertFail, updateOk], emptyCvvMap);
+    expect(out).not.toHaveProperty('error');
+    expect(out.records).toEqual([
+      successRecord,
+      { error: 'invalid token', httpCode: 401 },
+    ]);
+  });
+
+  test('inline error record omits httpCode when the error envelope has no numeric code', () => {
+    const insertFail = { error: { httpStatus: 'UNAUTHENTICATED', message: 'no numeric code' } };
+    const updateOk = { records: [successRecord] };
+    const out = mergeFlowDBCollectResponses([insertFail, updateOk], emptyCvvMap);
+    expect(out.records[1]).toEqual({ error: 'no numeric code' });
+    expect(out.records[1]).not.toHaveProperty('httpCode');
+  });
+
+  test('inline error record uses empty string when the error envelope has no message', () => {
+    const insertFail = { error: { httpCode: 500 } };
+    const updateOk = { records: [successRecord] };
+    const out = mergeFlowDBCollectResponses([insertFail, updateOk], emptyCvvMap);
+    expect(out.records[1]).toEqual({ error: '', httpCode: 500 });
+  });
+
+  test('every endpoint fully fails (nothing landed) → returns the first { error } for the caller to reject on', () => {
+    const insertFail = { error: { httpCode: 401, message: 'insert failed' } };
+    const updateFail = { error: { httpCode: 400, message: 'update failed' } };
+    const out = mergeFlowDBCollectResponses([insertFail, updateFail], emptyCvvMap);
+    expect(out).toEqual({ error: { httpCode: 401, message: 'insert failed' } });
+    expect(out).not.toHaveProperty('records');
+  });
+
+  test('single endpoint full failure → returns { error } (unchanged reject path)', () => {
+    const insertFail = { error: { httpCode: 401, message: 'insert failed' } };
+    const out = mergeFlowDBCollectResponses([insertFail], emptyCvvMap);
+    expect(out).toEqual({ error: { httpCode: 401, message: 'insert failed' } });
+  });
+
+  test('applies CVV mock to surviving success records in a mixed outcome', () => {
+    const insertFail = { error: { httpCode: 401, message: 'invalid token' } };
+    const updateOk = {
+      records: [{
+        tableName: 'table1',
+        skyflowId: 'id1',
+        tokens: { cvv: [{ token: 'real-cvv-token' }] },
+        httpCode: 200,
+      }],
+    };
+    const cvvMap = { insert: {}, update: { id1: { cvv: '123' } } };
+    const out = mergeFlowDBCollectResponses([insertFail, updateOk], cvvMap);
+    // token replaced with a 3-char mock (never the entered value), error record appended
+    expect(out.records[0].tokens.cvv[0].token).not.toBe('real-cvv-token');
+    expect(out.records[0].tokens.cvv[0].token).toHaveLength(3);
+    expect(out.records[1]).toEqual({ error: 'invalid token', httpCode: 401 });
   });
 });

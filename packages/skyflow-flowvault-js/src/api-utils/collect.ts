@@ -210,6 +210,43 @@ export const replaceCVVTokensInResponse = (
   return records;
 };
 
+// Merge the flowDB insert + update responses that fire together in one collect.
+// Each response is either a success / per-record-partial-failure body
+// ({ records }, where an individual record may carry an inline `error`) or a
+// full endpoint failure ({ error }, no records). Outcomes:
+//   - at least one endpoint returned records → resolve { records }, folding every
+//     fully-failed endpoint into a synthesized inline error record so its failure
+//     is not lost (mirrors flowDB collect's existing per-record partial-failure
+//     contract, rather than discarding the successful sibling). httpCode is
+//     included on the synthesized record only when the error envelope carried a
+//     numeric code.
+//   - every endpoint fully failed (nothing landed) → surface the first { error }
+//     so the caller rejects, unchanged from a single full failure.
+// Returns a plain union so the caller (skyflow-frame-controller) decides
+// resolve vs reject; kept pure so it is unit-testable without the frame harness.
+export const mergeFlowDBCollectResponses = (
+  responses: any[],
+  cvvMap: CVVMap,
+): CollectResponse | CollectError => {
+  const records: CollectRecord[] = responses.reduce(
+    (acc, response) => acc.concat(response?.records || []),
+    [] as CollectRecord[],
+  );
+  const failures = responses.filter((response) => response?.error !== undefined);
+  if (failures.length !== 0 && records.length === 0) {
+    return failures[0] as CollectError;
+  }
+  replaceCVVTokensInResponse(records, cvvMap);
+  failures.forEach((failure) => {
+    const httpCode = Number(failure.error?.httpCode);
+    records.push({
+      error: failure.error?.message ?? '',
+      ...(Number.isFinite(httpCode) ? { httpCode } : {}),
+    });
+  });
+  return { records };
+};
+
 export const constructFlowDBInsertError = (error: any): CollectError => {
   const rawError = error?.data?.error;
   if (rawError) {

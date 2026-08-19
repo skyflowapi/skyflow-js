@@ -131,7 +131,12 @@ export interface CollectRecord {
   skyflowId?: string;
   tokens?: Record<string, CollectRecordToken[]>;
   hashedData?: Record<string, CollectRecordHashedData[]>;
-  httpCode: number;
+  // Real insert/update records (RecordResponseObject) always carry httpCode (the
+  // flowdb.proto marks it `required`), but a mixed collect also folds a
+  // fully-failed sibling endpoint into a synthesized inline error record whose
+  // httpCode is only present when the error envelope carried a numeric code —
+  // hence optional on the public contract.
+  httpCode?: number;
   error?: string;
 }
 
