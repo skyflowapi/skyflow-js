@@ -10,7 +10,7 @@ import Skyflow, {
   RevealOptions,
   RevealResponse,
   SkyflowConfig,
-  ComposableRevealElement
+  ComposableRevealElement,
   SkyflowError,
 } from 'skyflow-flowvault-js';
 
