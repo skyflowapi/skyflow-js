@@ -12,12 +12,18 @@ import {
 } from '../../src/api-utils/reveal';
 import { Env, LogLevel, RedactionType } from '../../src/utils/common';
 import Client from '@core/client';
+import { getAccessToken } from '@core/utils/bus-events';
 
 // flowvault's reveal data layer imports getAccessToken from @core/utils/bus-events
 // (jest applies moduleNameMapper to jest.mock paths, so mock the @core path).
 jest.mock('@core/utils/bus-events', () => ({
   getAccessToken: jest.fn(() => Promise.resolve('mockAccessToken')),
 }));
+
+afterEach(() => {
+  getAccessToken.mockClear();
+  getAccessToken.mockImplementation(() => Promise.resolve('mockAccessToken'));
+});
 
 const skyflowConfig = {
   vaultID: 'vault123',
@@ -175,6 +181,18 @@ describe('constructFlowDBDetokenizeError', () => {
     expect(out.error).toEqual({ httpCode: 500, message: 'network error' });
     expect(out.errors).toEqual([{ token: '', error: { code: 500, description: 'network error' } }]);
   });
+
+  it('normalizes error.data itself when data carries no nested error key', () => {
+    const err = {
+      data: {
+        grpc_code: 5, http_code: 500, message: 'raw body, no error key',
+      },
+      error: { code: 500, description: 'raw body, no error key' },
+    };
+    expect(constructFlowDBDetokenizeError(err).error).toEqual({
+      grpcCode: 5, httpCode: 500, message: 'raw body, no error key',
+    });
+  });
 });
 
 describe('formatRecordsForClientFlowDB', () => {
@@ -222,6 +240,38 @@ describe('formatRecordsForClientFlowDB', () => {
       },
     });
   });
+
+  it('handles a response with only inline errors (no records key)', () => {
+    const response = { errors: [{ token: 'bad', error: { code: 404, description: 'nf' } }] };
+    expect(formatRecordsForClientFlowDB(response)).toEqual({
+      records: [{ error: 'nf', token: 'bad', httpCode: 404 }],
+    });
+  });
+
+  it('uses the raw error when an inline error carries no description', () => {
+    const response = { records: [], errors: [{ token: 'bad', error: 'flat error string' }] };
+    expect(formatRecordsForClientFlowDB(response).records[0].error).toBe('flat error string');
+  });
+
+  it('keeps a tokenGroupName-only record and skips empty metadata', () => {
+    const response = {
+      records: [
+        { token: 't1', tokenGroupName: 'grp', metadata: {}, httpCode: 200 },
+      ],
+    };
+    expect(formatRecordsForClientFlowDB(response)).toEqual({
+      records: [{ token: 't1', tokenGroupName: 'grp', httpCode: 200 }],
+    });
+  });
+
+  it('normalizes metadata that lacks table/skyflowID (leaves other keys intact)', () => {
+    const response = {
+      records: [{ token: 't1', metadata: { region: 'us' }, httpCode: 200 }],
+    };
+    expect(formatRecordsForClientFlowDB(response)).toEqual({
+      records: [{ token: 't1', metadata: { region: 'us' }, httpCode: 200 }],
+    });
+  });
 });
 
 describe('formatRecordsForClientComposableFlowDB', () => {
@@ -263,6 +313,29 @@ describe('formatRecordsForClientComposableFlowDB', () => {
     const response = { error: { httpCode: 404, message: 'Vault not found.' } };
     expect(formatRecordsForClientComposableFlowDB(response)).toEqual({
       error: { httpCode: 404, message: 'Vault not found.' },
+    });
+  });
+
+  it('handles a response with only errors (no records key) and flat error strings', () => {
+    const response = { errors: [{ error: 'flat error' }] };
+    expect(formatRecordsForClientComposableFlowDB(response)).toEqual({
+      records: [{ error: 'flat error', token: '', httpCode: undefined }],
+    });
+  });
+
+  it('defaults token to empty string when a record has no index-0 payload', () => {
+    const response = { records: [{ frameId: 'f1' }] };
+    expect(formatRecordsForClientComposableFlowDB(response)).toEqual({
+      records: [{ token: '', httpCode: undefined }],
+    });
+  });
+
+  it('keeps a tokenGroupName-only record and skips empty metadata', () => {
+    const response = {
+      records: [{ 0: { token: 't1', tokenGroupName: 'grp', metadata: {}, httpCode: 200 }, frameId: 'f1' }],
+    };
+    expect(formatRecordsForClientComposableFlowDB(response)).toEqual({
+      records: [{ token: 't1', tokenGroupName: 'grp', httpCode: 200 }],
     });
   });
 });
@@ -363,6 +436,55 @@ describe('fetchRecordsByTokenIdFlowDB', () => {
         },
       });
   });
+
+  it('routes a rejected body carrying a response array through the per-token success path', async () => {
+    const client = makeClient();
+    // Non-2xx status but the body still has a `response` array (partial failure):
+    // per-token results/errors must flow to the client, not the top-level error.
+    jest.spyOn(client, 'request').mockRejectedValue({
+      error: { code: 400, description: 'partial failure' },
+      data: {
+        response: [
+          { token: 'ok', value: 'v', httpCode: 200 },
+          { token: 'bad', value: null, error: 'not found', httpCode: 404 },
+        ],
+      },
+    });
+
+    await expect(fetchRecordsByTokenIdFlowDB([{ token: 'ok' }, { token: 'bad' }], client))
+      .rejects.toEqual({
+        records: [{ token: 'ok', value: 'v', httpCode: 200 }],
+        errors: [{ token: 'bad', error: { code: 404, description: 'not found' } }],
+      });
+  });
+
+  it('rejects with a top-level { error } when the request throws synchronously', async () => {
+    const client = makeClient();
+    jest.spyOn(client, 'request').mockImplementation(() => { throw new Error('sync boom'); });
+
+    await expect(fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client))
+      .rejects.toHaveProperty('error');
+  });
+
+  it('rejects when the access-token fetch fails', async () => {
+    const client = makeClient();
+    const tokenError = { error: { code: 401, description: 'token fetch failed' } };
+    getAccessToken.mockImplementationOnce(() => Promise.reject(tokenError));
+
+    await expect(fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client))
+      .rejects.toEqual(tokenError);
+  });
+
+  it('falls back to an empty clientId when the client carries no uuid', async () => {
+    const client = Client.fromJSON({ ...clientJSON, metaData: {} });
+    jest.spyOn(client, 'request').mockResolvedValue({
+      response: [{ token: 'token1', value: 'val1', httpCode: 200 }],
+    });
+
+    const result = await fetchRecordsByTokenIdFlowDB([{ token: 'token1' }], client);
+    expect(getAccessToken).toHaveBeenCalledWith('');
+    expect(result).toEqual({ records: [{ token: 'token1', value: 'val1', httpCode: 200 }] });
+  });
 });
 
 describe('fetchRecordsByTokenIdComposableFlowDB', () => {
@@ -443,6 +565,51 @@ describe('fetchRecordsByTokenIdComposableFlowDB', () => {
       error: {
         grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
       },
+    });
+  });
+
+  it('carries tokenGroupName through and defaults frameId to empty for an unmapped token', () => {
+    const client = makeClient();
+    jest.spyOn(client, 'request').mockResolvedValue({
+      response: [{ token: 'unmapped', value: 'v', tokenGroupName: 'grp', httpCode: 200 }],
+    });
+
+    return fetchRecordsByTokenIdComposableFlowDB(
+      [{ token: 'token1', iframeName: 'frame1' }], client, 'mockToken',
+    ).then((result) => {
+      expect(result.records).toEqual([
+        {
+          0: {
+            token: 'unmapped', value: 'v', tokenGroupName: 'grp', httpCode: 200,
+          },
+          frameId: '',
+        },
+      ]);
+    });
+  });
+
+  it('defaults token/iframeName keys to empty string in the frameId map', async () => {
+    const client = makeClient();
+    jest.spyOn(client, 'request').mockResolvedValue({
+      response: [{ token: 't', value: 'v', httpCode: 200 }],
+    });
+
+    // Records with neither token nor iframeName exercise the `?? ''` fallbacks
+    // while the frame map is built.
+    const result = await fetchRecordsByTokenIdComposableFlowDB([{}], client, 'mockToken');
+    expect(result.records[0].frameId).toBe('');
+  });
+
+  it('defaults an error record frameId to empty for an unmapped token', async () => {
+    const client = makeClient();
+    jest.spyOn(client, 'request').mockResolvedValue({
+      response: [{ token: 'unmapped-err', value: null, error: 'not found', httpCode: 404 }],
+    });
+
+    await expect(
+      fetchRecordsByTokenIdComposableFlowDB([{ token: 'token1', iframeName: 'frame1' }], client, 'mockToken'),
+    ).rejects.toEqual({
+      errors: [expect.objectContaining({ token: 'unmapped-err', frameId: '' })],
     });
   });
 });

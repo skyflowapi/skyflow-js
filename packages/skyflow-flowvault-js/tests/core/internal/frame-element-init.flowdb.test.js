@@ -297,3 +297,75 @@ describe('FrameElementInit tokenize (flowDB variant)', () => {
     await expect(instance['tokenize']({ options: {} }, config)).rejects.toEqual({ error: 'bad-request' });
   });
 });
+
+describe('FrameElementInit static + dispatchCollectRequest branches (flowDB)', () => {
+  test('startFrameElement instantiates the singleton frame element', () => {
+    expect(() => FrameElementInit.startFrameElement()).not.toThrow();
+  });
+
+  // dispatchCollectRequest is exercised directly to reach the errorMessages
+  // (setErrorMessages) branch and the per-response failure-reject branch.
+  test('applies client error messages and rejects the first failing response', async () => {
+    const instance = new FrameElementInit();
+    // Reset the request builders (an earlier test left them throwing).
+    constructFlowDBInsertRequest.mockImplementation(() => ({ vaultID: 'vault123', records: [] }));
+    constructFlowDBUpdateRequest.mockImplementation(() => ({ vaultID: 'vault123', records: [] }));
+    constructElementsInsertReq.mockImplementation(() => [
+      { records: [{ table: 'patients', fields: { alpha: 'A' } }] },
+      { updateRecords: [] },
+    ]);
+    insertDataInCollectFlowDB.mockResolvedValue({ error: { http_code: 500, message: 'boom' } });
+    const errorMessages = { NOT_FOUND: 'custom not found' };
+    await expect(
+      instance['dispatchCollectRequest'](
+        { patients: { alpha: 'A' } }, {}, {}, { options: {} }, config, errorMessages,
+      ),
+    ).rejects.toEqual({ error: { http_code: 500, message: 'boom' } });
+  });
+
+  test('resolves { records } (no errorMessages) when every response succeeds', async () => {
+    const instance = new FrameElementInit();
+    constructFlowDBInsertRequest.mockImplementation(() => ({ vaultID: 'vault123', records: [] }));
+    constructFlowDBUpdateRequest.mockImplementation(() => ({ vaultID: 'vault123', records: [] }));
+    constructElementsInsertReq.mockImplementation(() => [
+      { records: [{ table: 'patients', fields: { alpha: 'A' } }] },
+      { updateRecords: [] },
+    ]);
+    insertDataInCollectFlowDB.mockResolvedValue({ records: [{ id: 'ins1' }] });
+    await expect(
+      instance['dispatchCollectRequest'](
+        { patients: { alpha: 'A' } }, {}, {}, { options: {} }, config,
+      ),
+    ).resolves.toEqual({ records: [{ id: 'ins1' }] });
+  });
+
+  test('defaults to [] for a success response with no records key', async () => {
+    const instance = new FrameElementInit();
+    constructFlowDBInsertRequest.mockImplementation(() => ({ vaultID: 'vault123', records: [] }));
+    constructFlowDBUpdateRequest.mockImplementation(() => ({ vaultID: 'vault123', records: [] }));
+    constructElementsInsertReq.mockImplementation(() => [
+      { records: [{ table: 'patients', fields: { alpha: 'A' } }] },
+      { updateRecords: [] },
+    ]);
+    // A successful response that omits `records` exercises the `|| []` fallback.
+    insertDataInCollectFlowDB.mockResolvedValue({});
+    await expect(
+      instance['dispatchCollectRequest'](
+        { patients: { alpha: 'A' } }, {}, {}, { options: {} }, config,
+      ),
+    ).resolves.toEqual({ records: [] });
+  });
+
+  test('makes no request (pending promise) when there is nothing to insert or update', () => {
+    const instance = new FrameElementInit();
+    constructFlowDBInsertRequest.mockImplementation(() => ({ vaultID: 'vault123', records: [] }));
+    constructFlowDBUpdateRequest.mockImplementation(() => ({ vaultID: 'vault123', records: [] }));
+    constructElementsInsertReq.mockImplementation(() => [{ records: [] }, { updateRecords: [] }]);
+    const result = instance['dispatchCollectRequest'](
+      {}, {}, {}, { options: {} }, config,
+    );
+    expect(result).toBeInstanceOf(Promise);
+    expect(insertDataInCollectFlowDB).not.toHaveBeenCalled();
+    expect(updateDataInCollectFlowDB).not.toHaveBeenCalled();
+  });
+});

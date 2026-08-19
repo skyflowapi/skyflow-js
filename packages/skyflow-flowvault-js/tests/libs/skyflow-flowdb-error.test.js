@@ -43,6 +43,15 @@ describe('normalizeFlowDBError', () => {
     expect(normalizeFlowDBError('boom')).toEqual({ message: 'boom' });
   });
 
+  it('treats a null raw body as empty (falls back to {} for destructuring)', () => {
+    expect(normalizeFlowDBError(null)).toEqual({});
+  });
+
+  it('emits details only when present', () => {
+    expect(normalizeFlowDBError({ details: [{ x: 1 }] })).toEqual({ details: [{ x: 1 }] });
+    expect(normalizeFlowDBError({ message: 'm' })).not.toHaveProperty('details');
+  });
+
   it('accepts the internal SkyflowError code/description shape', () => {
     expect(normalizeFlowDBError({ code: 409, description: 'conflict' }))
       .toEqual({ httpCode: 409, message: 'conflict' });

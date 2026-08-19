@@ -14,8 +14,11 @@ import {
   validateFlowDBUpsertOptions,
   validateFlowDBAdditionalFieldsInCollect,
   validateCollectElementOptions,
+  validateRevealElementRecords,
+  validateRevealOptions,
+  validateCollectElementInput,
 } from '../../src/utils/validators';
-import { UpdateType } from '../../src/utils/common';
+import { UpdateType, LogLevel } from '../../src/utils/common';
 
 describe('validateFlowDBUpsertOptions', () => {
   test('B1: accepts a valid flowDB upsert ({ tableName, uniqueColumns })', () => {
@@ -62,6 +65,12 @@ describe('validateFlowDBUpsertOptions', () => {
     expect(() => validateFlowDBUpsertOptions([
       { tableName: 'cards', uniqueColumns: ['card_number'], updateType: 'FOO' as any },
     ])).toThrow(/updateType/);
+  });
+
+  test('rejects a non-object / array / null entry (names the index)', () => {
+    expect(() => validateFlowDBUpsertOptions([null as any])).toThrow(/index 0/);
+    expect(() => validateFlowDBUpsertOptions(['cards' as any])).toThrow(/index 0/);
+    expect(() => validateFlowDBUpsertOptions([[] as any])).toThrow(/index 0/);
   });
 
   test('regression: rejects the privacyDB upsert shape ({ table, column })', () => {
@@ -142,5 +151,111 @@ describe('validateCollectElementOptions', () => {
       .toThrow(/returnMockValue/);
     expect(() => validateCollectElementOptions({ returnMockValue: 1 as any }))
       .toThrow(SkyflowError);
+  });
+});
+
+describe('validateRevealElementRecords', () => {
+  test('accepts a valid token-only record (optional string label/altText)', () => {
+    expect(() => validateRevealElementRecords([{ token: 'tok-1' }])).not.toThrow();
+    expect(() => validateRevealElementRecords([
+      { token: 'tok-1', label: 'Card', altText: 'xxxx' } as any,
+    ])).not.toThrow();
+  });
+
+  test('rejects an empty records array', () => {
+    expect(() => validateRevealElementRecords([])).toThrow(SkyflowError);
+  });
+
+  test("rejects a record missing the 'token' key", () => {
+    expect(() => validateRevealElementRecords([{} as any])).toThrow(SkyflowError);
+    expect(() => validateRevealElementRecords([null as any])).toThrow(SkyflowError);
+  });
+
+  test('rejects an empty token', () => {
+    expect(() => validateRevealElementRecords([{ token: '' }])).toThrow(SkyflowError);
+  });
+
+  test('rejects a non-string token', () => {
+    expect(() => validateRevealElementRecords([{ token: 123 as any }])).toThrow(SkyflowError);
+  });
+
+  test('rejects a non-string label', () => {
+    expect(() => validateRevealElementRecords([{ token: 'tok-1', label: 5 as any }]))
+      .toThrow(SkyflowError);
+  });
+
+  test('rejects a non-string altText', () => {
+    expect(() => validateRevealElementRecords([{ token: 'tok-1', altText: 5 as any }]))
+      .toThrow(SkyflowError);
+  });
+});
+
+describe('validateRevealOptions', () => {
+  test('is a no-op when options are absent or tokenGroupRedactions is undefined', () => {
+    expect(() => validateRevealOptions()).not.toThrow();
+    expect(() => validateRevealOptions({})).not.toThrow();
+  });
+
+  test('accepts a valid tokenGroupRedactions array', () => {
+    expect(() => validateRevealOptions({
+      tokenGroupRedactions: [{ tokenGroupName: 'grp1', redaction: 'PLAIN_TEXT' }],
+    })).not.toThrow();
+  });
+
+  test('rejects a non-array tokenGroupRedactions', () => {
+    expect(() => validateRevealOptions({ tokenGroupRedactions: {} as any }))
+      .toThrow(/tokenGroupRedactions/);
+  });
+
+  test('rejects an entry with an invalid tokenGroupName (names the index)', () => {
+    expect(() => validateRevealOptions({
+      tokenGroupRedactions: [{ tokenGroupName: '', redaction: 'PLAIN_TEXT' }],
+    })).toThrow(/index 0/);
+    expect(() => validateRevealOptions({
+      tokenGroupRedactions: [{ redaction: 'PLAIN_TEXT' } as any],
+    })).toThrow(/index 0/);
+  });
+
+  test('rejects an entry with an invalid redaction', () => {
+    expect(() => validateRevealOptions({
+      tokenGroupRedactions: [{ tokenGroupName: 'grp1', redaction: '' }],
+    })).toThrow(/index 0/);
+    expect(() => validateRevealOptions({
+      tokenGroupRedactions: [null as any],
+    })).toThrow(/index 0/);
+  });
+});
+
+describe('validateCollectElementInput', () => {
+  test('accepts a valid input', () => {
+    expect(() => validateCollectElementInput({ type: 'CARD_NUMBER' } as any, LogLevel.ERROR))
+      .not.toThrow();
+  });
+
+  test("rejects an input missing the 'type' key", () => {
+    expect(() => validateCollectElementInput({} as any, LogLevel.ERROR)).toThrow(SkyflowError);
+  });
+
+  test('rejects an empty type', () => {
+    expect(() => validateCollectElementInput({ type: '' } as any, LogLevel.ERROR))
+      .toThrow(SkyflowError);
+  });
+
+  test('warns (does not throw) when the deprecated altText key is present', () => {
+    expect(() => validateCollectElementInput(
+      { type: 'CARD_NUMBER', altText: 'xxxx' } as any, LogLevel.WARN,
+    )).not.toThrow();
+  });
+
+  test('rejects a non-string skyflowId', () => {
+    expect(() => validateCollectElementInput(
+      { type: 'CARD_NUMBER', skyflowId: 5 } as any, LogLevel.ERROR,
+    )).toThrow(SkyflowError);
+  });
+
+  test('accepts a string skyflowId', () => {
+    expect(() => validateCollectElementInput(
+      { type: 'CARD_NUMBER', skyflowId: 'id1' } as any, LogLevel.ERROR,
+    )).not.toThrow();
   });
 });

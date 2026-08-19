@@ -9,7 +9,12 @@ import {
   generateMockCVV,
   MOCK_CVV_THREE_DIGIT,
   MOCK_CVV_FOUR_DIGIT,
+  getSDKNameAndVersion,
 } from '../../src/utils/helpers';
+
+// SDK identity injected by tests/jest.setup.js from this package's package.json.
+declare const SDK_NAME: string;
+declare const SDK_VERSION: string;
 
 describe('generateMockCVV', () => {
   test('returns the fixed 3-digit mock for a 3-digit CVV', () => {
@@ -31,5 +36,24 @@ describe('generateMockCVV', () => {
     expect(generateMockCVV(0)).toBe('');
     expect(generateMockCVV(2)).toBe('');
     expect(generateMockCVV(5)).toBe('');
+  });
+});
+
+describe('getSDKNameAndVersion', () => {
+  test('returns the build-injected SDK identity when metaData is undefined', () => {
+    expect(getSDKNameAndVersion()).toEqual({ sdkName: SDK_NAME, sdkVersion: SDK_VERSION });
+  });
+
+  test('returns the injected identity for an empty string', () => {
+    expect(getSDKNameAndVersion('')).toEqual({ sdkName: SDK_NAME, sdkVersion: SDK_VERSION });
+  });
+
+  test('returns the injected identity when metaData has no "@" separator', () => {
+    expect(getSDKNameAndVersion('no-separator')).toEqual({ sdkName: SDK_NAME, sdkVersion: SDK_VERSION });
+  });
+
+  test('parses sdkName and sdkVersion from a "name@version" metaData string', () => {
+    expect(getSDKNameAndVersion('skyflow-react-js@1.2.3'))
+      .toEqual({ sdkName: 'skyflow-react-js', sdkVersion: '1.2.3' });
   });
 });

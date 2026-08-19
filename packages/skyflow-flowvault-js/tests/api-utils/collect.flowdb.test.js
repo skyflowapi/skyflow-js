@@ -8,6 +8,7 @@ import {
   insertDataInCollectFlowDB,
   updateDataInCollectFlowDB,
   mergeFlowDBCollectResponses,
+  replaceCVVTokensInResponse,
 } from '../../src/api-utils/collect';
 
 // Note: the flowvault collect data layer receives the auth token as a parameter
@@ -23,6 +24,12 @@ describe('constructFlowDBInsertRequest', () => {
       { table: 'table2', fields: { ssn: '999' } },
     ],
   };
+
+  test('defaults options to { tokens: true } when omitted', () => {
+    const req = constructFlowDBInsertRequest(finalInsertRecords, undefined, 'vault123');
+    expect(req.records.map((r) => r.tableName)).toEqual(['table1', 'table2']);
+    expect(req.records[0].upsert).toBeUndefined();
+  });
 
   test('maps records to flowDB shape with vaultID at root and tableName per record', () => {
     const req = constructFlowDBInsertRequest(finalInsertRecords, { tokens: true }, 'vault123');
@@ -192,6 +199,12 @@ describe('constructFlowDBUpdateRequest', () => {
     ],
   };
 
+  test('defaults options to { tokens: true } when omitted (no updateType)', () => {
+    const req = constructFlowDBUpdateRequest(finalUpdateRecords, undefined, 'vault123');
+    expect(req.records[0]).toEqual({ skyflowID: 'id1', tableName: 'table1', data: { name: 'Vivek' } });
+    expect(req.records[0].updateType).toBeUndefined();
+  });
+
   test('maps to flowDB update shape, omitting table/skyflowID from data', () => {
     const req = constructFlowDBUpdateRequest(finalUpdateRecords, { tokens: true }, 'vault123');
     expect(req).toEqual({
@@ -222,6 +235,16 @@ describe('constructFlowDBUpdateRequest', () => {
 });
 
 describe('additionalFields (AdditionalFields) → flowDB request bodies', () => {
+  test('passes element req/update through unchanged when no additionalFields are supplied', () => {
+    const req = { table1: { ssn: '999' } };
+    const update = { id1: { name: 'V', table: 'table1' } };
+    const [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(req, update, {});
+    expect(finalInsertRecords.records).toEqual([{ table: 'table1', fields: { ssn: '999' } }]);
+    expect(finalUpdateRecords.updateRecords).toEqual([
+      { table: 'table1', fields: { name: 'V', table: 'table1' }, skyflowID: 'id1' },
+    ]);
+  });
+
   test('records without skyflowId become inserts (tableName/data) in the flowDB insert body', () => {
     const options = {
       additionalFields: {
@@ -256,6 +279,40 @@ describe('additionalFields (AdditionalFields) → flowDB request bodies', () => 
       vaultID: 'vault123',
       records: [{ skyflowID: 'id1', tableName: 'table1', data: { name: 'Vivek' } }],
     });
+  });
+
+  test('merges an additionalFields record into an existing update id (same skyflowId)', () => {
+    const options = {
+      additionalFields: {
+        records: [{ tableName: 'table1', data: { newCol: 'y' }, skyflowId: 'id1' }],
+      },
+    };
+    // `update` already carries id1 (from an element with that skyflowID), so the
+    // additionalFields record merges into it rather than creating a new entry.
+    const update = { id1: { existingCol: 'x', table: 'table1' } };
+    const [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq({}, update, options);
+
+    expect(finalInsertRecords.records).toHaveLength(0);
+    expect(finalUpdateRecords.updateRecords).toEqual([
+      { table: 'table1', fields: { newCol: 'y', existingCol: 'x', table: 'table1' }, skyflowID: 'id1' },
+    ]);
+  });
+
+  test('merges an additionalFields record into an existing insert table (same tableName)', () => {
+    const options = {
+      additionalFields: {
+        records: [{ tableName: 'table1', data: { newCol: 'y' } }],
+      },
+    };
+    // `req` already carries table1 (from an element on that table), so the
+    // additionalFields record merges into it rather than creating a new entry.
+    const req = { table1: { existingCol: 'x' } };
+    const [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(req, {}, options);
+
+    expect(finalUpdateRecords.updateRecords).toHaveLength(0);
+    expect(finalInsertRecords.records).toEqual([
+      { table: 'table1', fields: { newCol: 'y', existingCol: 'x' } },
+    ]);
   });
 
   test('mixes inserts and skyflowId updates in a single additionalFields batch', () => {
@@ -450,5 +507,88 @@ describe('mergeFlowDBCollectResponses (mixed insert/update outcomes)', () => {
     expect(out.records[0].tokens.cvv[0].token).not.toBe('real-cvv-token');
     expect(out.records[0].tokens.cvv[0].token).toHaveLength(3);
     expect(out.records[1]).toEqual({ error: 'invalid token', httpCode: 401 });
+  });
+});
+
+describe('replaceCVVTokensInResponse', () => {
+  const emptyCvvMap = { insert: {}, update: {} };
+
+  test('returns records unchanged when records is falsy', () => {
+    expect(replaceCVVTokensInResponse(undefined, emptyCvvMap)).toBeUndefined();
+    expect(replaceCVVTokensInResponse(null, emptyCvvMap)).toBeNull();
+  });
+
+  test('skips a record with no tokens (and a null record)', () => {
+    const records = [null, { tableName: 't1', httpCode: 200 }];
+    expect(replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '123' } }, update: {} }))
+      .toBe(records);
+    expect(records[1]).toEqual({ tableName: 't1', httpCode: 200 });
+  });
+
+  test('leaves tokens untouched when no columnMap matches the record', () => {
+    const records = [{ tableName: 't1', tokens: { cvv: 'real' } }];
+    replaceCVVTokensInResponse(records, { insert: { other: { cvv: '123' } }, update: {} });
+    expect(records[0].tokens.cvv).toBe('real');
+  });
+
+  test('insert path: replaces a flat primitive token with the length-matched mock', () => {
+    const records = [{ tableName: 't1', tokens: { cvv: 'real-token' } }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '123' } }, update: {} });
+    expect(records[0].tokens.cvv).toBe('817');
+  });
+
+  test('update path: replaces the token inside a non-array object token value', () => {
+    const records = [{ skyflowId: 'id1', tokens: { cvv: { token: 'real-token' } } }];
+    replaceCVVTokensInResponse(records, { insert: {}, update: { id1: { cvv: '1234' } } });
+    expect(records[0].tokens.cvv.token).toBe('8173');
+  });
+
+  test('flat array column: replaces only the path-less entries', () => {
+    const records = [{
+      tableName: 't1',
+      tokens: { cvv: [{ token: 'a' }, { token: 'b', path: 'sub' }] },
+    }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '123' } }, update: {} });
+    expect(records[0].tokens.cvv[0].token).toBe('817');
+    expect(records[0].tokens.cvv[1].token).toBe('b');
+  });
+
+  test('nested array column: replaces only the entry whose path exactly matches', () => {
+    const records = [{
+      tableName: 't1',
+      tokens: { address: [{ token: 'a', path: 'city' }, { token: 'b', path: 'ward' }] },
+    }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { 'address.city': '123' } }, update: {} });
+    expect(records[0].tokens.address[0].token).toBe('817');
+    expect(records[0].tokens.address[1].token).toBe('b');
+  });
+
+  test('skips array entries that are not token-bearing objects', () => {
+    const records = [{
+      tableName: 't1',
+      tokens: { cvv: [null, 'str', { noToken: 1 }, { token: 'x' }] },
+    }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '123' } }, update: {} });
+    expect(records[0].tokens.cvv).toEqual([null, 'str', { noToken: 1 }, { token: '817' }]);
+  });
+
+  test('skips a mapped column that is absent from the token map', () => {
+    const records = [{ tableName: 't1', tokens: { other: 'keep' } }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '123' } }, update: {} });
+    expect(records[0].tokens.other).toBe('keep');
+  });
+
+  test('uses an empty-string mock when the entered value is empty', () => {
+    const records = [{ tableName: 't1', tokens: { cvv: 'real' } }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '' } }, update: {} });
+    expect(records[0].tokens.cvv).toBe('');
+  });
+
+  test('leaves a nested-path column untouched when its top-level token value is not an array', () => {
+    // nestedPath is defined ('city') but tokens.address is a plain object, not an
+    // array of path-bearing entries, so nothing is replaced.
+    const records = [{ tableName: 't1', tokens: { address: { token: 'keep' } } }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { 'address.city': '123' } }, update: {} });
+    expect(records[0].tokens.address).toEqual({ token: 'keep' });
   });
 });

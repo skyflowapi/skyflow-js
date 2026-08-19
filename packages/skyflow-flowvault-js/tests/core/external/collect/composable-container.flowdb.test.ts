@@ -286,4 +286,20 @@ describe('flowDB composable collect container', () => {
         .toThrow(SkyflowError);
     });
   });
+
+  // wrapCollectError maps a truthy error to SkyflowFlowDBError; a falsy error
+  // (the deferred/no-error path) passes through unchanged.
+  describe('wrapCollectError', () => {
+    const container = new ComposableContainer(metaData, context, { layout: [1] });
+    const wrap = (err: any) => (container as any).wrapCollectError(err);
+
+    it('wraps a truthy error as SkyflowFlowDBError', () => {
+      expect(wrap({ http_code: 500, message: 'boom' })).toBeInstanceOf(SkyflowFlowDBError);
+    });
+
+    it('passes a falsy error through unchanged', () => {
+      expect(wrap(null)).toBeNull();
+      expect(wrap(undefined)).toBeUndefined();
+    });
+  });
 });

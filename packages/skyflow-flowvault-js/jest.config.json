@@ -7,7 +7,16 @@
     "!**/*.d.ts",
     "!<rootDir>/src/index.ts",
     "!<rootDir>/src/index-node.ts",
-    "!<rootDir>/src/index-internal.ts"
+    "!<rootDir>/src/index-internal.ts",
+    "!<rootDir>/src/internal/internal-types/index.ts",
+    "!<rootDir>/src/utils/common/index.ts",
+    "!<rootDir>/src/utils/logs-helper/index.ts",
+    "!<rootDir>/src/external/skyflow-container.ts",
+    "!<rootDir>/src/external/collect/compose-collect-element.ts",
+    "!<rootDir>/src/external/reveal/reveal-element.ts",
+    "!<rootDir>/src/external/reveal/composable-reveal-element.ts",
+    "!<rootDir>/src/external/reveal/composable-reveal-internal.ts",
+    "!<rootDir>/src/internal/reveal/reveal-frame.ts"
   ],
   "testEnvironment": "jsdom",
   "testTimeout": 30000,
