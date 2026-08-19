@@ -74,6 +74,12 @@ abstract class CoreSkyflowFrameController<
   // privacyDB always rejects the reveal error branch.
   protected revealResolvesPartialFailure: boolean = false;
 
+  // privacyDB overrides to `true`: it registers the pure-JS data-access channel
+  // (DETOKENIZE/INSERT/UPDATE/GET/DELETE) and so announces those listeners in the
+  // readiness handshake. flowDB is elements-only — it registers no such channel,
+  // so it must not advertise listeners it never wired.
+  protected registersDataAccessListeners: boolean = false;
+
   constructor(clientId: string) {
     this.clientId = clientId || '';
     const encodedClientDomain = getValueFromName(window.name, 2);
@@ -220,10 +226,15 @@ abstract class CoreSkyflowFrameController<
           ...data.client.config,
         };
         this.client = Client.fromJSON(data.client) as any;
-        Object.keys(PUREJS_TYPES).forEach((key) => {
-          printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
-            CLASS_NAME, PUREJS_TYPES[key]), MessageType.LOG, this.context.logLevel);
-        });
+        // Only announce the pure-JS listeners when this variant actually registers
+        // the channel (privacyDB). flowDB leaves registerDataAccessListeners a
+        // no-op, so it must not log listeners that were never wired.
+        if (this.registersDataAccessListeners) {
+          Object.keys(PUREJS_TYPES).forEach((key) => {
+            printLog(parameterizedString(logs.infoLogs.LISTEN_PURE_JS_REQUEST,
+              CLASS_NAME, PUREJS_TYPES[key]), MessageType.LOG, this.context.logLevel);
+          });
+        }
       });
   }
 

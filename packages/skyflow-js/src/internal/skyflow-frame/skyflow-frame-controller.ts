@@ -74,6 +74,10 @@ import {
 const CLASS_NAME = 'SkyflowFrameController';
 class SkyflowFrameController
   extends CoreSkyflowFrameController<TokenizeDataInput, CollectResponse, RevealResponse> {
+  // privacyDB registers the pure-JS data-access channel, so it announces those
+  // listeners in the readiness handshake (see registerDataAccessListeners).
+  protected registersDataAccessListeners = true;
+
   static init(clientId: string): SkyflowFrameController {
     injectCoralogixTrackingScript();
     return new SkyflowFrameController(clientId);
