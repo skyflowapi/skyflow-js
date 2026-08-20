@@ -315,6 +315,26 @@ describe('additionalFields (AdditionalFields) → flowDB request bodies', () => 
     ]);
   });
 
+  test('does not pollute Object.prototype when the merge source carries a __proto__ key', () => {
+    const options = {
+      additionalFields: {
+        records: [{ tableName: 'table1', data: { newCol: 'y' } }],
+      },
+    };
+    // Collected element data (the merge source) carries a malicious __proto__
+    // key as an own property, as it would after JSON parsing.
+    const req = { table1: JSON.parse('{"existingCol":"x","__proto__":{"polluted":"yes"}}') };
+    const [finalInsertRecords] = constructElementsInsertReq(req, {}, options);
+
+    expect(({}).polluted).toBeUndefined();
+    expect(Object.prototype.polluted).toBeUndefined();
+    // Legitimate fields still merge; the forbidden key is dropped.
+    expect(finalInsertRecords.records).toEqual([
+      { table: 'table1', fields: { newCol: 'y', existingCol: 'x' } },
+    ]);
+    delete Object.prototype.polluted;
+  });
+
   test('mixes inserts and skyflowId updates in a single additionalFields batch', () => {
     const options = {
       additionalFields: {

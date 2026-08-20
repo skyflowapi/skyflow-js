@@ -132,6 +132,24 @@ describe("Testing constructElementsInsertReq method", () => {
       );
     }
   });
+
+  test("does not pollute Object.prototype when merging an additionalFields record into an existing table", () => {
+    // Collected element data (the merge source) carries a malicious __proto__
+    // key as an own property, as it would after JSON parsing.
+    const insertReq: any = { table1: JSON.parse('{"cvv":"122","__proto__":{"polluted":"yes"}}') };
+    const pollutionOptions: ICollectOptions = {
+      tokens: true,
+      additionalFields: {
+        records: [{ table: "table1", fields: { name: "name" } }],
+      },
+    };
+
+    constructElementsInsertReq(insertReq, {}, pollutionOptions);
+
+    expect(({} as any).polluted).toBeUndefined();
+    expect((Object.prototype as any).polluted).toBeUndefined();
+    delete (Object.prototype as any).polluted;
+  });
 });
 
 class MockIFrameFormElement {

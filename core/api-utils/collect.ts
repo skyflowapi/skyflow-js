@@ -7,8 +7,8 @@ Copyright (c) 2022 Skyflow, Inc.
 // then builds its own API request (privacyDB constructInsertRecordRequest,
 // flowDB constructFlowDBInsertRequest). The privacyDB /v1 builders and transport
 // stay in src/api-utils/collect and consume this helper.
-import merge from 'lodash/merge';
 import get from 'lodash/get';
+import { safeMerge } from '@core/utils/safe-merge';
 import { IInsertRecord } from '@core/types';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import SkyflowError from '@core/errors';
@@ -48,7 +48,7 @@ export const constructElementsInsertReq = (req, update, options) => {
             record.fields, update[record.fields.skyflowID], record.table,
           );
           const temp = record.fields;
-          merge(temp, update[record.fields.skyflowID]);
+          safeMerge(temp, update[record.fields.skyflowID]);
           update[record.fields.skyflowID] = temp;
         } else {
           update[record.fields.skyflowID] = {
@@ -60,7 +60,7 @@ export const constructElementsInsertReq = (req, update, options) => {
         if (tables.includes(record.table)) {
           checkDuplicateColumns(record.fields, req[record.table], record.table);
           const temp = record.fields;
-          merge(temp, req[record.table]);
+          safeMerge(temp, req[record.table]);
           req[record.table] = temp;
         } else {
           req[record.table] = record.fields;

@@ -5,8 +5,8 @@ Copyright (c) 2025 Skyflow, Inc.
 // the insert/update transport variants. The generic element-collection step
 // (`constructElementsInsertReq`) is reused from @core — not redefined — and
 // re-exported here so consumers import it from the flowvault collect surface.
-import merge from 'lodash/merge';
 import omit from 'lodash/omit';
+import { safeMerge } from '@core/utils/safe-merge';
 import {
   IInsertRecordInput, IInsertRecord, CVVMap,
 } from '@core/types';
@@ -45,7 +45,7 @@ export const constructElementsInsertReq = (req, update, options) => {
         if (ids.includes(skyflowId)) {
           checkDuplicateColumns(data, update[skyflowId], tableName);
           const temp = { ...data };
-          merge(temp, update[skyflowId]);
+          safeMerge(temp, update[skyflowId]);
           update[skyflowId] = temp;
         } else {
           update[skyflowId] = {
@@ -56,7 +56,7 @@ export const constructElementsInsertReq = (req, update, options) => {
       } else if (tables.includes(tableName)) {
         checkDuplicateColumns(data, req[tableName], tableName);
         const temp = { ...data };
-        merge(temp, req[tableName]);
+        safeMerge(temp, req[tableName]);
         req[tableName] = temp;
       } else {
         req[tableName] = { ...data };
