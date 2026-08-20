@@ -760,6 +760,20 @@ describe('checkAndSetForCustomUrl', () => {
     const isValid = isValidURL(config.options.customElementsURL);
     expect(isValid).toEqual(false);
   });
+
+  it('should reject a near-miss scheme that merely starts with "https"', () => {
+    // `httpsx://` parses as a valid URL with scheme `httpsx`, but it is not
+    // TLS and must be rejected.
+    expect(isValidURL('httpsx://js.skyflow.com')).toEqual(false);
+  });
+
+  it('should reject an http (non-TLS) url', () => {
+    expect(isValidURL('http://js.skyflow.com')).toEqual(false);
+  });
+
+  it('should accept an uppercase HTTPS scheme', () => {
+    expect(isValidURL('HTTPS://js.skyflow.com')).toEqual(true);
+  });
 });
 
 

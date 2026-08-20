@@ -101,17 +101,17 @@ export const isValidExpiryYearFormat = (format: string): boolean => {
 };
 
 export const isValidURL = (url: string) => {
-  if (!url || url.substring(0, 5).toLowerCase() !== 'https') {
+  if (!url) {
     return false;
   }
   try {
-    const tempUrl = new URL(url);
-    if (tempUrl) return true;
+    // Gate on the parsed scheme rather than a substring prefix so that
+    // near-miss schemes like `httpsx://` (which start with "https" but are
+    // not TLS) are rejected. `new URL` also rejects malformed URLs.
+    return new URL(url).protocol === 'https:';
   } catch (err) {
     return false;
   }
-
-  return true;
 };
 
 export const isValidRegExp = (input) => {
