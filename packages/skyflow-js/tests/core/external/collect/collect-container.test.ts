@@ -3,7 +3,7 @@ Copyright (c) 2025 Skyflow, Inc.
 */
 import {
   ELEMENT_EVENTS_TO_IFRAME,
-  ElementType,
+  BaseElementType, FileElementType,
 } from "@core/constants";
 import CollectContainer from "../../../../src/external/collect/collect-container";
 import CollectElement from "@core/external/collect/collect-element";
@@ -88,27 +88,27 @@ const cvvInput: CollectElementInput = {
   column: "primary_card.cvv",
   placeholder: "cvv",
   label: "cvv",
-  type: ElementType.CVV,
+  type: BaseElementType.CVV,
   ...collectStylesOptions,
 };
 
 const cardNumberInput: CollectElementInput = {
   table: "pii_fields",
   column: "primary_card.card_number",
-  type: ElementType.CARD_NUMBER,
+  type: BaseElementType.CARD_NUMBER,
   ...collectStylesOptions,
 };
 
 const ExpirationDateInput: CollectElementInput = {
   table: "pii_fields",
   column: "primary_card.expiry",
-  type: ElementType.EXPIRATION_DATE,
+  type: BaseElementType.EXPIRATION_DATE,
 };
 
 const fileInput: CollectElementInput = {
   table: "pii_fields",
   column: "primary_card.file",
-  type: ElementType.FILE_INPUT,
+  type: FileElementType.FILE_INPUT,
   skyflowID: "abc-def",
 };
 

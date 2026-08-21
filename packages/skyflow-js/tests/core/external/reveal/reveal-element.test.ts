@@ -8,7 +8,7 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   REVEAL_TYPES,
   REVEAL_ELEMENT_OPTIONS_TYPES,
-  ElementType,
+  BaseElementType,
   CUSTOM_ERROR_MESSAGES,
 } from "@core/constants";
 import RevealElement from "../../../../src/external/reveal/reveal-element";

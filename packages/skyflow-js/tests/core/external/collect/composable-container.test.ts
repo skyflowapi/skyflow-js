@@ -3,7 +3,7 @@
 */
 import {
   ELEMENT_EVENTS_TO_IFRAME,
-  ElementType,
+  BaseElementType,
 } from "@core/constants";
 import {
   LogLevel,
@@ -132,7 +132,7 @@ const cvvElementInput: CollectElementInput = {
   column: "primary_card.cvv",
   placeholder: "cvv",
   label: "cvv",
-  type: ElementType.CVV,
+  type: BaseElementType.CVV,
   validations: [
     {
       type: ValidationRuleType.LENGTH_MATCH_RULE,
@@ -149,7 +149,7 @@ const cvvElementInput: CollectElementInput = {
 const cardNumberElement: CollectElementInput = {
   table: "pii_fields",
   column: "primary_card.card_number",
-  type: ElementType.CARD_NUMBER,
+  type: BaseElementType.CARD_NUMBER,
   ...collectStylesOptions,
 };
 

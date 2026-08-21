@@ -10,11 +10,16 @@ Copyright (c) 2025 Skyflow, Inc.
 // and the `UpdateType` enum are defined locally; the flowDB request/response
 // bodies live in ../../internal/internal-types.
 
+// Internal @core base element enum — projected into flowDB's public ElementType
+// below. Not re-exported (only the derived ElementType is public).
+import { BaseElementType } from '@core/constants';
+
 // --- Reused, variant-neutral @core types (do not redefine) ---
+// NOTE: RequestMethod is intentionally NOT re-exported — flowDB is elements-only
+// (no invokeConnection / invokeGateway), so it would expose an unsupported surface.
 export {
   ErrorType,
   RedactionType,
-  RequestMethod,
   EventName,
   LogLevel,
   Env,
@@ -22,6 +27,15 @@ export {
   ValidationRuleType,
   ContainerType,
 } from '@core/types';
+
+// flowDB public element-type surface: the shared @core base ONLY. flowDB has no
+// file support, so — unlike privacyDB — it does NOT fold in FileElementType. This
+// is flowvault's "ElementType extends BaseElementType {}" (enums can't be extended
+// in TS, so the base enum is re-projected here). Runtime value + type share one
+// name (legal in TS). BaseElementType stays internal to @core, never public.
+export const ElementType = { ...BaseElementType };
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export type ElementType = BaseElementType;
 export type {
   IRevealElementOptions,
   ErrorMessages,

@@ -3,7 +3,7 @@ import FrameElement from '@core/internal';
 import * as validators from '@core/validators';
 import * as helpers from '@core/helpers';
 import { getMaskedOutput, domReady } from '@core/helpers';
-import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, CARD_ENCODED_ICONS, INPUT_KEYBOARD_EVENTS, ELEMENT_EVENTS_TO_CLIENT, ElementType, STYLE_TYPE } from '@core/constants';
+import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, CARD_ENCODED_ICONS, INPUT_KEYBOARD_EVENTS, ELEMENT_EVENTS_TO_CLIENT, BaseElementType, STYLE_TYPE } from '@core/constants';
 import IFrameFormElement from '@core/internal/iframe-form';
 import { ValidationRuleType } from '../../../src/utils/common';
 import { get } from 'lodash';
@@ -1332,7 +1332,7 @@ describe('FrameElement', () => {
     it('should update input styles when enablecardicon are provided', () => {
     const mockOptions = {
       enableCardIcon: true,
-      elementType: ElementType.CARD_NUMBER
+      elementType: BaseElementType.CARD_NUMBER
     };
   
     frameElement.updateOptions(mockOptions);

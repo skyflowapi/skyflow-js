@@ -13,7 +13,7 @@ import {
   CONTROLLER_STYLES, ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS, FRAME_ELEMENT,
   COLLECT_TYPES,
-  ElementType,
+  AnyElementType,
 } from '@core/constants';
 import properties from '@core/properties';
 import Container from '@core/external/common/container';
@@ -49,7 +49,7 @@ import {
 // package's own `ICollectElement extends ICollectElementBase` adds. `column` is
 // the shared column key.
 export interface ICollectElementBase {
-  elementType: ElementType;
+  elementType: AnyElementType;
   elementName: string;
   name: string;
   column?: string;
@@ -62,7 +62,7 @@ export interface ICollectElementBase {
 }
 
 export interface ElementGroupItem extends CollectElementInput, ICollectElementOptionsBase {
-  elementType: ElementType;
+  elementType: AnyElementType;
   name?: string;
   accept?: string[];
   elementName?: string;

@@ -11,7 +11,7 @@ import {
   DEFAULT_EXPIRATION_YEAR_FORMAT,
   DEFAULT_INPUT_FORMAT_TRANSLATION,
   ELEMENTS,
-  ElementType,
+  AnyElementType,
   INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES,
   INPUT_STYLES,
 } from '@core/constants';
@@ -270,7 +270,7 @@ IValidationRule[] | undefined => {
 };
 
 export const formatOptions = (
-  elementType: ElementType,
+  elementType: AnyElementType,
   options: ICollectElementOptionsBase & IFileCollectElementOptions,
   logLevel: LogLevel,
 ) => {

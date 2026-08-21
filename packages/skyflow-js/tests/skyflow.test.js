@@ -6,7 +6,7 @@ import Skyflow, { ContainerType } from '../src/skyflow';
 import CollectContainer from '../src/external/collect/collect-container';
 import RevealContainer from '../src/external/reveal/reveal-container';
 import * as iframerUtils from '@core/iframe-libs/iframer';
-import { ElementType, ELEMENT_EVENTS_TO_IFRAME } from '@core/constants';
+import { BaseElementType, ELEMENT_EVENTS_TO_IFRAME } from '@core/constants';
 import { Env, EventName, LogLevel, RedactionType, RequestMethod, ValidationRuleType } from '../src/utils/common';
 import ComposableContainer from '../src/external/collect/compose-collect-container';
 import SkyflowContainer from '../src/external/skyflow-container';
@@ -1580,10 +1580,10 @@ describe('Skyflow Enums', () => {
   });
 
   test('Skyflow.ElementType', () => {
-    expect(Skyflow.ElementType.CARDHOLDER_NAME).toEqual(ElementType.CARDHOLDER_NAME);
-    expect(Skyflow.ElementType.CARD_NUMBER).toEqual(ElementType.CARD_NUMBER);
-    expect(Skyflow.ElementType.CVV).toEqual(ElementType.CVV);
-    expect(Skyflow.ElementType.EXPIRATION_DATE).toEqual(ElementType.EXPIRATION_DATE);
+    expect(Skyflow.ElementType.CARDHOLDER_NAME).toEqual(BaseElementType.CARDHOLDER_NAME);
+    expect(Skyflow.ElementType.CARD_NUMBER).toEqual(BaseElementType.CARD_NUMBER);
+    expect(Skyflow.ElementType.CVV).toEqual(BaseElementType.CVV);
+    expect(Skyflow.ElementType.EXPIRATION_DATE).toEqual(BaseElementType.EXPIRATION_DATE);
   });
 
   test('Skyflow.RedactionType', () => {

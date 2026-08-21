@@ -1,4 +1,4 @@
-import { CARDNUMBER_INPUT_FORMAT, CardType, ElementType } from "@core/constants";
+import { CARDNUMBER_INPUT_FORMAT, CardType, BaseElementType, FileElementType } from "@core/constants";
 import { formatOptions, formatValidations } from "@core/libs/element-options";
 import { LogLevel } from "../../src/utils/common";
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
@@ -19,98 +19,98 @@ jest.mock('@core/validators',()=>{
 describe('test formatOptions function with format and translation', () => {
     test("formatOptions function should return existing options as is", () => {
         const options = { enableCardIcon: true }
-        expect(formatOptions(ElementType.CVV, options, LogLevel.ERROR)).toEqual({ ...options, required: false })
+        expect(formatOptions(BaseElementType.CVV, options, LogLevel.ERROR)).toEqual({ ...options, required: false })
     });   
 
     test('should throw warning if the format or translation is provided for not supported element types', () => {
         const spy = jest.spyOn(console, 'warn'); 
         const options = { format: 'XXXX' }
         
-        formatOptions(ElementType.CVV, options, LogLevel.WARN);
+        formatOptions(BaseElementType.CVV, options, LogLevel.WARN);
         expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
-            ElementType.CVV)}`);
+            BaseElementType.CVV)}`);
         expect(spy).toBeCalledTimes(1);
 
-        formatOptions(ElementType.EXPIRATION_MONTH, options, LogLevel.WARN);
+        formatOptions(BaseElementType.EXPIRATION_MONTH, options, LogLevel.WARN);
         expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
-            ElementType.EXPIRATION_MONTH)}`);
+            BaseElementType.EXPIRATION_MONTH)}`);
         expect(spy).toBeCalledTimes(2);
         
-        formatOptions(ElementType.PIN, {enableCardIcon:true}, LogLevel.WARN);
+        formatOptions(BaseElementType.PIN, {enableCardIcon:true}, LogLevel.WARN);
         expect(spy).toBeCalledTimes(2);
         
-        formatOptions(ElementType.CARDHOLDER_NAME, options, LogLevel.WARN);
+        formatOptions(BaseElementType.CARDHOLDER_NAME, options, LogLevel.WARN);
         expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
-            ElementType.CARDHOLDER_NAME)}`);
+            BaseElementType.CARDHOLDER_NAME)}`);
         expect(spy).toBeCalledTimes(3);
         
-        formatOptions(ElementType.FILE_INPUT, options, LogLevel.WARN);
+        formatOptions(FileElementType.FILE_INPUT, options, LogLevel.WARN);
         expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
-            ElementType.FILE_INPUT)}`);
+            FileElementType.FILE_INPUT)}`);
         expect(spy).toBeCalledTimes(4);
         
-        formatOptions(ElementType.PIN, options, LogLevel.WARN);
+        formatOptions(BaseElementType.PIN, options, LogLevel.WARN);
         expect(spy).toBeCalledWith(`WARN: [Skyflow] ${parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED,
-            ElementType.PIN)}`);
+            BaseElementType.PIN)}`);
         expect(spy).toBeCalledTimes(5);
 
     });
 
     test('should call validateInputFormatOptions function if the format or translation is provided for supported element types',()=>{
         const options = {format:'XXXX',translation:{X:'[0-9]'}}
-        formatOptions(ElementType.INPUT_FIELD,options,LogLevel.ERROR);
+        formatOptions(BaseElementType.INPUT_FIELD,options,LogLevel.ERROR);
         expect(validateInputFormatOptions).toBeCalled();
     });
 
     test('should return mask array object with valid format and translation for input field type',()=>{
         const options = {format:'XXXX',translation:{X:'[]'}}
-        const formattedOptions = formatOptions(ElementType.INPUT_FIELD,options,LogLevel.ERROR);
+        const formattedOptions = formatOptions(BaseElementType.INPUT_FIELD,options,LogLevel.ERROR);
         const res = { mask:[options.format,options.translation],required:false};
         expect(formattedOptions).toEqual(res)
     });
 
     test('should return mask array object with valid format and default translation for input field type',()=>{
         const options = {format:'XXXX'}
-        const formattedOptions = formatOptions(ElementType.INPUT_FIELD,options,LogLevel.ERROR);
+        const formattedOptions = formatOptions(BaseElementType.INPUT_FIELD,options,LogLevel.ERROR);
         const res = { mask:[options.format,{X:'[0-9]'}],required:false};
         expect(formattedOptions).toEqual(res)
     });
 
     test('should return default cardSeperator in the options as default only for card number field type - no format',()=>{
-        const formattedOptions = formatOptions(ElementType.CARD_NUMBER,{required:false},LogLevel.ERROR);
+        const formattedOptions = formatOptions(BaseElementType.CARD_NUMBER,{required:false},LogLevel.ERROR);
         expect(formattedOptions).toEqual({required:false,cardSeperator:DEFAULT_CARD_NUMBER_SEPERATOR,enableCardIcon:true});
     });
 
     test('should return default cardSeperator in the options as default only for card number field type - not allowed format',()=>{
-        const formattedOptions = formatOptions(ElementType.CARD_NUMBER,{required:false,format:'XXXX/XXXX/XXXX/XXXX'},LogLevel.ERROR);
+        const formattedOptions = formatOptions(BaseElementType.CARD_NUMBER,{required:false,format:'XXXX/XXXX/XXXX/XXXX'},LogLevel.ERROR);
         expect(formattedOptions).toEqual({required:false,cardSeperator:DEFAULT_CARD_NUMBER_SEPERATOR,enableCardIcon:true});
     });
 
     test('should return hypen cardSeperator in the options format only for card number field type - with dash format',()=>{
         const cardFormat = CARDNUMBER_INPUT_FORMAT.DASH_FORMAT
-        const formattedOptions = formatOptions(ElementType.CARD_NUMBER,{required:false,format:cardFormat},LogLevel.ERROR);
+        const formattedOptions = formatOptions(BaseElementType.CARD_NUMBER,{required:false,format:cardFormat},LogLevel.ERROR);
         expect(formattedOptions).toEqual({required:false,cardSeperator:'-',enableCardIcon:true});
     });
 
     test('should return space cardSeperator in the options format only for card number field type - space format',()=>{
         const cardFormat = CARDNUMBER_INPUT_FORMAT.SPACE_FORMAT
-        const formattedOptions = formatOptions(ElementType.CARD_NUMBER,{required:false,format:cardFormat},LogLevel.ERROR);
+        const formattedOptions = formatOptions(BaseElementType.CARD_NUMBER,{required:false,format:cardFormat},LogLevel.ERROR);
         expect(formattedOptions).toEqual({required:false,cardSeperator:DEFAULT_CARD_NUMBER_SEPERATOR,enableCardIcon:true});
     });
 
     test('should return preserveFileName true when not provied in options',()=>{
-        const formattedOptions = formatOptions(ElementType.FILE_INPUT,{required:true},LogLevel.ERROR);
+        const formattedOptions = formatOptions(FileElementType.FILE_INPUT,{required:true},LogLevel.ERROR);
         expect(formattedOptions).toEqual({required:true,preserveFileName:true});
     });
 
     test('should return preserveFileName false when not provied as false in options',()=>{
-        const formattedOptions = formatOptions(ElementType.FILE_INPUT,{required:true,preserveFileName:false},LogLevel.ERROR);
+        const formattedOptions = formatOptions(FileElementType.FILE_INPUT,{required:true,preserveFileName:false},LogLevel.ERROR);
         expect(formattedOptions).toEqual({required:true,preserveFileName:false});
     });
 
     test('should throw errror for preserveFileName provied as not of boolean type',(done)=>{
         try{
-            formatOptions(ElementType.FILE_INPUT,{required:true,preserveFileName:undefined},LogLevel.ERROR);
+            formatOptions(FileElementType.FILE_INPUT,{required:true,preserveFileName:undefined},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, 'preserveFileName'))
@@ -120,7 +120,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should return masking in format options when masking is true',(done)=>{
         try{
-            formatOptions(ElementType.CARD_NUMBER,{masking: true},LogLevel.ERROR);
+            formatOptions(BaseElementType.CARD_NUMBER,{masking: true},LogLevel.ERROR);
             done();
         }catch(err){
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, 'preserveFileName'))
@@ -130,7 +130,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw error when masking not of boolean type',(done)=>{
         try{
-            formatOptions(ElementType.CARD_NUMBER,{required:true,masking: 'test'},LogLevel.ERROR);
+            formatOptions(BaseElementType.CARD_NUMBER,{required:true,masking: 'test'},LogLevel.ERROR);
             done();
         }catch(err){
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, ['masking'], true))
@@ -140,7 +140,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should return masking and maskingChar in format options when masking is true',(done)=>{
         try{
-            formatOptions(ElementType.CARD_NUMBER,{required:true,masking: true, maskingChar: '*'},LogLevel.ERROR);
+            formatOptions(BaseElementType.CARD_NUMBER,{required:true,masking: true, maskingChar: '*'},LogLevel.ERROR);
             done();
         }catch(err){
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, 'preserveFileName'))
@@ -150,7 +150,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw error when maskingChar is of length one',(done)=>{
         try{
-            formatOptions(ElementType.CVV,{required:true,masking: true, maskingChar:'**'},LogLevel.ERROR);
+            formatOptions(BaseElementType.CVV,{required:true,masking: true, maskingChar:'**'},LogLevel.ERROR);
             done();
         }catch(err){
             expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_MASKING_CHARACTER.description, [], true)
@@ -160,7 +160,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw errror for cardMetadata provied as not of object type',(done)=>{
         try{
-            formatOptions(ElementType.CARD_NUMBER,{cardMetadata:true},LogLevel.ERROR);
+            formatOptions(BaseElementType.CARD_NUMBER,{cardMetadata:true},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description));
@@ -170,7 +170,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw errror for cardMetadata provied value is object type',(done)=>{
         try{
-            formatOptions(ElementType.CARD_NUMBER,{cardMetadata:[]},LogLevel.ERROR);
+            formatOptions(BaseElementType.CARD_NUMBER,{cardMetadata:[]},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_METADATA.description));
@@ -180,7 +180,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw errror for cardMetadata schema provied value is array type',(done)=>{
         try{
-            formatOptions(ElementType.CARD_NUMBER,{cardMetadata:{scheme:{}}},LogLevel.ERROR);
+            formatOptions(BaseElementType.CARD_NUMBER,{cardMetadata:{scheme:{}}},LogLevel.ERROR);
             done('should throw error');
         }catch(err){
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_OPTION_CARD_SCHEME.description));
@@ -189,18 +189,18 @@ describe('test formatOptions function with format and translation', () => {
     });
 
     test('should return the array of Cardtype provided in scheme of cardmetadata',()=>{
-        const options = formatOptions(ElementType.CARD_NUMBER,{cardMetadata:{scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]}},LogLevel.ERROR);
+        const options = formatOptions(BaseElementType.CARD_NUMBER,{cardMetadata:{scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]}},LogLevel.ERROR);
         expect(options).toEqual({cardMetadata:{scheme:[CardType.VISA,CardType.CARTES_BANCAIRES]}, "cardSeperator": " ","enableCardIcon": true,"required": false,})
     });
 
     test('should include maxFileSize in formatted options for MULTI_FILE_INPUT', () => {
-        const formattedOptions = formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileSize: 4000000 }, LogLevel.ERROR);
+        const formattedOptions = formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileSize: 4000000 }, LogLevel.ERROR);
         expect(formattedOptions.maxFileSize).toBe(4000000);
     });
 
     test('should throw error for maxFileSize provided as non-number for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileSize: 'large' }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileSize: 'large' }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileSize'));
@@ -210,7 +210,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw error for maxFileSize provided as zero for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileSize: 0 }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileSize: 0 }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileSize'));
@@ -220,7 +220,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw error for maxFileSize provided as negative number for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileSize: -1000 }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileSize: -1000 }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileSize'));
@@ -229,13 +229,13 @@ describe('test formatOptions function with format and translation', () => {
     });
 
     test('should include maxFileCount in formatted options for MULTI_FILE_INPUT', () => {
-        const formattedOptions = formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileCount: 2 }, LogLevel.ERROR);
+        const formattedOptions = formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileCount: 2 }, LogLevel.ERROR);
         expect(formattedOptions.maxFileCount).toBe(2);
     });
 
     test('should throw error for maxFileCount provided as non-integer for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileCount: 2.5 }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileCount: 2.5 }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileCount'));
@@ -245,7 +245,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw error for maxFileCount provided as zero for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileCount: 0 }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileCount: 0 }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileCount'));
@@ -255,7 +255,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw error for maxFileCount provided as negative number for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(ElementType.MULTI_FILE_INPUT, { maxFileCount: -1 }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileCount: -1 }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileCount'));
@@ -264,12 +264,12 @@ describe('test formatOptions function with format and translation', () => {
     });
 
     test('should not include maxFileSize in formatted options for FILE_INPUT', () => {
-        const formattedOptions = formatOptions(ElementType.FILE_INPUT, { maxFileSize: 4000000 }, LogLevel.ERROR);
+        const formattedOptions = formatOptions(FileElementType.FILE_INPUT, { maxFileSize: 4000000 }, LogLevel.ERROR);
         expect(formattedOptions.maxFileSize).toBeUndefined();
     });
 
     test('should not include maxFileCount in formatted options for FILE_INPUT', () => {
-        const formattedOptions = formatOptions(ElementType.FILE_INPUT, { maxFileCount: 2 }, LogLevel.ERROR);
+        const formattedOptions = formatOptions(FileElementType.FILE_INPUT, { maxFileCount: 2 }, LogLevel.ERROR);
         expect(formattedOptions.maxFileCount).toBeUndefined();
     });
 

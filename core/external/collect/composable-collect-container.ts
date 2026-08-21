@@ -244,10 +244,15 @@ abstract class CoreComposableCollectContainer<
         printLog(parameterizedString(logs.infoLogs.INITIALIZE_COMPOSABLE_CLIENT, CLASS_NAME),
           MessageType.LOG,
           this.context.logLevel);
-        callback({
-          client: this.metaData.clientJSON,
-          context: this.context,
-        });
+        // The controller-frame emit no longer passes a reply callback (the frame
+        // builds its client per-request from clientConfig), so guard before calling
+        // it — otherwise `callback(...)` throws "callback is not a function".
+        if (typeof callback === 'function') {
+          callback({
+            client: this.metaData.clientJSON,
+            context: this.context,
+          });
+        }
         this.isComposableFrameReady = true;
       });
   }

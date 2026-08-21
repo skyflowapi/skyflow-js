@@ -2,7 +2,7 @@
 Copyright (c) 2022 Skyflow, Inc.
 */
 import bus from 'framebus';
-import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, ElementType, FRAME_ELEMENT } from '@core/constants';
+import { COLLECT_FRAME_CONTROLLER, ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ELEMENTS, BaseElementType, FRAME_ELEMENT } from '@core/constants';
 import { Env, LogLevel, ValidationRuleType } from '../../../../src/utils/common';
 import IFrameFormElement from '@core/internal/iframe-form'
 import * as busEvents from '@core/utils/bus-events';
@@ -135,50 +135,50 @@ describe('test iframeFormelement', () => {
         const elementsList = [
             {
                 element: test_collect_element,
-                type: ElementType.CARD_NUMBER,
+                type: BaseElementType.CARD_NUMBER,
                 input: '4111111111111111',
                 expected:'41111111XXXXXXXX'
             },
             {
                 element: collect_element,
-                type: ElementType.CVV,
+                type: BaseElementType.CVV,
                 input: '1234',
                 expected: undefined
             },
             {
                 element: test_collect_element,
-                type: ElementType.CARDHOLDER_NAME,
+                type: BaseElementType.CARDHOLDER_NAME,
                 input: 'john doe',
                 expected: undefined
             },
             {
                 element: test_collect_element,
-                type: ElementType.EXPIRATION_DATE,
+                type: BaseElementType.EXPIRATION_DATE,
                 input: '12/30',
                 format: 'MM/YY',
                 expected: undefined,
             },
             {
                 element: test_collect_element,
-                type: ElementType.EXPIRATION_MONTH,
+                type: BaseElementType.EXPIRATION_MONTH,
                 input: '11',
                 expected: undefined
             },
             {
                 element: test_collect_element,
-                type: ElementType.EXPIRATION_YEAR,
+                type: BaseElementType.EXPIRATION_YEAR,
                 input: '29',
                 expected: undefined
             },
             {
                 element: test_collect_element,
-                type: ElementType.PIN,
+                type: BaseElementType.PIN,
                 input: '2912',
                 expected: undefined
             },
             {
                 element: test_collect_element,
-                type: ElementType.INPUT_FIELD,
+                type: BaseElementType.INPUT_FIELD,
                 input: '212-61-2465',
                 expected: undefined
             },
@@ -202,50 +202,50 @@ describe('test iframeFormelement', () => {
         const elementsList = [
             {
                 element: test_collect_element,
-                type: ElementType.CARD_NUMBER,
+                type: BaseElementType.CARD_NUMBER,
                 input: '4111111111111111',
                 expected:'4111111111111111'
             },
             {
                 element: collect_element,
-                type: ElementType.CVV,
+                type: BaseElementType.CVV,
                 input: '1234',
                 expected: '1234'
             },
             {
                 element: test_collect_element,
-                type: ElementType.CARDHOLDER_NAME,
+                type: BaseElementType.CARDHOLDER_NAME,
                 input: 'john doe',
                 expected: 'john doe'
             },
             {
                 element: test_collect_element,
-                type: ElementType.EXPIRATION_DATE,
+                type: BaseElementType.EXPIRATION_DATE,
                 input: '12/30',
                 format: 'MM/YY',
                 expected: '12/30',
             },
             {
                 element: test_collect_element,
-                type: ElementType.EXPIRATION_MONTH,
+                type: BaseElementType.EXPIRATION_MONTH,
                 input: '11',
                 expected: '11'
             },
             {
                 element: test_collect_element,
-                type: ElementType.EXPIRATION_YEAR,
+                type: BaseElementType.EXPIRATION_YEAR,
                 input: '29',
                 expected: '29'
             },
             {
                 element: test_collect_element,
-                type: ElementType.PIN,
+                type: BaseElementType.PIN,
                 input: '2912',
                 expected: '2912'
             },
             {
                 element: test_collect_element,
-                type: ElementType.INPUT_FIELD,
+                type: BaseElementType.INPUT_FIELD,
                 input: '212-61-2465',
                 expected: '212-61-2465'
             },

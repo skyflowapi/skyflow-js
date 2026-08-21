@@ -31,7 +31,7 @@ import ComposableContainer from './external/collect/compose-collect-container';
 import ComposableRevealContainer from './external/reveal/composable-reveal-container';
 import SkyflowContainer from './external/skyflow-container';
 import SkyflowFlowDBError from './libs/skyflow-flowdb-error';
-import { UpdateType } from './utils/common';
+import { UpdateType, ElementType } from './utils/common';
 
 // Relocated to @core/types (variant-neutral); re-exported here under the same
 // names so `./skyflow` importers and the public surface are unchanged.
@@ -98,6 +98,12 @@ ComposableRevealContainer
 
   static get Error() {
     return SkyflowFlowDBError;
+  }
+
+  // flowDB's ElementType (base only — no file elements). Overrides the removed
+  // @core base getter so the exposed enum matches flowDB's supported surface.
+  static get ElementType() {
+    return ElementType;
   }
 }
 export default Skyflow;

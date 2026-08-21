@@ -7,10 +7,11 @@
 // failure is wrapped as SkyflowFlowDBError, and the factory returns the container.
 import {
   ELEMENT_EVENTS_TO_IFRAME,
-  ElementType,
+  BaseElementType, FileElementType,
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import SkyflowError from '@core/errors';
+import logs from '@core/utils/logs';
 import EventEmitter from '@core/event-emitter';
 import CollectElement from '@core/external/collect/collect-element';
 import properties from '@core/properties';
@@ -122,7 +123,7 @@ const cvvElementInput: CollectElementInput = {
   column: 'primary_card.cvv',
   placeholder: 'cvv',
   label: 'cvv',
-  type: ElementType.CVV,
+  type: BaseElementType.CVV,
   validations: [
     {
       type: ValidationRuleType.LENGTH_MATCH_RULE,
@@ -135,7 +136,7 @@ const cvvElementInput: CollectElementInput = {
 const cardNumberElement: CollectElementInput = {
   tableName: 'pii_fields',
   column: 'primary_card.card_number',
-  type: ElementType.CARD_NUMBER,
+  type: BaseElementType.CARD_NUMBER,
   ...collectStylesOptions,
 } as any;
 
@@ -172,10 +173,56 @@ describe('flowDB composable collect container', () => {
     expect(container).toBeInstanceOf(ComposableContainer);
   });
 
+  // The controller-frame emit (frame-element-init) no longer passes a reply
+  // callback, so the ready listener must not assume `callback` is a function —
+  // otherwise it throws "callback is not a function" on init.
+  it('registerReadyListener: tolerates a controller emit with no reply callback', () => {
+    const onSpy = jest.spyOn(bus, 'on');
+    // uuid is mocked to a constant, so all test containers share the event name;
+    // clear so mock.calls only holds this container's registrations.
+    onSpy.mockClear();
+    const container = new ComposableContainer(metaData, context, { layout: [1] });
+    const readyEvent = `COMPOSABLE_CONTAINER${(container as any).containerId}`;
+    const readyCall = onSpy.mock.calls.find(([event]) => event === readyEvent);
+    expect(readyCall).toBeDefined();
+    const readyHandler = readyCall![1];
+    // 3rd arg (reply callback) omitted by the emitter -> callback is undefined
+    expect(() => readyHandler({}, undefined)).not.toThrow();
+    expect((container as any).isComposableFrameReady).toBe(true);
+  });
+
+  // The composable collect base keeps the default "Creating Collect container" log
+  // (only composable reveal overrides it).
+  it('getCreateContainerLog returns the collect message', () => {
+    const container = new ComposableContainer(metaData, context, { layout: [1] });
+    expect((container as any).getCreateContainerLog()).toBe(logs.infoLogs.CREATE_COLLECT_CONTAINER);
+  });
+
   it('create() returns a ComposableElement for a flowDB (tableName) input', () => {
     const container = new ComposableContainer(metaData, context, { layout: [1] });
     const element = container.create(cvvElementInput);
     expect(element).toBeInstanceOf(ComposableElement);
+  });
+
+  // flowDB has no file-element support; file types are rejected at create().
+  it('create() rejects FILE_INPUT / MULTI_FILE_INPUT element types', () => {
+    const container = new ComposableContainer(metaData, context, { layout: [1] });
+    expect(() => container.create({
+      tableName: 'cards', column: 'file', type: FileElementType.FILE_INPUT,
+    } as any)).toThrow(SkyflowError);
+    expect(() => container.create({
+      tableName: 'cards', column: 'files', type: FileElementType.MULTI_FILE_INPUT,
+    } as any)).toThrow(SkyflowError);
+  });
+
+  // The documented identity key is `tableName`; a client-supplied `table` is
+  // rejected so the composable path matches the collect path (previously `table`
+  // silently broke here because of the spread order).
+  it('create() rejects a client-supplied `table` key', () => {
+    const container = new ComposableContainer(metaData, context, { layout: [1] });
+    expect(() => container.create({
+      table: 'cards', column: 'cvv', type: BaseElementType.CVV,
+    } as any)).toThrow(SkyflowError);
   });
 
   it('collect() rejects a @core SkyflowError when no elements are added', (done) => {

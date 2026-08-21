@@ -10,7 +10,8 @@ import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENTS,
-  ElementType,
+  BaseElementType,
+  FileElementType,
   FRAME_ELEMENT,
   DEFAULT_ERROR_TEXT_ELEMENT_TYPES,
   DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES,
@@ -164,7 +165,7 @@ export default class IFrameFormElement extends EventEmitter {
         if (inputElement) {
           let elementValue = inputElement?.value;
 
-          if (elementValue && this.fieldType === ElementType.CARD_NUMBER) {
+          if (elementValue && this.fieldType === BaseElementType.CARD_NUMBER) {
             elementValue = elementValue.replace(/[\s-]/g, '');
           }
 
@@ -191,7 +192,7 @@ export default class IFrameFormElement extends EventEmitter {
 
     bus.on(ELEMENT_EVENTS_TO_CLIENT.BLUR + iframeName, () => {
       let { value } = this.state;
-      if (value && this.fieldType === ElementType.CARD_NUMBER) {
+      if (value && this.fieldType === BaseElementType.CARD_NUMBER) {
         value = value.replace(/[\s-]/g, '');
       }
       // Validate the match and update the state accordingly
@@ -516,19 +517,19 @@ export default class IFrameFormElement extends EventEmitter {
     let vaildateFileNames = true;
     let fileSpecificError = '';
 
-    if (this.fieldType === ElementType.CARD_NUMBER && value) {
+    if (this.fieldType === BaseElementType.CARD_NUMBER && value) {
       if (this.regex) {
         resp = this.regex.test(value)
           && validateCreditCardNumber(value)
           && validateCardNumberLengthCheck(value);
       }
-    } else if (this.fieldType === ElementType.EXPIRATION_DATE && value) {
+    } else if (this.fieldType === BaseElementType.EXPIRATION_DATE && value) {
       resp = validateExpiryDate(value, this.format);
-    } else if (this.fieldType === ElementType.EXPIRATION_MONTH && value) {
+    } else if (this.fieldType === BaseElementType.EXPIRATION_MONTH && value) {
       resp = validateExpiryMonth(value);
-    } else if (this.fieldType === ElementType.EXPIRATION_YEAR && value) {
+    } else if (this.fieldType === BaseElementType.EXPIRATION_YEAR && value) {
       resp = validateExpiryYear(value, this.format);
-    } else if (this.fieldType === ElementType.FILE_INPUT) {
+    } else if (this.fieldType === FileElementType.FILE_INPUT) {
       try {
         resp = fileValidation(value, this.state.isRequired, {
           allowedFileType: this.allowedFileType,
@@ -538,7 +539,7 @@ export default class IFrameFormElement extends EventEmitter {
         resp = false;
       }
       if (this.preserveFileName) vaildateFileNames = vaildateFileName(value.name);
-    } else if (this.fieldType === ElementType.MULTI_FILE_INPUT) {
+    } else if (this.fieldType === FileElementType.MULTI_FILE_INPUT) {
       const files = this.state.value instanceof FileList
         ? Array.from(this.state.value)
         : [this.state.value];
@@ -636,7 +637,7 @@ export default class IFrameFormElement extends EventEmitter {
     let resp = true;
     if (this.validations && this.validations.length) {
       for (let i = 0; i < this.validations.length; i += 1) {
-        if (this.fieldType === ElementType.CARD_NUMBER) {
+        if (this.fieldType === BaseElementType.CARD_NUMBER) {
           value = value.replace(/[\s-]/g, '');
         }
         switch (this.validations[i].type) {

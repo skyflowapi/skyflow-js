@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2025 Skyflow, Inc.
 */
-import { CardType, ElementType } from '@core/constants';
+import { CardType, AnyElementType } from '@core/constants';
 import EventEmitter from '@core/event-emitter';
 
 declare global {
@@ -376,7 +376,7 @@ export interface ICollectElementUpdateOptionsBase extends ICollectElementInputBa
 // own public CollectElementInput (base + type + its own identity keys) that is
 // structurally assignable to this.
 export interface CollectElementInput extends ICollectElementInputBase {
-  type: ElementType,
+  type: AnyElementType,
 }
 
 // ---- Behavioral contracts --------------------------------------------------
@@ -613,7 +613,7 @@ export interface InternalState {
   isFocused: boolean,
   isRequired: boolean,
   name: string;
-  elementType: ElementType;
+  elementType: AnyElementType;
   isComplete: boolean;
   value: string | Blob | undefined;
   selectedCardScheme: string;

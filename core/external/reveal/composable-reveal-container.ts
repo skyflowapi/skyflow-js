@@ -54,6 +54,11 @@ abstract class CoreComposableRevealContainer<
     return 'ComposableRevealContainer';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  protected getCreateContainerLog(): string {
+    return logs.infoLogs.CREATE_REVEAL_CONTAINER;
+  }
+
   setError(errors: Partial<Record<ErrorType, string>>) {
     this.customErrorMessages = errors;
     // eslint-disable-next-line no-underscore-dangle

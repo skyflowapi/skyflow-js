@@ -3,7 +3,7 @@ Copyright (c) 2022 Skyflow, Inc.
 */
 import {
   COLLECT_FRAME_CONTROLLER,
-  ElementType,
+  BaseElementType,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENT_EVENTS_TO_CONTAINER,
   SKYFLOW_FRAME_CONTROLLER_READY,

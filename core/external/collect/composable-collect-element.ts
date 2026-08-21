@@ -10,7 +10,13 @@ Copyright (c) 2023 Skyflow, Inc.
 import { Context } from 'vm';
 import EventEmitter from '@core/event-emitter';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
-import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '@core/constants';
+import {
+  ELEMENT_EVENTS_TO_CLIENT,
+  ELEMENT_EVENTS_TO_IFRAME,
+  BaseElementType,
+  FileElementType,
+  AnyElementType,
+} from '@core/constants';
 import logs from '@core/utils/logs';
 import properties from '@core/properties';
 import SkyflowError from '@core/errors';
@@ -43,7 +49,7 @@ class ComposableElement<
 
   #context: Context;
 
-  #elementType: ElementType;
+  #elementType: AnyElementType;
 
   constructor(name, eventEmitter, iframeName, metaData) {
     this.#elementName = name;
@@ -58,7 +64,7 @@ class ComposableElement<
       logLevel: this.#metaData?.clientJSON?.config?.options?.logLevel,
       env: this.#metaData?.clientJSON?.config?.options?.env,
     };
-    this.#elementType = this.#metaData?.type as ElementType;
+    this.#elementType = this.#metaData?.type as AnyElementType;
   }
 
   on(eventName: string, handler: Function) {
@@ -89,7 +95,7 @@ class ComposableElement<
         data.value = '';
       }
 
-      if (data.elementType !== ElementType.CARD_NUMBER) delete data.selectedCardScheme;
+      if (data.elementType !== BaseElementType.CARD_NUMBER) delete data.selectedCardScheme;
 
       delete data.isComplete;
       delete data.name;
@@ -133,7 +139,7 @@ class ComposableElement<
 
   uploadMultipleFiles = (metaData?: MetaData) => new Promise((resolve, reject) => {
     try {
-      if (this.#elementType !== ElementType.MULTI_FILE_INPUT) {
+      if (this.#elementType !== FileElementType.MULTI_FILE_INPUT) {
         throw new SkyflowError(
           SKYFLOW_ERROR_CODE.MULTI_FILE_NOT_SUPPORTED,
           [],

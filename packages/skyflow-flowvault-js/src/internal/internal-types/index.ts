@@ -10,7 +10,7 @@ import {
   RedactionType, ContainerType, ClientMetadata, ElementInfo, ICollectResponseBase,
   IRevealResponseBase,
 } from '@core/types';
-import { ElementType } from '@core/constants';
+import { BaseElementType } from '@core/constants';
 import { UpdateType, ICollectOptions } from '../../utils/common';
 
 // COLLECT tokenize input consumed by the skyflow-frame-controller. Mirrors the
@@ -39,7 +39,7 @@ export type {
 // (flowvault does not import the privacyDB container classes).
 export interface SkyflowElementProps {
   id: string;
-  type: ElementType;
+  type: BaseElementType;
   element: HTMLElement;
   container: any;
 }

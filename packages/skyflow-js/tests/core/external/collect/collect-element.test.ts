@@ -16,7 +16,7 @@ import {
 import {
   ELEMENT_EVENTS_TO_CLIENT,
   ELEMENT_EVENTS_TO_IFRAME,
-  ElementType,
+  BaseElementType,
 } from "@core/constants";
 import SKYFLOW_ERROR_CODE from "@core/utils/constants";
 import { ContainerType } from "../../../../src/skyflow";
@@ -44,7 +44,7 @@ const input: CollectElementInput = {
   },
   placeholder: "cvv",
   label: "cvv",
-  type: ElementType.CVV,
+  type: BaseElementType.CVV,
 };
 
 const composableElementName =
@@ -60,7 +60,7 @@ const composableInput: CollectElementInput = {
   },
   placeholder: "XXXX XXXX XXXX XXXX",
   label: "card number",
-  type: ElementType.CARD_NUMBER,
+  type: BaseElementType.CARD_NUMBER,
 };
 
 const labelStyles: LabelStyles = {
@@ -116,7 +116,7 @@ const composableRows = [
 ];
 
 const updateElementInput = {
-  elementType: ElementType.CVV,
+  elementType: BaseElementType.CVV,
   name: input.column,
   ...input,
 };
@@ -885,7 +885,7 @@ const row = {
 };
 
 describe("testing collect element validations", () => {
-  it("Invalid ElementType", () => {
+  it("Invalid BaseElementType", () => {
     const invalidElementType = [
       {
         elements: [

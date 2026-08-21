@@ -20,7 +20,8 @@ import {
   EVENT_TYPES,
   METRIC_TYPES,
   ELEMENT_TYPES,
-  ElementType,
+  BaseElementType,
+  FileElementType,
 } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
@@ -484,7 +485,7 @@ class CollectElement<
         data.value = '';
       }
 
-      if (data.elementType !== ElementType.CARD_NUMBER) delete data.selectedCardScheme;
+      if (data.elementType !== BaseElementType.CARD_NUMBER) delete data.selectedCardScheme;
       delete data.isComplete;
       delete data.name;
       handler(data);
@@ -562,8 +563,8 @@ class CollectElement<
                     this.#states[index].isFocused = data.value.isFocused;
                     this.#states[index].isRequired = data.value.isRequired;
                     this.#states[index].selectedCardScheme = data?.value?.selectedCardScheme || '';
-                    if (element.elementType === ElementType.MULTI_FILE_INPUT
-                      || element.elementType === ElementType.FILE_INPUT) {
+                    if (element.elementType === FileElementType.MULTI_FILE_INPUT
+                      || element.elementType === FileElementType.FILE_INPUT) {
                       this.#states[index].metaData = data?.value?.metaData || [];
                     }
                     if (Object.prototype.hasOwnProperty.call(data.value, 'value')) this.#states[index].value = data.value.value;

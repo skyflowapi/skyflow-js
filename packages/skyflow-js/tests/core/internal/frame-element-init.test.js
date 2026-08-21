@@ -1,5 +1,5 @@
 import FrameElementInit from '../../../src/internal/frame-element-init';
-import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, ElementType, COLLECT_TYPES } from '@core/constants';
+import { ELEMENT_EVENTS_TO_IFRAME, FRAME_ELEMENT, ELEMENT_EVENTS_TO_CLIENT, BaseElementType, FileElementType, COLLECT_TYPES } from '@core/constants';
 import bus from 'framebus';
 import SkyflowError from '@core/errors';
 import * as helpers from '../../../src/utils/helpers';
@@ -109,7 +109,7 @@ const element = {
               ...stylesOptions
           },
           {
-              elementType: ElementType.MULTI_FILE_INPUT,
+              elementType: FileElementType.MULTI_FILE_INPUT,
               elementName: `element:MULTI_FILE_INPUT:123`,
               table: 'patients',
               column: 'file_uploads',
@@ -621,7 +621,7 @@ describe('FrameElementInit Additional Test Cases', () => {
                     ...stylesOptions
                 },
                 {
-                    elementType: ElementType.MULTI_FILE_INPUT,
+                    elementType: FileElementType.MULTI_FILE_INPUT,
                     elementName: `element:MULTI_FILE_INPUT:123`,
                     table: 'patients',
                     column: 'file_uploads',

@@ -20,7 +20,7 @@ import {
   COLLECT_ELEMENT_LABEL_DEFAULT_STYLES,
   CARD_ENCODED_ICONS,
   INPUT_WITH_ICON_STYLES,
-  ElementType,
+  BaseElementType,
   INPUT_WITH_ICON_DEFAULT_STYLES,
   CARD_NUMBER_MASK,
   EXPIRY_DATE_MASK,
@@ -332,7 +332,7 @@ export default class FrameElement {
       if (this.iFrameFormElement.containerType === ContainerType.COMPOSABLE) {
         const elementType = this.iFrameFormElement.fieldType;
         const fieldTypeCheck = ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES
-          .includes(elementType as ElementType);
+          .includes(elementType as BaseElementType);
         if (state.value && state.isComplete && state.isValid && fieldTypeCheck) {
           const inputElements = document.getElementsByTagName('input') as any;
           let elementList = [];
@@ -1045,7 +1045,7 @@ export default class FrameElement {
         ...INPUT_STYLES,
         ...options.inputStyles.base,
       };
-      if (options.elementType === ElementType.CARD_NUMBER && this.options.enableCardIcon) {
+      if (options.elementType === BaseElementType.CARD_NUMBER && this.options.enableCardIcon) {
         options.inputStyles.base = {
           ...INPUT_WITH_ICON_STYLES,
           ...options.inputStyles.base,
@@ -1053,7 +1053,7 @@ export default class FrameElement {
       }
 
       this.injectInputStyles(options.inputStyles);
-    } else if (options.elementType === ElementType.CARD_NUMBER && this.options.enableCardIcon) {
+    } else if (options.elementType === BaseElementType.CARD_NUMBER && this.options.enableCardIcon) {
       this.injectInputStyles({ base: { ...INPUT_WITH_ICON_DEFAULT_STYLES } });
     }
     if (Object.prototype.hasOwnProperty.call(options, 'label')) {
@@ -1125,10 +1125,10 @@ export default class FrameElement {
       const id: any = this.domInput;
       this.iFrameFormElement.setValidation(this.options.validations);
       this.iFrameFormElement.setReplacePattern(this.options.replacePattern);
-      if (options.elementType === ElementType.EXPIRATION_DATE) {
+      if (options.elementType === BaseElementType.EXPIRATION_DATE) {
         this.iFrameFormElement.setFormat(options.format);
         this.iFrameFormElement.setMask(EXPIRY_DATE_MASK[options.format] as string[]);
-      } else if (options.elementType === ElementType.EXPIRATION_YEAR) {
+      } else if (options.elementType === BaseElementType.EXPIRATION_YEAR) {
         this.iFrameFormElement.setFormat(options.format);
         this.iFrameFormElement.setMask(EXPIRY_YEAR_MASK[options.format] as string[]);
       } else {

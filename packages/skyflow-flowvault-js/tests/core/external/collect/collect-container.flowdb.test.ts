@@ -8,7 +8,7 @@
 // buildCreateElementFields validates the flowDB `returnMockValue` option,
 // validateCollectOptions validates the flowDB upsert/additionalFields shapes and
 // forces tokens on, and wrapCollectError maps a truthy error to SkyflowFlowDBError.
-import { ElementType } from '@core/constants';
+import { BaseElementType, FileElementType } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import SkyflowError from '@core/errors';
 import CollectElement from '@core/external/collect/collect-element';
@@ -95,7 +95,7 @@ const cvvInput: CollectElementInput = {
   column: 'primary_card.cvv',
   placeholder: 'cvv',
   label: 'cvv',
-  type: ElementType.CVV,
+  type: BaseElementType.CVV,
   validations: [
     {
       type: ValidationRuleType.LENGTH_MATCH_RULE,
@@ -151,7 +151,7 @@ describe('flowDB collect container', () => {
     it('validateCreateInput: throws when skyflowId is not a string', () => {
       const container = new CollectContainer(metaData, context);
       expect(() => container.create({
-        tableName: 'cards', column: 'cvv', type: ElementType.CVV, skyflowId: 123,
+        tableName: 'cards', column: 'cvv', type: BaseElementType.CVV, skyflowId: 123,
       } as any)).toThrow(SkyflowError);
     });
 
@@ -159,6 +159,31 @@ describe('flowDB collect container', () => {
       const container = new CollectContainer(metaData, context);
       expect(() => container.create(cvvInput, { returnMockValue: 'yes' } as any))
         .toThrow(SkyflowError);
+    });
+
+    // flowDB has no file-element support; file types are rejected at create() rather
+    // than silently dropped by the collect pipeline.
+    it('validateCreateInput: rejects FILE_INPUT element type', () => {
+      const container = new CollectContainer(metaData, context);
+      expect(() => container.create({
+        tableName: 'cards', column: 'file', type: FileElementType.FILE_INPUT,
+      } as any)).toThrow(SkyflowError);
+    });
+
+    it('validateCreateInput: rejects MULTI_FILE_INPUT element type', () => {
+      const container = new CollectContainer(metaData, context);
+      expect(() => container.create({
+        tableName: 'cards', column: 'files', type: FileElementType.MULTI_FILE_INPUT,
+      } as any)).toThrow(SkyflowError);
+    });
+
+    // flowDB's documented identity key is `tableName`; a client-supplied `table`
+    // is rejected so collect and composable-collect behave identically.
+    it('validateCreateInput: rejects a client-supplied `table` key', () => {
+      const container = new CollectContainer(metaData, context);
+      expect(() => container.create({
+        table: 'cards', column: 'cvv', type: BaseElementType.CVV,
+      } as any)).toThrow(SkyflowError);
     });
   });
 

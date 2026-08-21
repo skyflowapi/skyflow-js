@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { CardType, ElementType,COPY_UTILS, CARD_NUMBER_MASK, DEFAULT_CARD_NUMBER_SEPERATOR, CARD_NUMBER_HYPEN_SEPERATOR } from '@core/constants';
+import { CardType, BaseElementType,COPY_UTILS, CARD_NUMBER_MASK, DEFAULT_CARD_NUMBER_SEPERATOR, CARD_NUMBER_HYPEN_SEPERATOR } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import {
   replaceIdInResponseXml,
@@ -47,48 +47,48 @@ jest.mock('@core/libs/uuid',()=>({
 describe('bin data for for all card number except AMEX element type on CHANGE event', () => {
   test("in PROD return bin data only for card number element", () => {
     expect(detectCardType("4111 1111 1111 1111")).toBe(CardType.VISA)
-    expect(getReturnValue("4111 1111 1111 1111", ElementType.CARD_NUMBER, false)).toBe("41111111XXXXXXXX")
-    expect(getReturnValue("4111 1111 ", ElementType.CARD_NUMBER, false)).toBe("41111111")
+    expect(getReturnValue("4111 1111 1111 1111", BaseElementType.CARD_NUMBER, false)).toBe("41111111XXXXXXXX")
+    expect(getReturnValue("4111 1111 ", BaseElementType.CARD_NUMBER, false)).toBe("41111111")
     expect(detectCardType("5105 1051 0510 5100")).toBe(CardType.MASTERCARD)
-    expect(getReturnValue("5105 1051 0510 5100", ElementType.CARD_NUMBER, false)).toBe("51051051XXXXXXXX")
+    expect(getReturnValue("5105 1051 0510 5100", BaseElementType.CARD_NUMBER, false)).toBe("51051051XXXXXXXX")
     expect(detectCardType("5066 9911 1111 1118")).toBe(CardType.DEFAULT)
-    expect(getReturnValue("5066 9911 1111 1118", ElementType.CARD_NUMBER, false)).toBe("50669911XXXXXXXX")
-    expect(getReturnValue("123", ElementType.CVV, false)).toBe(undefined)
-    expect(getReturnValue("name", ElementType.CARDHOLDER_NAME, false)).toBe(undefined)
-    expect(getReturnValue("02", ElementType.EXPIRATION_MONTH, false)).toBe(undefined)
-    expect(getReturnValue("2025", ElementType.EXPIRATION_YEAR, false)).toBe(undefined)
-    expect(getReturnValue("1234", ElementType.PIN, false)).toBe(undefined)
+    expect(getReturnValue("5066 9911 1111 1118", BaseElementType.CARD_NUMBER, false)).toBe("50669911XXXXXXXX")
+    expect(getReturnValue("123", BaseElementType.CVV, false)).toBe(undefined)
+    expect(getReturnValue("name", BaseElementType.CARDHOLDER_NAME, false)).toBe(undefined)
+    expect(getReturnValue("02", BaseElementType.EXPIRATION_MONTH, false)).toBe(undefined)
+    expect(getReturnValue("2025", BaseElementType.EXPIRATION_YEAR, false)).toBe(undefined)
+    expect(getReturnValue("1234", BaseElementType.PIN, false)).toBe(undefined)
   })
   test("in DEV return data for all elements", () => {
-    expect(getReturnValue("4111 1111 1111 1111", ElementType.CARD_NUMBER, true)).toBe("4111111111111111")
-    expect(getReturnValue("123", ElementType.CVV, true)).toBe("123")
-    expect(getReturnValue("1234", ElementType.PIN, true)).toBe("1234")
-    expect(getReturnValue("name", ElementType.CARDHOLDER_NAME, true)).toBe("name")
-    expect(getReturnValue("02", ElementType.EXPIRATION_MONTH, true)).toBe("02")
-    expect(getReturnValue("2025", ElementType.EXPIRATION_YEAR, true)).toBe("2025")
+    expect(getReturnValue("4111 1111 1111 1111", BaseElementType.CARD_NUMBER, true)).toBe("4111111111111111")
+    expect(getReturnValue("123", BaseElementType.CVV, true)).toBe("123")
+    expect(getReturnValue("1234", BaseElementType.PIN, true)).toBe("1234")
+    expect(getReturnValue("name", BaseElementType.CARDHOLDER_NAME, true)).toBe("name")
+    expect(getReturnValue("02", BaseElementType.EXPIRATION_MONTH, true)).toBe("02")
+    expect(getReturnValue("2025", BaseElementType.EXPIRATION_YEAR, true)).toBe("2025")
   })
 })
 
 describe('bin data for for AMEX card number element type on CHANGE event', () => {
   test("in PROD return bin data only for card number element", () => {
     expect(detectCardType("3782 822463 10005")).toBe(CardType.AMEX)
-    expect(getReturnValue("3782 822463 10005", ElementType.CARD_NUMBER, false)).toBe("378282XXXXXXXXX")
-    expect(getReturnValue("3782 822", ElementType.CARD_NUMBER, false)).toBe("378282X")
-    expect(getReturnValue("123", ElementType.CVV, false)).toBe(undefined)
-    expect(getReturnValue("name", ElementType.CARDHOLDER_NAME, false)).toBe(undefined)
-    expect(getReturnValue("02", ElementType.EXPIRATION_MONTH, false)).toBe(undefined)
-    expect(getReturnValue("2025", ElementType.EXPIRATION_YEAR, false)).toBe(undefined)
-    expect(getReturnValue("1234", ElementType.PIN, false)).toBe(undefined)
-    expect(getReturnValue('4111 1111 1111 1111', ElementType.CARD_NUMBER, true)).toBe('4111111111111111');
-    expect(getReturnValue('4111-1111-1111-1111', ElementType.CARD_NUMBER, true)).toBe('4111111111111111');
+    expect(getReturnValue("3782 822463 10005", BaseElementType.CARD_NUMBER, false)).toBe("378282XXXXXXXXX")
+    expect(getReturnValue("3782 822", BaseElementType.CARD_NUMBER, false)).toBe("378282X")
+    expect(getReturnValue("123", BaseElementType.CVV, false)).toBe(undefined)
+    expect(getReturnValue("name", BaseElementType.CARDHOLDER_NAME, false)).toBe(undefined)
+    expect(getReturnValue("02", BaseElementType.EXPIRATION_MONTH, false)).toBe(undefined)
+    expect(getReturnValue("2025", BaseElementType.EXPIRATION_YEAR, false)).toBe(undefined)
+    expect(getReturnValue("1234", BaseElementType.PIN, false)).toBe(undefined)
+    expect(getReturnValue('4111 1111 1111 1111', BaseElementType.CARD_NUMBER, true)).toBe('4111111111111111');
+    expect(getReturnValue('4111-1111-1111-1111', BaseElementType.CARD_NUMBER, true)).toBe('4111111111111111');
   })
   test("in DEV return data for all elements", () => {
-    expect(getReturnValue("3782 822463 10005", ElementType.CARD_NUMBER, true)).toBe("378282246310005")
-    expect(getReturnValue("123", ElementType.CVV, true)).toBe("123")
-    expect(getReturnValue("1234", ElementType.PIN, true)).toBe("1234")
-    expect(getReturnValue("name", ElementType.CARDHOLDER_NAME, true)).toBe("name")
-    expect(getReturnValue("02", ElementType.EXPIRATION_MONTH, true)).toBe("02")
-    expect(getReturnValue("2025", ElementType.EXPIRATION_YEAR, true)).toBe("2025")
+    expect(getReturnValue("3782 822463 10005", BaseElementType.CARD_NUMBER, true)).toBe("378282246310005")
+    expect(getReturnValue("123", BaseElementType.CVV, true)).toBe("123")
+    expect(getReturnValue("1234", BaseElementType.PIN, true)).toBe("1234")
+    expect(getReturnValue("name", BaseElementType.CARDHOLDER_NAME, true)).toBe("name")
+    expect(getReturnValue("02", BaseElementType.EXPIRATION_MONTH, true)).toBe("02")
+    expect(getReturnValue("2025", BaseElementType.EXPIRATION_YEAR, true)).toBe("2025")
   })
 })
 

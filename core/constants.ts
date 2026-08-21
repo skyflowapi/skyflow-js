@@ -168,7 +168,13 @@ export const ELEMENT_EVENTS_TO_CONTAINER = {
   RENDER_FILE_REQUEST: 'RENDER_FILE_REQUEST',
 };
 
-export enum ElementType {
+// Base element types supported by every variant (flowDB + privacyDB). This is the
+// shared @core base; file elements are a privacyDB-only extension (see
+// FileElementType) — flowDB has no file support — so they are intentionally NOT
+// part of this base. Neither BaseElementType nor FileElementType is public: each
+// package defines its own public `ElementType` on top of these — privacyDB as
+// base + file, flowvault as base only.
+export enum BaseElementType {
   CVV = 'CVV',
   EXPIRATION_DATE = 'EXPIRATION_DATE',
   CARD_NUMBER = 'CARD_NUMBER',
@@ -177,9 +183,20 @@ export enum ElementType {
   PIN = 'PIN',
   EXPIRATION_MONTH = 'EXPIRATION_MONTH',
   EXPIRATION_YEAR = 'EXPIRATION_YEAR',
+}
+
+// File element types — the privacyDB-only extension of the base (flowDB has no
+// file upload/render support). Defined in @core because the shared collect
+// pipeline (iframe-form file handling, collect-element file metadata) references
+// these values; not public — privacyDB folds them into its own `ElementType`.
+export enum FileElementType {
   FILE_INPUT = 'FILE_INPUT',
   MULTI_FILE_INPUT = 'MULTI_FILE_INPUT',
 }
+
+// Any element type the shared pipeline may handle (base + file). Used internally
+// where a field can hold either set; not part of any package's public surface.
+export type AnyElementType = BaseElementType | FileElementType;
 
 export enum CardType {
   VISA = 'VISA',
@@ -254,7 +271,7 @@ export const ELEMENTS = {
     },
     sensitive: false,
   },
-  [ElementType.CARDHOLDER_NAME]: {
+  [BaseElementType.CARDHOLDER_NAME]: {
     name: 'cardHolderName',
     attributes: {
       type: 'text',
@@ -263,7 +280,7 @@ export const ELEMENTS = {
     sensitive: true,
     regex: /^([a-zA-Z\\ \\,\\.\\-\\']{2,})$/,
   },
-  [ElementType.CARD_NUMBER]: {
+  [BaseElementType.CARD_NUMBER]: {
     name: 'CARD_NUMBER',
     attributes: {
       type: 'text',
@@ -274,7 +291,7 @@ export const ELEMENTS = {
     mask: CARD_NUMBER_MASK[CardType.DEFAULT],
     regex: /$|^[\s]*?([0-9]{2,6}[ -]?){3,5}[\s]*/,
   },
-  [ElementType.EXPIRATION_DATE]: {
+  [BaseElementType.EXPIRATION_DATE]: {
     name: 'EXPIRATION_DATE',
     attributes: {
       type: 'text',
@@ -285,7 +302,7 @@ export const ELEMENTS = {
     // mask: ["XY/YYYY", { X: "[0-1]", Y: "[0-9]" }],
     // regex: /^(0[1-9]|1[0-2])\/([0-9]{4})$/,
   },
-  [ElementType.EXPIRATION_MONTH]: {
+  [BaseElementType.EXPIRATION_MONTH]: {
     name: 'EXPIRATION_MONTH',
     attributes: {
       maxLength: 2,
@@ -296,7 +313,7 @@ export const ELEMENTS = {
     sensitive: true,
     mask: ['XX', { X: '[0-9]' }],
   },
-  [ElementType.EXPIRATION_YEAR]: {
+  [BaseElementType.EXPIRATION_YEAR]: {
     name: 'EXPIRATION_YEAR',
     attributes: {
       // maxLength: 4,
@@ -306,7 +323,7 @@ export const ELEMENTS = {
     },
     sensitive: true,
   },
-  [ElementType.CVV]: {
+  [BaseElementType.CVV]: {
     name: 'CVV',
     attributes: {
       type: 'text',
@@ -316,14 +333,14 @@ export const ELEMENTS = {
     sensitive: true,
     regex: /^$|^[0-9]{3,4}$/,
   },
-  [ElementType.INPUT_FIELD]: {
+  [BaseElementType.INPUT_FIELD]: {
     name: 'INPUT_FIELD',
     sensitive: true,
     attributes: {
       type: 'text',
     },
   },
-  [ElementType.PIN]: {
+  [BaseElementType.PIN]: {
     name: 'PIN',
     attributes: {
       type: 'text',
@@ -334,14 +351,14 @@ export const ELEMENTS = {
     sensitive: true,
     regex: /^$|^[0-9]{4,12}$/,
   },
-  [ElementType.FILE_INPUT]: {
+  [FileElementType.FILE_INPUT]: {
     name: 'FILE_INPUT',
     sensitive: true,
     attributes: {
       type: 'file',
     },
   },
-  [ElementType.MULTI_FILE_INPUT]: {
+  [FileElementType.MULTI_FILE_INPUT]: {
     name: 'MULTI_FILE_INPUT',
     sensitive: true,
     attributes: {
@@ -647,36 +664,36 @@ export enum ContentType {
 }
 
 export const ALLOWED_FOCUS_AUTO_SHIFT_ELEMENT_TYPES = [
-  ElementType.CARD_NUMBER,
-  ElementType.EXPIRATION_DATE,
-  ElementType.EXPIRATION_MONTH,
-  ElementType.EXPIRATION_YEAR,
+  BaseElementType.CARD_NUMBER,
+  BaseElementType.EXPIRATION_DATE,
+  BaseElementType.EXPIRATION_MONTH,
+  BaseElementType.EXPIRATION_YEAR,
 ];
 
 export const DEFAULT_ERROR_TEXT_ELEMENT_TYPES = {
-  [ElementType.CVV]: 'Invalid cvv',
-  [ElementType.EXPIRATION_DATE]: 'Invalid expiration date',
-  [ElementType.CARD_NUMBER]: 'Invalid card number',
-  [ElementType.CARDHOLDER_NAME]: 'Invalid cardholder name',
-  [ElementType.INPUT_FIELD]: logs.errorLogs.INVALID_COLLECT_VALUE,
-  [ElementType.PIN]: 'Invalid pin',
-  [ElementType.EXPIRATION_MONTH]: 'Invalid expiration month',
-  [ElementType.EXPIRATION_YEAR]: 'Invalid expiration year',
-  [ElementType.FILE_INPUT]: logs.errorLogs.INVALID_COLLECT_VALUE,
-  [ElementType.MULTI_FILE_INPUT]: logs.errorLogs.INVALID_COLLECT_VALUE,
+  [BaseElementType.CVV]: 'Invalid cvv',
+  [BaseElementType.EXPIRATION_DATE]: 'Invalid expiration date',
+  [BaseElementType.CARD_NUMBER]: 'Invalid card number',
+  [BaseElementType.CARDHOLDER_NAME]: 'Invalid cardholder name',
+  [BaseElementType.INPUT_FIELD]: logs.errorLogs.INVALID_COLLECT_VALUE,
+  [BaseElementType.PIN]: 'Invalid pin',
+  [BaseElementType.EXPIRATION_MONTH]: 'Invalid expiration month',
+  [BaseElementType.EXPIRATION_YEAR]: 'Invalid expiration year',
+  [FileElementType.FILE_INPUT]: logs.errorLogs.INVALID_COLLECT_VALUE,
+  [FileElementType.MULTI_FILE_INPUT]: logs.errorLogs.INVALID_COLLECT_VALUE,
 };
 
 export const DEFAULT_REQUIRED_TEXT_ELEMENT_TYPES = {
-  [ElementType.CVV]: 'cvv is required',
-  [ElementType.EXPIRATION_DATE]: 'expiration date is required',
-  [ElementType.CARD_NUMBER]: 'card number is required',
-  [ElementType.CARDHOLDER_NAME]: 'cardholder name is required',
-  [ElementType.INPUT_FIELD]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
-  [ElementType.PIN]: 'pin is required',
-  [ElementType.EXPIRATION_MONTH]: 'expiration month is required',
-  [ElementType.EXPIRATION_YEAR]: 'expiration year is required',
-  [ElementType.FILE_INPUT]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
-  [ElementType.MULTI_FILE_INPUT]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
+  [BaseElementType.CVV]: 'cvv is required',
+  [BaseElementType.EXPIRATION_DATE]: 'expiration date is required',
+  [BaseElementType.CARD_NUMBER]: 'card number is required',
+  [BaseElementType.CARDHOLDER_NAME]: 'cardholder name is required',
+  [BaseElementType.INPUT_FIELD]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
+  [BaseElementType.PIN]: 'pin is required',
+  [BaseElementType.EXPIRATION_MONTH]: 'expiration month is required',
+  [BaseElementType.EXPIRATION_YEAR]: 'expiration year is required',
+  [FileElementType.FILE_INPUT]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
+  [FileElementType.MULTI_FILE_INPUT]: logs.errorLogs.DEFAULT_REQUIRED_COLLECT_VALUE,
 };
 
 export const INPUT_KEYBOARD_EVENTS = {
@@ -689,11 +706,11 @@ export const INPUT_KEYBOARD_EVENTS = {
 export const CUSTOM_ROW_ID_ATTRIBUTE = 'data-row-id';
 
 export const INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES = [
-  ElementType.CARDHOLDER_NAME,
-  ElementType.EXPIRATION_MONTH,
-  ElementType.FILE_INPUT,
-  ElementType.PIN,
-  ElementType.CVV,
+  BaseElementType.CARDHOLDER_NAME,
+  BaseElementType.EXPIRATION_MONTH,
+  FileElementType.FILE_INPUT,
+  BaseElementType.PIN,
+  BaseElementType.CVV,
 ];
 
 export const DEFAULT_CARD_NUMBER_SEPERATOR = ' ';

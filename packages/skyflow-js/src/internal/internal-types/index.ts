@@ -1,5 +1,5 @@
 import { ContainerType, ElementInfo, ClientMetadata } from '@core/types';
-import { ElementType } from '@core/constants';
+import { AnyElementType } from '@core/constants';
 import { ClientToJSON } from '@core/client';
 import CollectContainer from '../../external/collect/collect-container';
 import ComposableContainer from '../../external/collect/compose-collect-container';
@@ -35,7 +35,7 @@ export interface UploadFileDataInput extends ICollectOptions {
 
 export interface SkyflowElementProps {
   id: string;
-  type: ElementType;
+  type: AnyElementType;
   element: HTMLElement;
   container: CollectContainer | RevealContainer | ComposableContainer;
 }

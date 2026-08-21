@@ -9,6 +9,7 @@
 // forwards the reveal options into the frame payload, and handleRevealResponse
 // maps a full failure ({ error }) to SkyflowFlowDBError while resolving on success.
 import SkyflowError from '@core/errors';
+import logs from '@core/utils/logs';
 import { LogLevel, Env, Context } from '../../../../src/utils/common';
 import ComposableRevealContainer from '../../../../src/external/reveal/composable-reveal-container';
 import ComposableRevealElement from '../../../../src/external/reveal/composable-reveal-element';
@@ -63,6 +64,15 @@ describe('flowDB composable reveal container', () => {
   it('constructs a ComposableRevealContainer', () => {
     const container = new ComposableRevealContainer(metaData, context, options);
     expect(container).toBeInstanceOf(ComposableRevealContainer);
+  });
+
+  // The container-create log must identify a Reveal container, not "Creating Collect
+  // container" (the shared base default that composable reveal previously inherited).
+  it('getCreateContainerLog returns the reveal message, not the collect one', () => {
+    const container = new ComposableRevealContainer(metaData, context, options);
+    expect((container as any).getCreateContainerLog()).toBe(logs.infoLogs.CREATE_REVEAL_CONTAINER);
+    expect((container as any).getCreateContainerLog())
+      .not.toBe(logs.infoLogs.CREATE_COLLECT_CONTAINER);
   });
 
   // create() delegates to the base buildComposableRevealElement and returns this

@@ -10,10 +10,20 @@ import {
   ICollectOptionsBase, ICollectElementInputBase, ICollectElementOptionsBase,
   ICollectElementUpdateOptionsBase, IElementStateBase, IInsertRecordInput,
 } from '@core/types';
-import { ElementType } from '@core/constants';
+import { BaseElementType, FileElementType } from '@core/constants';
 import { IUpsertOptions } from '../../api-utils/collect';
 
 export * from '@core/types';
+
+// privacyDB public element-type surface: the shared @core base PLUS the file
+// elements (FILE_INPUT / MULTI_FILE_INPUT), which are privacyDB-only — flowDB has
+// no file support. This is privacyDB's "ElementType extends BaseElementType + file"
+// (enums can't be extended in TS, so the base and file enums are merged here).
+// The runtime value and the type share one name (legal in TS). BaseElementType /
+// FileElementType stay internal to @core and are never re-exported publicly.
+export const ElementType = { ...BaseElementType, ...FileElementType };
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export type ElementType = BaseElementType | FileElementType;
 
 // privacyDB collect options. Extends the @core marker and owns the full shape,
 // including `tokens` (privacyDB honours it; flowDB has none).

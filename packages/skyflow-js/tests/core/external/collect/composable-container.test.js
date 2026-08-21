@@ -2,7 +2,7 @@ import {
   COLLECT_FRAME_CONTROLLER,
   ELEMENT_EVENTS_TO_IFRAME,
   ELEMENT_EVENTS_TO_CLIENT,
-  ElementType
+  BaseElementType, FileElementType
 } from '@core/constants';
 import * as iframerUtils from '@core/iframe-libs/iframer';
 import { LogLevel, Env, ValidationRuleType, ErrorType } from '../../../../src/utils/common';
@@ -147,7 +147,7 @@ const cardNumberElement = {
 const FileInuptElement = {
   table: 'pii_fields',
   column: 'profile_picture',
-  type: ElementType.FILE_INPUT,
+  type: FileElementType.FILE_INPUT,
   skyflowID:'id1',
   ...collectStylesOptions,
 }

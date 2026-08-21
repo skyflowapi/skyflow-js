@@ -5,7 +5,7 @@ import bus from 'framebus';
 import CollectElement from '@core/external/collect/collect-element';
 import SkyflowError from '@core/errors';
 import { LogLevel, Env, ValidationRuleType } from '../../../../src/utils/common';
-import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '@core/constants';
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, BaseElementType, FileElementType } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { checkForElementMatchRule } from '@core/helpers';
 import { ContainerType } from '../../../../src/skyflow';
@@ -693,7 +693,7 @@ const row = {
 };
 
 describe('collect element validations', () => {
-  it('Invalid ElementType', () => {
+  it('Invalid BaseElementType', () => {
     const invalidElementType = [
       {
         elements: [
@@ -1190,7 +1190,7 @@ describe('collect element methods', () => {
     const composableRowsForTest = [
       { elements: [
         { composableElementName, elementType: input.type, elementName, name: input.column, labelStyles, errorTextStyles, ...input },
-        { composableElementName, elementType: ElementType.MULTI_FILE_INPUT, elementName: multiFileElementName, name: 'files', labelStyles, errorTextStyles, table: 'pii_fields', column: 'primary_card.files' }
+        { composableElementName, elementType: FileElementType.MULTI_FILE_INPUT, elementName: multiFileElementName, name: 'files', labelStyles, errorTextStyles, table: 'pii_fields', column: 'primary_card.files' }
       ] }
     ];
     const groupEmitterLocal = { _emit: jest.fn(), on: jest.fn() };
@@ -1243,7 +1243,7 @@ describe('collect element methods', () => {
     const composableRowsForTest = [
       { elements: [
         { composableElementName, elementType: input.type, elementName, name: input.column, labelStyles, errorTextStyles, ...input },
-        { composableElementName, elementType: ElementType.MULTI_FILE_INPUT, elementName: multiFileElementName, name: 'files', labelStyles, errorTextStyles, table: 'pii_fields', column: 'primary_card.files' }
+        { composableElementName, elementType: FileElementType.MULTI_FILE_INPUT, elementName: multiFileElementName, name: 'files', labelStyles, errorTextStyles, table: 'pii_fields', column: 'primary_card.files' }
       ] }
     ];
     const groupEmitterLocal = { _emit: jest.fn(), on: jest.fn() };

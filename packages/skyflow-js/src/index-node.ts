@@ -64,8 +64,11 @@ export type { ThreeDSBrowserDetails } from './external/threeds/threeds';
 
 export {
   CardType,
-  ElementType,
 } from '@core/constants';
+
+// privacyDB's public ElementType (base + file elements) is defined in ./utils/common,
+// not @core (which only holds the internal BaseElementType / FileElementType).
+export { ElementType } from './utils/common';
 
 export {
   ContainerType,

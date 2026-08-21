@@ -91,6 +91,14 @@ abstract class ComposableContainerBase<
     return 'CollectContainer';
   }
 
+  // The container-create log message; overridden by the composable reveal subclass
+  // to CREATE_REVEAL_CONTAINER. A concrete overridable method (like getClassName)
+  // so virtual dispatch resolves to the subclass override during super().
+  // eslint-disable-next-line class-methods-use-this
+  protected getCreateContainerLog(): string {
+    return logs.infoLogs.CREATE_COLLECT_CONTAINER;
+  }
+
   // Instantiates the product's element class; created per subclass because the
   // element class + constructor signature diverge (and would cross the boundary).
   protected abstract createMultipleElement: (
@@ -134,7 +142,7 @@ abstract class ComposableContainerBase<
       src: getIframeSrc(),
     });
     setStyles(iframe, { ...CONTROLLER_STYLES });
-    printLog(parameterizedString(logs.infoLogs.CREATE_COLLECT_CONTAINER, this.getClassName()),
+    printLog(parameterizedString(this.getCreateContainerLog(), this.getClassName()),
       MessageType.LOG,
       this.context.logLevel);
     this.containerMounted = true;

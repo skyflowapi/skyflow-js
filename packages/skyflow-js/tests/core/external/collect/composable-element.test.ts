@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2025 Skyflow, Inc.
 */
-import { ELEMENT_EVENTS_TO_IFRAME, ElementType } from "@core/constants";
+import { ELEMENT_EVENTS_TO_IFRAME, BaseElementType, FileElementType } from "@core/constants";
 import ComposableElement from "../../../../src/external/collect/compose-collect-element";
 import EventEmitter from "@core/event-emitter";
 import { ContainerType } from "../../../../src/skyflow";
@@ -212,7 +212,7 @@ describe("test composable element", () => {
   it('uploadMultipleFiles resolves on success message event', async () => {
     const elementName = 'multiSuccess';
     const emitterStub: any = { _emit: jest.fn(), on: jest.fn() };
-    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: ElementType.MULTI_FILE_INPUT });
+    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: FileElementType.MULTI_FILE_INPUT });
     let messageHandler: any;
     const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => {
       if (evt === 'message') messageHandler = handler;
@@ -228,7 +228,7 @@ describe("test composable element", () => {
   it('uploadMultipleFiles rejects when message has errorResponse', async () => {
     const elementName = 'multiErrResp';
     const emitterStub: any = { _emit: jest.fn(), on: jest.fn() };
-    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: ElementType.MULTI_FILE_INPUT });
+    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: FileElementType.MULTI_FILE_INPUT });
     let messageHandler: any;
     const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => { if (evt === 'message') messageHandler = handler; });
     const promise = multiEl.uploadMultipleFiles();
@@ -240,7 +240,7 @@ describe("test composable element", () => {
   it('uploadMultipleFiles rejects when message has error field', async () => {
     const elementName = 'multiErrField';
     const emitterStub: any = { _emit: jest.fn(), on: jest.fn() };
-    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: ElementType.MULTI_FILE_INPUT });
+    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: FileElementType.MULTI_FILE_INPUT });
     let messageHandler: any;
     const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => { if (evt === 'message') messageHandler = handler; });
     const promise = multiEl.uploadMultipleFiles();
@@ -251,7 +251,7 @@ describe("test composable element", () => {
     it('uploadMultipleFiles ignores message from wrong origin', async () => {
     const elementName = 'multiWrongOrigin';
     const emitterStub: any = { _emit: jest.fn(), on: jest.fn() };
-    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: ElementType.MULTI_FILE_INPUT });
+    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: FileElementType.MULTI_FILE_INPUT });
     let messageHandler: any;
     const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => {
       if (evt === 'message') messageHandler = handler;
@@ -268,7 +268,7 @@ describe("test composable element", () => {
   it('uploadMultipleFiles ignores message with wrong event type', async () => {
     const elementName = 'multiWrongType';
     const emitterStub: any = { _emit: jest.fn(), on: jest.fn() };
-    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: ElementType.MULTI_FILE_INPUT });
+    const multiEl = new ComposableElement(elementName, emitterStub, iframeName, { type: FileElementType.MULTI_FILE_INPUT });
     let messageHandler: any;
     const addSpy = jest.spyOn(window, 'addEventListener').mockImplementation((evt, handler) => {
       if (evt === 'message') messageHandler = handler;

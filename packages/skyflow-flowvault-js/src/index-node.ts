@@ -28,8 +28,9 @@ export {
   UpdateType,
   ContainerOptions,
   // Shared variant-neutral enums / types (re-exported from @core by ./utils/common)
+  // NOTE: no RequestMethod — flowDB is elements-only (no connection/gateway APIs).
   RedactionType,
-  RequestMethod,
+  ElementType,
   ValidationRuleType,
   IValidationRule as ValidationRule,
   EventName,
@@ -55,9 +56,10 @@ export {
   RevealRecordMetadata,
 } from './internal/internal-types';
 
+// flowDB's public ElementType (base only) is exported from ./utils/common above;
+// @core only holds the internal BaseElementType / FileElementType.
 export {
   CardType,
-  ElementType,
 } from '@core/constants';
 
 export {

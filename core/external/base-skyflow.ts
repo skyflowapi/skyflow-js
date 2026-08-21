@@ -37,7 +37,6 @@ import uuid from '@core/libs/uuid';
 import isTokenValid from '@core/utils/jwt-utils';
 import {
   CardType,
-  ElementType,
   ELEMENT_EVENTS_TO_IFRAME,
   SDK_VERSION_KEY,
   SESSION_ID,
@@ -390,9 +389,10 @@ abstract class BaseSkyflow<
     return ContainerType;
   }
 
-  static get ElementType() {
-    return ElementType;
-  }
+  // `ElementType` is NOT exposed here: it is the one enum that differs per package
+  // (privacyDB = base + file elements, flowvault = base only). Each package's
+  // Skyflow subclass defines its own `static get ElementType()` returning its
+  // public ElementType, so the shared base stays file-agnostic.
 
   static get RedactionType() {
     return RedactionType;

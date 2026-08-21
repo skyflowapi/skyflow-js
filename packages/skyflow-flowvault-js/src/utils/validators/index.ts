@@ -6,6 +6,7 @@ import * as coreValidators from '@core/validators';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import logs from '@core/utils/logs';
 import SkyflowError from '@core/errors';
+import { FileElementType } from '@core/constants';
 import {
   IFlowDBRevealElementInput as IRevealElementInput,
   MessageType,
@@ -102,6 +103,21 @@ export const validateRevealOptions = (options?: { tokenGroupRedactions?: any }) 
   });
 };
 
+// flowDB collect-element input error codes. These describe flowDB-only create()
+// constraints (no file elements; `tableName` is the documented identity key, not
+// `table`) that have no privacyDB counterpart, so they are defined locally here
+// — mirroring the FLOWDB_REVEAL_ERROR_CODE / FLOWDB_COLLECT_ERROR_CODE blocks.
+const FLOWDB_COLLECT_INPUT_ERROR_CODE = {
+  FILE_ELEMENTS_NOT_SUPPORTED: {
+    code: 400,
+    description: "Validation error. File elements ('FILE_INPUT' / 'MULTI_FILE_INPUT') are not supported. Use a supported element type.",
+  },
+  INVALID_TABLE_KEY_IN_COLLECT: {
+    code: 400,
+    description: "Validation error. Invalid 'table' key in collect element. Specify 'tableName' instead.",
+  },
+};
+
 // Collect-input validator: emits a package-specific deprecation warning via the
 // Tier-1 per-package logs-helper (printLog), so it stays local.
 export const validateCollectElementInput = (input: CollectElementInput, logLevel: LogLevel) => {
@@ -116,6 +132,20 @@ export const validateCollectElementInput = (input: CollectElementInput, logLevel
   }
   if (Object.prototype.hasOwnProperty.call(input, 'skyflowId') && !(typeof input.skyflowId === 'string')) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_SKYFLOWID_IN_COLLECT, [], true);
+  }
+  // flowDB has no file-element support. flowvault's public ElementType is base-only
+  // (no file types), so a TS caller can't pass them — but a JS caller still can, so
+  // reject the raw string values explicitly rather than letting the collect pipeline
+  // silently drop them. Compared as strings since input.type is typed base-only.
+  const elementType = input.type as string;
+  if (elementType === FileElementType.FILE_INPUT || elementType === FileElementType.MULTI_FILE_INPUT) {
+    throw new SkyflowError(FLOWDB_COLLECT_INPUT_ERROR_CODE.FILE_ELEMENTS_NOT_SUPPORTED, [], true);
+  }
+  // flowDB's documented identity key is `tableName` (mapped internally to `table`).
+  // Reject a client-supplied `table` so the collect and composable-collect paths
+  // behave identically — otherwise `table` works on one path and breaks on the other.
+  if (Object.prototype.hasOwnProperty.call(input, 'table')) {
+    throw new SkyflowError(FLOWDB_COLLECT_INPUT_ERROR_CODE.INVALID_TABLE_KEY_IN_COLLECT, [], true);
   }
 };
 

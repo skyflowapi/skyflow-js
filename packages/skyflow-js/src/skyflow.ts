@@ -43,6 +43,7 @@ import {
   IUpdateRequest,
   UpdateResponse,
   IUpdateOptions,
+  ElementType,
 } from './utils/common';
 import ComposableContainer from './external/collect/compose-collect-container';
 import ThreeDS from './external/threeds/threeds';
@@ -156,6 +157,12 @@ ComposableRevealContainer
 
   static get ThreeDS() {
     return ThreeDS;
+  }
+
+  // privacyDB's ElementType (base + file elements). Overrides the removed @core
+  // base getter so `Skyflow.ElementType.FILE_INPUT` stays available for privacyDB.
+  static get ElementType() {
+    return ElementType;
   }
 }
 export default Skyflow;

@@ -10,7 +10,7 @@ import {
 import SkyflowError from '@core/errors';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import {
-  ALLOWED_NAME_FOR_FILE, CardType, ElementType, COPY_UTILS,
+  ALLOWED_NAME_FOR_FILE, CardType, BaseElementType, COPY_UTILS,
   DEFAULT_INPUT_FORMAT_TRANSLATION, CORALOGIX_DOMAIN,
 } from '@core/constants';
 import properties from '@core/properties';
@@ -123,7 +123,7 @@ export const getContainerType = (frameName:string):ContainerType => {
 
 export const getReturnValue = (value: string | Blob, element: string, doesReturnValue: boolean) => {
   if (typeof value === 'string') {
-    if (element === ElementType.CARD_NUMBER) {
+    if (element === BaseElementType.CARD_NUMBER) {
       value = value && value.replace(/[\s-]/g, '');
       if (!doesReturnValue) {
         const cardType = detectCardType(value);
