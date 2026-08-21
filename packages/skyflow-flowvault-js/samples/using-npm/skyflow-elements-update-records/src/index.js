@@ -68,7 +68,7 @@ try {
     ...collectStylesOptions,
     placeholder: 'card number',
     label: 'Card Number',
-    skyflowId: '',
+    skyflowId: '<SKYFLOW_ID>', // Replace with a valid Skyflow ID of the record to update
     type: Skyflow.ElementType.CARD_NUMBER,
   });
 
@@ -79,7 +79,7 @@ try {
     label: 'Cvv',
     placeholder: 'cvv',
     type: Skyflow.ElementType.CVV,
-    skyflowId: '',
+    skyflowId: '<SKYFLOW_ID>', // Replace with a valid Skyflow ID of the record to update
   });
 
   const expiryDateElement = collectContainer.create({
@@ -89,7 +89,7 @@ try {
     label: 'Expiry Date',
     placeholder: 'MM/YYYY',
     type: Skyflow.ElementType.EXPIRATION_DATE,
-    skyflowId: '',
+    skyflowId: '<SKYFLOW_ID>', // Replace with a valid Skyflow ID of the record to update
   });
 
   const cardHolderNameElement = collectContainer.create({
@@ -115,7 +115,7 @@ try {
         {
           tableName: 'table1',
           data: {
-            skyflowId: '',
+            skyflowId: '<SKYFLOW_ID>', // Replace with a valid Skyflow ID of the record to update
             gender: 'MALE',
           },
         },

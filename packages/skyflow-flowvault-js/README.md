@@ -203,7 +203,6 @@ Everything below expands on each step: styling, validation, upsert, composable l
 - [**UI Error for Collect Elements**](#ui-error-for-collect-elements)
 - [**Set and Clear value for Collect Elements (DEV ENV ONLY)**](#set-and-clear-value-for-collect-elements-dev-env-only)
 - [**Update Collect Elements**](#update-collect-elements) 
-- [**Using Skyflow File Element to upload a file**](#using-skyflow-file-element-to-upload-a-file)
 
 ## Using Skyflow Elements to collect data
 
@@ -1620,8 +1619,8 @@ inputStyles: {
   }
 }
 ```
-The states that are available for `labelStyles` are `base`, `focus`, `global`.
-* requiredAsterisk: styles applied for the Asterisk symbol in the label.
+The states that are available for `labelStyles` are `base`, `focus`, `global` and `requiredAsterisk`.
+* `requiredAsterisk`: styles applied for the Asterisk symbol in the label.
 
 An example `labelStyles` object:
 
@@ -2910,7 +2909,7 @@ const cardNumberRevealElement = revealComposableContainer.create({
 });
 
 // Mount the reveal elements.
-revealContainer.mount('#container'); // Assumes there is a div with container
+revealComposableContainer.mount('#container'); // Assumes there is a div with container
 // ...
 
 // Update label, labelStyles properties on cardHolderNameRevealElement.
