@@ -14,9 +14,6 @@ Copyright (c) 2025 Skyflow, Inc.
 // below. Not re-exported (only the derived ElementType is public).
 import { BaseElementType } from '@core/constants';
 
-// --- Reused, variant-neutral @core types (do not redefine) ---
-// NOTE: RequestMethod is intentionally NOT re-exported — flowDB is elements-only
-// (no invokeConnection / invokeGateway), so it would expose an unsupported surface.
 export {
   ErrorType,
   RedactionType,
