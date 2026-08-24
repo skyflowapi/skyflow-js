@@ -76,7 +76,6 @@ import {
   LogLevel,
   MessageType,
   RedactionType,
-  RequestMethod,
   ValidationRuleType,
 } from '@core/types';
 
@@ -402,9 +401,10 @@ abstract class BaseSkyflow<
     return ErrorType;
   }
 
-  static get RequestMethod() {
-    return RequestMethod;
-  }
+  // RequestMethod is deliberately NOT exposed on the shared base: it advertises
+  // connection/gateway capability (invokeConnection / invokeGateway) that only
+  // privacyDB has. The privacyDB `Skyflow` subclass re-declares this getter;
+  // flowDB (elements-only) inherits the base without it. See audit finding F1.
 
   static get LogLevel() {
     return LogLevel;

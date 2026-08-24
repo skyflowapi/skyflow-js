@@ -59,7 +59,6 @@ describe('flowDB Skyflow (BaseSkyflow subclass wiring)', () => {
     expect(Skyflow.ElementType).toBeDefined();
     expect(Skyflow.RedactionType).toBeDefined();
     expect(Skyflow.ErrorType).toBeDefined();
-    expect(Skyflow.RequestMethod).toBeDefined();
     expect(Skyflow.LogLevel).toBeDefined();
     expect(Skyflow.EventName).toBeDefined();
     expect(Skyflow.Env).toBeDefined();
@@ -68,5 +67,8 @@ describe('flowDB Skyflow (BaseSkyflow subclass wiring)', () => {
     expect(Skyflow.UpdateType).toBeDefined();
     expect(Skyflow.Error.name).toBe('SkyflowFlowDBError');
     expect(Skyflow.ThreeDS).toBeUndefined();
+    // flowDB is elements-only (no invokeConnection / invokeGateway), so it must
+    // NOT inherit RequestMethod. See audit finding F1.
+    expect(Skyflow.RequestMethod).toBeUndefined();
   });
 });

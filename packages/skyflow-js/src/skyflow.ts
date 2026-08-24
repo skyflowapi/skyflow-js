@@ -18,6 +18,7 @@ import {
   Context,
   ICoreMetadata,
   ISkyflow,
+  RequestMethod,
   SkyflowConfigOptions,
 } from '@core/types';
 import logs from '@core/utils/logs';
@@ -157,6 +158,12 @@ ComposableRevealContainer
 
   static get ThreeDS() {
     return ThreeDS;
+  }
+
+  // RequestMethod is privacyDB-only (invokeConnection / invokeGateway). Relocated
+  // here from BaseSkyflow so the elements-only flowDB SDK no longer inherits it.
+  static get RequestMethod() {
+    return RequestMethod;
   }
 
   // privacyDB's ElementType (base + file elements). Overrides the removed @core

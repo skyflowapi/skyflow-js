@@ -7,7 +7,6 @@ Copyright (c) 2023 Skyflow, Inc.
 // privacyDB and flowDB use it unchanged. uploadMultipleFiles throws for any
 // non-MULTI_FILE_INPUT element, so the flowDB build (no file upload) never
 // exercises it.
-import { Context } from 'vm';
 import EventEmitter from '@core/event-emitter';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import {
@@ -22,7 +21,7 @@ import properties from '@core/properties';
 import SkyflowError from '@core/errors';
 import { formatValidations } from '@core/libs/element-options';
 import {
-  ICollectElementUpdateOptionsBase, EventName, MessageType, MetaData, ContainerType,
+  ICollectElementUpdateOptionsBase, EventName, MessageType, MetaData, ContainerType, Context,
 } from '@core/types';
 import { printLog } from '@core/utils/logs-helper';
 

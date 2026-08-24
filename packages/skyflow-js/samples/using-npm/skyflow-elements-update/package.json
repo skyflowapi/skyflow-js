@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "parcel src/index.html --open",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,5 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "skyflow-js": "^1.34.0"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.1"
   }
 }

@@ -116,7 +116,7 @@ Every sample exists in up to three flavors. Pick the one that matches how you co
 | masking | Masked input on Collect Elements | [html](using-script-tag/masking.html) | — | — |
 | card-brand-choice | Card brand choice (co-badged cards) | [html](using-script-tag/card-brand-choice.html) | — | — |
 | upsert-support | Upsert on insert (`tableName`/`uniqueColumns`/`updateType`) | [html](using-script-tag/upsert-support.html) | — | — |
-| bearer-token-with-context | `getBearerTokenWithContext` token provider | [html](using-script-tag/bearer-token-with-context.html) | — | — |
+| bearer-token-with-context | `getBearerToken` token provider with bound context (`.bind(...)`) | [html](using-script-tag/bearer-token-with-context.html) | — | — |
 
 ---
 

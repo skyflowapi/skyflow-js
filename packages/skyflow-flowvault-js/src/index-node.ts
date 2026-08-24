@@ -79,8 +79,12 @@ export const CollectElement = CoreCollectElement;
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type CollectElement = CoreCollectElement<CollectElementUpdateOptions>;
 export const ComposableElement = CoreComposableElement;
+// flowDB is elements-only (no MULTI_FILE_INPUT), so the shared @core class's
+// uploadMultipleFiles() can only ever throw MULTI_FILE_NOT_SUPPORTED here. Hide
+// it from the published TYPE so it isn't dead file-API surface; the runtime value
+// stays the real @core class (instanceof preserved). See audit finding F5.
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export type ComposableElement = CoreComposableElement<CollectElementUpdateOptions>;
+export type ComposableElement = Omit<CoreComposableElement<CollectElementUpdateOptions>, 'uploadMultipleFiles'>;
 
 export { default as CollectContainer } from './external/collect/collect-container';
 export { default as ComposableContainer } from './external/collect/compose-collect-container';

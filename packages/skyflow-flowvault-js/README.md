@@ -583,7 +583,7 @@ const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 const element = container.create({
   tableName: 'cards',
   column: 'cardNumber',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -1890,6 +1890,7 @@ state : {
   isFocused: boolean
   isValid: boolean
   value: string
+  selectedCardScheme: Skyflow.CardType  // only for CARD_NUMBER element type
 }
 ```
 `Note`: Events only include element values when in the state object when env is DEV. By default, value is an empty string.
@@ -2033,7 +2034,7 @@ const cvvElement = composableContainer.create({
 });
 
 // Mount the composable container.
-composableContainer.mount('#compostableContainer'); // Assumes there is a div with id='#composableContainer' in the webpage.
+composableContainer.mount('#composableContainer'); // Assumes there is a div with id='#composableContainer' in the webpage.
 
 // ...
 
@@ -2198,6 +2199,8 @@ const options = {
 **Reveal Element Options examples:**
 Example 1
 ```js
+const revealContainer = skyflowClient.container(Skyflow.ContainerType.REVEAL);
+
 const revealElementInput = {
  token: '<token>' 
 };
@@ -2215,6 +2218,8 @@ Revealed Value displayed in element: "(123) 412-1234"
 
 Example 2:
 ```js
+const revealContainer = skyflowClient.container(Skyflow.ContainerType.REVEAL);
+
 const revealElementInput = {
  token: '<token>' 
 };
@@ -2408,7 +2413,7 @@ const revealButton = document.getElementById('revealPCIData');
 
 if (revealButton) {
   revealButton.addEventListener('click', () => {
-    revealContainer.reveal().then((res) => {
+    container.reveal().then((res) => {
       //handle reveal response
     }).catch((err) => {
       cardNumber.setErrorOverride("custom error")
@@ -2673,6 +2678,8 @@ const options = {
 **Reveal Element Options examples:**
 Example 1
 ```js
+const revealComposableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
+
 const revealElementInput = {
  token: '<token>' 
 };
@@ -2690,6 +2697,8 @@ Revealed Value displayed in element: "(123) 412-1234"
 
 Example 2:
 ```js
+const revealComposableContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
+
 const revealElementInput = {
  token: '<token>' 
 };
