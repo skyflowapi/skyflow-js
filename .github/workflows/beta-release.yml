@@ -2,7 +2,11 @@ name: Public Beta Release
 
 on:
  push:
-    tags: '*.*.*-beta.*'
+    # The '!flowvault-*' negation excludes the flowvault namespace: a glob '*'
+    # matches '-', so a plain '*.*.*-beta.*' would also match a flowvault beta
+    # tag (flowvault-v1.0.0-beta.3) and fire this skyflow-js workflow with a
+    # garbage version. flowvault betas are handled by flowvault-beta-release.yml.
+    tags: ['*.*.*-beta.*', '!flowvault-*']
     paths-ignore:
       - "package.json"
       - "package-lock.json"
@@ -15,6 +19,12 @@ jobs:
     with:
       REGISTRY_URL: "https://registry.npmjs.org"
       TAG: "beta"
+      PACKAGE_DIR: "packages/skyflow-js"
+      PACKAGE_NAME: "skyflow-js"
+      DIST_DIR: "packages/skyflow-js/dist/v1"
+      S3_PREFIX: ""
+      TAG_PREFIX: ""
+      INVALIDATION_PATH: "/*"
     secrets:
       IFRAME_SECURE_ORIGIN: ${{ secrets.SANDBOX_IFRAME_SECURE_ORIGIN }}
       IFRAME_SECURE_SITE: ${{ secrets.SANDBOX_IFRAME_SECURE_SITE }}

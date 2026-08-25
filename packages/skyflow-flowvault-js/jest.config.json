@@ -1,0 +1,32 @@
+{
+  "verbose": true,
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "<rootDir>/src/**/*.{ts,tsx}",
+    "<rootDir>/../../core/**/*.{ts,tsx}",
+    "!**/*.d.ts",
+    "!<rootDir>/src/index.ts",
+    "!<rootDir>/src/index-node.ts",
+    "!<rootDir>/src/index-internal.ts",
+    "!<rootDir>/src/internal/internal-types/index.ts",
+    "!<rootDir>/src/utils/common/index.ts",
+    "!<rootDir>/src/utils/logs-helper/index.ts",
+    "!<rootDir>/src/external/skyflow-container.ts",
+    "!<rootDir>/src/external/collect/compose-collect-element.ts",
+    "!<rootDir>/src/external/reveal/reveal-element.ts",
+    "!<rootDir>/src/external/reveal/composable-reveal-element.ts",
+    "!<rootDir>/src/external/reveal/composable-reveal-internal.ts",
+    "!<rootDir>/src/internal/reveal/reveal-frame.ts"
+  ],
+  "testEnvironment": "jsdom",
+  "testTimeout": 30000,
+  "setupFiles": ["<rootDir>/tests/jest.setup.js"],
+  "moduleNameMapper":{
+    "^@core/(.*)$": "<rootDir>/../../core/$1",
+    "^.+\\.svg$": "<rootDir>/tests/__mocks__/file-mock.js"
+  },
+  "transform": {
+    "^.+\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]
+  },
+  "transformIgnorePatterns": ["/node_modules/(?!mime)"]
+}

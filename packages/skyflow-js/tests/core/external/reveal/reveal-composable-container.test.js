@@ -1,0 +1,865 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
+import RevealContainer from "../../../../src/external/reveal/reveal-container";
+import { ComposableRevealContainer, ComposableRevealElement } from "../../../../src/index-node";
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER, REVEAL_TYPES } from "@core/constants";
+import bus from "framebus";
+import { LogLevel,Env } from "../../../../src/utils/common";
+import RevealElement from "../../../../src/external/reveal/reveal-element";
+import * as iframerUtils from '@core/iframe-libs/iframer';
+import SKYFLOW_ERROR_CODE from "@core/utils/constants";
+import { parameterizedString } from "../../../../src/utils/logs-helper";
+import SkyflowError from "@core/errors";
+import logs from "@core/utils/logs";
+// Mock internal element to intercept constructor arguments for mount coverage
+jest.mock('../../../../src/external/reveal/composable-reveal-internal', () => {
+  return {
+    __esModule: true,
+    default: jest.fn().mockImplementation((elementId, recordGroup, metaData, containerProps, context) => {
+      return {
+        iframeName: () => 'mockIframeName',
+        mount: jest.fn(),
+        unmount: jest.fn(),
+        __recordGroup: recordGroup, // expose for assertions
+        __containerProps: containerProps,
+        __metaData: metaData,
+        __context: context,
+      };
+    }),
+  };
+});
+import ComposableRevealInternalElement from '../../../../src/external/reveal/composable-reveal-internal';
+import properties from "@core/properties";
+
+iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
+const mockUuid = '1234'; 
+jest.mock('@core/libs/uuid',()=>({
+  __esModule: true,
+  default:jest.fn(()=>(mockUuid)),
+}));
+
+const on = jest.fn();
+const off = jest.fn();
+jest.setTimeout(40000);
+describe("Reveal Composable Container Class", () => {
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+      off,
+      emit: emitSpy,
+    });
+  });
+  const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve('token'));
+  const testMetaData = {
+    getSkyflowBearerToken: getBearerToken,
+     skyflowContainer: {
+        isControllerFrameReady: true,
+      },
+    uuid: "123",
+    config: {
+      vaultID: "vault123",
+      vaultURL: "https://sb.vault.dev.com",
+      getBearerToken,
+    },
+    metaData: {
+      clientDomain: "http://abc.com",
+    },
+  };
+   const testRevealContainer = new ComposableRevealContainer(testMetaData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+});
+  const skyflowConfig = {
+    vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
+    vaultURL: 'https://testurl.com',
+    getBearerToken,
+  };
+  
+  const clientData = {
+    getSkyflowBearerToken: getBearerToken,
+      skyflowContainer: {
+        isControllerFrameReady: false,
+      },
+    uuid: '1234',
+    client: {
+      config: { ...skyflowConfig },
+      metaData: {
+        uuid: "1234",
+      },
+    },
+    clientJSON: {
+        config: {
+            vaultID: 'vault123',
+            vaultURL: 'https://sb.vault.dev',
+            getBearerToken,
+        },
+    },
+  }
+    
+  const clientData2 = {
+      skyflowContainer: {
+        isControllerFrameReady: true,
+      },
+    uuid: '1234',
+    client: {
+      config: { ...skyflowConfig },
+      metaData: {
+        uuid: "1234",
+      },
+    },
+    clientJSON:{
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+      metaData: {
+        uuid: "1234",
+      },
+      config:{
+        ...skyflowConfig,
+        getBearerToken
+      }
+    } 
+  }
+
+  const testRecord = {
+    token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+    // redaction: RedactionType.PLAIN_TEXT,
+    label: "",
+    styles: {
+      base: {
+        color: "#32ce21",
+      },
+    },
+  };
+  test("reveal should throw error with no elements", (done) => {
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    container.reveal().catch((error) => {
+      done();
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.error.code).toEqual(400);
+      expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_COMPOSABLE);
+    })
+  });
+
+  /**************** Mount method lines 246-299 coverage tests ****************/
+  test('mount() should throw MISMATCH_ELEMENT_COUNT_LAYOUT_SUM when layout sum differs from elements length', () => {
+    const meta = { ...testMetaData };
+    const container = new ComposableRevealContainer(meta, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [2] });
+    // Add only one element
+    container.create({ token: 'token-1' });
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    expect(() => container.mount(host)).toThrow(SkyflowError);
+    try { container.mount(host); } catch (e) {
+      expect(e.error.code).toBe(SKYFLOW_ERROR_CODE.MISMATCH_ELEMENT_COUNT_LAYOUT_SUM.code);
+    }
+    document.body.removeChild(host);
+  });
+
+  test('mount() should group elements, apply styles & errorTextStyles, and call internal element mount', () => {
+    const styles = { base: { color: 'blue' } };
+    const errorTextStyles = { base: { color: 'red' } };
+    const meta = { ...testMetaData };
+    const container = new ComposableRevealContainer(meta, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [2], styles, errorTextStyles });
+    container.create({ token: 'token-1' });
+    container.create({ token: 'token-2' });
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    container.mount(host);
+    // Assert internal element constructed once
+    expect(ComposableRevealInternalElement).toHaveBeenCalledTimes(1);
+    const callArgs = ComposableRevealInternalElement.mock.calls[0];
+    const recordGroup = callArgs[1];
+    expect(recordGroup.styles).toMatchObject(styles);
+    expect(recordGroup.errorTextStyles).toMatchObject(errorTextStyles);
+    // Internal mock instance mount should have been called
+    const instance = ComposableRevealInternalElement.mock.results[0].value;
+    expect(instance.mount).toHaveBeenCalledWith(host);
+    document.body.removeChild(host);
+  });
+
+  test('mount() inside shadow DOM should emit HEIGHT event via postMessage', () => {
+    const meta = { ...testMetaData };
+    const container = new ComposableRevealContainer(meta, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: 'token-1' });
+    // Shadow host setup
+    const shadowHost = document.createElement('div');
+    document.body.appendChild(shadowHost);
+    const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+    const mountPoint = document.createElement('div');
+    mountPoint.id = 'shadowMount';
+    shadowRoot.appendChild(mountPoint);
+    // Spy contentWindow.postMessage after mount creates iframe via internal element
+    // Mock iframe element appended by internal element mount (we simulate it)
+    const iframe = document.createElement('iframe');
+    iframe.id = 'mockIframeName';
+    Object.defineProperty(iframe, 'contentWindow', { value: { postMessage: jest.fn() }, writable: true });
+    shadowRoot.appendChild(iframe);
+    container.mount(mountPoint);
+    // After mount, height event initial emit should call postMessage
+    expect(iframe.contentWindow.postMessage).toHaveBeenCalled();
+    const postedArgs = iframe.contentWindow.postMessage.mock.calls[0][0];
+    expect(postedArgs.name).toContain(ELEMENT_EVENTS_TO_CLIENT.HEIGHT);
+    document.body.removeChild(shadowHost);
+  });
+
+  test("constructor", () => {
+    expect(testRevealContainer).toBeInstanceOf(ComposableRevealContainer);
+    expect(testRevealContainer).toBeInstanceOf(Object);
+    expect(testRevealContainer).toHaveProperty("create");
+    expect(testRevealContainer).toHaveProperty("reveal");
+    expect(testRevealContainer).toHaveProperty("type");
+  });
+  test("create() will return a Reveal composable element", () => {
+    const testRevealElement = testRevealContainer.create(testRecord);
+    expect(testRevealElement).toBeInstanceOf(ComposableRevealElement);
+  });
+  test("create() will throw error if record id invalid", () => {
+    try {
+      testRevealContainer.create({
+        token: "",
+        // redaction: RedactionType.REDACTED,
+      });
+    } catch (error) {
+      expect(error.message).toBe("Invalid Token Id ");
+    }
+    try {
+      testRevealContainer.create({
+        token: true,
+        // redaction: RedactionType.PLAIN_TEXT,
+      });
+    } catch (error) {
+      expect(error.message).toBe("Invalid Token Id true");
+    }
+  });
+
+  test('create()  will throw error for invalid input format options',(done)=>{
+    try {
+      testRevealContainer.create({
+        token: "1244",
+      },{
+        format:undefined
+      });
+      done('should throw error');
+    } catch (error) {
+      expect(error.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description));
+      done();
+    }
+  });
+
+  test("on container mounted call back",()=>{
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+    testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+    const div = document.createElement('div');
+    div.id = 'container';
+    document.body.appendChild(div);
+    testRevealContainer.mount('#container');
+  });
+//   test("on container mounted call back 5",()=>{
+//     const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+//     testRevealContainer.create({
+//       token: "token",
+//     });
+//     const data = {
+//       token: "1815-6223-1073-1425",
+//       containerId:mockUuid
+//     }
+//     const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+//     bus.emit(eventName,data);
+//     const onCbName = on.mock.calls[0][0];
+//     expect(onCbName).toBe(eventName);
+//     const onCb = on.mock.calls[0][1];
+//     onCb(data);
+//     testRevealContainer.reveal();
+//     const frameEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+//     const onframeEvent = on.mock.calls[1][0];
+//     expect(frameEventName).toBe(onframeEvent);
+//     const onCbFrame = on.mock.calls[1][1];
+//     onCbFrame({});
+//     const emitEventName = emitSpy.mock.calls[1][0];
+//     const emitCb = emitSpy.mock.calls[1][2];
+//     expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+//     emitCb({"success":[{token:"1815-6223-1073-1425"}]});
+//   });
+
+//   test("on container mounted else call back",()=>{
+//     const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+//     testRevealContainer.create({
+//       token: "1815-6223-1073-1425",
+//     });
+//     const data = {
+//       token: "1815-6223-1073-1425",
+//       containerId:mockUuid
+//     }
+    
+//     testRevealContainer.reveal().catch(err => {
+//       console.log(err);
+//     });
+//     const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+//     bus.emit(eventName,data);
+//     const onCbName = on.mock.calls[0][0];
+//     expect(onCbName).toBe(eventName);
+//     const onCb = on.mock.calls[0][1];
+//     onCb(data);
+
+//     const frameEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+//     const onframeEvent = on.mock.calls[1][0];
+//     expect(frameEventName).toBe(onframeEvent);
+//     const onCbFrame = on.mock.calls[1][1];
+//     onCbFrame({});
+
+//     const emitEventName = emitSpy.mock.calls[1][0];
+//     const emitCb = emitSpy.mock.calls[1][2];
+//     expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+//     emitCb({error:{code:404,description:"Not Found"}});
+//   });
+//   test("on container mounted else call back 1",()=>{
+//     const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+//     testRevealContainer.create({
+//       token: "1815-6223-1073-1425",
+//     });
+//     const data = {
+//       token: "1815-6223-1073-1425",
+//       containerId:mockUuid
+//     }
+  
+
+//     testRevealContainer.reveal();
+//     const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+//     bus.emit(eventName,data);
+
+//     const onCbName = on.mock.calls[0][0];
+//     expect(onCbName).toBe(eventName);
+//     const onCb = on.mock.calls[0][1];
+//     onCb(data);
+//     const frameEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+//     const onframeEvent = on.mock.calls[1][0];
+//     expect(frameEventName).toBe(onframeEvent);
+//     const onCbFrame = on.mock.calls[1][1];
+//     onCbFrame({});
+
+//     const emitEventName = emitSpy.mock.calls[1][0];
+//     const emitCb = emitSpy.mock.calls[1][2];
+//     expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+//     emitCb({"success":[{token:"1815-6223-1073-1425"}]});
+//   });
+  test("reveal before skyflow frame ready event",async ()=>{
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+     testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+    testRevealContainer.setError({[SKYFLOW_ERROR_CODE.NOT_FOUND]: "Test error message",})
+    const res = testRevealContainer.reveal();
+    await Promise.resolve('token');
+    expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: data
+      }
+    }));
+    await Promise.resolve();
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: {"success":[{token:"1815-6223-1073-1425"}]}
+      }
+    }));
+
+    await expect(res).resolves.toEqual({"success":[{token:"1815-6223-1073-1425"}]});
+  });
+  test("reveal before skyflow frame ready event, Error case",async ()=>{
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+     testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+  
+    const res = testRevealContainer.reveal();
+    await Promise.resolve('token');
+    expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: data
+      }
+    }));
+    await Promise.resolve();
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: {"errors":{
+            code:404,
+            description:"Not Found"
+        }}
+      }
+    }));
+
+    await expect(res).rejects.toEqual({"errors":{code:404,description:"Not Found"}});
+  });
+  test("reveal before skyflow frame ready event, Error case when bearer token step failed",async ()=>{
+    // Create a mock that rejects for bearer token
+    const getBearerTokenFail = jest.fn().mockRejectedValue({
+      errors: {
+        code: 400,
+        description: "Failed to fetch bearer token"
+      }
+    });
+
+    const clientDataFail = {
+      ...clientData,
+      getSkyflowBearerToken: getBearerTokenFail,
+    };
+
+    const testRevealContainer = new ComposableRevealContainer(clientDataFail, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+     testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+
+    const res = testRevealContainer.reveal();
+
+    await expect(res).rejects.toEqual({errors:{code:400,description:"Failed to fetch bearer token"}});
+  });
+
+  /// frame ready event
+  test("reveal before skyflow frame ready event",async ()=>{
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+     testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+
+    const res = testRevealContainer.reveal();
+    await Promise.resolve('token');
+    expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: data
+      }
+    }));
+    await Promise.resolve();
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: {"success":[{token:"1815-6223-1073-1425"}]}
+      }
+    }));
+
+    await expect(res).resolves.toEqual({"success":[{token:"1815-6223-1073-1425"}]});
+  });
+  test("reveal before skyflow frame ready event, Error case",async ()=>{
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+    testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+
+    const res = testRevealContainer.reveal();
+    await Promise.resolve('token');
+    expect(res).toBeInstanceOf(Promise); //ELEMENT_EVENTS_TO_CLIENT.MOUNTED
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: data
+      }
+    }));
+    await Promise.resolve();
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: {"errors":{
+            code:404,
+            description:"Not Found"
+        }}
+      }
+    }));
+
+    await expect(res).rejects.toEqual({"errors":{code:404,description:"Not Found"}});
+  });
+  test("reveal before skyflow frame ready event, Error case when bearer token step failed",async ()=>{
+    // Create a mock that rejects for bearer token
+    const getBearerTokenFail = jest.fn().mockRejectedValue({
+      errors: {
+        code: 400,
+        description: "Failed to fetch bearer token"
+      }
+    });
+    
+    const clientDataFail = {
+      ...clientData,
+      getSkyflowBearerToken: getBearerTokenFail,
+    };
+    
+    const testRevealContainer = new ComposableRevealContainer(clientDataFail, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+        window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: data
+      }
+    }));
+     testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+  
+    const res = testRevealContainer.reveal();
+    
+    await expect(res).rejects.toEqual({errors:{code:400,description:"Failed to fetch bearer token"}});
+  });
+
+  test("reveal when elment is empty when skyflow ready",(done)=>{
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+
+            window.dispatchEvent(new MessageEvent('message', {
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: 'data'
+      }
+    }));
+    testRevealContainer.reveal().catch((error) => {
+      done();
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.error.code).toEqual(400);
+      expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_COMPOSABLE);
+    })
+  });
+  test("reveal when elment is empty when skyflow frame not ready",(done)=>{
+    const testRevealContainer = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+    testRevealContainer.reveal().catch((error) => {
+      done();
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.error.code).toEqual(400);
+      expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_COMPOSABLE);
+    })
+  });
+  test("reveal before skyflow frame ready event, Error case when bearer token step failed when set error is called",async ()=>{
+    // Create a mock that rejects for bearer token
+    const getBearerTokenFail = jest.fn().mockRejectedValue({
+      errors: {
+        code: 400,
+        description: "Failed to fetch bearer token"
+      }
+    });
+
+    const clientDataFail = {
+      ...clientData,
+      getSkyflowBearerToken: getBearerTokenFail,
+    };
+
+    const testRevealContainer = new ComposableRevealContainer(clientDataFail, { logLevel: LogLevel.ERROR,env:Env.PROD }, {
+        layout:[1]
+    });
+     testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+    testRevealContainer.setError({[SKYFLOW_ERROR_CODE.NOT_FOUND]: "Test error message",})
+    const res = testRevealContainer.reveal();
+
+    await expect(res).rejects.toEqual({errors:{code:400,description:"Failed to fetch bearer token"}});
+  });
+
+  test("reveal when frame not ready - ignores MOUNTED message from wrong origin", async () => {
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+
+    const res = container.reveal();
+    await Promise.resolve(); // let getBearerToken resolve and outer message listener attach
+
+    // Wrong origin - line 441 evaluates false, inner code is skipped
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://attacker.com',
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: { token: "1815-6223-1073-1425", containerId: mockUuid }
+      }
+    }));
+
+    // Correct origin MOUNTED - now proceeds to emit COMPOSABLE_REVEAL and attach REVEAL_RESPONSE_READY listener
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: { token: "1815-6223-1073-1425", containerId: mockUuid }
+      }
+    }));
+    await Promise.resolve();
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
+  });
+
+  test("reveal when frame not ready - inner listener rejects when revealData has errors", async () => {
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+
+    const res = container.reveal();
+    await Promise.resolve(); // let getBearerToken resolve and outer MOUNTED listener attach
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: { token: "1815-6223-1073-1425", containerId: mockUuid }
+      }
+    }));
+    await Promise.resolve();
+
+    // revealData.errors is truthy → line 464 true branch → reject
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { errors: { code: 500, description: "Internal Server Error" } }
+      }
+    }));
+
+    await expect(res).rejects.toEqual({ errors: { code: 500, description: "Internal Server Error" } });
+  });
+
+  test("reveal when frame not ready - inner listener ignores REVEAL_RESPONSE_READY from wrong origin", async () => {
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+
+    const res = container.reveal();
+    await Promise.resolve(); // let getBearerToken resolve and outer MOUNTED listener attach
+
+    // Correct MOUNTED - registers the inner REVEAL_RESPONSE_READY listener
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid,
+        data: { token: "1815-6223-1073-1425", containerId: mockUuid }
+      }
+    }));
+    await Promise.resolve();
+
+    // Wrong origin for REVEAL_RESPONSE_READY - line 464 origin check is false, skipped
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://attacker.com',
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    // Correct origin - now resolves
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
+  });
+
+  // Tests for the "frame IS already ready" path (lines 378-400 in composable-reveal-container.ts)
+  // #isComposableFrameReady is set to true by dispatching MOUNTED before calling reveal()
+
+  test("reveal when frame already ready - resolves with success data", async () => {
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+    // Set #isComposableFrameReady = true before calling reveal()
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    const res = container.reveal();
+    await Promise.resolve(); // let getBearerToken resolve and message listener attach
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
+  });
+
+  test("reveal when frame already ready - rejects with error data", async () => {
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    const res = container.reveal();
+    await Promise.resolve();
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { errors: { code: 404, description: "Not Found" } }
+      }
+    }));
+
+    await expect(res).rejects.toEqual({ errors: { code: 404, description: "Not Found" } });
+  });
+
+  test("reveal when frame already ready - ignores message from wrong origin", async () => {
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    const res = container.reveal();
+    await Promise.resolve();
+
+    // Wrong origin - listener should skip this
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://attacker.com',
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    // Correct message after wrong-origin one - should still resolve correctly
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
+  });
+
+  test("reveal when frame already ready - ignores message with wrong type", async () => {
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    const res = container.reveal();
+    await Promise.resolve();
+
+    // Wrong type - listener should skip this
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: 'WRONG_EVENT_TYPE',
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    // Correct message after wrong-type one - should still resolve correctly
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: properties.IFRAME_SECURE_ORIGIN,
+      data: {
+        type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_RESPONSE_READY + mockUuid,
+        data: { success: [{ token: "1815-6223-1073-1425" }] }
+      }
+    }));
+
+    await expect(res).resolves.toEqual({ success: [{ token: "1815-6223-1073-1425" }] });
+  });
+
+  test("reveal when frame already ready - rejects when bearer token fails", async () => {
+    const getBearerTokenFail = jest.fn().mockRejectedValue({
+      errors: { code: 400, description: "Failed to fetch bearer token" }
+    });
+    const clientDataFail = { ...clientData, getSkyflowBearerToken: getBearerTokenFail };
+
+    const container = new ComposableRevealContainer(clientDataFail, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    container.create({ token: "1815-6223-1073-1425" });
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    const res = container.reveal();
+
+    await expect(res).rejects.toEqual({ errors: { code: 400, description: "Failed to fetch bearer token" } });
+  });
+
+  test("reveal when frame already ready - throws error when no elements in container", (done) => {
+    const container = new ComposableRevealContainer(clientData, { logLevel: LogLevel.ERROR, env: Env.PROD }, { layout: [1] });
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: ELEMENT_EVENTS_TO_CLIENT.MOUNTED + mockUuid }
+    }));
+
+    container.reveal().catch((error) => {
+      done();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.error.code).toEqual(400);
+      expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_COMPOSABLE);
+    });
+  });
+});

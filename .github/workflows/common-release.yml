@@ -9,6 +9,39 @@ on:
       REGISTRY_URL:
         required: false
         type: string
+      # --- Package targeting (defaults preserve skyflow-js behavior) ---
+      PACKAGE_DIR:
+        required: false
+        type: string
+        default: packages/skyflow-js
+      PACKAGE_NAME:
+        required: false
+        type: string
+        default: skyflow-js
+      # Tag namespace for this package. Empty => bare-semver tags (skyflow-js,
+      # e.g. "2.7.9"); "flowvault-" => "flowvault-v1.0.0". Stripped (along with
+      # an optional leading "v") from the triggering tag to get the version.
+      TAG_PREFIX:
+        required: false
+        type: string
+        default: ''
+      DIST_DIR:
+        required: false
+        type: string
+        default: packages/skyflow-js/dist/v1
+      # S3 key prefix placed BEFORE the version segment (e.g. "flowvault/").
+      # Empty => s3://bucket/v<version>/ (skyflow-js, unchanged).
+      S3_PREFIX:
+        required: false
+        type: string
+        default: ''
+      # CloudFront invalidation path. "/*" preserves current behavior; a
+      # package can scope it (e.g. "/flowvault/*") to avoid churning the
+      # other package's cache.
+      INVALIDATION_PATH:
+        required: false
+        type: string
+        default: '/*'
     secrets:
         PAT_ACTIONS:
             required: true
@@ -42,29 +75,40 @@ jobs:
           token: ${{ secrets.PAT_ACTIONS }}
           fetch-depth: 0
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
-          node-version: 14.17.6
+          node-version: '20.x'
           registry-url: ${{ inputs.REGISTRY_URL }}
 
       - run: npm install --ignore-scripts
 
-      - name: Get Previous Tag
-        run: |
-          echo "TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
-
       - name: Set RELEASE_VERSION
         run: |
+          PREFIX="${{ inputs.TAG_PREFIX }}"
           if [ "${{ inputs.TAG }}" == "internal" ]; then
-            echo "RELEASE_VERSION=${{ env.TAG }}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
+            if [ -n "$PREFIX" ]; then
+              PREV_TAG=$(git describe --tags --abbrev=0 --match "${PREFIX}*" 2>/dev/null || true)
+            else
+              PREV_TAG=$(git describe --tags --abbrev=0 --match '[0-9]*' --exclude 'flowvault-*' 2>/dev/null || true)
+            fi
+            if [ -z "$PREV_TAG" ]; then
+              BASE_VERSION=$(node -p "require('./${{ inputs.PACKAGE_DIR }}/package.json').version")
+            else
+              BASE_VERSION="${PREV_TAG#$PREFIX}"
+              BASE_VERSION="${BASE_VERSION#v}"
+            fi
+            echo "RELEASE_VERSION=${BASE_VERSION}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
           else
-            echo "RELEASE_VERSION=${{ env.TAG }}" >> $GITHUB_ENV
+            BASE_VERSION="${{ github.ref_name }}"
+            BASE_VERSION="${BASE_VERSION#$PREFIX}"
+            BASE_VERSION="${BASE_VERSION#v}"
+            echo "RELEASE_VERSION=${BASE_VERSION}" >> $GITHUB_ENV
           fi
 
       - name: Bump Version
         run: |
           chmod +x ./scripts/bump_version.sh
-          ./scripts/bump_version.sh "${{ env.RELEASE_VERSION }}"
+          ./scripts/bump_version.sh "${{ env.RELEASE_VERSION }}" "${{ inputs.PACKAGE_DIR }}"
 
       - name: Resolve Branch for the Tagged Commit
         id: resolve-branch
@@ -83,25 +127,26 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Commit Changes
+        if: ${{ inputs.tag == 'beta' || inputs.tag == 'public' }}
         run: |
           git config user.name ${{ github.actor }}
           git config user.email ${{ github.actor }}@users.noreply.github.com
           git checkout ${{ env.branch_name }}
-          git add package.json
+          git add ${{ inputs.PACKAGE_DIR }}/package.json
           git commit -m "[AUTOMATED] Release - ${{ env.RELEASE_VERSION }}"
           git push origin ${{ env.branch_name }} -f
 
       - name: Build Browser SDK
-        run: npm run build-browser-sdk
+        run: npm run build-browser-sdk -w ${{ inputs.PACKAGE_NAME }}
         env:
           IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+          IFRAME_SECURE_SITE: "${{ inputs.S3_PREFIX }}v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
 
       - name: Build Iframe
-        run: npm run build-iframe
+        run: npm run build-iframe -w ${{ inputs.PACKAGE_NAME }}
         env:
           IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+          IFRAME_SECURE_SITE: "${{ inputs.S3_PREFIX }}v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -110,49 +155,49 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # - name: Set Latest Tag
-      #   run: |
-      #     mkdir tags
-      #     echo "v${{ env.RELEASE_VERSION }}" > tags/latest
-
-      # - name: Deploy Latest Tag to S3
-      #   run: aws s3 cp --recursive tags s3://${{ secrets.AWS_BUCKET_NAME }}/
-
-      # - name: Remove Latest Tag
-      #   run: rm -rf tags
-
       - name: Deploy to S3
         run: |
-          aws s3 cp --recursive dist/v1 s3://${{ secrets.AWS_BUCKET_NAME }}/v${{ env.RELEASE_VERSION }}/
+          aws s3 cp --recursive ${{ inputs.DIST_DIR }} s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.S3_PREFIX }}v${{ env.RELEASE_VERSION }}/
+      - name: Update latest pointer in S3
+        run: |
+          printf 'v%s' "${{ env.RELEASE_VERSION }}" > latest
+          aws s3 cp latest \
+            "s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.S3_PREFIX }}latest" \
+            --content-type text/plain \
+            --cache-control no-cache
+          rm -f latest
 
       - name: Build Node SDK
         run: |
-          npm run build:types 
-          npm run build-node-sdk
+          npm run build:types -w ${{ inputs.PACKAGE_NAME }}
+          npm run build-node-sdk -w ${{ inputs.PACKAGE_NAME }}
         env:
           IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-          IFRAME_SECURE_SITE: "v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
+          IFRAME_SECURE_SITE: "${{ inputs.S3_PREFIX }}v${{  env.RELEASE_VERSION }}/${{ secrets.IFRAME_SECURE_SITE }}"
 
       - name: Publish SDK
         run: |
           if [ "${{ inputs.TAG }}" == "beta" ]; then
-            npm publish --tag v${{  env.RELEASE_VERSION }}
+            npm publish -w ${{ inputs.PACKAGE_NAME }} --tag beta
           elif [ "${{ inputs.TAG }}" == "internal" ]; then
-            curl -u ${{ secrets.JFROG_USERNAME }}:${{ secrets.JFROG_PASSWORD }} https://prekarilabs.jfrog.io/prekarilabs/api/npm/auth/ > ~/.npmrc
+            JFROG_AUTH=$(echo -n "$JFROG_USERNAME:$JFROG_PASSWORD" | base64 -w 0)
+            echo "::add-mask::${JFROG_AUTH}"
             npm config set registry https://prekarilabs.jfrog.io/prekarilabs/api/npm/npm/
-            npm config set unsafe-perm true
-            npm publish
+            npm config set //prekarilabs.jfrog.io/prekarilabs/api/npm/npm/:_auth "$JFROG_AUTH"
+            npm publish -w ${{ inputs.PACKAGE_NAME }}
           else
-            npm publish
+            npm publish -w ${{ inputs.PACKAGE_NAME }}
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+          JFROG_USERNAME: ${{ secrets.JFROG_USERNAME }}
+          JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
 
       - name: Invalidate CloudFront cache 10 times
         run: |
           for i in {1..10}; do
             aws cloudfront create-invalidation \
               --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} \
-              --paths "/*"
+              --paths "${{ inputs.INVALIDATION_PATH }}"
             sleep 10
           done

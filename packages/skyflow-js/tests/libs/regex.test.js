@@ -1,0 +1,11 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
+import  regExFromString  from '@core/libs/regex';
+
+describe('construct regex', () => {
+  it('construct regex', () => {
+    const regEx = regExFromString('/[A-Z]/');
+    expect(typeof regEx).toBe('object');
+  });
+});

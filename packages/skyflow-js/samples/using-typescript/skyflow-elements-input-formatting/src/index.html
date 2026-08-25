@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skyflow Elements</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .empty-div {
+        height: 100px;
+        width: 350px;
+      }
+      .reveal-view {
+        margin-top: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Collect Elements</h3>
+    <!-- COllect Part -->
+    <div>
+      <div id="collectCardNumber" class="empty-div"></div>
+      <div id="collectCvv" class="empty-div"></div>
+      <div id="collectExpiryDate" class="empty-div"></div>
+      <div id="collectCardholderName" class="empty-div"></div>
+      <div>
+        <button id="collectPCIData">Collect Data</button>
+      </div>
+      <div>
+        <pre id="collectResponse"></pre>
+      </div>
+    </div>
+    <!-- Reveal Part-->
+    <div id="revealView" class="reveal-view">
+      <h3>Reveal Elements</h3>
+      <div id="revealCardNumber" class="empty-div"></div>
+      <div id="revealCvv" class="empty-div"></div>
+      <div id="revealExpiryDate" class="empty-div"></div>
+      <div id="revealCardholderName" class="empty-div"></div>
+      <div>
+        <button id="revealPCIData">Reveal Data</button>
+      </div>
+    </div>
+    
+    <script type="module" src="collect-input-formatting.ts"></script>
+    <script type="module" src="reveal-input-formatting.ts"></script>
+  </body>
+</html>
