@@ -30,9 +30,6 @@ jobs:
       - name: Detect changed scopes
         id: filter
         run: |
-          # Diff base = merge-base with main, i.e. "what does this release
-          # branch change relative to where it diverged from main". Consistent
-          # across re-pushes (idempotent) rather than per-push delta.
           git fetch --no-tags origin main
           BASE=$(git merge-base FETCH_HEAD HEAD)
           echo "Merge-base with main: $BASE"
@@ -99,12 +96,6 @@ jobs:
       # Same internal/BLITZ bucket + distribution + CDN origin as skyflow-js;
       # flowDB just lands under the flowvault/ key prefix.
       IFRAME_SECURE_ORIGIN: ${{ secrets.IFRAME_SECURE_ORIGIN }}
-      # Reuses skyflow-js's shared trailing-path secret ("elements/index.html").
-      # Both packages build the same dist/v1/elements/index.html artifact via
-      # webpack/iframe.js, and this value is origin-/prefix-independent — the
-      # workflow prepends "flowvault/v<version>/" — so no flowvault-specific
-      # secret is needed. The final src resolves to
-      # <origin>/flowvault/v<version>/elements/index.html.
       IFRAME_SECURE_SITE: ${{ secrets.IFRAME_SECURE_SITE }}
       AWS_ACCESS_KEY_ID: ${{ secrets.BLITZ_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.BLITZ_AWS_ACCESS_KEY_SECRET }}

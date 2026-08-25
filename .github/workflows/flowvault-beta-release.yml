@@ -25,16 +25,11 @@ jobs:
       DIST_DIR: "packages/skyflow-flowvault-js/dist/v1"
       S3_PREFIX: "flowvault/"
       TAG_PREFIX: "flowvault-"
-      INVALIDATION_PATH: "/flowvault/*"
+      INVALIDATION_PATH: "/*"
     secrets:
       # Same sandbox bucket / distribution / CDN origin as skyflow-js — flowDB
       # just lands under the flowvault/ key prefix, so the shared SANDBOX_*
-      # secrets are reused as-is.
       IFRAME_SECURE_ORIGIN: ${{ secrets.SANDBOX_IFRAME_SECURE_ORIGIN }}
-      # Reuses skyflow-js's shared trailing-path secret ("elements/index.html").
-      # Both packages build the same dist/v1/elements/index.html artifact, and
-      # this value is origin-/prefix-independent — the workflow prepends
-      # "flowvault/v<version>/" — so no flowvault-specific secret is needed.
       IFRAME_SECURE_SITE: ${{ secrets.SANDBOX_IFRAME_SECURE_SITE }}
       AWS_ACCESS_KEY_ID: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.SANDBOX_AWS_ACCESS_KEY_SECRET }}

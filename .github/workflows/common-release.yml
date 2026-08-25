@@ -86,28 +86,12 @@ jobs:
         run: |
           PREFIX="${{ inputs.TAG_PREFIX }}"
           if [ "${{ inputs.TAG }}" == "internal" ]; then
-            # Branch-triggered (release/*): github.ref_name is a branch, not a
-            # version tag. Derive the base version from the latest tag in THIS
-            # package's namespace, then append the -dev.<sha> suffix.
-            # `|| true` so a namespace with no tag yet doesn't abort the step
-            # under `set -e` (GitHub runs `run:` with `bash -eo pipefail`); the
-            # empty result is handled by the package.json fallback below.
             if [ -n "$PREFIX" ]; then
               PREV_TAG=$(git describe --tags --abbrev=0 --match "${PREFIX}*" 2>/dev/null || true)
             else
-              # Bare-semver tags only (skyflow-js). Must EXCLUDE the flowvault-*
-              # namespace, otherwise once a flowvault-v* tag is the newest tag
-              # in the repo this would resolve the skyflow-js base version to
-              # "flowvault-v1.0.0" and produce an invalid -dev.<sha> version.
               PREV_TAG=$(git describe --tags --abbrev=0 --match '[0-9]*' --exclude 'flowvault-*' 2>/dev/null || true)
             fi
             if [ -z "$PREV_TAG" ]; then
-              # No tag in this package's namespace yet (e.g. flowvault's first
-              # internal build, before any flowvault-* tag exists). Seed the base
-              # from the package's own package.json version so the -dev.<sha>
-              # build still gets a valid semver base instead of failing the run.
-              # Once the package cuts its first real tag, the describe branch
-              # above takes over automatically.
               BASE_VERSION=$(node -p "require('./${{ inputs.PACKAGE_DIR }}/package.json').version")
             else
               BASE_VERSION="${PREV_TAG#$PREFIX}"
@@ -115,9 +99,6 @@ jobs:
             fi
             echo "RELEASE_VERSION=${BASE_VERSION}-dev.$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
           else
-            # Tag-triggered (beta/public): the version IS the triggering tag,
-            # minus the package prefix and an optional leading "v"
-            # (e.g. flowvault-v1.0.0 -> 1.0.0; 2.7.9-beta.1 -> 2.7.9-beta.1).
             BASE_VERSION="${{ github.ref_name }}"
             BASE_VERSION="${BASE_VERSION#$PREFIX}"
             BASE_VERSION="${BASE_VERSION#v}"
@@ -146,10 +127,6 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Commit Changes
-        # Only beta/public commit the version bump back to the release branch.
-        # Internal (-dev.<sha>) builds must NOT — branch_name is unset for them
-        # (Resolve Branch is skipped), and with two internal jobs running in
-        # parallel an unguarded commit-back would race on the git push.
         if: ${{ inputs.tag == 'beta' || inputs.tag == 'public' }}
         run: |
           git config user.name ${{ github.actor }}
@@ -181,13 +158,6 @@ jobs:
       - name: Deploy to S3
         run: |
           aws s3 cp --recursive ${{ inputs.DIST_DIR }} s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.S3_PREFIX }}v${{ env.RELEASE_VERSION }}/
-
-      # Publish the unversioned "latest" pointer AFTER the versioned artifacts are
-      # uploaded, so a consumer resolving `latest` never gets a version whose files
-      # aren't in the bucket yet. Scoped by S3_PREFIX so skyflow-js -> `latest` and
-      # flowvault -> `flowvault/latest`; without the prefix both packages (which share
-      # a bucket per environment) would clobber the same object. The trailing
-      # CloudFront invalidation (INVALIDATION_PATH) already covers these keys.
       - name: Update latest pointer in S3
         run: |
           printf 'v%s' "${{ env.RELEASE_VERSION }}" > latest
@@ -208,7 +178,7 @@ jobs:
       - name: Publish SDK
         run: |
           if [ "${{ inputs.TAG }}" == "beta" ]; then
-            npm publish -w ${{ inputs.PACKAGE_NAME }} --tag v${{  env.RELEASE_VERSION }}
+            npm publish -w ${{ inputs.PACKAGE_NAME }} --tag beta
           elif [ "${{ inputs.TAG }}" == "internal" ]; then
             JFROG_AUTH=$(echo -n "$JFROG_USERNAME:$JFROG_PASSWORD" | base64 -w 0)
             echo "::add-mask::${JFROG_AUTH}"
