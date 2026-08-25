@@ -5,7 +5,7 @@
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "./tsconfig.json"
+        "project": "./tsconfig.eslint.json"
     },
     "plugins": [
         "@typescript-eslint"
@@ -23,6 +23,23 @@
         }
     },
     "rules": {
+        "import/no-restricted-paths": [
+            "error",
+            {
+                "zones": [
+                    {
+                        "target": "./core",
+                        "from": "./packages",
+                        "message": "core/ must not import from packages/ — the @core boundary points downward only. Move shared code into core/ instead of importing up."
+                    },
+                    {
+                        "target": "./packages/skyflow-flowvault-js",
+                        "from": "./packages/skyflow-js",
+                        "message": "skyflow-flowvault-js must not import from skyflow-js — the two SDK packages are independent. Share code via @core only."
+                    }
+                ]
+            }
+        ],
         "import/no-cycle": "off",
         "prefer-promise-reject-errors": "off",
         "max-classes-per-file": [
@@ -32,5 +49,16 @@
         "no-param-reassign": "off",
         "prefer-destructuring": "off",
         "@typescript-eslint/no-implied-eval": "off"
-    }
+    },
+    "overrides": [
+        {
+            "files": ["core/**/*.ts", "core/**/*.js"],
+            "rules": {
+                "import/no-extraneous-dependencies": [
+                    "error",
+                    { "packageDir": ["./", "./packages/skyflow-js"] }
+                ]
+            }
+        }
+    ]
 }

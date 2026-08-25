@@ -1,9 +1,12 @@
 
 dist
-types
+/types
+packages/*/types
 coverage
 tests
 
 babel.config.js
 webpack.*
+webpack
+jest.config.js
 samples

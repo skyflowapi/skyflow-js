@@ -1,0 +1,521 @@
+/*
+Copyright (c) 2022 Skyflow, Inc.
+*/
+import RevealContainer from "../../../../src/external/reveal/reveal-container";
+import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_CONTAINER, ELEMENT_EVENTS_TO_IFRAME, REVEAL_FRAME_CONTROLLER, REVEAL_TYPES } from "@core/constants";
+import bus from "framebus";
+import { LogLevel,Env } from "../../../../src/utils/common";
+import RevealElement from "../../../../src/external/reveal/reveal-element";
+import * as iframerUtils from '@core/iframe-libs/iframer';
+import SKYFLOW_ERROR_CODE from "@core/utils/constants";
+import { parameterizedString } from "../../../../src/utils/logs-helper";
+import SkyflowError from "@core/errors";
+import logs from "@core/utils/logs";
+
+iframerUtils.getIframeSrc = jest.fn(() => ('https://google.com'));
+const mockUuid = '1234'; 
+jest.mock('@core/libs/uuid',()=>({
+  __esModule: true,
+  default:jest.fn(()=>(mockUuid)),
+}));
+
+const on = jest.fn();
+const off = jest.fn();
+jest.setTimeout(40000);
+describe("Reveal Container Class", () => {
+  let emitSpy;
+  let targetSpy;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    emitSpy = jest.spyOn(bus, 'emit');
+    targetSpy = jest.spyOn(bus, 'target');
+    targetSpy.mockReturnValue({
+      on,
+      off,
+      emit: emitSpy,
+    });
+  });
+  const getBearerToken = jest.fn().mockImplementation(() => Promise.resolve());
+  const testMetaData = {
+  skyflowContainer: {
+        isControllerFrameReady: true,
+      },
+    uuid: "123",
+    config: {
+      vaultID: "vault123",
+      vaultURL: "https://sb.vault.dev.com",
+      getBearerToken,
+    },
+    metaData: {
+      clientDomain: "http://abc.com",
+    },
+  };
+  const skyflowConfig = {
+    vaultID: 'e20afc3ae1b54f0199f24130e51e0c11',
+    vaultURL: 'https://testurl.com',
+    getBearerToken,
+  };
+  
+  const clientData = {
+      skyflowContainer: {
+        isControllerFrameReady: false,
+      },
+    uuid: '1234',
+    client: {
+      config: { ...skyflowConfig },
+      metaData: {
+        uuid: "1234",
+      },
+    },
+    clientJSON:{
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+      metaData: {
+        uuid: "1234",
+      },
+      config:{
+        ...skyflowConfig,
+        getBearerToken
+      }
+    } 
+  }
+    
+  const clientData2 = {
+      skyflowContainer: {
+        isControllerFrameReady: true,
+      },
+    uuid: '1234',
+    client: {
+      config: { ...skyflowConfig },
+      metaData: {
+        uuid: "1234",
+      },
+    },
+    clientJSON:{
+      context: { logLevel: LogLevel.ERROR,env:Env.PROD},
+      metaData: {
+        uuid: "1234",
+      },
+      config:{
+        ...skyflowConfig,
+        getBearerToken
+      }
+    } 
+  }
+
+  const testRecord = {
+    token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+    // redaction: RedactionType.PLAIN_TEXT,
+    label: "",
+    styles: {
+      base: {
+        color: "#32ce21",
+      },
+    },
+  };
+  test("reveal should throw error with no elements", (done) => {
+    const container = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    container.reveal().catch((error) => {
+      done();
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.error.code).toEqual(400);
+      expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_REVEAL);
+    })
+  });
+
+  const testRevealContainer = new RevealContainer(testMetaData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+  test("constructor", () => {
+    expect(testRevealContainer).toBeInstanceOf(RevealContainer);
+    expect(testRevealContainer).toBeInstanceOf(Object);
+    expect(testRevealContainer).toHaveProperty("create");
+    expect(testRevealContainer).toHaveProperty("reveal");
+    expect(testRevealContainer).toHaveProperty("type");
+  });
+  test("create() will return a Reveal Element", () => {
+    const testRevealElement = testRevealContainer.create(testRecord);
+    expect(testRevealElement).toBeInstanceOf(RevealElement);
+  });
+  test("create() will throw error if record id invalid", () => {
+    try {
+      testRevealContainer.create({
+        token: "",
+        // redaction: RedactionType.REDACTED,
+      });
+    } catch (error) {
+      expect(error.message).toBe("Invalid Token Id ");
+    }
+    try {
+      testRevealContainer.create({
+        token: true,
+        // redaction: RedactionType.PLAIN_TEXT,
+      });
+    } catch (error) {
+      expect(error.message).toBe("Invalid Token Id true");
+    }
+  });
+
+  test('create()  will throw error for invalid input format options',(done)=>{
+    try {
+      testRevealContainer.create({
+        token: "1244",
+      },{
+        format:undefined
+      });
+      done('should throw error');
+    } catch (error) {
+      expect(error.error.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_INPUT_OPTIONS_FORMAT.description));
+      done();
+    }
+  });
+  test("on container mounted call back",()=>{
+    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+    const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+    bus.emit(eventName,data);
+
+    const onCbName = on.mock.calls[0][0];
+    expect(onCbName).toBe(eventName);
+    const onCb = on.mock.calls[0][1];
+    onCb(data);
+
+
+    testRevealContainer.reveal().catch(error => {
+      expect(error).toBeDefined()
+      expect(error.code).toEqual(404);
+      expect(error.description).toEqual('Not Found');
+    });
+    const eventName1 = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY+mockUuid
+
+    const onCbName1 = on.mock.calls[1][0];
+    expect(onCbName1).toBe(eventName1);
+    const onCb1 = on.mock.calls[1][1];
+    onCb1({}, jest.fn());
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+    emitCb({error:{code:404,description:"Not Found"}});
+  });
+  test("on container mounted call back 2",()=>{
+    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+
+    testRevealContainer.reveal();
+
+    const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+    bus.emit(eventName,data);
+    const onCbName = on.mock.calls[0][0];
+    expect(onCbName).toBe(eventName);
+    const onCb = on.mock.calls[0][1];
+    onCb(data);
+    const frameEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    const onframeEvent = on.mock.calls[1][0];
+    expect(frameEventName).toBe(onframeEvent);
+    const onCbFrame = on.mock.calls[1][1];
+    onCbFrame({});
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+    emitCb({"success":[{token:"1815-6223-1073-1425"}]});
+  });
+  test("on container mounted call back 3",()=>{
+    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+    const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+    bus.emit(eventName,data);
+    const onCbName = on.mock.calls[0][0];
+    expect(onCbName).toBe(eventName);
+    const onCb = on.mock.calls[0][1];
+    onCb(data);
+    testRevealContainer.reveal().then(res => {
+      expect(res).toBeDefined()
+      expect(res).toEqual({"success":[{token:"1815-6223-1073-1425"}]});
+      expect(res.success[0].token).toEqual("1815-6223-1073-1425");
+      expect(res.success[0].token).toEqual(data.token);
+    }).catch(error => {
+      console.log('error is here', error);
+    });
+    const eventName1 = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY+mockUuid
+
+    const onCbName1 = on.mock.calls[1][0];
+    expect(onCbName1).toBe(eventName1);
+    const onCb1 = on.mock.calls[1][1];
+    onCb1({}, jest.fn());
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+    emitCb({"success":[{token:"1815-6223-1073-1425"}]});
+  });
+  test("on container mounted call back 4",()=>{
+    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    testRevealContainer.create({
+      token: "123",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+
+    const mountEventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+    bus.emit(mountEventName,data);
+    const onCbName1 = on.mock.calls[0][0];
+    expect(onCbName1).toBe(mountEventName);
+    const onCb1 = on.mock.calls[0][1];
+    onCb1(data);
+
+
+    testRevealContainer.reveal().then((data) => {
+      console.log('data is here', data);
+    }).catch(error => console.log('error is here', error));
+
+    const eventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY+mockUuid
+    const onCbName = on.mock.calls[1][0];
+    expect(onCbName).toBe(eventName);
+    const onCb = on.mock.calls[1][1];
+    onCb({}, jest.fn());
+    bus.emit(eventName,data);
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitData = emitSpy.mock.calls[1][1];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+    expect(emitData)
+    .toEqual({type: REVEAL_TYPES.REVEAL,
+      containerId: '1234', records :[{token:"123"}], errorMessages: {}});
+    emitCb({"success":[{token:"1815-6223-1073-1425"}]}); 
+});
+  test("on container mounted call back 5",()=>{
+    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    testRevealContainer.create({
+      token: "token",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+    const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+    bus.emit(eventName,data);
+    const onCbName = on.mock.calls[0][0];
+    expect(onCbName).toBe(eventName);
+    const onCb = on.mock.calls[0][1];
+    onCb(data);
+    testRevealContainer.reveal();
+    const frameEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    const onframeEvent = on.mock.calls[1][0];
+    expect(frameEventName).toBe(onframeEvent);
+    const onCbFrame = on.mock.calls[1][1];
+    onCbFrame({});
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+    emitCb({"success":[{token:"1815-6223-1073-1425"}]});
+  });
+
+  test("on container mounted else call back",()=>{
+    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+    
+    testRevealContainer.reveal().catch(err => {
+      console.log(err);
+    });
+    const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+    bus.emit(eventName,data);
+    const onCbName = on.mock.calls[0][0];
+    expect(onCbName).toBe(eventName);
+    const onCb = on.mock.calls[0][1];
+    onCb(data);
+
+    const frameEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    const onframeEvent = on.mock.calls[1][0];
+    expect(frameEventName).toBe(onframeEvent);
+    const onCbFrame = on.mock.calls[1][1];
+    onCbFrame({});
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+    emitCb({error:{code:404,description:"Not Found"}});
+  });
+  test("on container mounted else call back 1",()=>{
+    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+  
+
+    testRevealContainer.reveal();
+    const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+    bus.emit(eventName,data);
+
+    const onCbName = on.mock.calls[0][0];
+    expect(onCbName).toBe(eventName);
+    const onCb = on.mock.calls[0][1];
+    onCb(data);
+    const frameEventName = ELEMENT_EVENTS_TO_IFRAME.SKYFLOW_FRAME_CONTROLLER_READY + mockUuid
+    const onframeEvent = on.mock.calls[1][0];
+    expect(frameEventName).toBe(onframeEvent);
+    const onCbFrame = on.mock.calls[1][1];
+    onCbFrame({});
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+    emitCb({"success":[{token:"1815-6223-1073-1425"}]});
+  });
+  test("reveal before skyflow frame ready event",()=>{
+    const testRevealContainer = new RevealContainer(clientData2, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+  
+
+    testRevealContainer.reveal();
+    const eventName = ELEMENT_EVENTS_TO_CONTAINER.ELEMENT_MOUNTED+mockUuid
+    bus.emit(eventName,data);
+
+    const onCbName = on.mock.calls[0][0];
+    expect(onCbName).toBe(eventName);
+    const onCb = on.mock.calls[0][1];
+    onCb(data);
+
+    const emitEventName = emitSpy.mock.calls[1][0];
+    const emitCb = emitSpy.mock.calls[1][2];
+    expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS+mockUuid);
+    emitCb({"success":[{token:"1815-6223-1073-1425"}]});
+  });
+  test("reveal before skyflow frame ready when element have error",(done)=>{
+    const testRevealContainer = new RevealContainer(clientData2, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    var element = testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+    element.setError('error occ')
+
+    testRevealContainer.reveal().catch((error) => {
+      done();
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.errors[0].code).toEqual(400);
+      expect(error.errors[0].description).toEqual(logs.errorLogs.REVEAL_ELEMENT_ERROR_STATE);
+    })
+  });
+  test("reveal before skyflow frame ready",(done)=>{
+    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+    var element = testRevealContainer.create({
+      token: "1815-6223-1073-1425",
+    });
+    const data = {
+      token: "1815-6223-1073-1425",
+      containerId:mockUuid
+    }
+    element.setError('error occ')
+
+    testRevealContainer.reveal().catch((error) => {
+      done();
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.errors[0].code).toEqual(400);
+      expect(error.errors[0].description).toEqual(logs.errorLogs.REVEAL_ELEMENT_ERROR_STATE);
+    })
+  });
+  test("reveal when elment is empty when skyflow ready",(done)=>{
+    const testRevealContainer = new RevealContainer(clientData2, { logLevel: LogLevel.ERROR,env:Env.PROD });
+
+    testRevealContainer.reveal().catch((error) => {
+      done();
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.error.code).toEqual(400);
+      expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_REVEAL);
+    })
+  });
+  test("reveal when elment is empty when skyflow frame not ready",(done)=>{
+    const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+
+    testRevealContainer.reveal().catch((error) => {
+      done();
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(SkyflowError);
+      expect(error.error.code).toEqual(400);
+      expect(error.error.description).toEqual(logs.errorLogs.NO_ELEMENTS_IN_REVEAL);
+    })
+  });
+  // test("file render call",async ()=>{
+  //   const testRevealContainer = new RevealContainer(clientData, { logLevel: LogLevel.ERROR,env:Env.PROD });
+  //   const { window } = new JSDOM('<!DOCTYPE html><div id="mockElement"></div>');
+  //   global.document = window.document;
+  //   let ele = document.createElement('div');
+  //   ele.setAttribute('id', '#mockElement');
+
+  //   let element = testRevealContainer.create({
+  //     skyflowID: "1244",
+  //     column: 'column', 
+  //     table: 'table'
+  //   },);
+  //   const data = {
+  //     skyflowID: "1244",
+  //     column: 'column', 
+  //     table: 'table',      
+  //     containerId:mockUuid
+  //   }
+  //   element.mount("#mockElement")
+  //   try {
+  //     const result  = await element.renderFile().then((data) => {
+  //       console.log('data is here', data);
+  //     }).catch(error => console.log('error is here', error));
+  //   } catch(error) {
+  //     console.log(error);
+  //   }
+  //   expect(result).toBeInstanceOf(Promise);
+  //   element.metaData = clientData
+  //   const eventName = ELEMENT_EVENTS_TO_IFRAME.PUREJS_FRAME_READY  + mockUuid
+  //   bus.emit(eventName,data);
+  //   const onCbName = on.mock.calls[1][0];
+  //   expect(onCbName).toBe(eventName);
+  //   const onCb = on.mock.calls[1][1];
+  //   onCb(data);
+
+
+
+  //   const emitEventName = emitSpy.mock.calls[1][0];
+  //   const emitCb = emitSpy.mock.calls[1][2];
+  //   expect(emitEventName).toBe(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST+mockUuid);
+  //   emitCb({"success":[{skyflow_id:"1244"}]});
+  // });
+
+});

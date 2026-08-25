@@ -1,0 +1,614 @@
+import Client from '@core/client';
+import {
+  constructElementsInsertReq,
+  constructFlowDBInsertRequest,
+  constructFlowDBInsertResponse,
+  constructFlowDBInsertError,
+  constructFlowDBUpdateRequest,
+  insertDataInCollectFlowDB,
+  updateDataInCollectFlowDB,
+  mergeFlowDBCollectResponses,
+  replaceCVVTokensInResponse,
+} from '../../src/api-utils/collect';
+
+// Note: the flowvault collect data layer receives the auth token as a parameter
+// (from the frame controller), so it does not import @core bus-events — no
+// getAccessToken mock is needed here (unlike the skyflow-js privacyDB path).
+
+const buildClient = () => Client.fromJSON({ config: { vaultID: 'vault123', vaultURL: 'https://vaulturl.com' } });
+
+describe('constructFlowDBInsertRequest', () => {
+  const finalInsertRecords = {
+    records: [
+      { table: 'table1', fields: { card_number: '4111', cvv: '123' } },
+      { table: 'table2', fields: { ssn: '999' } },
+    ],
+  };
+
+  test('defaults options to { tokens: true } when omitted', () => {
+    const req = constructFlowDBInsertRequest(finalInsertRecords, undefined, 'vault123');
+    expect(req.records.map((r) => r.tableName)).toEqual(['table1', 'table2']);
+    expect(req.records[0].upsert).toBeUndefined();
+  });
+
+  test('maps records to flowDB shape with vaultID at root and tableName per record', () => {
+    const req = constructFlowDBInsertRequest(finalInsertRecords, { tokens: true }, 'vault123');
+    expect(req).toEqual({
+      vaultID: 'vault123',
+      records: [
+        { tableName: 'table1', data: { card_number: '4111', cvv: '123' } },
+        { tableName: 'table2', data: { ssn: '999' } },
+      ],
+    });
+  });
+
+  test('adds upsert uniqueColumns when upsert option matches table', () => {
+    const options = { tokens: true, upsert: [{ tableName: 'table1', uniqueColumns: ['card_number'] }] };
+    const req = constructFlowDBInsertRequest(finalInsertRecords, options, 'vault123');
+    expect(req.records[0].upsert).toEqual({ uniqueColumns: ['card_number'] });
+    expect(req.records[1].upsert).toBeUndefined();
+  });
+
+  test('supports multiple uniqueColumns per table', () => {
+    const options = {
+      tokens: true,
+      upsert: [{ tableName: 'table1', uniqueColumns: ['card_number', 'cvv'] }],
+    };
+    const req = constructFlowDBInsertRequest(finalInsertRecords, options, 'vault123');
+    expect(req.records[0].upsert).toEqual({ uniqueColumns: ['card_number', 'cvv'] });
+  });
+
+  test('includes updateType in upsert only when provided', () => {
+    const options = {
+      tokens: true,
+      upsert: [
+        { tableName: 'table1', uniqueColumns: ['card_number'], updateType: 'REPLACE' },
+        { tableName: 'table2', uniqueColumns: ['ssn'] },
+      ],
+    };
+    const req = constructFlowDBInsertRequest(finalInsertRecords, options, 'vault123');
+    expect(req.records[0].upsert).toEqual({ uniqueColumns: ['card_number'], updateType: 'REPLACE' });
+    expect(req.records[1].upsert).toEqual({ uniqueColumns: ['ssn'] });
+    expect(req.records[1].upsert.updateType).toBeUndefined();
+  });
+});
+
+describe('constructFlowDBInsertResponse', () => {
+  const responseBody = {
+    records: [
+      {
+        skyflowID: 'id1',
+        tableName: 'table1',
+        httpCode: 200,
+        tokens: { card_number: [{ token: 'tok-1', tokenGroupName: 'nondeterministic' }] },
+      },
+    ],
+  };
+
+  test('builds { tableName, skyflowId, tokens, httpCode }', () => {
+    const res = constructFlowDBInsertResponse(responseBody);
+    expect(res).toEqual({
+      records: [
+        {
+          tableName: 'table1',
+          skyflowId: 'id1',
+          tokens: {
+            card_number: [{ token: 'tok-1', tokenGroupName: 'nondeterministic' }],
+          },
+          httpCode: 200,
+        },
+      ],
+    });
+  });
+
+  test('omits skyflowId when null and defaults tokens to empty object', () => {
+    const body = {
+      records: [
+        { skyflowID: null, tableName: 'table1', httpCode: 200 },
+      ],
+    };
+    const res = constructFlowDBInsertResponse(body);
+    expect(res.records[0].tokens).toEqual({});
+    expect(res.records[0]).not.toHaveProperty('skyflowId');
+    expect(res.records[0]).not.toHaveProperty('errors');
+  });
+
+  test('inlines per-record error into records without a skyflowId field', () => {
+    const body = {
+      records: [
+        { skyflowID: 'ok1', tableName: 'table1', httpCode: 200, tokens: {} },
+        { skyflowID: null, tableName: '', httpCode: 400, error: 'not found' },
+      ],
+    };
+    const res = constructFlowDBInsertResponse(body);
+    expect(res).not.toHaveProperty('errors');
+    expect(res.records).toHaveLength(2);
+    expect(res.records[0]).toEqual({
+      tableName: 'table1', skyflowId: 'ok1', tokens: {}, httpCode: 200,
+    });
+    expect(res.records[1]).toEqual({
+      error: 'not found', tableName: '', httpCode: 400,
+    });
+  });
+
+  test('includes hashedData only when non-empty', () => {
+    const body = {
+      records: [
+        { skyflowID: 'a', tableName: 't', httpCode: 200, tokens: {}, hashedData: { ssn: [{ data: 'h', hashName: 'hash1' }] } },
+        { skyflowID: 'b', tableName: 't', httpCode: 200, tokens: {}, hashedData: {} },
+        { skyflowID: 'c', tableName: 't', httpCode: 200, tokens: {} },
+      ],
+    };
+    const res = constructFlowDBInsertResponse(body);
+    expect(res.records[0].hashedData).toEqual({ ssn: [{ data: 'h', hashName: 'hash1' }] });
+    expect(res.records[1]).not.toHaveProperty('hashedData');
+    expect(res.records[2]).not.toHaveProperty('hashedData');
+  });
+});
+
+describe('constructFlowDBInsertError', () => {
+  test('passes through raw API error body when present on error.data', () => {
+    const out = constructFlowDBInsertError({
+      data: {
+        error: {
+          httpCode: 404,
+          message: 'Vault not found.',
+          httpStatus: 'Not Found',
+          details: [],
+        },
+      },
+    });
+    expect(out).toEqual({
+      error: {
+        httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+      },
+    });
+  });
+
+  test('normalizes a snake_case API error body to camelCase', () => {
+    const out = constructFlowDBInsertError({
+      data: {
+        error: {
+          grpc_code: 5,
+          http_code: 404,
+          message: 'Vault not found.',
+          http_status: 'Not Found',
+          details: [],
+        },
+      },
+    });
+    expect(out).toEqual({
+      error: {
+        grpcCode: 5, httpCode: 404, message: 'Vault not found.', httpStatus: 'Not Found', details: [],
+      },
+    });
+  });
+
+  test('falls back to SkyflowError code/description when no raw body', () => {
+    const out = constructFlowDBInsertError({ error: { code: 500, description: 'boom', type: 'INTERNAL_SERVER_ERROR' } });
+    expect(out).toEqual({
+      error: { httpCode: 500, message: 'boom' },
+    });
+  });
+});
+
+describe('constructFlowDBUpdateRequest', () => {
+  const finalUpdateRecords = {
+    updateRecords: [
+      { table: 'table1', skyflowID: 'id1', fields: { name: 'Vivek', table: 'table1', skyflowID: 'id1' } },
+    ],
+  };
+
+  test('defaults options to { tokens: true } when omitted (no updateType)', () => {
+    const req = constructFlowDBUpdateRequest(finalUpdateRecords, undefined, 'vault123');
+    expect(req.records[0]).toEqual({ skyflowID: 'id1', tableName: 'table1', data: { name: 'Vivek' } });
+    expect(req.records[0].updateType).toBeUndefined();
+  });
+
+  test('maps to flowDB update shape, omitting table/skyflowID from data', () => {
+    const req = constructFlowDBUpdateRequest(finalUpdateRecords, { tokens: true }, 'vault123');
+    expect(req).toEqual({
+      vaultID: 'vault123',
+      records: [
+        { skyflowID: 'id1', tableName: 'table1', data: { name: 'Vivek' } },
+      ],
+    });
+  });
+
+  test('sources updateType per-record from the matching table upsert entry', () => {
+    const req = constructFlowDBUpdateRequest(
+      finalUpdateRecords,
+      { upsert: [{ tableName: 'table1', uniqueColumns: ['name'], updateType: 'REPLACE' }] },
+      'vault123',
+    );
+    expect(req.records[0].updateType).toBe('REPLACE');
+  });
+
+  test('omits updateType when the record table has no upsert entry', () => {
+    const req = constructFlowDBUpdateRequest(
+      finalUpdateRecords,
+      { upsert: [{ tableName: 'other', uniqueColumns: ['name'], updateType: 'REPLACE' }] },
+      'vault123',
+    );
+    expect(req.records[0].updateType).toBeUndefined();
+  });
+});
+
+describe('additionalFields (AdditionalFields) → flowDB request bodies', () => {
+  test('passes element req/update through unchanged when no additionalFields are supplied', () => {
+    const req = { table1: { ssn: '999' } };
+    const update = { id1: { name: 'V', table: 'table1' } };
+    const [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(req, update, {});
+    expect(finalInsertRecords.records).toEqual([{ table: 'table1', fields: { ssn: '999' } }]);
+    expect(finalUpdateRecords.updateRecords).toEqual([
+      { table: 'table1', fields: { name: 'V', table: 'table1' }, skyflowID: 'id1' },
+    ]);
+  });
+
+  test('records without skyflowId become inserts (tableName/data) in the flowDB insert body', () => {
+    const options = {
+      additionalFields: {
+        records: [
+          { tableName: 'table1', data: { ssn: '999' } },
+        ],
+      },
+    };
+    const [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq({}, {}, options);
+    const insertReq = constructFlowDBInsertRequest(finalInsertRecords, options, 'vault123');
+
+    expect(insertReq).toEqual({
+      vaultID: 'vault123',
+      records: [{ tableName: 'table1', data: { ssn: '999' } }],
+    });
+    expect(finalUpdateRecords.updateRecords).toHaveLength(0);
+  });
+
+  test('records with top-level skyflowId become updates (skyflowID/tableName/data) in the flowDB update body', () => {
+    const options = {
+      additionalFields: {
+        records: [
+          { tableName: 'table1', data: { name: 'Vivek' }, skyflowId: 'id1' },
+        ],
+      },
+    };
+    const [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq({}, {}, options);
+    const updateReq = constructFlowDBUpdateRequest(finalUpdateRecords, { tokens: true }, 'vault123');
+
+    expect(finalInsertRecords.records).toHaveLength(0);
+    expect(updateReq).toEqual({
+      vaultID: 'vault123',
+      records: [{ skyflowID: 'id1', tableName: 'table1', data: { name: 'Vivek' } }],
+    });
+  });
+
+  test('merges an additionalFields record into an existing update id (same skyflowId)', () => {
+    const options = {
+      additionalFields: {
+        records: [{ tableName: 'table1', data: { newCol: 'y' }, skyflowId: 'id1' }],
+      },
+    };
+    // `update` already carries id1 (from an element with that skyflowID), so the
+    // additionalFields record merges into it rather than creating a new entry.
+    const update = { id1: { existingCol: 'x', table: 'table1' } };
+    const [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq({}, update, options);
+
+    expect(finalInsertRecords.records).toHaveLength(0);
+    expect(finalUpdateRecords.updateRecords).toEqual([
+      { table: 'table1', fields: { newCol: 'y', existingCol: 'x', table: 'table1' }, skyflowID: 'id1' },
+    ]);
+  });
+
+  test('merges an additionalFields record into an existing insert table (same tableName)', () => {
+    const options = {
+      additionalFields: {
+        records: [{ tableName: 'table1', data: { newCol: 'y' } }],
+      },
+    };
+    // `req` already carries table1 (from an element on that table), so the
+    // additionalFields record merges into it rather than creating a new entry.
+    const req = { table1: { existingCol: 'x' } };
+    const [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq(req, {}, options);
+
+    expect(finalUpdateRecords.updateRecords).toHaveLength(0);
+    expect(finalInsertRecords.records).toEqual([
+      { table: 'table1', fields: { newCol: 'y', existingCol: 'x' } },
+    ]);
+  });
+
+  test('does not pollute Object.prototype when the merge source carries a __proto__ key', () => {
+    const options = {
+      additionalFields: {
+        records: [{ tableName: 'table1', data: { newCol: 'y' } }],
+      },
+    };
+    // Collected element data (the merge source) carries a malicious __proto__
+    // key as an own property, as it would after JSON parsing.
+    const req = { table1: JSON.parse('{"existingCol":"x","__proto__":{"polluted":"yes"}}') };
+    const [finalInsertRecords] = constructElementsInsertReq(req, {}, options);
+
+    expect(({}).polluted).toBeUndefined();
+    expect(Object.prototype.polluted).toBeUndefined();
+    // Legitimate fields still merge; the forbidden key is dropped.
+    expect(finalInsertRecords.records).toEqual([
+      { table: 'table1', fields: { newCol: 'y', existingCol: 'x' } },
+    ]);
+    delete Object.prototype.polluted;
+  });
+
+  test('mixes inserts and skyflowId updates in a single additionalFields batch', () => {
+    const options = {
+      additionalFields: {
+        records: [
+          { tableName: 'table1', data: { ssn: '999' } },
+          { tableName: 'table2', data: { name: 'Vivek' }, skyflowId: 'id2' },
+        ],
+      },
+    };
+    const [finalInsertRecords, finalUpdateRecords] = constructElementsInsertReq({}, {}, options);
+
+    expect(constructFlowDBInsertRequest(finalInsertRecords, options, 'vault123').records)
+      .toEqual([{ tableName: 'table1', data: { ssn: '999' } }]);
+    expect(constructFlowDBUpdateRequest(finalUpdateRecords, {}, 'vault123').records)
+      .toEqual([{ skyflowID: 'id2', tableName: 'table2', data: { name: 'Vivek' } }]);
+  });
+});
+
+describe('insertDataInCollectFlowDB', () => {
+  const finalInsertRecords = { records: [{ table: 'table1', fields: { ssn: '999' } }] };
+
+  test('resolves with parsed { records, errors } on success', async () => {
+    const client = buildClient();
+    jest.spyOn(client, 'request').mockResolvedValue({
+      records: [{ skyflowID: 'id1', tableName: 'table1', httpCode: 200, tokens: { ssn: [{ token: 't1', tokenGroupName: 'det' }] } }],
+    });
+    const out = await insertDataInCollectFlowDB(finalInsertRecords, client, 'auth-token');
+    expect(out).toEqual({
+      records: [{
+        tableName: 'table1', skyflowId: 'id1', tokens: { ssn: [{ token: 't1', tokenGroupName: 'det' }] }, httpCode: 200,
+      }],
+    });
+  });
+
+  test('always resolves with { error } on request failure', async () => {
+    const client = buildClient();
+    jest.spyOn(client, 'request').mockRejectedValue({ error: { code: 500, description: 'insert failed' } });
+    const out = await insertDataInCollectFlowDB(finalInsertRecords, client, 'auth-token');
+    expect(out).toEqual({
+      error: { httpCode: 500, message: 'insert failed' },
+    });
+    expect(out.records).toBeUndefined();
+  });
+
+  test('resolves as success when a rejected body carries a records key (partial failure)', async () => {
+    const client = buildClient();
+    jest.spyOn(client, 'request').mockRejectedValue({
+      error: { code: 400, description: 'partial failure' },
+      data: {
+        records: [
+          { skyflowID: 'id1', tableName: 'table1', httpCode: 200, tokens: { ssn: [{ token: 't1', tokenGroupName: 'det' }] } },
+          { skyflowID: null, tableName: '', httpCode: 400, error: 'not found' },
+        ],
+      },
+    });
+    const out = await insertDataInCollectFlowDB(finalInsertRecords, client, 'auth-token');
+    expect(out).not.toHaveProperty('error');
+    expect(out.records).toEqual([
+      {
+        tableName: 'table1', skyflowId: 'id1', tokens: { ssn: [{ token: 't1', tokenGroupName: 'det' }] }, httpCode: 200,
+      },
+      { error: 'not found', tableName: '', httpCode: 400 },
+    ]);
+  });
+});
+
+describe('updateDataInCollectFlowDB', () => {
+  const finalUpdateRecords = {
+    updateRecords: [{ table: 'table1', skyflowID: 'id1', fields: { name: 'V', table: 'table1', skyflowID: 'id1' } }],
+  };
+
+  test('resolves with parsed { records, errors } on success', async () => {
+    const client = buildClient();
+    jest.spyOn(client, 'request').mockResolvedValue({
+      records: [{ skyflowID: 'id1', tableName: 'table1', httpCode: 200, tokens: { name: [{ token: 't1', tokenGroupName: 'det' }] } }],
+    });
+    const out = await updateDataInCollectFlowDB(finalUpdateRecords, client, 'auth-token');
+    expect(out).toEqual({
+      records: [{
+        tableName: 'table1', skyflowId: 'id1', tokens: { name: [{ token: 't1', tokenGroupName: 'det' }] }, httpCode: 200,
+      }],
+    });
+  });
+
+  test('always resolves with { error } on request failure', async () => {
+    const client = buildClient();
+    jest.spyOn(client, 'request').mockRejectedValue({ error: { code: 400, description: 'update failed' } });
+    const out = await updateDataInCollectFlowDB(finalUpdateRecords, client, 'auth-token');
+    expect(out).toEqual({
+      error: { httpCode: 400, message: 'update failed' },
+    });
+  });
+
+  test('resolves as success when a rejected body carries a records key (partial failure)', async () => {
+    const client = buildClient();
+    jest.spyOn(client, 'request').mockRejectedValue({
+      error: { code: 400, description: 'partial failure' },
+      data: {
+        records: [
+          { skyflowID: 'id1', tableName: 'table1', httpCode: 200, tokens: { name: [{ token: 't1', tokenGroupName: 'det' }] } },
+        ],
+      },
+    });
+    const out = await updateDataInCollectFlowDB(finalUpdateRecords, client, 'auth-token');
+    expect(out).not.toHaveProperty('error');
+    expect(out.records).toEqual([
+      {
+        tableName: 'table1', skyflowId: 'id1', tokens: { name: [{ token: 't1', tokenGroupName: 'det' }] }, httpCode: 200,
+      },
+    ]);
+  });
+});
+
+describe('mergeFlowDBCollectResponses (mixed insert/update outcomes)', () => {
+  const emptyCvvMap = { insert: {}, update: {} };
+
+  const successRecord = {
+    tableName: 'table1',
+    skyflowId: 'id1',
+    tokens: { card_number: [{ token: 't1', tokenGroupName: 'det' }] },
+    httpCode: 200,
+  };
+
+  test('both endpoints succeed → resolve shape merges all records, no error record', () => {
+    const insertOk = { records: [{ tableName: 'table2', tokens: {}, httpCode: 200 }] };
+    const updateOk = { records: [successRecord] };
+    const out = mergeFlowDBCollectResponses([insertOk, updateOk], emptyCvvMap);
+    expect(out).toEqual({
+      records: [
+        { tableName: 'table2', tokens: {}, httpCode: 200 },
+        successRecord,
+      ],
+    });
+    expect(out).not.toHaveProperty('error');
+  });
+
+  test('one endpoint fully fails, sibling returns records → resolve with surviving records + inline error record', () => {
+    const insertFail = { error: { httpCode: 401, message: 'invalid token' } };
+    const updateOk = { records: [successRecord] };
+    const out = mergeFlowDBCollectResponses([insertFail, updateOk], emptyCvvMap);
+    expect(out).not.toHaveProperty('error');
+    expect(out.records).toEqual([
+      successRecord,
+      { error: 'invalid token', httpCode: 401 },
+    ]);
+  });
+
+  test('inline error record omits httpCode when the error envelope has no numeric code', () => {
+    const insertFail = { error: { httpStatus: 'UNAUTHENTICATED', message: 'no numeric code' } };
+    const updateOk = { records: [successRecord] };
+    const out = mergeFlowDBCollectResponses([insertFail, updateOk], emptyCvvMap);
+    expect(out.records[1]).toEqual({ error: 'no numeric code' });
+    expect(out.records[1]).not.toHaveProperty('httpCode');
+  });
+
+  test('inline error record uses empty string when the error envelope has no message', () => {
+    const insertFail = { error: { httpCode: 500 } };
+    const updateOk = { records: [successRecord] };
+    const out = mergeFlowDBCollectResponses([insertFail, updateOk], emptyCvvMap);
+    expect(out.records[1]).toEqual({ error: '', httpCode: 500 });
+  });
+
+  test('every endpoint fully fails (nothing landed) → returns the first { error } for the caller to reject on', () => {
+    const insertFail = { error: { httpCode: 401, message: 'insert failed' } };
+    const updateFail = { error: { httpCode: 400, message: 'update failed' } };
+    const out = mergeFlowDBCollectResponses([insertFail, updateFail], emptyCvvMap);
+    expect(out).toEqual({ error: { httpCode: 401, message: 'insert failed' } });
+    expect(out).not.toHaveProperty('records');
+  });
+
+  test('single endpoint full failure → returns { error } (unchanged reject path)', () => {
+    const insertFail = { error: { httpCode: 401, message: 'insert failed' } };
+    const out = mergeFlowDBCollectResponses([insertFail], emptyCvvMap);
+    expect(out).toEqual({ error: { httpCode: 401, message: 'insert failed' } });
+  });
+
+  test('applies CVV mock to surviving success records in a mixed outcome', () => {
+    const insertFail = { error: { httpCode: 401, message: 'invalid token' } };
+    const updateOk = {
+      records: [{
+        tableName: 'table1',
+        skyflowId: 'id1',
+        tokens: { cvv: [{ token: 'real-cvv-token' }] },
+        httpCode: 200,
+      }],
+    };
+    const cvvMap = { insert: {}, update: { id1: { cvv: '123' } } };
+    const out = mergeFlowDBCollectResponses([insertFail, updateOk], cvvMap);
+    // token replaced with a 3-char mock (never the entered value), error record appended
+    expect(out.records[0].tokens.cvv[0].token).not.toBe('real-cvv-token');
+    expect(out.records[0].tokens.cvv[0].token).toHaveLength(3);
+    expect(out.records[1]).toEqual({ error: 'invalid token', httpCode: 401 });
+  });
+});
+
+describe('replaceCVVTokensInResponse', () => {
+  const emptyCvvMap = { insert: {}, update: {} };
+
+  test('returns records unchanged when records is falsy', () => {
+    expect(replaceCVVTokensInResponse(undefined, emptyCvvMap)).toBeUndefined();
+    expect(replaceCVVTokensInResponse(null, emptyCvvMap)).toBeNull();
+  });
+
+  test('skips a record with no tokens (and a null record)', () => {
+    const records = [null, { tableName: 't1', httpCode: 200 }];
+    expect(replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '123' } }, update: {} }))
+      .toBe(records);
+    expect(records[1]).toEqual({ tableName: 't1', httpCode: 200 });
+  });
+
+  test('leaves tokens untouched when no columnMap matches the record', () => {
+    const records = [{ tableName: 't1', tokens: { cvv: 'real' } }];
+    replaceCVVTokensInResponse(records, { insert: { other: { cvv: '123' } }, update: {} });
+    expect(records[0].tokens.cvv).toBe('real');
+  });
+
+  test('insert path: replaces a flat primitive token with the length-matched mock', () => {
+    const records = [{ tableName: 't1', tokens: { cvv: 'real-token' } }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '123' } }, update: {} });
+    expect(records[0].tokens.cvv).toBe('817');
+  });
+
+  test('update path: replaces the token inside a non-array object token value', () => {
+    const records = [{ skyflowId: 'id1', tokens: { cvv: { token: 'real-token' } } }];
+    replaceCVVTokensInResponse(records, { insert: {}, update: { id1: { cvv: '1234' } } });
+    expect(records[0].tokens.cvv.token).toBe('8173');
+  });
+
+  test('flat array column: replaces only the path-less entries', () => {
+    const records = [{
+      tableName: 't1',
+      tokens: { cvv: [{ token: 'a' }, { token: 'b', path: 'sub' }] },
+    }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '123' } }, update: {} });
+    expect(records[0].tokens.cvv[0].token).toBe('817');
+    expect(records[0].tokens.cvv[1].token).toBe('b');
+  });
+
+  test('nested array column: replaces only the entry whose path exactly matches', () => {
+    const records = [{
+      tableName: 't1',
+      tokens: { address: [{ token: 'a', path: 'city' }, { token: 'b', path: 'ward' }] },
+    }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { 'address.city': '123' } }, update: {} });
+    expect(records[0].tokens.address[0].token).toBe('817');
+    expect(records[0].tokens.address[1].token).toBe('b');
+  });
+
+  test('skips array entries that are not token-bearing objects', () => {
+    const records = [{
+      tableName: 't1',
+      tokens: { cvv: [null, 'str', { noToken: 1 }, { token: 'x' }] },
+    }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '123' } }, update: {} });
+    expect(records[0].tokens.cvv).toEqual([null, 'str', { noToken: 1 }, { token: '817' }]);
+  });
+
+  test('skips a mapped column that is absent from the token map', () => {
+    const records = [{ tableName: 't1', tokens: { other: 'keep' } }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '123' } }, update: {} });
+    expect(records[0].tokens.other).toBe('keep');
+  });
+
+  test('uses an empty-string mock when the entered value is empty', () => {
+    const records = [{ tableName: 't1', tokens: { cvv: 'real' } }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { cvv: '' } }, update: {} });
+    expect(records[0].tokens.cvv).toBe('');
+  });
+
+  test('leaves a nested-path column untouched when its top-level token value is not an array', () => {
+    // nestedPath is defined ('city') but tokens.address is a plain object, not an
+    // array of path-bearing entries, so nothing is replaced.
+    const records = [{ tableName: 't1', tokens: { address: { token: 'keep' } } }];
+    replaceCVVTokensInResponse(records, { insert: { t1: { 'address.city': '123' } }, update: {} });
+    expect(records[0].tokens.address).toEqual({ token: 'keep' });
+  });
+});

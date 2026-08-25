@@ -2,7 +2,10 @@ name: Public Release
 
 on:
   push:
-    tags: '*.*.\d+'
+    tags:
+      - '*.*.\d+'
+      - '!flowvault-*'
+      - '!*-beta*'
     paths-ignore:
       - "package.json"
       - "package-lock.json"
@@ -15,6 +18,12 @@ jobs:
     with:
       REGISTRY_URL: "https://registry.npmjs.org"
       TAG: "public"
+      PACKAGE_DIR: "packages/skyflow-js"
+      PACKAGE_NAME: "skyflow-js"
+      DIST_DIR: "packages/skyflow-js/dist/v1"
+      S3_PREFIX: ""
+      TAG_PREFIX: ""
+      INVALIDATION_PATH: "/*"
     secrets:
       IFRAME_SECURE_ORIGIN: ${{ secrets.PROD_IFRAME_SECURE_ORIGIN }}
       IFRAME_SECURE_SITE: ${{ secrets.PROD_IFRAME_SECURE_SITE }}

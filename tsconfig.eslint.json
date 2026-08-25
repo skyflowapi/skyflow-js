@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "core",
+    "packages/skyflow-js/src",
+    "packages/skyflow-js/src/custom.d.ts",
+    "packages/skyflow-js/typings.d.ts",
+    "packages/skyflow-flowvault-js/src",
+    "packages/skyflow-flowvault-js/src/custom.d.ts",
+    "packages/skyflow-flowvault-js/typings.d.ts"
+  ]
+}
