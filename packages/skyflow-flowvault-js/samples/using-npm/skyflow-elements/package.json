@@ -2,7 +2,6 @@
   "name": "skyflowelements",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "start": "parcel src/index.html --open",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +9,7 @@
   "keywords": [],
   "license": "ISC",
   "dependencies": {
-    "skyflow-flowvault-js": "^1.0.0"
+    "skyflow-flowvault-js": "1.0.0-dev.2432cf4c"
   },
   "devDependencies": {
     "parcel": "^2.0.1"
