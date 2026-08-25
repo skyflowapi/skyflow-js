@@ -2,7 +2,7 @@
   "name": "skyflow-flowvault-js",
   "preferGlobal": true,
   "analyze": false,
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0",
   "author": "Skyflow",
   "description": "Skyflow FlowVault JavaScript SDK",
   "homepage": "https://github.com/skyflowapi/skyflow-js",
