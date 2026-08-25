@@ -1,0 +1,53 @@
+{
+  "name": "skyflow-js",
+  "preferGlobal": true,
+  "analyze": false,
+  "version": "2.7.9",
+  "author": "Skyflow",
+  "description": "Skyflow JavaScript SDK",
+  "homepage": "https://github.com/skyflowapi/skyflow-js",
+  "main": "./dist/sdkNodeBuild/index.js",
+  "types": "./types/packages/skyflow-js/src/index-node.d.ts",
+  "files": [
+    "dist/sdkNodeBuild",
+    "types"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "client",
+    "sdk",
+    "javascript"
+  ],
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
+    "build:types": "tsc --emitDeclarationOnly && tsc-alias -p tsconfig.json",
+    "dev": "webpack serve --config=webpack.dev.js --open --hot ",
+    "build-browser-sdk": "webpack --config=webpack.skyflow-browser.js",
+    "build-node-sdk": "webpack --config=webpack.skyflow-node.js",
+    "build-iframe": "webpack --config=webpack.iframe.js",
+    "test": "jest --config=jest.config.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skyflowapi/skyflow-js.git"
+  },
+  "dependencies": {
+    "core-js": "3.44.0",
+    "framebus": "4.0.5",
+    "inject-stylesheet": "2.0.0",
+    "jquery": "3.7.1",
+    "jquery-mask-plugin": "1.14.16",
+    "jss": "10.10.0",
+    "jss-preset-default": "10.10.0",
+    "jwt-decode": "3.1.2",
+    "lodash": "4.18.1",
+    "mime": "3.0.0",
+    "regex-parser": "2.3.1",
+    "set-value": "4.1.0"
+  },
+  "engines": {
+    "node": ">=12.0",
+    "npm": ">=6.0"
+  }
+}
