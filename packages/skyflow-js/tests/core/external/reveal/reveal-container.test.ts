@@ -74,7 +74,7 @@ const testMetaData2: Metadata = {
 };
 
 const testRecord = {
-  token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+  token: "<TOKEN_1>",
   label: "",
   styles: {
     base: {
@@ -188,7 +188,7 @@ describe("Reveal Container Class", () => {
       env: Env.PROD,
     });
     const element = testRevealContainer.create({
-      token: "1815-6223-1073-1425",
+      token: "<TOKEN_2>",
     });
     const div = document.createElement("div");
     element.mount(div);
@@ -219,14 +219,14 @@ describe("Reveal Container Class", () => {
       env: Env.PROD,
     });
     const element = testRevealContainer.create({
-      token: "1815-6223-1073-1425",
+      token: "<TOKEN_2>",
     });
     const div = document.createElement("div");
 
     // Setup emit spy to handle reveal request
     emitSpy.mockImplementation((eventName, _, callback) => {
       if (eventName.includes(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS)) {
-        callback({ success: [{ token: "1815-6223-1073-1425" }] });
+        callback({ success: [{ token: "<TOKEN_2>" }] });
       }
     });
 
@@ -241,7 +241,7 @@ describe("Reveal Container Class", () => {
 
     const response = await revealPromise;
     expect(response.success).toBeDefined();
-    expect(response.success![0].token).toBe("1815-6223-1073-1425");
+    expect(response.success![0].token).toBe("<TOKEN_2>");
   });
 
   test("frame controller ready event correctly", async () => {
@@ -250,7 +250,7 @@ describe("Reveal Container Class", () => {
       env: Env.PROD,
     });
     const element = testRevealContainer.create({
-      token: "1815-6223-1073-1425",
+      token: "<TOKEN_2>",
     });
     const div = document.createElement("div");
     element.mount(div);
@@ -258,7 +258,7 @@ describe("Reveal Container Class", () => {
     // Mock frame controller ready event
     emitSpy.mockImplementation((eventName, _, callback) => {
       if (eventName.includes(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS)) {
-        callback({ success: [{ token: "1815-6223-1073-1425" }] });
+        callback({ success: [{ token: "<TOKEN_2>" }] });
       }
     });
 
@@ -269,7 +269,7 @@ describe("Reveal Container Class", () => {
 
     const response = await testRevealContainer.reveal();
     expect(response.success).toBeDefined();
-    expect(response.success![0].token).toBe("1815-6223-1073-1425");
+    expect(response.success![0].token).toBe("<TOKEN_2>");
   });
 
   test("on container mounted else call back", async () => {
@@ -278,7 +278,7 @@ describe("Reveal Container Class", () => {
       env: Env.PROD,
     });
     const element = testRevealContainer.create({
-      token: "1815-6223-1073-1425",
+      token: "<TOKEN_2>",
     });
     const div = document.createElement("div");
     element.mount(div);
@@ -307,7 +307,7 @@ describe("Reveal Container Class", () => {
       env: Env.PROD,
     });
     const element = testRevealContainer.create({
-      token: "1815-6223-1073-1425",
+      token: "<TOKEN_2>",
     });
     const div = document.createElement("div");
     element.mount(div);
@@ -315,7 +315,7 @@ describe("Reveal Container Class", () => {
     // Mock successful response
     emitSpy.mockImplementation((eventName, _, callback) => {
       if (eventName.includes(ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS)) {
-        callback({ success: [{ token: "1815-6223-1073-1425" }] });
+        callback({ success: [{ token: "<TOKEN_2>" }] });
       }
     });
 
@@ -326,7 +326,7 @@ describe("Reveal Container Class", () => {
 
     const response = await testRevealContainer.reveal();
     expect(response.success).toBeDefined();
-    expect(response.success![0].token).toBe("1815-6223-1073-1425");
+    expect(response.success![0].token).toBe("<TOKEN_2>");
   });
 
   test("reveal before skyflow frame ready event", async () => {
@@ -336,7 +336,7 @@ describe("Reveal Container Class", () => {
     });
 
     // Create reveal element with test token
-    const testToken = "1815-6223-1073-1425";
+    const testToken = "<TOKEN_2>";
     const div = document.createElement("div");
     const revealElement = testRevealContainer.create({
       token: testToken,
@@ -403,7 +403,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("reveal before skyflow frame ready when element have error", (done) => {
-    var element = testRevealContainer2.create({ token: "1815-6223-1073-1425" });
+    var element = testRevealContainer2.create({ token: "<TOKEN_2>" });
     element.setError("error occ");
 
     testRevealContainer2.reveal().catch((error: RevealResponse) => {
@@ -419,7 +419,7 @@ describe("Reveal Container Class", () => {
   });
 
   test("reveal before skyflow frame ready", (done) => {
-    var element = testRevealContainer1.create({ token: "1815-6223-1073-1425" });
+    var element = testRevealContainer1.create({ token: "<TOKEN_2>" });
     element.setError("error occ");
 
     testRevealContainer1.reveal().catch((error: RevealResponse) => {
