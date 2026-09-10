@@ -125,7 +125,7 @@ describe("Reveal Composable Container Class", () => {
   }
 
   const testRecord = {
-    token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+    token: "<TOKEN_1>",
     // redaction: RedactionType.PLAIN_TEXT,
     label: "",
     styles: {

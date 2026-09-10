@@ -640,10 +640,10 @@ container.collect({
       "skyflowId": "431eaa6c-5c15-4513-aa15-29f50babe882",
       "tokens": {
         "cardNumber": [
-          { "token": "f3907186-e7e2-466f-91e5-48e12c2bcbc1", "tokenGroupName": "nondeterministic" }
+          { "token": "<TOKEN_1>", "tokenGroupName": "nondeterministic" }
         ],
         "gender": [
-          { "token": "12f670af-6c7d-4837-83fb-30365fbc0b1e", "tokenGroupName": "nondeterministic" }
+          { "token": "<TOKEN_2>", "tokenGroupName": "nondeterministic" }
         ]
       },
       "httpCode": 200
@@ -741,10 +741,10 @@ cvvElement.mount('#cvv'); //Assumes there is a div with id='#cvv' in the webpage
       "skyflowId": "431eaa6c-5c15-4513-aa15-29f50babe882",
       "tokens": {
         "card_number": [
-          { "token": "f3907186-e7e2-466f-91e5-48e12c2bcbc1", "tokenGroupName": "nondeterministic" }
+          { "token": "<TOKEN_1>", "tokenGroupName": "nondeterministic" }
         ],
         "cvv": [
-          { "token": "12f670af-6c7d-4837-83fb-30365fbc0b1e", "tokenGroupName": "nondeterministic" }
+          { "token": "<TOKEN_2>", "tokenGroupName": "nondeterministic" }
         ]
       },
       "httpCode": 200
@@ -1040,13 +1040,13 @@ container.collect({
      "skyflowId": "431eaa6c-5c15-4513-aa15-29f50babe882",
      "tokens": {
        "cardNumber": [
-         { "token": "f3907186-e7e2-466f-91e5-48e12c2bcbc1", "tokenGroupName": "nondeterministic" }
+         { "token": "<TOKEN_1>", "tokenGroupName": "nondeterministic" }
        ],
        "first_name": [
-         { "token": "131e70dc-6f76-4319-bdd3-96281e051051", "tokenGroupName": "deterministic" }
+         { "token": "<TOKEN_3>", "tokenGroupName": "deterministic" }
        ],
        "gender": [
-         { "token": "12f670af-6c7d-4837-83fb-30365fbc0b1e", "tokenGroupName": "deterministic_string" }
+         { "token": "<TOKEN_2>", "tokenGroupName": "deterministic_string" }
        ]
      },
      "httpCode": 200
@@ -1849,13 +1849,13 @@ composableContainer.collect();
             "skyflowId": "431eaa6c-5c15-4513-aa15-29f50babe882",
             "tokens": {
                 "first_name": [
-                    { "token": "63b5eeee-3624-493f-825e-137a9336f882", "tokenGroupName": "deterministic" }
+                    { "token": "<TOKEN_4>", "tokenGroupName": "deterministic" }
                 ],
                 "card_number": [
-                    { "token": "f3907186-e7e2-466f-91e5-48e12c2bcbc1", "tokenGroupName": "nondeterministic" }
+                    { "token": "<TOKEN_1>", "tokenGroupName": "nondeterministic" }
                 ],
                 "cvv": [
-                    { "token": "7baf5bda-aa22-4587-a5c5-412f6f783a19", "tokenGroupName": "deterministic_string" }
+                    { "token": "<TOKEN_5>", "tokenGroupName": "deterministic_string" }
                 ]
             },
             "httpCode": 200
@@ -2279,7 +2279,7 @@ const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 // Step 2.
 const cardNumberElement = container.create({
-  token: 'b63ec4e0-bbad-4e43-96e6-6bd50f483f75',
+  token: '<TOKEN_6>',
   inputStyles: {
     base: {
       color: '#1d1d1d',
@@ -2300,7 +2300,7 @@ const cardNumberElement = container.create({
 });
 
 const cvvElement = container.create({
-  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  token: '<TOKEN_7>',
   inputStyles: {
     base: {
       color: '#1d1d1d',
@@ -2311,7 +2311,7 @@ const cvvElement = container.create({
 });
 
 const expiryDate= container.create({
- token: 'a4b24714-6a26-4256-b9d4-55ad69aa4047',
+ token: '<TOKEN_8>',
  inputStyles: {
    base: {
      color: '#1d1d1d',
@@ -2344,18 +2344,18 @@ The response below shows that some tokens assigned to the reveal elements get re
 {
   "records": [
     {
-      "token": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+      "token": "<TOKEN_6>",
       "tokenGroupName": "nondeterministic",
       "httpCode": 200
     },
     {
-      "token": "a4b24714-6a26-4256-b9d4-55ad69aa4047",
+      "token": "<TOKEN_8>",
       "tokenGroupName": "nondeterministic",
       "httpCode": 200
     },
     {
-      "error": "Tokens not found for 89024714-6a26-4256-b9d4-55ad69aa4047",
-      "token": "89024714-6a26-4256-b9d4-55ad69aa4047",
+      "error": "Tokens not found for <TOKEN_7>",
+      "token": "<TOKEN_7>",
       "httpCode": 404
     }
   ]
@@ -2388,7 +2388,7 @@ Helps to display custom error messages on the Skyflow Elements through the metho
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 const cardNumber = container.create({
-  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  token: '<TOKEN_7>',
 });
 
 // Set custom error.
@@ -2406,7 +2406,7 @@ You can override the default error messages with custom ones by using `setErrorO
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 const cardNumber = container.create({
-  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  token: '<TOKEN_7>',
 });
 
 const revealButton = document.getElementById('revealPCIData');
@@ -2435,7 +2435,7 @@ const cardNumber = container.create({
 });
 
 // Set token.
-cardNumber.setToken('89024714-6a26-4256-b9d4-55ad69aa4047');
+cardNumber.setToken('<TOKEN_7>');
 ```
 ### Set and Clear altText for Reveal Elements
 The `setAltText(value: string)` method can be used to set the altText of the Reveal Element. This will cause the altText to be displayed in the UI regardless of whether the token or value is currently being displayed.
@@ -2447,7 +2447,7 @@ The `setAltText(value: string)` method can be used to set the altText of the Rev
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 const cardNumber = container.create({
-  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  token: '<TOKEN_7>',
 });
 
 // Set altText.
@@ -2504,14 +2504,14 @@ const stylesOptions = {
 
 // Create reveal elements
 const cardHolderNameRevealElement = revealContainer.create({
-  token: 'ed5fdd1f-5009-435c-a06b-3417ce76d2c8',
+  token: '<TOKEN_9>',
   altText: 'first name',
   ...stylesOptions,
   label: 'Card Holder Name',
 });
 
 const cardNumberRevealElement = revealContainer.create({
-  token: '8ee84061-7107-4faf-bb25-e044f3d191fe',
+  token: '<TOKEN_10>',
   altText: 'xxxx',
   ...stylesOptions,
   label: 'Card Number',
@@ -2766,7 +2766,7 @@ container
 const container = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
 // Step 2.
 const cardNumberElement = container.create({
-  token: 'b63ec4e0-bbad-4e43-96e6-6bd50f483f75',
+  token: '<TOKEN_6>',
   inputStyles: {
     base: {
       color: '#1d1d1d',
@@ -2787,7 +2787,7 @@ const cardNumberElement = container.create({
 });
 
 const cvvElement = container.create({
-  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  token: '<TOKEN_7>',
   inputStyles: {
     base: {
       color: '#1d1d1d',
@@ -2798,7 +2798,7 @@ const cvvElement = container.create({
 });
 
 const expiryDate= container.create({
- token: 'a4b24714-6a26-4256-b9d4-55ad69aa4047',
+ token: '<TOKEN_8>',
  inputStyles: {
    base: {
      color: '#1d1d1d',
@@ -2827,18 +2827,18 @@ The response below shows that some tokens assigned to the reveal elements get re
 {
   "records": [
     {
-      "token": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+      "token": "<TOKEN_6>",
       "tokenGroupName": "nondeterministic",
       "httpCode": 200
     },
     {
-      "token": "a4b24714-6a26-4256-b9d4-55ad69aa4047",
+      "token": "<TOKEN_8>",
       "tokenGroupName": "nondeterministic",
       "httpCode": 200
     },
     {
-      "error": "Tokens not found for 89024714-6a26-4256-b9d4-55ad69aa4047",
-      "token": "89024714-6a26-4256-b9d4-55ad69aa4047",
+      "error": "Tokens not found for <TOKEN_7>",
+      "token": "<TOKEN_7>",
       "httpCode": 404
     }
   ]
@@ -2904,14 +2904,14 @@ const stylesOptions = {
 
 // Create reveal elements
 const cardHolderNameRevealElement = revealComposableContainer.create({
-  token: 'ed5fdd1f-5009-435c-a06b-3417ce76d2c8',
+  token: '<TOKEN_9>',
   altText: 'first name',
   ...stylesOptions,
   label: 'Card Holder Name',
 });
 
 const cardNumberRevealElement = revealComposableContainer.create({
-  token: '8ee84061-7107-4faf-bb25-e044f3d191fe',
+  token: '<TOKEN_10>',
   altText: 'xxxx',
   ...stylesOptions,
   label: 'Card Number',
