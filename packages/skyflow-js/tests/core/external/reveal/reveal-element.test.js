@@ -133,7 +133,7 @@ const getBearerToken2 = jest.fn().mockImplementation(() => Promise.reject());
 const client = new Client(clientData.client.config, clientData);
 
 const testRecord = {
-  token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+  token: "<TOKEN_1>",
   // redaction: RedactionType.PLAIN_TEXT,
 };
 const on = jest.fn();

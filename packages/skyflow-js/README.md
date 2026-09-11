@@ -1085,7 +1085,7 @@ container.collect({
      "fields": {
        "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
        "cardNumber": "f3907186-e7e2-466f-91e5-48e12c2bcbc1",
-       "first_name": "131e70dc-6f76-4319-bdd3-96281e051051",
+       "first_name": "<TOKEN_3>",
        "gender": "12f670af-6c7d-4837-83fb-30365fbc0b1e"
      }
    }
@@ -3096,10 +3096,10 @@ An [example](https://github.com/skyflowapi/skyflow-js/blob/main/packages/skyflow
 skyflow.detokenize({
   records: [
     {
-      token: '131e70dc-6f76-4319-bdd3-96281e051051',
+      token: '<TOKEN_1>,
     },
     {
-     token: '1r434532-6f76-4319-bdd3-96281e051051',
+     token: '<TOKEN_2>',
      redaction: Skyflow.RedactionType.MASKED
     }
   ],
@@ -3111,12 +3111,12 @@ The sample response:
 {
   "records": [
     {
-      "token": "131e70dc-6f76-4319-bdd3-96281e051051",
+      "token": "<TOKEN_3>",
       "value": "1990-01-01",
       "valueType": "STRING"
     },
     {
-     "token": "1r434532-6f76-4319-bdd3-96281e051051",
+     "token": "<TOKEN_2>",
      "value": "xxxxxxer",
      "valueType": "STRING"
    }
@@ -3461,7 +3461,7 @@ const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 // Step 2.
 const cardNumberElement = container.create({
-  token: 'b63ec4e0-bbad-4e43-96e6-6bd50f483f75',
+  token: '<TOKEN_4>',
   inputStyles: {
     base: {
       color: '#1d1d1d',
@@ -3483,7 +3483,7 @@ const cardNumberElement = container.create({
 });
 
 const cvvElement = container.create({
-  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  token: '<TOKEN_5>',
   inputStyles: {
     base: {
       color: '#1d1d1d',
@@ -3494,7 +3494,7 @@ const cvvElement = container.create({
 });
 
 const expiryDate= container.create({
- token: 'a4b24714-6a26-4256-b9d4-55ad69aa4047',
+ token: '<TOKEN_6>',
  inputStyles: {
    base: {
      color: '#1d1d1d',
@@ -3527,22 +3527,22 @@ The response below shows that some tokens assigned to the reveal elements get re
 {
   "success": [
      {
-     "token": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+     "token": "<TOKEN_4>",
      "value": "xxxxxxxxx4163"
      "valueType": "STRING"
    },
    {
-     "token": "a4b24714-6a26-4256-b9d4-55ad69aa4047",
+     "token": "<TOKEN_6>",
      "value": "12/2098"
      "valueType": "STRING"
    }
   ],
  "errors": [
     {
-       "token": "89024714-6a26-4256-b9d4-55ad69aa4047",
+       "token": "<TOKEN_5>",
        "error": {
          "code": 404,
-         "description": "Tokens not found for 89024714-6a26-4256-b9d4-55ad69aa4047"
+         "description": "Tokens not found for <TOKEN_5>"
        } 
    }   
   ]
@@ -3562,7 +3562,7 @@ Helps to display custom error messages on the Skyflow Elements through the metho
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 const cardNumber = container.create({
-  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  token: '<TOKEN_5>',
 });
 
 // Set custom error.
@@ -3580,7 +3580,7 @@ You can override the default error messages with custom ones by using `setErrorO
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 const cardNumber = container.create({
-  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  token: '<TOKEN_5>',
 });
 
 const revealButton = document.getElementById('revealPCIData');
@@ -3609,7 +3609,7 @@ const cardNumber = container.create({
 });
 
 // Set token.
-cardNumber.setToken('89024714-6a26-4256-b9d4-55ad69aa4047');
+cardNumber.setToken('<TOKEN_5>');
 ```
 ### Set and Clear altText for Reveal Elements
 The `setAltText(value: string)` method can be used to set the altText of the Reveal Element. This will cause the altText to be displayed in the UI regardless of whether the token or value is currently being displayed.
@@ -3621,7 +3621,7 @@ The `setAltText(value: string)` method can be used to set the altText of the Rev
 const container = skyflowClient.container(Skyflow.ContainerType.REVEAL);
 
 const cardNumber = container.create({
-  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  token: '<TOKEN_5>',
 });
 
 // Set altText.
@@ -3714,7 +3714,7 @@ fetch("<BACKEND_URL>")
 
     // Step 2.
     const fileElement = container.create({
-      skyflowID: "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+      skyflowID: "<TOKEN_4>",
       column: "file",
       table: "table",
       inputStyles: {
@@ -3762,7 +3762,7 @@ fetch("<BACKEND_URL>")
 {
   "success": [
      {
-     "skyflow_id": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+     "skyflow_id": "<TOKEN_4>",
      "column": "file"
    },
   ]
@@ -3819,14 +3819,14 @@ const stylesOptions = {
 
 // Create reveal elements
 const cardHolderNameRevealElement = revealContainer.create({
-  token: 'ed5fdd1f-5009-435c-a06b-3417ce76d2c8',
+  token: '<TOKEN_7>',
   altText: 'first name',
   ...stylesOptions,
   label: 'Card Holder Name',
 });
 
 const cardNumberRevealElement = revealContainer.create({
-  token: '8ee84061-7107-4faf-bb25-e044f3d191fe',
+  token: '<TOKEN_8>',
   altText: 'xxxx',
   ...stylesOptions,
   label: 'Card Number',
@@ -4069,7 +4069,7 @@ container
 const container = skyflowClient.container(Skyflow.ContainerType.COMPOSE_REVEAL, containerOptions);
 // Step 2.
 const cardNumberElement = container.create({
-  token: 'b63ec4e0-bbad-4e43-96e6-6bd50f483f75',
+  token: '<TOKEN_4>',
   inputStyles: {
     base: {
       color: '#1d1d1d',
@@ -4091,7 +4091,7 @@ const cardNumberElement = container.create({
 });
 
 const cvvElement = container.create({
-  token: '89024714-6a26-4256-b9d4-55ad69aa4047',
+  token: '<TOKEN_5>',
   inputStyles: {
     base: {
       color: '#1d1d1d',
@@ -4102,7 +4102,7 @@ const cvvElement = container.create({
 });
 
 const expiryDate= container.create({
- token: 'a4b24714-6a26-4256-b9d4-55ad69aa4047',
+ token: '<TOKEN_6>',
  inputStyles: {
    base: {
      color: '#1d1d1d',
@@ -4131,22 +4131,22 @@ The response below shows that some tokens assigned to the reveal elements get re
 {
   "success": [
      {
-     "token": "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+     "token": "<TOKEN_4>",
      "value": "xxxxxxxxx4163"
      "valueType": "STRING"
    },
    {
-     "token": "a4b24714-6a26-4256-b9d4-55ad69aa4047",
+     "token": "<TOKEN_6>",
      "value": "12/2098"
      "valueType": "STRING"
    }
   ],
  "errors": [
     {
-       "token": "89024714-6a26-4256-b9d4-55ad69aa4047",
+       "token": "<TOKEN_5>",
        "error": {
          "code": 404,
-         "description": "Tokens not found for 89024714-6a26-4256-b9d4-55ad69aa4047"
+         "description": "Tokens not found for <TOKEN_5>"
        } 
    }   
   ]
@@ -4204,14 +4204,14 @@ const stylesOptions = {
 
 // Create reveal elements
 const cardHolderNameRevealElement = revealComposableContainer.create({
-  token: 'ed5fdd1f-5009-435c-a06b-3417ce76d2c8',
+  token: '<TOKEN_7>',
   altText: 'first name',
   ...stylesOptions,
   label: 'Card Holder Name',
 });
 
 const cardNumberRevealElement = revealComposableContainer.create({
-  token: '8ee84061-7107-4faf-bb25-e044f3d191fe',
+  token: '<TOKEN_8>',
   altText: 'xxxx',
   ...stylesOptions,
   label: 'Card Number',
@@ -4334,7 +4334,7 @@ fetch("<BACKEND_URL>")
 
     // Step 2.
     const fileElement = container.create({
-      skyflowID: "b63ec4e0-bbad-4e43-96e6-6bd50f483f75",
+      skyflowID: "<TOKEN_4>",
       column: "file",
       table: "table",
       inputStyles: {

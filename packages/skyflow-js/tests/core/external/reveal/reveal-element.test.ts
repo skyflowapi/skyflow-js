@@ -161,7 +161,7 @@ const metaData2: Metadata = {
 // });
 
 const testRecord: IRevealElementInput = {
-  token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+  token: "<TOKEN_1>",
 };
 const on = jest.fn();
 const off = jest.fn();

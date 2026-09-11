@@ -57,7 +57,7 @@ describe("Reveal Frame Class",()=>{
 
     // Initialize test record
     testRecord = {
-      token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+      token: "<TOKEN_1>",
       // redaction: RedactionType.DEFAULT,
       label: "date_of_birth",
       inputStyles: {
@@ -986,7 +986,7 @@ describe("Reveal Frame Class", () => {
 
     // Initialize test record
     testRecord = {
-      token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+      token: "<TOKEN_1>",
       // redaction: RedactionType.DEFAULT,
       label: "date_of_birth",
       inputStyles: {
@@ -2061,7 +2061,7 @@ describe("Reveal Frame Class - Additional Tests", () => {
 
     // Initialize test record
     testRecord = {
-      token: "1677f7bd-c087-4645-b7da-80a6fd1a81a4",
+      token: "<TOKEN_1>",
       // redaction: RedactionType.DEFAULT,
       label: "date_of_birth",
       inputStyles: {
