@@ -102,7 +102,6 @@ const logs = {
     NO_ELEMENTS_IN_COLLECT: 'Validation error. No elements found in collect container',
     NO_ELEMENTS_IN_COMPOSABLE: 'Validation error. No elements found in composable container',
     NO_ELEMENTS_IN_REVEAL: 'Validation error. No elements found in reveal container',
-    INVALID_FILE_NAMES: 'Invalid File Name. Only alphanumeric characters and !-_.*() are allowed.',
     INVALID_FILE_NAME: 'Invalid File Name. Only alphanumeric characters and !-_.*() are allowed.',
     CLIENT_CONNECTION: 'client connection not established. client info has not reached iframes',
     INVALID_BEARER_TOKEN: 'Token generated from \'getBearerToken\' callback function is invalid. Make sure the implementation of \'getBearerToken\' is correct.',
