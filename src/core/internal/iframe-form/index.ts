@@ -575,7 +575,10 @@ export default class IFrameFormElement extends EventEmitter {
               oversizedFileNames.push(files[i].name);
             }
           }
-          if (this.preserveFileName) vaildateFileNames = vaildateFileName(files[i].name);
+          // Once any file name fails, keep the flag false; do not let a later valid name reset it.
+          if (this.preserveFileName && vaildateFileNames) {
+            vaildateFileNames = vaildateFileName(files[i].name);
+          }
         }
         if (oversizedFileNames.length > 0) {
           if (files.length === 1) {

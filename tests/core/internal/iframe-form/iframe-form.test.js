@@ -1169,6 +1169,45 @@ describe('MULTI_FILE_INPUT validator - specific UI error messages', () => {
     return arr;
   };
 
+  test('invalid file name shows the specific INVALID_FILE_NAME message in a COLLECT container for both file element types', () => {
+    const expected = logs.errorLogs.INVALID_FILE_NAME;
+    const badName = new File(['a'], 'my file.pdf', { type: 'application/pdf' });
+    const cases = [
+      [file_element, badName],
+      [multi_file_element, makeFileList(badName)],
+    ];
+    cases.forEach(([name, value]) => {
+      const element = new IFrameFormElement(name, 'Passport', { containerType: ContainerType.COLLECT }, context);
+      element.preserveFileName = true;
+      element.state.value = value;
+      expect(element.validator(value)).toBe(false);
+      expect(element.errorText).toBe(expected);
+    });
+  });
+
+  test('MULTI_FILE_INPUT with preserveFileName=true fails when an earlier file has an invalid name even if the last one is valid', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.preserveFileName = true;
+    const badName = new File(['a'], 'my file.pdf', { type: 'application/pdf' }); // space is not allowed
+    const goodName = new File(['b'], 'ok.pdf', { type: 'application/pdf' });
+    const fileList = makeFileList(badName, goodName); // invalid first, valid last
+    element.state.value = fileList;
+    const result = element.validator(fileList);
+    expect(result).toBe(false);
+    expect(element.errorText).toBe(parameterizedString(logs.errorLogs.INVALID_FILE_NAME));
+  });
+
+  test('MULTI_FILE_INPUT with preserveFileName=false ignores invalid file names', () => {
+    const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
+    element.preserveFileName = false;
+    const badName = new File(['a'], 'my file.pdf', { type: 'application/pdf' });
+    const goodName = new File(['b'], 'ok.pdf', { type: 'application/pdf' });
+    const fileList = makeFileList(badName, goodName);
+    element.state.value = fileList;
+    const result = element.validator(fileList);
+    expect(result).toBe(true);
+  });
+
   test('invalid file type in MULTI_FILE_INPUT shows generic error not size-specific message', () => {
     const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
     element.maxFileSize = 10_000_000; // 10 MB — file below this so size is not the issue

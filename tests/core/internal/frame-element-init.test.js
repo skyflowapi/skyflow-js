@@ -697,7 +697,7 @@ describe('FrameElementInit Additional Test Cases', () => {
             expect(postMessageSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
                     type: `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:element:MULTI_FILE_INPUT:123`,
-                    data: {"error": "No files selected"}, // Response data (success or error)
+                    data: { errorResponse: [{ error: { code: 400, description: 'No File Selected' } }] }, // Response data (success or error)
                 }),
                 'http://localhost.com'
             );

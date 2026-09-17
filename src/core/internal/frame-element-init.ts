@@ -515,7 +515,8 @@ export default class FrameElementInit {
     }
 
     if (state.value === undefined || state.value === null || state.value === '') {
-      rootReject({ error: 'No files selected' });
+      const noFileError = new SkyflowError(SKYFLOW_ERROR_CODE.NO_FILE_SELECTED, [], true);
+      rootReject({ errorResponse: [{ error: noFileError.error }] });
       return;
     }
 
@@ -642,9 +643,13 @@ export default class FrameElementInit {
         throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE, [], true);
       }
 
-      const isValidFileName = vaildateFileName(file.name);
-      if (!isValidFileName) {
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true);
+      // Only validate the original file name when it will actually be sent to the vault.
+      // With preserveFileName: false the name is replaced with a generated UUID before upload.
+      if (fileElement.preserveFileName) {
+        const isValidFileName = vaildateFileName(file.name);
+        if (!isValidFileName) {
+          throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME, [], true);
+        }
       }
     });
     return true;
