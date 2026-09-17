@@ -204,13 +204,13 @@ describe('test formatOptions function with format and translation', () => {
     });
 
     test('should include maxFileSize in formatted options for MULTI_FILE_INPUT', () => {
-        const formattedOptions = formatOptions(FileFileElementType.MULTI_FILE_INPUT, { maxFileSize: 4000000 }, LogLevel.ERROR);
+        const formattedOptions = formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileSize: 4000000 }, LogLevel.ERROR);
         expect(formattedOptions.maxFileSize).toBe(4000000);
     });
 
     test('should throw error for maxFileSize provided as non-number for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(FileFileElementType.MULTI_FILE_INPUT, { maxFileSize: 'large' }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileSize: 'large' }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileSize'));
@@ -220,7 +220,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw error for maxFileSize provided as zero for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(FileFileElementType.MULTI_FILE_INPUT, { maxFileSize: 0 }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileSize: 0 }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileSize'));
@@ -230,7 +230,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw error for maxFileSize provided as negative number for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(FileFileElementType.MULTI_FILE_INPUT, { maxFileSize: -1000 }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileSize: -1000 }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileSize'));
@@ -239,13 +239,13 @@ describe('test formatOptions function with format and translation', () => {
     });
 
     test('should include maxFileCount in formatted options for MULTI_FILE_INPUT', () => {
-        const formattedOptions = formatOptions(FileFileElementType.MULTI_FILE_INPUT, { maxFileCount: 2 }, LogLevel.ERROR);
+        const formattedOptions = formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileCount: 2 }, LogLevel.ERROR);
         expect(formattedOptions.maxFileCount).toBe(2);
     });
 
     test('should throw error for maxFileCount provided as non-integer for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(FileFileElementType.MULTI_FILE_INPUT, { maxFileCount: 2.5 }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileCount: 2.5 }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileCount'));
@@ -255,7 +255,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw error for maxFileCount provided as zero for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(FileFileElementType.MULTI_FILE_INPUT, { maxFileCount: 0 }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileCount: 0 }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileCount'));
@@ -265,7 +265,7 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should throw error for maxFileCount provided as negative number for MULTI_FILE_INPUT', (done) => {
         try {
-            formatOptions(FileFileElementType.MULTI_FILE_INPUT, { maxFileCount: -1 }, LogLevel.ERROR);
+            formatOptions(FileElementType.MULTI_FILE_INPUT, { maxFileCount: -1 }, LogLevel.ERROR);
             done('should throw error');
         } catch (err) {
             expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_POSITIVE_NUMBER_OPTIONS.description, 'maxFileCount'));
