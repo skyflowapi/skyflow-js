@@ -1184,7 +1184,6 @@ describe('MULTI_FILE_INPUT validator - specific UI error messages', () => {
       expect(element.errorText).toBe(expected);
     });
   });
-
   test('MULTI_FILE_INPUT with preserveFileName=true fails when an earlier file has an invalid name even if the last one is valid', () => {
     const element = new IFrameFormElement(multi_file_element, '', { containerType: ContainerType.COLLECT }, context);
     element.preserveFileName = true;
