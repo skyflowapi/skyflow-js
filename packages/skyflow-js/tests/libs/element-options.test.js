@@ -103,6 +103,16 @@ describe('test formatOptions function with format and translation', () => {
         expect(formattedOptions).toEqual({required:true,preserveFileName:true});
     });
 
+    test('should return preserveFileName true for MULTI_FILE_INPUT when not provided in options',()=>{
+        const formattedOptions = formatOptions(FileElementType.MULTI_FILE_INPUT,{required:true},LogLevel.ERROR);
+        expect(formattedOptions).toEqual({required:true,preserveFileName:true});
+    });
+
+    test('should keep preserveFileName false for MULTI_FILE_INPUT when provided as false',()=>{
+        const formattedOptions = formatOptions(FileElementType.MULTI_FILE_INPUT,{required:true,preserveFileName:false},LogLevel.ERROR);
+        expect(formattedOptions).toEqual({required:true,preserveFileName:false});
+    });
+
     test('should return preserveFileName false when not provied as false in options',()=>{
         const formattedOptions = formatOptions(FileElementType.FILE_INPUT,{required:true,preserveFileName:false},LogLevel.ERROR);
         expect(formattedOptions).toEqual({required:true,preserveFileName:false});

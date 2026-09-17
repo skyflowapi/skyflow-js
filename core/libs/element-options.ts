@@ -381,7 +381,8 @@ export const formatOptions = (
       break;
     }
 
-    case ELEMENTS.FILE_INPUT.name || ELEMENTS.MULTI_FILE_INPUT.name: {
+    case ELEMENTS.FILE_INPUT.name:
+    case ELEMENTS.MULTI_FILE_INPUT.name: {
       if (!Object.prototype.hasOwnProperty.call(formattedOptions, 'preserveFileName')) {
         formattedOptions = { ...formattedOptions, preserveFileName: true };
       }
