@@ -50,8 +50,13 @@ jobs:
       - run: npm install --ignore-scripts
 
       - name: Get Previous Tag
+        # Only consider this SDK's numeric semver tags (e.g. 2.7.9, 2.9.0-beta.1).
+        # Other packages released from this repo use prefixed tags (e.g. flowvault-v1.0.0),
+        # which are not valid npm versions and must not be picked up here.
         run: |
-          echo "TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+          SEMVER_GLOB='[0-9]*.[0-9]*.[0-9]*'
+          LAST_SEMVER_COMMIT=$(git rev-list --tags="$SEMVER_GLOB" --max-count=1)
+          echo "TAG=$(git describe --abbrev=0 --tags --match "$SEMVER_GLOB" "$LAST_SEMVER_COMMIT")" >> $GITHUB_ENV
 
       - name: Set RELEASE_VERSION
         run: |
