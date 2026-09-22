@@ -242,7 +242,7 @@ class RevealFrame extends CoreRevealFrame {
             const fileType = this.getExtension(url);
             const isZip = RevealFrame.isZipMimeType(fileType);
             if (isZip && this.#renderOptions.zipRender) {
-              this.dataElememt.innerText = '...loading';
+              this.dataElememt.innerText = ZIP_PREVIEW_LOADING_MESSAGE;
               this.unZipFiles(url).then((files) => {
                 printLog(parameterizedString(logs.infoLogs.FILES_UNZIPPED_SUCCESSFULLY,
                   CLASS_NAME, this.record?.skyflowID), MessageType.LOG, this.context?.logLevel);
@@ -457,7 +457,7 @@ class RevealFrame extends CoreRevealFrame {
 
   private async downloadCurrentFile(): Promise<void> {
     if (!this.#renderOptions.allowDownload) {
-      printLog(logs.errorLogs.DOWNLOAD_NOT_ALLOWED, MessageType.ERROR, this.context?.logLevel);
+      printLog(logs.errorLogs.DOWNLOAD_NOT_ALLOWED, MessageType.WARN, this.context?.logLevel);
       return;
     }
     const currentFile = this.#currentFile;

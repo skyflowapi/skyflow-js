@@ -208,7 +208,9 @@ const DANGEROUS_FILE_EXTENSIONS = [
   '.ova', '.ovf', '.vdi', '.vbox',
 ];
 
-export const isDangerousFileType = (file: { name?: string; type?: string }): boolean => {
+export const isDangerousFileType = (
+  file?: { name?: string; type?: string } | null,
+): boolean => {
   const lowerName = (file?.name || '').toLowerCase();
   const lowerType = (file?.type || '').toLowerCase();
   if (DANGEROUS_FILE_EXTENSIONS.some((ext) => lowerName.endsWith(ext))) {

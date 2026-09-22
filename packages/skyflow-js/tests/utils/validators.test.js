@@ -1482,6 +1482,21 @@ describe('isDangerousFileType', () => {
     expect(isDangerousFileType({ name: 'clip.mp4', type: 'video/mp4' })).toBe(false);
     expect(isDangerousFileType({})).toBe(false);
     expect(isDangerousFileType(undefined)).toBe(false);
+    expect(isDangerousFileType(null)).toBe(false);
+    expect(isDangerousFileType()).toBe(false);
+  });
+  test('handles an undefined type: decides by extension alone', () => {
+    // Extracted zip entries often have no MIME type; the extension check must carry the decision.
+    expect(isDangerousFileType({ name: 'run.exe' })).toBe(true);
+    expect(isDangerousFileType({ name: 'run.exe', type: undefined })).toBe(true);
+    expect(isDangerousFileType({ name: 'photo.png' })).toBe(false);
+    expect(isDangerousFileType({ name: 'photo.png', type: undefined })).toBe(false);
+  });
+  test('handles an undefined name: decides by mime type alone', () => {
+    expect(isDangerousFileType({ type: 'text/html' })).toBe(true);
+    expect(isDangerousFileType({ name: undefined, type: 'application/x-msdownload' })).toBe(true);
+    expect(isDangerousFileType({ type: 'image/png' })).toBe(false);
+    expect(isDangerousFileType({ name: undefined, type: 'application/pdf' })).toBe(false);
   });
 });
 

@@ -19,7 +19,7 @@ import cartesBancairesIcon from '../assets/carter-banceris.svg';
 
 export const DEFAULT_WARNING_FOR_DANGEROUS_FILE_TYPE = 'This file type is not supported for preview.';
 export const ZIP_EMPTY_ARCHIVE_MESSAGE = 'No files found in the ZIP archive.';
-export const ZIP_PREVIEW_LOADING_MESSAGE = 'Loading preview...';
+export const ZIP_PREVIEW_LOADING_MESSAGE = '...loading';
 
 // MIME types recognised as a zip archive for `zipRender`. Deliberately exact:
 // 'application/gzip' also contains "zip" but is not a zip.
