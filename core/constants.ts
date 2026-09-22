@@ -17,6 +17,16 @@ import successIcon from '../assets/path.svg';
 import dropDownIcon from '../assets/drop-down.svg';
 import cartesBancairesIcon from '../assets/carter-banceris.svg';
 
+export const DEFAULT_WARNING_FOR_DANGEROUS_FILE_TYPE = 'This file type is not supported for preview.';
+export const ZIP_EMPTY_ARCHIVE_MESSAGE = 'No files found in the ZIP archive.';
+export const ZIP_PREVIEW_LOADING_MESSAGE = '...loading';
+
+// MIME types recognised as a zip archive for `zipRender`. Deliberately exact:
+// 'application/gzip' also contains "zip" but is not a zip.
+export const ZIP_ARCHIVE_MIME_TYPES = [
+  'application/zip', 'application/x-zip-compressed', 'application/x-zip',
+];
+
 export const SESSION_ID = 'session_id';
 export const SKY_METADATA_HEADER = 'sky-metadata';
 // Metadata object KEY under which the SDK version string is stored (serialized into
@@ -109,6 +119,7 @@ export const ELEMENT_EVENTS_TO_CLIENT = {
 };
 
 export const ELEMENT_EVENTS_TO_IFRAME = {
+  REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE: 'REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE',
   MULTIPLE_UPLOAD_FILES_RESPONSE: 'MULTIPLE_UPLOAD_FILES_RESPONSE',
   RENDER_MOUNTED: 'RENDER_MOUNTED',
   HEIGHT_CALLBACK: 'HEIGHT_CALLBACK',
@@ -523,6 +534,87 @@ export const RENDER_ELEMENT_IMAGE_STYLES = {
   [STYLE_TYPE.BASE]: {
     maxHeight: '100%',
     maxWidth: '100%',
+  },
+};
+
+// Zip file render (list-detail layout): container, left file list, right preview panel.
+export const ZIP_CONTAINER_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    display: 'flex',
+    'flex-direction': 'row',
+    height: '100%',
+    width: '100%',
+    overflow: 'auto',
+    border: '1px solid #a5a2a2',
+    borderRadius: '4px',
+  },
+};
+
+export const ZIP_NAV_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    width: '30%',
+    height: '100%',
+    borderRight: '1px solid #ccc',
+    boxSizing: 'border-box' as const,
+    margin: '4px',
+    overflow: 'auto' as const,
+  },
+};
+
+export const ZIP_NAV_LIST_ITEM_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    alignItems: 'center',
+    padding: '8px',
+    margin: '4px',
+    cursor: 'pointer',
+    borderRadius: '4px',
+    boxSizing: 'border-box' as const,
+    backgroundColor: '#f9f9f9',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    wordBreak: 'break-all',
+  },
+  [STYLE_TYPE.FOCUS]: {
+    alignItems: 'center',
+    padding: '8px',
+    margin: '4px',
+    cursor: 'pointer',
+    borderRadius: '4px',
+    boxSizing: 'border-box' as const,
+    backgroundColor: '#f9f9f9',
+    border: '2px solid rgb(155, 158, 164)',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    wordBreak: 'break-all',
+  },
+};
+
+// In-pane messages for the zip viewer ("Loading preview...", unsupported /
+// failed preview). The error styles are the default under the element's
+// errorTextStyles.base.
+export const ZIP_PREVIEW_MESSAGE_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    padding: '10px',
+  },
+};
+export const ZIP_PREVIEW_ERROR_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    color: 'red',
+    padding: '10px',
+  },
+};
+
+export const ZIP_PANEL_STYLES = {
+  [STYLE_TYPE.BASE]: {
+    width: '70%',
+    height: '100%',
+    boxSizing: 'border-box' as const,
+    padding: '10px 10px 10px 10px',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'auto',
   },
 };
 

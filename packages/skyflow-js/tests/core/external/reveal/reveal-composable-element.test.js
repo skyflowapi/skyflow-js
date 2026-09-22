@@ -166,6 +166,33 @@ describe("Reveal Composable Element Class", () => {
     const res =  testRevealElement.renderFile()
     await expect(res).resolves.toEqual({ success: { skyflow_id: '1244', column: 'column' } });
   });
+  test("renderFile forwards its options on the request payload", async () => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement("name", eventEmitter, '123');
+    const seen = [];
+    eventEmitter.on(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ':name', (data, cb) => {
+      seen.push(data);
+      cb({ success: { skyflow_id: '1244', column: 'column' } });
+    });
+
+    const options = { zipRender: true, allowDownload: true, labelMode: 'path' };
+    await expect(testRevealElement.renderFile(options)).resolves.toBeDefined();
+    await expect(testRevealElement.renderFile()).resolves.toBeDefined();
+    expect(seen[0]).toEqual({ options });
+    expect(seen[1]).toEqual({ options: undefined });
+  });
+  test("downloadCurrentFile emits the download event for the element", () => {
+    const eventEmitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealElement(
+        "name",
+        eventEmitter,
+        '123',
+    );
+    const listener = jest.fn();
+    eventEmitter.on(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + ':name', listener);
+    testRevealElement.downloadCurrentFile();
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
   test("file render call error case 1", async () => {
     const eventEmitter = new EventEmitter();
     const testRevealElement = new ComposableRevealElement(
