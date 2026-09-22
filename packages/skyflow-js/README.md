@@ -4320,9 +4320,13 @@ fileElement
 ```
 
 ### Render a zip file
-Zip rendering is opt-in. If the file stored in the vault is a `.zip` archive and you call `renderFile({ zipRender: true })`, the SDK unzips it in the browser and renders a list-detail layout: the extracted files are listed on the left and the selected file is previewed on the right. Without `zipRender: true` the archive is rendered as a single file, exactly as before. 
+Zip rendering is opt-in. If the file stored in the vault is a `.zip` archive and you call `renderFile({ zipRender: true })`, the SDK unzips it in the browser and renders a list-detail layout: the extracted files are listed on the left and the selected file is previewed on the right. Without `zipRender: true` the archive is rendered as a single file, exactly as before.
 
-Only the archive's file list is read up front; each file is extracted the first time it is previewed or downloaded, so large archives stay responsive. Images are previewed in an `<img>` tag, video and audio in their native players, and everything else (such as PDF) through the browser's `<embed>` viewer, so which formats display depends on the browser. Files that could execute in the browser (scripts, HTML, executables, nested archives) are listed but not previewed; the message "This file type is not supported for preview." is shown instead, and such files cannot be downloaded through `downloadCurrentFile()`.
+`zipRender: true` only takes effect when the stored file's detected type is `application/zip`, `application/x-zip-compressed` or `application/x-zip`. For any other file type, `renderFile()` falls back to the normal single-file render and `zipRender` is ignored: no error is raised, nothing is logged, and the response has no `unZippedFilesMetadata`.
+
+Only the archive's file list is read up front; each file is extracted the first time it is previewed or downloaded, so large archives stay responsive. Images are previewed in an `<img>` tag, video and audio in their native players, and everything else (such as PDF) through the browser's `<embed>` viewer, so which formats display depends on the browser. 
+
+Files matching a blocked list of extensions and MIME types are listed but neither previewed nor downloadable. The list covers not just scripts, source and SQL files, HTML and executables, but also installer and disk images (`.iso`, `.dmg`, `.vhd`), shortcuts (`.lnk`), packaged apps (`.jar`, `.apk`, `.class`), and nested archives of any common format (`.zip`, `.7z`, `.rar`, `.tar`, `.gz`). The check uses each entry's file extension and the MIME type derived from its name, not the file contents. The message "This file type is not supported for preview." is shown instead, and such files cannot be downloaded through `downloadCurrentFile()`. Only the main zip is extracted. If it contains another zip, that inner zip is listed as one file, for example `reports/archive.zip`, and is not opened: the files inside it do not appear in the list or in `unZippedFilesMetadata`.
 
 `renderFile()` accepts an optional options object. All keys are optional:
 
@@ -4336,6 +4340,8 @@ fileElement.renderFile({
 });
 ```
 
+Options are validated before rendering the file. A value of the wrong type, or a `layout` or `labelMode` value that is not one of the enum members, makes `renderFile()` reject immediately with a validation error (code 400) whose description names the invalid key, and nothing is rendered.
+
 `Skyflow.ZipRenderLayout` and `Skyflow.ZipLabelMode` are exported as `ZipRenderLayout` and `ZipLabelMode` from the npm package. For example, to show full archive paths in the file list:
 
 ```javascript
@@ -4346,7 +4352,17 @@ fileElement.renderFile({
 });
 ```
 
-With `Skyflow.ZipLabelMode.BASENAME` the list shows each file's name and the full path on hover; if two files share a name, the nearest parent folder is prepended (for example `2024/report.pdf` and `2025/report.pdf`). With `Skyflow.ZipLabelMode.PATH` the full archive path is shown.
+`Skyflow.ZipLabelMode.PATH` shows the full path of every file, exactly as stored in the zip.
+
+`Skyflow.ZipLabelMode.BASENAME` (the default) shows only the file name, and the full path on hover. When two files have the same name, the SDK adds just enough of the path to tell them apart:
+
+| Files in the zip | Label shown |
+| --- | --- |
+| `photo.png` | `photo.png` |
+| `2024/report.pdf` and `2025/report.pdf` | `2024/report.pdf` and `2025/report.pdf` (parent folder added) |
+| `a/x/report.pdf` and `b/x/report.pdf` | `a/x/report.pdf` and `b/x/report.pdf` (the nearest parent folder is `x` for both, so adding it does not help and the full path is used) |
+
+Labels that are too long for the list are cut off with an ellipsis; hovering always shows the full path.
 
 The zip layout accepts three additional, optional style objects on the element. Each accepts only the `base` variant (and `focus` for list items):
 
@@ -4385,8 +4401,16 @@ For zip files, the `renderFile()` success response also includes `unZippedFilesM
 
 For TypeScript users, the npm package exports `RenderFileResponse` for this response, `UnzippedFileMetadata` for each entry of `unZippedFilesMetadata`, and `RenderOptions` for the `renderFile()` options object.
 
+#### Zip states
+- **Loading.** While the archive is being fetched, and again while a selected file's bytes are being extracted for preview, the element shows `...loading`.
+- **Empty archive.** If the zip contains no previewable entries , the element shows `No files found in the ZIP archive.` and `renderFile()` resolves with an empty `unZippedFilesMetadata` array.
+- **Failed to unzip.** If the archive cannot be fetched or parsed, the element shows `File rendering failed. Please try again later.` and `renderFile()` rejects with an error object whose `errors` carry `code: 400` and the description `Failed to unzip files. Please try again later.`
+- **Per-file preview failure.** If one entry cannot be loaded in the preview pane (for example a corrupted file), the panel shows `This file type is not supported for preview.`, the same message used for files blocked by policy. The two cases are distinguished only in the console, where a preview failure is logged with the file name.
+
+These in-pane messages use the element's `errorTextStyles.base`, as described above.
+
 #### Download the currently previewed file
-For composable reveal elements rendering a zip file with `allowDownload: true`, call `downloadCurrentFile()` to download the file currently selected in the preview. Download is off by default; without `allowDownload: true` the call is ignored and an error is logged.
+For composable reveal elements rendering a zip file with `allowDownload: true`, call `downloadCurrentFile()` to download the file currently selected in the preview. Download is off by default; without `allowDownload: true` the call is ignored and a warning is logged.
 
 ```javascript
 fileElement.downloadCurrentFile();
