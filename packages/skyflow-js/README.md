@@ -4376,12 +4376,14 @@ For zip files, the `renderFile()` success response also includes `unZippedFilesM
     column: 'string',
     fileMetadata: { ... },
     unZippedFilesMetadata: [
-      { name: 'photo.png', fileSize: 20480, type: 'image/png' },
-      { name: 'doc.pdf', fileSize: 102400, type: 'application/pdf' },
+      { name: 'photo.png', size: 20480, type: 'image/png' },
+      { name: 'doc.pdf', size: 102400, type: 'application/pdf' },
     ],
   },
 }
 ```
+
+For TypeScript users, the npm package exports `RenderFileResponse` for this response, `UnzippedFileMetadata` for each entry of `unZippedFilesMetadata`, and `RenderOptions` for the `renderFile()` options object.
 
 #### Download the currently previewed file
 For composable reveal elements rendering a zip file with `allowDownload: true`, call `downloadCurrentFile()` to download the file currently selected in the preview. Download is off by default; without `allowDownload: true` the call is ignored and an error is logged.

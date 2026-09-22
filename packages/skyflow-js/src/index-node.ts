@@ -53,6 +53,7 @@ export type {
   RevealResponse,
   RenderFileResponse,
   IRenderOptions as RenderOptions,
+  IUnzippedFileMetadata as UnzippedFileMetadata,
   IValidationRule as ValidationRule,
   ElementState,
   ErrorMessages,

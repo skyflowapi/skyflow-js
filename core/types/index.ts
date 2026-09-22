@@ -565,6 +565,11 @@ export interface RenderFileResponse {
   success?: {
     skyflow_id: string,
     column: string,
+    // Metadata of the rendered file record itself (name, size, content type).
+    fileMetadata?: Record<string, any>,
+    // Present only when a zip archive was rendered with `zipRender: true`:
+    // one entry per extracted file.
+    unZippedFilesMetadata?: IUnzippedFileMetadata[],
   },
   errors?: {
     skyflowId: string,
