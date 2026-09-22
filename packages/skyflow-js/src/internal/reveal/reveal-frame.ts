@@ -239,7 +239,7 @@ class RevealFrame extends CoreRevealFrame {
             if (resolvedResult.fields && data.column) {
               url = resolvedResult.fields[data.column];
             }
-            const fileType = this.getExtension(url);
+            const fileType = this.getExtension(url) || resolvedResult?.fileMetadata?.file?.fileType;
             const isZip = RevealFrame.isZipMimeType(fileType);
             if (isZip && this.#renderOptions.zipRender) {
               this.dataElememt.innerText = ZIP_PREVIEW_LOADING_MESSAGE;
@@ -247,7 +247,7 @@ class RevealFrame extends CoreRevealFrame {
                 printLog(parameterizedString(logs.infoLogs.FILES_UNZIPPED_SUCCESSFULLY,
                   CLASS_NAME, this.record?.skyflowID), MessageType.LOG, this.context?.logLevel);
                 const metadata = files.map((f) => ({
-                  name: f.name, fileSize: f.size, type: f.type,
+                  name: f.name, size: f.size, type: f.type,
                 }));
                 if (renderId !== this.#renderSeq) {
                   // A newer renderFile() call owns the DOM now; just answer this one.

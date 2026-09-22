@@ -339,7 +339,7 @@ describe("formatForRenderClient fn test",()=>{
     }});
   });
   test("with unZippedFilesMetadata should include it in success",()=>{
-    const unZippedFilesMetadata = [{ name: 'a.png', fileSize: 10, type: 'image/png' }];
+    const unZippedFilesMetadata = [{ name: 'a.png', size: 10, type: 'image/png' }];
     const testInput = {"fields": { "col" : "http://dummy.com", "skyflow_id": "id" },
       "fileMetadata": { contentType: 'application/zip' }, unZippedFilesMetadata };
     const fnResponse = formatForRenderClient(testInput, 'col');

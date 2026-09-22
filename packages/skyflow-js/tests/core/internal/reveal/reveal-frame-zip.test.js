@@ -206,7 +206,7 @@ describe("Reveal Frame - zip file render", () => {
     expect(success.unZippedFilesMetadata.map((f) => f.name).sort()).toEqual(['doc.pdf', 'photo.png']);
     // size comes from the archive's central directory, before any extraction
     expect(success.unZippedFilesMetadata.find((f) => f.name === 'photo.png')).toEqual({
-      name: 'photo.png', type: 'image/png', fileSize: 'png-bytes'.length,
+      name: 'photo.png', type: 'image/png', size: 'png-bytes'.length,
     });
 
     const items = navItems();
@@ -766,9 +766,46 @@ describe("Reveal Frame - zip file render", () => {
     for (let i = 0; i < 300; i += 1) entries[`dir${i % 7}/f${i}.txt`] = 'x'.repeat(50);
     const response = await renderZip(entries, { zipRender: true, autoSelectFirst: false });
     expect(response.data.result.success.unZippedFilesMetadata).toHaveLength(300);
-    expect(response.data.result.success.unZippedFilesMetadata[0].fileSize).toBe(50);
+    expect(response.data.result.success.unZippedFilesMetadata[0].size).toBe(50);
     expect(navItems()).toHaveLength(300);
     expect(createObjectURL).not.toHaveBeenCalled();
+  });
+
+  // ------------------------------------------------------- metadata shape
+  test("unZippedFilesMetadata: every entry has exactly name, size and type, with size from the archive", async () => {
+    const entries = {
+      'img.png': 'png-bytes',
+      'docs/2024/report.pdf': 'hello pdf',
+      'docs/notes.txt': 'n',
+    };
+    const response = await renderZip(entries, { zipRender: true, autoSelectFirst: false });
+    const manifest = response.data.result.success.unZippedFilesMetadata;
+
+    expect(manifest).toHaveLength(3);
+    manifest.forEach((entry) => {
+      expect(Object.keys(entry).sort()).toEqual(['name', 'size', 'type']);
+      expect(typeof entry.name).toBe('string');
+      expect(typeof entry.size).toBe('number');
+      expect(typeof entry.type).toBe('string');
+      // size is the uncompressed byte length reported by the archive; nothing was inflated yet
+      expect(entry.size).toBe(entries[entry.name].length);
+      expect(entry).not.toHaveProperty('fileSize');
+    });
+    expect(manifest.map((f) => f.name).sort()).toEqual(['docs/2024/report.pdf', 'docs/notes.txt', 'img.png']);
+    expect(manifest.find((f) => f.name === 'img.png').type).toBe('image/png');
+    expect(manifest.find((f) => f.name === 'docs/2024/report.pdf').type).toBe('application/pdf');
+    expect(createObjectURL).not.toHaveBeenCalled();
+  });
+
+  test("the archive's own fileMetadata is preserved alongside unZippedFilesMetadata", async () => {
+    const response = await renderZip({ 'a.png': 'a', 'b.pdf': 'bb' }, { zipRender: true, autoSelectFirst: false });
+    const { success } = response.data.result;
+    // fileMetadata describes the zip record itself and must survive the manifest being added
+    expect(success.fileMetadata).toEqual({ contentType: 'application/zip' });
+    expect(success.unZippedFilesMetadata).toHaveLength(2);
+    expect(success.unZippedFilesMetadata.map((f) => f.size)).toEqual(expect.arrayContaining([1, 2]));
+    expect(success.skyflow_id).toBe('abc123');
+    expect(success.column).toBe('primary_card_file');
   });
 
   // ---------------------------------------------------------------- re-render / races

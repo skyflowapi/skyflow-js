@@ -130,7 +130,7 @@ export interface IRevealResponseType {
 }
 export interface IUnzippedFileMetadata {
   name: string;
-  fileSize: number;
+  size: number;
   type: string;
 }
 
