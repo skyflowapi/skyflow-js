@@ -4,6 +4,8 @@ Copyright (c) 2022 Skyflow, Inc.
 
 const logs = {
   infoLogs: {
+    FILE_DOWNLOADED: '%s1 - File %s2 downloaded successfully.',
+    FILES_UNZIPPED_SUCCESSFULLY: '%s1 - Files unzipped successfully for skyflowId: %s2',
     INITIALIZE_CLIENT: '%s1 - Initializing skyflow client.',
     CLIENT_INITIALIZED: '%s1 - Initialized skyflow client successfully.',
 
@@ -97,6 +99,17 @@ const logs = {
     VALIDATE_GET_BY_ID_INPUT: '%s1 - Validating getByID input.',
   },
   errorLogs: {
+    FAILED_DOWNLOAD_FILE: 'Failed to download file. Please try again later.',
+    FAILED_TO_UNZIP_FILES: 'Failed to unzip files. Please try again later.',
+    DOWNLOAD_NOT_ALLOWED: 'Download is not allowed for this element. Pass allowDownload: true in renderFile() options to enable downloadCurrentFile().',
+    DOWNLOAD_BLOCKED_DANGEROUS_FILE: 'Download blocked. The selected file type is not allowed.',
+    ZIP_PREVIEW_FAILED: '%s1 - Failed to preview %s2 from the zip archive.',
+    INVALID_RENDER_OPTIONS: 'Validation error. Invalid options passed to renderFile(). Specify an object.',
+    INVALID_ZIP_RENDER_OPTION: 'Validation error. Invalid \'zipRender\' key in renderFile() options. Specify a value of type boolean instead.',
+    INVALID_LAYOUT_OPTION: 'Validation error. Invalid \'layout\' key in renderFile() options. Supported value: \'listDetail\'.',
+    INVALID_ALLOW_DOWNLOAD_OPTION: 'Validation error. Invalid \'allowDownload\' key in renderFile() options. Specify a value of type boolean instead.',
+    INVALID_AUTO_SELECT_FIRST_OPTION: 'Validation error. Invalid \'autoSelectFirst\' key in renderFile() options. Specify a value of type boolean instead.',
+    INVALID_LABEL_MODE_OPTION: 'Validation error. Invalid \'labelMode\' key in renderFile() options. Supported values: \'basename\', \'path\'.',
     MULTI_FILE_NOT_SUPPORTED: 'Multi file upload is only supported in MULT_FILE_INPUT element in composable container. Please use MULT_FILE_INPUT element for multi file upload.',
     INVALID_REVEAL_COMPOSABLE_INPUT: 'Reveal composable input is invalid. Please provide a valid input.',
     NO_ELEMENTS_IN_COLLECT: 'Validation error. No elements found in collect container',
@@ -336,6 +349,7 @@ const logs = {
     SIGNED_TOKEN_DECODE_FAILED: 'Failed to decode the signed token. Please check the signed token and try again.',
   },
   warnLogs: {
+    INVALID_RENDER_OPTION_IGNORED: "Ignoring invalid renderFile() option '%s1'. Using its default value.",
     INVALID_EXPIRATION_DATE_FORMAT: 'EXPIRATION_DATE format must be in one of %s1, the format is set to default MM/YY',
     INVALID_EXPIRATION_YEAR_FORMAT: 'EXPIRATION_YEAR format must be in one of %s1, the format is set to default YY',
     UNABLE_TO_SET_VALUE_IN_PROD_ENV: '%s1 setValue() cannot invoked while in PROD env. It is Not Recommeded',

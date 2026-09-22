@@ -11,6 +11,7 @@ import * as busEvents from '@core/utils/bus-events';
 import bus from "framebus";
 import { JSDOM } from 'jsdom';
 import EventEmitter from "@core/event-emitter";
+import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import { error } from "console";
 import properties from "@core/properties";
 
@@ -255,6 +256,72 @@ describe("Reveal Element Class", () => {
             }
         }
     }));
+  });
+  test("file render forwards renderOptions to the iframe and rejects invalid options", async () => {
+    const elementArray = {
+        rows:[{
+            elements : [{
+            "column": "file",
+            "table": "table6",
+            "altText": "Alt text 1",
+            "name": "element1",
+            "skyflowID": "id1"
+            }]
+        }]
+    };
+    const groupEmiitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealInternalElement(
+        elementId,
+        elementArray,
+        clientData,
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        { logLevel: LogLevel.ERROR,env:Env.PROD }
+    );
+    window.dispatchEvent(new MessageEvent('message', {
+        data: { type: ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED + "element1", containerId: mockUuid }
+    }));
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    document.body.appendChild(testEmptyDiv);
+    testRevealElement.mount("#testDiv");
+    const iframe = document.querySelector("iframe");
+    const postMessage = jest.fn();
+    iframe.contentWindow.postMessage = postMessage;
+
+    // valid options travel on the REVEAL_CALL_REQUESTS payload
+    const options = { zipRender: true, allowDownload: false, autoSelectFirst: false, labelMode: 'basename', layout: 'listDetail' };
+    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", { options }, () => {});
+    await Promise.resolve('token');
+    await new Promise((r) => setTimeout(r, 0));
+    const renderCall = postMessage.mock.calls
+      .map((c) => c[0])
+      .find((m) => m?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + "element1");
+    expect(renderCall).toBeDefined();
+    expect(renderCall.data.type).toBe(REVEAL_TYPES.RENDER_FILE);
+    expect(renderCall.data.renderOptions).toEqual(options);
+
+    // no options => empty renderOptions object
+    postMessage.mockClear();
+    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", {}, () => {});
+    await Promise.resolve('token');
+    await new Promise((r) => setTimeout(r, 0));
+    const plainCall = postMessage.mock.calls
+      .map((c) => c[0])
+      .find((m) => m?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + "element1");
+    expect(plainCall.data.renderOptions).toEqual({});
+
+    // invalid options reject before anything is sent
+    postMessage.mockClear();
+    const errorCb = jest.fn();
+    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST + ":element1", { options: { zipRender: 'yes' } }, errorCb);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(errorCb).toHaveBeenCalledTimes(1);
+    expect(errorCb.mock.calls[0][0].error.errors[0].code).toBe(SKYFLOW_ERROR_CODE.INVALID_ZIP_RENDER_OPTION.code);
+    // only the "loading..." alt-text update went out; no render request was sent
+    const rejectedRender = postMessage.mock.calls
+      .map((c) => c[0])
+      .find((m) => m?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + "element1");
+    expect(rejectedRender).toBeUndefined();
   });
   test("file render call error case", async () => {
     const elementArray = {
@@ -679,6 +746,40 @@ describe("Reveal Element Class", () => {
             containerId: mockUuid,
         }
     }));
+ });
+ test("download current file event is forwarded to the iframe", async () => {
+    const elementArray = {
+        rows:[{
+            elements : [{
+            "column": "file",
+            "table": "table6",
+            "altText": "Alt text 1",
+            "name": "element2",
+            "skyflowID": "id1"
+            }]
+        }]
+    };
+    const groupEmiitter = new EventEmitter();
+    const testRevealElement = new ComposableRevealInternalElement(
+        elementId,
+        elementArray,
+        clientData,
+        {containerId:containerId,isMounted:false,eventEmitter:groupEmiitter},
+        { logLevel: LogLevel.ERROR,env:Env.PROD }
+    );
+    const testEmptyDiv = document.createElement("div");
+    testEmptyDiv.setAttribute("id", "testDiv");
+    document.body.appendChild(testEmptyDiv);
+    testRevealElement.mount("#testDiv");
+    const iframe = document.querySelector("iframe");
+    const postMessage = jest.fn();
+    iframe.contentWindow.postMessage = postMessage;
+
+    groupEmiitter._emit(ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + ":element2", {});
+    const eventName = ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + "element2";
+    const call = postMessage.mock.calls.find((c) => c[0]?.name === eventName);
+    expect(call).toBeTruthy();
+    expect(call[0]).toMatchObject({ name: eventName });
  });
  test("update call error case when container is not mounted", async () => {
     const elementArray = {

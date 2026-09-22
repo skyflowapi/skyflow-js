@@ -13,6 +13,8 @@ export {
   LogLevel,
   Env,
   ErrorType,
+  ZipLabelMode,
+  ZipRenderLayout,
 } from './utils/common';
 
 export type {
@@ -50,6 +52,7 @@ export type {
   IRevealRecord as RevealRecord,
   RevealResponse,
   RenderFileResponse,
+  IRenderOptions as RenderOptions,
   IValidationRule as ValidationRule,
   ElementState,
   ErrorMessages,

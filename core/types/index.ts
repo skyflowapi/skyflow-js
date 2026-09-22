@@ -128,10 +128,41 @@ export interface IRevealResponseType {
   records?: Record<string, string>[];
   errors?: Record<string, any>[];
 }
+export interface IUnzippedFileMetadata {
+  name: string;
+  fileSize: number;
+  type: string;
+}
+
+// Options for `renderFile(options)`. Only consumed when the stored file is a zip
+// archive and `zipRender` is true; a plain file render ignores them. Kept off the
+// element record (which carries data + styles) because these are render-time
+// behaviour flags, matching the "Zip render GA" design doc.
+export enum ZipRenderLayout {
+  LIST_DETAIL = 'listDetail',
+}
+export enum ZipLabelMode {
+  BASENAME = 'basename',
+  PATH = 'path',
+}
+export interface IRenderOptions {
+  // Opt in to unzipping a .zip archive and rendering its files. Default false.
+  zipRender?: boolean;
+  // Layout for the zip viewer. Only 'listDetail' is supported. Default 'listDetail'.
+  layout?: ZipRenderLayout;
+  // Whether `downloadCurrentFile()` is permitted for the previewed file. Default false.
+  allowDownload?: boolean;
+  // Auto-select and preview the first file after unzipping. Default true.
+  autoSelectFirst?: boolean;
+  // File-list label: 'basename' (full path on hover, nearest parent folder added
+  // when two files share a basename) or 'path' (full path). Default 'basename'.
+  labelMode?: ZipLabelMode;
+}
 export interface IRenderResponseType {
   fields?: Record<string, any>
   errors?: Record<string, any>
   fileMetadata?: Record<string, any>
+  unZippedFilesMetadata?: IUnzippedFileMetadata[]
 }
 
 export interface IDetokenizeInput {

@@ -4,6 +4,7 @@ Copyright (c) 2022 Skyflow, Inc.
 import { CardType, SDK_VERSION } from '@core/constants';
 import SKYFLOW_ERROR_CODE from '@core/utils/constants';
 import {
+  isDangerousFileType,
   detectCardType,
   isValidRegExp,
   validateCreditCardNumber,
@@ -24,10 +25,11 @@ import {
   validateDeleteRecords,
   validateInputFormatOptions,
   validateRenderElementRecord,
+  validateRenderOptions,
   validateUpdateRecord
 } from '../../src/utils/validators/index';
 import { parameterizedString } from '../../src/utils/logs-helper';
-import { RedactionType } from '../../src/utils/common';
+import { RedactionType, ZipLabelMode, ZipRenderLayout } from '../../src/utils/common';
 
 
 describe('Validation card number and Expiry Date', () => {
@@ -1461,4 +1463,73 @@ describe('test validateInputFormatOptions', () => {
 
 
 
+});
+
+describe('isDangerousFileType', () => {
+  test('flags dangerous extensions regardless of case and mime', () => {
+    expect(isDangerousFileType({ name: 'run.EXE', type: '' })).toBe(true);
+    expect(isDangerousFileType({ name: 'a.js', type: 'text/plain' })).toBe(true);
+    expect(isDangerousFileType({ name: 'page.html', type: 'text/html' })).toBe(true);
+    expect(isDangerousFileType({ name: 'inner.zip', type: 'application/zip' })).toBe(true);
+  });
+  test('flags dangerous mime types even with a harmless extension', () => {
+    expect(isDangerousFileType({ name: 'photo.png', type: 'application/x-msdownload' })).toBe(true);
+    expect(isDangerousFileType({ name: 'notes', type: 'TEXT/HTML' })).toBe(true);
+  });
+  test('allows regular previewable files', () => {
+    expect(isDangerousFileType({ name: 'photo.png', type: 'image/png' })).toBe(false);
+    expect(isDangerousFileType({ name: 'doc.pdf', type: 'application/pdf' })).toBe(false);
+    expect(isDangerousFileType({ name: 'clip.mp4', type: 'video/mp4' })).toBe(false);
+    expect(isDangerousFileType({})).toBe(false);
+    expect(isDangerousFileType(undefined)).toBe(false);
+  });
+});
+
+describe('validateRenderOptions', () => {
+  test('accepts undefined, an empty object and every valid key', () => {
+    expect(() => validateRenderOptions()).not.toThrow();
+    expect(() => validateRenderOptions({})).not.toThrow();
+    expect(() => validateRenderOptions({
+      zipRender: true, layout: 'listDetail', allowDownload: false, autoSelectFirst: true, labelMode: 'path',
+    })).not.toThrow();
+    expect(() => validateRenderOptions({ labelMode: 'basename' })).not.toThrow();
+  });
+  test('accepts the ZipLabelMode / ZipRenderLayout enums (same string values)', () => {
+    expect(ZipLabelMode.BASENAME).toBe('basename');
+    expect(ZipLabelMode.PATH).toBe('path');
+    expect(ZipRenderLayout.LIST_DETAIL).toBe('listDetail');
+    expect(() => validateRenderOptions({
+      layout: ZipRenderLayout.LIST_DETAIL, labelMode: ZipLabelMode.PATH,
+    })).not.toThrow();
+  });
+  test('rejects non-object options', () => {
+    [null, 'zip', 1, true, []].forEach((bad) => {
+      try {
+        validateRenderOptions(bad);
+        throw new Error('expected to throw');
+      } catch (err) {
+        expect(err.errors[0].code).toBe(SKYFLOW_ERROR_CODE.INVALID_RENDER_OPTIONS.code);
+        expect(err.errors[0].description).toBe(SKYFLOW_ERROR_CODE.INVALID_RENDER_OPTIONS.description);
+      }
+    });
+  });
+  test('rejects wrong types and unsupported values per key', () => {
+    const cases = [
+      [{ zipRender: 'true' }, SKYFLOW_ERROR_CODE.INVALID_ZIP_RENDER_OPTION],
+      [{ layout: 'grid' }, SKYFLOW_ERROR_CODE.INVALID_LAYOUT_OPTION],
+      [{ layout: 1 }, SKYFLOW_ERROR_CODE.INVALID_LAYOUT_OPTION],
+      [{ allowDownload: 1 }, SKYFLOW_ERROR_CODE.INVALID_ALLOW_DOWNLOAD_OPTION],
+      [{ autoSelectFirst: null }, SKYFLOW_ERROR_CODE.INVALID_AUTO_SELECT_FIRST_OPTION],
+      [{ labelMode: 'folder' }, SKYFLOW_ERROR_CODE.INVALID_LABEL_MODE_OPTION],
+    ];
+    cases.forEach(([options, expected]) => {
+      try {
+        validateRenderOptions(options);
+        throw new Error('expected to throw');
+      } catch (err) {
+        expect(err.errors[0].code).toBe(expected.code);
+        expect(err.errors[0].description).toBe(expected.description);
+      }
+    });
+  });
 });
