@@ -562,13 +562,26 @@ describe("Reveal Frame - zip file render", () => {
   });
 
   test("download is blocked by default (allowDownload false)", async () => {
-    await renderZip({ 'a.png': 'a' });
+    // A download attempt without allowDownload is a misuse, not a failure, so the SDK
+    // reports it at WARN level. Run this frame at LogLevel.WARN so the message is emitted.
+    defineUrl('http://localhost/?' + btoa(JSON.stringify({
+      ...frameData, context: { logLevel: LogLevel.WARN, env: Env.PROD },
+    })));
+    mockFetch(await buildZip({ 'a.png': 'a' }));
+    RevealFrame.init();
+    dispatchRenderRequest();
+    await waitForResponse();
     await waitFor(() => document.querySelector('#zip-panel img'));
+
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     dispatchDownload();
     await new Promise((r) => setTimeout(r, 10));
+
     expect(clickSpy).not.toHaveBeenCalled();
-    expect(errorSpy.mock.calls.flat().join(' ')).toContain(logs.errorLogs.DOWNLOAD_NOT_ALLOWED);
+    expect(warnSpy.mock.calls.flat().join(' ')).toContain(logs.errorLogs.DOWNLOAD_NOT_ALLOWED);
+    // and it is a warning, not an error
+    expect(errorSpy.mock.calls.flat().join(' ')).not.toContain(logs.errorLogs.DOWNLOAD_NOT_ALLOWED);
   });
 
   test("download is blocked for dangerous file types even when allowed", async () => {
@@ -769,6 +782,33 @@ describe("Reveal Frame - zip file render", () => {
     expect(response.data.result.success.unZippedFilesMetadata[0].size).toBe(50);
     expect(navItems()).toHaveLength(300);
     expect(createObjectURL).not.toHaveBeenCalled();
+  });
+
+  // ---------------------------------------------------------- nav chips
+  test("long unbroken file names: nav chips stay single-line, truncate with an ellipsis, and keep the full path on hover", async () => {
+    const longName = 'zipfilesfordemo/zipfile_flower_summer_flowers_yellow_flower_with_a_very_long_name_that_cannot_wrap.jpg';
+    await renderZip({ [longName]: 'jpg', 'short.pdf': 'p' }, { zipRender: true, autoSelectFirst: false });
+
+    const items = Array.from(navItems());
+    const chip = items.find((li) => li.title === longName);
+    expect(chip).toBeTruthy();
+    // basename label (default labelMode) but the full archive path stays on hover
+    expect(chip.textContent).toBe('zipfile_flower_summer_flowers_yellow_flower_with_a_very_long_name_that_cannot_wrap.jpg');
+    expect(chip.title).toBe(longName);
+
+    // both the resting and the selected chip styles carry the truncation rules
+    [ZIP_NAV_LIST_ITEM_STYLES.base, ZIP_NAV_LIST_ITEM_STYLES.focus].forEach((style) => {
+      expect(style).toEqual(expect.objectContaining({
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      }));
+    });
+    const index = items.indexOf(chip);
+    const applied = jssCalls.filter((c) => c.name === `zip-nav-item${index}`).pop()?.styles;
+    expect(applied.base).toEqual(expect.objectContaining({
+      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+    }));
   });
 
   // ------------------------------------------------------- metadata shape

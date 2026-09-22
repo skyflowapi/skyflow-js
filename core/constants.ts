@@ -544,6 +544,9 @@ export const ZIP_CONTAINER_STYLES = {
     'flex-direction': 'row',
     height: '100%',
     width: '100%',
+    overflow: 'auto',
+    border: '1px solid #a5a2a2',
+    borderRadius: '4px',
   },
 };
 
@@ -567,6 +570,10 @@ export const ZIP_NAV_LIST_ITEM_STYLES = {
     borderRadius: '4px',
     boxSizing: 'border-box' as const,
     backgroundColor: '#f9f9f9',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    wordBreak: 'break-all',
   },
   [STYLE_TYPE.FOCUS]: {
     alignItems: 'center',
@@ -576,7 +583,11 @@ export const ZIP_NAV_LIST_ITEM_STYLES = {
     borderRadius: '4px',
     boxSizing: 'border-box' as const,
     backgroundColor: '#f9f9f9',
-    border: '2px solid #b0b3b8ff',
+    border: '2px solid rgb(155, 158, 164)',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    wordBreak: 'break-all',
   },
 };
 
