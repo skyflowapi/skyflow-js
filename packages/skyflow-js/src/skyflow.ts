@@ -20,6 +20,8 @@ import {
   ISkyflow,
   RequestMethod,
   SkyflowConfigOptions,
+  ZipLabelMode,
+  ZipRenderLayout,
 } from '@core/types';
 import logs from '@core/utils/logs';
 import RevealContainer from './external/reveal/reveal-container';
@@ -170,6 +172,15 @@ ComposableRevealContainer
   // base getter so `Skyflow.ElementType.FILE_INPUT` stays available for privacyDB.
   static get ElementType() {
     return ElementType;
+  }
+
+  // `renderFile(options)` enums for zip rendering (privacyDB-only, like renderFile).
+  static get ZipLabelMode() {
+    return ZipLabelMode;
+  }
+
+  static get ZipRenderLayout() {
+    return ZipRenderLayout;
   }
 }
 export default Skyflow;

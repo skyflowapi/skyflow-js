@@ -12,7 +12,7 @@ import ComposableContainer from '../src/external/collect/compose-collect-contain
 import SkyflowContainer from '../src/external/skyflow-container';
 import Client from '@core/client'
 import logs from '@core/utils/logs';
-import { ComposableRevealContainer } from '../src/index-node';
+import { ComposableRevealContainer, ZipLabelMode, ZipRenderLayout } from '../src/index-node';
 
 jest.mock('@core/utils/jwt-utils', () => ({
   __esModule: true,
@@ -1924,5 +1924,15 @@ describe('Skyflow delete tests', () => {
       expect(err).toBeDefined();
       done();
     });
+  });
+});
+describe('zip render enums', () => {
+  test('Skyflow exposes ZipLabelMode and ZipRenderLayout', () => {
+    expect(Skyflow.ZipLabelMode).toEqual({ BASENAME: 'basename', PATH: 'path' });
+    expect(Skyflow.ZipRenderLayout).toEqual({ LIST_DETAIL: 'listDetail' });
+  });
+  test('npm entry exports the same enums', () => {
+    expect(ZipLabelMode).toBe(Skyflow.ZipLabelMode);
+    expect(ZipRenderLayout).toBe(Skyflow.ZipRenderLayout);
   });
 });

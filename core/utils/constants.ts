@@ -4,6 +4,34 @@ Copyright (c) 2022 Skyflow, Inc.
 import logs from '@core/utils/logs';
 
 const SKYFLOW_ERROR_CODE = {
+  FAILED_TO_UNZIP_FILES: {
+    code: 400,
+    description: logs.errorLogs.FAILED_TO_UNZIP_FILES,
+  },
+  INVALID_RENDER_OPTIONS: {
+    code: 400,
+    description: logs.errorLogs.INVALID_RENDER_OPTIONS,
+  },
+  INVALID_ZIP_RENDER_OPTION: {
+    code: 400,
+    description: logs.errorLogs.INVALID_ZIP_RENDER_OPTION,
+  },
+  INVALID_LAYOUT_OPTION: {
+    code: 400,
+    description: logs.errorLogs.INVALID_LAYOUT_OPTION,
+  },
+  INVALID_ALLOW_DOWNLOAD_OPTION: {
+    code: 400,
+    description: logs.errorLogs.INVALID_ALLOW_DOWNLOAD_OPTION,
+  },
+  INVALID_AUTO_SELECT_FIRST_OPTION: {
+    code: 400,
+    description: logs.errorLogs.INVALID_AUTO_SELECT_FIRST_OPTION,
+  },
+  INVALID_LABEL_MODE_OPTION: {
+    code: 400,
+    description: logs.errorLogs.INVALID_LABEL_MODE_OPTION,
+  },
   MULTI_FILE_NOT_SUPPORTED: {
     code: 400,
     description: logs.errorLogs.MULTI_FILE_NOT_SUPPORTED,

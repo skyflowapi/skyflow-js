@@ -1,17 +1,20 @@
 import { ELEMENT_EVENTS_TO_IFRAME } from '@core/constants';
 import CoreComposableRevealElement from '@core/external/reveal/composable-reveal-element';
-import { RenderFileResponse } from '../../utils/common';
+import { IRenderOptions, RenderFileResponse } from '../../utils/common';
 import { IRevealElementInput } from './reveal-container';
 
 // privacyDB composable reveal element: the shared @core base bound to privacyDB's
 // reveal-input shape, plus the file-render request (flowDB has no renderFile).
 class ComposableRevealElement extends CoreComposableRevealElement<IRevealElementInput> {
-  renderFile(): Promise<RenderFileResponse> {
+  // `options` are render-time behaviour flags (zip opt-in, layout, download policy,
+  // ...). They travel with the request to the internal element, which validates
+  // them and forwards them to the reveal iframe.
+  renderFile(options?: IRenderOptions): Promise<RenderFileResponse> {
     return new Promise((resolve, reject) => {
       // eslint-disable-next-line no-underscore-dangle
       this.eventEmitter?._emit?.(
         `${ELEMENT_EVENTS_TO_IFRAME.RENDER_FILE_REQUEST}:${this.elementName}`,
-        {},
+        { options },
         (response) => {
           if (response?.errors) {
             reject(response);
@@ -23,6 +26,15 @@ class ComposableRevealElement extends CoreComposableRevealElement<IRevealElement
         },
       );
     });
+  }
+
+  // Downloads the file currently previewed in a rendered zip archive.
+  downloadCurrentFile(): void {
+    // eslint-disable-next-line no-underscore-dangle
+    this.eventEmitter?._emit?.(
+      `${ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE}:${this.elementName}`,
+      {},
+    );
   }
 }
 

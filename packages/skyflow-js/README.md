@@ -4319,6 +4319,79 @@ fileElement
   });
 ```
 
+### Render a zip file
+Zip rendering is opt-in. If the file stored in the vault is a `.zip` archive and you call `renderFile({ zipRender: true })`, the SDK unzips it in the browser and renders a list-detail layout: the extracted files are listed on the left and the selected file is previewed on the right. Without `zipRender: true` the archive is rendered as a single file, exactly as before. 
+
+Only the archive's file list is read up front; each file is extracted the first time it is previewed or downloaded, so large archives stay responsive. Images are previewed in an `<img>` tag, video and audio in their native players, and everything else (such as PDF) through the browser's `<embed>` viewer, so which formats display depends on the browser. Files that could execute in the browser (scripts, HTML, executables, nested archives) are listed but not previewed; the message "This file type is not supported for preview." is shown instead, and such files cannot be downloaded through `downloadCurrentFile()`.
+
+`renderFile()` accepts an optional options object. All keys are optional:
+
+```javascript
+fileElement.renderFile({
+  zipRender: true,                                // Unzip and render the archive contents. Default: false.
+  layout: Skyflow.ZipRenderLayout.LIST_DETAIL,    // Zip viewer layout. Skyflow.ZipRenderLayout enum. Only LIST_DETAIL is supported. Default: LIST_DETAIL.
+  allowDownload: false,                           // Allow downloadCurrentFile() for the previewed file. Default: false.
+  autoSelectFirst: true,                          // Select and preview the first file automatically. Default: true.
+  labelMode: Skyflow.ZipLabelMode.BASENAME,       // File list labels. Skyflow.ZipLabelMode enum: BASENAME or PATH. Default: BASENAME.
+});
+```
+
+`Skyflow.ZipRenderLayout` and `Skyflow.ZipLabelMode` are exported as `ZipRenderLayout` and `ZipLabelMode` from the npm package. For example, to show full archive paths in the file list:
+
+```javascript
+fileElement.renderFile({
+  zipRender: true,
+  layout: Skyflow.ZipRenderLayout.LIST_DETAIL,
+  labelMode: Skyflow.ZipLabelMode.PATH,
+});
+```
+
+With `Skyflow.ZipLabelMode.BASENAME` the list shows each file's name and the full path on hover; if two files share a name, the nearest parent folder is prepended (for example `2024/report.pdf` and `2025/report.pdf`). With `Skyflow.ZipLabelMode.PATH` the full archive path is shown.
+
+The zip layout accepts three additional, optional style objects on the element. Each accepts only the `base` variant (and `focus` for list items):
+
+```javascript
+const fileElement = {
+  skyflowID: 'string',
+  column: 'string',
+  table: 'string',
+  inputStyles: { base: { height: '400px' } },  // Optional, applied to the zip layout container.
+  zipNavStyles: { base: { width: '30%' } },    // Optional, applied to the file list panel.
+  zipNavListItemStyles: {                      // Optional, applied to each file in the list.
+    base: { padding: '8px' },
+    focus: { border: '2px solid #b0b3b8' },    // Applied to the selected file.
+  },
+  zipPanelStyles: { base: { width: '70%' } },  // Optional, applied to the preview panel.
+};
+```
+
+Messages shown inside the preview panel, such as "This file type is not supported for preview.", use the element's `errorTextStyles.base`. An element that already sets `errorTextStyles` therefore gets consistent error styling in the zip viewer with no extra configuration.
+
+For zip files, the `renderFile()` success response also includes `unZippedFilesMetadata`, one entry per extracted file:
+
+```javascript
+{
+  success: {
+    skyflow_id: 'string',
+    column: 'string',
+    fileMetadata: { ... },
+    unZippedFilesMetadata: [
+      { name: 'photo.png', size: 20480, type: 'image/png' },
+      { name: 'doc.pdf', size: 102400, type: 'application/pdf' },
+    ],
+  },
+}
+```
+
+For TypeScript users, the npm package exports `RenderFileResponse` for this response, `UnzippedFileMetadata` for each entry of `unZippedFilesMetadata`, and `RenderOptions` for the `renderFile()` options object.
+
+#### Download the currently previewed file
+For composable reveal elements rendering a zip file with `allowDownload: true`, call `downloadCurrentFile()` to download the file currently selected in the preview. Download is off by default; without `allowDownload: true` the call is ignored and an error is logged.
+
+```javascript
+fileElement.downloadCurrentFile();
+```
+
 ### End to end example of file render
 ```javascript
 // Step 1.

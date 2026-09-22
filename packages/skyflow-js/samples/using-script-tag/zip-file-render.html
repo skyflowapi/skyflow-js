@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skyflow Zip File Render</title>
+    <script src="https://js.skyflow.com/v2/index.js"></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        font-family: sans-serif;
+      }
+      .render-view {
+        margin-top: 24px;
+      }
+      .actions button {
+        height: 30px;
+        margin-right: 8px;
+      }
+      #renderResponse {
+        margin-top: 16px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Render a zip file</h3>
+    <p>
+      Zip rendering is only available on composable reveal elements. The element unzips the archive
+      in the browser and shows the file list on the left and a preview of the selected file on the right.
+    </p>
+
+    <div id="revealView" class="render-view">
+      <div id="zipRenderContainer"></div>
+    </div>
+
+    <div class="actions">
+      <button id="renderZip">Render zip file</button>
+      <button id="downloadCurrentFile">Download current file</button>
+    </div>
+
+    <pre id="renderResponse"></pre>
+
+    <script>
+      try {
+        const skyflowClient = Skyflow.init({
+          vaultID: '<VAULT_ID>',
+          vaultURL: '<VAULT_URL>',
+          getBearerToken: () => {
+            return new Promise((resolve, reject) => {
+              const Http = new XMLHttpRequest();
+
+              Http.onreadystatechange = () => {
+                if (Http.readyState === 4 && Http.status === 200) {
+                  const response = JSON.parse(Http.responseText);
+                  resolve(response.accessToken);
+                }
+              };
+              const url = '<TOKEN_END_POINT_URL>';
+              Http.open('GET', url);
+              Http.send();
+            });
+          },
+          options: {
+            logLevel: Skyflow.LogLevel.ERROR,
+            env: Skyflow.Env.PROD,
+          },
+        });
+
+        // Styles for the composable reveal container that hosts the element.
+        const containerOptions = {
+          layout: [1],
+          styles: {
+            base: {
+              border: '1px solid #eae8ee',
+              padding: '16px',
+              borderRadius: '4px',
+              margin: '12px 2px',
+            },
+          },
+          errorTextStyles: {
+            base: {
+              color: '#f44336',
+            },
+          },
+        };
+
+        // Styles for the element. The zip layout accepts three extra style objects:
+        // zipNavStyles (file list panel), zipNavListItemStyles (each file in the list,
+        // `focus` is applied to the selected file) and zipPanelStyles (preview panel).
+        const zipElementStyles = {
+          inputStyles: {
+            base: {
+              border: '1px solid #eae8ee',
+              borderRadius: '4px',
+              height: '400px',
+              width: '800px',
+            },
+          },
+          zipNavStyles: {
+            base: {
+              width: '30%',
+              borderRight: '1px solid #eae8ee',
+            },
+          },
+          zipNavListItemStyles: {
+            base: {
+              padding: '8px',
+              cursor: 'pointer',
+            },
+            focus: {
+              border: '2px solid #b0b3b8',
+              borderRadius: '4px',
+            },
+          },
+          zipPanelStyles: {
+            base: {
+              width: '70%',
+            },
+          },
+          errorTextStyles: {
+            base: {
+              color: '#f44336',
+            },
+          },
+        };
+
+        // Step 1: create a composable reveal container.
+        const revealContainer = skyflowClient.container(
+          Skyflow.ContainerType.COMPOSE_REVEAL,
+          containerOptions
+        );
+
+        // Step 2: create the file element. Pass the skyflow_id of the record that holds the zip file.
+        // REPLACE with your own implementation to fetch the skyflow_id from your backend service.
+        const zipFileElement = revealContainer.create({
+          skyflowID: '<SKYFLOW_ID>',
+          table: '<TABLE_NAME>',
+          column: '<FILE_COLUMN_NAME>',
+          altText: 'Zip archive',
+          ...zipElementStyles,
+        });
+
+        // Step 3: mount the container.
+        revealContainer.mount('#zipRenderContainer');
+
+        // Step 4: render the zip file with the zip render options.
+        const renderButton = document.getElementById('renderZip');
+        if (renderButton) {
+          renderButton.addEventListener('click', () => {
+            zipFileElement
+              .renderFile({
+                zipRender: true,                              // Unzip and render the archive contents. Default: false.
+                layout: Skyflow.ZipRenderLayout.LIST_DETAIL,  // Only LIST_DETAIL is supported. Default: LIST_DETAIL.
+                allowDownload: true,                          // Enables downloadCurrentFile(). Default: false.
+                autoSelectFirst: true,                        // Preview the first file automatically. Default: true.
+                labelMode: Skyflow.ZipLabelMode.BASENAME,     // BASENAME or PATH. Default: BASENAME.
+              })
+              .then((res) => {
+                // res.success.unZippedFilesMetadata lists every file extracted from the archive.
+                document.getElementById('renderResponse').innerText = JSON.stringify(res, null, 2);
+              })
+              .catch((err) => {
+                document.getElementById('renderResponse').innerText = JSON.stringify(err, null, 2);
+                console.log(err);
+              });
+          });
+        }
+
+        // Step 5: download the file currently selected in the preview.
+        // Only works after renderFile() resolved with allowDownload: true; otherwise the call is
+        // ignored and an error is logged.
+        const downloadButton = document.getElementById('downloadCurrentFile');
+        if (downloadButton) {
+          downloadButton.addEventListener('click', () => {
+            zipFileElement.downloadCurrentFile();
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    </script>
+  </body>
+</html>

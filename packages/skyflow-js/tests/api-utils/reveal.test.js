@@ -338,6 +338,17 @@ describe("formatForRenderClient fn test",()=>{
       "fileMetadata": undefined,
     }});
   });
+  test("with unZippedFilesMetadata should include it in success",()=>{
+    const unZippedFilesMetadata = [{ name: 'a.png', size: 10, type: 'image/png' }];
+    const testInput = {"fields": { "col" : "http://dummy.com", "skyflow_id": "id" },
+      "fileMetadata": { contentType: 'application/zip' }, unZippedFilesMetadata };
+    const fnResponse = formatForRenderClient(testInput, 'col');
+    expect(fnResponse).toStrictEqual({ success :{"column": "col",
+      "skyflow_id": "id",
+      "fileMetadata": { contentType: 'application/zip' },
+      unZippedFilesMetadata,
+    }});
+  });
   test("errors case", ()=>{
     const errorResponse = {
       "errors": {

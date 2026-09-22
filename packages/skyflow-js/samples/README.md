@@ -161,6 +161,20 @@ This sample shows you how to upload files to your vault.
 
 From your browser, navigate to `http://localhost:8000/` to view the page.
 
+### Zip file render
+This sample shows you how to render a `.zip` file stored in your vault with a composable reveal element. The archive is unzipped in the browser and shown as a file list with a preview of the selected file, and the previewed file can be downloaded with `downloadCurrentFile()`.
+
+#### Configure
+1. Navigate to the using-script-tag and open the zip-file-render.html file.
+2. Replace **<VAULT_ID>** and **VAULT URL** with your vault-specific values.
+3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
+4. Replace **<SKYFLOW_ID>**, **<TABLE_NAME>** and **<FILE_COLUMN_NAME>** with the record that holds the zip file.
+
+#### Run the following command.
+        npx live-server zip-file-render.html --port=8000
+
+From your browser, navigate to `http://localhost:8000/` to view the page.
+
 
 ## Using npm
 ### collect-element-listeners

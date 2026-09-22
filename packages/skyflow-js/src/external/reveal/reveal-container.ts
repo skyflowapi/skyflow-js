@@ -26,6 +26,10 @@ export interface IRevealElementInput {
   labelStyles?: object;
   altText?: string;
   errorTextStyles?: object;
+  // Zip file render (list-detail layout) styles.
+  zipNavStyles?: object;
+  zipPanelStyles?: object;
+  zipNavListItemStyles?: object;
 }
 
 // Relocated to @core/types; re-exported here under the same public name.
