@@ -339,6 +339,8 @@ export const formatForRenderClient = (response: IRenderResponseType, column: str
       skyflow_id: response.fields.skyflow_id,
       column,
       fileMetadata: response.fileMetadata,
+      ...(response.unZippedFilesMetadata
+        ? { unZippedFilesMetadata: response.unZippedFilesMetadata } : {}),
     };
     formattedResponse.success = successRecord;
   } else if (response.errors) {

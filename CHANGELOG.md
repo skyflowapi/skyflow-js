@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- Render zip files in composable reveal file elements (list-detail layout with per-file preview), opt-in via `renderFile({ zipRender: true })`
+- `renderFile(options)` now accepts `zipRender`, `layout`, `allowDownload`, `autoSelectFirst` and `labelMode` options (`IRenderOptions`)
+- `downloadCurrentFile()` on composable reveal elements to download the previewed file from a rendered zip (requires `allowDownload: true`)
+- Zip rendering hardening: lazy per-file extraction, exact zip MIME detection, origin-checked download requests, and download blocked for unsafe file types
+- `zipNavStyles`, `zipPanelStyles` and `zipNavListItemStyles` options for the zip render layout
+- `unZippedFilesMetadata` in the `renderFile()` success response for zip files
+
 ## [2.6.0] - 2025-11-19
 ### Added
 - Composable Reveal elements

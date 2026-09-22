@@ -17,11 +17,13 @@ import {
 } from '@core/types';
 import CoreComposableRevealInternalElement from '@core/external/reveal/composable-reveal-internal';
 import {
-  MessageType, RenderFileResponse,
+  MessageType, RenderFileResponse, IRenderOptions,
 } from '../../utils/common';
 import { IRevealElementInput, IRevealElementOptions } from './reveal-container';
 import { parameterizedString, printLog } from '../../utils/logs-helper';
-import { validateInitConfig, validateRenderElementRecord } from '../../utils/validators';
+import {
+  validateInitConfig, validateRenderElementRecord, validateRenderOptions,
+} from '../../utils/validators';
 
 const CLASS_NAME = 'RevealElementInteranalElement';
 
@@ -47,11 +49,27 @@ class ComposableRevealInternalElement
     this.eventEmitter?.on(
       `${ELEMENT_EVENTS_TO_IFRAME?.RENDER_FILE_REQUEST}:${element?.name}`,
       (data, callback) => {
-        this.renderFile(element)?.then((response) => {
+        this.renderFile(element, data?.options)?.then((response) => {
           callback?.(response);
         })?.catch((error) => {
           callback?.({ error });
         });
+      },
+    );
+    this.eventEmitter?.on(
+      `${ELEMENT_EVENTS_TO_IFRAME?.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE}:${element?.name}`,
+      () => {
+        this.downloadCurrentFile(element?.name as string);
+      },
+    );
+  }
+
+  // Forwards the zip "download current file" request to the reveal iframe.
+  downloadCurrentFile(elementName: string): void {
+    this.emitEvent(
+      ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + elementName,
+      {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_ELEMENT_DOWNLOAD_CURRENT_FILE + elementName,
       },
     );
   }
@@ -61,6 +79,7 @@ class ComposableRevealInternalElement
   private sendRenderFileCall(
     recordData: any,
     altText: string,
+    renderOptions: IRenderOptions,
     resolve: (value: RenderFileResponse) => void,
     reject: (reason?: any) => void,
   ): void {
@@ -75,6 +94,7 @@ class ComposableRevealInternalElement
             type: REVEAL_TYPES.RENDER_FILE,
             containerId: this.containerId,
             iframeName: recordData.name,
+            renderOptions,
           },
           clientConfig: {
             vaultURL: this.metaData.clientJSON.config.vaultURL,
@@ -118,7 +138,8 @@ class ComposableRevealInternalElement
     });
   }
 
-  renderFile(recordData: any): Promise<RenderFileResponse> {
+  renderFile(recordData: any, options?: IRenderOptions): Promise<RenderFileResponse> {
+    const renderOptions: IRenderOptions = options ?? {};
     let altText = '';
     if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
       altText = recordData.altText;
@@ -132,14 +153,15 @@ class ComposableRevealInternalElement
           MessageType.LOG,
           loglevel);
         validateRenderElementRecord(recordData);
+        validateRenderOptions(options);
         if (this.isComposableFrameReady) {
-          this.sendRenderFileCall(recordData, altText, resolve, reject);
+          this.sendRenderFileCall(recordData, altText, renderOptions, resolve, reject);
         } else {
           window.addEventListener('message', (event) => {
             if (event.data.type === ELEMENT_EVENTS_TO_IFRAME.RENDER_MOUNTED
                     + recordData?.name) {
               this.markMounted();
-              this.sendRenderFileCall(recordData, altText, resolve, reject);
+              this.sendRenderFileCall(recordData, altText, renderOptions, resolve, reject);
             }
           });
         }
