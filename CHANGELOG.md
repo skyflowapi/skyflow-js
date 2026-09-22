@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [2.8.0] - 2026-9-22
 ### Added
 - Render zip files in composable reveal file elements (list-detail layout with per-file preview), opt-in via `renderFile({ zipRender: true })`
 - `renderFile(options)` now accepts `zipRender`, `layout`, `allowDownload`, `autoSelectFirst` and `labelMode` options (`IRenderOptions`)
