@@ -76,13 +76,13 @@ const getBearerToken = () => {
           const response = JSON.parse(Http.responseText);
           resolve(response.accessToken);
         } else {
-          reject('Error occured');
+          reject('Error occurred');
         }
       }
     };
 
     Http.onerror = error => {
-      reject('Error occured');
+      reject('Error occurred');
     };
 
     const url = 'https://api.acmecorp.com/skyflowToken';
@@ -300,7 +300,7 @@ The `inputStyles` field accepts a style object which consists of CSS properties 
 
 Styles are specified with [JSS](https://cssinjs.org/?v=v10.7.1). 
 
-An example of a inputStyles object:
+An example of an inputStyles object:
 ```javascript
 inputStyles: {
   base: {
@@ -375,7 +375,7 @@ errorTextStyles: {
 },
 ```
 
-Finally, the `type` field takes a Skyflow ElementType. Each type applies the appropriate regex and validations to the form element. There are currently 8 types:
+Finally, the `type` field takes a Skyflow ElementType. Each type applies the appropriate regex and validations to the form element. There are currently 10 types:
 - `CARDHOLDER_NAME`
 - `CARD_NUMBER`
 - `EXPIRATION_DATE`
@@ -385,6 +385,7 @@ Finally, the `type` field takes a Skyflow ElementType. Each type applies the app
 - `INPUT_FIELD`
 - `PIN`
 - `FILE_INPUT`
+- `MULTI_FILE_INPUT`
   
 
 The `INPUT_FIELD` type is a custom UI element without any built-in validations. For information on validations, see [validations](#validations).
@@ -395,7 +396,7 @@ Along with CollectElement we can define other options which takes a object of op
 const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
   enableCardIcon: true, // Optional, indicates whether a card icon should be enabled (only applicable for CARD_NUMBER ElementType).
-  enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false'.
   format: String,       // Optional, format for the element 
   translation: {},      // Optional, indicates the allowed data type value for format. 
   cardMetadata: {},     // Optional, metadata to control card number element behavior. (only applicable for CARD_NUMBER ElementType).
@@ -553,7 +554,7 @@ const collectElement = {
 const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
   enableCardIcon: true, // Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType).
-  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false'.
   format: String,       // Optional, format for the element
   translation: {},      // Optional, indicates the allowed data type value for format.
 };
@@ -634,7 +635,7 @@ const container = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 const element = container.create({
   table: 'cards',
   column: 'cardNumber',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -860,7 +861,7 @@ const binLookup = (bin) => {
 const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
   enableCardIcon: true, // Optional, indicates whether a card icon should be enabled (only applicable for CARD_NUMBER ElementType).
-  enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false'.
   format: String,       // Optional, format for the element 
   translation: {},      // Optional, indicates the allowed data type value for format. 
   cardMetadata: {},     // Optional, metadata to control card number element behavior. (only applicable for CARD_NUMBER ElementType).
@@ -917,7 +918,7 @@ const collectElement = {
 const options = {
  required: false,             // Optional, indicates whether the field is marked as required. Defaults to 'false'.
  enableCardIcon: true,        // Optional, indicates whether  the element needs a card icon (only applicable for CARD_NUMBER ElementType).
- enableCopy: false,           // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+ enableCopy: false,           // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false'.
  format: String,              // Optional, format for the element
  translation: {},             // Optional, indicates the allowed data type value for format.
 };
@@ -1606,7 +1607,7 @@ container.uploadFiles();
 ```
 ### File upload limitations:
 
-- Only non-executable file are allowed to be uploaded.
+- Only non-executable files are allowed to be uploaded.
 - Files must have a maximum size of 32 MB
 - File columns can't enable tokenization, redaction, or arrays.
 - Re-uploading a file overwrites previously uploaded data.
@@ -1623,7 +1624,7 @@ const element = container.create({
   table: 'pii_fields',
   column: 'file',
   skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -1679,7 +1680,7 @@ const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 const cardNumberElement = collectContainer.create({
   table: 'newTable',
   column: 'card_number',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -1706,7 +1707,7 @@ const fileElement = collectContainer.create({
   table: 'newTable',
   column: 'file',
   skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -1769,7 +1770,7 @@ const collectContainer = skyflowClient.container(Skyflow.ContainerType.COLLECT);
 const cardNumberElement = collectContainer.create({
   table: 'newTable',
   column: 'card_number',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -1794,7 +1795,7 @@ const fileElement = collectContainer.create({
   table: 'newTable',
   column: 'file',
   skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -2015,7 +2016,7 @@ const options = {
     required: false,  		// Optional, indicates whether the field is marked as required. Defaults to 'false'
     enableCardIcon: true, 	// Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
     format: String, 		// Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType),
-    enableCopy: false 		// Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false')
+    enableCopy: false 		// Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false'
 }
 ```
 
@@ -2058,7 +2059,7 @@ const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
   enableCardIcon: true, // Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType).
   format: String,       // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
-  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false'.
 };
 
 const element = container.create(composableElement, options);
@@ -2489,7 +2490,7 @@ composableContainer.uploadFiles();
 ```
 ### File upload limitations:
 
-- Only non-executable file are allowed to be uploaded.
+- Only non-executable files are allowed to be uploaded.
 - Files must have a maximum size of 32 MB
 - File columns can't enable tokenization, redaction, or arrays.
 - Re-uploading a file overwrites previously uploaded data.
@@ -2509,7 +2510,7 @@ const element = container.create({
   table: 'pii_fields',
   column: 'file',
   skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -2568,7 +2569,7 @@ const collectContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABL
 const cardNumberElement = collectContainer.create({
   table: 'newTable',
   column: 'card_number',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -2595,7 +2596,7 @@ const fileElement = collectContainer.create({
   table: 'newTable',
   column: 'file',
   skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -2660,7 +2661,7 @@ const collectContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABL
 const cardNumberElement = collectContainer.create({
   table: 'newTable',
   column: 'card_number',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -2685,7 +2686,7 @@ const fileElement = collectContainer.create({
   table: 'newTable',
   column: 'file',
   skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -2790,7 +2791,7 @@ Note:
 
 ### File upload limitations:
 
-- Only non-executable file are allowed to be uploaded.
+- Only non-executable files are allowed to be uploaded.
 - Files have a default maximum size of 32 MB per file. This limit is configurable using the `maxFileSize` option.
 - Up to 4 files can be uploaded at a time by default. This limit is configurable using the `maxFileCount` option.
 - File columns can't enable tokenization, redaction, or arrays.
@@ -2811,7 +2812,7 @@ const element = container.create({
   table: 'pii_fields',
   column: 'file',
   skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -2879,7 +2880,7 @@ const collectContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABL
 const cardNumberElement = collectContainer.create({
   table: 'newTable',
   column: 'card_number',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -2908,7 +2909,7 @@ const fileElement = collectContainer.create({
   table: 'newTable',
   column: 'file',
   skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -2973,7 +2974,7 @@ const collectContainer = skyflowClient.container(Skyflow.ContainerType.COMPOSABL
 const cardNumberElement = collectContainer.create({
   table: 'newTable',
   column: 'card_number',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -2998,7 +2999,7 @@ const fileElement = collectContainer.create({
   table: 'newTable',
   column: 'file',
   skyflowID: '431eaa6c-5c15-4513-aa15-29f50babe882',
-  inputstyles: {
+  inputStyles: {
     base: {
       color: '#1d1d1d',
     },
@@ -3086,17 +3087,17 @@ const records = {
   ],
 };
 
-Note: If you do not provide a redaction type, RedactionType.PLAIN_TEXT is the default.
-
-skyflow.detokenize(records);
+skyflowClient.detokenize(records);
 ```
+Note: If you do not provide a redaction type, `RedactionType.PLAIN_TEXT` is the default.
+
 An [example](https://github.com/skyflowapi/skyflow-js/blob/main/packages/skyflow-js/samples/using-script-tag/pure-js.html) of a detokenize call: 
 
 ```javascript
-skyflow.detokenize({
+skyflowClient.detokenize({
   records: [
     {
-      token: '<TOKEN_1>,
+      token: '<TOKEN_1>',
     },
     {
      token: '<TOKEN_2>',
@@ -3180,7 +3181,7 @@ data = {
 [Example usage (Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/main/packages/skyflow-js/samples/using-script-tag/get-pure-js.html)
 
 ```javascript
-skyflow.get({
+skyflowClient.get({
  records: [
    {
      ids: ["f8d8a622-b557-4c6b-a12c-c5ebe0b0bfd9"],
@@ -3225,7 +3226,7 @@ Example response
 [Example usage (Unique column values)](https://github.com/skyflowapi/skyflow-js/blob/main/packages/skyflow-js/samples/using-script-tag/get-pure-js.html)
 
 ```javascript
-skyflow.get({
+skyflowClient.get({
  records: [
    {
    table: "cards",
@@ -3264,7 +3265,7 @@ Sample response:
 
 [Example usage (Fetch tokens using Skyflow IDs)](https://github.com/skyflowapi/skyflow-js/blob/main/packages/skyflow-js/samples/using-script-tag/get-pure-js.html)
 ```javascript
-skyflow.get({
+skyflowClient.get({
  records: [
    {
      ids: [
@@ -3333,7 +3334,7 @@ Note: If you don't provide a redaction type, RedactionType.PLAIN_TEXT will apply
 
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant, `copyIcon` and `global` style objects. 
 
-An example of a inputStyles object:
+An example of an inputStyles object:
 
 ```javascript
 inputStyles: {
@@ -3381,7 +3382,7 @@ errorTextStyles: {
 Along with RevealElementInput, you can define other options in the RevealElementOptions object as described below: 
 ```js
 const options = {
-  enableCopy: false,    // Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false'.
  format: String,        // Optional, format for the element 
  translation: {}        // Optional, indicates the allowed data type value for format. 
 }
@@ -3658,7 +3659,7 @@ const fileElement = {
 ```
 The inputStyles and errorTextStyles parameters accept a styles object as described in the [previous section](https://github.com/skyflowapi/skyflow-js#step-2-create-a-collect-element) for collecting data. But for render file elements, inputStyles accepts only base variant, global style objects.
 
-An example of a inputStyles object:
+An example of an inputStyles object:
 
 ```javascript
 inputStyles: {
@@ -3764,7 +3765,7 @@ fetch("<BACKEND_URL>")
      {
      "skyflow_id": "<TOKEN_4>",
      "column": "file"
-   },
+   }
   ]
 }
 ```
@@ -3933,7 +3934,7 @@ Note: If you don't provide a redaction type, RedactionType.PLAIN_TEXT will apply
 
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant, `copyIcon` and `global` style objects. 
 
-An example of a inputStyles object:
+An example of an inputStyles object:
 
 ```javascript
 inputStyles: {
@@ -3981,7 +3982,7 @@ errorTextStyles: {
 Along with RevealElementInput, you can define other options in the RevealElementOptions object as described below: 
 ```js
 const options = {
-  enableCopy: false,    // Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false'.
  format: String,        // Optional, format for the element 
  translation: {}        // Optional, indicates the allowed data type value for format. 
 }
@@ -4279,7 +4280,7 @@ const fileElement = {
 ```
 The inputStyles and errorTextStyles parameters accept a styles object as described in the [previous section](https://github.com/skyflowapi/skyflow-js#step-2-create-a-collect-element) for collecting data. But for render file elements, inputStyles accepts only base variant, global style objects.
 
-An example of a inputStyles object:
+An example of an inputStyles object:
 
 ```javascript
 inputStyles: {
@@ -4479,18 +4480,20 @@ fetch("<BACKEND_URL>")
 
 ## Deleting data from the vault
 
-To delete data from the vault, use the `delete(records, options?)` method of the Skyflow client. The `records` parameter takes an array of records to delete in the following format. The `options` parameter is optional and takes an object of deletion parameters. Currently, there are no supported deletion parameters.
+To delete data from the vault, use the `delete(records, options?)` method of the Skyflow client. The `records` parameter takes an object with a `records` array of records to delete, in the following format. The `options` parameter is optional and takes an object of deletion parameters. Currently, there are no supported deletion parameters.
 
 ```javascript
-const records = [
-  {
-    id: "<SKYFLOW_ID_1>", // skyflow id of the record to delete
-    table: "<TABLE_NAME>" // Table from which the record is to be deleted
-  },
-  {
-    // ...additional records here
-  },
-],
+const records = {
+  records: [
+    {
+      id: "<SKYFLOW_ID_1>", // skyflow id of the record to delete
+      table: "<TABLE_NAME>" // Table from which the record is to be deleted
+    },
+    {
+      // ...additional records here
+    },
+  ],
+};
 
 skyflowClient.delete(records);
 ```
@@ -4519,11 +4522,11 @@ A sample response:
   "records": [
     {
      "skyflow_id": "29ebda8d-5272-4063-af58-15cc674e332b",
-     "deleted": true,
+     "deleted": true
     },
     {
-     "skyflow_id": "29ebda8d-5272-4063-af58-15cc674e332b",
-     "deleted": true,
+     "skyflow_id": "d5f4b926-7b1a-41df-8fac-7950d2cbd923",
+     "deleted": true
     }
   ]
 }
@@ -4533,7 +4536,7 @@ A sample response:
 
 Add custom network error messages to a container with the `setError` method.
 
-`setError(ErrorMessages: Record<ErrorType, string>)` sets the error text for the different network errors types. When this method is triggered, all the errors present in the error response are overridden with the specified custom error message. This error is sent on the collect or upload file call on the same container.
+`setError(ErrorMessages: Partial<Record<ErrorType, string>>)` sets the error text for the different network errors types. When this method is triggered, all the errors present in the error response are overridden with the specified custom error message. This error is sent on the collect or upload file call on the same container.
 
 ### Sample code snippet for setError on collect container
 ```javascript
@@ -4576,7 +4579,7 @@ container
         "code":0,
         "description":"You appear to be offline. Please check your internet connection.",
         "type":"OFFLINE"
-  },
+  }
 }
 ```
 
