@@ -1654,11 +1654,18 @@ container.uploadFiles();
 {
     fileUploadResponse: [
         {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+            "fileMetadata": {
+                "fileName": "kyc.jpeg",
+                "fileSize": 1024,
+                "fileType": "application/jpeg"
+            }
         }
     ]
 }
 ```
+
+`fileMetadata` is included only when the element was created with `returnFileMetadata: true` (the samples above assume it). It describes the stored file: `fileName` is the name saved in the vault (the original name when `preserveFileName` is true, otherwise the generated one), `fileSize` is in bytes, and `fileType` is the MIME type.
 ### File upload with options:
 
 Along with fileElementInput, you can define other options in the Options object as described below: 
@@ -1754,7 +1761,12 @@ collectContainer.uploadFiles();
 {
     "fileUploadResponse": [
         {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+            "fileMetadata": {
+                "fileName": "kyc.jpeg",
+                "fileSize": 1024,
+                "fileType": "application/jpeg"
+            }
         }
     ]
 }
@@ -1840,7 +1852,12 @@ collectContainer.uploadFiles();
 {
     "fileUploadResponse": [
         {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+            "fileMetadata": {
+                "fileName": "kyc.jpeg",
+                "fileSize": 1024,
+                "fileType": "application/jpeg"
+            }
         }
     ]
 }
@@ -2540,7 +2557,12 @@ container.uploadFiles();
 {
     fileUploadResponse: [
         {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+            "fileMetadata": {
+                "fileName": "kyc.jpeg",
+                "fileSize": 1024,
+                "fileType": "application/jpeg"
+            }
         }
     ]
 }
@@ -2642,7 +2664,12 @@ collectContainer.uploadFiles();
 {
     "fileUploadResponse": [
         {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+            "fileMetadata": {
+                "fileName": "kyc.jpeg",
+                "fileSize": 1024,
+                "fileType": "application/jpeg"
+            }
         }
     ]
 }
@@ -2731,7 +2758,12 @@ collectContainer.uploadFiles();
 {
     "fileUploadResponse": [
         {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+            "fileMetadata": {
+                "fileName": "kyc.jpeg",
+                "fileSize": 1024,
+                "fileType": "application/jpeg"
+            }
         }
     ]
 }
@@ -2842,7 +2874,12 @@ element.uploadMultipleFiles();
 {
     fileUploadResponse: [
         {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+            "fileMetadata": {
+                "fileName": "kyc.jpeg",
+                "fileSize": 1024,
+                "fileType": "application/jpeg"
+            }
         }
     ]
 }
@@ -2854,7 +2891,8 @@ Along with fileElementInput, you can define other options in the Options object 
 const options = {
   allowedFileType: String[],  // Optional. Restricts uploads to the listed file extensions (e.g. [".pdf", ".png"]).
   blockEmptyFiles: Boolean,   // Optional. When true, rejects files with 0 bytes. Default: false.
-  preserveFileName: Boolean,  // Optional. When true, keeps the original filename on upload. Default: false.
+  preserveFileName: Boolean,  // Optional. When true, keeps the original filename on upload. Default: true.
+  returnFileMetadata: Boolean, // Optional. When true, each upload response entry includes fileMetadata. Default: false.
   maxFileSize: Number,        // Optional. Maximum size in bytes for each individual file. Default: 32000000 (32 MB).
   maxFileCount: Number,       // Optional. Maximum number of files that can be selected at once. Must be a positive integer. Default: 4.
 }
@@ -2862,7 +2900,8 @@ const options = {
 
 - `allowedFileType`: An array of strings indicating which file extensions are accepted for upload.
 - `blockEmptyFiles`: When `true`, files with a size of 0 bytes are rejected.
-- `preserveFileName`: When `true`, the original filename is preserved on upload.
+- `preserveFileName`: When `true`, the original filename is preserved on upload. Defaults to `true`.
+- `returnFileMetadata`: When `true`, the vault returns `fileMetadata` (`fileName`, `fileSize`, `fileType`) for each uploaded file and it is included in the `fileUploadResponse` entry. Defaults to `false`, matching the vault API default. Supported on `FILE_INPUT` and `MULTI_FILE_INPUT` elements in both collect and composable containers.
 - `maxFileSize`: Maximum allowed size **per file**, in bytes. If any file exceeds this limit, a validation error is shown with the filename. Defaults to `32000000` (32 MB). Only applies to `MULTI_FILE_INPUT` elements.
 - `maxFileCount`: Maximum number of files that can be selected for a single upload. Must be a positive integer. Defaults to `4`. Only applies to `MULTI_FILE_INPUT` elements.
 
@@ -2955,7 +2994,12 @@ fileElement.uploadMultipleFiles();
 {
     "fileUploadResponse": [
         {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+            "fileMetadata": {
+                "fileName": "kyc.jpeg",
+                "fileSize": 1024,
+                "fileType": "application/jpeg"
+            }
         }
     ]
 }
@@ -3043,10 +3087,20 @@ fileElement.uploadMultipleFiles();
 {
     "fileUploadResponse": [
         {
-            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882"
+            "skyflow_id": "431eaa6c-5c15-4513-aa15-29f50babe882",
+            "fileMetadata": {
+                "fileName": "kyc.jpeg",
+                "fileSize": 1024,
+                "fileType": "application/jpeg"
+            }
         },
         {
-            "skyflow_id": "546eaa6c-5c15-4513-aa15-29f50babe809"
+            "skyflow_id": "546eaa6c-5c15-4513-aa15-29f50babe809",
+            "fileMetadata": {
+                "fileName": "kyc.jpeg",
+                "fileSize": 1024,
+                "fileType": "application/jpeg"
+            }
         }
     ]
 }
@@ -3657,6 +3711,20 @@ const fileElement = {
 };
 ```
 The inputStyles and errorTextStyles parameters accept a styles object as described in the [previous section](https://github.com/skyflowapi/skyflow-js#step-2-create-a-collect-element) for collecting data. But for render file elements, inputStyles accepts only base variant, global style objects.
+
+#### File render options
+`create()` accepts an options object as its second argument. For file render elements it supports:
+
+```javascript
+const options = {
+  returnFileMetadata: true, // Optional. When true, the render response includes fileMetadata (fileName, fileSizeKB, fileType). Default: true.
+};
+
+const fileElement = container.create(fileElementInput, options);
+```
+
+The vault API defaults `returnFileMetadata` to `false`; the SDK defaults it to `true` to keep the existing render response. Set it to `false` to omit `fileMetadata` from the response, in which case zip detection relies on the file name alone.
+
 
 An example of a inputStyles object:
 
@@ -4278,6 +4346,20 @@ const fileElement = {
 };
 ```
 The inputStyles and errorTextStyles parameters accept a styles object as described in the [previous section](https://github.com/skyflowapi/skyflow-js#step-2-create-a-collect-element) for collecting data. But for render file elements, inputStyles accepts only base variant, global style objects.
+
+#### File render options
+`create()` accepts an options object as its second argument. For file render elements it supports:
+
+```javascript
+const options = {
+  returnFileMetadata: true, // Optional. When true, the render response includes fileMetadata (fileName, fileSizeKB, fileType). Default: true.
+};
+
+const fileElement = container.create(fileElementInput, options);
+```
+
+The vault API defaults `returnFileMetadata` to `false`; the SDK defaults it to `true` to keep the existing render response. Set it to `false` to omit `fileMetadata` from the response, in which case zip detection relies on the file name alone.
+
 
 An example of a inputStyles object:
 

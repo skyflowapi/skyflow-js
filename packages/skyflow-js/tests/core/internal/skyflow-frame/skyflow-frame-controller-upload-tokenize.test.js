@@ -357,7 +357,7 @@ describe('Uploading files to the vault', () => {
         
         // Check successful upload
         expect(result.error.fileUploadResponse).toHaveLength(1);
-        const parsedResponse = JSON.parse(result.error.fileUploadResponse[0]);
+        const parsedResponse = result.error.fileUploadResponse[0];
         expect(parsedResponse.skyflow_id).toBe('success-file-id');
         
         // Check failed upload
@@ -495,6 +495,7 @@ describe('Uploading files to the vault', () => {
     test('should upload file with preserveFileName false and skyflowID set', (done) => {
       testValue.iFrameFormElement.preserveFileName = false;
       testValue.iFrameFormElement.skyflowID = 'test-skyflow-id';
+      testValue.iFrameFormElement.returnFileMetadata = true;
       windowSpy.mockImplementation(()=>({
         frames:{
           'element:FILE_INPUT:ID:CONTAINER-ID:ERROR:':{document:{
@@ -502,7 +503,8 @@ describe('Uploading files to the vault', () => {
           }}
         }
       }));
-      const clientReq = jest.fn(() => Promise.resolve({ skyflowID: 'file-upload-skyflow-id' }));
+      const fileMetadata = { fileName: 'kyc.jpeg', fileSize: 1024, fileType: 'application/jpeg' };
+      const clientReq = jest.fn(() => Promise.resolve({ skyflowID: 'file-upload-skyflow-id', fileMetadata }));
       jest.spyOn(clientModule, 'fromJSON').mockImplementation(() => ({
         ...clientData.client,
         request: clientReq,
@@ -530,10 +532,14 @@ describe('Uploading files to the vault', () => {
         expect(cb2).toHaveBeenCalled();
         expect(cb2.mock.calls[0][0].fileUploadResponse).toBeDefined();
         expect(cb2.mock.calls[0][0].fileUploadResponse.length).toBe(1);
-        const parsedResponse = JSON.parse(cb2.mock.calls[0][0].fileUploadResponse[0]);
+        const parsedResponse = cb2.mock.calls[0][0].fileUploadResponse[0];
         expect(parsedResponse.skyflow_id).toBe('file-upload-skyflow-id');
+        // fileMetadata from the vault is passed through to the client response
+        expect(parsedResponse.fileMetadata).toEqual(fileMetadata);
         const requestArgs = clientReq.mock.calls[0][0];
         expect(requestArgs.body.get('skyflowID')).toBe('test-skyflow-id');
+        // every upload asks the vault for the metadata
+        expect(requestArgs.body.get('returnFileMetadata')).toBe('true');
         done();
       }, 1000);
     });

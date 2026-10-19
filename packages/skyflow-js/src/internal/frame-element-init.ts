@@ -235,7 +235,7 @@ export default class FrameElementInit extends CoreFrameElementInit {
     const fileUploadObject: any = {};
 
     const {
-      state, tableName, skyflowID, onFocusChange, preserveFileName,
+      state, tableName, skyflowID, onFocusChange, preserveFileName, returnFileMetadata,
     } = fileElement;
 
     if (state.isRequired) {
@@ -261,6 +261,7 @@ export default class FrameElementInit extends CoreFrameElementInit {
     const value: Blob = Object.values(fileUploadObject)[0] as Blob;
 
     formData.append('columnName', column);
+    if (returnFileMetadata) formData.append('returnFileMetadata', 'true');
     formData.append('tableName', tableName);
 
     if (preserveFileName) {
@@ -327,7 +328,7 @@ export default class FrameElementInit extends CoreFrameElementInit {
     if (!this.#client) throw new SkyflowError(SKYFLOW_ERROR_CODE.CLIENT_CONNECTION, [], true);
 
     const {
-      state, tableName, onFocusChange, preserveFileName,
+      state, tableName, onFocusChange, preserveFileName, returnFileMetadata,
     } = fileElement;
     if (state.isRequired) {
       onFocusChange(false);
@@ -350,6 +351,7 @@ export default class FrameElementInit extends CoreFrameElementInit {
     const uploadFile = (file: File, skyflowID?: string) => {
       const formData = new FormData();
       formData.append('columnName', state.name);
+      if (returnFileMetadata) formData.append('returnFileMetadata', 'true');
       if (tableName) formData.append('tableName', tableName);
       if (preserveFileName) {
         formData.append('file', file);

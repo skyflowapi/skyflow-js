@@ -492,6 +492,21 @@ describe('test formatRevealElementOptions function', () => {
     }
   });
 
+  test('should pass returnFileMetadata through when it is a boolean', () => {
+    expect(formatRevealElementOptions({ returnFileMetadata: false })).toEqual({ returnFileMetadata: false });
+    expect(formatRevealElementOptions({ returnFileMetadata: true })).toEqual({ returnFileMetadata: true });
+  });
+
+  test('should throw error if passed returnFileMetadata option is invalid type', (done) => {
+    try {
+      formatRevealElementOptions({ returnFileMetadata: 'yes' });
+      done('should throw error');
+    } catch (err) {
+      expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, 'returnFileMetadata'));
+      done();
+    }
+  });
+
   test('should return mask in options if both format and translation are provided',()=>{
     expect(formatRevealElementOptions({format:'YY-YY',translation:{Y:'[A-Z]'}})).toEqual({mask:['YY-YY',null,{Y:'[A-Z]'}]});
   });
