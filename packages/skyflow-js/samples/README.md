@@ -18,11 +18,11 @@ Samples come in three flavors — [`using-script-tag/`](using-script-tag) (loads
 ## Get Started
 
 ### Create the vault
-1. Sign in to Skyflow Studio.In a browser, navigate to Skyflow Studio.
+1. Sign in to Skyflow Studio. In a browser, navigate to Skyflow Studio.
 2. Create a vault by clicking **Create Vault** > **Start With a Template** > **Quickstart vault**.
-3. Under Quickstart, click Create.Once the vault is created, click the gear icon and select **Edit Vault Details**.
+3. Under Quickstart, click Create. Once the vault is created, click the gear icon and select **Edit Vault Details**.
 
-To run the following commands, you'll need to retrieve your vault-specific values, **<vault_url>** and **<vault_id>**. Find your vault values by clicking the vault menu icon > Edit vault details.Note your **Vault URL** and **Vault ID** values, then click Cancel. You'll need these later.
+To run the following commands, you'll need to retrieve your vault-specific values, **<vault_url>** and **<vault_id>**. Find your vault values by clicking the vault menu icon > Edit vault details. Note your **Vault URL** and **Vault ID** values, then click Cancel. You'll need these later.
 
 
 ### Create a service account
@@ -187,18 +187,17 @@ This sample shows you how to use event listeners with Skyflow Elements.
 1. open [`index.js`](using-npm/collect-element-listeners/src/index.js)
 2. Replace **<VAULT_ID>** and **VAULT URL** with your vault-specific values.
 3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
-Run the following command.
 
+#### Run the following command.
 
-        cd using-npm/collect-element-listeners/src
-        npx live-server index.html --port=8000
-From your browser, navigate to `http://localhost:8000/` to view the page.
+        npm start
+From your browser, navigate to the URL printed by parcel to view the page.
 
 ### skyflow-elements
 This sample shows you how to collect and reveal data with Skyflow Elements.
 #### Run the following command.
 
-        cd using-npm/custom-validations
+        cd using-npm/skyflow-elements
         npm i
 #### Configure
 1. open [`index.js`](using-npm/skyflow-elements/src/index.js)
@@ -206,16 +205,15 @@ This sample shows you how to collect and reveal data with Skyflow Elements.
 3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
 #### Run the following command.
 
-        cd using-npm/custom-validations/src
-        npx live-server index.html --port=8000
-From your browser, navigate to `http://localhost:8000/` to view the page.
+        npm start
+From your browser, navigate to the URL printed by parcel to view the page.
 
 ### custom-validations
 This sample shows you how to create custom validation when using Skyflow Elements. 
 
 #### Run the following command.
 
-        cd using-npm/pure-js
+        cd using-npm/custom-validations
         npm i
 #### Configure
 1. open [`index.js`](using-npm/custom-validations/src/index.js)
@@ -223,24 +221,22 @@ This sample shows you how to create custom validation when using Skyflow Element
 3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
 #### Run the following command.
 
-            cd using-npm/pure-js/src
-            npx live-server index.html --port=8000
-From your browser, navigate to`http://localhost:8000/` to view the page.
+        npm start
+From your browser, navigate to the URL printed by parcel to view the page.
 
 ### Record Insertion
 This sample shows you how to insert data into your vault.
 
 #### Run the following command.
 
-            cd using-npm/pure-js
-            npm i
+        cd using-npm/pure-js
+        npm i
 #### Configure
-1. open [`index.js`](using-npm/collect-element-listeners/src/index.js)
+1. open [`index.js`](using-npm/pure-js/src/index.js)
 2. Replace **<VAULT_ID>** and **VAULT URL** with your vault-specific values.
 3. Replace **<TOKEN_END_POINT_URL>** with `http://localhost:3000/`
 
 #### Run the following command.
 
-            cd using-npm/skyflow-elements/src
-            npx live-server index.html --port=8000
-From your browser, navigate to `http://localhost:8000/` to view the page.
+        npm start
+From your browser, navigate to the URL printed by parcel to view the page.
