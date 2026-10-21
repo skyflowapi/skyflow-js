@@ -233,7 +233,10 @@ class RevealFrame extends CoreRevealFrame {
     this.resetZipLayout();
     return new Promise((resolve, reject) => {
       try {
-        getFileURLFromVaultBySkyflowIDComposable(data, this.#client, clientConfig.authToken)
+        // `returnFileMetadata` is an element option (create-time); default true.
+        getFileURLFromVaultBySkyflowIDComposable(
+          data, this.#client, clientConfig.authToken, this.record?.returnFileMetadata ?? true,
+        )
           .then((resolvedResult) => {
             let url = '';
             if (resolvedResult.fields && data.column) {

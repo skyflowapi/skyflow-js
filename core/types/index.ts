@@ -520,6 +520,21 @@ export interface EventConfig{
   vaultID: string,
 }
 
+// Metadata of an uploaded file, returned by the vault for every upload because the
+// SDK always sends `returnFileMetadata: true`.
+export interface IFileUploadMetadata {
+  fileName: string,
+  fileSize: number,
+  fileType: string,
+}
+
+// One entry of `fileUploadResponse`: the record id and, when requested with
+// `returnFileMetadata: true`, the uploaded file's `fileMetadata`.
+export interface IFileUploadRecord {
+  skyflow_id: string,
+  fileMetadata?: IFileUploadMetadata,
+}
+
 export interface UploadFilesResponse {
   fileUploadResponse?: Record<string, any>,
   errorResponse?: Record<string, any>,
@@ -619,6 +634,10 @@ export interface IRevealElementOptions {
   enableCopy?: boolean;
   format?: string;
   translation?:Record<string, string>
+  // File render elements only. Ask the vault for `fileMetadata` with the render
+  // response. Default true: the API default is false, but the SDK has always requested
+  // it, surfaces it as `success.fileMetadata`, and uses it as a fallback for zip detection.
+  returnFileMetadata?: boolean;
 }
 
 // Internal element/frame types — variant-neutral. Relocated from
@@ -684,6 +703,8 @@ export interface CVVMap {
 // without importing a package symbol; the file branch never runs for flowDB.
 export interface IFileCollectElementOptions {
   preserveFileName?: boolean,
+  // Include `fileMetadata` in each upload response entry. Default false.
+  returnFileMetadata?: boolean,
   allowedFileType?: string[],
   blockEmptyFiles?: boolean,
   maxFileSize?: number,

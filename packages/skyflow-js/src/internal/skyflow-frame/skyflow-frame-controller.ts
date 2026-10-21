@@ -46,6 +46,7 @@ import {
 } from '../../api-utils/reveal';
 import { printLog, parameterizedString } from '../../utils/logs-helper';
 import {
+  IFileUploadRecord,
   IRevealRecord,
   IGetRecord,
   MessageType,
@@ -316,7 +317,12 @@ class SkyflowFrameController
   renderFile(data: IRevealRecord, iframeName: string): Promise<IRenderResponseType> {
     return new Promise((resolve, reject) => {
       try {
-        getFileURLFromVaultBySkyflowID(data, this.client)
+        // `returnFileMetadata` is an element option carried on the record; default true.
+        getFileURLFromVaultBySkyflowID(
+          data,
+          this.client,
+          (data as IRevealRecord & { returnFileMetadata?: boolean }).returnFileMetadata ?? true,
+        )
           .then((resolvedResult) => {
             let url = '';
             if (resolvedResult.fields && data.column) {
@@ -525,7 +531,10 @@ class SkyflowFrameController
             if (Object.prototype.hasOwnProperty.call(result.value, 'error')) {
               errorResponse.push(result.value);
             } else {
-              fileUploadResponse.push(result.value);
+              const entry = typeof result.value === 'string'
+                ? JSON.parse(result.value)
+                : result.value;
+              fileUploadResponse.push(entry);
             }
           }
         } else if (result.status === 'rejected') {
@@ -544,7 +553,7 @@ class SkyflowFrameController
     const fileUploadObject: any = {};
 
     const {
-      state, tableName, skyflowID, onFocusChange, preserveFileName,
+      state, tableName, skyflowID, onFocusChange, preserveFileName, returnFileMetadata,
     } = fileElement;
 
     if (state.isRequired) {
@@ -570,6 +579,7 @@ class SkyflowFrameController
     const value: Blob = Object.values(fileUploadObject)[0] as Blob;
 
     formData.append('columnName', column);
+    if (returnFileMetadata) formData.append('returnFileMetadata', 'true');
     formData.append('tableName', tableName ?? '');
 
     if (preserveFileName) {
@@ -591,7 +601,7 @@ class SkyflowFrameController
 
     const client = this.client;
     const sendRequest = ():
-    Promise<UploadFilesResponse> => new Promise((rootResolve, rootReject) => {
+    Promise<IFileUploadRecord> => new Promise((rootResolve, rootReject) => {
       const clientId = client.toJSON()?.metaData?.uuid || '';
       getAccessToken(clientId).then((authToken) => {
         client

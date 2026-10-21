@@ -108,6 +108,9 @@ export default class IFrameFormElement extends EventEmitter {
 
   preserveFileName: boolean = true;
 
+  // Ask the vault for fileMetadata on upload. Off by default (API default too).
+  returnFileMetadata: boolean = false;
+
   allowedFileType: any;
 
   blockEmptyFiles: boolean = false;

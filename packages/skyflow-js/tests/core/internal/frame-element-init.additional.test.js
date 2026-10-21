@@ -81,6 +81,7 @@ const makeFileElement = ({
   name = 'upload',
   tableName = 'files_table',
   preserveFileName = true,
+  returnFileMetadata = false,
   maxFileCount = 4,
   maxFileSize = 32_000_000,
 }) => {
@@ -94,6 +95,7 @@ const makeFileElement = ({
     tableName,
     onFocusChange: jest.fn(),
     preserveFileName,
+    returnFileMetadata,
     maxFileCount,
     maxFileSize,
     fieldType: multiple ? ELEMENTS.MULTI_FILE_INPUT.name : ELEMENTS.FILE_INPUT.name,
@@ -538,7 +540,7 @@ describe('FrameElementInit extended unit tests', () => {
   test('multipleUploadFiles uploads a file with an invalid original name when preserveFileName is false', async () => {
     const instance = new FrameElementInit();
     const files = [makeFile('my file.pdf')];
-    const fileElement = makeFileElement({ multiple: true, files, preserveFileName: false });
+    const fileElement = makeFileElement({ multiple: true, files, preserveFileName: false, returnFileMetadata: true });
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
     helpers.vaildateFileName = jest.fn(() => false); // original name is invalid
@@ -549,6 +551,7 @@ describe('FrameElementInit extended unit tests', () => {
     await expect(instance['multipleUploadFiles'](fileElement, config, undefined))
       .resolves.toEqual({ fileUploadResponse: [{ skyflow_id: 'abc' }] });
     expect(mockClientRequest).toHaveBeenCalledTimes(1);
+    expect(mockClientRequest.mock.calls[0][0].body.get('returnFileMetadata')).toBe('true');
     const uploaded = mockClientRequest.mock.calls[0][0].body.get('file');
     expect(uploaded.name).toBe('generated-uuid.pdf');
     expect(helpers.vaildateFileName).not.toHaveBeenCalled();
@@ -586,19 +589,20 @@ describe('FrameElementInit extended unit tests', () => {
   });
 
   // ================= uploadFiles tests =================
-  const makeSingleFileElement = ({ file, isRequired = false, preserveFileName = true, skyflowID } = {}) => ({
+  const makeSingleFileElement = ({ file, isRequired = false, preserveFileName = true, returnFileMetadata = false, skyflowID } = {}) => ({
     state: { value: file, name: 'uploadColumn', isRequired },
     tableName: 'files_table',
     skyflowID,
     onFocusChange: jest.fn(),
     preserveFileName,
+    returnFileMetadata,
     fieldType: ELEMENTS.FILE_INPUT.name,
   });
 
   test('uploadFiles success with preserveFileName true and skyflowID included', async () => {
     const instance = new FrameElementInit();
     const file = makeFile('original.txt', 5);
-    const element = makeSingleFileElement({ file, isRequired: true, preserveFileName: true, skyflowID: 'sky123' });
+    const element = makeSingleFileElement({ file, isRequired: true, preserveFileName: true, returnFileMetadata: true, skyflowID: 'sky123' });
     helpers.fileValidation = jest.fn(() => true);
     helpers.vaildateFileName = jest.fn(() => true);
     mockClientRequest.mockResolvedValue({ upload: 'ok' });
@@ -611,6 +615,7 @@ describe('FrameElementInit extended unit tests', () => {
     const callArgs = mockClientRequest.mock.calls[0][0];
     const body = callArgs.body;
     expect(body.get('columnName')).toBe('uploadColumn');
+    expect(body.get('returnFileMetadata')).toBe('true');
     expect(body.get('tableName')).toBe('files_table');
     expect(body.get('skyflowID')).toBe('sky123');
     const uploadedFile = body.get('file');
@@ -646,6 +651,64 @@ describe('FrameElementInit extended unit tests', () => {
     expect(helpers.vaildateFileName).not.toHaveBeenCalled();
     expect(mockClientRequest.mock.calls[0][0].body.get('file').name).toBe('gen_name.pdf');
     genSpy.mockRestore();
+  });
+
+  test('returnFileMetadata is off by default: no field is sent on single or multi uploads', async () => {
+    const instance = new FrameElementInit();
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    mockClientRequest.mockResolvedValue({ skyflowID: 'x' });
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'tokenXYZ' };
+
+    const single = makeSingleFileElement({ file: makeFile('a.txt') });
+    await instance.uploadFiles(single, config);
+    expect(mockClientRequest.mock.calls[0][0].body.get('returnFileMetadata')).toBeNull();
+
+    const files = [makeFile('b.txt')];
+    const multi = makeFileElement({ multiple: true, files });
+    multi.state.value = makeFileList(...files);
+    await instance['multipleUploadFiles'](multi, config, undefined);
+    expect(mockClientRequest.mock.calls[1][0].body.get('returnFileMetadata')).toBeNull();
+  });
+
+  test('uploadFiles (single) passes fileMetadata from the vault response through to the caller', async () => {
+    const instance = new FrameElementInit();
+    const file = makeFile('kyc.jpeg', 1024);
+    const element = makeSingleFileElement({ file, preserveFileName: true, returnFileMetadata: true });
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    const vaultResponse = {
+      skyflowID: '4423ccdf-75eb-4e2e-abfc-acb43b1440cd',
+      fileMetadata: { fileName: 'kyc.jpeg', fileSize: 1024, fileType: 'application/jpeg' },
+    };
+    mockClientRequest.mockResolvedValue(JSON.stringify(vaultResponse));
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'tokenXYZ' };
+    instance.iframeFormList = [element];
+    await expect(instance['parallelUploadFiles']({}, config))
+      .resolves.toEqual({ fileUploadResponse: [vaultResponse] });
+    expect(mockClientRequest.mock.calls[0][0].body.get('returnFileMetadata')).toBe('true');
+  });
+
+  test('multipleUploadFiles passes fileMetadata for every uploaded file', async () => {
+    const instance = new FrameElementInit();
+    const files = [makeFile('a.pdf', 10), makeFile('b.pdf', 20)];
+    const fileElement = makeFileElement({ multiple: true, files, returnFileMetadata: true });
+    // the multi path only fans out over a real FileList; a plain array is treated as one file
+    fileElement.state.value = makeFileList(...files);
+    instance.iframeFormList = [fileElement];
+    helpers.fileValidation = jest.fn(() => true);
+    helpers.vaildateFileName = jest.fn(() => true);
+    const meta = (name, size) => ({ fileName: name, fileSize: size, fileType: 'application/pdf' });
+    mockClientRequest
+      .mockResolvedValueOnce({ skyflowID: 'id-a', fileMetadata: meta('a.pdf', 10) })
+      .mockResolvedValueOnce({ skyflowID: 'id-b', fileMetadata: meta('b.pdf', 20) });
+    const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
+    const res = await instance['multipleUploadFiles'](fileElement, config, undefined);
+    expect(res.fileUploadResponse).toHaveLength(2);
+    expect(res.fileUploadResponse.map((r) => r.fileMetadata)).toEqual([meta('a.pdf', 10), meta('b.pdf', 20)]);
+    mockClientRequest.mock.calls.forEach((call) => {
+      expect(call[0].body.get('returnFileMetadata')).toBe('true');
+    });
   });
 
   test('uploadFiles rejects on invalid file name when preserveFileName true', async () => {

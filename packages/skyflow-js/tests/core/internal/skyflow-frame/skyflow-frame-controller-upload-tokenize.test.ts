@@ -363,7 +363,7 @@ describe("Uploading files to the vault", () => {
 
       // Check successful upload
       expect(result.error.fileUploadResponse).toHaveLength(1);
-      const parsedResponse = JSON.parse(result.error.fileUploadResponse[0]);
+      const parsedResponse = result.error.fileUploadResponse[0];
       expect(parsedResponse.skyflow_id).toBe('success-file-id');
 
       // Check failed upload
@@ -476,7 +476,7 @@ describe("Uploading files to the vault", () => {
       expect(cb2).toHaveBeenCalled();
       expect(cb2.mock.calls[0][0].fileUploadResponse).toBeDefined();
       expect(cb2.mock.calls[0][0].fileUploadResponse.length).toBe(1);
-      const parsedResponse = JSON.parse(cb2.mock.calls[0][0].fileUploadResponse[0]);
+      const parsedResponse = cb2.mock.calls[0][0].fileUploadResponse[0];
       expect(parsedResponse.skyflow_id).toBe("file-upload-skyflow-id");
       expect(clientReq).toHaveBeenCalled();
       const requestArgs = (clientReq.mock.calls as any[][])[0][0];
