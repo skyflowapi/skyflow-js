@@ -114,6 +114,9 @@ export default class FrameElement {
     if (Object.prototype.hasOwnProperty.call(options, 'preserveFileName')) {
       this.iFrameFormElement.preserveFileName = options?.preserveFileName;
     }
+    if (Object.prototype.hasOwnProperty.call(options, 'returnFileMetadata')) {
+      this.iFrameFormElement.returnFileMetadata = options?.returnFileMetadata;
+    }
     if (Object.prototype.hasOwnProperty.call(options, 'allowedFileType')) {
       this.iFrameFormElement.allowedFileType = options?.allowedFileType;
     }

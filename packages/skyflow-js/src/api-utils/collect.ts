@@ -5,6 +5,7 @@ import omit from 'lodash/omit';
 import { getAccessToken } from '@core/utils/bus-events';
 import Client from '@core/client';
 import {
+  IFileUploadRecord,
   IInsertRecordInput, IInsertRecord,
   MessageType, LogLevel,
   InsertResponse,
@@ -156,9 +157,17 @@ export const constructFinalUpdateRecordResponse = (
   };
 };
 
-export const constructUploadResponse = (response) => {
+// Shapes the vault's file upload response for the client. `fileMetadata` is returned
+// by the vault when the request carries `returnFileMetadata: true`, which every upload
+// path sets; it is passed through untouched ({ fileName, fileSize, fileType }).
+export const constructUploadResponse = (response): IFileUploadRecord => {
   const data = typeof response === 'string' ? JSON.parse(response) : response;
-  return JSON.stringify({ skyflow_id: data.skyflowID }) as any;
+  // Returns a plain object: a stringified entry would reach the caller with escaped
+  // quotes inside `fileUploadResponse` and force a second JSON.parse.
+  return {
+    skyflow_id: data.skyflowID,
+    ...(data.fileMetadata ? { fileMetadata: data.fileMetadata } : {}),
+  };
 };
 
 // keyify / checkDuplicateColumns / constructElementsInsertReq moved to

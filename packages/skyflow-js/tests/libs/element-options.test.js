@@ -100,22 +100,41 @@ describe('test formatOptions function with format and translation', () => {
 
     test('should return preserveFileName true when not provied in options',()=>{
         const formattedOptions = formatOptions(FileElementType.FILE_INPUT,{required:true},LogLevel.ERROR);
-        expect(formattedOptions).toEqual({required:true,preserveFileName:true});
+        expect(formattedOptions).toEqual({required:true,preserveFileName:true,returnFileMetadata:false});
     });
 
     test('should return preserveFileName true for MULTI_FILE_INPUT when not provided in options',()=>{
         const formattedOptions = formatOptions(FileElementType.MULTI_FILE_INPUT,{required:true},LogLevel.ERROR);
-        expect(formattedOptions).toEqual({required:true,preserveFileName:true});
+        expect(formattedOptions).toEqual({required:true,preserveFileName:true,returnFileMetadata:false});
     });
 
     test('should keep preserveFileName false for MULTI_FILE_INPUT when provided as false',()=>{
         const formattedOptions = formatOptions(FileElementType.MULTI_FILE_INPUT,{required:true,preserveFileName:false},LogLevel.ERROR);
-        expect(formattedOptions).toEqual({required:true,preserveFileName:false});
+        expect(formattedOptions).toEqual({required:true,preserveFileName:false,returnFileMetadata:false});
+    });
+
+    test('should default returnFileMetadata to false for FILE_INPUT and MULTI_FILE_INPUT',()=>{
+        expect(formatOptions(FileElementType.FILE_INPUT,{required:true},LogLevel.ERROR)).toEqual({required:true,preserveFileName:true,returnFileMetadata:false});
+        expect(formatOptions(FileElementType.MULTI_FILE_INPUT,{required:true},LogLevel.ERROR)).toEqual({required:true,preserveFileName:true,returnFileMetadata:false});
+    });
+
+    test('should keep returnFileMetadata true when provided',()=>{
+        expect(formatOptions(FileElementType.FILE_INPUT,{returnFileMetadata:true},LogLevel.ERROR)).toEqual({required:false,preserveFileName:true,returnFileMetadata:true});
+    });
+
+    test('should throw error for returnFileMetadata provided as not of boolean type',(done)=>{
+        try{
+            formatOptions(FileElementType.FILE_INPUT,{returnFileMetadata:'yes'},LogLevel.ERROR);
+            done('should throw error');
+        }catch(err){
+            expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS.description, 'returnFileMetadata'));
+            done();
+        }
     });
 
     test('should return preserveFileName false when not provied as false in options',()=>{
         const formattedOptions = formatOptions(FileElementType.FILE_INPUT,{required:true,preserveFileName:false},LogLevel.ERROR);
-        expect(formattedOptions).toEqual({required:true,preserveFileName:false});
+        expect(formattedOptions).toEqual({required:true,preserveFileName:false,returnFileMetadata:false});
     });
 
     test('should throw errror for preserveFileName provied as not of boolean type',(done)=>{
