@@ -45,6 +45,7 @@ export type {
   ICollectOptions as CollectOptions,
   CollectResponse,
   UploadFilesResponse,
+  IFileUploadMetadata as FileUploadMetadata,
   CardMetadata,
   InputStyles,
   LabelStyles,

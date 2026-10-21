@@ -386,6 +386,10 @@ export const formatOptions = (
       if (!Object.prototype.hasOwnProperty.call(formattedOptions, 'preserveFileName')) {
         formattedOptions = { ...formattedOptions, preserveFileName: true };
       }
+      // Opt-in: the vault only returns file metadata for an upload when asked.
+      if (!Object.prototype.hasOwnProperty.call(formattedOptions, 'returnFileMetadata')) {
+        formattedOptions = { ...formattedOptions, returnFileMetadata: false };
+      }
       break;
     }
 
@@ -403,6 +407,9 @@ export const formatOptions = (
   }
   if (Object.prototype.hasOwnProperty.call(formattedOptions, 'preserveFileName') && !validateBooleanOptions(formattedOptions.preserveFileName)) {
     throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['preserveFileName'], true);
+  }
+  if (Object.prototype.hasOwnProperty.call(formattedOptions, 'returnFileMetadata') && !validateBooleanOptions(formattedOptions.returnFileMetadata)) {
+    throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_BOOLEAN_OPTIONS, ['returnFileMetadata'], true);
   }
   if (elementType === ELEMENTS.FILE_INPUT.name || elementType === ELEMENTS.MULTI_FILE_INPUT.name) {
     if (options.allowedFileType) {

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- `returnFileMetadata` option on `FILE_INPUT` and `MULTI_FILE_INPUT` elements (default `false`): when `true`, each entry of the `fileUploadResponse` from `uploadFiles()` and `uploadMultipleFiles()` includes `fileMetadata` (`fileName`, `fileSize`, `fileType`)
+- `returnFileMetadata` option on file render elements, passed in the `create()` options like `enableCopy` (default `true`, preserving existing behaviour): set `false` to omit `fileMetadata` from the render response; applies to reveal and composable reveal containers
+- `FileUploadMetadata` type export
+### Fixed
+- `uploadFiles()` on a collect container returned each `fileUploadResponse` entry as a JSON string (visible as escaped quotes); entries are now plain objects, matching the composable container and the documented response. Callers that worked around this with their own `JSON.parse` must remove it.
+
 ## [2.8.0] - 2026-9-22
 ### Added
 - Render zip files in composable reveal file elements (list-detail layout with per-file preview), opt-in via `renderFile({ zipRender: true })`

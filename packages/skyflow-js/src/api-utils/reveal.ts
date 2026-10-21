@@ -131,16 +131,22 @@ const getTokenRecordsFromVault = (
   });
 };
 
+// `returnFileMetadata` defaults to true: the vault API defaults it to false, but the
+// SDK has always requested it, surfaces it as `success.fileMetadata`, and uses the
+// file type from it as a fallback for zip detection. Callers turn it off through the
+// `returnFileMetadata` element option passed to `create()`.
 export const getFileURLForRender = (
   skyflowIdRecord: IRevealRecord,
   client: Client,
   authToken: string,
+  returnFileMetadata: boolean = true,
 ): Promise<any> => {
   let paramList: string = '';
 
   paramList += `${skyflowIdRecord.skyflowID}?`;
 
-  paramList += `fields=${skyflowIdRecord.column}&${FILE_DOWNLOAD_URL_PARAM}&returnFileMetadata=true`;
+  paramList += `fields=${skyflowIdRecord.column}&${FILE_DOWNLOAD_URL_PARAM}`;
+  if (returnFileMetadata) paramList += '&returnFileMetadata=true';
 
   const vaultEndPointurl: string = `${client.config.vaultURL}/v1/vaults/${client.config.vaultID}/${skyflowIdRecord.table}/${paramList}`;
   return client.request({
@@ -156,12 +162,13 @@ export const getFileURLForRender = (
 export const getFileURLFromVaultBySkyflowID = (
   skyflowIdRecord: IRevealRecord,
   client: Client,
+  returnFileMetadata: boolean = true,
 ): Promise<IRenderResponseType> => new Promise((rootResolve, rootReject) => {
   try {
     const clientId = client.toJSON().metaData.uuid || '';
     getAccessToken(clientId).then((authToken) => {
       getFileURLForRender(
-        skyflowIdRecord, client, authToken as string,
+        skyflowIdRecord, client, authToken as string, returnFileMetadata,
       ).then((resolvedResult: IRenderResponseType) => {
         rootResolve(resolvedResult);
       }).catch((err: any) => {
@@ -182,10 +189,11 @@ export const getFileURLFromVaultBySkyflowIDComposable = (
   skyflowIdRecord: IRevealRecord,
   client: Client,
   authToken: string,
+  returnFileMetadata: boolean = true,
 ): Promise<IRenderResponseType> => new Promise((rootResolve, rootReject) => {
   try {
     getFileURLForRender(
-      skyflowIdRecord, client, authToken as string,
+      skyflowIdRecord, client, authToken as string, returnFileMetadata,
     ).then((resolvedResult: IRenderResponseType) => {
       rootResolve(resolvedResult);
     }).catch((err: any) => {

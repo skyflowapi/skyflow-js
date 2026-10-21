@@ -53,6 +53,7 @@ export interface CollectElementUpdateOptions extends ICollectElementUpdateOption
 // (flowDB has no file API). See Decision 2.3.
 export interface CollectElementOptions extends ICollectElementOptionsBase {
   preserveFileName?: boolean,
+  returnFileMetadata?: boolean,
   allowedFileType?: string[],
   blockEmptyFiles?: boolean,
   maxFileSize?: number,
