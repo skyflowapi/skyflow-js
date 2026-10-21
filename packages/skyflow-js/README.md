@@ -3723,9 +3723,6 @@ const options = {
 const fileElement = container.create(fileElementInput, options);
 ```
 
-The vault API defaults `returnFileMetadata` to `false`; the SDK defaults it to `true` to keep the existing render response. Set it to `false` to omit `fileMetadata` from the response, in which case zip detection relies on the file name alone.
-
-
 An example of a inputStyles object:
 
 ```javascript
@@ -4357,9 +4354,6 @@ const options = {
 
 const fileElement = container.create(fileElementInput, options);
 ```
-
-The vault API defaults `returnFileMetadata` to `false`; the SDK defaults it to `true` to keep the existing render response. Set it to `false` to omit `fileMetadata` from the response, in which case zip detection relies on the file name alone.
-
 
 An example of a inputStyles object:
 
