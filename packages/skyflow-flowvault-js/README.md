@@ -106,13 +106,13 @@ const getBearerToken = () => {
           const response = JSON.parse(Http.responseText);
           resolve(response.accessToken);
         } else {
-          reject('Error occured');
+          reject('Error occurred');
         }
       }
     };
 
     Http.onerror = error => {
-      reject('Error occured');
+      reject('Error occurred');
     };
 
     const url = 'https://api.acmecorp.com/skyflowToken';
@@ -222,8 +222,8 @@ A Skyflow collect Element is defined as shown below:
 
 ```javascript
 const collectElement = {
-  tableName: 'string',             // Optional, the table this data belongs to.
-  column: 'string',            // Optional, the column into which this data should be inserted.
+  tableName: 'string',             // Required, the table this data belongs to.
+  column: 'string',            // Required, the column into which this data should be inserted.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional, styles that should be applied to the form element.
   labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
@@ -250,7 +250,7 @@ The `inputStyles` field accepts a style object which consists of CSS properties 
 
 Styles are specified with [JSS](https://cssinjs.org/?v=v10.7.1). 
 
-An example of a inputStyles object:
+An example of an inputStyles object:
 ```javascript
 inputStyles: {
   base: {
@@ -344,7 +344,7 @@ Along with CollectElement we can define other options which takes a object of op
 const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
   enableCardIcon: true, // Optional, indicates whether a card icon should be enabled (only applicable for CARD_NUMBER ElementType).
-  enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false'.
   format: String,       // Optional, format for the element 
   translation: {},      // Optional, indicates the allowed data type value for format. 
   cardMetadata: {},     // Optional, metadata to control card number element behavior. (only applicable for CARD_NUMBER ElementType).
@@ -487,8 +487,8 @@ Once the Element object and options has been defined, add it to the container us
 
 ```javascript
 const collectElement = {
-  tableName: 'string',             // Optional, the table this data belongs to.
-  column: 'string',            // Optional, the column into which this data should be inserted.
+  tableName: 'string',             // Required, the table this data belongs to.
+  column: 'string',            // Required, the column into which this data should be inserted.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional, styles that should be applied to the form element.
   labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
@@ -502,7 +502,7 @@ const collectElement = {
 const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
   enableCardIcon: true, // Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType).
-  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false'.
   format: String,       // Optional, format for the element
   translation: {},      // Optional, indicates the allowed data type value for format.
 };
@@ -817,7 +817,7 @@ const binLookup = (bin) => {
 const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
   enableCardIcon: true, // Optional, indicates whether a card icon should be enabled (only applicable for CARD_NUMBER ElementType).
-  enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon to collect elements to copy text to clipboard. Defaults to 'false'.
   format: String,       // Optional, format for the element 
   translation: {},      // Optional, indicates the allowed data type value for format. 
   cardMetadata: {},     // Optional, metadata to control card number element behavior. (only applicable for CARD_NUMBER ElementType).
@@ -874,7 +874,7 @@ const collectElement = {
 const options = {
  required: false,             // Optional, indicates whether the field is marked as required. Defaults to 'false'.
  enableCardIcon: true,        // Optional, indicates whether  the element needs a card icon (only applicable for CARD_NUMBER ElementType).
- enableCopy: false,           // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+ enableCopy: false,           // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false'.
  format: String,              // Optional, format for the element
  translation: {},             // Optional, indicates the allowed data type value for format.
 };
@@ -1557,8 +1557,8 @@ Composable Elements use the following schema:
 
 ```javascript
 const composableElement = {
-  tableName: 'string',             // Optional. The table this data belongs to.
-  column: 'string',            // Optional. The column this data belongs to.
+  tableName: 'string',             // Required, the table this data belongs to.
+  column: 'string',            // Required, the column this data belongs to.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional. Styles applied to the form element.
   labelStyles: {},             // Optional. Styles for the label of the collect element.
@@ -1666,7 +1666,7 @@ const options = {
     required: false,  		// Optional, indicates whether the field is marked as required. Defaults to 'false'
     enableCardIcon: true, 	// Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType)
     format: String, 		// Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType),
-    enableCopy: false 		// Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false')
+    enableCopy: false 		// Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false'
 }
 ```
 
@@ -1693,8 +1693,8 @@ Once you define the Element object and options, add it to the container using th
 
 ```javascript
 const composableElement = {
-  tableName: 'string',             // Optional, the table this data belongs to.
-  column: 'string',            // Optional, the column into which this data should be inserted.
+  tableName: 'string',             // Required, the table this data belongs to.
+  column: 'string',            // Required, the column into which this data should be inserted.
   type: Skyflow.ElementType,   // Skyflow.ElementType enum.
   inputStyles: {},             // Optional, styles that should be applied to the form element.
   labelStyles: {},             // Optional, styles that will be applied to the label of the collect element.
@@ -1709,7 +1709,7 @@ const options = {
   required: false,      // Optional, indicates whether the field is marked as required. Defaults to 'false'.
   enableCardIcon: true, // Optional, indicates whether card icon should be enabled (only applicable for CARD_NUMBER ElementType).
   format: String,       // Optional, format for the element (only applicable currently for EXPIRATION_DATE ElementType).
-  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon in collect and reveal elements to copy text to clipboard. Defaults to 'false'.
 };
 
 const element = container.create(composableElement, options);
@@ -2138,7 +2138,7 @@ Note: To control the redaction applied to revealed data, pass `tokenGroupRedacti
 
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant, `copyIcon` and `global` style objects. 
 
-An example of a inputStyles object:
+An example of an inputStyles object:
 
 ```javascript
 inputStyles: {
@@ -2186,7 +2186,7 @@ errorTextStyles: {
 Along with RevealElementInput, you can define other options in the RevealElementOptions object as described below: 
 ```js
 const options = {
-  enableCopy: false,    // Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false'.
  format: String,        // Optional, format for the element 
  translation: {}        // Optional, indicates the allowed data type value for format. 
 }
@@ -2617,7 +2617,7 @@ Note: Redaction is no longer set per element. To control the redaction applied t
 
 The `inputStyles`, `labelStyles` and  `errorTextStyles` parameters accepts a styles object as described in the [previous section](#step-2-create-a-collect-element) for collecting data. But for reveal element, `inputStyles` accepts only `base` variant, `copyIcon` and `global` style objects. 
 
-An example of a inputStyles object:
+An example of an inputStyles object:
 
 ```javascript
 inputStyles: {
@@ -2665,7 +2665,7 @@ errorTextStyles: {
 Along with RevealElementInput, you can define other options in the RevealElementOptions object as described below: 
 ```js
 const options = {
-  enableCopy: false,    // Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false').
+  enableCopy: false,    // Optional, enables the copy icon to reveal elements to copy text to clipboard. Defaults to 'false'.
  format: String,        // Optional, format for the element 
  translation: {}        // Optional, indicates the allowed data type value for format. 
 }
