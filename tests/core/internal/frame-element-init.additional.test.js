@@ -119,13 +119,13 @@ describe('FrameElementInit extended unit tests', () => {
       addEventListener: jest.fn(),
     });
     originalFileValidation = helpers.fileValidation;
-    originalValidateFileName = helpers.vaildateFileName;
+    originalValidateFileName = helpers.validateFileName;
   });
 
 
   afterEach(() => {
     helpers.fileValidation = originalFileValidation;
-    helpers.vaildateFileName = originalValidateFileName;
+    helpers.validateFileName = originalValidateFileName;
   mockClientRequest.mockReset();
     jest.clearAllMocks();
   });
@@ -152,7 +152,7 @@ describe('FrameElementInit extended unit tests', () => {
 
     // Force helper validations to pass
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
 
     // Mock insertDataCallInMultiFiles to resolve with skyflow IDs
     instance['insertDataCallInMultiFiles'] = jest.fn().mockResolvedValue({
@@ -177,7 +177,7 @@ describe('FrameElementInit extended unit tests', () => {
     fileElement.state.value = files;
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     // insertDataInCollect.mockResolvedValue({records: [{ skyflow_id: 'ins1' }] });
     mockClientRequest.mockImplementationOnce(() => Promise.resolve({records: [{ skyflow_id: 'ins1' }] }))
     mockClientRequest.mockImplementationOnce(() => Promise.resolve({ skyflow_id: 'ins1' }))
@@ -195,7 +195,7 @@ describe('FrameElementInit extended unit tests', () => {
     fileElement.state.value = files;
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     mockClientRequest.mockImplementationOnce(() => Promise.reject({code: '500', message: 'error'}))
 
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
@@ -211,7 +211,7 @@ describe('FrameElementInit extended unit tests', () => {
     fileElement.state.value = files;
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     // insertDataInCollect.mockResolvedValue({records: [{ skyflow_id: 'ins1' }] });
     mockClientRequest.mockImplementationOnce(() => Promise.resolve({records: [{ skyflow_id: 'ins1' }] }))
     mockClientRequest.mockImplementationOnce(() => Promise.resolve({ error: 'ins1' }))
@@ -228,7 +228,7 @@ describe('FrameElementInit extended unit tests', () => {
     fileElement.state.value = files;
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     // insertDataInCollect.mockResolvedValue({records: [{ skyflow_id: 'ins1' }] });
     mockClientRequest.mockImplementationOnce(() => Promise.resolve({records: [  { skyflow_id: 'ins1' },{ skyflow_id: 'ins2' } ] }))
     mockClientRequest.mockImplementationOnce(() => Promise.reject('ins1'))
@@ -246,7 +246,7 @@ describe('FrameElementInit extended unit tests', () => {
     fileElement.state.value = files;
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     mockClientRequest.mockImplementationOnce(() => Promise.resolve({ skyflow_id: 'ins1' }))
 
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
@@ -260,7 +260,7 @@ describe('FrameElementInit extended unit tests', () => {
     const fileElement = makeFileElement({ multiple: true, files });
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     instance['insertDataCallInMultiFiles'] = jest.fn().mockResolvedValue({ records: [] });
     mockClientRequest.mockResolvedValue({ upload: 'ok' });
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
@@ -273,7 +273,7 @@ describe('FrameElementInit extended unit tests', () => {
     const fileElement = makeFileElement({ multiple: true, files });
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => false); // force invalid name
+    helpers.validateFileName = jest.fn(() => false); // force invalid name
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'token123' };
     await expect(instance['multipleUploadFiles'](fileElement, config, {})).rejects.toBeTruthy();
   });
@@ -287,7 +287,7 @@ describe('FrameElementInit extended unit tests', () => {
     fileElement.state.value = files;
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     // Two successful uploads returning JSON strings to hit JSON.parse branch
     mockClientRequest
       .mockImplementationOnce(() => Promise.resolve({"up":"okA"}))
@@ -305,7 +305,7 @@ describe('FrameElementInit extended unit tests', () => {
     fileElement.state.value = files;
     instance.iframeFormList = [fileElement];
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     mockClientRequest
       .mockImplementationOnce(() => Promise.reject({error: {code: '500', message: 'badA'}}));
       // .mockImplementationOnce(() => Promise.reject('badB'));
@@ -320,7 +320,7 @@ describe('FrameElementInit extended unit tests', () => {
     const files = [makeFile('first.txt'), makeFile('second.txt')];
     const fileElement = makeFileElement({ multiple: true, files });
     helpers.fileValidation = jest.fn(file => file.name !== 'second.txt'); // second invalid
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     expect(() => instance['validateFiles'](files, fileElement.state, fileElement)).toThrow(SkyflowError);
   });
 
@@ -369,7 +369,7 @@ describe('FrameElementInit extended unit tests', () => {
     const file = makeFile('original.txt', 5);
     const element = makeSingleFileElement({ file, isRequired: true, preserveFileName: true, skyflowID: 'sky123' });
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     mockClientRequest.mockResolvedValue({ upload: 'ok' });
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'tokenXYZ' };
     const result = await instance.uploadFiles(element, config);
@@ -391,7 +391,7 @@ describe('FrameElementInit extended unit tests', () => {
     const file = makeFile('orig.txt', 5);
     const element = makeSingleFileElement({ file, preserveFileName: false });
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     const genSpy = jest.spyOn(helpers, 'generateUploadFileName').mockImplementation(() => 'gen_name.txt');
     mockClientRequest.mockResolvedValue({ upload: 'ok' });
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'tokenXYZ' };
@@ -407,7 +407,7 @@ describe('FrameElementInit extended unit tests', () => {
     const file = makeFile('bad.txt', 5);
     const element = makeSingleFileElement({ file, preserveFileName: true });
     helpers.fileValidation = jest.fn(() => true);
-    helpers.vaildateFileName = jest.fn(() => false); // invalid name
+    helpers.validateFileName = jest.fn(() => false); // invalid name
     mockClientRequest.mockResolvedValue({ upload: 'ok' });
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'tokenXYZ' };
     await expect(instance.uploadFiles(element, config)).rejects.toBeInstanceOf(SkyflowError);
@@ -421,7 +421,7 @@ describe('FrameElementInit extended unit tests', () => {
     helpers.fileValidation = jest.fn()
       .mockImplementationOnce(() => true)
       .mockImplementationOnce(() => false);
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     mockClientRequest.mockResolvedValue({ upload: 'ok' });
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'tokenXYZ' };
     await expect(instance.uploadFiles(element, config)).rejects.toBeInstanceOf(SkyflowError);
@@ -433,7 +433,7 @@ describe('FrameElementInit extended unit tests', () => {
     const element = makeSingleFileElement({ file });
     const thrown = new SkyflowError('CUSTOM_ERROR', [], true);
     helpers.fileValidation = jest.fn(() => { throw thrown; });
-    helpers.vaildateFileName = jest.fn(() => true);
+    helpers.validateFileName = jest.fn(() => true);
     mockClientRequest.mockResolvedValue({ upload: 'ok' });
     const config = { vaultURL: 'https://vault.url', vaultID: 'vault123', authToken: 'tokenXYZ' };
     await expect(instance.uploadFiles(element, config)).rejects.toBe(thrown);

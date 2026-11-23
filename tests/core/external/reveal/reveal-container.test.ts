@@ -137,7 +137,7 @@ describe("Reveal Container Class", () => {
     expect(testRevealContainer1).toHaveProperty("reveal");
     expect(testRevealContainer1).toHaveProperty("type");
   });
-  test("reveal when elment is empty when skyflow ready", async() => {
+  test("reveal when element is empty when skyflow ready", async() => {
     const errPromise = testRevealContainer2.reveal()
     await expect(errPromise).rejects.toEqual(new Error(logs.errorLogs.NO_ELEMENTS_IN_REVEAL))
   });

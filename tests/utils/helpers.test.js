@@ -1,7 +1,7 @@
 /*
 Copyright (c) 2022 Skyflow, Inc.
 */
-import { CardType, ElementType,COPY_UTILS, CARD_NUMBER_MASK, DEFAULT_CARD_NUMBER_SEPERATOR, CARD_NUMBER_HYPEN_SEPERATOR } from '../../src/core/constants';
+import { CardType, ElementType,COPY_UTILS, CARD_NUMBER_MASK, DEFAULT_CARD_NUMBER_SEPARATOR, CARD_NUMBER_HYPHEN_SEPARATOR } from '../../src/core/constants';
 import SKYFLOW_ERROR_CODE from '../../src/utils/constants';
 import {
   replaceIdInResponseXml,
@@ -13,7 +13,7 @@ import {
   styleToString,
   appendMonthFourDigitYears,
   appendMonthTwoDigitYears,
-  addSeperatorToCardNumberMask,
+  addSeparatorToCardNumberMask,
   constructMaskTranslation,
   formatRevealElementOptions,
   getDeviceType,
@@ -23,7 +23,7 @@ import {
   getMetaObject,
   checkAndSetForCustomUrl,
   domReady,
-  vaildateFileName,
+  validateFileName,
   generateUploadFileName,
   getSDKNameAndVersion,
 } from '../../src/utils/helpers/index';
@@ -141,7 +141,7 @@ describe('test file name validation', () => {
   ]
     invalidFileName.forEach(invalidFile => {
       try {
-        vaildateFileName(invalidFile)
+        validateFileName(invalidFile)
       } catch(err) {
         expect(err?.error?.description).toEqual(parameterizedString(SKYFLOW_ERROR_CODE.INVALID_FILE_NAME.description))
       }      
@@ -156,7 +156,7 @@ describe('test file name validation', () => {
       type: "image/jpeg",
       webkitRelativePath: ""
     }
-    expect(vaildateFileName(file.name)).toBe(true);
+    expect(validateFileName(file.name)).toBe(true);
   })
   
   });
@@ -302,7 +302,7 @@ describe('test file validation', () => {
       expect(err?.error?.description).toEqual(SKYFLOW_ERROR_CODE.INVALID_FILE_TYPE.description)
     }
   })
-  test('valid file type with allowedfiletye options', () => {
+  test('valid file type with allowedFileType options', () => {
     const file = {
       lastModified: '',
       lastModifiedDate: '',
@@ -313,7 +313,7 @@ describe('test file validation', () => {
     }
     expect(fileValidation(file, false, {allowedFileType: ['.jpeg']})).toBe(true);
   })
-  test('valid file type with allowedfiletye options case 2', () => {
+  test('valid file type with allowedFileType options case 2', () => {
     const file = {
       lastModified: '',
       lastModifiedDate: '',
@@ -370,26 +370,26 @@ describe('test appendMonthTwoDigitYears function',()=>{
 
 });
 
-describe('test addSeperatorToCardNumberMask function',()=>{
+describe('test addSeparatorToCardNumberMask function',()=>{
 
-  test('should return default visa mask with spaces if cardSeperator is not provided',()=>{
-      expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.VISA)).toEqual(CARD_NUMBER_MASK.VISA);
+  test('should return default visa mask with spaces if cardSeparator is not provided',()=>{
+      expect(addSeparatorToCardNumberMask(CARD_NUMBER_MASK.VISA)).toEqual(CARD_NUMBER_MASK.VISA);
   });
 
-  test('should return default visa mask with spaces if cardSeperator is space',()=>{
-    expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.VISA,DEFAULT_CARD_NUMBER_SEPERATOR)).toEqual(CARD_NUMBER_MASK.VISA);
+  test('should return default visa mask with spaces if cardSeparator is space',()=>{
+    expect(addSeparatorToCardNumberMask(CARD_NUMBER_MASK.VISA,DEFAULT_CARD_NUMBER_SEPARATOR)).toEqual(CARD_NUMBER_MASK.VISA);
   });
 
-  test('should return mask with hypen if cardSeperator is hypen',()=>{
-    expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.VISA,CARD_NUMBER_HYPEN_SEPERATOR)).toEqual(['XXXX-XXXX-XXXX-XXXX',CARD_NUMBER_MASK.VISA[1]]);
+  test('should return mask with hyphen if cardSeparator is hyphen',()=>{
+    expect(addSeparatorToCardNumberMask(CARD_NUMBER_MASK.VISA,CARD_NUMBER_HYPHEN_SEPARATOR)).toEqual(['XXXX-XXXX-XXXX-XXXX',CARD_NUMBER_MASK.VISA[1]]);
   });
 
-  test('should return default amex mask with hypen if cardSeperator is space',()=>{
-    expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.AMEX,DEFAULT_CARD_NUMBER_SEPERATOR)).toEqual(['XXXX XXXXXX XXXXX',CARD_NUMBER_MASK.AMEX[1]]);
+  test('should return default amex mask with hyphen if cardSeparator is space',()=>{
+    expect(addSeparatorToCardNumberMask(CARD_NUMBER_MASK.AMEX,DEFAULT_CARD_NUMBER_SEPARATOR)).toEqual(['XXXX XXXXXX XXXXX',CARD_NUMBER_MASK.AMEX[1]]);
   });
 
-  test('should return amex mask with hypen if cardSeperator is hypen',()=>{
-    expect(addSeperatorToCardNumberMask(CARD_NUMBER_MASK.AMEX,CARD_NUMBER_HYPEN_SEPERATOR)).toEqual(['XXXX-XXXXXX-XXXXX',CARD_NUMBER_MASK.AMEX[1]]);
+  test('should return amex mask with hyphen if cardSeparator is hyphen',()=>{
+    expect(addSeparatorToCardNumberMask(CARD_NUMBER_MASK.AMEX,CARD_NUMBER_HYPHEN_SEPARATOR)).toEqual(['XXXX-XXXXXX-XXXXX',CARD_NUMBER_MASK.AMEX[1]]);
   });
 
 });
@@ -499,7 +499,7 @@ describe('getMetaObject', () => {
     });
   });
 
-  it('should return metaObject with sdk name skyflow js and other detalis as null', () => {
+  it('should return metaObject with sdk name skyflow js and other details as null', () => {
     const navigator = {
       'userAgent': ''
     };

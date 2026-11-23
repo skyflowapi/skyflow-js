@@ -188,7 +188,7 @@ try {
         },
       });
 
-      // update table,coloumn on expiry date
+      // update table,column on expiry date
       expiryDateElement.update({
         table: "pii_fields",
         column: "expiration_date",
@@ -306,7 +306,7 @@ try {
         },
       });
 
-      // update label,labelSyles on card number
+      // update label,labelStyles on card number
       revealCardNumberElement.update({
         label: "CARD NUMBER",
         labelStyles: {
@@ -330,7 +330,7 @@ try {
       // update altText,token,inputStyles,errorTextStyles on cvv
       revealCardCvvElement.update({
         altText: "XXXX-XX",
-        token: "new-random-roken",
+        token: "new-random-token",
         inputStyles: {
           base: {
             color: "#fff",

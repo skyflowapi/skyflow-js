@@ -183,7 +183,7 @@ try {
     // mount the container
     composableContainer.mount('#composableContainer');
 
-    // Add OnSubmit event listner on composable container
+    // Add OnSubmit event listener on composable container
     composableContainer.on(Skyflow.EventName.SUBMIT, () => {
         // Handle when enter key pressed in any container elements
         console.log('Submit Listener is being Triggered.');
@@ -248,7 +248,7 @@ try {
                 }
             } as CollectElementUpdateOptions);
 
-            // update table,coloumn on expiry date
+            // update table,column on expiry date
             expiryDateElement.update({
                 table: 'pii_fields',
                 column: 'primary_card.expiry_date',
@@ -339,8 +339,8 @@ try {
 
                     if (revealButton) {
                         revealButton.addEventListener('click', () => {
-                            const revealResonse: Promise<RevealResponse> = revealContainer.reveal();
-                            revealResonse.then((res: RevealResponse) => {
+                            const revealResponse: Promise<RevealResponse> = revealContainer.reveal();
+                            revealResponse.then((res: RevealResponse) => {
                                 console.log(res);
                             })
                             .catch((err: RevealResponse) => {

@@ -121,7 +121,7 @@ try{
     const passwordElement: CollectElement = collectContainer.create(passwordInput);
 
     const elementMatchRule: ValidationRule = {
-      // ELEMENT VALUE MATCH RULE validates that element value matches the provied element.
+      // ELEMENT VALUE MATCH RULE validates that element value matches the provided element.
 	    type: Skyflow.ValidationRuleType.ELEMENT_VALUE_MATCH_RULE,
 	    params: {
         // Specify with which element value should be matched.

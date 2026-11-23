@@ -31,6 +31,9 @@ jobs:
       - name: install modules
         run: npm ci
 
+      - name: Run spellcheck
+        run: npm run spellcheck
+
       - name: Check code quality
         uses: stefanoeb/eslint-action@1.0.2
 

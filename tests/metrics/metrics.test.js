@@ -2,7 +2,7 @@ import {
   updateMetricObjectValue,
   pushEvent,
   pushElementEventWithTimeout,
-  initalizeMetricObject,
+  initializeMetricObject,
   getEventStatus,
   METRIC_OBJECT,
 } from '../../src/metrics/index';
@@ -40,7 +40,7 @@ describe('metric object test', () => {
     });
   });
 
-  describe('initalizeMetricObject', () => {
+  describe('initializeMetricObject', () => {
     it('should initialize the METRIC_OBJECT.records with the correct properties', () => {
       const metadata = {
         clientJSON: {
@@ -54,7 +54,7 @@ describe('metric object test', () => {
       };
       const elementId = 'ElementIDMock';
 
-      initalizeMetricObject(metadata, elementId);
+      initializeMetricObject(metadata, elementId);
       expect(METRIC_OBJECT.records.length).toBe(1);
     });
   });

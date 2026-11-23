@@ -35,7 +35,7 @@ import RevealComposableFrameElementInit from './core/internal/composable-frame-e
       const logLevel = getValueFromName(frameName, 4) || LogLevel.ERROR;
       printLog(
         parameterizedString(
-          logs.infoLogs.COLLECT_ELEMET_START,
+          logs.infoLogs.COLLECT_ELEMENT_START,
           'index-internal',
           getElementName(frameName),
         ),

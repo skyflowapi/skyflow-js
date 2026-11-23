@@ -38,7 +38,7 @@ import logs from '../../utils/logs';
 import { detectCardType } from '../../utils/validators';
 import { LogLevel, MessageType } from '../../utils/common';
 import {
-  addSeperatorToCardNumberMask,
+  addSeparatorToCardNumberMask,
   appendMonthFourDigitYears,
   appendMonthTwoDigitYears,
   appendZeroToOne,
@@ -214,7 +214,7 @@ export default class FrameElement {
       this.onFocusChange(event, false);
     };
 
-    // Required asterick
+    // Required asterisk
     if (this.options.required && this.domError) {
       this.isRequiredLabel = document.createElement('label');
       this.isRequiredLabel.textContent = ' *';
@@ -303,9 +303,9 @@ export default class FrameElement {
             }
           }
         }
-        const cardNumberMask = addSeperatorToCardNumberMask(
+        const cardNumberMask = addSeparatorToCardNumberMask(
           CARD_NUMBER_MASK[cardType],
-          this.options?.cardSeperator,
+          this.options?.cardSeparator,
         );
         this.iFrameFormElement.setMask(cardNumberMask as string[]);
       } else if (this.iFrameFormElement.fieldType === ELEMENTS.EXPIRATION_MONTH.name
@@ -623,9 +623,9 @@ export default class FrameElement {
         } else {
           cardType = detectCardType(value);
         }
-        const cardNumberMask = addSeperatorToCardNumberMask(
+        const cardNumberMask = addSeparatorToCardNumberMask(
           CARD_NUMBER_MASK[cardType],
-          this.options?.cardSeperator,
+          this.options?.cardSeparator,
         );
         updatedMask[0] = cardNumberMask[0];
         updatedMask[1] = null;

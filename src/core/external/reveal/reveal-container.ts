@@ -57,7 +57,7 @@ class RevealContainer extends Container {
 
   #containerId: string;
 
-  #eventEmmiter: EventEmitter;
+  #eventEmitter: EventEmitter;
 
   #isRevealCalled: boolean = false;
 
@@ -98,7 +98,7 @@ class RevealContainer extends Container {
     };
     this.#skyflowElements = skyflowElements;
     this.#containerId = uuid();
-    this.#eventEmmiter = new EventEmitter();
+    this.#eventEmitter = new EventEmitter();
     this.#context = context;
     const clientDomain = this.#metaData.clientDomain || '';
     const iframe = iframer({
@@ -132,7 +132,7 @@ class RevealContainer extends Container {
           // this.#mountedRecords.length === this.#revealElements.length;
           if (this.#isRevealCalled && this.#isElementsMounted) {
             // eslint-disable-next-line no-underscore-dangle
-            this.#eventEmmiter._emit(
+            this.#eventEmitter._emit(
               ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED
                 + this.#containerId,
               {
@@ -152,7 +152,7 @@ class RevealContainer extends Container {
       {
         containerId: this.#containerId,
         isMounted: this.#isMounted,
-        eventEmitter: this.#eventEmmiter,
+        eventEmitter: this.#eventEmitter,
         type: ContainerType.REVEAL,
       }, elementId, this.#context);
     this.#revealElements.push(revealElement);
@@ -163,7 +163,7 @@ class RevealContainer extends Container {
   setError(errors: Partial<Record<ErrorType, string>>) {
     this.#customErrorMessages = errors;
     // eslint-disable-next-line no-underscore-dangle
-    this.#eventEmmiter._emit(`${CUSTOM_ERROR_MESSAGES}:${this.#containerId}`, {
+    this.#eventEmitter._emit(`${CUSTOM_ERROR_MESSAGES}:${this.#containerId}`, {
       errorMessages: this.#customErrorMessages,
     });
   }
@@ -197,7 +197,7 @@ class RevealContainer extends Container {
               reject(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL));
             }, 10000);
 
-            this.#eventEmmiter.on(
+            this.#eventEmitter.on(
               ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
               () => {
                 clearTimeout(timeout);
@@ -238,7 +238,7 @@ class RevealContainer extends Container {
             reject(new Error(logs.errorLogs.ELEMENTS_NOT_MOUNTED_REVEAL));
           }, 10000);
 
-          this.#eventEmmiter.on(
+          this.#eventEmitter.on(
             ELEMENT_EVENTS_TO_CONTAINER.ALL_ELEMENTS_MOUNTED + this.#containerId,
             () => {
               clearTimeout(timeout);

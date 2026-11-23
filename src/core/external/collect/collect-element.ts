@@ -37,7 +37,7 @@ import {
 import SkyflowElement from '../common/skyflow-element';
 import { ContainerType } from '../../../skyflow';
 import {
-  initalizeMetricObject,
+  initializeMetricObject,
   pushElementEventWithTimeout,
   updateMetricObjectValue,
 } from '../../../metrics';
@@ -126,7 +126,7 @@ class CollectElement extends SkyflowElement {
       ? this.#elements[0].elementType
       : 'group';
 
-    initalizeMetricObject(metaData, elementId);
+    initializeMetricObject(metaData, elementId);
     this.#states = [];
     this.#elements.forEach((element) => {
       updateMetricObjectValue(this.#elementId, METRIC_TYPES.ELEMENT_TYPE_KEY, element.elementType);

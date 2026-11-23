@@ -316,10 +316,10 @@ describe("test composable container class", () => {
       origin: properties.IFRAME_SECURE_ORIGIN,
       data: {
         type: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_CALL_RESPONSE + '1234', // containerId
-        data: { error: "Error occured"}
+        data: { error: "Error occurred" }
       }
     }));
-    await expect(collectPromiseError).rejects.toEqual("Error occured");
+    await expect(collectPromiseError).rejects.toEqual("Error occurred");
   });
 
   it("tests collect when isMount is false", async () => {
@@ -447,7 +447,7 @@ describe("test composable container class", () => {
       container.collect(options);
       const collectCb = emitSpy.mock.calls[0][2];
       collectCb(collectResponse);
-      collectCb({ error: "Error occured" });
+      collectCb({ error: "Error occurred" });
     }, 200);
   });
 

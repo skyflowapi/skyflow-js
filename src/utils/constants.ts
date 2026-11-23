@@ -579,9 +579,9 @@ const SKYFLOW_ERROR_CODE = {
     code: 400,
     description: logs.errorLogs.INVALID_OPTION_CARD_SCHEME,
   },
-  INVALID_FIELD_SHOW_3DS_CHALLEGNGE: {
+  INVALID_FIELD_SHOW_3DS_CHALLENGE: {
     code: 400,
-    description: logs.errorLogs.INVALID_FIELD_SHOW_3DS_CHALLEGNGE,
+    description: logs.errorLogs.INVALID_FIELD_SHOW_3DS_CHALLENGE,
   },
   NO_ELEMENTS_IN_COLLECT: {
     code: 400,

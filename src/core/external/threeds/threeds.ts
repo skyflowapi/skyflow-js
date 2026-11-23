@@ -43,13 +43,13 @@ class ThreeDS {
     container?: HTMLElement,
   ): HTMLIFrameElement => {
     if (!acsUrl) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELD_SHOW_3DS_CHALLEGNGE, ['acsUrl'], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELD_SHOW_3DS_CHALLENGE, ['acsUrl'], true);
     }
     if (!cReq) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELD_SHOW_3DS_CHALLEGNGE, ['cReq'], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELD_SHOW_3DS_CHALLENGE, ['cReq'], true);
     }
     if (container && !(container instanceof HTMLElement)) {
-      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELD_SHOW_3DS_CHALLEGNGE, ['container'], true);
+      throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELD_SHOW_3DS_CHALLENGE, ['container'], true);
     }
     const windowSize = ThreeDS.#getWindowSize(challengeWindowSize);
     const iFrame = ThreeDS.#createIFrame(
@@ -77,7 +77,7 @@ class ThreeDS {
       case '05':
         return ['100%', '100%'];
       default:
-        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELD_SHOW_3DS_CHALLEGNGE, ['challengeWindowSize'], true);
+        throw new SkyflowError(SKYFLOW_ERROR_CODE.INVALID_FIELD_SHOW_3DS_CHALLENGE, ['challengeWindowSize'], true);
     }
   };
 

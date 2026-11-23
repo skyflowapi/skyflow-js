@@ -5,8 +5,8 @@ import {
   ALLOWED_EXPIRY_DATE_FORMATS,
   ALLOWED_EXPIRY_YEAR_FORMATS,
   CARDNUMBER_INPUT_FORMAT,
-  CARD_NUMBER_HYPEN_SEPERATOR,
-  DEFAULT_CARD_NUMBER_SEPERATOR,
+  CARD_NUMBER_HYPHEN_SEPARATOR,
+  DEFAULT_CARD_NUMBER_SEPARATOR,
   DEFAULT_EXPIRATION_DATE_FORMAT,
   DEFAULT_EXPIRATION_YEAR_FORMAT,
   DEFAULT_INPUT_FORMAT_TRANSLATION,
@@ -294,7 +294,7 @@ export const formatOptions = (
   || Object.prototype.hasOwnProperty.call(formattedOptions, 'translation')) {
     if (INPUT_FORMATTING_NOT_SUPPORTED_ELEMENT_TYPES.includes(elementType)) {
       printLog(
-        parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPROTED, elementType),
+        parameterizedString(logs.warnLogs.INPUT_FORMATTING_NOT_SUPPORTED, elementType),
         MessageType.WARN, logLevel,
       );
       delete formattedOptions?.format;
@@ -319,12 +319,12 @@ export const formatOptions = (
       if (!Object.prototype.hasOwnProperty.call(formattedOptions, 'enableCardIcon')) {
         formattedOptions = { ...formattedOptions, enableCardIcon: true };
       }
-      let cardSeperator = DEFAULT_CARD_NUMBER_SEPERATOR;
+      let cardSeparator = DEFAULT_CARD_NUMBER_SEPARATOR;
 
       if (formattedOptions?.format === CARDNUMBER_INPUT_FORMAT.DASH_FORMAT) {
-        cardSeperator = CARD_NUMBER_HYPEN_SEPERATOR;
+        cardSeparator = CARD_NUMBER_HYPHEN_SEPARATOR;
       }
-      formattedOptions = { ...formattedOptions, cardSeperator };
+      formattedOptions = { ...formattedOptions, cardSeparator };
       delete formattedOptions?.format;
       delete formattedOptions?.translation;
 

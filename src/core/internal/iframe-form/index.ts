@@ -47,7 +47,7 @@ import {
   formatFrameNameToId,
   getReturnValue,
   removeSpaces,
-  vaildateFileName,
+  validateFileName,
 } from '../../../utils/helpers';
 import { ContainerType } from '../../../skyflow';
 
@@ -509,7 +509,7 @@ export default class IFrameFormElement extends EventEmitter {
 
   validator(value: any) {
     let resp = true;
-    let vaildateFileNames = true;
+    let validateFileNames = true;
 
     if (this.fieldType === ElementType.CARD_NUMBER && value) {
       if (this.regex) {
@@ -532,7 +532,7 @@ export default class IFrameFormElement extends EventEmitter {
       } catch (err) {
         resp = false;
       }
-      if (this.preserveFileName) vaildateFileNames = vaildateFileName(value.name);
+      if (this.preserveFileName) validateFileNames = validateFileName(value.name);
     } else if (this.fieldType === ElementType.MULTI_FILE_INPUT) {
       const files = this.state.value instanceof FileList
         ? Array.from(this.state.value)
@@ -546,7 +546,7 @@ export default class IFrameFormElement extends EventEmitter {
         } catch (err) {
           resp = false;
         }
-        if (this.preserveFileName) vaildateFileNames = vaildateFileName(files[i].name);
+        if (this.preserveFileName) validateFileNames = validateFileName(files[i].name);
       }
     } else {
       // eslint-disable-next-line no-lonely-if
@@ -554,7 +554,7 @@ export default class IFrameFormElement extends EventEmitter {
         resp = this.regex.test(value);
       }
     }
-    if (!resp || !vaildateFileNames) {
+    if (!resp || !validateFileNames) {
       this.isCustomValidationFailed = false;
       if (!resp) {
         if (this.label) {
@@ -569,13 +569,13 @@ export default class IFrameFormElement extends EventEmitter {
         }
         return resp;
       }
-      if (!vaildateFileNames) {
+      if (!validateFileNames) {
         this.errorText = this.containerType === ContainerType.COLLECT
           ? parameterizedString(
             logs.errorLogs.INVALID_FILE_NAME,
           )
           : DEFAULT_ERROR_TEXT_ELEMENT_TYPES[this.fieldType];
-        return vaildateFileNames;
+        return validateFileNames;
       }
     }
 

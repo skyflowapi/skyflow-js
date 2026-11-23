@@ -40,11 +40,11 @@ const getBearerToken = jest.fn();
 const getBearerTokenReject = jest
   .fn()
   .mockImplementation(() => Promise.reject());
-const groupEmittFn = jest.fn();
+const groupEmitFn = jest.fn();
 
 let groupOnCb: Function;
-const groupEmiitter: EventEmitter = {
-  _emit: groupEmittFn,
+const groupEmitter: EventEmitter = {
+  _emit: groupEmitFn,
   on: jest.fn().mockImplementation((args, cb) => {
     groupOnCb = cb;
   }),
@@ -196,7 +196,7 @@ describe("Reveal Element Class", () => {
       {
         containerId: containerId,
         isMounted: false,
-        eventEmitter: groupEmiitter,
+        eventEmitter: groupEmitter,
         type: ContainerType.REVEAL
       },
       elementId,
@@ -213,7 +213,7 @@ describe("Reveal Element Class", () => {
       {
         containerId: containerId,
         isMounted: true,
-        eventEmitter: groupEmiitter,
+        eventEmitter: groupEmitter,
         type: ContainerType.REVEAL
       },
       elementId,
@@ -261,7 +261,7 @@ describe("Reveal Element Class", () => {
       {
         containerId: containerId,
         isMounted: true,
-        eventEmitter: groupEmiitter,
+        eventEmitter: groupEmitter,
         type: ContainerType.REVEAL
       },
       elementId,
@@ -309,7 +309,7 @@ describe("Reveal Element Class", () => {
       {
         containerId: containerId,
         isMounted: true,
-        eventEmitter: groupEmiitter,
+        eventEmitter: groupEmitter,
         type: ContainerType.REVEAL
       },
       elementId,
@@ -388,7 +388,7 @@ describe("Reveal Element Class", () => {
       {
         containerId: containerId,
         isMounted: true,
-        eventEmitter: groupEmiitter,
+        eventEmitter: groupEmitter,
         type: ContainerType.REVEAL
       },
       elementId,
@@ -444,13 +444,13 @@ describe("Reveal Element Class", () => {
       {
         containerId: containerId,
         isMounted: true,
-        eventEmitter: groupEmiitter,
+        eventEmitter: groupEmitter,
         type: ContainerType.REVEAL
       },
       elementId,
       { logLevel: LogLevel.ERROR, env: Env.PROD }
     );
-      groupEmiitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {errorMessages: {
+      groupEmitter._emit(`${CUSTOM_ERROR_MESSAGES}:${containerId}`, {errorMessages: {
       [ErrorType.NOT_FOUND]: "No Records Found",
         }});
 
@@ -556,7 +556,7 @@ describe("Reveal Element Class", () => {
       {
         containerId: containerId,
         isMounted: false,
-        eventEmitter: groupEmiitter,
+        eventEmitter: groupEmitter,
         type: ContainerType.REVEAL
       },
       elementId,
@@ -589,7 +589,7 @@ describe("Reveal Element Class", () => {
       {
         containerId: containerId,
         isMounted: false,
-        eventEmitter: groupEmiitter,
+        eventEmitter: groupEmitter,
         type: ContainerType.REVEAL
       },
       elementId,
@@ -622,7 +622,7 @@ describe("Reveal Element Class", () => {
       {
         containerId: containerId,
         isMounted: false,
-        eventEmitter: groupEmiitter,
+        eventEmitter: groupEmitter,
         type: ContainerType.REVEAL
       },
       elementId,
@@ -640,7 +640,7 @@ describe("Reveal Element Methods", () => {
     },
     undefined,
     metaData,
-    { containerId: containerId, isMounted: false, eventEmitter: groupEmiitter, type: ContainerType.REVEAL
+    { containerId: containerId, isMounted: false, eventEmitter: groupEmitter, type: ContainerType.REVEAL
  },
     elementId,
     { logLevel: LogLevel.ERROR, env: Env.PROD }
@@ -1009,7 +1009,7 @@ describe("Reveal Element Methods", () => {
       label: "Updated Label",
       inputStyles: {
         base: {
-          borderWitdth: "5px",
+          borderWidth: "5px",
         },
       },
     };
@@ -1031,7 +1031,7 @@ describe("Reveal Element Methods", () => {
       updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
       updatedValue: {
         label: "Updated Label",
-        inputStyles: { base: { borderWitdth: "5px" } },
+        inputStyles: { base: { borderWidth: "5px" } },
       },
     });
     expect(emitSpy).toBeCalled();
@@ -1044,7 +1044,7 @@ describe("Reveal Element Methods", () => {
       label: "Updated Label",
       inputStyles: {
         base: {
-          borderWitdth: "5px",
+          borderWidth: "5px",
         },
       },
     };
@@ -1066,7 +1066,7 @@ describe("Reveal Element Methods", () => {
       updateType: REVEAL_ELEMENT_OPTIONS_TYPES.ELEMENT_PROPS,
       updatedValue: {
         label: "Updated Label",
-        inputStyles: { base: { borderWitdth: "5px" } },
+        inputStyles: { base: { borderWidth: "5px" } },
       },
     });
     expect(emitSpy).toBeCalled();

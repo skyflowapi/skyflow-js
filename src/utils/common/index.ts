@@ -117,9 +117,9 @@ export interface IRevealRecordComposable {
 }
 
 export interface IInsertResponse {
-  records: IInsertResponseReocrds[];
+  records: IInsertResponseRecords[];
 }
-export interface IInsertResponseReocrds {
+export interface IInsertResponseRecords {
   table: string;
   fields?: Record<string, any>;
   skyflowID?: string;
