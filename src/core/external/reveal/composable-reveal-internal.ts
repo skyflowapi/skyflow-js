@@ -338,27 +338,30 @@ class ComposableRevealInternalElement extends SkyflowElement {
               },
             );
             window?.addEventListener('message', (event) => {
-              if (event?.data && event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
+              if (event?.origin === properties.IFRAME_SECURE_ORIGIN) {
+                if (event?.data
+                  && event?.data?.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
        + recordData.name) {
-                if (event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
-                  const revealData = event?.data?.data?.result;
-                  if (revealData?.error || revealData?.errors) {
-                    printLog(parameterizedString(
-                      logs.errorLogs.FAILED_RENDER,
-                    ), MessageType.ERROR,
-                    this.#context.logLevel);
-                    if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
-                      this.setAltText(altText, recordData);
-                    }
-                    reject(revealData?.error || revealData?.errors);
-                  } else {
-                    printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
-                      MessageType.LOG,
+                  if (event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
+                    const revealData = event?.data?.data?.result;
+                    if (revealData?.error || revealData?.errors) {
+                      printLog(parameterizedString(
+                        logs.errorLogs.FAILED_RENDER,
+                      ), MessageType.ERROR,
                       this.#context.logLevel);
-                    printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
-                      CLASS_NAME, recordData.skyflowID),
-                    MessageType.LOG, this.#context.logLevel);
-                    resolve(revealData);
+                      if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
+                        this.setAltText(altText, recordData);
+                      }
+                      reject(revealData?.error || revealData?.errors);
+                    } else {
+                      printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
+                        MessageType.LOG,
+                        this.#context.logLevel);
+                      printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
+                        CLASS_NAME, recordData.skyflowID),
+                      MessageType.LOG, this.#context.logLevel);
+                      resolve(revealData);
+                    }
                   }
                 }
               }
@@ -408,29 +411,31 @@ class ComposableRevealInternalElement extends SkyflowElement {
                 },
               );
               window.addEventListener('message', (event1) => {
-                if (event1?.data
+                if (event1?.origin === properties.IFRAME_SECURE_ORIGIN) {
+                  if (event1?.data
                          && event1?.data?.type === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE
              + recordData.name) {
-                  if (event1?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
-                    const revealData = event1?.data?.data?.result;
-                    if (revealData?.error || revealData?.errors) {
-                      printLog(parameterizedString(
-                        logs.errorLogs.FAILED_RENDER,
-                      ), MessageType.ERROR,
-                      this.#context.logLevel);
-                      if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
-                        this.setAltText(altText, recordData);
-                      }
-                      reject(revealData?.error || revealData?.errors);
-                    } else {
-                      // eslint-disable-next-line max-len
-                      printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
-                        MessageType.LOG,
+                    if (event1?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
+                      const revealData = event1?.data?.data?.result;
+                      if (revealData?.error || revealData?.errors) {
+                        printLog(parameterizedString(
+                          logs.errorLogs.FAILED_RENDER,
+                        ), MessageType.ERROR,
                         this.#context.logLevel);
-                      printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
-                        CLASS_NAME, recordData.skyflowID),
-                      MessageType.LOG, this.#context.logLevel);
-                      resolve(revealData);
+                        if (Object.prototype.hasOwnProperty.call(recordData, 'altText')) {
+                          this.setAltText(altText, recordData);
+                        }
+                        reject(revealData?.error || revealData?.errors);
+                      } else {
+                      // eslint-disable-next-line max-len
+                        printLog(parameterizedString(logs.infoLogs.RENDER_SUBMIT_SUCCESS, CLASS_NAME),
+                          MessageType.LOG,
+                          this.#context.logLevel);
+                        printLog(parameterizedString(logs.infoLogs.FILE_RENDERED,
+                          CLASS_NAME, recordData.skyflowID),
+                        MessageType.LOG, this.#context.logLevel);
+                        resolve(revealData);
+                      }
                     }
                   }
                 }

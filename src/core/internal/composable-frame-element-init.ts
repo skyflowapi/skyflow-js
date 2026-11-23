@@ -62,7 +62,11 @@ export default class RevealComposableFrameElementInit {
     this.createContainerDiv(this.group);
 
     window?.addEventListener('message', (event) => {
-      if (event?.origin === this.clientMetaData.clientDomain) {
+      const clientDomain = this.clientMetaData?.clientDomain;
+      if (!clientDomain) {
+        return;
+      }
+      if (event?.origin === clientDomain) {
         if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL
           + this.containerId && event?.data?.data?.type === REVEAL_TYPES.REVEAL) {
           this.#context = event?.data?.context;
@@ -343,32 +347,30 @@ export default class RevealComposableFrameElementInit {
     );
 
     window?.addEventListener('message', (event) => {
-      if (event?.origin === this.clientMetaData.clientDomain) {
-        if (event?.data?.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name) {
-          window?.parent?.postMessage(
-            {
-              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
-              data: {
-                height: this.rootDiv?.scrollHeight ?? 0,
-                name: window?.name,
-              },
+      if (event?.data?.name === ELEMENT_EVENTS_TO_CLIENT.HEIGHT + window?.name) {
+        window?.parent?.postMessage(
+          {
+            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+            data: {
+              height: this.rootDiv?.scrollHeight ?? 0,
+              name: window?.name,
             },
-            this.clientMetaData?.clientDomain,
-          );
-        }
-        if (event?.data?.type
+          },
+          this.clientMetaData?.clientDomain,
+        );
+      }
+      if (event?.data?.type
          === ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name) {
-          window?.parent?.postMessage(
-            {
-              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
-              data: {
-                height: this.rootDiv?.scrollHeight ?? 0,
-                name: window?.name,
-              },
+        window?.parent?.postMessage(
+          {
+            type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK + window?.name,
+            data: {
+              height: this.rootDiv?.scrollHeight ?? 0,
+              name: window?.name,
             },
-            this.clientMetaData?.clientDomain,
-          );
-        }
+          },
+          this.clientMetaData?.clientDomain,
+        );
       }
     });
   };

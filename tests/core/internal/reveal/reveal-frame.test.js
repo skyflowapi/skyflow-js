@@ -1273,11 +1273,13 @@ describe("Reveal Frame Class", () => {
     defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
     RevealFrame.init();
     window.dispatchEvent(new MessageEvent('message', {
+      origin: 'http://localhost',
       data: {
         name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementName,
         data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementName },
         clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
-      }
+      },
+      origin: 'http://localhost'
     }));
 
     await new Promise(r => setTimeout(r, 0));
@@ -1321,7 +1323,8 @@ describe("Reveal Frame Class", () => {
         name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementName,
         data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementName },
         clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
-      }
+      },
+      origin: 'http://localhost'
     }));
 
     await new Promise(r => setTimeout(r, 0));
@@ -1363,7 +1366,8 @@ describe("Reveal Frame Class", () => {
         name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementName,
         data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementName },
         clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
-      }
+      },
+      origin: 'http://localhost'
     }));
 
     await new Promise(r => setTimeout(r, 0));
@@ -1377,6 +1381,43 @@ describe("Reveal Frame Class", () => {
     const windowCalls = window.postMessage.mock.calls;
     const heightCall = windowCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window.name));
     expect(heightCall).toBeTruthy();
+  });
+
+  test("render file request ignored when message origin does not match clientDomain", async () => {
+    setFileURLResolve();
+    window.postMessage = jest.fn();
+
+    const data = {
+      record: {
+        skyflowID: '1815-6223-1073-1425',
+        table: 'pii_fields',
+        column: 'primary_card_file',
+        label: 'Card Number',
+        altText: 'xxxx-xxxx-xxxx-xxxx',
+        inputStyles: { base: { color: 'red' } },
+        labelStyles: { base: { color: 'black' } },
+      },
+      clientJSON: { metaData: { uuid: '1234' } },
+      context: { logLevel: LogLevel.ERROR, env: Env.PROD },
+    };
+    defineUrl('http://localhost/?' + btoa(JSON.stringify(data)));
+    RevealFrame.init();
+
+    // Wrong origin — origin check at line 303 is false, renderFile is never called
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://attacker.com',
+      data: {
+        name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementName,
+        data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementName },
+        clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
+      }
+    }));
+
+    await new Promise(r => setTimeout(r, 0));
+
+    const parentCalls = window.parent.postMessage.mock.calls;
+    const responseCall = parentCalls.find(c => c[0]?.type === (ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + elementName));
+    expect(responseCall).toBeUndefined();
   });
 
   test("responseUpdate with signed token and mask applies both correctly", () => {
@@ -2140,7 +2181,8 @@ describe("Reveal Frame Class - Additional Tests", () => {
         name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementNameComposable,
         data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementNameComposable },
         clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
-      }
+      },
+      origin: 'http://localhost'
     }));
 
     await new Promise(r => setTimeout(r, 0));
@@ -2196,7 +2238,8 @@ describe("Reveal Frame Class - Additional Tests", () => {
         name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + composableElementName,
         data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: composableElementName },
         clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
-      }
+      },
+      origin: 'http://localhost'
     }));
 
     // Wait for async operations to complete (Promise resolution and DOM updates)
@@ -2270,7 +2313,8 @@ describe("Reveal Frame Class - Additional Tests", () => {
         name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + composableElementName,
         data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: composableElementName },
         clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
-      }
+      },
+      origin: 'http://localhost'
     }));
 
     // Wait for async operations to complete (Promise resolution and DOM updates)
@@ -2338,7 +2382,8 @@ describe("Reveal Frame Class - Additional Tests", () => {
         name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + composableElementName,
         data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: composableElementName },
         clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
-      }
+      },
+      origin: 'http://localhost'
     }));
 
     // Wait for async operations to complete (Promise resolution and DOM updates)
@@ -2395,7 +2440,8 @@ describe("Reveal Frame Class - Additional Tests", () => {
         name: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + elementNameComposable,
         data: { type: REVEAL_TYPES.RENDER_FILE, iframeName: elementNameComposable },
         clientConfig: { vaultURL: 'http://localhost', vaultID: 'vault123', authToken: 'dummy-token' }
-      }
+      },
+      origin: 'http://localhost'
     }));
 
     await new Promise(r => setTimeout(r, 0));

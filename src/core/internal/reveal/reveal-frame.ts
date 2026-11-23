@@ -300,41 +300,43 @@ class RevealFrame {
     );
     this.updateRevealElementOptions();
     window.addEventListener('message', (event) => {
-      if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#name) {
-        if (event?.data?.data?.iframeName === this.#name
+      if (event?.origin === this.#clientDomain) {
+        if (event?.data?.name === ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_REQUESTS + this.#name) {
+          if (event?.data?.data?.iframeName === this.#name
           && event?.data?.data?.type === REVEAL_TYPES.RENDER_FILE) {
-          this.renderFile(this.#record, event?.data?.clientConfig,
-            event?.data?.errorMessages)?.then((resolvedResult) => {
-            const result = formatForRenderClient(
-              resolvedResult as IRenderResponseType,
-              this.#record?.column,
-            );
-            window?.parent?.postMessage({
-              type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
-              data: {
-                type: REVEAL_TYPES.RENDER_FILE,
-                result,
-              },
-            }, this.#clientDomain);
-
-            window?.postMessage({
-              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
-            }, properties?.IFRAME_SECURE_ORIGIN);
-          })?.catch((error) => {
-            window?.parent?.postMessage({
-              type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
-              data: {
-                type: REVEAL_TYPES.RENDER_FILE,
-                result: {
-                  errors: error,
+            this.renderFile(this.#record, event?.data?.clientConfig,
+              event?.data?.errorMessages)?.then((resolvedResult) => {
+              const result = formatForRenderClient(
+                resolvedResult as IRenderResponseType,
+                this.#record?.column,
+              );
+              window?.parent?.postMessage({
+                type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
+                data: {
+                  type: REVEAL_TYPES.RENDER_FILE,
+                  result,
                 },
-              },
-            }, this.#clientDomain);
+              }, this.#clientDomain);
 
-            window?.postMessage({
-              type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
-            }, properties?.IFRAME_SECURE_ORIGIN);
-          });
+              window?.postMessage({
+                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+              }, properties?.IFRAME_SECURE_ORIGIN);
+            })?.catch((error) => {
+              window?.parent?.postMessage({
+                type: ELEMENT_EVENTS_TO_IFRAME.REVEAL_CALL_RESPONSE + this.#name,
+                data: {
+                  type: REVEAL_TYPES.RENDER_FILE,
+                  result: {
+                    errors: error,
+                  },
+                },
+              }, this.#clientDomain);
+
+              window?.postMessage({
+                type: ELEMENT_EVENTS_TO_IFRAME.HEIGHT_CALLBACK_COMPOSABLE + window?.name,
+              }, properties?.IFRAME_SECURE_ORIGIN);
+            });
+          }
         }
       }
 

@@ -1180,6 +1180,49 @@ describe('composableFrameElementInit Additional Test Cases', () => {
       }
     });
 
+    test('should return early from COMPOSABLE_REVEAL handler when clientDomain is missing', () => {
+      const containerId = 'no-client-domain';
+      const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;
+      const postMessageSpy = jest.fn();
+      let messageHandler;
+
+      windowSpy.mockImplementation(() => ({
+        name: id,
+        location: {
+          href: `http://localhost/?${btoa(JSON.stringify({
+            record: element,
+            clientJSON: { metaData: {} }, // clientDomain intentionally absent
+            containerId: containerId,
+          }))}`,
+        },
+        parent: { postMessage: postMessageSpy },
+        addEventListener: (event, handler) => {
+          if (event === 'message') messageHandler = handler;
+        },
+      }));
+
+      RevealComposableFrameElementInit.startFrameElement();
+      postMessageSpy.mockClear();
+      mockFetchRecordsByTokenIdComposable.mockClear();
+
+      if (messageHandler) {
+        messageHandler({
+          data: {
+            name: ELEMENT_EVENTS_TO_IFRAME.COMPOSABLE_REVEAL + containerId,
+            data: {
+              elementIds: [{ frameId: 'reveal-composable:123' }],
+              type: REVEAL_TYPES.REVEAL,
+            },
+            clientConfig: { authToken: 'test-token' },
+          },
+        });
+
+        // clientDomain is falsy → handler returns early; no fetch, no postMessage
+        expect(mockFetchRecordsByTokenIdComposable).not.toHaveBeenCalled();
+        expect(postMessageSpy).not.toHaveBeenCalled();
+      }
+    });
+
     test('should handle window message with missing data fields gracefully', () => {
       const containerId = 'missing-data-test';
       const id = `${COMPOSABLE_REVEAL}:${containerId}:ERROR:`;

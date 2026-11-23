@@ -10,6 +10,7 @@ import SKYFLOW_ERROR_CODE from '../../../utils/constants';
 import { ELEMENT_EVENTS_TO_CLIENT, ELEMENT_EVENTS_TO_IFRAME, ElementType } from '../../constants';
 import { printLog } from '../../../utils/logs-helper';
 import logs from '../../../utils/logs';
+import properties from '../../../properties';
 
 class ComposableElement {
   #elementName: string;
@@ -134,17 +135,19 @@ class ComposableElement {
         }
       });
       window.addEventListener('message', (event) => {
-        if (event?.data?.type === `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${this.#elementName}`) {
-          if (event?.data?.data?.errorResponse || event?.data?.data?.error) {
-            printLog(`${event?.data?.data.errorResponse || event?.data?.data.error}`, MessageType.ERROR, this.#context.logLevel);
-            reject(event?.data?.data);
-          } else if (event?.data?.data.fileUploadResponse) {
-            printLog(logs.infoLogs.MULTI_UPLOAD_FILES_SUCCESS,
-              MessageType.LOG, this.#context.logLevel);
-            resolve(event?.data?.data);
-          } else {
-            printLog(`${event?.data?.data}`, MessageType.ERROR, this.#context.logLevel);
-            reject(event?.data?.data);
+        if (event?.origin === properties.IFRAME_SECURE_ORIGIN) {
+          if (event?.data?.type === `${ELEMENT_EVENTS_TO_IFRAME.MULTIPLE_UPLOAD_FILES_RESPONSE}:${this.#elementName}`) {
+            if (event?.data?.data?.errorResponse || event?.data?.data?.error) {
+              printLog(`${event?.data?.data.errorResponse || event?.data?.data.error}`, MessageType.ERROR, this.#context.logLevel);
+              reject(event?.data?.data);
+            } else if (event?.data?.data.fileUploadResponse) {
+              printLog(logs.infoLogs.MULTI_UPLOAD_FILES_SUCCESS,
+                MessageType.LOG, this.#context.logLevel);
+              resolve(event?.data?.data);
+            } else {
+              printLog(`${event?.data?.data}`, MessageType.ERROR, this.#context.logLevel);
+              reject(event?.data?.data);
+            }
           }
         }
       });
