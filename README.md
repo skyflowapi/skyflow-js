@@ -14,7 +14,7 @@ This repository publishes two SDKs from a shared codebase. Pick the one that mat
 
 Not sure which one you need? If you are an existing Skyflow JS customer, stay on **skyflow-js** — it is fully backward compatible. **skyflow-flowvault-js** is for Flow vaults; v1.x is Elements-only (no pure-JS, file, or 3DS APIs support yet).
 
-Both SDKs expose the same `Skyflow` global when loaded via script tag, so a single page must load only one of them. If you need both in one app, install both from npm and alias on import.
+Both SDKs expose the same `Skyflow` global when loaded via script tag, so a single page must load only one of them. If you need both in one app, install both from npm and alias on import..
 
 ## Repository layout
 
